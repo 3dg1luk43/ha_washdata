@@ -163,6 +163,11 @@ _TRIM_SNAP_TOLERANCE_S = 1.0
 _BURST_SAVE_WINDOW_S = 120.0
 _BURST_SAVE_DELAY_S = 10.0
 
+# The Clean overlay's record in the active-cycle file (#500): cycle finished, load
+# still inside. Additive key with no default, so no storage version.
+CLEAN_STATE_KEY = "clean_state"
+_MISSING: Any = object()
+
 # Floor of the resampled sample-segment cache (audit ML-12, ~20-45 KB an entry);
 # see ProfileStore._sample_segment_cache_cap.
 SAMPLE_SEGMENT_CACHE_MIN = 64
@@ -2618,6 +2623,11 @@ class ProfileStore:
             hass, 1, f"{STORAGE_KEY}.{entry_id}.active"
         )
         self._active_data: JSONDict = {}
+        # The Clean overlay's record (#500) as last written to the active file;
+        # _MISSING until the file is read. Lets the manager's unload/stop write
+        # land even when the write-through task that would have carried it was
+        # cancelled by the unload.
+        self._clean_state_on_disk: Any = _MISSING
         # The last snapshot that failed to restore (register item 266 follow-up):
         # written only on a failure, read only by the diagnostics download.
         self._failed_restore_store: Store[JSONDict] = Store(
@@ -6070,24 +6080,59 @@ class ProfileStore:
             self._logger.warning("Could not read the active-cycle snapshot: %s", err)
             active = None
         self._active_data = dict(active) if isinstance(active, dict) else {}
+        self._clean_state_on_disk = self._active_data.get(CLEAN_STATE_KEY)
         legacy = self._data.pop("active_cycle", None)
         legacy_saved = self._data.pop("last_active_save", None)
         if not self._active_data.get("active_cycle") and isinstance(legacy, dict):
-            self._active_data = {"active_cycle": legacy, "last_active_save": legacy_saved}
+            self._active_data.update(
+                {"active_cycle": legacy, "last_active_save": legacy_saved}
+            )
             await self._async_write_active()
 
     async def _async_write_active(self) -> None:
+        data = dict(self._active_data)
         try:
-            await self._active_store.async_save(self._active_data)
+            await self._active_store.async_save(data)
         except Exception as err:  # noqa: BLE001 - never break the cycle for a snapshot
             self._logger.warning("Could not write the active-cycle snapshot: %s", err)
+            return
+        self._clean_state_on_disk = data.get(CLEAN_STATE_KEY)
 
     async def async_save_active_cycle(self, detector_snapshot: JSONDict) -> None:
         """Save the active cycle state to its own file (throttled by Manager)."""
         self._active_data = {
+            **self._clean_state_entry(),
             "active_cycle": detector_snapshot,
             "last_active_save": dt_util.now().isoformat(),
         }
+        await self._async_write_active()
+
+    def _clean_state_entry(self) -> JSONDict:
+        """The Clean record as an ``_active_data`` fragment, so a snapshot write or
+        clear keeps it (#500)."""
+        record = self._active_data.get(CLEAN_STATE_KEY)
+        return {CLEAN_STATE_KEY: record} if isinstance(record, dict) else {}
+
+    def get_clean_state(self) -> JSONDict | None:
+        """The persisted Clean overlay (#500): finished, load still inside."""
+        raw = self._active_data.get(CLEAN_STATE_KEY)
+        return cast(JSONDict, raw) if isinstance(raw, dict) else None
+
+    async def async_save_clean_state(self, record: JSONDict | None) -> None:
+        """Persist (or with None, drop) the Clean overlay (#500).
+
+        Lives in the small active-cycle file, not the main store: it changes at
+        every cycle end and reminder, and the main store is megabytes. Writes only
+        when the file holds something else, so the manager can call it on every
+        change and at unload/stop. Never raises.
+        """
+        if isinstance(record, dict):
+            self._active_data[CLEAN_STATE_KEY] = record
+        else:
+            record = None
+            self._active_data.pop(CLEAN_STATE_KEY, None)
+        if self._clean_state_on_disk is not _MISSING and self._clean_state_on_disk == record:
+            return
         await self._async_write_active()
 
     def get_active_cycle(self) -> JSONDict | None:
@@ -6128,9 +6173,9 @@ class ProfileStore:
         return cast(JSONDict, raw) if isinstance(raw, dict) else None
 
     async def async_clear_active_cycle(self) -> None:
-        """Clear the active cycle snapshot from storage."""
-        if self._active_data:
-            self._active_data = {}
+        """Clear the active cycle snapshot from storage (the Clean record stays)."""
+        if any(k != CLEAN_STATE_KEY for k in self._active_data):
+            self._active_data = self._clean_state_entry()
             await self._async_write_active()
 
     async def async_add_cycle(self, cycle_data: CycleDict) -> set[str]:

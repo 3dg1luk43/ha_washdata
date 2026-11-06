@@ -771,6 +771,9 @@ class WashDataManager:
         self._is_clean_state: bool = False
         self._clean_state_start: datetime | None = None
         self._notified_clean_laundry: bool = False
+        # A Clean state restored at setup re-reads the door once HA has started
+        # (#500): it may have been opened while HA was down.
+        self._remove_clean_door_recheck: Callable[[], None] | None = None
         # Set by _dispatch_notification when a call is queued for later (quiet
         # hours / presence) rather than sent; read by dedup-flag callers.
         self._last_dispatch_deferred: bool = False
@@ -2419,6 +2422,10 @@ class WashDataManager:
 
         # Attempt to restore state (BEFORE starting listener)
         await self._attempt_state_restoration()
+        # The Clean overlay of a cycle that ended before the restart (#500). After
+        # the active cycle (a restored cycle supersedes it), before the baseline
+        # (so its state is not announced again). Nothing awaited: setup time (#408).
+        self._restore_clean_state()
         # What the restored cycle shows was announced before the restart (#478).
         self._trigger_baseline()
         # A day-interval maintenance task falls due at any time, also while an idle
@@ -2982,6 +2989,7 @@ class WashDataManager:
             await asyncio.gather(*_to_await, return_exceptions=True)
         for _unsub_name in (
             "_remove_ha_stop_listener", "_remove_notify_queue_restore", "_remove_maintenance_timer",
+            "_remove_clean_door_recheck",
         ):
             _unsub = getattr(self, _unsub_name, None)
             if _unsub is not None:
@@ -2990,6 +2998,8 @@ class WashDataManager:
         # Keep the held notifications for the entry's next setup (audit MANAGER-16)
         # before the queues are cleared below.
         await self._async_persist_notification_queues()
+        # And the Clean overlay (#500): a write-through cancelled above must land.
+        await self._async_save_clean_state_now()
         if self._remove_listener:
             self._remove_listener()
         if self._remove_report_listener:
@@ -3436,6 +3446,7 @@ class WashDataManager:
         self._clean_state_start = None
         self._notified_clean_laundry = False
         self._reset_unload_nag_tracking()
+        self._persist_clean_state()
         # Dismiss a delivered clean reminder (and purge any queued ones) so it does
         # not linger on the phone after the laundry is taken.
         self._clear_clean_notification()
@@ -3460,6 +3471,205 @@ class WashDataManager:
         nag until the progress-reset window expired.
         """
         return bool(self._unload_confirm_entity) or self._unload_track_without_door
+
+    def _clean_state_record(self) -> dict[str, Any] | None:
+        """The Clean overlay as the active file keeps it (#500); None when not Clean.
+
+        What a restart needs to carry on where it was: when the load started
+        waiting (the reminder's clock), when the cycle completed (the reset
+        delay's), the reminder bookkeeping (so nothing is sent twice), the
+        program the ``unloaded`` trigger names and the detector's state.
+        """
+        start = self._clean_state_start
+        if not self._is_clean_state or not isinstance(start, datetime):
+            return None
+        completed = self._cycle_completed_time
+        if not isinstance(completed, datetime):
+            completed = start
+        last_nag = self._last_unload_nag_time
+        program = self._trigger_ended_program
+        state = getattr(self.detector, "state", None)
+        return {
+            "start": dt_util.as_utc(start).isoformat(),
+            "completed": dt_util.as_utc(completed).isoformat(),
+            "notified": bool(self._notified_clean_laundry),
+            "last_nag": (
+                dt_util.as_utc(last_nag).isoformat()
+                if isinstance(last_nag, datetime)
+                else None
+            ),
+            "nag_count": int(self._unload_nag_count),
+            "nag_dismissed": bool(self._unload_nag_dismissed),
+            "program": program if isinstance(program, str) else None,
+            "detector_state": state if isinstance(state, str) else None,
+        }
+
+    def _persist_clean_state(self) -> None:
+        """Write the Clean overlay through to the active file (#500). Never raises.
+
+        Called wherever it is entered or cleared and wherever its reminder
+        bookkeeping moves. An HA restart does not unload the entry, so a write
+        left to the unload would never happen on the restart this is for.
+        """
+        try:
+            record = self._clean_state_record()
+            store = self.profile_store
+            if record is None and store.get_clean_state() is None:
+                return
+            coro = store.async_save_clean_state(record)
+        except Exception:  # noqa: BLE001 - a lost write only costs the restore
+            self._logger.debug("Could not persist the Clean state", exc_info=True)
+            return
+        if asyncio.iscoroutine(coro):
+            self._spawn_tracked(coro)
+
+    async def _async_save_clean_state_now(self) -> None:
+        """Write the Clean overlay before an unload or a stop (#500). Never raises.
+
+        The store skips the write when the file already holds it; this one
+        lands a write-through the unload cancelled, and the detector's state.
+        """
+        try:
+            result = self.profile_store.async_save_clean_state(self._clean_state_record())
+            if asyncio.iscoroutine(result):
+                await result
+        except Exception:  # noqa: BLE001
+            self._logger.debug("Could not save the Clean state", exc_info=True)
+
+    def _power_off_configured(self) -> bool:
+        """Whether power-based Off detection (#284) is on and valid."""
+        cfg = self.detector.config
+        pot = cfg.power_off_threshold_w
+        stop_w = cfg.stop_threshold_w
+        return (
+            isinstance(pot, (int, float))
+            and isinstance(stop_w, (int, float))
+            and 0.0 < pot < stop_w
+        )
+
+    def _restore_clean_state(self) -> None:
+        """Re-enter the Clean state a restart interrupted (#500). Never raises.
+
+        It lived in memory only, so a restart with the load still inside showed
+        Off. Restored with its own clocks, so the reset delay and the reminder
+        carry on where they were, and its reminder bookkeeping, so nothing is
+        sent twice. Dropped when a restored cycle is under way (it supersedes
+        the overlay, as a new cycle would), when nothing configured could clear
+        it any more, or when it expired while HA was down: that ends OFF with
+        everything cleared, as the expiry does.
+        """
+        try:
+            record = self.profile_store.get_clean_state()
+        except Exception:  # noqa: BLE001
+            return
+        if not isinstance(record, dict):
+            return
+        try:
+            restored = self._apply_clean_record(record)
+        except Exception:  # noqa: BLE001
+            self._logger.debug("Could not restore the Clean state", exc_info=True)
+            self._is_clean_state = False
+            self._clean_state_start = None
+            self._notified_clean_laundry = False
+            self._reset_unload_nag_tracking()
+            restored = False
+        if not restored:
+            self._persist_clean_state()
+
+    def _apply_clean_record(self, record: dict[str, Any]) -> bool:
+        """Apply a persisted Clean record at setup; False when it does not apply."""
+        start = _snapshot_time(record.get("start"))
+        if start is None:
+            return False
+        completed = _snapshot_time(record.get("completed")) or start
+        if not (self._door_sensor_entity or self._unload_confirmable_without_door()):
+            self._logger.info(
+                "Not restoring the Clean state: no door sensor or unload "
+                "confirmation is configured any more"
+            )
+            return False
+        if self.detector.state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
+            return False
+        now = utc_now()
+        # The terminal state it was shown over. A restored anti-crease tail or
+        # probe keeps its own state, and so does an OFF it was shown over.
+        finished = (
+            record.get("detector_state") == STATE_FINISHED
+            and self.detector.state == STATE_OFF
+        )
+        self._is_clean_state = True
+        self._clean_state_start = start
+        self._cycle_completed_time = completed
+        self._notified_clean_laundry = record.get("notified") is True
+        self._last_unload_nag_time = _snapshot_time(record.get("last_nag"))
+        count = record.get("nag_count")
+        self._unload_nag_count = (
+            count if isinstance(count, int) and not isinstance(count, bool) and count > 0
+            else 0
+        )
+        self._unload_nag_dismissed = record.get("nag_dismissed") is True
+        since_complete = (now - completed).total_seconds()
+        # What the expiry tick would have done by now. It only runs in OFF and
+        # the terminal states, and power-based Off ignores the reset delay.
+        if (
+            self.detector.state in (STATE_OFF, STATE_FINISHED)
+            and not (finished and self._power_off_configured())
+            and since_complete > self._progress_reset_delay
+            and not self._unload_nag_active(now)
+        ):
+            self._logger.info(
+                "Not restoring the Clean state: the reset delay (%ss) ran out "
+                "while Home Assistant was down (finished %.0f min ago)",
+                self._progress_reset_delay,
+                since_complete / 60,
+            )
+            self._is_clean_state = False
+            self._clean_state_start = None
+            self._notified_clean_laundry = False
+            self._cycle_completed_time = None
+            self._reset_unload_nag_tracking()
+            return False
+        if finished:
+            self.detector.restore_terminal_state(STATE_FINISHED, completed)
+        self._cycle_progress = (
+            100.0 if since_complete <= self._progress_reset_delay else 0.0
+        )
+        program = record.get("program")
+        if self._trigger_ended_program is None and isinstance(program, str):
+            self._trigger_ended_program = program
+        self._start_state_expiry_timer()
+        if (
+            self._notify_unload_repeat
+            and self._notified_clean_laundry
+            and not self._unload_nag_dismissed
+        ):
+            # The delivered reminder's "Stop reminding" must still work.
+            self._ensure_unload_dismiss_listener()
+        self._logger.info(
+            "Restored the Clean state: finished %.0f min ago, reminder %s",
+            since_complete / 60,
+            "sent" if self._notified_clean_laundry else "pending",
+        )
+        if self._door_sensor_entity:
+            self._remove_clean_door_recheck = async_at_started(
+                self.hass, self._recheck_restored_clean_door
+            )
+        return True
+
+    @callback
+    def _recheck_restored_clean_door(self, _hass: HomeAssistant) -> None:
+        """A door opened while HA was down took the load out (#500).
+
+        The door listener sees changes only, and ignores a sensor coming back
+        from unavailable, so a restored Clean state would otherwise wait for the
+        reset delay. Read once HA has started, when the sensor has reported.
+        """
+        self._remove_clean_door_recheck = None
+        if self._is_shutdown or not self._is_clean_state or not self._door_sensor_entity:
+            return
+        door = self.hass.states.get(self._door_sensor_entity)
+        if door is not None and door.state == "on":  # binary_sensor: on = open
+            self.mark_unloaded("door open after restart", how="door")
 
     def _maybe_arm_door_end_dwell_if_open(self) -> None:
         """Arm the end-dwell timer when in RUNNING or ENDING with the door already open.
@@ -4455,6 +4665,8 @@ class WashDataManager:
                     self._notified_clean_laundry = True
                     self._last_unload_nag_time = now
                     self._unload_nag_count += 1
+                # A restart must not send it again (#500).
+                self._persist_clean_state()
 
         # Defer leaving the terminal state while a clean-state unload notification is
         # still pending. Without this guard the 30-min progress reset (or an early
@@ -4470,14 +4682,8 @@ class WashDataManager:
         # evaluated ONLY in a terminal state; active states never reach here because
         # _cycle_completed_time is None until cycle end.
         cfg = self.detector.config
-        pot = cfg.power_off_threshold_w
-        stop_w = cfg.stop_threshold_w
-        power_off_enabled = (
-            isinstance(pot, (int, float))
-            and isinstance(stop_w, (int, float))
-            and 0.0 < pot < stop_w
-            and self.detector.state
-            in (STATE_FINISHED, STATE_INTERRUPTED, STATE_FORCE_STOPPED)
+        power_off_enabled = self._power_off_configured() and self.detector.state in (
+            STATE_FINISHED, STATE_INTERRUPTED, STATE_FORCE_STOPPED
         )
 
         if power_off_enabled:
@@ -4550,6 +4756,7 @@ class WashDataManager:
         self._clean_state_start = None
         self._notified_clean_laundry = False
         self._reset_unload_nag_tracking()
+        self._persist_clean_state()
         self._power_off_below_since = None
         self._cancel_power_off_timer()
         self.detector.reset(STATE_OFF)
@@ -4586,12 +4793,9 @@ class WashDataManager:
         """One-shot power-off timer callback: reset to Off only if still valid."""
         cfg = self.detector.config
         pot = cfg.power_off_threshold_w
-        stop_w = cfg.stop_threshold_w
         # Same enable + terminal-state guard as the poll path.
         if not (
-            isinstance(pot, (int, float))
-            and isinstance(stop_w, (int, float))
-            and 0.0 < pot < stop_w
+            self._power_off_configured()
             and self.detector.state
             in (STATE_FINISHED, STATE_INTERRUPTED, STATE_FORCE_STOPPED)
         ):
@@ -5252,6 +5456,7 @@ class WashDataManager:
             self._clean_state_start = None
             self._notified_clean_laundry = False
             self._reset_unload_nag_tracking()
+            self._persist_clean_state()
             self._cycle_progress = 0.0
             self._power_off_below_since = None
             self._cancel_power_off_timer()
@@ -5329,6 +5534,7 @@ class WashDataManager:
                 self._clean_state_start = None
                 self._notified_clean_laundry = False
                 self._reset_unload_nag_tracking()
+                self._persist_clean_state()
 
                 # A program the user armed while idle - or pinned during STARTING,
                 # which the reset above would otherwise have wiped - takes effect
@@ -6942,6 +7148,8 @@ class WashDataManager:
             self._logger.debug(
                 "Cycle ended, unload confirmation configured: entering Clean state"
             )
+        # Survives a restart (#500), or the load still inside is forgotten.
+        self._persist_clean_state()
 
         # Start progress reset timer to go back to 0% after user unload window
         self._start_state_expiry_timer()
@@ -7137,6 +7345,7 @@ class WashDataManager:
                 await self.profile_store.async_save_active_cycle(snapshot)
         except Exception:  # noqa: BLE001
             self._logger.debug("Could not save the active cycle at stop", exc_info=True)
+        await self._async_save_clean_state_now()
         await self._async_persist_notification_queues()
 
     @callback
@@ -8783,6 +8992,7 @@ class WashDataManager:
                     "Unload reminder dismissed via notification action"
                 )
                 self._unload_nag_dismissed = True
+                self._persist_clean_state()
                 self._clear_clean_notification()
                 self._notify_update()
 

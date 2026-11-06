@@ -6326,6 +6326,29 @@ class CycleDetector:
             and self._time_below_threshold > 0
         )
 
+    def restore_terminal_state(
+        self, state: str, entered_at: datetime | None = None
+    ) -> bool:
+        """Put an idle detector back in the terminal state a restart lost (#500).
+
+        Only from OFF and only into FINISHED / INTERRUPTED / FORCE_STOPPED. No
+        state-change callback, as in :meth:`restore_state_snapshot`: the cycle
+        ended before the restart, so nothing is transitioning. Returns True when
+        applied.
+        """
+        if self._state != STATE_OFF or state not in (
+            STATE_FINISHED, STATE_INTERRUPTED, STATE_FORCE_STOPPED
+        ):
+            return False
+        self._state = state
+        self._sub_state = state.capitalize()
+        self._state_enter_time = (
+            dt_util.as_utc(entered_at) if entered_at is not None else utc_now()
+        )
+        self._time_in_state = 0.0
+        self._standby_reprobe = False
+        return True
+
     def restore_state_snapshot(self, snapshot: dict[str, Any]) -> bool:
         """Restore state from snapshot; False when it could not be restored.
 
