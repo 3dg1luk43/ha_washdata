@@ -131,8 +131,8 @@ from .time_utils import (
 )
 from .trace_codec import (
     count_compact_fields,
-    decode_stored_cycles,
-    encode_stored_cycles,
+    decode_store_payload,
+    encode_store_payload,
 )
 from .maintenance import clean_task_name, coerce_interval, is_due
 from .notification_rules import cycle_end_is_finish
@@ -1060,35 +1060,36 @@ def compress_power_data(cycle: CycleDict) -> list[Any] | None:
 class WashDataStore(Store[JSONDict]):
     """Store implementation with migration support.
 
-    Since v19 the file holds each cycle's ``power_data`` / ``debug_data`` as compact
-    JSON text (``trace_codec``): every write goes through an encoded shallow copy
-    of the payload and every load is decoded, so memory never holds the text.
+    Since v19 the file holds each cycle's ``power_data`` / ``debug_data`` and each
+    envelope as compact JSON text (``trace_codec``): every write goes through an
+    encoded shallow copy of the payload and every load is decoded, so memory never
+    holds the text.
     """
 
     async def async_load(self) -> JSONDict | None:
         """Load (and migrate) the store, with every compact field decoded."""
         data = await super().async_load()
         if isinstance(data, dict):
-            # Off the loop: one parse per trace, ~0.5-0.7 us a sample (60-90 ms on
-            # a 126k-sample store). Nothing else holds `data` yet.
-            await self.hass.async_add_executor_job(decode_stored_cycles, data)
+            # Off the loop: one parse per trace and envelope (~0.1 s on tron4r's
+            # 17 MB store). Nothing else holds `data` yet.
+            await self.hass.async_add_executor_job(decode_store_payload, data)
         return data
 
     async def async_save(self, data: JSONDict) -> None:
-        """Write ``data`` with its cycle traces compact; ``data`` is not changed."""
+        """Write ``data`` with its traces and envelopes compact; ``data`` is not changed."""
         if self.hass.state is CoreState.stopping:
             # HA defers this one to its final write, which serialised `data` as it
             # is THEN: encode then too (the override below wraps the function).
             self.async_delay_save(lambda: data)
             return
-        await super().async_save(encode_stored_cycles(data))
+        await super().async_save(encode_store_payload(data))
 
     @callback
     def async_delay_save(
         self, data_func: Callable[[], JSONDict], delay: float = 0
     ) -> None:
         """Debounced write; encodes the store as it is when the write fires."""
-        super().async_delay_save(lambda: encode_stored_cycles(data_func()), delay)
+        super().async_delay_save(lambda: encode_store_payload(data_func()), delay)
 
     async def _async_migrate_func(
         self,
@@ -1097,11 +1098,12 @@ class WashDataStore(Store[JSONDict]):
         old_data: JSONDict,
     ) -> JSONDict:
         """Migrate data to the new version."""
-        # Whatever version the file claims, every step below reads decoded traces.
+        # Whatever version the file claims, every step below reads decoded traces
+        # and envelopes.
         # Only a round trip through an older build leaves compact text in an older
         # file (it loads a v19 file without decoding it and writes it back as its
         # own version); a store written by any older build has none.
-        decode_stored_cycles(old_data)
+        decode_store_payload(old_data)
 
         if old_major_version < 2:
             _LOGGER.info("Migrating storage from v%s to v2", old_major_version)
@@ -1408,15 +1410,17 @@ class WashDataStore(Store[JSONDict]):
             )
 
         if old_major_version < 19:
-            # Compact traces on disk (`trace_codec`). Memory keeps the decoded lists
-            # (the decode at the top made sure of it); the file changes: the write
-            # that follows every migration (Store.async_load saves what this returns,
-            # the restore of a restore point saves too) stores each cycle's
-            # power_data / debug_data as compact JSON text, every value bit-identical.
-            # Nothing is dropped or rewritten. Idempotent.
+            # Compact traces and envelopes on disk (`trace_codec`). Memory keeps the
+            # decoded values (the decode at the top made sure of it); the file
+            # changes: the write that follows every migration (Store.async_load saves
+            # what this returns, the restore of a restore point saves too) stores each
+            # cycle's power_data / debug_data and each envelope as compact JSON text,
+            # every value bit-identical. Nothing is dropped or rewritten. Idempotent.
+            fields, envelopes = count_compact_fields(old_data)
             _LOGGER.info(
-                "Migrating storage from v%s to v19 (%d cycle traces written compact)",
-                old_major_version, count_compact_fields(old_data),
+                "Migrating storage from v%s to v19 (%d cycle traces and %d envelopes "
+                "written compact)",
+                old_major_version, fields, envelopes,
             )
 
         return old_data
@@ -2298,8 +2302,9 @@ def unwrap_import_payload(payload: Any) -> tuple[dict[str, Any], dict[str, Any]]
         present = set(data_dict)
         fmt = "v2"
     # Exports are written decoded, but a store file or restore point handed in as an
-    # import carries compact traces (v19); copy-on-decode, the payload is not touched.
-    decode_stored_cycles(data_dict)
+    # import carries compact traces and envelopes (v19); copy-on-decode, the payload
+    # is not touched.
+    decode_store_payload(data_dict)
 
     # What the payload really carried, read before the repair below fills the core
     # keys in: a null, or a core key of the wrong type, carried nothing. The
@@ -11614,10 +11619,11 @@ class ProfileStore:
             "store_version": STORAGE_VERSION,
             "counts": self._pre_import_counts(self._data),
             "entry_options": dict(entry_options) if isinstance(entry_options, dict) else None,
-            # A whole store, so its traces go compact like the main file's (v19).
+            # A whole store, so its traces and envelopes go compact like the main
+            # file's (v19).
             # Otherwise aliases the live store: Store.async_save serialises before it
             # returns and the caller mutates nothing until then (it holds the write lock).
-            "data": encode_stored_cycles(self._data),
+            "data": encode_store_payload(self._data),
         }
         try:
             await self._pre_import_store.async_save(record)
@@ -11695,9 +11701,9 @@ class ProfileStore:
         if version > STORAGE_VERSION:
             raise ValueError("The restore point was saved by a newer version of WashData")
         data: JSONDict = dict(raw["data"])
-        # Written with compact traces since v19 (older restore points without):
-        # decoded before a migration step or the restored store reads a trace.
-        await self.hass.async_add_executor_job(decode_stored_cycles, data)
+        # Written compact since v19 (older restore points are not): decoded before
+        # a migration step or the restored store reads a trace or an envelope.
+        await self.hass.async_add_executor_job(decode_store_payload, data)
         if version < STORAGE_VERSION:
             # Taken before an upgrade: same forward migration the main store runs on
             # load, which an import path never does by itself.

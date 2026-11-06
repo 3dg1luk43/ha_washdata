@@ -269,9 +269,9 @@ Power sensor change -> manager._async_power_changed (sync @callback) -> CycleDet
 
 `homeassistant.helpers.storage.Store` (JSON). Profiles, cycle history, phase catalog, detected
 cycles, `profile_groups`, `suggestions`, per-cycle `ml_review`, `ml_model_versions`. Since v19 a
-stored cycle's `power_data`/`debug_data` sit in the file as compact JSON text (`trace_codec.py`,
-encoded and decoded only by `WashDataStore`, imports and the restore point); never read the file
-directly without `trace_codec.decode_stored_cycles`.
+stored cycle's `power_data`/`debug_data` and every envelope sit in the file as compact JSON text
+(`trace_codec.py`, encoded and decoded only by `WashDataStore`, imports and the restore point);
+never read the file directly without `trace_codec.decode_store_payload`.
 
 **Three cycle lists, three different claims about a cycle** - mixing them up loses user data or fakes
 provenance:
@@ -462,10 +462,10 @@ old-schema fixtures. **Two separate layers, tested separately:**
    `energy_wh` with `integrate_cycle_wh` (#498; cost follows, meter and lifetime untouched) and arms
    `CYCLE_ENERGY_REBUILD_KEY`, which the manager consumes after setup by rebuilding every envelope
    (#495 `avg_energy`); imports of older exports do the same. v18->v19 compact traces on disk
-   (`trace_codec`): `WashDataStore` writes each stored cycle's `power_data`/`debug_data` as one
-   string of compact JSON text (bit-identical values) and decodes on load, imports and the restore
-   point decode too, so memory, exports and the WS API only ever hold the lists; the step itself
-   only decodes text an older build wrote back.
+   (`trace_codec`): `WashDataStore` writes each stored cycle's `power_data`/`debug_data` and each
+   envelope as one string of compact JSON text (bit-identical values) and decodes on load, imports
+   and the restore point decode too, so memory, exports and the WS API only ever hold the decoded
+   values; the step itself only decodes text an older build wrote back.
 
 ## Matching Pipeline
 

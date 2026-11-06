@@ -191,16 +191,18 @@ def public_key(rel: str) -> str:
 
 
 def _decode_compact_traces(store: dict) -> None:
-    """A raw store file from v19 on holds its traces as compact JSON text; exports and
-    diagnostics never do. Decoded in place (``trace_codec``), imported only when needed."""
+    """A raw store file from v19 on holds its traces and envelopes as compact JSON text;
+    exports and diagnostics never do. Decoded in place (``trace_codec``), imported only
+    when needed."""
+    envelopes = store.get("envelopes")
     if any(
         isinstance(c, dict) and isinstance(c.get(name), str)
         for key, _ in LISTS for c in (store.get(key) or [])
         for name in ("power_data", "debug_data")
-    ):
-        from custom_components.ha_washdata.trace_codec import decode_stored_cycles  # noqa: PLC0415
+    ) or (isinstance(envelopes, dict) and any(isinstance(e, str) for e in envelopes.values())):
+        from custom_components.ha_washdata.trace_codec import decode_store_payload  # noqa: PLC0415
 
-        decode_stored_cycles(store)
+        decode_store_payload(store)
 
 
 def _unwrap(doc: dict) -> tuple[dict, dict, dict, str] | None:

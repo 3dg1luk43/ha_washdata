@@ -47,7 +47,7 @@ from custom_components.ha_washdata.const import (
     STORAGE_VERSION,
 )
 from custom_components.ha_washdata.profile_store import ProfileStore, WashDataStore
-from custom_components.ha_washdata.trace_codec import decode_stored_cycles
+from custom_components.ha_washdata.trace_codec import decode_store_payload
 
 ENTRY = "01KBWSV8WQZHNZ0STZCPZGZ5K9"
 MAIN = f"{STORAGE_KEY}.{ENTRY}"
@@ -129,7 +129,7 @@ async def test_wholesale_replace_then_undo_restores_the_exact_previous_data(
     assert ps._data == before  # noqa: SLF001
     # The file holds the traces as compact text since v19; decoded, it is `before`.
     on_disk = copy.deepcopy(hass_storage[MAIN]["data"])
-    assert decode_stored_cycles(on_disk) > 0
+    assert decode_store_payload(on_disk) > 0
     assert on_disk == before
     assert restored["entry_options"] == {"off_delay": 120}
     assert restored["counts"]["real_cycles"] == 3

@@ -35,7 +35,7 @@ from homeassistant.helpers import entity_registry as er
 
 from custom_components.ha_washdata.const import DOMAIN
 from custom_components.ha_washdata.profile_store import ProfileStore
-from custom_components.ha_washdata.trace_codec import decode_stored_cycles
+from custom_components.ha_washdata.trace_codec import decode_store_payload
 
 from . import test_perf_budgets as perf
 from .real_manager import boot, make_entry
@@ -60,9 +60,9 @@ NEW_CYCLES = PROFILES * CYCLES_PER_PROFILE + 1
 
 
 def _decoded(on_disk: dict[str, Any]) -> dict[str, Any]:
-    """The store file as memory holds it: the traces are compact text on disk (v19)."""
+    """The store file as memory holds it: traces and envelopes are compact text on disk (v19)."""
     out = copy.deepcopy(on_disk)
-    decode_stored_cycles(out)
+    decode_store_payload(out)
     return out
 
 
@@ -155,7 +155,7 @@ async def test_finished_cycle_is_on_disk_before_the_debounced_write(
     # The cycle end has run to completion and the clock has not moved since: one
     # write, and it already holds the cycle, its counters and its envelope.
     assert main_writes() == 1
-    on_disk = hass_storage[main_key(entry)]["data"]
+    on_disk = _decoded(hass_storage[main_key(entry)]["data"])
     assert new["id"] in {c["id"] for c in on_disk["past_cycles"]}
     assert on_disk["lifetime_energy_wh"] == ps.get_lifetime_energy_wh()
     assert on_disk["lifetime_cycle_count"] == ps.get_lifetime_cycle_count()

@@ -75,6 +75,26 @@ def _cycle(cid: str, **extra: Any) -> dict[str, Any]:
     return base
 
 
+def _envelope(base: float) -> dict[str, Any]:
+    """A profile envelope shaped like a real one (full-precision floats, nested refs)."""
+    grid = [i * 40.61732673267327 for i in range(30)]
+    return {
+        "time_grid": grid,
+        "target_duration": 1170.0,
+        "min": [[round(t, 1), round(base * 0.5 + i, 1)] for i, t in enumerate(grid)],
+        "max": [[round(t, 1), round(base * 1.5 + i, 1)] for i, t in enumerate(grid)],
+        "avg": [[round(t, 1), round(base + i, 1)] for i, t in enumerate(grid)],
+        "std": [[round(t, 1), round(base / 7 + i / 3, 1)] for i, t in enumerate(grid)],
+        "cycle_count": 12, "shape_cycle_count": 12,
+        "avg_energy": 0.38660216666666664, "duration_std_dev": 1026.4176080916666,
+        "updated": "2026-11-04T00:00:02.427691+01:00",
+        "energy_ref": {"n": 12, "median_wh": 388.089},
+        "spin_ref": {"v": 1, "n": 12, "events": [{"heat": [[624.9, 685.3, 60.4]], "final": None}]},
+        "tail_ref": {"n": 12, "with_tail": 9, "median_s": 157.3},
+        "member_prog_s": {"92f0a85f960c": 7952.0, "5eb517f16806": -0.0},
+    }
+
+
 def _v18_store() -> dict[str, Any]:
     """A v18 store as it sits on disk: every list, the odd shapes a real one has."""
     odd = [[-0.0, 0.0], [0.1, 1e-7], [3.0, 2], [6.0, 123456789.123], [9.0, -4.5]]
@@ -95,14 +115,18 @@ def _v18_store() -> dict[str, Any]:
         ],
         "reference_cycles": [_cycle("r1", label_source="store")],
         "backfill_cycles": [_cycle("b1", profile_name=None)],
-        "envelopes": {},
+        "envelopes": {"Cotton": _envelope(412.3), "Eco 40": _envelope(97.1), "Empty": {}},
         "lifetime_cycle_count": 5,
         "lifetime_energy_wh": 700.0,
     })
 
 
+_COMPACT_KEYS = (*trace_codec.STORED_CYCLE_LISTS, trace_codec.ENVELOPES_KEY)
+
+
 def _cycles(data: dict[str, Any]) -> dict[str, Any]:
-    return {k: data.get(k) for k in trace_codec.STORED_CYCLE_LISTS}
+    """The parts of a store the codec writes: the three cycle lists and the envelopes."""
+    return {k: data.get(k) for k in _COMPACT_KEYS}
 
 
 def _migrator(hass: HomeAssistant) -> WashDataStore:
@@ -146,10 +170,12 @@ def test_what_cannot_or_need_not_be_encoded_is_left_alone() -> None:
 def test_encode_never_changes_the_store_it_was_given() -> None:
     data = _v18_store()
     before = copy.deepcopy(data)
-    lists = {k: data[k] for k in trace_codec.STORED_CYCLE_LISTS}
-    out = trace_codec.encode_stored_cycles(data)
+    lists = {k: data[k] for k in _COMPACT_KEYS}
+    out = trace_codec.encode_store_payload(data)
     assert data == before
     assert all(data[k] is lists[k] for k in lists)
+    assert isinstance(out["envelopes"]["Cotton"], str)
+    assert out["envelopes"]["Empty"] == {}  # nothing to gain
     assert out["profiles"] is data["profiles"]
     assert isinstance(out["past_cycles"][0]["power_data"], str)
     assert isinstance(out["past_cycles"][0]["debug_data"], str)
@@ -158,21 +184,23 @@ def test_encode_never_changes_the_store_it_was_given() -> None:
 
 
 def test_decode_is_copy_on_write_and_idempotent() -> None:
-    disk = _as_stored(trace_codec.encode_stored_cycles(_v18_store()))
+    disk = _as_stored(trace_codec.encode_store_payload(_v18_store()))
     shared = disk["past_cycles"]
     shared_first = shared[0]
-    assert trace_codec.decode_stored_cycles(disk) == 6  # 5 traces + 1 debug_data
+    shared_envelopes = disk["envelopes"]
+    assert trace_codec.decode_store_payload(disk) == 8  # 5 traces, 1 debug_data, 2 envelopes
     assert shared[0] is shared_first and isinstance(shared_first["power_data"], str)
+    assert isinstance(shared_envelopes["Cotton"], str) and disk["envelopes"] is not shared_envelopes
     assert _bits(_cycles(disk)) == _bits(_cycles(_v18_store()))
     again = copy.deepcopy(disk)
-    assert trace_codec.decode_stored_cycles(again) == 0
+    assert trace_codec.decode_store_payload(again) == 0
     assert again == disk
 
 
 def test_file_is_at_least_four_times_smaller_per_sample() -> None:
     data = {"past_cycles": [_cycle(f"c{i}", power_data=_trace(n=400)) for i in range(5)]}
     old = len(_orjson_default_encoder({"data": data}))
-    new = len(_orjson_default_encoder({"data": trace_codec.encode_stored_cycles(data)}))
+    new = len(_orjson_default_encoder({"data": trace_codec.encode_store_payload(data)}))
     assert old / new > 4
 
 
@@ -186,8 +214,9 @@ async def test_v18_to_v19_keeps_every_cycle_bit_identical_and_is_idempotent(
     before = _v18_store()
     once = await store._async_migrate_func(18, 1, copy.deepcopy(before))  # noqa: SLF001
     assert _bits(_cycles(once)) == _bits(_cycles(before))
-    assert {k: v for k, v in once.items() if k not in trace_codec.STORED_CYCLE_LISTS} == {
-        k: v for k, v in before.items() if k not in trace_codec.STORED_CYCLE_LISTS
+    assert once["envelopes"]["Cotton"] == before["envelopes"]["Cotton"]
+    assert {k: v for k, v in once.items() if k not in _COMPACT_KEYS} == {
+        k: v for k, v in before.items() if k not in _COMPACT_KEYS
     }
     twice = await store._async_migrate_func(18, 1, copy.deepcopy(once))  # noqa: SLF001
     assert _bits(twice) == _bits(once)
@@ -197,13 +226,15 @@ async def test_migration_decodes_text_an_older_build_wrote_back(hass: HomeAssist
     # An older build loads a v19 file without decoding it and saves it as its own
     # version: every later step must still read lists.
     store = _migrator(hass)
-    round_tripped = _as_stored(trace_codec.encode_stored_cycles(_v18_store()))
+    round_tripped = _as_stored(trace_codec.encode_store_payload(_v18_store()))
     out = await store._async_migrate_func(17, 1, round_tripped)  # noqa: SLF001
     for key in trace_codec.STORED_CYCLE_LISTS:
         for cycle in out[key]:
             assert not isinstance(cycle.get("power_data"), str)
             assert not isinstance(cycle.get("debug_data"), str)
+    assert all(isinstance(e, dict) for e in out["envelopes"].values())
     assert out["past_cycles"][0]["power_data"] == _v18_store()["past_cycles"][0]["power_data"]
+    assert _bits(out["envelopes"]) == _bits(_v18_store()["envelopes"])
 
 
 # --- the real Store ----------------------------------------------------------------
@@ -226,8 +257,10 @@ async def test_v18_file_migrates_to_compact_v19_and_reloads_identical(
     assert isinstance(disk["data"]["past_cycles"][0]["debug_data"], str)
     assert isinstance(disk["data"]["reference_cycles"][0]["power_data"], str)
     assert isinstance(disk["data"]["backfill_cycles"][0]["power_data"], str)
+    assert isinstance(disk["data"]["envelopes"]["Cotton"], str)
+    assert isinstance(disk["data"]["envelopes"]["Eco 40"], str)
     file_cycles = copy.deepcopy(disk["data"])
-    trace_codec.decode_stored_cycles(file_cycles)
+    trace_codec.decode_store_payload(file_cycles)
     assert _bits(_cycles(file_cycles)) == _bits(_cycles(before))
 
     # Save, load in a fresh store: identical again, and every reader sees lists.
@@ -241,6 +274,8 @@ async def test_v18_file_migrates_to_compact_v19_and_reloads_identical(
             next(c for c in ps.iter_stored_cycles() if c["id"] == cycle["id"])
         )
     assert fresh.get_cycle_power_data("p1") == [tuple(r) for r in before["past_cycles"][0]["power_data"]]
+    assert fresh.get_envelope("Cotton") == before["envelopes"]["Cotton"]
+    assert all(isinstance(e, dict) for e in fresh._data["envelopes"].values())  # noqa: SLF001
 
 
 async def test_saves_leave_memory_decoded_and_the_debounced_write_encodes_late(
@@ -262,7 +297,7 @@ async def test_saves_leave_memory_decoded_and_the_debounced_write_encodes_late(
     await hass.async_block_till_done()
     disk = copy.deepcopy(hass_storage[MAIN]["data"])
     assert isinstance(disk["past_cycles"][0]["power_data"], str)
-    trace_codec.decode_stored_cycles(disk)
+    trace_codec.decode_store_payload(disk)
     assert disk["past_cycles"][0]["power_data"] == _trace(n=3)
     assert isinstance(ps._data["past_cycles"][0]["power_data"], list)  # noqa: SLF001
 
@@ -283,7 +318,7 @@ async def test_a_save_while_stopping_still_writes_the_store_as_it_is_at_the_fina
         hass.set_state(CoreState.running)
     disk = copy.deepcopy(hass_storage[MAIN]["data"])
     assert isinstance(disk["past_cycles"][0]["power_data"], str)
-    trace_codec.decode_stored_cycles(disk)
+    trace_codec.decode_store_payload(disk)
     assert disk["past_cycles"][0]["power_data"] == _trace(n=4)
 
 
@@ -299,6 +334,7 @@ async def test_export_keeps_the_readable_shape(hass: HomeAssistant) -> None:
     assert export["version"] == STORAGE_VERSION
     assert export["data"]["past_cycles"][0]["power_data"] == _trace()
     assert isinstance(export["data"]["past_cycles"][0]["debug_data"], dict)
+    assert isinstance(export["data"]["envelopes"]["Cotton"]["avg"], list)
     assert _bits(_cycles(export["data"])) == _bits(_cycles(_v18_store()))
 
 
@@ -309,7 +345,7 @@ def test_import_unwrap_accepts_old_exports_and_compact_store_files() -> None:
 
     store_file = _as_stored({
         "version": 19, "minor_version": 1, "key": MAIN,
-        "data": trace_codec.encode_stored_cycles(_v18_store()),
+        "data": trace_codec.encode_store_payload(_v18_store()),
     })
     payload = copy.deepcopy(store_file)
     data_new, meta = unwrap_import_payload(payload)
@@ -324,17 +360,21 @@ async def test_import_of_old_and_new_exports_stores_identical_traces(hass: HomeA
     src._data = _v18_store()  # noqa: SLF001
     new_export = json.loads(json.dumps(src.export_data()))
     old_export = {"version": 18, "data": _v18_store()}
-    raw_file = _as_stored({"version": 19, "data": trace_codec.encode_stored_cycles(_v18_store())})
+    raw_file = _as_stored({"version": 19, "data": trace_codec.encode_store_payload(_v18_store())})
 
     results = []
+    envelopes: list[Any] = []
     for i, payload in enumerate((old_export, new_export, raw_file)):
         dst = ProfileStore(hass, f"01KV19IMPORT{i:014d}")
         await dst.async_load()
         await dst.async_import_data(payload)
         results.append({c["id"]: c.get("power_data") for c in dst.iter_stored_cycles()})
+        envelopes.append(dst._data["envelopes"])  # noqa: SLF001
     assert results[0] == results[1] == results[2]
     assert results[0]["p1"] == _trace()
     assert all(not isinstance(v, str) for r in results for v in r.values())
+    assert envelopes[0] == envelopes[1] == envelopes[2]
+    assert all(isinstance(e, dict) for m in envelopes for e in m.values())
 
 
 async def test_restore_point_is_compact_on_disk_and_restores_identical(
@@ -348,6 +388,7 @@ async def test_restore_point_is_compact_on_disk_and_restores_identical(
     assert await ps.async_save_pre_import_snapshot("test")
     slot = next(v for k, v in hass_storage.items() if k.endswith(".pre_import"))
     assert isinstance(slot["data"]["data"]["past_cycles"][0]["power_data"], str)
+    assert isinstance(slot["data"]["data"]["envelopes"]["Cotton"], str)
 
     ps._data = {"profiles": {}, "past_cycles": [], "reference_cycles": [], "backfill_cycles": []}  # noqa: SLF001
     await ps.async_restore_pre_import_snapshot()
@@ -366,7 +407,7 @@ def test_harness_loader_reads_a_raw_v19_store_file() -> None:
     export = {"version": 19, "data": _v18_store(), "entry_options": {"device_type": "washing_machine"}}
     store_file = _as_stored({
         "version": 19, "minor_version": 1, "key": MAIN,
-        "data": trace_codec.encode_stored_cycles(_v18_store()),
+        "data": trace_codec.encode_store_payload(_v18_store()),
     })
     from_export, from_file = ev._unwrap(export), ev._unwrap(store_file)  # noqa: SLF001
     assert from_export[3] == from_file[3] == "export"

@@ -2048,9 +2048,10 @@ SELF_UNMATCHABLE_MIN_CYCLES = 3
 # silent heater stretches) and arms `CYCLE_ENERGY_REBUILD_KEY` so every envelope's
 # `avg_energy` is rebuilt from the cycles (#495). Idempotent.
 # v19: compact traces on disk (`trace_codec`): each stored cycle's `power_data` and
-# `debug_data` are written as one string of compact JSON text (the indent was over
-# half of a real store), decoded on load, so memory, exports and the WS API keep the
-# lists. Every value bit-identical; nothing in memory changes. Idempotent.
+# `debug_data`, and each profile envelope, are written as one string of compact JSON
+# text (the 2-space indent was most of a real store), decoded on load, so memory,
+# exports and the WS API keep the lists. Every value bit-identical; nothing in
+# memory changes. Idempotent.
 STORAGE_VERSION = 19
 STORAGE_KEY = "ha_washdata"
 
