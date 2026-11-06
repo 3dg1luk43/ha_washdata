@@ -235,7 +235,6 @@ class LearningManager:
         # no-update timeouts would be re-suggested from it every five minutes.
         # Bounded like the model itself: only its last 200 survive a commit anyway.
         self._pending_intervals: deque[tuple[float, datetime]] = deque(maxlen=200)
-        self._last_suggestion_update: datetime | None = None
         self._last_batch_simulation_count: int = 0  # track when to re-run batch
         self._last_suggestions_labeled_count: int = 0  # gate model/detection passes
 
@@ -338,20 +337,21 @@ class LearningManager:
     def process_power_reading(
         self, _power: float, now: datetime, last_reading_time: datetime | None
     ) -> None:
-        """Ingest power reading metadata for statistical analysis."""
+        """Hold this reading's update interval for the cycle-end cadence commit.
+
+        No suggestion pass runs here. It used to, every 5 minutes of a running
+        cycle, but everything it reads moves only at a cycle end (the cadence
+        model is committed by ``close_cycle_cadence``, the traces it scans are
+        stored then), so each one re-derived what the last cycle-end pass had,
+        a ~100-trace executor scan for nothing (#510 follow-up). The pass runs
+        once per cycle end, in ``close_cycle_cadence``.
+        """
         if last_reading_time:
             delta = (now - last_reading_time).total_seconds()
             # Ignore ultra-small jitter (<0.1s) and massive gaps (>1800s - likely downtime)
             if 0.1 < delta < 1800:
                 # Held until the cycle's outcome is known (#458): see close_cycle_cadence.
                 self._pending_intervals.append((delta, now))
-
-        # Periodically update suggestions based on operational stats
-        if (
-            self._last_suggestion_update is None
-            or (now - self._last_suggestion_update).total_seconds() > 300  # Check every 5 mins
-        ):
-            self._update_operational_suggestions(now)
 
     def discard_cycle_cadence(self) -> None:
         """Drop held intervals without committing them (a new start from idle)."""
@@ -381,9 +381,9 @@ class LearningManager:
             return False
         for delta, ts in pending:
             self._sample_interval_model.add_sample(delta, ts)
-        # The periodic refresh only runs while a cycle is active, so surface what
-        # this cycle taught now rather than at the start of the next one.
-        self._update_operational_suggestions(pending[-1][1])
+        # The operational pass's one run per cycle: its cadence input changes only
+        # here (process_power_reading runs none during the cycle).
+        self._update_operational_suggestions()
         return True
 
     def process_cycle_end(
@@ -490,7 +490,7 @@ class LearningManager:
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.error("Batch simulation failed: %s", e)
 
-    def _update_operational_suggestions(self, now: datetime) -> None:
+    def _update_operational_suggestions(self) -> None:
         """Generate suggestions for operational parameters (intervals, timeouts).
 
         The cadence stats (p95/median) are read on the event loop and captured as
@@ -507,9 +507,6 @@ class LearningManager:
         if p95 is None or median is None:
             return
 
-        # Throttle before dispatching so repeated readings within the window do
-        # not schedule overlapping passes.
-        self._last_suggestion_update = now
         # Bind the config snapshot here, on the loop, not inside the executor job.
         engine = self.suggestion_engine.for_job()
         self._dispatch_scan_and_apply(

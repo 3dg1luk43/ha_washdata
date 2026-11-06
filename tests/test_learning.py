@@ -135,7 +135,7 @@ def test_watchdog_suggestion(learning_manager):
     )
 
     # Trigger update
-    learning_manager._update_operational_suggestions(now)
+    learning_manager._update_operational_suggestions()
     
     sugg = learning_manager.profile_store.get_suggestions()
     

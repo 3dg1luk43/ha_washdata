@@ -212,7 +212,8 @@ def test_a_cycle_that_did_not_end_on_its_own_teaches_no_cadence(cycle) -> None:
 def test_a_clean_cycle_commits_its_cadence() -> None:
     lm = _learning()
     _feed(lm, 5.0, 40)
-    lm._update_operational_suggestions.reset_mock()  # the periodic mid-cycle refresh
+    # No pass while the cycle runs (#510 follow-up); one at its end.
+    lm._update_operational_suggestions.assert_not_called()
     assert lm.close_cycle_cadence({"status": "completed", "termination_reason": "smart"})
     assert lm._sample_interval_model.count == 40
     lm._update_operational_suggestions.assert_called_once()

@@ -22,6 +22,10 @@ interval values (its cadence model only moves at a cycle end). Each pass saved t
 whole store (megabytes) for nothing: a suggestion equal to the current setting
 "deleted" a key that was not there, and a pending one was stored again unchanged.
 Measured here on a 30 min run: 6 store writes, now 0.
+
+Follow-up: the pass no longer runs during a cycle at all. Everything it reads moves
+only at a cycle end, so it runs once there (``close_cycle_cadence``); a running
+cycle calls the generator zero times instead of every 5 minutes.
 """
 from __future__ import annotations
 
@@ -33,6 +37,7 @@ from homeassistant.util import dt as dt_util
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
 from custom_components.ha_washdata.const import DOMAIN, STATE_FINISHED, STATE_OFF, STATE_RUNNING
+from custom_components.ha_washdata.suggestion_engine import SuggestionEngine
 
 POWER = "sensor.plug_power"
 FAST = {
@@ -77,6 +82,20 @@ def _count_main_store_writes(manager: Any) -> list[Any]:
     return writes
 
 
+def _spy_operational_pass(monkeypatch: Any) -> list[dict[str, Any]]:
+    """Every run of the operational generator, with what it returned."""
+    runs: list[dict[str, Any]] = []
+    original = SuggestionEngine.generate_operational_suggestions
+
+    def _spy(self: SuggestionEngine, p95: float, median: float) -> dict[str, Any]:
+        out = original(self, p95, median)
+        runs.append({"p95": p95, "median": median, "out": out})
+        return out
+
+    monkeypatch.setattr(SuggestionEngine, "generate_operational_suggestions", _spy)
+    return runs
+
+
 async def _one_cycle_then_idle(hass: HomeAssistant, freezer: Any, manager: Any) -> None:
     """A completed cycle, so the cadence model holds enough intervals to suggest."""
     await _feed(hass, freezer, 500, 900)
@@ -86,7 +105,7 @@ async def _one_cycle_then_idle(hass: HomeAssistant, freezer: Any, manager: Any) 
 
 
 async def test_running_cycle_with_pending_suggestions_does_not_rewrite_the_store(
-    hass: HomeAssistant, setup_washdata_entry, freezer
+    hass: HomeAssistant, setup_washdata_entry, freezer, monkeypatch
 ) -> None:
     entry = await setup_washdata_entry(power_sensor=POWER, options=FAST)
     manager = hass.data[DOMAIN][entry.entry_id]
@@ -95,10 +114,12 @@ async def test_running_cycle_with_pending_suggestions_does_not_rewrite_the_store
     assert pending, "the cadence pass should have proposed values for this plug"
 
     writes = _count_main_store_writes(manager)
+    runs = _spy_operational_pass(monkeypatch)
     await _feed(hass, freezer, 500, 1800)
     assert manager.detector.state == STATE_RUNNING
 
     assert writes == []
+    assert runs == []  # no pass at all while the cycle runs
     # Still pending, same values: nothing was dropped to get there.
     after = manager.profile_store.get_suggestions()
     assert {k: v["value"] for k, v in after.items()} == {
@@ -107,7 +128,7 @@ async def test_running_cycle_with_pending_suggestions_does_not_rewrite_the_store
 
 
 async def test_running_cycle_with_applied_suggestions_does_not_rewrite_the_store(
-    hass: HomeAssistant, setup_washdata_entry, freezer
+    hass: HomeAssistant, setup_washdata_entry, freezer, monkeypatch
 ) -> None:
     entry = await setup_washdata_entry(power_sensor=POWER, options=FAST)
     manager = hass.data[DOMAIN][entry.entry_id]
@@ -124,11 +145,41 @@ async def test_running_cycle_with_applied_suggestions_does_not_rewrite_the_store
     await manager.profile_store.async_save()
 
     writes = _count_main_store_writes(manager)
+    runs = _spy_operational_pass(monkeypatch)
     await _feed(hass, freezer, 500, 1800)
     assert manager.detector.state == STATE_RUNNING
 
     assert writes == []
+    assert runs == []
     assert manager.profile_store.get_suggestions() == {}
+
+
+async def test_the_pass_runs_once_per_cycle_end_and_stores_what_it_derived(
+    hass: HomeAssistant, setup_washdata_entry, freezer, monkeypatch
+) -> None:
+    """What the user sees after a cycle is the cycle-end pass's output, as before:
+    one run, on the cadence model the cycle just committed."""
+    entry = await setup_washdata_entry(power_sensor=POWER, options=FAST)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    runs = _spy_operational_pass(monkeypatch)
+    await _one_cycle_then_idle(hass, freezer, manager)
+    model = manager.learning_manager._sample_interval_model  # noqa: SLF001
+    assert len(runs) == 1
+    assert runs[0]["p95"] == model.p95 and runs[0]["median"] == model.median
+
+    await _feed(hass, freezer, 500, 900)  # a second cycle: nothing while it runs
+    assert manager.detector.state == STATE_RUNNING
+    assert len(runs) == 1
+    await _feed(hass, freezer, 0, 600)
+    assert manager.detector.state in (STATE_OFF, STATE_FINISHED)
+    assert len(runs) == 2
+    assert runs[1]["p95"] == model.p95 and runs[1]["median"] == model.median
+    stored = manager.profile_store.get_suggestions()
+    derived = runs[1]["out"]
+    shown = {k for k in derived if k in stored}
+    assert shown, "the cycle-end pass should still surface its values"
+    for key in shown:
+        assert stored[key]["value"] == derived[key]["value"]
 
 
 async def test_a_changed_suggestion_is_still_saved(

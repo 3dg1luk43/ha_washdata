@@ -4347,8 +4347,9 @@ class WashDataManager:
             return
 
         # Track observed power readings for learning - only while a cycle is
-        # active (#394). An appliance is idle ~98% of the time; running the 5-min
-        # auto-tune pass and training the sample-interval cadence model on the
+        # active (#394). An appliance is idle ~98% of the time; running the auto-tune
+        # pass (then every 5 min; since #510's follow-up once per cycle end) and
+        # training the sample-interval cadence model on the
         # standby heartbeat is constant background work (a store rewrite every few
         # minutes) that buys nothing AND skews every operational suggestion, since
         # the idle publish-on-change heartbeat is not the in-cycle sampling
