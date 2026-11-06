@@ -11,17 +11,13 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 ### TL;DR
 
-- Washing machines and dryers recognise their program far more often, while running and at the end.
-- Washers report "finished" sooner after the program ends; with an anti-crease phase within minutes, not 20.
-- Remaining time on washers with an anti-crease phase counts down to the program end.
+- Washers and dryers recognise their program far more often, and washers with an anti-crease phase finish and count down to the program end.
 - Cycle and program energy are right on plugs that report only on change; history is recalculated.
-- Fewer review questions, answered in one tap on the Overview or the phone.
-- A blank notification text sends the default instead of failing.
-- A finished load stays Clean across a Home Assistant restart.
 - Long washer-dryer programmes are no longer cut at 8 h.
-- Panel readable with light accent themes.
-- New actions: mark a maintenance task done, delete a cycle.
-- Last cycle duration, energy and cost as sensors.
+- A finished load stays Clean across a Home Assistant restart.
+- Fewer review questions, answered in one tap on the Overview or the phone.
+- New: last cycle duration, energy and cost sensors; actions to mark maintenance done and delete a cycle.
+- Fixes for blank notifications and for panel buttons on light accent themes.
 
 ### Features
 
