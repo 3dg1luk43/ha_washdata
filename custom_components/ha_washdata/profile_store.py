@@ -2217,6 +2217,18 @@ def unwrap_import_payload(payload: Any) -> tuple[dict[str, Any], dict[str, Any]]
         raise ValueError("Invalid export payload (not a JSON object)")
 
     version = payload.get("version", 1)
+    # A newer build's store may mean something this one cannot read, and no
+    # migration runs backwards; the undo path refuses the same (#511). An
+    # unreadable version passes, as the other version checks treat it as old.
+    try:
+        newer = int(version) > STORAGE_VERSION
+    except (TypeError, ValueError, OverflowError):
+        newer = False
+    if newer:
+        raise ValueError(
+            f"This export was made by a newer version of WashData (storage v{version}, "
+            f"this one reads up to v{STORAGE_VERSION}); update WashData to import it"
+        )
     if version == 1 or "data" not in payload:
         data_dict: dict[str, Any] = {
             "profiles": payload.get("profiles", {}),
