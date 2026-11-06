@@ -298,17 +298,23 @@ class LearningManager:
                         abs_delta = abs(sv - cv)
 
                         # Gate 1: exact equality → stale, delete so it doesn't linger.
+                        # Gates 1 and 2 save only when a stored key was removed
+                        # (#510): the 5-minute pass re-derives the same applied
+                        # values every tick of a running cycle, and "deleting" a key
+                        # that was never stored rewrote the whole store each time.
                         if abs_delta < 1e-9:
-                            self.profile_store.delete_suggestion(key)
-                            any_deleted = True
+                            if key in existing_suggestions:
+                                self.profile_store.delete_suggestion(key)
+                                any_deleted = True
                             continue
 
                         # Gate 2: change too small to be meaningful → delete (noise).
                         rel_delta = abs_delta / max(abs(cv), 1e-3)
                         if (rel_delta < MIN_SUGGESTION_REL_DELTA
                                 and abs_delta < _suggestion_min_abs_delta(key)):
-                            self.profile_store.delete_suggestion(key)
-                            any_deleted = True
+                            if key in existing_suggestions:
+                                self.profile_store.delete_suggestion(key)
+                                any_deleted = True
                             continue
 
                         # Gate 3: cooldown active → skip update without deleting.

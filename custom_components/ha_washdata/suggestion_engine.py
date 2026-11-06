@@ -851,6 +851,21 @@ def _num(value: Any) -> float | None:
     return result if np.isfinite(result) else None
 
 
+def _same_suggestion(stored: Any, data: dict[str, Any]) -> bool:
+    """Is ``data`` already the stored suggestion (value, reason and its sidecars)?
+
+    The ``updated`` stamp is ignored: re-sending a pending value is not a change.
+    """
+    if not isinstance(stored, dict):
+        return False
+    return (
+        stored.get("value") == data.get("value")
+        and stored.get("reason") == data.get("reason")
+        and stored.get("reason_key") == data.get("reason_key")
+        and stored.get("reason_params") == data.get("reason_params")
+    )
+
+
 def reconcile_suggestions(
     suggestions: dict[str, Any],
     current: dict[str, Any],
@@ -2234,8 +2249,17 @@ class SuggestionEngine:
         over the *entire* accumulated suggestion set so that suggesting one
         parameter never leaves it inconsistent with another (see
         :func:`reconcile_suggestions`).
+
+        A suggestion already stored with the same value and reason is left as it
+        is, and the store is saved only when something changed (#510): the
+        operational pass re-sends the same pending values every five minutes of a
+        running cycle, and each re-send rewrote the whole store.
         """
+        stored = self.profile_store.get_suggestions()
+        updated: list[str] = []
         for key, data in suggestions.items():
+            if _same_suggestion(stored.get(key), data):
+                continue
             self.profile_store.set_suggestion(
                 key,
                 data["value"],
@@ -2243,23 +2267,27 @@ class SuggestionEngine:
                 reason_key=data.get("reason_key"),
                 reason_params=data.get("reason_params"),
             )
-        if suggestions:
-            _LOGGER.info("Applied %d setting suggestion(s): %s", len(suggestions), ", ".join(sorted(suggestions)))
+            updated.append(key)
+        if updated:
+            _LOGGER.info("Applied %d setting suggestion(s): %s", len(updated), ", ".join(sorted(updated)))
 
-        self._reconcile_stored_suggestions()
+        reconciled = self._reconcile_stored_suggestions()
 
-        if self.hass and suggestions:
+        if self.hass and (updated or reconciled):
             save = self.profile_store.async_save()
             if self._spawn_fn is not None:
                 self._spawn_fn(save)
             else:
                 self.hass.async_create_task(save)
 
-    def _reconcile_stored_suggestions(self) -> None:
-        """Reconcile the accumulated stored suggestions against current options."""
+    def _reconcile_stored_suggestions(self) -> bool:
+        """Reconcile the accumulated stored suggestions against current options.
+
+        Returns whether any stored suggestion was adjusted.
+        """
         stored = self.profile_store.get_suggestions()
         if not stored:
-            return
+            return False
         adjusted, changed = reconcile_suggestions(stored, self._entry_options())
         for key in changed:
             entry = adjusted[key]
@@ -2272,3 +2300,4 @@ class SuggestionEngine:
             )
         if changed:
             _LOGGER.info("Reconciled coupled parameters for consistency: %s", ", ".join(sorted(changed)))
+        return bool(changed)
