@@ -433,10 +433,12 @@ async def test_running_cycle_work(
         # 40-185 us each, on every sample).
         ("detector NumPy calls", c["numpy"], 1),
         # The per-profile pause / terminal statistics a live match reads are cached
-        # on an evidence fingerprint. Measured 6 (each computed once); budget 9.
-        # Guards those caches (register item 297: uncached, the profile's traces
-        # are decompressed on the event loop on every match tick).
-        ("trace decompressions", decompressions["decompress"], 9),
+        # on an evidence fingerprint and aggregate trace summaries computed in the
+        # executor at each envelope rebuild (#510 follow-up). Measured 0 (6 before
+        # the summaries: each statistic decompressed its profile once, on the event
+        # loop); budget 0. Guards both (register item 297: uncached, the profile's
+        # traces are decompressed on the event loop on every match tick).
+        ("trace decompressions", decompressions["decompress"], 0),
         # Measured 0; budget 0. Guards an envelope rebuild on the live path.
         ("envelope rebuilds", c["async_rebuild_envelope"], 0),
         # The in-flight snapshot has its own file. Measured 0; budget 0. Guards
@@ -490,10 +492,11 @@ async def test_cycle_end_work(
         # Guards the rebuild memo (2 without it).
         ("envelope builds", c["_rebuild_envelope_sync"], 1),
         # The labelled profile's build (one per cycle of it), the new cycle's peak,
-        # and that profile's artifacts. Measured 9 (35 before item 456: every
-        # envelope rebuilt and every stored cycle's artifacts recomputed; 55
-        # before `_cycle_peak` was memoised); budget 11. Guards a pass that
-        # decompresses every stored trace again (the store size, not the profile's).
+        # its trace summary (#510 follow-up, in the executor) and that profile's
+        # artifacts. Measured 10 (35 before item 456: every envelope rebuilt and
+        # every stored cycle's artifacts recomputed; 55 before `_cycle_peak` was
+        # memoised); budget 11. Guards a pass that decompresses every stored trace
+        # again (the store size, not the profile's).
         ("trace decompressions", decompressions["decompress"], 11),
     )
 
@@ -513,8 +516,10 @@ async def test_get_profiles_work(
     await hass.async_block_till_done(wait_background_tasks=True)
     assert connection.send_result.call_count == 1
     within_budget(
-        # Measured one per stored cycle (12); budget cycles + 2. Guards a second
-        # heuristic decompressing every trace again (2 x cycles).
+        # Measured 0: the terminal signatures read the trace summaries the seeding
+        # rebuilds computed (one per stored cycle, 12, before them, and still on a
+        # store whose summaries are not filled yet); budget cycles + 2. Guards a
+        # second heuristic decompressing every trace again (2 x cycles).
         ("trace decompressions", decompressions["decompress"],
          len(mgr.profile_store.get_past_cycles()) + 2),
     )

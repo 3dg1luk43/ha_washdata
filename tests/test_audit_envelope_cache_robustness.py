@@ -68,7 +68,9 @@ class _GatedHass:
 
     async def async_add_executor_job(self, fn: Any, *args: Any) -> Any:
         if getattr(fn, "__name__", "") != "_rebuild_envelope_sync":
-            return await self._real.async_add_executor_job(fn, *args)
+            # Inline, like the build: the race must not wait on a real executor
+            # thread (the trace-summary fill before each build is one, #510).
+            return fn(*args)
         result = fn(*args)
         gate = asyncio.Event()
         self.gates.append(gate)

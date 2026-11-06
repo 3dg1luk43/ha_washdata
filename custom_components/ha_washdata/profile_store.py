@@ -32,6 +32,7 @@ import statistics
 import threading
 import time
 import uuid
+from array import array
 from collections.abc import Callable, Mapping
 from datetime import datetime, timedelta
 from typing import Any, TypeAlias, cast
@@ -118,7 +119,6 @@ from .signal_processing import (
     integrate_wh,
     integrate_cycle_wh,
     energy_gap_threshold_s,
-    has_resumed_pause as _has_resumed_pause,
     resumed_pauses as _resumed_pauses,
     terminal_event_end as _terminal_event_end,
     terminal_quiet_seen as _terminal_quiet_seen,
@@ -2569,6 +2569,270 @@ def _last_high_block(
     return (min(max(start_frac, 0.0), 1.0), seconds, start_offset)
 
 
+# --- Trace summaries --------------------------------------------------------------
+# The per-profile statistics the detector is fed (pause catalogues, terminal quiet,
+# member terminal spins, the prefix term's "ever paused below") each decompressed
+# every evidence cycle of the profile, on the event loop, on the first match tick
+# after the profile's evidence changed (0.8 s at 300 cycles, ~3 s at 1000). What
+# they read from one trace is a pure function of that trace, so it is computed once
+# per trace, off the loop (`ProfileStore.async_warm_trace_summaries`), and the
+# statistics aggregate the summaries. The signature and pause parts are those
+# statistics' own per-cycle bodies, moved; the spin part answers `_last_high_block`
+# at any level (tests/test_issue_510_statistics_off_loop.py checks it against that
+# function). The aggregates are bit-identical to the inline computation.
+
+
+class _PartFailed(Exception):
+    """A summary part whose computation raised. Reading it raises, so the statistic
+    fails the way it did when it computed the part inline (and is not cached)."""
+
+
+_PART_FAILED = object()
+
+
+def _terminal_event_measure(points: list[tuple[float, float]]) -> tuple[float, ...] | None:
+    """One cycle's input to :meth:`ProfileStore.compute_profile_terminal_signature`.
+
+    None: not measurable (too few points, all-zero, zero span). ``()``: measured,
+    no run above the threshold. ``(tail,)``: the last run is main activity, with
+    the quiet tail after it (item 469). Otherwise ``(gap, seconds, event_peak,
+    event_peak_frac, position)``.
+    """
+    if len(points) < 5:
+        return None
+    peak = max(p for _t, p in points)
+    if peak <= 0:
+        return None
+    threshold = peak * TERMINAL_EVENT_PEAK_FRAC
+    span = points[-1][0] - points[0][0]
+    if span <= 0:
+        return None
+    # Walk back to the last run above the threshold, then to the start of that
+    # run, then to the end of the quiet stretch before it.
+    end_i = None
+    for i in range(len(points) - 1, -1, -1):
+        if points[i][1] > threshold:
+            end_i = i
+            break
+    if end_i is None:
+        return ()
+    start_i = end_i
+    while start_i > 0 and points[start_i - 1][1] > threshold:
+        start_i -= 1
+    # The quiet PHASE, not the sample interval: walk back to the previous activity.
+    # Measuring the gap to the preceding sample would just report the plug's
+    # reporting rate, since a plug that keeps sampling through the drying phase has
+    # no large interval.
+    prev_i = None
+    for i in range(start_i - 1, -1, -1):
+        if points[i][1] > threshold:
+            prev_i = i
+            break
+    event_peak = max(p for _t, p in points[start_i : end_i + 1])
+    if (
+        prev_i is None  # the run reaches the start, or nothing precedes it
+        or points[start_i][0] - points[prev_i][0] < TERMINAL_QUIET_MIN_S
+        or event_peak > peak * TERMINAL_EVENT_MAX_PEAK_FRAC
+    ):
+        # The last run is the main activity (item 469): no event seen, only how
+        # long the trace stayed quiet after it.
+        return (points[-1][0] - points[end_i][0],)
+    gap = points[start_i][0] - points[prev_i][0]
+    return (
+        gap,
+        points[end_i][0] - points[start_i][0],
+        event_peak,
+        event_peak / peak,
+        (points[start_i][0] - points[0][0]) / span,
+    )
+
+
+class _SpinTail:
+    """What :func:`_last_high_block` can return a TERMINAL block from, at any level.
+
+    ``_member_terminal_spins`` keeps a member's last block above the level only when
+    it starts at ``ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC`` or later, and the standby
+    finalise asks at a level that follows the live cycle's peak, so the answer
+    cannot be cached per level ahead of time. A block that starts before index ``B``
+    (the first sample at or past that fraction of the trimmed span) is never kept,
+    so only the samples from ``B - 1`` on are held: about a tenth of the trace. The
+    trim, span and median step are the trace's own, computed as ``_last_high_block``
+    computes them. A trace whose times are not sorted keeps all of it.
+    """
+
+    __slots__ = ("t", "p", "t0", "span", "step", "s")
+
+    def __init__(self, points: list[tuple[float, float]]) -> None:
+        times = [float(pt[0]) for pt in points]
+        powers = [float(pt[1]) for pt in points]
+        # The trim and span of _last_high_block, level-independent.
+        peak = max(powers) if powers else 0.0
+        quiet_floor = max(1.0, peak * 0.02)
+        end = len(powers) - 1
+        while end > 0 and powers[end] <= quiet_floor:
+            end -= 1
+        self.t: array[float] = array("d")
+        self.p: array[float] = array("d")
+        self.t0 = 0.0
+        self.span = 0.0
+        self.step = 0.0
+        self.s = 0
+        if end < 1:
+            return
+        times = times[: end + 1]
+        powers = powers[: end + 1]
+        span = float(times[-1]) - float(times[0])
+        if span <= 0:
+            return
+        t0 = float(times[0])
+        diffs = [
+            float(times[i + 1]) - float(times[i])
+            for i in range(len(times) - 1)
+            if float(times[i + 1]) - float(times[i]) > 0
+        ]
+        self.step = statistics.median(diffs) if diffs else 0.0
+        self.t0 = t0
+        self.span = span
+        if all(times[i] <= times[i + 1] for i in range(len(times) - 1)):
+            b = len(times) - 1
+            while b > 0 and (float(times[b - 1]) - t0) / span >= (
+                ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC
+            ):
+                b -= 1
+            self.s = max(b - 1, 0)
+        self.t = array("d", times[self.s :])
+        self.p = array("d", powers[self.s :])
+
+    def terminal_block(self, level: float) -> tuple[float, float] | None:
+        """``(start_offset_s, seconds)`` of ``_last_high_block(trace, level)`` when
+        that block starts at ``ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC`` or later, else
+        None. The same walk on the held samples."""
+        t, p = self.t, self.p
+        if self.span <= 0 or not p:
+            return None
+        last = None
+        for i in range(len(p) - 1, -1, -1):
+            if p[i] > level:
+                last = i
+                break
+        if last is None:
+            return None  # nothing above the level from B - 1 on: not terminal
+        first = last
+        while first > 0 and p[first - 1] > level:
+            first -= 1
+        if first == 0 and self.s > 0:
+            return None  # the run starts at B - 1 or earlier: not terminal
+        start_offset = float(t[first]) - self.t0
+        start_frac = start_offset / self.span
+        if last + 1 < len(t):
+            end_t = float(t[last + 1])
+        elif self.s + last > 0:
+            end_t = float(t[last]) + self.step
+        else:
+            end_t = float(t[last])
+        seconds = end_t - float(t[first])
+        if seconds <= 0:
+            return None
+        if min(max(start_frac, 0.0), 1.0) < ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC:
+            return None
+        return (start_offset, seconds)
+
+
+class _TraceSummary:
+    """Everything the profile statistics read from one stored trace.
+
+    Valid while the cycle holds the same ``power_data`` object (every edit assigns
+    a new one) with the same length and ``start_time``: the inputs of
+    ``decompress_power_data``. ``pauses`` maps a stop level to
+    ``signal_processing.resumed_pauses`` at that level, flattened into doubles
+    (``(f0, d0, f1, d1, ...)``: a washer trace holds ~120 pauses a level, 28 KiB as
+    tuples, 4 KiB like this); :meth:`pause_pairs` gives the tuples back.
+    """
+
+    __slots__ = ("raw", "n_raw", "start", "n", "sig", "spin", "pauses")
+
+    def __init__(self, raw: Any, start: Any) -> None:
+        self.raw = raw
+        self.n_raw = _raw_len(raw)
+        self.start = start
+        self.n = 0
+        self.sig: Any = None
+        self.spin: Any = None
+        self.pauses: dict[float, array[float]] = {}
+
+    def pause_pairs(self, level: float) -> list[tuple[float, float]]:
+        flat = self.pauses[level]
+        return list(zip(flat[0::2], flat[1::2]))
+
+    def longest_pause(self, level: float) -> float:
+        return max(self.pauses[level][1::2], default=0.0)
+
+    def valid_for(self, raw: Any, start: Any) -> bool:
+        return self.raw is raw and self.n_raw == _raw_len(raw) and self.start == start
+
+    def signature(self) -> tuple[float, ...] | None:
+        if self.sig is _PART_FAILED:
+            raise _PartFailed
+        return cast("tuple[float, ...] | None", self.sig)
+
+    def spin_block(self, level: float) -> tuple[float, float] | None:
+        if self.spin is _PART_FAILED:
+            raise _PartFailed
+        return self.spin.terminal_block(level) if self.spin is not None else None
+
+
+def _raw_len(raw: Any) -> int:
+    return len(raw) if isinstance(raw, list) else -1
+
+
+def _trace_points(raw: Any, start: Any) -> list[tuple[float, float]]:
+    """``decompress_power_data`` of a cycle holding ``raw`` and ``start``."""
+    return decompress_power_data(cast(Any, {"power_data": raw, "start_time": start}))
+
+
+def _resumed_pauses_at(points: list[tuple[float, float]], level: float) -> array[float]:
+    flat: array[float] = array("d")
+    if len(points) >= 2:
+        for f, d in _resumed_pauses(points, level):
+            flat.append(f)
+            flat.append(d)
+    return flat
+
+
+def _summarise_trace(raw: Any, start: Any, levels: Any) -> _TraceSummary:
+    """One trace's summary. Raises only if decompression does (pure otherwise)."""
+    points = _trace_points(raw, start)
+    summary = _TraceSummary(raw, start)
+    summary.n = len(points)
+    try:
+        summary.sig = _terminal_event_measure(points)
+    except Exception:  # noqa: BLE001 - the statistic reading it fails instead
+        summary.sig = _PART_FAILED
+    if summary.n >= 10:
+        try:
+            summary.spin = _SpinTail(points)
+        except Exception:  # noqa: BLE001
+            summary.spin = _PART_FAILED
+    for level in levels:
+        summary.pauses[float(level)] = _resumed_pauses_at(points, float(level))
+    return summary
+
+
+def _summarise_traces(
+    todo: list[tuple[Any, Any]], levels: tuple[float, ...]
+) -> list[_TraceSummary]:
+    """Executor job: the summaries of ``todo`` (``(raw, start)`` pairs). Never
+    raises; a trace that cannot be decompressed is left to the statistic, which
+    fails on it as before."""
+    out: list[_TraceSummary] = []
+    for raw, start in todo:
+        try:
+            out.append(_summarise_trace(raw, start, levels))
+        except Exception:  # noqa: BLE001
+            continue
+    return out
+
+
 class ProfileStore:
     """Manages storage of washer profiles and past cycles."""
 
@@ -2600,6 +2864,11 @@ class ProfileStore:
         # has no access to them itself. Defaults to all three, i.e. pre-setting behaviour.
         self._evidence_sources: tuple[str, ...] = tuple(PROFILE_EVIDENCE_SOURCES)
         self._save_debug_traces = save_debug_traces
+        # One summary per stored trace (keyed by its power_data object) and the stop
+        # levels each carries its pauses at, pinned by the manager: what the profile
+        # statistics read, computed off the loop (async_warm_trace_summaries).
+        self._trace_summaries: dict[int, _TraceSummary] = {}
+        self._trace_summary_levels: tuple[float, ...] = ()
 
         # Cache for resampled sample segments: key=(cycle_id, dt), least recently
         # used first, bounded by _sample_segment_cache_cap (audit ML-12). Written
@@ -7204,7 +7473,11 @@ class ProfileStore:
         reproduce the same envelope and stats. A cycle end used to rebuild the
         labelled profile twice (the manager, then the learning pass confirming the
         same label) and every other profile once more (register item 456).
+
+        First the profile's trace summaries: every edit of its cycles reaches this
+        method, so what the next match tick's statistics read is ready off the loop.
         """
+        await self.async_warm_trace_summaries((profile_name,))
         before = self._envelope_inputs(profile_name)
         memo: dict[str, tuple[tuple[Any, ...], tuple[Any, ...], list[Any]]] = (
             self.__dict__.setdefault("_envelope_built_from", {})
@@ -8050,11 +8323,12 @@ class ProfileStore:
             for cycle in self.iter_evidence_cycles():
                 if cycle.get("profile_name") != profile_name or not cycle.get("power_data"):
                     continue
-                points = decompress_power_data(cast(Any, cycle))
-                if len(points) < 2:
+                summary = self._trace_summary(cycle, stop)
+                if summary.n < 2:
                     continue
                 traced += 1
-                if _has_resumed_pause(points, stop, SMART_TERM_PREFIX_MIN_PAUSE_S):
+                # `has_resumed_pause` on the trace: its longest resumed pause.
+                if summary.longest_pause(stop) >= SMART_TERM_PREFIX_MIN_PAUSE_S:
                     seen = True
                     break
             value: bool | None = seen if traced else None
@@ -8091,11 +8365,11 @@ class ProfileStore:
             for cycle in self.iter_evidence_cycles():
                 if cycle.get("profile_name") != profile_name or not cycle.get("power_data"):
                     continue
-                points = decompress_power_data(cast(Any, cycle))
-                if len(points) < 10:
+                summary = self._trace_summary(cycle, stop)
+                if summary.n < 10:
                     continue
                 traced += 1
-                pauses.extend(_resumed_pauses(points, stop))
+                pauses.extend(summary.pause_pairs(stop))
             value = (traced, tuple(pauses)) if traced else None
             cache[key] = (fingerprint, value)
             return value
@@ -8138,7 +8412,7 @@ class ProfileStore:
             hit = cache.get(key)
             if hit is not None and hit[0] == fingerprint:
                 return hit[1]
-            # Per cycle too, so a new cycle costs one decompression, not the store's
+            # Per cycle too, so a new cycle costs one trace summary, not the store's
             # (this runs on the event loop, in ENDING).
             per_cycle = getattr(self, "_cycle_pause_cache", {}).get(key, {})
             kept: dict[tuple[str, int, str], Any] = {}
@@ -8153,9 +8427,13 @@ class ProfileStore:
                         str(cycle.get("duration") or ""))
                 got = per_cycle.get(ckey)
                 if got is None:
-                    points = decompress_power_data(cast(Any, cycle))
-                    got = (len(points) >= 10,
-                           _resumed_pauses(points, stop) if len(points) >= 10 else [])
+                    # Each cycle's own frontier: a pause another pause of its cycle
+                    # dominates is dominated in the pool too, so the pooled frontier
+                    # is the same, sorted over a handful per cycle instead of every
+                    # pause of the device (44k at 375 washer cycles: 150 ms here).
+                    summary = self._trace_summary(cycle, stop)
+                    got = (summary.n >= 10,
+                           _pause_frontier(summary.pause_pairs(stop)) if summary.n >= 10 else ())
                 if ckey[0]:
                     kept[ckey] = got
                 if got[0]:
@@ -8231,6 +8509,128 @@ class ProfileStore:
             return (traced, _pause_frontier(pauses))
         except Exception:  # noqa: BLE001 - a statistic must never break matching
             return None
+
+    def set_trace_summary_levels(self, levels: Any) -> bool:
+        """The stop levels every trace summary carries its pauses at (the manager's
+        stop threshold and near-stop ceiling); True when they changed.
+
+        A statistic asked at another level (a Playground what-if) still gets it, by
+        decompressing that trace once for the level, wherever it runs.
+        """
+        new = tuple(sorted({float(v) for v in levels if math.isfinite(float(v))}))
+        old = self.__dict__.get("_trace_summary_levels", ())
+        self._trace_summary_levels = new
+        return new != old
+
+    def _trace_summary(self, cycle: CycleDict, level: float | None = None) -> _TraceSummary:
+        """The summary of ``cycle``'s trace, with its pauses at ``level`` if given.
+
+        Read from the cache when :meth:`async_warm_trace_summaries` (or an earlier
+        read) computed it for this very ``power_data`` object; computed here
+        otherwise, which is the decompression every statistic used to do inline.
+        Callable from an executor (the Playground, the panel's statistics): cache
+        writes are single dict assignments. Raises what decompression raises.
+        """
+        cache: dict[int, _TraceSummary] = self.__dict__.setdefault("_trace_summaries", {})
+        raw = cycle.get("power_data")
+        start = cycle.get("start_time")
+        hit = cache.get(id(raw))
+        if hit is not None and hit.valid_for(raw, start):
+            if level is not None and level not in hit.pauses:
+                hit.pauses[level] = _resumed_pauses_at(_trace_points(raw, start), level)
+            return hit
+        levels = set(self.__dict__.get("_trace_summary_levels", ()))
+        if level is not None:
+            levels.add(level)
+        summary = _summarise_trace(raw, start, levels)
+        cache[id(raw)] = summary
+        return summary
+
+    def _missing_trace_summaries(self, profiles: Any = None) -> list[tuple[Any, Any]]:
+        """``(raw, start)`` of every labelled evidence trace (of ``profiles``, if
+        given) without a current summary at every pinned level. O(cycles), no
+        decompression."""
+        # Runs on every match tick, so the validity test is inlined (valid_for).
+        cache: dict[int, _TraceSummary] = self.__dict__.setdefault("_trace_summaries", {})
+        levels = self.__dict__.get("_trace_summary_levels", ())
+        names = None if profiles is None else {p for p in profiles if p}
+        out: list[tuple[Any, Any]] = []
+        queued: set[int] = set()
+        for cycle in self.iter_evidence_cycles():
+            if not isinstance(cycle, dict):
+                continue
+            name = cycle.get("profile_name")
+            if not name or (names is not None and name not in names):
+                continue
+            raw = cycle.get("power_data")
+            if not raw:
+                continue
+            key = id(raw)
+            hit = cache.get(key)
+            start = cycle.get("start_time")
+            if (
+                hit is not None
+                and hit.raw is raw
+                and hit.n_raw == (len(raw) if isinstance(raw, list) else -1)
+                and hit.start == start
+            ):
+                pauses = hit.pauses
+                for level in levels:
+                    if level not in pauses:
+                        break
+                else:
+                    continue
+            if key in queued:
+                continue
+            queued.add(key)
+            out.append((raw, start))
+        return out
+
+    async def async_warm_trace_summaries(self, profiles: Any = None) -> int:
+        """Compute the missing trace summaries in the executor; how many.
+
+        Run where a profile's traces change (every envelope rebuild: cycle end,
+        label, delete, trim, merge, split, import, migrations), at setup and on a
+        stop-threshold change, and by the live match tick before it reads the
+        statistics, so the first tick after a new cycle aggregates summaries instead
+        of decompressing every cycle of the profile on the event loop. A no-op that
+        never yields when nothing is missing. Never raises.
+        """
+        try:
+            todo = self._missing_trace_summaries(profiles)
+            if not todo:
+                return 0
+            levels = tuple(self.__dict__.get("_trace_summary_levels", ()))
+            built = await self.hass.async_add_executor_job(_summarise_traces, todo, levels)
+            if not isinstance(built, list):
+                return 0
+            cache: dict[int, _TraceSummary] = self.__dict__.setdefault(
+                "_trace_summaries", {}
+            )
+            count = 0
+            for summary in built:
+                if isinstance(summary, _TraceSummary):
+                    cache[id(summary.raw)] = summary
+                    count += 1
+            self._prune_trace_summaries()
+            return count
+        except Exception:  # noqa: BLE001 - a cache fill must never break its caller
+            self._logger.debug("Trace summary warm-up failed", exc_info=True)
+            return 0
+
+    def _prune_trace_summaries(self) -> None:
+        """Drop summaries of traces no stored cycle holds any more (each pins its
+        trace's memory). Rebuilt and swapped, never mutated mid-iteration."""
+        cache: dict[int, _TraceSummary] = self.__dict__.get("_trace_summaries") or {}
+        live = [c.get("power_data") for c in self.iter_stored_cycles() if isinstance(c, dict)]
+        if len(cache) <= len(live) + 64:
+            return
+        kept: dict[int, _TraceSummary] = {}
+        for raw in live:
+            hit = cache.get(id(raw))
+            if hit is not None and hit.raw is raw:
+                kept[id(raw)] = hit
+        self._trace_summaries = kept
 
     def _terminal_quiet_fingerprint(self, profile_name: str) -> tuple[int, str, int]:
         """Cheap stand-in for "has this profile's evidence changed?".
@@ -8396,15 +8796,14 @@ class ProfileStore:
                 or not cycle.get("power_data")
             ):
                 continue
-            points = decompress_power_data(cycle)
-            if len(points) < 10:
+            summary = self._trace_summary(cycle)
+            if summary.n < 10:
                 continue
             members += 1
-            block = _last_high_block(
-                [float(pt[0]) for pt in points], [float(pt[1]) for pt in points], level
-            )
-            if block is not None and block[0] >= ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC:
-                starts.append(block[2])
+            # `_last_high_block` on the member's trace, kept when terminal.
+            block = summary.spin_block(level)
+            if block is not None:
+                starts.append(block[0])
                 lengths.append(block[1])
         value = (
             (tuple(sorted(starts)), tuple(sorted(lengths)), members) if members else None
@@ -8729,15 +9128,10 @@ class ProfileStore:
             measured = 0
 
             for cycle in cycles:
-                points = decompress_power_data(cast(Any, cycle))
-                if len(points) < 5:
-                    continue
-                peak = max(p for _t, p in points)
-                if peak <= 0:
-                    continue
-                threshold = peak * TERMINAL_EVENT_PEAK_FRAC
-                span = points[-1][0] - points[0][0]
-                if span <= 0:
+                # The per-cycle walk is `_terminal_event_measure`, read from the
+                # trace's summary (decompressed once, off the loop).
+                measure = self._trace_summary(cycle).signature()
+                if measure is None:
                     continue
                 # Counted only once the trace is measurable AT ALL. An all-zero
                 # cycle (a stored cycle that is nothing but 0.0 W keepalives,
@@ -8748,45 +9142,19 @@ class ProfileStore:
                 # how long it stayed quiet without one, which decides after the
                 # loop whether it is an absence or censored (item 469).
                 measured += 1
-
-                # Walk back to the last run above the threshold, then to the start
-                # of that run, then to the end of the quiet stretch before it.
-                end_i = None
-                for i in range(len(points) - 1, -1, -1):
-                    if points[i][1] > threshold:
-                        end_i = i
-                        break
-                if end_i is None:
+                if not measure:
                     continue
-                start_i = end_i
-                while start_i > 0 and points[start_i - 1][1] > threshold:
-                    start_i -= 1
-                # The quiet PHASE, not the sample interval: walk back to the
-                # previous activity. Measuring the gap to the preceding sample
-                # would just report the plug's reporting rate, since a plug that
-                # keeps sampling through the drying phase has no large interval.
-                prev_i = None
-                for i in range(start_i - 1, -1, -1):
-                    if points[i][1] > threshold:
-                        prev_i = i
-                        break
-                event_peak = max(p for _t, p in points[start_i : end_i + 1])
-                if (
-                    prev_i is None  # the run reaches the start, or nothing precedes it
-                    or points[start_i][0] - points[prev_i][0] < TERMINAL_QUIET_MIN_S
-                    or event_peak > peak * TERMINAL_EVENT_MAX_PEAK_FRAC
-                ):
+                if len(measure) == 1:
                     # The last run is the main activity (item 469): no event seen,
                     # only how long the trace stayed quiet after it.
-                    no_event_tails.append(points[-1][0] - points[end_i][0])
+                    no_event_tails.append(measure[0])
                     continue
-                gap = points[start_i][0] - points[prev_i][0]
-
+                gap, event_s, event_peak, event_frac, position = measure
                 quiet.append(gap)
-                seconds.append(points[end_i][0] - points[start_i][0])
+                seconds.append(event_s)
                 watts.append(event_peak)
-                watt_fracs.append(event_peak / peak)
-                positions.append((points[start_i][0] - points[0][0]) / span)
+                watt_fracs.append(event_frac)
+                positions.append(position)
 
             if not measured:
                 return None

@@ -700,6 +700,7 @@ class WashDataManager:
         self._remove_ha_stop_listener: Callable[[], None] | None = None
         self._remove_maintenance_timer: Callable[[], None] | None = None
         self._remove_notify_queue_restore: Callable[[], None] | None = None
+        self._remove_trace_warm_at_started: Callable[[], None] | None = None
         self._remove_notify_people_listener = None
         self._live_notification_sent_count = 0
 
@@ -1135,6 +1136,9 @@ class WashDataManager:
             terminal_drop_provider=self._terminal_drop_provider,
             longest_programme_provider=self._longest_programme_s,
         )
+        # The stop levels the detector's statistics ask at, so the trace summaries
+        # computed off the loop carry them (see _pin_trace_summary_levels).
+        self._pin_trace_summary_levels()
         self._ml_end_expectation_cache: tuple[str, dict[str, float]] | None = None
         # (cycle_count, earliest_quiet_offset|None, peak_range|None) for the
         # terminal-drop baselines; keyed by cycle count so it auto-invalidates
@@ -1305,6 +1309,16 @@ class WashDataManager:
             # rewrote `_current_program` and the expected duration on a finished
             # cycle, and pushed it into the detector, so the next cycle reached
             # RUNNING already "matched".
+
+            # 0. The profile statistics this tick reads (the prefix term inside the
+            # matcher, the detector inputs below) aggregate per-trace summaries.
+            # Any still missing (a restart mid-cycle, an edit during the cycle) are
+            # computed in the executor here, not decompressed on the loop by the
+            # first read. A no-op that does not yield when all are present.
+            try:
+                await self.profile_store.async_warm_trace_summaries()
+            except Exception:  # noqa: BLE001 - a cache fill must never cost the match
+                self._logger.debug("Trace summary warm-up failed", exc_info=True)
 
             # 1. RUN BETTER ASYNC MATCHING
             # in_progress: this is the live match on a cycle that is still running,
@@ -2254,6 +2268,18 @@ class WashDataManager:
             self._async_rebuild_after_energy_fix()
         )
 
+    def _pin_trace_summary_levels(self) -> bool:
+        """Pin the stop levels the live statistics ask at onto the store: the stop
+        threshold (pause catalogue, hazard gate, prefix term) and the near-stop
+        ceiling (stall catalogue), as those callers pass them. True when changed."""
+        try:
+            stop = self.detector.config.stop_threshold_w
+            return self.profile_store.set_trace_summary_levels(
+                (float(stop), float(standby_near_stop_ceiling(stop)))
+            )
+        except Exception:  # noqa: BLE001 - a cache hint must never break setup
+            return False
+
     def _terminal_high_for_guards(self, profile_name: str | None) -> Any:
         """Element 10: the matched profile's last high-power block, or None.
 
@@ -2509,6 +2535,11 @@ class WashDataManager:
         self._remove_notify_queue_restore = async_at_started(
             self.hass, self._schedule_notify_queue_restore
         )
+        # Every stored trace's summary, once HA has started (not billed to the
+        # startup time, #408): what the first match tick's statistics read.
+        self._remove_trace_warm_at_started = async_at_started(
+            self.hass, self._schedule_trace_summary_warm
+        )
 
         # Register schedulers (maintenance + ML training). These are also re-
         # registered on every config reload; calling them here ensures they
@@ -2610,6 +2641,10 @@ class WashDataManager:
         new_off_delay = new_detector_config.off_delay
         new_interrupted_min = new_detector_config.interrupted_min_seconds
         apply_detector_config(self.detector.config, new_detector_config)
+        # A new stop threshold is a new pause level for every trace summary: fill
+        # them off the loop now rather than on the next match tick.
+        if self._pin_trace_summary_levels():
+            self._spawn_tracked(self.profile_store.async_warm_trace_summaries())
 
         self.profile_store.dtw_bandwidth = float(
             config_entry.options.get(CONF_DTW_BANDWIDTH, DEFAULT_DTW_BANDWIDTH)
@@ -2990,7 +3025,7 @@ class WashDataManager:
             await asyncio.gather(*_to_await, return_exceptions=True)
         for _unsub_name in (
             "_remove_ha_stop_listener", "_remove_notify_queue_restore", "_remove_maintenance_timer",
-            "_remove_clean_door_recheck",
+            "_remove_clean_door_recheck", "_remove_trace_warm_at_started",
         ):
             _unsub = getattr(self, _unsub_name, None)
             if _unsub is not None:
@@ -7393,6 +7428,13 @@ class WashDataManager:
             self._logger.debug("Could not save the active cycle at stop", exc_info=True)
         await self._async_save_clean_state_now()
         await self._async_persist_notification_queues()
+
+    @callback
+    def _schedule_trace_summary_warm(self, _hass: HomeAssistant) -> None:
+        """Summarise every stored trace off the loop once HA has started."""
+        self._remove_trace_warm_at_started = None
+        if not self._is_shutdown:
+            self._spawn_tracked(self.profile_store.async_warm_trace_summaries())
 
     @callback
     def _schedule_notify_queue_restore(self, _hass: HomeAssistant) -> None:
