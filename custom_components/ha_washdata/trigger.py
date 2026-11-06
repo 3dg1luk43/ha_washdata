@@ -56,6 +56,10 @@ from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from homeassistant.helpers.target import (
+    TargetSelection,
+    async_extract_referenced_entity_ids,
+)
 from homeassistant.helpers.trigger import Trigger, TriggerActionRunner, TriggerConfig
 from homeassistant.helpers.typing import ConfigType
 
@@ -66,14 +70,6 @@ from .device_trigger import (
     washdata_device_id,
 )
 from .trigger_rules import describe, options_schema, run_variables
-
-try:  # 2026.2 and 2026.9; TargetSelectorData is its deprecated alias until 2026.12
-    from homeassistant.helpers.target import TargetSelection
-except ImportError:  # pragma: no cover - an older core
-    from homeassistant.helpers.target import (  # type: ignore[attr-defined,no-redef]
-        TargetSelectorData as TargetSelection,
-    )
-from homeassistant.helpers.target import async_extract_referenced_entity_ids
 
 _TARGET_SCHEMA = vol.Schema(
     vol.All(cv.TARGET_FIELDS, cv.has_at_least_one_key(*cv.TARGET_FIELDS))
