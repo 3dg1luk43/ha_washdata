@@ -464,6 +464,15 @@
       },
       "energy_total": {
         "name": "총 에너지"
+      },
+      "last_cycle_duration": {
+        "name": "마지막 사이클 소요 시간"
+      },
+      "last_cycle_energy": {
+        "name": "마지막 사이클 에너지"
+      },
+      "last_cycle_cost": {
+        "name": "마지막 사이클 비용"
       }
     },
     "select": {

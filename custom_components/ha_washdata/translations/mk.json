@@ -464,6 +464,15 @@
       },
       "energy_total": {
         "name": "Вкупна енергија"
+      },
+      "last_cycle_duration": {
+        "name": "Времетраење на последниот циклус"
+      },
+      "last_cycle_energy": {
+        "name": "Енергија на последниот циклус"
+      },
+      "last_cycle_cost": {
+        "name": "Цена на последниот циклус"
       }
     },
     "select": {

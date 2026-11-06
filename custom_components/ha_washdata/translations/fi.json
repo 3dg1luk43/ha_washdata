@@ -464,6 +464,15 @@
       },
       "energy_total": {
         "name": "Energia yhteensä"
+      },
+      "last_cycle_duration": {
+        "name": "Viimeisimmän syklin kesto"
+      },
+      "last_cycle_energy": {
+        "name": "Viimeisimmän syklin energia"
+      },
+      "last_cycle_cost": {
+        "name": "Viimeisimmän syklin kustannus"
       }
     },
     "select": {

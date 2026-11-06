@@ -464,6 +464,15 @@
       },
       "energy_total": {
         "name": "Energi i alt"
+      },
+      "last_cycle_duration": {
+        "name": "Varighed af sidste cyklus"
+      },
+      "last_cycle_energy": {
+        "name": "Energi for sidste cyklus"
+      },
+      "last_cycle_cost": {
+        "name": "Omkostning ved sidste cyklus"
       }
     },
     "select": {

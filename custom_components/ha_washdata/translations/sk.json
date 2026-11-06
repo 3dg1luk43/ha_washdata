@@ -464,6 +464,15 @@
       },
       "energy_total": {
         "name": "Celková energia"
+      },
+      "last_cycle_duration": {
+        "name": "Trvanie posledného cyklu"
+      },
+      "last_cycle_energy": {
+        "name": "Energia posledného cyklu"
+      },
+      "last_cycle_cost": {
+        "name": "Náklady posledného cyklu"
       }
     },
     "select": {

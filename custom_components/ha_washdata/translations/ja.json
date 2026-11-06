@@ -464,6 +464,15 @@
       },
       "energy_total": {
         "name": "総電力量"
+      },
+      "last_cycle_duration": {
+        "name": "前回サイクルの所要時間"
+      },
+      "last_cycle_energy": {
+        "name": "前回サイクルの電力量"
+      },
+      "last_cycle_cost": {
+        "name": "前回サイクルの電気料金"
       }
     },
     "select": {

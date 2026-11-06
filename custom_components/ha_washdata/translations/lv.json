@@ -464,6 +464,15 @@
       },
       "energy_total": {
         "name": "Kopējā enerģija"
+      },
+      "last_cycle_duration": {
+        "name": "Pēdējā cikla ilgums"
+      },
+      "last_cycle_energy": {
+        "name": "Pēdējā cikla enerģija"
+      },
+      "last_cycle_cost": {
+        "name": "Pēdējā cikla izmaksas"
       }
     },
     "select": {

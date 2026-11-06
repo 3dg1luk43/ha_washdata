@@ -464,6 +464,15 @@
       },
       "energy_total": {
         "name": "Heildarorka"
+      },
+      "last_cycle_duration": {
+        "name": "Lengd síðustu lotu"
+      },
+      "last_cycle_energy": {
+        "name": "Orka síðustu lotu"
+      },
+      "last_cycle_cost": {
+        "name": "Kostnaður síðustu lotu"
       }
     },
     "select": {

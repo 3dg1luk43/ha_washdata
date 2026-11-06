@@ -464,6 +464,15 @@
       },
       "energy_total": {
         "name": "Bendra energija"
+      },
+      "last_cycle_duration": {
+        "name": "Paskutinio ciklo trukmė"
+      },
+      "last_cycle_energy": {
+        "name": "Paskutinio ciklo energija"
+      },
+      "last_cycle_cost": {
+        "name": "Paskutinio ciklo kaina"
       }
     },
     "select": {

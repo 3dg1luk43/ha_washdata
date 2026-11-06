@@ -464,6 +464,15 @@
       },
       "energy_total": {
         "name": "Συνολική ενέργεια"
+      },
+      "last_cycle_duration": {
+        "name": "Διάρκεια τελευταίου κύκλου"
+      },
+      "last_cycle_energy": {
+        "name": "Ενέργεια τελευταίου κύκλου"
+      },
+      "last_cycle_cost": {
+        "name": "Κόστος τελευταίου κύκλου"
       }
     },
     "select": {

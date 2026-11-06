@@ -464,6 +464,15 @@
       },
       "energy_total": {
         "name": "Skupna energija"
+      },
+      "last_cycle_duration": {
+        "name": "Trajanje zadnjega cikla"
+      },
+      "last_cycle_energy": {
+        "name": "Energija zadnjega cikla"
+      },
+      "last_cycle_cost": {
+        "name": "Strošek zadnjega cikla"
       }
     },
     "select": {

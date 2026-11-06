@@ -464,6 +464,15 @@
       },
       "energy_total": {
         "name": "Całkowita energia"
+      },
+      "last_cycle_duration": {
+        "name": "Czas trwania ostatniego cyklu"
+      },
+      "last_cycle_energy": {
+        "name": "Energia ostatniego cyklu"
+      },
+      "last_cycle_cost": {
+        "name": "Koszt ostatniego cyklu"
       }
     },
     "select": {

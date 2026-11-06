@@ -464,6 +464,15 @@
       },
       "energy_total": {
         "name": "Загальна енергія"
+      },
+      "last_cycle_duration": {
+        "name": "Тривалість останнього циклу"
+      },
+      "last_cycle_energy": {
+        "name": "Енергія останнього циклу"
+      },
+      "last_cycle_cost": {
+        "name": "Вартість останнього циклу"
       }
     },
     "select": {

@@ -464,6 +464,15 @@
       },
       "energy_total": {
         "name": "Energia kokku"
+      },
+      "last_cycle_duration": {
+        "name": "Viimase tsükli kestus"
+      },
+      "last_cycle_energy": {
+        "name": "Viimase tsükli energia"
+      },
+      "last_cycle_cost": {
+        "name": "Viimase tsükli maksumus"
       }
     },
     "select": {

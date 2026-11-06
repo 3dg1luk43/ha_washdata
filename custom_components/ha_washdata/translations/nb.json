@@ -464,6 +464,15 @@
       },
       "energy_total": {
         "name": "Total energi"
+      },
+      "last_cycle_duration": {
+        "name": "Varighet for siste syklus"
+      },
+      "last_cycle_energy": {
+        "name": "Energi for siste syklus"
+      },
+      "last_cycle_cost": {
+        "name": "Kostnad for siste syklus"
       }
     },
     "select": {

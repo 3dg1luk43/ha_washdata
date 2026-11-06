@@ -464,6 +464,15 @@
       },
       "energy_total": {
         "name": "Energie totală"
+      },
+      "last_cycle_duration": {
+        "name": "Durata ultimului ciclu"
+      },
+      "last_cycle_energy": {
+        "name": "Energia ultimului ciclu"
+      },
+      "last_cycle_cost": {
+        "name": "Costul ultimului ciclu"
       }
     },
     "select": {

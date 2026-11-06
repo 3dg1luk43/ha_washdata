@@ -464,6 +464,15 @@
       },
       "energy_total": {
         "name": "Összes energia"
+      },
+      "last_cycle_duration": {
+        "name": "Utolsó ciklus időtartama"
+      },
+      "last_cycle_energy": {
+        "name": "Utolsó ciklus energiája"
+      },
+      "last_cycle_cost": {
+        "name": "Utolsó ciklus költsége"
       }
     },
     "select": {

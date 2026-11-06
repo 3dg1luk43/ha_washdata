@@ -464,6 +464,15 @@
       },
       "energy_total": {
         "name": "Total energi"
+      },
+      "last_cycle_duration": {
+        "name": "Varaktighet för senaste cykeln"
+      },
+      "last_cycle_energy": {
+        "name": "Energi för senaste cykeln"
+      },
+      "last_cycle_cost": {
+        "name": "Kostnad för senaste cykeln"
       }
     },
     "select": {

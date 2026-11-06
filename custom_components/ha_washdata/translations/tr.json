@@ -464,6 +464,15 @@
       },
       "energy_total": {
         "name": "Toplam enerji"
+      },
+      "last_cycle_duration": {
+        "name": "Son Döngü Süresi"
+      },
+      "last_cycle_energy": {
+        "name": "Son Döngü Enerjisi"
+      },
+      "last_cycle_cost": {
+        "name": "Son Döngü Maliyeti"
       }
     },
     "select": {
