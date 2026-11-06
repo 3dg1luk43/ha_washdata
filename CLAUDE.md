@@ -80,7 +80,7 @@ python3 devtools/mqtt_mock_socket.py --source <export.json>   # mock MQTT plug i
 python3 devtools/mqtt_mock_socket.py --dry-run --source <export.json> --scenario soak --mode silent
 
 cd devtools/testbox && ./up.sh --fresh   # real-HA container test box (see its README.md)
-cd devtools/testbox && ./smoke.sh        # one cycle end-to-end on real HA + 20 checks (~12 min)
+cd devtools/testbox && ./smoke.sh        # one cycle end-to-end on real HA + 22 checks (~4 min)
 cd devtools/testbox && ./check_notify_actions.sh   # the notification-ACTION delivery path (~1 min)
 cd devtools/testbox && ./check_unload_confirm.sh  # unload confirmation button/service/entity (~3 min)
 cd devtools/testbox && ./check_clean_restart.sh  # the Clean state across a graceful restart and a crash (~8 min, #500)
@@ -127,7 +127,7 @@ reject or sequence, which is where "all green, still broken" comes from:
 - Config-flow steps, storage migration against a real `Store`, WS API handlers, entity wiring.
 - Anything whose failure mode is "the integration still loads, it just does nothing".
 
-`smoke.sh` (~12 min) is the default choice; `check_notify_actions.sh` (~1 min) when the change is
+`smoke.sh` (~4 min) is the default choice; `check_notify_actions.sh` (~1 min) when the change is
 only in the notification-action path. Say in the commit or the report that the box ran and what it
 proved - a slow-suite pass alone is not evidence about any of the above.
 

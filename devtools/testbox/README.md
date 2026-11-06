@@ -30,7 +30,7 @@ when this was written), not a fixed release. Read it with
 ```bash
 cd devtools/testbox
 ./up.sh --fresh        # ~40 s: container, config, owner user, long-lived token
-./smoke.sh             # ~12 min: one full cycle end to end, then the assertions
+./smoke.sh             # ~4 min: one full cycle end to end, then the assertions
 ./down.sh              # stop (add --wipe to delete config/ too)
 ```
 
@@ -38,7 +38,7 @@ cd devtools/testbox
 real config flow, seeds it from a real export, replays a recorded 133 min washing
 machine cycle at 60x, waits for the cycle to close, and then runs the 22 checks
 in `assert_run.py` that no mocked Home Assistant can make (see *What smoke.sh
-proves* below). Most of the ~12 min is the wait for the cycle to close (see
+proves* below). Most of the ~4 min is the wait for the cycle to close (see
 *Current known state*).
 
 **The default seed data is private.** Without `--export`, `smoke.sh` seeds from
