@@ -1119,6 +1119,7 @@
     "bp_unreachable": "Það er sótt frá GitHub. Gakktu úr skugga um að Home Assistant nái sambandi við internetið og reyndu svo aftur.",
     "bp_library_intro": "Tilbúin sjálfvirkni sem WashData-notendur deila á GitHub, yfirfarin áður en hún er birt. Aðeins í boði þegar kveikt er á nettengdum eiginleikum.",
     "bp_needs_version": "Krefst WashData {version} eða nýrra.",
+    "bp_review_check": "Athugaðu þetta áður en þú vistar: Home Assistant keyrir það nákvæmlega eins og það er skrifað.",
     "review_q_title": "Hvaða kerfi var þetta?",
     "review_q_intro": "WashData gat ekki greint þessi kerfi í sundur. Svarið þitt kennir því.",
     "review_q_started": "Hófst {when}",

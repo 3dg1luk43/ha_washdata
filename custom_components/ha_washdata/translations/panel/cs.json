@@ -1153,6 +1153,7 @@
     "bp_unreachable": "Stahuje se z GitHubu. Zkontrolujte, že má Home Assistant přístup k internetu, a zkuste to znovu.",
     "bp_library_intro": "Hotové automatizace, které sdílejí uživatelé WashData na GitHubu a které se před zařazením do seznamu kontrolují. Dostupné jen se zapnutými online funkcemi.",
     "bp_needs_version": "Vyžaduje WashData {version} nebo novější.",
+    "bp_review_check": "Před uložením si to zkontrolujte: Home Assistant to spustí přesně tak, jak je napsáno.",
     "review_q_title": "Jaký to byl program?",
     "review_q_intro": "WashData je nedokázal rozlišit. Vaše odpověď ho to naučí.",
     "review_q_started": "Zahájeno {when}",

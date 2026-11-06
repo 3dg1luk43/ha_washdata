@@ -1153,6 +1153,7 @@
     "bp_unreachable": "Ji atsisiunčiama iš GitHub. Patikrinkite, ar Home Assistant gali prisijungti prie interneto, ir bandykite dar kartą.",
     "bp_library_intro": "Paruoštos automatikos, kuriomis WashData naudotojai dalijasi GitHub; prieš įtraukiant į sąrašą jos peržiūrimos. Prieinama tik įjungus interneto funkcijas.",
     "bp_needs_version": "Reikalinga WashData {version} arba naujesnė versija.",
+    "bp_review_check": "Patikrinkite tai prieš išsaugodami: Home Assistant tai vykdys tiksliai taip, kaip parašyta.",
     "review_q_title": "Kokia tai buvo programa?",
     "review_q_intro": "WashData negalėjo jų atskirti. Jūsų atsakymas jį moko.",
     "review_q_started": "Pradėtas {when}",

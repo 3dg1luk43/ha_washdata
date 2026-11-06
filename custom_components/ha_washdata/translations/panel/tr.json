@@ -1119,6 +1119,7 @@
         "bp_unreachable": "Kitaplık GitHub'dan indirilir. Home Assistant'ın internete erişebildiğini kontrol edin ve tekrar deneyin.",
         "bp_library_intro": "WashData kullanıcılarının GitHub'da paylaştığı, listelenmeden önce incelenen hazır otomasyonlar. Yalnızca çevrimiçi özellikler açıkken kullanılabilir.",
         "bp_needs_version": "WashData {version} veya üzeri gerekir.",
+        "bp_review_check": "Kaydetmeden önce bunu kontrol edin: Home Assistant bunu tam olarak yazıldığı gibi çalıştırır.",
         "review_q_title": "Bu hangi programdı?",
         "review_q_intro": "WashData bunları ayırt edemedi. Yanıtınız onun öğrenmesine yardımcı olur.",
         "review_q_started": "Başlangıç: {when}",

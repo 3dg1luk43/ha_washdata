@@ -1102,6 +1102,7 @@
         "bp_unreachable": "ライブラリは GitHub からダウンロードされます。Home Assistant がインターネットに接続できることを確認してから、もう一度お試しください。",
         "bp_library_intro": "WashData ユーザーが GitHub で共有した既製のオートメーションで、掲載前にレビューされています。オンライン機能がオンのときだけ利用できます。",
         "bp_needs_version": "WashData {version} 以降が必要です。",
+        "bp_review_check": "保存する前に内容を確認してください。Home Assistant は書かれているとおりに実行します。",
         "review_q_title": "これはどのプログラムでしたか？",
         "review_q_intro": "WashData はこれらを区別できませんでした。回答は学習に使われます。",
         "review_q_started": "開始: {when}",

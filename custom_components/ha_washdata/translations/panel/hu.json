@@ -1119,6 +1119,7 @@
         "bp_unreachable": "A GitHubról töltődik le. Ellenőrizze, hogy a Home Assistant eléri-e az internetet, majd próbálja újra.",
         "bp_library_intro": "Kész automatizálások, amelyeket WashData-felhasználók osztanak meg a GitHubon, és listázás előtt átnézésre kerülnek. Csak bekapcsolt online funkciókkal érhető el.",
         "bp_needs_version": "WashData {version} vagy újabb szükséges.",
+        "bp_review_check": "Mentés előtt ellenőrizze ezt: a Home Assistant pontosan úgy futtatja, ahogy le van írva.",
         "review_q_title": "Melyik program volt ez?",
         "review_q_intro": "A WashData nem tudta megkülönböztetni őket. Az Ön válaszából tanul.",
         "review_q_started": "Indult: {when}",

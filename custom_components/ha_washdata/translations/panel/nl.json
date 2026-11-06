@@ -1119,6 +1119,7 @@
     "bp_unreachable": "Deze wordt van GitHub gedownload. Controleer of Home Assistant het internet kan bereiken en probeer het daarna opnieuw.",
     "bp_library_intro": "Kant-en-klare automatiseringen die WashData-gebruikers op GitHub delen, gecontroleerd voordat ze worden opgenomen. Alleen beschikbaar als onlinefuncties aan staan.",
     "bp_needs_version": "Vereist WashData {version} of nieuwer.",
+    "bp_review_check": "Controleer dit voordat u opslaat: Home Assistant voert het precies zo uit als het er staat.",
     "review_q_title": "Welk programma was dit?",
     "review_q_intro": "WashData kon deze niet van elkaar onderscheiden. Van uw antwoord leert het.",
     "review_q_started": "Gestart: {when}",

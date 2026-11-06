@@ -1136,6 +1136,7 @@
     "bp_unreachable": "Preuzima se sa GitHuba. Proverite da li Home Assistant ima pristup internetu, pa pokušajte ponovo.",
     "bp_library_intro": "Gotove automatizacije koje korisnici WashData dele na GitHubu, pregledane pre objavljivanja na listi. Dostupno samo sa uključenim online funkcijama.",
     "bp_needs_version": "Zahteva WashData {version} ili noviji.",
+    "bp_review_check": "Proverite ovo pre čuvanja: Home Assistant će to izvršiti tačno onako kako je napisano.",
     "review_q_title": "Koji je ovo bio program?",
     "review_q_intro": "WashData ih nije mogao razlikovati. Vaš odgovor ga tome uči.",
     "review_q_started": "Pokrenuto {when}",

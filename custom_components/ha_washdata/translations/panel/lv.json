@@ -1136,6 +1136,7 @@
     "bp_unreachable": "Tā tiek lejupielādēta no GitHub. Pārbaudiet, vai Home Assistant var piekļūt internetam, un mēģiniet vēlreiz.",
     "bp_library_intro": "Gatavas automatizācijas, ko WashData lietotāji kopīgo GitHub un kas tiek pārskatītas pirms iekļaušanas sarakstā. Pieejamas tikai ar ieslēgtām tiešsaistes funkcijām.",
     "bp_needs_version": "Nepieciešams WashData {version} vai jaunāks.",
+    "bp_review_check": "Pārbaudiet to pirms saglabāšanas: Home Assistant to izpildīs tieši tā, kā tas ir uzrakstīts.",
     "review_q_title": "Kāda programma tā bija?",
     "review_q_intro": "WashData nespēja tās atšķirt. Jūsu atbilde to apmāca.",
     "review_q_started": "Sākts {when}",

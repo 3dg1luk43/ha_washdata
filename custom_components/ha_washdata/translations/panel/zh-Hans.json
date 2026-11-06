@@ -1102,6 +1102,7 @@
         "bp_unreachable": "模板库从 GitHub 下载。请检查 Home Assistant 能否访问互联网，然后重试。",
         "bp_library_intro": "WashData 用户在 GitHub 上分享的现成自动化，上架前经过审核。仅在开启在线功能时可用。",
         "bp_needs_version": "需要 WashData {version} 或更高版本。",
+        "bp_review_check": "保存前请检查：Home Assistant 会完全按照所写内容执行。",
         "review_q_title": "这是哪个程序？",
         "review_q_intro": "WashData 无法区分这些程序。您的回答将帮助它学习。",
         "review_q_started": "开始于 {when}",
