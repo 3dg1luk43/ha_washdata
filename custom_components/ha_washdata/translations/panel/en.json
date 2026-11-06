@@ -1130,6 +1130,7 @@
     "bp_unreachable": "It is downloaded from GitHub. Check that Home Assistant can reach the internet, then try again.",
     "bp_library_intro": "Ready-made automations shared by WashData users on GitHub, reviewed before they are listed. Available only with online features on.",
     "bp_needs_version": "Needs WashData {version} or newer.",
+    "bp_review_check": "Check this before saving: Home Assistant will run it exactly as written.",
     "review_q_title": "Which program was this?",
     "review_q_intro": "WashData could not tell these apart. Your answer teaches it.",
     "review_q_started": "Started {when}",

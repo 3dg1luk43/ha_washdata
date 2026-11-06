@@ -6,7 +6,8 @@
  * repository on GitHub, only with online features on), filtered to the device
  * type. An administrator installs a template with HA's blueprint/save; one whose
  * only open input is the device ("one_click") then becomes an automation for this
- * device in the same click. Everyone may read a template's details and YAML.
+ * device in the same step. Every save first shows the YAML it saves, as text, to
+ * confirm. Everyone may read a template's details and YAML.
  *
  * v2: "Start from a trigger" lists every WashData integration trigger the device
  * type offers, and everything the panel creates gets the "WashData" label and the
@@ -130,6 +131,19 @@ async function openTab(
 
 const card = (page, id: string) => page.locator(`.wd-bp-card[data-bpid="${id}"]`);
 const apiCalls = (page) => page.evaluate(() => (window as any).__api);
+// The dialog every save goes through: the template's YAML, then confirm.
+const review = (page) => page.locator('.wd-modal.wd-bp-review');
+const reviewText = (page) => review(page).locator('.wd-bp-yaml').evaluate((el) => el.textContent);
+async function confirmReview(page, yaml: string) {
+  await expect(review(page)).toBeVisible();
+  expect(await reviewText(page)).toBe(yaml);
+  await assertWsNotCalled(page, 'blueprint/save');
+  await review(page).locator('[data-maction="ok"]').click();
+}
+/** A template whose YAML tries to be markup, and is long enough to scroll. */
+const HOSTILE_YAML = 'blueprint:\n  name: "WashData: <img src=x onerror=window.__xss=1>"\n  domain: automation\n'
+  + '  description: </pre><b id="injected">bold</b> & "quoted" \'single\'\n'
+  + Array.from({ length: 80 }, (_, i) => `  # line ${i}: ${'x'.repeat(i % 3 ? 20 : 140)}`).join('\n') + '\n';
 
 test('the tab follows Settings and Notifications no longer carries the automations', async ({ page }) => {
   await page.goto('/');
@@ -248,9 +262,16 @@ test('a template for a newer WashData cannot be added', async ({ page }) => {
   await expect(tile.locator('[data-action="auto-bp-details"]')).toBeVisible();
 });
 
-test('one click installs the blueprint, creates the automation for this device and opens it', async ({ page }) => {
+test('Add shows the YAML first, then installs the blueprint, creates the automation for this device and opens it', async ({ page }) => {
   await openTab(page, DRYER_OPTIONS);
   await card(page, 'dryer_anti_crease_power_cut').locator('[data-action="auto-bp-use"]').click();
+
+  const dlg = review(page);
+  await expect(dlg.locator('h2')).toHaveText('End a long dryer anti-crease phase');
+  await expect(dlg.locator('.wd-bp-risk')).toHaveText('Check this before saving: Home Assistant will run it exactly as written.');
+  await expect(dlg.locator('[data-maction="ok"]')).toHaveText('Add to Test Washer');
+  await expect(dlg.locator('.wd-bp-yaml')).toBeVisible();
+  await confirmReview(page, DRYER.yaml);
 
   await expect(page).toHaveURL(/\/config\/automation\/edit\/washdata_[a-z0-9]+$/, { timeout: 8_000 });
   const [save] = await assertWsCalled(page, 'blueprint/save');
@@ -267,13 +288,56 @@ test('one click installs the blueprint, creates the automation for this device a
   expect(update).toMatchObject({ entity_id: 'automation.' + call.path.split('/').pop(), labels: ['washdata'], categories: { automation: 'cat_washdata' } });
 });
 
+test('the YAML under review is plain text, scrolls, and is exactly the text that is saved', async ({ page }) => {
+  const hostile = { ...DRYER, yaml: HOSTILE_YAML };
+  await openTab(page, { ...DRYER_OPTIONS, 'ha_washdata/blueprints/list': { blueprints: [hostile, INDICATOR] } });
+  await card(page, 'dryer_anti_crease_power_cut').locator('[data-action="auto-bp-use"]').click();
+
+  const pre = review(page).locator('.wd-bp-yaml');
+  await expect(pre).toBeVisible();
+  // Rendered as text: no element came out of it, nothing ran.
+  expect(await reviewText(page)).toBe(HOSTILE_YAML);
+  await expect(pre.locator('*')).toHaveCount(0);
+  await expect(page.locator('#injected, .wd-bp-review img')).toHaveCount(0);
+  await expect(pre).toContainText('<img src=x onerror=window.__xss=1>');
+  const style = await pre.evaluate((el) => {
+    const cs = getComputedStyle(el);
+    return { font: cs.fontFamily, overflowY: cs.overflowY, scrolls: el.scrollHeight > el.clientHeight };
+  });
+  expect(style.font).toContain('monospace');
+  expect(style.overflowY).toBe('auto');
+  expect(style.scrolls).toBe(true);
+  // A re-render (a live update while the dialog is open) keeps the reading position.
+  await pre.evaluate((el) => { el.scrollTop = 200; });
+  await page.evaluate(() => (document.querySelector('ha-washdata-panel') as any)._render());
+  expect(await review(page).locator('.wd-bp-yaml').evaluate((el) => el.scrollTop)).toBe(200);
+
+  await review(page).locator('[data-maction="ok"]').click();
+  await expect(page).toHaveURL(/\/config\/automation\/edit\/washdata_[a-z0-9]+$/, { timeout: 8_000 });
+  const [save] = await assertWsCalled(page, 'blueprint/save');
+  expect(save.yaml).toBe(HOSTILE_YAML);
+  expect(await page.evaluate(() => (window as any).__xss)).toBeUndefined();
+});
+
+test('cancelling the review saves and creates nothing', async ({ page }) => {
+  await openTab(page, DRYER_OPTIONS);
+  await card(page, 'dryer_anti_crease_power_cut').locator('[data-action="auto-bp-use"]').click();
+  await expect(review(page)).toBeVisible();
+  await review(page).locator('[data-maction="cancel"]').click();
+  await expect(review(page)).toHaveCount(0);
+  await assertWsNotCalled(page, 'blueprint/save');
+  expect(await apiCalls(page)).toEqual([]);
+});
+
 test('an installed copy of the same version is not saved again', async ({ page }) => {
   await openTab(page, { ...DRYER_OPTIONS, 'blueprint/list': installed(DRYER) });
   const dryer = card(page, 'dryer_anti_crease_power_cut');
   await expect(dryer.locator('.wd-bp-status')).toHaveText('Installed');
   await dryer.locator('[data-action="auto-bp-use"]').click();
 
+  // Nothing is saved, so there is nothing to review.
   await expect.poll(() => apiCalls(page).then((c) => c.length)).toBe(1);
+  await expect(review(page)).toHaveCount(0);
   await assertWsNotCalled(page, 'blueprint/save');
 });
 
@@ -283,9 +347,10 @@ test('a different installed copy is replaced only after a confirm', async ({ pag
   await expect(dryer.locator('.wd-bp-status')).toHaveText('Other version installed');
   await dryer.locator('[data-action="auto-bp-use"]').click();
 
-  await expect(page.locator('.wd-modal')).toContainText('different version');
-  await assertWsNotCalled(page, 'blueprint/save');
-  await page.locator('.wd-modal [data-maction="ok"]').click();
+  // One dialog: the replace warning above the YAML that replaces it.
+  await expect(review(page)).toContainText('different version');
+  await expect(review(page).locator('[data-maction="ok"]')).toHaveText('Replace');
+  await confirmReview(page, DRYER.yaml);
 
   await expect.poll(() => apiCalls(page).then((c) => c.length)).toBe(1);
   const [save] = await assertWsCalled(page, 'blueprint/save');
@@ -296,6 +361,7 @@ test('a failed automation step leaves the blueprint installed and says so', asyn
   await openTab(page, DRYER_OPTIONS);
   await page.evaluate(() => { (window as any).__apiFail = { status_code: 400, body: { message: 'Message malformed' } }; });
   await card(page, 'dryer_anti_crease_power_cut').locator('[data-action="auto-bp-use"]').click();
+  await confirmReview(page, DRYER.yaml);
 
   await expect(page.locator('.wd-toast')).toContainText('template is installed', { timeout: 8_000 });
   await expect(page.locator('.wd-toast')).toContainText('Message malformed');
@@ -311,6 +377,8 @@ test('a template with open inputs is installed and finished in Home Assistant', 
   const ind = card(page, 'cycle_running_indicator');
   await expect(ind.locator('[data-action="auto-bp-use"]')).toHaveCount(0);
   await ind.locator('[data-action="auto-bp-install"]').click();
+  await expect(review(page).locator('[data-maction="ok"]')).toHaveText('Set up in Home Assistant');
+  await confirmReview(page, INDICATOR.yaml);
 
   await expect(page).toHaveURL(/\/config\/blueprint\/dashboard$/, { timeout: 8_000 });
   const [save] = await assertWsCalled(page, 'blueprint/save');
@@ -372,10 +440,11 @@ test('Details shows the whole template, its settings and where each link goes', 
   await expect(modal).toHaveCount(0);
 });
 
-test('Add from Details installs and opens the automation like the tile does', async ({ page }) => {
+test('Add from Details reviews, installs and opens the automation like the tile does', async ({ page }) => {
   await openTab(page, DRYER_OPTIONS);
   await card(page, 'dryer_anti_crease_power_cut').locator('[data-action="auto-bp-details"]').click();
   await page.locator('.wd-modal [data-maction="bp-use"]').click();
+  await confirmReview(page, DRYER.yaml);
   await expect(page).toHaveURL(/\/config\/automation\/edit\/washdata_[a-z0-9]+$/, { timeout: 8_000 });
   await assertWsCalled(page, 'blueprint/save');
 });
@@ -573,6 +642,29 @@ test.describe('phone', () => {
     for (const btn of await card(page, 'dryer_anti_crease_power_cut').locator('.wd-btn').all()) {
       const r = await btn.boundingBox();
       expect(r!.x + r!.width).toBeLessThanOrEqual(a!.x + a!.width + 0.5);
+    }
+  });
+
+  test('the review dialog fits the screen: YAML scrolls inside it, the buttons stay in view', async ({ page }) => {
+    const hostile = { ...DRYER, yaml: HOSTILE_YAML };
+    await openTab(page, { ...DRYER_OPTIONS, 'ha_washdata/blueprints/list': { blueprints: [hostile, INDICATOR] } });
+    await card(page, 'dryer_anti_crease_power_cut').locator('[data-action="auto-bp-use"]').click();
+    const vp = page.viewportSize()!;
+    const box = await review(page).boundingBox();
+    expect(box!.y).toBeGreaterThanOrEqual(0);
+    expect(box!.y + box!.height).toBeLessThanOrEqual(vp.height + 0.5);
+    expect(box!.x + box!.width).toBeLessThanOrEqual(vp.width + 0.5);
+    // The long lines scroll inside the block, not the dialog or the page.
+    const pre = await review(page).locator('.wd-bp-yaml').evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return { right: r.right, wide: el.scrollWidth > el.clientWidth };
+    });
+    expect(pre.wide).toBe(true);
+    expect(pre.right).toBeLessThanOrEqual(box!.x + box!.width + 0.5);
+    for (const a of ['cancel', 'ok']) {
+      const r = await review(page).locator(`[data-maction="${a}"]`).boundingBox();
+      expect(r!.y + r!.height).toBeLessThanOrEqual(vp.height + 0.5);
+      expect(r!.x + r!.width).toBeLessThanOrEqual(box!.x + box!.width + 0.5);
     }
   });
 

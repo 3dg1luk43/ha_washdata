@@ -4662,7 +4662,7 @@ class HaWashdataPanel extends HTMLElement {
   //     position a moment before the real tree comes back. Carry it instead.
 
   // Reset on navigation, preserved across every other re-render.
-  _SCROLLERS = ['.wd-main', '.wd-modal', '.wd-logs', '.wd-log-drawer-body', '.wd-table-wrap', '.wd-sd-tree', '.wd-review-tiles'];
+  _SCROLLERS = ['.wd-main', '.wd-modal', '.wd-logs', '.wd-log-drawer-body', '.wd-table-wrap', '.wd-sd-tree', '.wd-review-tiles', '.wd-bp-yaml'];
   // Navigation chrome: preserved across navigation too. Clicking a tab must not also
   // scroll the strip the tab is in - on a narrow screen that strip overflows, and
   // moving it is how the tab you just pressed ends up off-screen.
@@ -7192,8 +7192,8 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   // A tile's main button (admin-only, like HA's blueprint/save). A template
-  // whose only open input is the device becomes an automation for it in one
-  // click; any other is installed and finished in HA's own blueprint form.
+  // whose only open input is the device becomes an automation for it once its
+  // YAML is confirmed; any other is installed and finished in HA's own form.
   _htmlBlueprintAction(b, admin, cls = 'wd-btn-sm') {
     if (!admin || b.compatible === false) return '';
     const busy = this._busy.has('bp-' + b.id);
@@ -7256,7 +7256,7 @@ class HaWashdataPanel extends HTMLElement {
       importUrl ? `<a class="wd-bp-import" href="${_esc(importUrl)}" target="_blank" rel="noopener noreferrer">${this._t('link.bp_import_my_ha', {}, 'Import with My Home Assistant')} ↗</a>` : '',
     ].join('');
     const yaml = m.showYaml ? `
-      <pre class="wd-bp-yaml" tabindex="0" aria-label="${_esc(this._tText('lbl.bp_yaml', {}, 'Blueprint YAML'))}">${_esc(b.yaml || '')}</pre>
+      ${this._htmlBlueprintYaml(b)}
       <button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-maction="bp-copy">${this._t('btn.bp_copy_yaml', {}, 'Copy YAML')}</button>` : '';
     const action = this._htmlBlueprintAction(b, admin, '').replace('data-action="auto-bp-', 'data-maction="bp-');
     return `<div class="wd-bp-dhead">
@@ -7273,6 +7273,37 @@ class HaWashdataPanel extends HTMLElement {
       <div class="wd-modal-actions">
         <button type="button" class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
         ${action}
+      </div>`;
+  }
+
+  // The template's YAML: the library's text, untrusted, so escaped and never
+  // markup. The newline after <pre> is the one the HTML parser drops, so a text
+  // that starts with a blank line still shows it.
+  _htmlBlueprintYaml(b) {
+    return `<pre class="wd-bp-yaml" tabindex="0" aria-label="${_esc(this._tText('lbl.bp_yaml', {}, 'Blueprint YAML'))}">\n${_esc(b.yaml || '')}</pre>`;
+  }
+
+  // The step before anything is saved: the YAML exactly as blueprint/save gets
+  // it (m.bp, the object _bpRun saves, never a fresh catalog lookup). Always
+  // shown, not behind a toggle: reading it is what this dialog is for.
+  _htmlBlueprintReview(m) {
+    const b = m.bp;
+    const dev = this._devices[this._selIdx];
+    const ok = m.save === 'override' ? this._t('btn.replace', {}, 'Replace')
+      : m.mode === 'use' ? this._t('btn.bp_add_to', {device: (dev && dev.title) || 'WashData'}, 'Add to {device}')
+      : this._t('btn.bp_setup_in_ha', {}, 'Set up in Home Assistant');
+    return `<div class="wd-bp-dhead">
+        <span class="wd-bp-port">${this._autoIcon(b.icon)}</span>
+        <div class="wd-bp-titles"><h2 id="wd-modal-title">${_esc(this._bpName(b))}</h2>${this._htmlBlueprintStatus(b)}</div>
+      </div>
+      <div class="wd-bp-dbody">
+        ${m.save === 'override' ? `<p>${this._t('modal.bp_replace_library_msg', {name: this._bpName(b)}, 'Home Assistant has a different version of "{name}". Replace it with the one from the template library? Automations that use it change with it.')}</p>` : ''}
+        <p class="wd-bp-risk">${this._autoIcon('alert')}<span>${this._t('msg.bp_review_check', {}, 'Check this before saving: Home Assistant will run it exactly as written.')}</span></p>
+        ${this._htmlBlueprintYaml(b)}
+      </div>
+      <div class="wd-modal-actions">
+        <button type="button" class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
+        <button type="button" class="wd-btn wd-btn-primary" data-maction="ok">${ok}</button>
       </div>`;
   }
 
@@ -7301,11 +7332,16 @@ class HaWashdataPanel extends HTMLElement {
   // the blueprint unless this version is already there, create an automation from
   // it for this device and open it. 'install': install only, then HA's blueprint
   // page, where the user fills in the inputs the template cannot default.
+  // Anything saved is the library's text, which HA then runs as written, so the
+  // admin reads it first; a different installed copy is replaced from the same
+  // dialog. This version already installed: nothing is saved, nothing to read.
   _bpStart(b, mode) {
     if (!this._isAdmin() || this._busy.has('bp-' + b.id)) return;
     const st = this._bpInstalledState(b);
-    if (st === 'different') { this._bpConfirmReplace(b, mode); return; }
-    this._bpRun(b, mode, st === 'same' ? 'skip' : 'save');
+    if (st === 'same') { this._bpRun(b, mode, 'skip'); return; }
+    const save = st === 'different' ? 'override' : 'save';
+    this._modal = { type: 'bp-review', bp: b, mode, save, onOk: () => this._bpRun(b, mode, save) };
+    this._render();
   }
 
   // Never overwrite a different installed copy (the user may have edited it)
@@ -11305,6 +11341,7 @@ class HaWashdataPanel extends HTMLElement {
     if (m.type === 'import-wizard') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlImportWizardModal(m)}</div></div>`;
     if (m.type === 'history-import') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlHistoryImportModal(m)}</div></div>`;
     if (m.type === 'bp-details') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg wd-bp-modal" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlBlueprintDetails(m)}</div></div>`;
+    if (m.type === 'bp-review') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg wd-bp-modal wd-bp-review" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlBlueprintReview(m)}</div></div>`;
 
     let body = '';
     if (m.type === 'confirm') {
