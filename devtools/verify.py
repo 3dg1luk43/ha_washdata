@@ -17,8 +17,10 @@ Tiers:
   fresh ``run --mode fast`` compared with ``eval_baseline.json``; nothing is
   rewritten).
 * ``--box`` adds the real-HA test box (``up.sh --fresh``, ``smoke.sh``, the
-  notification-action, unload and Clean-restart checks). Never by default: it is minutes, it is
-  shared, and it only proves things a MagicMock cannot (CLAUDE.md). When the
+  notification-action, unload and Clean-restart checks). It runs last and alone:
+  its compressed-time replay is load-sensitive (register item 589). Never by
+  default: it is minutes, it is shared, and it only proves things a MagicMock
+  cannot (CLAUDE.md). When the
   changed files touch setup, services, entities, the WS API or notifications the
   summary says so, so you can decide.
 
@@ -127,6 +129,10 @@ class Stage:
     #: A deterministic stage: it is skipped as ``cached`` when these inputs are
     #: byte-identical to the last run that passed (``--no-cache`` runs it anyway).
     inputs: Inputs | None = None
+    #: Starts only once every other stage has finished, on an otherwise idle host:
+    #: the box's compressed-time replay misses its matched live update under load
+    #: (register item 589).
+    alone: bool = False
 
 
 @dataclass
@@ -257,7 +263,7 @@ def _stages() -> list[Stage]:
             Command(["./check_notify_actions.sh"], cwd=REPO / "devtools" / "testbox"),
             Command(["./check_unload_confirm.sh"], cwd=REPO / "devtools" / "testbox"),
             Command(["./check_clean_restart.sh"], cwd=REPO / "devtools" / "testbox"),
-        ], 1000, unavailable=lambda: _box_busy() or _need("docker")()),
+        ], 1000, unavailable=lambda: _box_busy() or _need("docker")(), alone=True),
     ]
 
 
@@ -595,6 +601,7 @@ def run(
     procs: dict[str, subprocess.Popen] = {}
     running: dict[str, Result] = {}
     free = budget
+    stage_alone = {st.name: st.alone for st in stages}
     #: (time, cores held by the non-tiny running stages) after every change.
     timeline: list[tuple[float, int]] = []
 
@@ -630,8 +637,13 @@ def run(
     try:
         while queued or running:
             slot_taken = any(r.kind == "slot" for r in running.values())
-            for s, c, kind in plan(queued, work, free, budget, remaining_work(), bool(running),
-                                   slot_taken):
+            # A stage that runs alone waits for every other stage to finish.
+            others_left = bool(running) or any(not q.alone for q in queued)
+            startable = [q for q in queued if not (q.alone and others_left)]
+            if any(stage_alone.get(n) for n in running):
+                startable = []
+            for s, c, kind in plan(startable, work, free, budget, remaining_work(),
+                                   bool(running), slot_taken):
                 queued.remove(s)
                 free -= c if kind == "budget" else 0
                 now = clock()

@@ -38,7 +38,7 @@ pip install -r requirements-dev.txt
 ./run_tests.sh --all            # everything (~13 min)
 devtools/verify.sh              # quick: generated files, docs_check, fast suite, E2E readable (~3 min on 4 cores)
 devtools/verify.sh full         # pre-push: + slow suite, E2E min, release_check --skip-tests, end_gate --check, eval.py gate on one dynamically shared core budget; ~10 min cold on this 4C/8T box, ~6.7 min after a Python-only change (E2E/end-gate reported `cached` when their inputs are unchanged since a pass)
-devtools/verify.sh full --box   # + the real-HA test box (never by default; the summary names changed files that need it)
+devtools/verify.sh full --box   # + the real-HA test box, run last and alone (never by default; the summary names changed files that need it)
 devtools/verify.sh full --no-cache   # run every stage regardless of the result cache (use before a release)
 devtools/release_check.sh --skip-tests   # every release check except the test suites
 

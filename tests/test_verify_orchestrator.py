@@ -228,6 +228,24 @@ def test_an_elastic_stage_gets_the_cores_nothing_else_can_use(tmp_path, monkeypa
     assert row.split()[2] == "1>2"
 
 
+
+def test_an_alone_stage_starts_after_every_other_stage(tmp_path, monkeypatch):
+    """The box waits for the rest and runs on an idle host (register item 589)."""
+    stages = [
+        verify.Stage("box", ("quick",), lambda c, logs: [_py("")], 1000, alone=True),
+        verify.Stage("a", ("quick",), lambda c, logs: [_py("import time; time.sleep(0.3)")], 50),
+        verify.Stage("b", ("quick",), lambda c, logs: [_py("import time; time.sleep(0.3)")], 40),
+    ]
+    monkeypatch.setattr(verify, "_stages", lambda: stages)
+    monkeypatch.setattr(verify, "changed_files", lambda: [])
+    args = verify.parse_args(["--cores", "4", "--timings", "", "--logs", str(tmp_path)])
+    lines: list[str] = []
+    assert verify.run(args, verify.select(args), out=lines.append) == 0
+    events = [ln.split("] ", 1)[1].split()[:2] for ln in lines if "] start " in ln or "] ok " in ln]
+    box_start = events.index(["start", "box"])
+    assert ["ok", "a"] in events[:box_start] and ["ok", "b"] in events[:box_start], events
+
+
 @pytest.mark.parametrize(("dist", "argv", "want"), [
     ("load", [], "-n {n} --dist load"),
     ("loadgroup", ["-q"], "-n {n} --dist loadgroup"),
