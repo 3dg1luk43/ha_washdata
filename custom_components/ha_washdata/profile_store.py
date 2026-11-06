@@ -6058,7 +6058,12 @@ class ProfileStore:
             try:
                 await self.async_rebuild_envelope(profile_name)
             except Exception:  # pylint: disable=broad-exception-caught
-                pass
+                # The repair stands; the envelope stays as it was until the next
+                # rebuild, which is worth knowing when matching looks off (#511).
+                self._logger.warning(
+                    "Envelope rebuild after repairing profile '%s' failed",
+                    profile_name, exc_info=True,
+                )
 
         return stats
 
