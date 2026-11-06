@@ -2023,8 +2023,9 @@ class CycleDetector:
         catalogue, one object per evidence fingerprint and stop threshold, so the
         same object arrives on every match tick until a cycle joins or leaves the
         profile, a trace is rewritten or the threshold moves, each of which builds
-        a new one. Sanitising walks every pause of the profile's traced evidence,
-        on the event loop: 1.6 / 28 / 112 ms per tick at 23 / 300 / 1000 cycles.
+        a new one. Sanitising walked every pause of the profile's traced evidence,
+        on the event loop: 1.6 / 28 / 112 ms per tick at 23 / 300 / 1000 cycles
+        (since item 601 the store hands in its frontier, a handful of pairs).
         Only a catalogue that cannot change in place is memoised (a tuple of
         ``(int, tuple of (number, number) tuples)``), and the memo holds the
         object, so an identity hit is always the value a fresh sanitise returns.
@@ -6494,6 +6495,9 @@ class CycleDetector:
             # Element 14. A dishwasher restored into its terminal-tail match freeze
             # never re-matches, so without it the item-465 release floor was gone
             # for the rest of the cycle (the hazard gate only lost a shortening).
+            # The store's frontier (item 601): a handful of pairs, which answer
+            # every reader as the full list did, so the restore needs no store. A
+            # snapshot written before it holds the full list and restores as is.
             "matched_pause_catalogue": (
                 [
                     self._matched_pause_catalogue[0],

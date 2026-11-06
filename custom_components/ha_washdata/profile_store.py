@@ -1882,9 +1882,11 @@ def _pause_frontier(
 ) -> tuple[tuple[float, float], ...]:
     """The pauses no later-or-equal, longer-or-equal pause dominates, ascending.
 
-    Exact for the only question the hazard end gate asks of a catalogue - the
-    longest pause starting at or after a position - so a catalogue pooled over many
-    cycles stays a handful of pairs. Pure.
+    Exact for every question the detector asks of a catalogue - the longest pause
+    starting at or after a position, and so the longest at all - so a catalogue
+    pooled over many cycles stays a handful of pairs. The frontier of pooled
+    frontiers is the frontier of the pool. Pairs must be finite (a non-finite one
+    would stand in for the pairs it dominates and then be dropped). Pure.
     """
     out: list[tuple[float, float]] = []
     best = -1.0
@@ -2804,10 +2806,12 @@ class _TraceSummary:
 
     Valid while the cycle holds the same ``power_data`` object (every edit assigns
     a new one) with the same length and ``start_time``: the inputs of
-    ``decompress_power_data``. ``pauses`` maps a stop level to
-    ``signal_processing.resumed_pauses`` at that level, flattened into doubles
-    (``(f0, d0, f1, d1, ...)``: a washer trace holds ~120 pauses a level, 28 KiB as
-    tuples, 4 KiB like this); :meth:`pause_pairs` gives the tuples back.
+    ``decompress_power_data``. ``pauses`` maps a stop level to the
+    :func:`_pause_frontier` of ``signal_processing.resumed_pauses`` at that level,
+    flattened into doubles (``(f0, d0, f1, d1, ...)``); :meth:`pause_pairs` gives
+    the tuples back. Every question asked of a trace's pauses (the longest from a
+    position on, the longest at all) has the same answer on its frontier, which is
+    a handful of a washer trace's ~120 pauses (register item 601).
     """
 
     __slots__ = ("raw", "n_raw", "start", "n", "sig", "spin", "pauses")
@@ -2852,9 +2856,17 @@ def _trace_points(raw: Any, start: Any) -> list[tuple[float, float]]:
 
 
 def _resumed_pauses_at(points: list[tuple[float, float]], level: float) -> array[float]:
+    """The :func:`_pause_frontier` of the trace's resumed pauses at ``level``,
+    flattened (register item 601). A non-finite pair is dropped first, as the
+    detector drops it on intake, so the frontier never keeps one in place of a
+    pair it dominates."""
     flat: array[float] = array("d")
     if len(points) >= 2:
-        for f, d in _resumed_pauses(points, level):
+        pauses = [
+            (f, d) for f, d in _resumed_pauses(points, level)
+            if math.isfinite(f) and math.isfinite(d)
+        ]
+        for f, d in _pause_frontier(pauses):
             flat.append(f)
             flat.append(d)
     return flat
@@ -8403,11 +8415,17 @@ class ProfileStore:
     ) -> tuple[int, tuple[tuple[float, float], ...]] | None:
         """``(traced cycles, pauses)`` for the hazard end gate (audit DETECT-16).
 
-        Every below-``stop_threshold_w`` pause that power later resumed from, as
-        ``(start_fraction, seconds)``, across the profile's traced evidence cycles.
-        The detector asks "has this programme ever paused this long from this far
-        in?" and waits only that long. None without traced evidence. Cached on the
-        evidence fingerprint and the threshold; never raises.
+        The below-``stop_threshold_w`` pauses that power later resumed from, as
+        ``(start_fraction, seconds)``, across the profile's traced evidence cycles,
+        reduced to their :func:`_pause_frontier`. The detector asks "has this
+        programme ever paused this long from this far in?" and waits only that
+        long; it also reads the longest pause at all (the dishwasher release floor,
+        an orphaned pause's wait) and the near-stop ceiling's catalogue for the
+        stall display, and the frontier answers each of these exactly as the full
+        list did. Register item 601: the full list held every pause (122k pairs at
+        1000 washer cycles), which the detector scanned on every ENDING reading and
+        wrote into the active snapshot every 60 s. None without traced evidence.
+        Cached on the evidence fingerprint and the threshold; never raises.
         """
         try:
             stop = float(stop_threshold_w)
@@ -8430,8 +8448,8 @@ class ProfileStore:
                 if summary.n < 10:
                     continue
                 traced += 1
-                pauses.extend(summary.pause_pairs(stop))
-            value = (traced, tuple(pauses)) if traced else None
+                pauses.extend(summary.pause_pairs(stop))  # each trace's frontier
+            value = (traced, _pause_frontier(pauses)) if traced else None
             cache[key] = (fingerprint, value)
             return value
         except Exception:  # noqa: BLE001 - a statistic must never break matching
