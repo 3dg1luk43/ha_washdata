@@ -6471,7 +6471,8 @@ class WashDataManager:
         finally:
             if not self._is_shutdown:
                 await self._async_close_cycle_end(
-                    cycle_token, failed, cycle_status=cycle_data.get("status")
+                    cycle_token, failed, cycle_status=cycle_data.get("status"),
+                    clear_snapshot=bool(ended.get("clear_snapshot")),
                 )
 
     async def _async_cycle_end_steps(
@@ -6816,10 +6817,13 @@ class WashDataManager:
             except Exception:  # noqa: BLE001
                 pass
 
-        # B1: only clear the active-cycle snapshot if it still belongs to THIS cycle.
-        # If a new cycle started during the awaits above, it now owns the active
-        # snapshot; clearing it here would strip the new cycle's restart-resilience.
-        if cycle_token is None or self._ranking_snapshot_cycle_id == cycle_token:
+        # The active-cycle snapshot is cleared by _async_close_cycle_end, after the
+        # coalesced write has put this cycle on disk (#511). Cleared here, its small
+        # file landed before the store and a crash between lost the cycle; kept
+        # until then, a restart restores it and MANAGER-04 sees the stored copy.
+        if ended is not None:
+            ended["clear_snapshot"] = True
+        elif cycle_token is None or self._ranking_snapshot_cycle_id == cycle_token:
             self._spawn_tracked(self.profile_store.async_clear_active_cycle())
 
         # Refresh the artifacts that read the envelopes rebuilt above.
@@ -7063,12 +7067,15 @@ class WashDataManager:
         cycle_token: str | None,
         tail_failed: bool = False,
         cycle_status: str | None = None,
+        clear_snapshot: bool = False,
     ) -> None:
         """The end of the cycle-end tail, run whatever failed before it (MANAGER-12).
 
-        Flushes the coalesced cycle-end write (item 456) and resets the terminal
-        state, unless a newer cycle has started (B1). ``tail_failed`` means the
-        follow-up stopped part-way, possibly before the live notification was
+        Flushes the coalesced cycle-end write (item 456), then clears the
+        active-cycle snapshot if ``clear_snapshot`` (the steps got that far), and
+        resets the terminal state, unless a newer cycle has started (B1).
+        ``tail_failed`` means the follow-up stopped part-way, possibly before the
+        live notification was
         handed over, so the live tag is cleared here instead of being left to
         count its chronometer into negative numbers. ``cycle_status`` is the
         ended cycle's status: an interrupted one never enters the Clean state
@@ -7083,6 +7090,15 @@ class WashDataManager:
             await self.profile_store.async_flush_saves()
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.error("Failed to save the finished cycle: %s", e)
+        # Only now, with the cycle on disk (#511). B1: and only while the snapshot
+        # still belongs to THIS cycle; a cycle started since owns it.
+        if clear_snapshot and (
+            cycle_token is None or self._ranking_snapshot_cycle_id == cycle_token
+        ):
+            try:
+                await self.profile_store.async_clear_active_cycle()
+            except Exception:  # noqa: BLE001 - the reset below must still run
+                self._logger.debug("Clearing the active-cycle snapshot failed", exc_info=True)
         # The idle display's standby level now includes this cycle (#452).
         await self._async_refresh_standby_level()
 
