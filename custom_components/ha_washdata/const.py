@@ -1631,12 +1631,27 @@ DEFAULT_OFF_DELAY_BY_DEVICE = {
     DEVICE_TYPE_PUMP: 20,  # 20 s (Pumps cut off sharply; no warm-down phase)
 }
 
+# The detector's hard cap on one cycle's wall-clock length (#502): zombie protection
+# for a run that never reaches an end. It was a flat 8 h, which cut a real 8.3 h
+# wash+dry in two (the drying rest opened a second cycle 9 s later). The cap is now
+# the larger of CYCLE_DURATION_CAP_BASE_S and CYCLE_DURATION_CAP_PROGRAMME_FACTOR x
+# the longest programme the device has learned or the current match expects
+# (`match_rules.cycle_duration_cap_s`), so a device whose programmes all run under
+# 5 h 20 min keeps exactly 8 h.
+CYCLE_DURATION_CAP_BASE_S = 28800  # 8 h
+CYCLE_DURATION_CAP_PROGRAMME_FACTOR = 1.5
+# Longest programme duration the duration cap scales on; anything longer is corrupt
+# data (the corpus holds a 53.8 h washer profile). Caps the duration cap at
+# 1.5 x 16 h = 24 h.
+MAX_PLAUSIBLE_PROGRAMME_S = 57600  # 16 h
+
 # Ceiling for the manager's *unmatched* zombie guard (seconds), i.e. the failsafe
 # that force-ends a cycle with no learned expected duration (expected == 0). This is
 # only a last-resort kill for a stuck FALSE START; the detector already hard-caps any
-# cycle at 8h (28800s), and the guard additionally only fires when the appliance is
-# effectively idle and no external end trigger is available (issue #404). All values
-# MUST stay below the detector's 28800s cap so the guard remains an *earlier* kill.
+# cycle at CYCLE_DURATION_CAP_BASE_S or more, and the guard additionally only fires
+# when the appliance is effectively idle, the detector's own end wait has run out
+# (#502) and no external end trigger is available (issue #404). All values MUST stay
+# below CYCLE_DURATION_CAP_BASE_S so the guard remains an *earlier* kill.
 # Wet/long appliances get a longer fuse because a genuine wash+dry or long cottons
 # programme with no matched profile can legitimately run well past 4h.
 DEFAULT_UNMATCHED_WATCHDOG_CEILING = 14400  # 4h scalar fallback

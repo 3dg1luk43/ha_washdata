@@ -1133,6 +1133,7 @@ class WashDataManager:
             device_name=config_entry.title,
             end_confidence_provider=self._ml_end_confidence,
             terminal_drop_provider=self._terminal_drop_provider,
+            longest_programme_provider=self._longest_programme_s,
         )
         self._ml_end_expectation_cache: tuple[str, dict[str, float]] | None = None
         # (cycle_count, earliest_quiet_offset|None, peak_range|None) for the
@@ -5173,7 +5174,7 @@ class WashDataManager:
         # Secondary zombie guard for unmatched cycles (expected == 0 when no profile
         # has been matched, or a hand-created profile has no learned avg_duration yet).
         # This is a failsafe against a stuck FALSE START, not a cap on real programmes.
-        # The detector already hard-caps any cycle at 8h (cycle_detector 28800s), so
+        # The detector already hard-caps any cycle at 8h or more (#502), so
         # this only ever fires *earlier*, and only when the cycle looks like it is not
         # really running any more. Its old form force-ended on elapsed time alone, which
         # truncated genuine long runs (issue #404: a >4h washer-dryer wash+dry drawing
@@ -5187,7 +5188,14 @@ class WashDataManager:
         #     running threshold) - a cycle still pulling real power is not a stuck false
         #     start (reporter's evidence: the plug never dropped below 64 W);
         #   - skipped when an authoritative external end trigger is wired and reporting,
-        #     since that signal will end the cycle cleanly.
+        #     since that signal will end the cycle cleanly;
+        #   - deferred while the detector's own end wait is still running (#502): a
+        #     7 h 55 min wash+dry that dropped to 0 W at its real end was force-ended
+        #     24 s later and stored force_stopped, minutes before the ENDING fallback
+        #     would have closed it as completed. Past that wait (plus two watchdog
+        #     ticks, the keepalives that advance it on a silent plug) the guard fires
+        #     as before; a standby draw at or above the stop threshold is never
+        #     deferred, since the detector cannot end that one itself.
         # Gate on the active detector state, not _current_program: the latter is only set
         # to "detecting..." on the RUNNING transition, so a cycle stuck in STARTING keeps
         # a stale program and would never hit this guard.
@@ -5200,6 +5208,9 @@ class WashDataManager:
             and not self._external_end_trigger_available()
             and self.detector.state in (
                 STATE_STARTING, STATE_RUNNING, STATE_PAUSED, STATE_ENDING
+            )
+            and not self.detector.ordinary_end_pending(
+                self._current_power, 2.0 * float(self._watchdog_interval)
             )
         ):
             self._logger.warning(
@@ -10235,6 +10246,11 @@ class WashDataManager:
     def armed_program(self) -> str | None:
         """The program pinned for the next cycle, when one is not under way (#411)."""
         return getattr(self, "_armed_program", None)
+
+    def _longest_programme_s(self) -> float:
+        """The device's longest learned programme for the detector's duration cap
+        (#502). Never raises (the detector also guards the call)."""
+        return match_rules.longest_programme_s(self._resolve_profiles())
 
     def _resolve_profiles(self) -> dict[str, Any]:
         """Return the stored profiles mapping, falling back to the raw store dict.

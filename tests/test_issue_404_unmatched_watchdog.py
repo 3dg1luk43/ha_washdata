@@ -92,6 +92,9 @@ def _make_manager(hass: MagicMock, options: dict) -> WashDataManager:
         # Explicit False so the guard's `not _verified_pause` gate is reachable
         # (a bare MagicMock attribute would be truthy and short-circuit it).
         mock_cd._verified_pause = False
+        # A stuck cycle: the detector's own end wait has run out (#502 defers the
+        # guard only while it has not).
+        mock_cd.ordinary_end_pending.return_value = False
 
         mgr = WashDataManager(hass, entry)
         mgr.detector = mock_cd

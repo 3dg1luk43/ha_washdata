@@ -114,6 +114,7 @@ from .const import (
     QUIET_PULSE_MAX_S,
     RUN_EXPECT_FLOOR_RATIO,
     RUN_EXPECT_GATES,
+    CYCLE_DURATION_CAP_BASE_S,
 )
 from . import spin_rhythm
 
@@ -739,6 +740,7 @@ class CycleDetector:
         terminal_drop_provider: (
             Callable[[list[tuple[float, float]], float], bool | None] | None
         ) = None,
+        longest_programme_provider: Callable[[], float] | None = None,
     ) -> None:
         """Initialize the cycle detector."""
         self._logger = DeviceLoggerAdapter(_LOGGER, device_name)
@@ -756,6 +758,10 @@ class CycleDetector:
         # Injected by the manager; None disables it (existing behavior). Opposite
         # asymmetry to the end-guard: it can only ever *shorten* the end wait.
         self._terminal_drop_provider = terminal_drop_provider
+        # () -> the device's longest learned programme in seconds (#502), which the
+        # duration cap scales on (`_duration_cap_s`). Read only once a run is past
+        # CYCLE_DURATION_CAP_BASE_S. None: the cap scales on the match alone.
+        self._longest_programme_provider = longest_programme_provider
         # Throttle caches for the two providers, scoped to the cycle + expectation:
         # (last_reading_ts, expected_duration, cycle_start, result). Reused only
         # within the recompute window when expected_duration and cycle_start match.
@@ -3623,11 +3629,9 @@ class CycleDetector:
             if self._maybe_finalize_standby_band(timestamp, power):
                 return
 
-            # Max duration safety
-            if (
-                self._current_cycle_start
-                and (timestamp - self._current_cycle_start).total_seconds() > 28800
-            ):  # 8h safety
+            # Max duration safety: 8 h, or longer for a device with long programmes
+            # (#502).
+            if self._past_duration_cap(timestamp):
                 self._finish_cycle(
                     timestamp,
                     status="force_stopped",
@@ -3663,12 +3667,9 @@ class CycleDetector:
             self._power_readings.append((timestamp, power))
             self._update_stall(timestamp, power)  # #452
 
-            # Hard cap: ENDING must not run longer than RUNNING's 8 h safety limit.
+            # Hard cap: ENDING must not run longer than RUNNING's safety limit.
             # Without this a standby baseline can hold the state open indefinitely.
-            if (
-                self._current_cycle_start
-                and (timestamp - self._current_cycle_start).total_seconds() > 28800
-            ):
+            if self._past_duration_cap(timestamp):
                 self._finish_cycle(
                     timestamp,
                     status="force_stopped",
@@ -6347,6 +6348,73 @@ class CycleDetector:
         )
         self._time_in_state = 0.0
         self._standby_reprobe = False
+        return True
+
+    def ordinary_end_pending(self, power: float, grace_s: float = 0.0) -> bool:
+        """True while a drop below the stop threshold is still inside the quiet
+        this detector's own end path waits for (#502).
+
+        The manager's unmatched idle guard defers to it: on the #502 washer-dryer
+        the plug fell to 0 W at the programme's end, 7 h 55 min in, and the guard
+        force-ended the cycle 24 s later, so a run the ENDING fallback was about to
+        close as ``completed`` was stored ``force_stopped``. The wait is the
+        longest an unmatched quiet needs (``max(off_delay, min_off_gap)`` and the
+        PAUSED -> ENDING threshold), plus ``grace_s``. A standby draw at or above
+        the stop threshold never counts: the detector cannot end that one itself,
+        and the guard is what does.
+        """
+        if self._state not in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
+            return False
+        try:
+            low = float(power) < float(self._config.stop_threshold_w)
+        except (TypeError, ValueError, OverflowError):
+            return False
+        if not low:
+            return False
+        wait = max(
+            float(self._config.off_delay),
+            float(self._config.min_off_gap),
+            float(self._dynamic_end_threshold),
+        )
+        return self._time_below_threshold < wait + max(0.0, float(grace_s))
+
+    def _duration_cap_s(self) -> float:
+        """This run's hard cap on wall-clock length (#502).
+
+        :func:`match_rules.cycle_duration_cap_s` on the match's expected duration
+        and the device's longest learned programme. A provider that raises reads
+        as no programme: the cap then falls back to the match and the base.
+        """
+        longest = 0.0
+        provider = self._longest_programme_provider
+        if provider is not None:
+            try:
+                longest = float(provider() or 0.0)
+            except Exception:  # pylint: disable=broad-exception-caught
+                longest = 0.0
+        return match_rules.cycle_duration_cap_s(self._expected_duration, longest)
+
+    def _past_duration_cap(self, timestamp: datetime) -> bool:
+        """Whether this run has outlived :meth:`_duration_cap_s`.
+
+        The cap is never below CYCLE_DURATION_CAP_BASE_S, so the provider is only
+        consulted past that (once per reading on a run longer than 8 h).
+        """
+        if not self._current_cycle_start:
+            return False
+        elapsed = (timestamp - self._current_cycle_start).total_seconds()
+        if elapsed <= CYCLE_DURATION_CAP_BASE_S:
+            return False
+        cap = self._duration_cap_s()
+        if elapsed <= cap:
+            return False
+        self._logger.warning(
+            "Cycle ran %.1f h, past its %.1f h duration cap (expected %.0fs); "
+            "force-stopping",
+            elapsed / 3600.0,
+            cap / 3600.0,
+            self._expected_duration,
+        )
         return True
 
     def restore_state_snapshot(self, snapshot: dict[str, Any]) -> bool:

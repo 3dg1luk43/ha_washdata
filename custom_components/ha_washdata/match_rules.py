@@ -53,6 +53,8 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from .const import (
+    CYCLE_DURATION_CAP_BASE_S,
+    CYCLE_DURATION_CAP_PROGRAMME_FACTOR,
     DEFAULT_MATCH_REVERT_RATIO,
     END_GATE_HAZARD_MARGIN,
     ENDING_HARD_FINALIZE_MIN_QUIET_S,
@@ -61,6 +63,7 @@ from .const import (
     MATCH_LABEL_MIN_MARGIN,
     MATCH_SURE_KNOTS,
     MATCH_SURE_SINGLE_CANDIDATE,
+    MAX_PLAUSIBLE_PROGRAMME_S,
     ORPHANED_PAUSE_MAX_WAIT_S,
 )
 
@@ -152,6 +155,57 @@ def profile_duration(value: Any) -> float | None:
     if not math.isfinite(avg) or avg <= 0:
         return None
     return avg
+
+
+def plausible_programme_s(value: Any) -> float:
+    """``value`` as a programme length the duration cap may scale on, else 0.0.
+
+    :func:`profile_duration`, and no longer than ``MAX_PLAUSIBLE_PROGRAMME_S``:
+    a longer one is corrupt data (#502), and must not stretch the cap.
+    """
+    duration = profile_duration(value)
+    if duration is None or duration > MAX_PLAUSIBLE_PROGRAMME_S:
+        return 0.0
+    return duration
+
+
+def longest_programme_s(profiles: Any) -> float:
+    """The longest programme this device has learned, in seconds (0.0: none).
+
+    Each profile's ``avg_duration`` and ``max_duration``, through
+    :func:`plausible_programme_s`. The duration cap reads it, so a run of the
+    device's longest programme is never cut short, matched or not (#502). The
+    manager passes its stored profiles and the Playground the replayed store's.
+    Never raises; anything but a mapping of mappings reads as no programme.
+    """
+    if not isinstance(profiles, dict):
+        return 0.0
+    longest = 0.0
+    for profile in profiles.values():
+        if not isinstance(profile, dict):
+            continue
+        for key in ("avg_duration", "max_duration"):
+            longest = max(longest, plausible_programme_s(profile.get(key)))
+    return longest
+
+
+def cycle_duration_cap_s(expected_s: Any, longest_programme: Any) -> float:
+    """The detector's hard cap on a cycle's wall-clock length (#502).
+
+    ``max(CYCLE_DURATION_CAP_BASE_S, CYCLE_DURATION_CAP_PROGRAMME_FACTOR x
+    longest)``, where ``longest`` is the larger of the current match's expected
+    duration and the device's longest learned programme, each bounded by
+    ``MAX_PLAUSIBLE_PROGRAMME_S``. The flat 8 h it replaces cut a real 8.3 h wash+dry
+    during its drying phase; the learned term makes it at least half a programme
+    longer than anything the device has run, while a device whose programmes all
+    run under 5 h 20 min keeps 8 h. Reading the learned programmes, not only the
+    match, keeps the cap from dropping when a late match switches to a shorter
+    programme, and covers an unmatched run.
+    """
+    longest = max(plausible_programme_s(expected_s), plausible_programme_s(longest_programme))
+    return max(
+        float(CYCLE_DURATION_CAP_BASE_S), CYCLE_DURATION_CAP_PROGRAMME_FACTOR * longest
+    )
 
 
 def analyze_trend(history: list[float]) -> bool:

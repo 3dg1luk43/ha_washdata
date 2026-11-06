@@ -376,7 +376,8 @@ def _cycle_label(cycle: dict[str, Any]) -> str | None:
 _PLAYGROUND_START_DT = 5.0
 
 # Bound on the keepalives emulated inside one silent stretch (8 h at a 30 s
-# watchdog): the detector's own 8 h cap ends any cycle long before this.
+# watchdog): a keepalive is only fed while the detector waits below the stop
+# threshold, and its ENDING fallback ends that wait long before this.
 _MAX_KEEPALIVES_PER_GAP = 960
 
 
@@ -900,7 +901,16 @@ class _DetailSim:
                 terminal_drop_provider=self._terminal_drop_provider(
                     {**self.options, **(settings_override or {})}
                 ),
+                longest_programme_provider=self._longest_programme_s,
             )
+
+    def _longest_programme_s(self) -> float:
+        """``manager._longest_programme_s`` for this replay: the duration cap (#502)
+        scales on the replayed store's profiles, as live does."""
+        getter = getattr(self.store, "get_profiles", None)
+        if not callable(getter):
+            return 0.0
+        return match_rules.longest_programme_s(getter())
 
     def _terminal_drop_provider(
         self, options: dict[str, Any]
