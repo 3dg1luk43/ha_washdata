@@ -2047,7 +2047,11 @@ SELF_UNMATCHABLE_MIN_CYCLES = 3
 # with the hold integrator (#498: the median gap rule dropped a change-only plug's
 # silent heater stretches) and arms `CYCLE_ENERGY_REBUILD_KEY` so every envelope's
 # `avg_energy` is rebuilt from the cycles (#495). Idempotent.
-STORAGE_VERSION = 18
+# v19: compact traces on disk (`trace_codec`): each stored cycle's `power_data` and
+# `debug_data` are written as one string of compact JSON text (the indent was over
+# half of a real store), decoded on load, so memory, exports and the WS API keep the
+# lists. Every value bit-identical; nothing in memory changes. Idempotent.
+STORAGE_VERSION = 19
 STORAGE_KEY = "ha_washdata"
 
 # Restore point for "Undo last import" (register item 195): the store as it was before

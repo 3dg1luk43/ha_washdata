@@ -268,7 +268,10 @@ Power sensor change -> manager._async_power_changed (sync @callback) -> CycleDet
 ### Data persistence
 
 `homeassistant.helpers.storage.Store` (JSON). Profiles, cycle history, phase catalog, detected
-cycles, `profile_groups`, `suggestions`, per-cycle `ml_review`, `ml_model_versions`.
+cycles, `profile_groups`, `suggestions`, per-cycle `ml_review`, `ml_model_versions`. Since v19 a
+stored cycle's `power_data`/`debug_data` sit in the file as compact JSON text (`trace_codec.py`,
+encoded and decoded only by `WashDataStore`, imports and the restore point); never read the file
+directly without `trace_codec.decode_stored_cycles`.
 
 **Three cycle lists, three different claims about a cycle** - mixing them up loses user data or fakes
 provenance:
@@ -436,7 +439,7 @@ old-schema fixtures. **Two separate layers, tested separately:**
    lives in `const.py` (`CONFIG_ENTRY_VERSION` / `CONFIG_ENTRY_MINOR_VERSION`), which the flow class,
    every stepwise block and the one-pass legacy migration all read: a bump is that constant plus one
    new migration step. Tested in `tests/test_migration_harness.py`.
-2. **Storage migration** - `WashDataStore._async_migrate_func` in `profile_store.py`, v1->18
+2. **Storage migration** - `WashDataStore._async_migrate_func` in `profile_store.py`, v1->19
    (`STORAGE_VERSION` in `const.py`). Tested in `tests/test_migration_v032.py`. Call
    `_async_migrate_func(old_version, 1, data)` **directly** - do not go through
    `ProfileStore.async_load()` (needs file I/O).
@@ -458,7 +461,11 @@ old-schema fixtures. **Two separate layers, tested separately:**
    `total_energy`'s; no cycle or label; idempotent), v17->v18 re-integrates past/backfill
    `energy_wh` with `integrate_cycle_wh` (#498; cost follows, meter and lifetime untouched) and arms
    `CYCLE_ENERGY_REBUILD_KEY`, which the manager consumes after setup by rebuilding every envelope
-   (#495 `avg_energy`); imports of older exports do the same.
+   (#495 `avg_energy`); imports of older exports do the same. v18->v19 compact traces on disk
+   (`trace_codec`): `WashDataStore` writes each stored cycle's `power_data`/`debug_data` as one
+   string of compact JSON text (bit-identical values) and decodes on load, imports and the restore
+   point decode too, so memory, exports and the WS API only ever hold the lists; the step itself
+   only decodes text an older build wrote back.
 
 ## Matching Pipeline
 
