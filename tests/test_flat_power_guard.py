@@ -303,6 +303,25 @@ def test_a_restored_cycle_waits_a_fresh_window() -> None:
     assert again.cycles[0]["duration"] == pytest.approx(resumed, abs=1.0)
 
 
+@pytest.mark.parametrize(
+    ("device_type", "last_w", "locked"),
+    [("washing_machine", 120.0, True), ("dishwasher", 120.0, True),
+     ("washing_machine", 2.0, False), ("other", 120.0, False)],
+)
+def test_force_end_stuck_locks_the_last_level(device_type: str, last_w: float, locked: bool) -> None:
+    """The staleness force-end's lockout: the flat-power stop's own band and scope
+    (its device types, at or above its floor; 2 W is below a 3 W start)."""
+    rig = _Rig(device_type)
+    rig.feed(_programme, 1800)
+    rig.feed(last_w, 10)
+    rig.det.force_end_stuck(T0 + timedelta(seconds=rig.t + 4 * 3600))
+    assert rig.det.state not in OPEN and rig.cycles
+    assert (rig.det._flat_lockout is not None) is locked  # noqa: SLF001
+    rig.t += 4 * 3600 + 60
+    rig.feed(last_w, 300)
+    assert rig.starts() == (1 if locked or last_w < 3.0 else 2)
+
+
 @pytest.mark.parametrize("device_type", ["other", "generic", "pump"])
 def test_excluded_device_types_never_fire(device_type: str) -> None:
     rig = _Rig(device_type)
@@ -416,6 +435,47 @@ async def test_manager_stores_the_stop_and_never_restarts(hass, freezer, caplog)
     assert len(mgr.profile_store.get_past_cycles()) == 1
     # The level is left: a programme starts as usual.
     await feed(hass, freezer, 900, 600, step=30, timers=True)
+    assert mgr.detector.state == STATE_RUNNING
+    await mgr.async_shutdown()
+
+
+async def test_stale_branch_stop_locks_the_silent_level_out(hass, freezer, caplog) -> None:
+    """A programme, one 120 W report, then silence: unmatched, the watchdog's
+    high-power staleness branch force-ends it at 4 h elapsed (before the 4 h of
+    flat power are up). The plug reporting 120 W again starts nothing; another
+    value starts a cycle."""
+    from homeassistant.util import dt as dt_util
+    from pytest_homeassistant_custom_component.common import async_fire_time_changed_exact
+
+    from .real_manager import POWER, boot, feed, idle_expire, make_entry, record_notify
+
+    record_notify(hass)
+    entry = make_entry(hass, {"progress_reset_delay": 300})
+    mgr = await boot(hass, entry)
+    for i in range(60):  # 30 min of a modulating programme
+        await feed(hass, freezer, 800 if i % 2 else 900, 30, step=30)
+    await feed(hass, freezer, 120, 30, step=30)
+    assert mgr.detector.state == STATE_RUNNING
+    await idle_expire(hass, freezer, int(4 * 3600), step=60)
+    assert "Active state stale" in caplog.text
+    assert "Power flat at" not in caplog.text
+    assert mgr.detector.state not in OPEN
+    stored = mgr.profile_store.get_past_cycles()
+    assert len(stored) == 1 and stored[0]["status"] == "force_stopped"
+    assert not stored[0].get("flat_power_stop")  # the stale branch, not the 4 h rule
+
+    async def report(watts: float) -> None:
+        freezer.tick(timedelta(seconds=30))
+        hass.states.async_set(POWER, str(watts), {"unit_of_measurement": "W"}, force_update=True)
+        async_fire_time_changed_exact(hass, dt_util.utcnow())
+        await hass.async_block_till_done()
+
+    for _ in range(20):  # the frozen value again, past the Off expiry
+        await report(121.0)
+    assert mgr.detector.state not in OPEN
+    assert len(mgr.profile_store.get_past_cycles()) == 1
+    for _ in range(10):  # a different value: a cycle starts as usual
+        await report(500.0)
     assert mgr.detector.state == STATE_RUNNING
     await mgr.async_shutdown()
 

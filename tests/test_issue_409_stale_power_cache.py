@@ -238,6 +238,7 @@ async def test_high_power_silence_defers_end_without_injecting(
         "no fabricated sample may enter the cycle trace"
     )
     d.force_end.assert_not_called()
+    d.force_end_stuck.assert_not_called()
 
 
 @pytest.mark.asyncio
@@ -260,7 +261,8 @@ async def test_high_power_silence_still_force_ends_past_the_limit(
         live.last_reported + timedelta(seconds=700)
     )
 
-    d.force_end.assert_called_once()
+    # The force-end that also locks the silent level out (flat-power stop lockout).
+    d.force_end_stuck.assert_called_once()
     assert manager.current_power == 17.6  # sensor value, not a synthetic 0
     assert manager._current_power == 0.0
 

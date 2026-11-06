@@ -6688,8 +6688,40 @@ class CycleDetector:
             keep_tail=False,
             flat_power_w=(lo + hi) / 2.0,
         )
+        self._lock_flat_band(band)
+
+    def _lock_flat_band(self, band: tuple[float, float] | None) -> None:
+        """After a stop on a stuck level: no cycle starts until a real reading leaves
+        ``band`` (``_in_flat_lockout``). Shared by the flat-power stop and
+        :meth:`force_end_stuck`; called after the stop's reset, which drops any
+        earlier lockout. None: nothing to lock (the level was below the floor)."""
         self._flat_run.clear()
-        self._flat_lockout = (lo, hi)
+        self._flat_lockout = band
+
+    def force_end_stuck(self, timestamp: datetime) -> None:
+        """Force-end a cycle whose sensor fell silent on its last level, and lock
+        that level out like the flat-power stop.
+
+        The manager's high-power staleness branch: a silent or frozen plug still
+        shows the value it last sent, which would start the next cycle on its next
+        report. The band is the flat run ending at the last real reading (that
+        reading at least), so it exists only on the flat-power stop's device types
+        and at or above its floor; anything else ends as :meth:`force_end` does.
+        """
+        band = (
+            self._flat_run.band
+            if self._state in (STATE_STARTING, STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
+            else None
+        )
+        self.force_end(timestamp)
+        if band is not None:
+            self._logger.info(
+                "Stopped on a silent sensor at %.1f-%.1fW: no new cycle starts until "
+                "the power leaves that level",
+                band[0],
+                band[1],
+            )
+            self._lock_flat_band(band)
 
     def restore_state_snapshot(self, snapshot: dict[str, Any]) -> bool:
         """Restore state from snapshot; False when it could not be restored.

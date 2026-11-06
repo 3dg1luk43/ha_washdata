@@ -281,6 +281,7 @@ async def test_watchdog_injects_keepalive_after_no_update_timeout(
     )
     # No force-end: the cycle should close gracefully, not be aborted.
     detector.force_end.assert_not_called()
+    detector.force_end_stuck.assert_not_called()
 
 
 @pytest.mark.asyncio
@@ -333,6 +334,7 @@ async def test_watchdog_does_not_inject_before_no_update_timeout(
     # Too early - the injection path must not have fired yet.
     detector.process_reading.assert_not_called()
     detector.force_end.assert_not_called()
+    detector.force_end_stuck.assert_not_called()
 
 
 @pytest.mark.asyncio
@@ -388,6 +390,7 @@ async def test_watchdog_skips_injection_during_verified_pause(
     # Verified pause is active → the cycle must not be ended, however long the
     # plug stays silent.
     detector.force_end.assert_not_called()
+    detector.force_end_stuck.assert_not_called()
     # A keepalive is allowed, but only as a synthetic reading: it may advance the
     # quiet accumulator, never masquerade as a sensor report.
     for c in detector.process_reading.call_args_list:

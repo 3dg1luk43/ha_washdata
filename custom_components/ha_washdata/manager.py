@@ -5441,7 +5441,10 @@ class WashDataManager:
                 "Watchdog: Force-ending cycle. Active state stale for %.0fs (> timeout).",
                 time_since_any_update
             )
-            self.detector.force_end(now)
+            # A silent or frozen plug still shows its last value, and its next
+            # report of it would start a new cycle at once: the detector locks that
+            # level out, as after a flat-power stop (one rule, `_lock_flat_band`).
+            self.detector.force_end_stuck(now)
             self._current_power = 0.0  # FIX: Reset current power
             self._notify_update()
             return
