@@ -95,6 +95,7 @@ wash + dry combination.
 | `sensor.<name>_current_phase` | The phase you defined for the program at this point ("Rinse", "Spin"), else `unknown` |
 | `sensor.<name>_cycle_count` | Lifetime runs, for maintenance by count |
 | `sensor.<name>_energy_total` | Lifetime kWh, for the Energy dashboard |
+| `sensor.<name>_last_cycle_duration` / `_last_cycle_energy` / `_last_cycle_cost` | The last finished run: minutes, kWh, and cost in your currency (unknown without a price). Diagnostic. |
 | `sensor.<name>_suggested_settings_available` | Number of tuning suggestions waiting in Settings |
 | `binary_sensor.<name>_maintenance_due` | On when a maintenance reminder is due |
 | `select.<name>_cycle_program` | Pick the program by hand |

@@ -32,7 +32,7 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.const import EntityCategory, UnitOfEnergy
+from homeassistant.const import EntityCategory, UnitOfEnergy, UnitOfTime
 from homeassistant.helpers import entity_registry
 from homeassistant.helpers.dispatcher import (
     async_dispatcher_connect,
@@ -77,6 +77,7 @@ from .const import (
     STATE_CLEAN,
 )
 from .manager import WashDataManager
+from .profile_store import cycle_report_energy_wh
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -190,6 +191,9 @@ async def async_setup_entry(
         WasherSuggestionsSensor(manager, entry),
         WasherCycleCountSensor(manager, entry),
         WasherEnergyTotalSensor(manager, entry),
+        WasherLastCycleDurationSensor(manager, entry),
+        WasherLastCycleEnergySensor(manager, entry),
+        WasherLastCycleCostSensor(manager, entry),
     ]
 
     # Add pump-specific sensors
@@ -1168,3 +1172,151 @@ class WasherEnergyTotalSensor(WasherBaseSensor):
     @property
     def native_value(self) -> float:  # type: ignore[override]
         return self._manager.lifetime_energy_kwh
+
+
+def _finite(value: Any) -> float | None:
+    """``value`` as a finite float, else None."""
+    if value is None or isinstance(value, bool):
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    return number if math.isfinite(number) else None
+
+
+class WasherLastCycleSensor(WasherBaseSensor):
+    """One figure of the newest stored run (#501): duration, energy or cost.
+
+    Read from the store (``ProfileStore.last_finished_cycle``), not restored, so it
+    survives a restart and follows a delete, trim, merge or relabel of that cycle.
+    The live refresh fires on every power reading, so the entity writes only when
+    its figure or attributes moved.
+    """
+
+    # The device page's Diagnostic section; still enabled by default.
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
+        super().__init__(manager, entry)
+        self._written_key: tuple[Any, ...] | None = None
+
+    def _cycle(self) -> dict[str, Any] | None:
+        return self._manager.profile_store.last_finished_cycle()
+
+    def _figure(self, cycle: dict[str, Any]) -> float | int | None:
+        raise NotImplementedError
+
+    def _write_key(self) -> tuple[Any, ...] | None:
+        cycle = self._cycle()
+        if cycle is None:
+            return None
+        return (
+            self._figure(cycle), cycle.get("id"), cycle.get("profile_name"),
+            cycle.get("status"), cycle.get("start_time"), cycle.get("end_time"),
+        )
+
+    async def async_added_to_hass(self) -> None:
+        """Remember what the first write (right after this) shows."""
+        await super().async_added_to_hass()
+        self._written_key = self._write_key()
+
+    @callback
+    def _update_callback(self) -> None:
+        key = self._write_key()
+        if key == self._written_key:
+            return
+        self._written_key = key
+        self.async_write_ha_state()
+
+    @property
+    def native_value(self) -> float | int | None:  # type: ignore[override]
+        cycle = self._cycle()
+        return None if cycle is None else self._figure(cycle)
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:  # type: ignore[override]
+        cycle = self._cycle()
+        if cycle is None:
+            return None
+        return {
+            "cycle_id": cycle.get("id"),
+            "program": cycle.get("profile_name"),
+            "status": cycle.get("status"),
+            "started_at": cycle.get("start_time"),
+            "ended_at": cycle.get("end_time"),
+        }
+
+
+class WasherLastCycleDurationSensor(WasherLastCycleSensor):
+    """How long the last run took, in whole minutes like the other durations."""
+
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
+        self.entity_description = SensorEntityDescription(
+            key="last_cycle_duration",
+            translation_key="last_cycle_duration",
+            device_class=SensorDeviceClass.DURATION,
+            native_unit_of_measurement=UnitOfTime.MINUTES,
+            suggested_display_precision=0,
+            icon="mdi:timer-check-outline",
+        )
+        super().__init__(manager, entry)
+
+    def _figure(self, cycle: dict[str, Any]) -> int | None:
+        seconds = _finite(cycle.get("duration"))
+        if seconds is None or seconds < 0:
+            return None
+        return int(math.floor(seconds / 60.0 + 0.5))
+
+
+class WasherLastCycleEnergySensor(WasherLastCycleSensor):
+    """The last run's energy: the figure the panel shows (meter, else integrated).
+
+    No state class: a per-cycle figure is neither a measurement (which the energy
+    device class refuses) nor a meter; ``energy_total`` is the meter.
+    """
+
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
+        self.entity_description = SensorEntityDescription(
+            key="last_cycle_energy",
+            translation_key="last_cycle_energy",
+            device_class=SensorDeviceClass.ENERGY,
+            native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+            suggested_display_precision=2,
+            icon="mdi:lightning-bolt-outline",
+        )
+        super().__init__(manager, entry)
+
+    def _figure(self, cycle: dict[str, Any]) -> float | None:
+        return round(cycle_report_energy_wh(cycle) / 1000.0, 3)
+
+
+class WasherLastCycleCostSensor(WasherLastCycleSensor):
+    """The cost frozen onto the last run at its end (#426), in HA's currency.
+
+    Unknown when that cycle has none (no price was configured then). No state
+    class, for the same reason as the energy sensor.
+    """
+
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
+        self.entity_description = SensorEntityDescription(
+            key="last_cycle_cost",
+            translation_key="last_cycle_cost",
+            device_class=SensorDeviceClass.MONETARY,
+            suggested_display_precision=2,
+            icon="mdi:cash",
+        )
+        super().__init__(manager, entry)
+        self._attr_native_unit_of_measurement = manager.hass.config.currency
+
+    def _figure(self, cycle: dict[str, Any]) -> float | None:
+        cost = _finite(cycle.get("cost"))
+        return None if cost is None else round(cost, 2)
+
+    def _write_key(self) -> tuple[Any, ...] | None:
+        # The currency is the unit: a change in HA's general settings shows at the
+        # next refresh.
+        currency = self._manager.hass.config.currency
+        if currency != self._attr_native_unit_of_measurement:
+            self._attr_native_unit_of_measurement = currency
+        return (currency, super()._write_key())

@@ -130,6 +130,7 @@ from .time_utils import (
     utc_now,
 )
 from .maintenance import clean_task_name, coerce_interval, is_due
+from .notification_rules import cycle_end_is_finish
 from .options_utils import canonical_device_type
 from .phase_catalog import (
     DEFAULT_PHASES_BY_DEVICE,
@@ -3061,6 +3062,37 @@ class ProfileStore:
         if isinstance(raw, list):
             return cast(list[CycleDict], raw)
         return []
+
+    def last_finished_cycle(self) -> CycleDict | None:
+        """The most recent observed run, or None (#501's last-cycle sensors).
+
+        ``past_cycles`` only (a download or a replayed history is not a run of this
+        appliance), newest first whatever the list order (``_newest_cycle``), and
+        only a cycle the cycle_finished trigger would announce
+        (``cycle_end_is_finish``): an interrupted false start must not replace the
+        wash it followed.
+
+        Called on every entity refresh, so the scan is cached while the list, its
+        length and its last element are unchanged and the cached cycle still sits
+        at its index; a delete, merge, split, import or wipe changes one of those.
+        The returned dict is the stored one, so an in-place trim or relabel shows.
+        """
+        cycles = self.get_past_cycles()
+        key = (id(cycles), len(cycles), id(cycles[-1]) if cycles else None)
+        cached = getattr(self, "_last_finished_cache", None)
+        if cached is not None and cached[0] == key:
+            idx, cycle = cached[1], cached[2]
+            if cycle is None or (0 <= idx < len(cycles) and cycles[idx] is cycle):
+                return cycle
+        best = _newest_cycle([
+            c for c in cycles
+            if isinstance(c, dict) and cycle_end_is_finish(c.get("status"))
+        ])
+        best_idx = next(
+            (i for i in range(len(cycles) - 1, -1, -1) if cycles[i] is best), -1
+        )
+        self._last_finished_cache = (key, best_idx, best)
+        return cast("CycleDict | None", best)
 
     # ── Legacy per-device community-store account ─────────────────────────────
     def get_store_account(self) -> dict[str, Any]:
