@@ -1,6 +1,6 @@
 {
  "about": "end_gate_eval baseline (audit TESTING-09). Regenerate with --write-baseline after an intended end-gate change; gate with --check.",
- "generated": "2026-11-03T09:51:39Z",
+ "generated": "2026-11-06T10:02:20Z",
  "flags": {
   "loo": true,
   "all_formats": true,
@@ -11,24 +11,9 @@
   "no_shortening": false
  },
  "tree": {
-  "head": "c42472e",
-  "dirty": [
-   " M custom_components/ha_washdata/analysis.py",
-   " M custom_components/ha_washdata/const.py",
-   " M custom_components/ha_washdata/cycle_detector.py",
-   " M custom_components/ha_washdata/manager.py",
-   " M custom_components/ha_washdata/match_rules.py",
-   " M custom_components/ha_washdata/playground.py",
-   " M custom_components/ha_washdata/profile_store.py",
-   " M custom_components/ha_washdata/progress.py",
-   " M custom_components/ha_washdata/spin_rhythm.py",
-   " M devtools/end_gate_eval.py",
-   " M tests/test_audit_hazard_end_gate.py",
-   " M tests/test_audit_match_context.py",
-   "?? tests/test_audit_run_expectation.py",
-   "?? tests/test_issue_486_anticrease_programme_end.py"
-  ],
-  "integration_py_sha256": "e877f04d9d6d179f"
+  "head": "d0860d15",
+  "dirty": [],
+  "integration_py_sha256": "fd03198f13235c75"
  },
  "tolerance": {
   "prog_median_lag_min": 0.25,
@@ -40,19 +25,19 @@
  },
  "summary": {
   "ALL": {
-   "n": 619,
-   "median_lag_min": 5.03,
-   "mean_lag_min": 7.68,
-   "p90_lag_min": 20.59,
+   "n": 633,
+   "median_lag_min": 5.0,
+   "mean_lag_min": 7.59,
+   "p90_lag_min": 20.51,
    "early_1min_n": 86,
    "early_5min_n": 76,
    "split_n": 74,
-   "early_1min_pct": 13.89,
-   "early_5min_pct": 12.28,
-   "split_pct": 11.95,
-   "prog_median_lag_min": 6.5,
-   "prog_mean_lag_min": 11.9,
-   "prog_p90_lag_min": 24.36,
+   "early_1min_pct": 13.59,
+   "early_5min_pct": 12.01,
+   "split_pct": 11.69,
+   "prog_median_lag_min": 6.45,
+   "prog_mean_lag_min": 11.71,
+   "prog_p90_lag_min": 23.83,
    "prog_early_1min_n": 11,
    "prog_early_5min_n": 8,
    "prog_split_n": 9
@@ -94,19 +79,19 @@
    "prog_split_n": 3
   },
   "washer_dryer": {
-   "n": 24,
-   "median_lag_min": 4.23,
-   "mean_lag_min": 5.9,
-   "p90_lag_min": 8.51,
+   "n": 38,
+   "median_lag_min": 4.0,
+   "mean_lag_min": 4.97,
+   "p90_lag_min": 7.29,
    "early_1min_n": 0,
    "early_5min_n": 0,
    "split_n": 0,
    "early_1min_pct": 0.0,
    "early_5min_pct": 0.0,
    "split_pct": 0.0,
-   "prog_median_lag_min": 4.69,
-   "prog_mean_lag_min": 6.81,
-   "prog_p90_lag_min": 10.65,
+   "prog_median_lag_min": 4.0,
+   "prog_mean_lag_min": 5.56,
+   "prog_p90_lag_min": 9.37,
    "prog_early_1min_n": 0,
    "prog_early_5min_n": 0,
    "prog_split_n": 0
