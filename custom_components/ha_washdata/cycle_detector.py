@@ -22,6 +22,7 @@ import itertools
 import logging
 import math
 import traceback
+from collections import deque
 from dataclasses import dataclass, replace
 from datetime import datetime, timedelta
 from typing import Any, Callable, cast
@@ -115,6 +116,10 @@ from .const import (
     RUN_EXPECT_FLOOR_RATIO,
     RUN_EXPECT_GATES,
     MAX_PLAUSIBLE_PROGRAMME_S,
+    FLAT_POWER_STOP_DEVICE_TYPES,
+    FLAT_POWER_STOP_WINDOW_S,
+    FLAT_POWER_STOP_TOLERANCE_W,
+    FLAT_POWER_STOP_TOLERANCE_FRACTION,
 )
 from . import spin_rhythm
 
@@ -399,6 +404,81 @@ class _QuietPulse:
     unobserved: float
     last_active: datetime | None
     resume: bool = False
+
+
+def flat_band_holds(lo: float, hi: float) -> bool:
+    """Whether readings spanning ``lo``..``hi`` W have not moved (flat-power stop).
+
+    The spread is held to max(FLAT_POWER_STOP_TOLERANCE_W,
+    FLAT_POWER_STOP_TOLERANCE_FRACTION x the mid-range). Monotone: a narrower span
+    holds whenever a wider one does, so the longest flat run is well defined.
+    """
+    spread = hi - lo
+    return spread <= max(
+        FLAT_POWER_STOP_TOLERANCE_W,
+        FLAT_POWER_STOP_TOLERANCE_FRACTION * (hi + lo) / 2.0,
+    )
+
+
+class _FlatRun:
+    """The longest flat run of REAL readings ending at the latest one.
+
+    Every reading of the run is at or above the floor it was pushed with and the
+    run's spread holds :func:`flat_band_holds`. O(1) amortised per reading: a
+    reading that breaks the band drops the oldest readings until it holds again
+    (monotone queues keep the run's min and max), so the run always starts where
+    the longest flat stretch ending now starts. A silence adds nothing, so the
+    last reading's level is carried forward until the next one.
+    """
+
+    __slots__ = ("_ts", "_maxq", "_minq", "_first", "_next")
+
+    def __init__(self) -> None:
+        self._ts: deque[datetime] = deque()
+        # (sequence number, power): the run's max / min candidates, oldest first.
+        self._maxq: deque[tuple[int, float]] = deque()
+        self._minq: deque[tuple[int, float]] = deque()
+        self._first = 0  # sequence number of the run's oldest reading
+        self._next = 0
+
+    def clear(self) -> None:
+        self._ts.clear()
+        self._maxq.clear()
+        self._minq.clear()
+        self._first = self._next
+
+    @property
+    def start(self) -> datetime | None:
+        return self._ts[0] if self._ts else None
+
+    @property
+    def band(self) -> tuple[float, float] | None:
+        if not self._ts:
+            return None
+        return (self._minq[0][1], self._maxq[0][1])
+
+    def push(self, timestamp: datetime, power: float, floor: float) -> None:
+        if not math.isfinite(power) or power < floor:
+            self.clear()
+            return
+        if self._ts and timestamp < self._ts[-1]:
+            self.clear()
+        seq = self._next
+        self._next += 1
+        self._ts.append(timestamp)
+        while self._maxq and self._maxq[-1][1] <= power:
+            self._maxq.pop()
+        self._maxq.append((seq, power))
+        while self._minq and self._minq[-1][1] >= power:
+            self._minq.pop()
+        self._minq.append((seq, power))
+        while not flat_band_holds(self._minq[0][1], self._maxq[0][1]):
+            self._ts.popleft()
+            if self._maxq[0][0] == self._first:
+                self._maxq.popleft()
+            if self._minq[0][0] == self._first:
+                self._minq.popleft()
+            self._first += 1
 
 
 @dataclass(frozen=True)
@@ -1008,6 +1088,14 @@ class CycleDetector:
         self._probe_hidden: bool = False
         self._probe_hidden_state: str = STATE_OFF
         self._probe_hidden_sub_state: str | None = None
+        # Flat-power stop (FLAT_POWER_STOP_*): the flat run of real readings at or
+        # above max(start, stop threshold) that ends at the latest one, and after a
+        # stop the (lo, hi) of the run it stopped on. While that is set no cycle
+        # starts: every reading inside the band is ignored, the first real one
+        # outside it releases the lockout. In memory only: a restart forgets both,
+        # so a run restored or restarted on a stuck level waits the window again.
+        self._flat_run = _FlatRun()
+        self._flat_lockout: tuple[float, float] | None = None
         # Discussion #452, display only (see the STALL_* / IDLE_* constants).
         # Element 15: the matched profile's low stretches below the near-stop
         # ceiling, as element 14's (traced, ((fraction, seconds), ...)).
@@ -2490,6 +2578,8 @@ class CycleDetector:
         decision (see ``process_reading``). Idempotent: an ongoing outage keeps
         its first start.
         """
+        # No flat run survives an outage: nobody saw the level in it.
+        self._flat_run.clear()
         if self._sensor_outage_since is None:
             self._sensor_outage_since = dt_util.as_utc(timestamp)
             in_cycle = self._state in (
@@ -2524,6 +2614,9 @@ class CycleDetector:
             and self._state in (STATE_FINISHED, STATE_INTERRUPTED, STATE_FORCE_STOPPED)
         )
         carried = (self._standby_reprobe, self._preroll_buffer) if idle_carry else None
+        # The flat-power lockout outlives that expiry the same way: the stuck level
+        # is still there once the display shows Off. Any other reset drops it.
+        flat_lockout = self._flat_lockout if idle_carry else None
         self._transition_to(
             target_state,
             dt_util.as_utc(timestamp) if timestamp is not None else utc_now(),
@@ -2607,6 +2700,7 @@ class CycleDetector:
         self._probe_terminal_from = None
         if carried is not None:
             self._standby_reprobe, self._preroll_buffer = carried
+        self._flat_lockout = flat_lockout
 
     @property
     def state(self) -> str:
@@ -2927,6 +3021,25 @@ class CycleDetector:
                 )
                 # Fall through: the state machine will start a new cycle.
 
+        # Flat-power lockout: the cycle was stopped on a level the power has not
+        # left, so a reading still on it must not start the next one (it would
+        # start at once, the level being at or above the start threshold). Only a
+        # real reading outside the band releases it; nothing else is touched, as in
+        # the manual stop lockout above.
+        if self._flat_lockout is not None:
+            if synthetic or self._in_flat_lockout(power):
+                self._last_process_time = timestamp
+                self._last_power = power
+                return
+            self._logger.info(
+                "Power left the flat band (%.1fW outside %.1f-%.1fW): flat-power "
+                "lockout released",
+                power,
+                self._flat_lockout[0],
+                self._flat_lockout[1],
+            )
+            self._flat_lockout = None
+
         # Snapshot the cadence BEFORE folding this reading in: the gap-free tally
         # below classifies `dt` against a ceiling derived from the cadence, and an
         # outage that has already widened p95 would raise the very threshold that
@@ -3132,6 +3245,10 @@ class CycleDetector:
         if not synthetic:
             # #452 idle display: real readings only (a keepalive is not a level).
             self._update_idle(timestamp, power)
+            # Flat-power stop: real readings only too. A keepalive repeats a value
+            # the sensor did not send; the run's last reading is carried forward
+            # through a silence instead.
+            self._track_flat(timestamp, power)
 
         # A keepalive inside a recorded outage carries no observation, only the
         # clock (item 266). Stepping the state machine on it would hand every
@@ -3144,6 +3261,12 @@ class CycleDetector:
             and outage_since is not None
             and self._state in (STATE_STARTING, STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
         ):
+            return
+
+        # Flat-power stop, ahead of every end gate: on any reading, a keepalive
+        # included (it only advances the clock of the level carried forward).
+        if self._flat_power_due(timestamp):
+            self._finish_flat_power(timestamp)
             return
 
         anti_wrinkle_active = (
@@ -6070,6 +6193,7 @@ class CycleDetector:
         keep_tail: bool = False,
         tail_cap: datetime | None = None,
         duration_capped: bool = False,
+        flat_power_w: float | None = None,
     ) -> None:
         """Finalize cycle.
 
@@ -6172,6 +6296,12 @@ class CycleDetector:
             # programme length (`match_rules.is_duration_cap_stop`), so a cap stop
             # labelled into a programme cannot lengthen the next cap.
             cycle_data["duration_capped"] = True
+        if flat_power_w is not None:
+            # The flat-power stop: like a cap stop, never a learned programme
+            # length (`match_rules.is_flat_power_stop`). The level it stopped on is
+            # kept for diagnostics (a standby above the start threshold shows here).
+            cycle_data["flat_power_stop"] = True
+            cycle_data["flat_power_w"] = round(float(flat_power_w), 2)
 
         self._logger.info("Cycle Finished: %s, %.1f min", status, duration / 60)
         self._on_cycle_end(cycle_data)
@@ -6447,6 +6577,120 @@ class CycleDetector:
         )
         return True
 
+    # --- Flat-power stop (FLAT_POWER_STOP_*) -----------------------------------
+
+    def _flat_floor_w(self) -> float:
+        """The level a flat run must hold: the higher of the start and stop
+        thresholds, i.e. a level that keeps a cycle open AND would start one."""
+        return max(float(self._config.start_threshold_w), float(self._config.stop_threshold_w))
+
+    def _track_flat(self, timestamp: datetime, power: float) -> None:
+        """Fold one real reading into the flat run (every state, so a run on a
+        stuck level covers the reading a cycle started on)."""
+        if self._config.device_type not in FLAT_POWER_STOP_DEVICE_TYPES:
+            return
+        try:
+            self._flat_run.push(timestamp, float(power), self._flat_floor_w())
+        except (TypeError, ValueError, OverflowError):
+            self._flat_run.clear()
+
+    def _in_flat_lockout(self, power: float) -> bool:
+        """Whether ``power`` is still on the level the last flat-power stop ended."""
+        band = self._flat_lockout
+        if band is None:
+            return False
+        try:
+            p = float(power)
+        except (TypeError, ValueError, OverflowError):
+            return False
+        if not math.isfinite(p) or p < self._flat_floor_w():
+            return False
+        return flat_band_holds(min(band[0], p), max(band[1], p))
+
+    def _flat_power_since(self) -> datetime | None:
+        """Where the open cycle went flat: the flat run's first reading, not before
+        the cycle's start. None when there is no open cycle or no run."""
+        run_start = self._flat_run.start
+        start = self._current_cycle_start
+        if run_start is None or start is None:
+            return None
+        return max(run_start, start)
+
+    def flat_power_due_at(self) -> datetime | None:
+        """When the flat-power stop fires if the power does not move, else None.
+
+        Washers, dryers, washer-dryers and dishwashers only
+        (``FLAT_POWER_STOP_DEVICE_TYPES``), in RUNNING / PAUSED / ENDING, never
+        while a pause is verified (a user pause or the envelope's, as the zombie
+        killer) or the sensor is in a recorded outage. Matched or not: no real
+        programme holds one level that long (``devtools/flat_power_eval.py``).
+        """
+        if self._config.device_type not in FLAT_POWER_STOP_DEVICE_TYPES:
+            return None
+        if self._state not in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
+            return None
+        if getattr(self, "_verified_pause", False) or self._sensor_outage_since is not None:
+            return None
+        since = self._flat_power_since()
+        if since is None:
+            return None
+        return since + timedelta(seconds=FLAT_POWER_STOP_WINDOW_S)
+
+    def _flat_power_due(self, timestamp: datetime) -> bool:
+        due = self.flat_power_due_at()
+        return due is not None and timestamp >= due
+
+    def check_flat_power(self, timestamp: datetime) -> bool:
+        """Watchdog tick: the flat-power stop without a reading; True if it stopped.
+
+        A change-only plug reports nothing while its power is flat, so without a
+        tick the stop would wait for the next report. The tick reads only the
+        clock: the level is the last real reading, carried forward.
+        """
+        timestamp = dt_util.as_utc(timestamp)
+        if self._last_process_time is not None and timestamp < self._last_process_time:
+            return False
+        if not self._flat_power_due(timestamp):
+            return False
+        self._finish_flat_power(timestamp)
+        return True
+
+    def _finish_flat_power(self, timestamp: datetime) -> None:
+        """Force-stop a cycle stuck on one level; see FLAT_POWER_STOP_WINDOW_S.
+
+        The stored cycle ends where the power went flat, so it keeps none of the
+        stuck level beyond that first reading, and it is marked
+        ``flat_power_stop`` so it never counts as a learned programme length
+        (``match_rules.longest_programme_s``). The level is then locked out: a
+        reading on it would start the next cycle at once.
+        """
+        since = self._flat_power_since()
+        band = self._flat_run.band
+        if since is None or band is None:
+            return
+        lo, hi = band
+        start = self._current_cycle_start or since
+        self._power_readings = [r for r in self._power_readings if r[0] <= since]
+        self._last_active_time = since
+        self._logger.warning(
+            "Power flat at %.1f-%.1fW for %.1f h (since %.1f h into the cycle): not "
+            "a programme; force-stopping the cycle where it went flat, and no new "
+            "cycle starts until the power leaves that level",
+            lo,
+            hi,
+            (timestamp - since).total_seconds() / 3600.0,
+            (since - start).total_seconds() / 3600.0,
+        )
+        self._finish_cycle(
+            timestamp,
+            status="force_stopped",
+            termination_reason=TerminationReason.FORCE_STOPPED,
+            keep_tail=False,
+            flat_power_w=(lo + hi) / 2.0,
+        )
+        self._flat_run.clear()
+        self._flat_lockout = (lo, hi)
+
     def restore_state_snapshot(self, snapshot: dict[str, Any]) -> bool:
         """Restore state from snapshot; False when it could not be restored.
 
@@ -6460,6 +6704,10 @@ class CycleDetector:
             self._sub_state = snapshot.get("sub_state")
             # Not persisted (item 501): a restored probe is shown.
             self._standby_reprobe = False
+            # Not persisted either: the restart is unobserved time, so the flat run
+            # starts again at the first reading after it (flat-power stop).
+            self._flat_run.clear()
+            self._flat_lockout = None
             self._probe_hidden = False
             self._energy_since_idle_wh = snapshot.get("accumulated_energy_wh", 0.0)
             self._time_above_threshold = snapshot.get("time_above", 0.0)

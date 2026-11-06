@@ -1650,6 +1650,33 @@ CYCLE_DURATION_CAP_BASE_BY_DEVICE = {
 }
 CYCLE_DURATION_CAP_PROGRAMME_FACTOR = 1.5
 CYCLE_DURATION_CAP_LEGACY_SLACK_S = 60
+
+# Flat-power stop: a stuck-cycle guard ahead of the duration cap. A cycle whose power
+# has not moved for FLAT_POWER_STOP_WINDOW_S at or above max(start, stop threshold)
+# is not running a programme (a standby above a misconfigured threshold, another
+# load on the plug, a frozen plug value): it is force-stopped with its end at the
+# start of that flat stretch, and no cycle starts again until the power leaves it
+# (`CycleDetector._flat_power_due`). "Not moved": every real reading within
+# max(FLAT_POWER_STOP_TOLERANCE_W, FLAT_POWER_STOP_TOLERANCE_FRACTION x the
+# stretch's mid-range), a silence carrying the last reading forward (a change-only
+# plug reports nothing while flat). Measured with `devtools/flat_power_eval.py` over
+# every stored cycle of the corpus (1796 of plausible length, all formats) and the
+# raw histories of the start-gate manifest: the longest real stretch at that floor
+# and tolerance is 107 min on a dishwasher (1.5-2.1 W drying, #214), 79 min on a
+# washer (a Miele's 3.9 W anti-crease tail), 61 min on a dryer (a heat-pump
+# compressor at ~540 W), 29 min on a washer-dryer (a heater block); 4 h is 2.2x the
+# worst. Washers, dryers, washer-dryers and dishwashers only: an Other (Advanced) or
+# Threshold Device may run a constant load for hours (EV charging, a heat pump) and
+# a pump has its own stuck alarm.
+FLAT_POWER_STOP_DEVICE_TYPES = frozenset({
+    DEVICE_TYPE_WASHING_MACHINE,
+    DEVICE_TYPE_DRYER,
+    DEVICE_TYPE_WASHER_DRYER,
+    DEVICE_TYPE_DISHWASHER,
+})
+FLAT_POWER_STOP_WINDOW_S = 14400  # 4 h
+FLAT_POWER_STOP_TOLERANCE_W = 5.0
+FLAT_POWER_STOP_TOLERANCE_FRACTION = 0.05
 # Longest programme duration the detector accepts as an expected duration and the
 # duration cap scales on; anything longer is corrupt data (the corpus holds a 53.8 h
 # washer profile). Caps the duration cap at 1.5 x 16 h = 24 h. The detector's bound

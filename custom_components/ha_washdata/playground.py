@@ -1380,6 +1380,7 @@ class _DetailSim:
         try:
             for ts, power in self.readings[i0:i1]:
                 self._watchdog_keepalives(ts)
+                self._watchdog_flat_tick(ts)
                 self.cursor["t"] = (ts - self.base).total_seconds()
                 self.detector.process_reading(power, ts)
                 self._note_stall()
@@ -1434,6 +1435,31 @@ class _DetailSim:
             self.detector.process_reading(prev_w, ts, synthetic=True, observed=True)
             self._sample(ts)
             k += 1
+
+    def _watchdog_flat_tick(self, until: datetime) -> None:
+        """The watchdog tick that asks for the flat-power stop before ``until``.
+
+        Mirrors ``manager._watchdog_check_stuck_cycle``, which calls
+        ``CycleDetector.check_flat_power`` on every tick: in a silent stretch at
+        a flat level nothing else reaches the detector. The first tick at or after
+        the detector's due time, on the keepalives' phase (half an interval into
+        each period after the last real reading); a tick fires only when due, so
+        one call is the whole emulation.
+        """
+        last = self._last_real
+        step = self.watchdog_s
+        if last is None or step <= 0:
+            return
+        due = self.detector.flat_power_due_at()
+        if due is None or due >= until:
+            return
+        k = max(1, math.ceil((due - last[0]).total_seconds() / step - 0.5))
+        ts = last[0] + timedelta(seconds=step * (k + 0.5))
+        if ts >= until:
+            return
+        self.cursor["t"] = (ts - self.base).total_seconds()
+        if self.detector.check_flat_power(ts):
+            self._sample(ts)
 
     def run_tail(self) -> None:
         """Synthetic quiet tail so a natural end can fire.

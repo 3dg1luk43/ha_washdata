@@ -5090,6 +5090,16 @@ class WashDataManager:
             self._notify_update()
             return
 
+        # Flat-power stop (FLAT_POWER_STOP_*): a change-only plug says nothing while
+        # its power is flat, so the detector is asked on the tick as well. First, so
+        # a stuck level ends by its own rule (end where it went flat, then the
+        # lockout that keeps it from starting the next cycle) and not by the
+        # staleness branches below. The level is the sensor's, so the cached power
+        # is left as it is.
+        if self.detector.check_flat_power(now) is True:
+            self._notify_update()
+            return
+
         # Refresh the remaining-time / progress estimate on the watchdog cadence
         # (sampling-derived: max(30, 2*sampling+1)s), independently of incoming power
         # events. A publish-on-change plug emits nothing during a flat low-power tail

@@ -191,6 +191,12 @@ def is_duration_cap_stop(cycle: Any) -> bool:
     )
 
 
+def is_flat_power_stop(cycle: Any) -> bool:
+    """Whether a stored cycle was ended by the detector's flat-power stop: the power
+    held one level for ``FLAT_POWER_STOP_WINDOW_S`` (``flat_power_stop`` mark)."""
+    return isinstance(cycle, dict) and bool(cycle.get("flat_power_stop"))
+
+
 def longest_programme_s(cycles: Any) -> float:
     """The longest programme this device has learned, in seconds (0.0: none).
 
@@ -199,10 +205,12 @@ def longest_programme_s(cycles: Any) -> float:
     those means. The duration cap scales on it (#502), so it leaves out every run
     the cap itself ended (:func:`is_duration_cap_stop`): a cap stop labelled into a
     programme would otherwise lengthen the next cap, and the next cap stop the one
-    after, the #404 loop. A force stop by anything else counts: on #502 the
-    unmatched guard ended 7.9 h runs at their real end. Profile ``avg_duration``
-    is not read for the same reason (it averages cap stops in). The manager and
-    the Playground pass their store's ``iter_evidence_cycles()``. Never raises.
+    after, the #404 loop. A flat-power stop (:func:`is_flat_power_stop`) is left out
+    too: a watchdog ended it, not the programme. A force stop by anything else
+    counts: on #502 the unmatched guard ended 7.9 h runs at their real end. Profile
+    ``avg_duration`` is not read for the same reason (it averages cap stops in). The
+    manager and the Playground pass their store's ``iter_evidence_cycles()``. Never
+    raises.
     """
     if isinstance(cycles, (str, bytes, dict)):
         return 0.0
@@ -219,7 +227,7 @@ def longest_programme_s(cycles: Any) -> float:
             continue
         if cycle.get("status") not in ("completed", "force_stopped"):
             continue
-        if is_duration_cap_stop(cycle):
+        if is_duration_cap_stop(cycle) or is_flat_power_stop(cycle):
             continue
         duration = plausible_programme_s(cycle.get("duration"))
         if duration <= 0:

@@ -651,6 +651,19 @@ def replay(readings: list[Reading], config: CycleDetectorConfig, manager: dict[s
                     break
                 _feed(tick, prev_w, synthetic=True)
                 k += 1
+        # The watchdog's flat-power tick (manager._watchdog_check_stuck_cycle asks
+        # the detector on every tick): in a report-free stretch at one level nothing
+        # else reaches it. One call at the first tick on or after the due time, on
+        # the keepalives' phase, as the Playground does. Absent on an older ref.
+        due_at = getattr(det, "flat_power_due_at", None)
+        due = due_at() if last_real is not None and watchdog > 0 and due_at else None
+        if due is not None and due < ts:
+            k = max(1, math.ceil((due - last_real[0]).total_seconds() / watchdog - 0.5))
+            tick = last_real[0] + timedelta(seconds=watchdog * (k + 0.5))
+            if tick < ts:
+                now["t"] = tick
+                det.check_flat_power(tick)
+                _expose()
         # manager._async_power_changed's throttle. A re-report (same value) carries
         # no old_state there, so it falls back to the last processed power.
         old = prev_raw if prev_raw is not None and prev_raw != power else current_power

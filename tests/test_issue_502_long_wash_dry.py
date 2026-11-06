@@ -100,6 +100,12 @@ def _wash_dry_power(t: float) -> float:
     return 77.0 + 52.0 * math.sin(t / 11.0)
 
 
+def _zombie(t: float) -> float:
+    """A draw that never ends and never holds one level: the cap's case. A
+    constant one ends at the flat-power stop's 4 h (tests/test_flat_power_guard.py)."""
+    return 120.0 if (t // 60) % 2 else 160.0
+
+
 def _run(detector: CycleDetector, step: float = 5.0) -> None:
     """Feed the programme, a 5 W reading, 0 W, then 30 s keepalives at 0 W."""
     t = 0.0
@@ -207,8 +213,8 @@ def test_a_cap_stopped_cycle_labelled_into_a_programme_does_not_raise_the_next_c
         cycles, lambda: match_rules.longest_programme_s(learned), "washing_machine"
     )
     t = 0.0
-    while not cycles and t < 25 * 3600:  # a zombie: 120 W that never ends
-        det.process_reading(120.0, T0 + timedelta(seconds=t))
+    while not cycles and t < 25 * 3600:  # a zombie: a draw that never ends
+        det.process_reading(_zombie(t), T0 + timedelta(seconds=t))
         t += 30.0
     stop = cycles[0]
     assert stop["status"] == "force_stopped" and stop["duration_capped"] is True
@@ -255,7 +261,7 @@ def test_a_washer_dryer_zombie_with_nothing_learned_stops_at_12h() -> None:
     det = _detector(cycles)
     t = 0.0
     while t < 13 * 3600 and not cycles:
-        det.process_reading(120.0, T0 + timedelta(seconds=t))
+        det.process_reading(_zombie(t), T0 + timedelta(seconds=t))
         t += 30.0
     assert cycles and cycles[0]["status"] == "force_stopped"
     assert cycles[0]["duration"] == pytest.approx(43200.0, abs=31.0)
@@ -285,7 +291,7 @@ def test_a_zombie_still_stops_at_the_scaled_cap() -> None:
     det = _detector(cycles, lambda: 28800.0)
     t = 0.0
     while t < 13 * 3600 and not cycles:
-        det.process_reading(120.0, T0 + timedelta(seconds=t))
+        det.process_reading(_zombie(t), T0 + timedelta(seconds=t))
         t += 30.0
     assert cycles and cycles[0]["status"] == "force_stopped"
     assert cycles[0]["duration"] == pytest.approx(43200.0, abs=31.0)
@@ -369,6 +375,15 @@ def test_ordinary_end_not_pending_once_the_wait_and_grace_are_spent() -> None:
 # --- the 24 s force-end (real manager) ----------------------------------------
 
 
+async def _feed_programme(hass, freezer, seconds: int) -> None:
+    """300 / 360 W in turn every 2 min: a long run that never holds one level (a
+    constant feed would end at the flat-power stop's 4 h)."""
+    from .real_manager import feed
+
+    for i in range(seconds // 120):
+        await feed(hass, freezer, 300 if i % 2 else 360, 120, step=120)
+
+
 async def test_unmatched_run_past_7h_that_finishes_is_stored_completed(
     hass, freezer, caplog
 ) -> None:
@@ -384,7 +399,7 @@ async def test_unmatched_run_past_7h_that_finishes_is_stored_completed(
     entry = make_entry(hass, {**OPTIONS, "min_off_gap": 600})
     mgr = await boot(hass, entry)
     assert mgr._unmatched_watchdog_ceiling == 25200.0  # noqa: SLF001
-    await feed(hass, freezer, 300, int(7.6 * 3600), step=120)
+    await _feed_programme(hass, freezer, int(7.6 * 3600))
     assert mgr.detector.state == STATE_RUNNING
     assert mgr.detector.expected_duration_seconds == 0  # nothing learned: unmatched
     await feed(hass, freezer, 5, 30, step=30)
@@ -401,14 +416,14 @@ async def test_unmatched_run_past_7h_that_finishes_is_stored_completed(
 async def test_a_cap_stop_is_stored_with_its_mark(hass, freezer) -> None:
     """The mark survives the cycle-end tail into the store, and the stored stop
     does not count as a learned programme length once labelled."""
-    from .real_manager import boot, feed, make_entry, record_notify
+    from .real_manager import boot, make_entry, record_notify
 
     record_notify(hass)
     entry = make_entry(
         hass, {**OPTIONS, "device_type": "washing_machine", "min_off_gap": 600}
     )
     mgr = await boot(hass, entry)
-    await feed(hass, freezer, 300, int(8.1 * 3600), step=120)  # nothing learned: 8 h
+    await _feed_programme(hass, freezer, int(8.1 * 3600))  # nothing learned: 8 h
 
     stored = mgr.profile_store.get_past_cycles()
     assert stored and stored[0]["status"] == "force_stopped"

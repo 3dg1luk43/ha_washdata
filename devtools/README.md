@@ -102,6 +102,7 @@ All but `dtw_ab_eval.py` replay the shipped code; run with `--help` for options.
 | `lead_in_eval.py` | stored cycle start vs the raw onset, on the start-gate manifest |
 | `advisory_usefulness_eval.py` | whether a computed profile advisory is worth showing |
 | `start_gate_eval.py --manifest cycle_data/github_issues/start_gate_sources.jsonl` | start gates on raw continuous histories: missed, late, phantom starts per idle day, per device type |
+| `flat_power_eval.py --histories` | the longest flat-power stretch of every real cycle per device type and tolerance: the margin of the flat-power stop's 4 h window |
 | `eta_eval.py --all-formats` | first-ETA timing and ETA error by elapsed fraction |
 | `energy_projection_eval.py` | projected-energy accuracy |
 | `ml_energy_gate_eval.py` | the on-device `total_energy` promotion gate |
@@ -116,8 +117,9 @@ All but `dtw_ab_eval.py` replay the shipped code; run with `--help` for options.
 History CSVs, exports) live under `cycle_data/github_issues/<issue>/` and the maintainer's
 recorder snapshot under `cycle_data/me/recorder_<date>/`, every file gzipped and the
 manifest named `.jsonl`, so no `*.json`/`*.csv` glob of the harnesses above or the slow
-tests reads them. Only `start_gate_eval.py` (it reads `*.gz`) and `lead_in_eval.py`
-(through its loaders) do. Promoting an export
+tests reads them. Only `start_gate_eval.py` (it reads `*.gz`), `lead_in_eval.py`
+(through its loaders) and `flat_power_eval.py` (`*.json.gz` and, with `--histories`, the
+manifest) do. Promoting an export
 into the matcher corpus is a deliberate step: gunzip it into a corpus folder and re-cut
 the baselines.
 
