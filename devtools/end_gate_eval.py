@@ -605,9 +605,12 @@ def _end_offset(events: list[dict[str, Any]]) -> float | None:
     rows had no offset and dropped out of every lag / early / split figure (36 of
     the 98 #486 Miele runs once the finalise fires at the programme end, audit
     2026-11-03 item 9), which also changed ``--check``'s per-type n.
+
+    A run the manager discards (a ghost or a dishwasher pump-out, register item
+    568) is not the close: its state events carry ``discarded``.
     """
     for ev in reversed(events):
-        if ev.get("type") != "state":
+        if ev.get("type") != "state" or ev.get("discarded"):
             continue
         detail = str(ev.get("detail") or "")
         if detail.startswith("ending->") or detail in _DIRECT_CLOSES:

@@ -45,9 +45,15 @@ before F7 (e0eef42) 17 of 176 replays ended differently from live (12 later,
 preference; 148 confidences: envelope templates were not re-gridded). After:
 0, 0 and 0 - the sim runs the live matcher and the manager's rules.
 
+The watchdog's ghost suppressor and the cycle-end ghost / dishwasher pump-out
+discards (register item 568) run in both arms on the sim's emulated watchdog ticks;
+the live arm asks the manager's own ``_watchdog_ghost_due`` / ``_cycle_end_discard``
+(its displayed program, its end clock), the sim ``ghost_rules`` with its own.
+
 Known, accepted differences the live arm does not model either: the match runs at
 the reading that triggered it (live awaits it while readings keep arriving), no
-user pause / door / manual pin, the watchdog's staleness branches.
+user pause / door / manual pin, the watchdog's staleness, zombie and unmatched-idle
+branches.
 
 Runs in a worktree of an older ref too (it only needs ``playground._DetailSim``
 and the manager), which is how the before/after numbers are taken:
@@ -135,9 +141,14 @@ def _base_data(data: dict) -> dict:
 
 
 def _end_offset(events: list[dict[str, Any]]) -> float | None:
-    """Replay offset of the last transition OUT of ENDING (end_gate_eval's)."""
+    """Replay offset of the last transition OUT of ENDING (end_gate_eval's); a
+    run the manager discards (ghost / pump-out, item 568) is not the close."""
     for ev in reversed(events):
-        if ev.get("type") == "state" and str(ev.get("detail") or "").startswith("ending->"):
+        if (
+            ev.get("type") == "state"
+            and not ev.get("discarded")
+            and str(ev.get("detail") or "").startswith("ending->")
+        ):
             return float(ev.get("t") or 0.0)
     return None
 
@@ -198,6 +209,26 @@ def _live_arm_class(playground: Any, const: Any) -> type:
                 mgr._cycle_start_time = self.detector.current_cycle_start
                 mgr._ranking_snapshot_cycle_id = str(uuid.uuid4())
 
+        def _ghost_due(self, elapsed: float, silence: float, power: float) -> bool:
+            # The manager's own ghost-suppressor wiring (item 568): its displayed
+            # program and end clock, the sensor's value as after its resync.
+            mgr = self._mgr
+            saved = mgr._current_power
+            mgr._current_power = power
+            try:
+                return bool(mgr._watchdog_ghost_due(elapsed, silence))
+            finally:
+                mgr._current_power = saved
+
+        def _discard_reason(self, cycle_data: dict[str, Any], prev_end: Any) -> Any:
+            # manager._on_cycle_end's end clock and its ghost / pump-out discard.
+            mgr = self._mgr
+            prev = mgr._last_cycle_end_time
+            mgr._last_cycle_end_time = self._now()
+            energy = playground.ghost_rules.cycle_end_energy_wh(cycle_data.get("power_data", []))
+            got = mgr._cycle_end_discard(cycle_data, cycle_data["duration"], energy, prev)
+            return got[0] if got else None
+
         def _on_cycle_end(self, cycle_data: dict[str, Any]) -> None:
             super()._on_cycle_end(cycle_data)
             mgr = self._mgr
@@ -224,10 +255,13 @@ def _prepare_manager(mgr: Any) -> None:
     mgr._current_program = "off"
 
 
-def _primary_index(captured: list[dict[str, Any]]) -> int | None:
-    if not captured:
+def _primary_index(captured: list[dict[str, Any]], discarded: Any = None) -> int | None:
+    """The longest end the manager would store (``discarded``: item 568, None on
+    a tree from before it)."""
+    kept = [i for i in range(len(captured)) if not (discarded and discarded[i])]
+    if not kept:
         return None
-    return max(range(len(captured)), key=lambda i: float(captured[i].get("duration") or 0.0))
+    return max(kept, key=lambda i: float(captured[i].get("duration") or 0.0))
 
 
 def _replay_export(args: tuple[Any, ...]) -> dict[str, Any]:
@@ -294,7 +328,7 @@ def _replay_export(args: tuple[Any, ...]) -> dict[str, Any]:
         out_l = live.finalize()
 
         o_s, o_l = out_s["outcome"], out_l["outcome"]
-        idx = _primary_index(live.captured)
+        idx = _primary_index(live.captured, getattr(live, "discarded", None))
         live_program = live.live_end_programs[idx] if idx is not None and idx < len(live.live_end_programs) else _committed(mgr._current_program)
         end_s, end_l = _end_offset(out_s["events"]), _end_offset(out_l["events"])
         end_diff = (
@@ -311,9 +345,11 @@ def _replay_export(args: tuple[Any, ...]) -> dict[str, Any]:
             "label": label,
             "sim": {"n": o_s["detected_count"], "reason": str(o_s["termination_reason"]),
                     "end_s": end_s, "program": o_s["matched_profile"],
+                    "discarded": [d for d in getattr(sim, "discarded", ()) if d],
                     "would_label": o_s.get("would_label"), "label_reason": o_s.get("label_reason")},
             "live": {"n": o_l["detected_count"], "reason": str(o_l["termination_reason"]),
                      "end_s": end_l, "program": live_program,
+                     "discarded": [d for d in getattr(live, "discarded", ()) if d],
                      "vp_ticks": live.vp_ticks, "revokes": live.revokes},
             "end_diff": bool(end_diff),
             "program_diff": o_s["matched_profile"] != live_program,
@@ -439,6 +475,7 @@ def _print_replay(results: list[dict[str, Any]]) -> dict[str, Any]:
             bucket["live_earlier"] += bool(r["end_delta_s"] is not None and r["end_delta_s"] < -END_TOLERANCE_S)
             bucket["vp_cycles"] += r["live"]["vp_ticks"] > 0
             bucket["revoke_cycles"] += r["live"]["revokes"] > 0
+            bucket["ghost_cycles"] += bool(r["live"].get("discarded"))
             bucket["sim_correct"] += bool(r["label"] and r["sim"]["program"] == r["label"])
             bucket["live_correct"] += bool(r["label"] and r["live"]["program"] == r["label"])
 
@@ -447,11 +484,12 @@ def _print_replay(results: list[dict[str, Any]]) -> dict[str, Any]:
             f"{name:<44.44}{c['replays']:>6}{c['end_diff']:>9}{c['live_later']:>7}"
             f"{c['live_earlier']:>8}{c['program_diff']:>9}{c['sim_correct']:>7}"
             f"{c['live_correct']:>7}{c['vp_cycles']:>6}{c['revoke_cycles']:>6}"
+            f"{c['ghost_cycles']:>6}"
         )
 
     hdr = (
         f"{'scope':<44}{'n':>6}{'end!=':>9}{'later':>7}{'earlier':>8}{'prog!=':>9}"
-        f"{'simOK':>7}{'liveOK':>7}{'vp':>6}{'rev':>6}"
+        f"{'simOK':>7}{'liveOK':>7}{'vp':>6}{'rev':>6}{'ghost':>6}"
     )
     print(hdr)
     print("-" * len(hdr))
@@ -466,7 +504,8 @@ def _print_replay(results: list[dict[str, Any]]) -> dict[str, Any]:
         "\nend!= : replays whose cycle count, termination reason or ENDING exit (>60 s)"
         " differ; later/earlier: the live arm's end vs the sim's.\nprog!= : program"
         " displayed when the primary cycle ended. vp: live arm engaged a verified"
-        " pause; rev: live arm revoked a match (confident mismatch)."
+        " pause; rev: live arm revoked a match (confident mismatch). ghost: live arm"
+        " discarded a ghost / pump-out run (register item 568)."
     )
     return {"rows": rows, "by_device": {k: dict(v) for k, v in by_dev.items()}}
 

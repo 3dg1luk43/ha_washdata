@@ -23,9 +23,10 @@ This harness closes that loop on the real corpus.
    manager resolves them - never a partial config).
 2. Every stored cycle that ended on its own is **re-detected** under that config: its
    trace goes through the Playground replay (real ``CycleDetector`` + real Stage 1-5
-   matcher + emulated watchdog keepalives, ``playground._DetailSim``, with a quiet
-   tail long enough for a dishwasher's end waits: :func:`run_tail`). What the detector
-   emits passes the manager's ghost / dishwasher pump-out suppression and
+   matcher + emulated watchdog keepalives and ghost suppressor, ``playground._DetailSim``,
+   with a quiet tail long enough for a dishwasher's end waits: :func:`run_tail`). What
+   the detector emits passes the manager's ghost / dishwasher pump-out discard
+   (``ghost_rules``, the previous end carried across stored cycles) and
    ``ProfileStore._add_cycle_data`` (the production normaliser: trim, sampling interval,
    signature, energy) and replaces the stored cycle.
 3. The update-cadence model behind the operational pass is rebuilt from the
@@ -144,7 +145,7 @@ if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
 from custom_components.ha_washdata import analysis as analysis_mod  # noqa: E402
-from custom_components.ha_washdata import playground, ws_api  # noqa: E402
+from custom_components.ha_washdata import ghost_rules, playground, ws_api  # noqa: E402
 from custom_components.ha_washdata.const import (  # noqa: E402
     CONF_AUTO_LABEL_CONFIDENCE,
     CADENCE_RESET_FROM_STATES,
@@ -163,10 +164,6 @@ from custom_components.ha_washdata.const import (  # noqa: E402
     STATE_STARTING,
     TerminationReason,
     resolve_sampling_interval_default,
-)
-from custom_components.ha_washdata.signal_processing import (  # noqa: E402
-    energy_gap_threshold_s,
-    integrate_wh,
 )
 from custom_components.ha_washdata.suggestion_engine import (  # noqa: E402
     SuggestionEngine,
@@ -462,18 +459,6 @@ def _throttle(points: list[tuple[float, float]], s: float, min_p: float) -> list
     return kept
 
 
-def _energy_wh(points: list) -> float:
-    try:
-        arr = sorted((float(p[0]), float(p[1])) for p in points)
-    except (TypeError, ValueError, IndexError):
-        return 0.0
-    if len(arr) < 2:
-        return 0.0
-    ts = np.array([a for a, _ in arr])
-    ps = np.array([b for _, b in arr])
-    return float(integrate_wh(ts, ps, max_gap_s=energy_gap_threshold_s(ts)))
-
-
 def _active_span(points: list[tuple[float, float]], stop: float) -> float:
     act = [t for t, p in points if p > stop]
     return (act[-1] - act[0]) if len(act) >= 2 else 0.0
@@ -582,9 +567,7 @@ def run_tail(sim: Any, cfg: Any) -> None:
     n_steps = int(span / step) + 1
     for i in range(1, n_steps + 1):
         ts = last_ts + timedelta(seconds=step * i)
-        sim.cursor["t"] = (ts - sim.base).total_seconds()
-        sim.detector.process_reading(0.0, ts)
-        sim._sample(ts)  # noqa: SLF001
+        sim.tail_step(ts)
         if sim.detector.state in (STATE_OFF, STATE_FINISHED) and sim.captured:
             break
     if not sim.captured and sim.detector.state != STATE_OFF:
@@ -678,20 +661,20 @@ def assemble(
         end_at: dict[int, float] = {}
         for i, cd in enumerate(rep["captured"]):
             duration = float(cd.get("duration") or 0.0)
-            energy = _energy_wh(cd.get("power_data") or [])
+            # What manager._on_cycle_end stores and tests the discards on (#498).
+            energy = ghost_rules.cycle_end_energy_wh(cd.get("power_data") or [])
             ends = rep["ends"]
             end_detect = rep["base"] + timedelta(seconds=ends[i] if i < len(ends) else 0.0)
             start_dt = dt_util.parse_datetime(str(cd.get("start_time") or ""))
             # manager._on_cycle_end: a ghost (and a dishwasher pump-out right after
-            # the previous end) is never stored.
-            ghost = duration < 60 and energy < 0.05
-            if (
-                not ghost and device_type == "dishwasher" and prev_end is not None
-                and start_dt is not None
-                and 0 < (start_dt - prev_end).total_seconds() < 600
-                and duration < 300 and energy < 1.0
-            ):
-                ghost = True
+            # the previous end) is never stored (ghost_rules, register item 568).
+            # Read here rather than from the replay's own `discarded`, which does
+            # the same for every end after a replay's first: only this loop knows
+            # the previous stored cycle's end, and replays run in parallel.
+            ghost = ghost_rules.cycle_end_discard(
+                device_type=device_type, duration_s=duration, energy_wh=energy,
+                cycle_start=start_dt, prev_cycle_end=prev_end,
+            ) is not None
             prev_end = end_detect
             if ghost:
                 m["ghosts"] += 1
