@@ -5259,9 +5259,15 @@ class WashDataManager:
             and time_since_real_update > 60  # 1 minute of silence
         )
 
+        # Only while the appliance is effectively idle (#509), the sibling #404
+        # guard's test: a change-only plug sends nothing while a draw stays flat,
+        # so silence alone killed a back-to-back wash at a steady 400 W. A ghost
+        # (pump-out, spin-down blip) is back near 0 W when it goes quiet;
+        # _current_power was resynced on the sensor at the top of this method.
         if (
             self._current_program == "detecting..."
             and is_suspicious
+            and self._current_power < self.detector.config.start_threshold_w
             and (
                 dishwasher_pump_out
                 or (elapsed > 600 and time_since_real_update > 300)
