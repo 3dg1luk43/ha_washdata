@@ -797,6 +797,29 @@ def _merge_spans(spans: list[tuple[float, float]]) -> list[tuple[float, float]]:
     return merged
 
 
+def _immutable_catalogue(raw: Any) -> bool:
+    """Whether a pause catalogue can never change in place: exactly
+    ``(int, ((number, number), ...))`` built of tuples, the store's form."""
+    if type(raw) is not tuple or len(raw) != 2 or type(raw[0]) is not int:
+        return False
+    pauses = raw[1]
+    return (
+        type(pauses) is tuple
+        and set(map(type, pauses)) <= {tuple}
+        and set(map(len, pauses)) <= {2}
+        and set(map(type, itertools.chain.from_iterable(pauses))) <= {float, int}
+    )
+
+
+# Programmes whose element 14 the detector keeps sanitised, one entry each
+# (`_sanitized_match_catalogue`). Before the first commit the match visits many
+# programmes in turn (12 in the first 22 ticks on the tron4r washer), so a few
+# shared slots sanitised the big catalogue again each time it came back. An entry
+# keeps its catalogue and the sanitised copy alive (~14 MB at 1000 traced washer
+# cycles in one programme); the store caches the same catalogue anyway.
+_PAUSE_CATALOGUE_MEMO_MAX = 64
+
+
 class CycleDetector:
     """Detects washing machine cycles based on power usage.
 
@@ -987,6 +1010,11 @@ class CycleDetector:
         # (traced cycles, ((start_fraction, seconds), ...)), for the hazard end
         # gate. None: no catalogue, the fallback waits as before.
         self._matched_pause_catalogue: tuple[int, tuple[tuple[float, float], ...]] | None = None
+        # Programme -> (the last immutable element-14 object handed in for it, its
+        # sanitised form) (`_sanitized_match_catalogue`).
+        self._pause_catalogue_memo: dict[
+            str, tuple[Any, tuple[int, tuple[tuple[float, float], ...]] | None]
+        ] = {}
         # Element 16: the hazard gate's evidence for an ambiguous match or a thinly
         # traced profile (`_hazard_evidence`), or its lazy producer. None: element
         # 14's rule alone.
@@ -1985,6 +2013,37 @@ class CycleDetector:
         except (TypeError, ValueError, OverflowError):
             return None
 
+    def _sanitized_match_catalogue(
+        self, raw: Any, profile_name: Any,
+    ) -> tuple[int, tuple[tuple[float, float], ...]] | None:
+        """:meth:`_sanitize_pause_catalogue` of ``profile_name``'s element 14,
+        memoised on the object.
+
+        Both producers (the manager and the Playground) hand in the store's cached
+        catalogue, one object per evidence fingerprint and stop threshold, so the
+        same object arrives on every match tick until a cycle joins or leaves the
+        profile, a trace is rewritten or the threshold moves, each of which builds
+        a new one. Sanitising walks every pause of the profile's traced evidence,
+        on the event loop: 1.6 / 28 / 112 ms per tick at 23 / 300 / 1000 cycles.
+        Only a catalogue that cannot change in place is memoised (a tuple of
+        ``(int, tuple of (number, number) tuples)``), and the memo holds the
+        object, so an identity hit is always the value a fresh sanitise returns.
+        The programme only picks the entry: a new object replaces it.
+        """
+        if not isinstance(profile_name, str):
+            return self._sanitize_pause_catalogue(raw)
+        memo = self._pause_catalogue_memo
+        hit = memo.pop(profile_name, None)
+        if hit is not None and hit[0] is raw:
+            memo[profile_name] = hit  # most recently used last
+            return hit[1]
+        out = self._sanitize_pause_catalogue(raw)
+        if _immutable_catalogue(raw):
+            memo[profile_name] = (raw, out)
+            while len(memo) > _PAUSE_CATALOGUE_MEMO_MAX:
+                del memo[next(iter(memo))]
+        return out
+
     def _hazard_wait(self, timestamp: datetime, base: float) -> float:
         """The ENDING fallback wait the matched profile's own pauses justify.
 
@@ -2290,6 +2349,7 @@ class CycleDetector:
                 result[2], result[1], result[11] if len(result) >= 12 else 0.0,
                 result[13] if len(result) >= 14 else None,
                 result[15] if len(result) >= 16 else None,
+                profile_name=result[0],
             )
         ):
             self._logger.debug(
@@ -2416,8 +2476,8 @@ class CycleDetector:
                 result_seq[12] if len(result_seq) >= 13 else None
             )
             # Element 14: cleared by a shorter tuple, like elements 9-13.
-            self._matched_pause_catalogue = self._sanitize_pause_catalogue(
-                result_seq[13] if len(result_seq) >= 14 else None
+            self._matched_pause_catalogue = self._sanitized_match_catalogue(
+                result_seq[13] if len(result_seq) >= 14 else None, match_name
             )
             # Element 15 (#452): likewise. A run already in progress keeps the
             # match it began under (`_stall_match`).
@@ -5863,7 +5923,7 @@ class CycleDetector:
 
     def ambiguous_ending_match_defers(
         self, expected: Any, confidence: Any, longest: Any, catalogue: Any = None,
-        hazard_catalogue: Any = None,
+        hazard_catalogue: Any = None, *, profile_name: str | None = None,
     ) -> bool:
         """Would an AMBIGUOUS match with these values make this ENDING wait longer?
 
@@ -5884,6 +5944,8 @@ class CycleDetector:
         alone, so there a longer one is refused outright.
 
         False outside ENDING or without a matched programme: nothing to keep.
+        ``profile_name`` (the incoming match's) only lets ``catalogue`` reuse
+        its sanitised form (`_sanitized_match_catalogue`).
         """
         if (
             self._state != STATE_ENDING
@@ -5908,7 +5970,7 @@ class CycleDetector:
             return True
         new_left = self._ending_wait_left_s(
             new_expected, True, new_longest, new_confidence,
-            self._sanitize_pause_catalogue(catalogue), hazard_catalogue,
+            self._sanitized_match_catalogue(catalogue, profile_name), hazard_catalogue,
         )
         old_left = self._ending_wait_left_s(
             self._expected_duration, self._match_ambiguous,

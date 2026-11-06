@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import random
 import threading
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import pytest
@@ -40,7 +41,12 @@ from custom_components.ha_washdata.const import (
     ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC,
     DOMAIN,
 )
-from custom_components.ha_washdata.cycle_detector import standby_near_stop_ceiling
+from custom_components.ha_washdata.cycle_detector import (
+    CycleDetector,
+    MatchContext,
+    standby_near_stop_ceiling,
+)
+from custom_components.ha_washdata.detector_config import build_detector_config
 from custom_components.ha_washdata.profile_store import _last_high_block, _SpinTail
 
 from . import test_perf_budgets as perf
@@ -278,3 +284,199 @@ async def test_setup_and_a_new_stop_threshold_fill_every_summary(
     await hass.async_block_till_done()
     assert float(stop) + 3.0 in ps._trace_summary_levels  # noqa: SLF001
     assert ps._missing_trace_summaries() == []  # noqa: SLF001
+
+
+# ------------------------------------------- element 14, sanitised once per object
+#
+# The detector sanitised the whole pause catalogue on every match tick (107 ms at
+# 1000 cycles). It now keeps the sanitised form of the last immutable catalogue
+# object it was handed; the store builds a new object whenever the evidence or the
+# threshold changes.
+
+T0 = datetime(2026, 5, 1, 8, 0, tzinfo=timezone.utc)
+
+
+def _det() -> CycleDetector:
+    return CycleDetector(
+        build_detector_config({"off_delay": 60, "min_off_gap": 2400}, {}, "washing_machine"),
+        lambda *_a: None, lambda *_a: None,
+    )
+
+
+def _ctx(cat: Any, name: str | None = "Cotton") -> MatchContext:
+    return MatchContext(name, 0.8, 7200.0, pause_catalogue=cat)
+
+
+def _sanitise_calls(monkeypatch: pytest.MonkeyPatch) -> list[Any]:
+    """Every catalogue the detector sanitises, in order (identity matters)."""
+    calls: list[Any] = []
+    real = CycleDetector._sanitize_pause_catalogue  # noqa: SLF001
+
+    def spy(raw: Any) -> Any:
+        calls.append(raw)
+        return real(raw)
+
+    monkeypatch.setattr(CycleDetector, "_sanitize_pause_catalogue", staticmethod(spy))
+    return calls
+
+
+def _times(calls: list[Any], obj: Any) -> int:
+    return sum(1 for c in calls if c is obj)
+
+
+def test_one_catalogue_object_is_sanitised_once_with_the_fresh_value(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = _sanitise_calls(monkeypatch)
+    det = _det()
+    cat = (3, ((0.4, 1800.0), (0.5, float("nan")), (0.6, -1.0), (0.92, 120.0)))
+    for _ in range(5):
+        det.update_match(_ctx(cat))
+    assert _times(calls, cat) == 1
+    assert det._matched_pause_catalogue == (3, ((0.4, 1800.0), (0.92, 120.0)))  # noqa: SLF001
+    # A revoke and a reset clear the value; the same object then comes back as is.
+    det.update_match(MatchContext(None, 0.0, 0.0, is_confident_mismatch=True))
+    assert det._matched_pause_catalogue is None  # noqa: SLF001
+    det.reset()
+    det.update_match(_ctx(cat))
+    assert _times(calls, cat) == 1
+    assert det._matched_pause_catalogue == (3, ((0.4, 1800.0), (0.92, 120.0)))  # noqa: SLF001
+
+
+def test_a_changed_catalogue_is_always_checked_again(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A new cycle, an edit or a threshold change makes the store build a NEW
+    object; the memo is keyed on the object, so none is ever served stale."""
+    calls = _sanitise_calls(monkeypatch)
+    det = _det()
+    old = (3, ((0.4, 1800.0),))
+    new = (4, ((0.4, 1800.0), (0.97, float("inf")), (0.97, 300.0)))
+    det.update_match(_ctx(old))
+    det.update_match(_ctx(new))
+    assert _times(calls, new) == 1
+    assert det._matched_pause_catalogue == (4, ((0.4, 1800.0), (0.97, 300.0)))  # noqa: SLF001
+    # An equal value in another object is checked too, and so is the old object
+    # again: the programme's entry holds only the last one.
+    same = (4, new[1])
+    det.update_match(_ctx(same))
+    det.update_match(_ctx(old))
+    assert _times(calls, same) == 1 and _times(calls, old) == 2
+    assert det._matched_pause_catalogue == old  # noqa: SLF001
+    for raw in (None, (0, ()), "junk"):
+        det.update_match(_ctx(raw))
+        assert det._matched_pause_catalogue is None  # noqa: SLF001
+
+
+def test_a_gate_profile_flipping_between_ticks_is_not_sanitised_again(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Before the first commit the match visits many programmes in turn."""
+    from custom_components.ha_washdata import cycle_detector as cd_mod
+
+    calls = _sanitise_calls(monkeypatch)
+    det = _det()
+    names = [f"P{i}" for i in range(12)]
+    cats = {n: (3 + i, ((0.05 * i, 60.0 * (i + 1)),)) for i, n in enumerate(names)}
+    for _ in range(3):
+        for n in names:
+            det.update_match(_ctx(cats[n], n))
+            assert det._matched_pause_catalogue == cats[n]  # noqa: SLF001
+    assert [_times(calls, c) for c in cats.values()] == [1] * 12
+    # A new object for one programme replaces only its entry.
+    fresh = (9, ((0.5, 30.0),))
+    det.update_match(_ctx(fresh, "P3"))
+    det.update_match(_ctx(cats["P4"], "P4"))
+    assert _times(calls, fresh) == 1 and _times(calls, cats["P4"]) == 1
+    assert det._matched_pause_catalogue == cats["P4"]  # noqa: SLF001
+    # Without a programme name nothing is kept; the cap drops the least recent.
+    det.update_match(_ctx(cats["P5"], None))
+    assert _times(calls, cats["P5"]) == 2
+    monkeypatch.setattr(cd_mod, "_PAUSE_CATALOGUE_MEMO_MAX", 2)
+    det = _det()
+    for n in ("P6", "P7", "P8", "P7", "P6"):
+        det.update_match(_ctx(cats[n], n))
+    assert [_times(calls, cats[n]) for n in ("P6", "P7", "P8")] == [3, 2, 2]
+    assert list(det._pause_catalogue_memo) == ["P7", "P6"]  # noqa: SLF001
+
+
+def test_a_catalogue_that_can_change_in_place_is_never_memoised() -> None:
+    det = _det()
+    for outer in (list, tuple):
+        pauses: list[Any] = [[0.4, 1800.0]]
+        cat = outer((3, pauses))
+        det.update_match(_ctx(cat))
+        pauses.append([0.9, 60.0])
+        det.update_match(_ctx(cat))
+        assert det._matched_pause_catalogue == (3, ((0.4, 1800.0), (0.9, 60.0)))  # noqa: SLF001
+    pair = [0.4, 1800.0]
+    cat = (3, (pair,))
+    det.update_match(_ctx(cat))
+    pair[1] = 60.0
+    det.update_match(_ctx(cat))
+    assert det._matched_pause_catalogue == (3, ((0.4, 60.0),))  # noqa: SLF001
+
+
+def test_the_ending_hold_shares_the_memo(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Item 469(b) reads the incoming match's element 14 on every ENDING tick."""
+    det = _det()
+    cat = (3, ((0.40, 1800.0), (0.92, 120.0)) * 3)
+    det.update_match(_ctx(cat))
+    det._current_cycle_start = T0  # noqa: SLF001
+    det._state = "ending"  # noqa: SLF001
+    det._power_readings = [(T0 + timedelta(seconds=0.95 * 7200 + 60), 0.0)]  # noqa: SLF001
+    det._time_below_threshold = 60.0  # noqa: SLF001
+    calls = _sanitise_calls(monkeypatch)
+    for _ in range(3):
+        det.ambiguous_ending_match_defers(7200.0, 0.8, 0.0, cat, None, profile_name="Cotton")
+    assert _times(calls, cat) == 0
+
+
+async def test_live_ticks_sanitise_each_store_catalogue_once(
+    hass: HomeAssistant, seeded: Any, freezer: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Real manager: every tick hands in the store's cached element 14, sanitised
+    once per object; the cycle that joins the profile makes the store build a new
+    one, which the next cycle's ticks read and check again."""
+    _entry, mgr = seeded
+    ps = mgr.profile_store
+    det = mgr.detector
+    name = f"Program {PROFILES - 1}"
+    stop = float(det.config.stop_threshold_w)
+    events: list[tuple[str, Any]] = []
+    calls = _sanitise_calls(monkeypatch)
+    real_update = det.update_match
+
+    def update(ctx: Any) -> Any:
+        n = len(calls)
+        out = real_update(ctx)
+        events.extend(("sanitise", c) for c in calls[n:])
+        events.append(("tick", ctx.pause_catalogue))
+        return out
+
+    monkeypatch.setattr(det, "update_match", update)
+
+    def ticks_of(obj: Any) -> int:
+        """Ticks handing ``obj``, which is sanitised once, at the first of them."""
+        ticks = [o for k, o in events if k == "tick"]
+        first = next(i for i, (k, o) in enumerate(events) if k == "tick" and o is obj)
+        assert [o for _k, o in events[:first] if o is obj] == [obj]  # its sanitise
+        assert _times([o for k, o in events if k == "sanitise"], obj) == 1
+        return sum(1 for o in ticks if o is obj)
+
+    old = ps.profile_pause_catalogue(name, stop)
+    for _t, w in program_trace(PROFILES - 1, 1):
+        await report(hass, freezer, w)
+        await fire_timers(hass)
+    for _ in range(8):
+        await report(hass, freezer, 0.0)
+        await fire_timers(hass)
+    assert ps.get_past_cycles()[-1]["profile_name"] == name
+    assert ticks_of(old) >= 2, "the run never repeated its catalogue"
+
+    # The finished cycle joined the profile: a new object, one more traced cycle.
+    new = ps.profile_pause_catalogue(name, stop)
+    assert new is not old and new[0] == old[0] + 1
+    events.clear()
+    await _run_until_matched(hass, freezer, mgr, name)
+    assert ticks_of(new) >= 1
+    assert not any(o is old for _k, o in events)
+    assert det._matched_pause_catalogue == (new[0], new[1])  # noqa: SLF001
