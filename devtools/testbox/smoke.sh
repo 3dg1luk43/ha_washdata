@@ -27,7 +27,7 @@ SLUG="test_washer"
 TYPE="washing_machine"
 SPEEDUP=60
 EXPORT=""
-CYCLE=0
+CYCLE=""
 FRESH=0
 
 while [ $# -gt 0 ]; do
@@ -47,13 +47,23 @@ done
 # created a dishwasher device and then seeded it with washing-machine
 # profiles - so the run matched programmes like "30 deg / 2:09 / 800rpm" and
 # the dishwasher-specific paths were never exercised against dishwasher data.
+#
+# The washer replays cycle #30 (30 deg / 1:07 / utility, 133 min), not #0
+# (register item 582). At 60x the matcher scores nothing until the replay has
+# MATCH_MIN_RESAMPLED_POINTS (12) points on its 5 s grid, i.e. ~55 s in, and an
+# ambiguous winner then needs 6 wins instead of 3. Cycle #0 (76 min) sits between
+# the rpm-only twins 2:09 / 800rpm and 1000rpm, so the winner flipped tick to tick
+# and often never committed inside its 76 s: no matched live update. #30's
+# programme has no twin; offline (Playground replay, box timings, jittered) it
+# wins every tick and commits 66-83 s into its 133 s replay.
 if [ -z "$EXPORT" ]; then
   case "$TYPE" in
-    dishwasher) EXPORT="$REPO/cycle_data/me/washdata_export_01KDMTAA.json"
-                [ "$CYCLE" = 0 ] && CYCLE=0 ;;
-    *)          EXPORT="$REPO/cycle_data/me/washdata_export_01KXGA3C.json" ;;
+    dishwasher) EXPORT="$REPO/cycle_data/me/washdata_export_01KDMTAA.json" ;;
+    *)          EXPORT="$REPO/cycle_data/me/washdata_export_01KXGA3C.json"
+                CYCLE="${CYCLE:-30}" ;;
   esac
 fi
+CYCLE="${CYCLE:-0}"
 if [ ! -f "$EXPORT" ]; then
   echo "export not found: $EXPORT" >&2
   exit 2
@@ -94,14 +104,14 @@ echo "== 3. options: notify targets + timings compressed by ${SPEEDUP}x"
 # to exercise production behaviour, not a bespoke configuration.
 #
 # notify_live_interval_seconds is floored at 30 in the manager, so at 60x one
-# live update covers ~30 min of appliance time: a 76 min cycle yields ~2.
+# live update covers ~30 min of appliance time: a 133 min cycle yields ~4.
 #
 # interrupted_min_seconds is marked "internal use only" in const.py but has to be
 # compressed too: a cycle shorter than it is filed as "interrupted" and never
 # stored, which reads as a detection failure rather than a unit mismatch.
 #
 # profile_match_interval likewise: at its 300 s default the matcher never fires
-# inside a 76 s replay, so every live update stays on the "no profile matched
+# inside a 133 s replay, so every live update stays on the "no profile matched
 # yet" branch and the matched payload (progress, chronometer, when) is never
 # exercised - which is exactly the payload users see for most of a cycle.
 $HACTL set-options "$ENTRY" \
