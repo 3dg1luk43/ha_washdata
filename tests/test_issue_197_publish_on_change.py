@@ -109,31 +109,34 @@ def detector(detector_config: CycleDetectorConfig) -> CycleDetector:
 def test_update_match_log_le_zero_says_le_zero(
     detector: CycleDetector, caplog: pytest.LogCaptureFixture
 ) -> None:
-    """Bug 1: when raw_expected_duration is 0 the log must say (<= 0), not (> 6h)."""
+    """Bug 1: when raw_expected_duration is 0 the log must say (<= 0), not (> 16h)."""
     with caplog.at_level(logging.DEBUG, logger="custom_components.ha_washdata"):
         detector.update_match(("SomeProfile", 0.8, 0.0, None, False))
 
     le_zero_msgs = [r.message for r in caplog.records if "<= 0" in r.message]
-    gt_6h_msgs = [r.message for r in caplog.records if "> 6h" in r.message and "0.0" in r.message]
+    gt_6h_msgs = [r.message for r in caplog.records if "> 16h" in r.message and "0.0" in r.message]
 
     assert le_zero_msgs, "Expected a log message containing '(<= 0)' for value 0.0"
     assert not gt_6h_msgs, (
-        "Got '(> 6h)' log for value 0.0 - this is the misleading message that was fixed"
+        "Got '(> 16h)' log for value 0.0 - this is the misleading message that was fixed"
     )
 
 
 def test_update_match_log_gt_6h_says_gt_6h(
     detector: CycleDetector, caplog: pytest.LogCaptureFixture
 ) -> None:
-    """Bug 1: when raw_expected_duration > 6 h the log must say (> 6h)."""
-    over_6h = 6 * 3600 + 1  # 21601 s
+    """Bug 1: when raw_expected_duration > the ceiling the log must say so.
+
+    The ceiling was 6 h; #502 raised it to 16 h (a 6.8-8 h wash+dry is real).
+    """
+    over_6h = 16 * 3600 + 1  # 57601 s
     with caplog.at_level(logging.DEBUG, logger="custom_components.ha_washdata"):
         detector.update_match(("SomeProfile", 0.8, over_6h, None, False))
 
-    gt_6h_msgs = [r.message for r in caplog.records if "> 6h" in r.message]
+    gt_6h_msgs = [r.message for r in caplog.records if "> 16h" in r.message]
     le_zero_msgs = [r.message for r in caplog.records if "<= 0" in r.message]
 
-    assert gt_6h_msgs, "Expected a '(> 6h)' log message for a value over 6 hours"
+    assert gt_6h_msgs, "Expected a '(> 16h)' log message for a value over 16 hours"
     assert not le_zero_msgs, "Got '(<= 0)' for a value > 6 h - wrong branch"
 
 

@@ -1640,9 +1640,11 @@ DEFAULT_OFF_DELAY_BY_DEVICE = {
 # 5 h 20 min keeps exactly 8 h.
 CYCLE_DURATION_CAP_BASE_S = 28800  # 8 h
 CYCLE_DURATION_CAP_PROGRAMME_FACTOR = 1.5
-# Longest programme duration the duration cap scales on; anything longer is corrupt
-# data (the corpus holds a 53.8 h washer profile). Caps the duration cap at
-# 1.5 x 16 h = 24 h.
+# Longest programme duration the detector accepts as an expected duration and the
+# duration cap scales on; anything longer is corrupt data (the corpus holds a 53.8 h
+# washer profile). Caps the duration cap at 1.5 x 16 h = 24 h. The detector's bound
+# was 6 h (issue #197), which treated every match to a longer wash+dry profile as
+# no match at all (#502).
 MAX_PLAUSIBLE_PROGRAMME_S = 57600  # 16 h
 
 # Ceiling for the manager's *unmatched* zombie guard (seconds), i.e. the failsafe

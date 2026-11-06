@@ -26,6 +26,9 @@ Midea LSD12X1 on a ~1 s publish-on-change Zigbee plug, programmes of 7.9-8.5 h.
    dropped to 0 W at its real end, so a cycle the ENDING fallback was about to
    close as completed was stored force_stopped. It now waits out the detector's
    own end wait first.
+3. The detector dropped every expected duration over 6 h as corrupt, so a match
+   to one of these programmes (6.8-8 h) left it unmatched while the manager
+   showed the program. It now accepts up to 16 h.
 """
 from __future__ import annotations
 
@@ -195,6 +198,28 @@ def test_a_zombie_still_stops_at_the_scaled_cap() -> None:
         t += 30.0
     assert cycles and cycles[0]["status"] == "force_stopped"
     assert cycles[0]["duration"] == pytest.approx(43200.0, abs=31.0)
+
+
+# --- the side question: a long match the detector dropped --------------------
+
+
+@pytest.mark.parametrize("expected", [24552.85, 28467.3, 28800.517669])
+def test_a_match_to_a_long_wash_dry_programme_is_kept(expected: float) -> None:
+    """The detector rejected every expected duration over 6 h as corrupt, so a
+    match to any of the reporter's wash+dry programmes (6.8-8 h) left it
+    unmatched while the manager showed the program: no Smart Termination, no
+    zombie killer, and the unmatched idle guard instead."""
+    det = _detector([])
+    det.update_match(("Cotton + Dry", 0.9, expected, None, False))
+    assert det.expected_duration_seconds == pytest.approx(expected)
+    assert det._matched_profile == "Cotton + Dry"  # noqa: SLF001
+
+
+def test_an_implausible_expected_duration_is_still_dropped() -> None:
+    det = _detector([])
+    det.update_match(("Daily Wash", 0.9, 53.78 * 3600, None, False))
+    assert det.expected_duration_seconds == 0.0
+    assert det._matched_profile is None  # noqa: SLF001
 
 
 # --- the guard's deferral (detector side) -----------------------------------

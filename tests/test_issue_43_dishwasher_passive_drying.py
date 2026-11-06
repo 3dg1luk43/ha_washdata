@@ -217,7 +217,7 @@ class TestDishwasherDeferralProtection:
 
 class TestMatchedProfileExpectedDurationInvariant:
     """Class invariant: _matched_profile must only be set when
-    _expected_duration is a valid (finite, > 0, ≤ 6h) value.  Setting
+    _expected_duration is a valid (finite, > 0, ≤ 16h) value.  Setting
     _matched_profile while _expected_duration is the 0.0 sentinel would let
     Smart Termination fire on the always-true `current_duration >= 0`
     comparison.
@@ -229,11 +229,11 @@ class TestMatchedProfileExpectedDurationInvariant:
         return det
 
     def test_update_match_drops_match_when_expected_duration_invalid(self) -> None:
-        """A match with invalid expected_duration (NaN, ≤0, >6h, garbage) must
+        """A match with invalid expected_duration (NaN, ≤0, >16h, garbage) must
         not set _matched_profile — otherwise Smart Termination's
         `current_duration >= expected_duration * smart_ratio` reduces to
         `current_duration >= 0` and fires immediately."""
-        for raw_invalid in (0.0, -1.0, float("nan"), float("inf"), 6 * 3600 + 1, "not a number"):
+        for raw_invalid in (0.0, -1.0, float("nan"), float("inf"), 16 * 3600 + 1, "not a number"):
             det = self._make_det()
             det.update_match(("ECO", 0.85, raw_invalid, None, False))
             assert det._matched_profile is None, (
@@ -268,7 +268,7 @@ class TestMatchedProfileExpectedDurationInvariant:
             "time_below": 0.0,
             "cycle_max_power": 0.0,
             "last_active_time": None,
-            "expected_duration": 99999.0,  # > 6h, will be rejected
+            "expected_duration": 99999.0,  # > 16h, will be rejected
             "matched_profile": "ECO",
             "state_enter_time": None,
             "end_spike_seen": False,

@@ -115,6 +115,7 @@ from .const import (
     RUN_EXPECT_FLOOR_RATIO,
     RUN_EXPECT_GATES,
     CYCLE_DURATION_CAP_BASE_S,
+    MAX_PLAUSIBLE_PROGRAMME_S,
 )
 from . import spin_rhythm
 
@@ -1741,24 +1742,27 @@ class CycleDetector:
     # Maximum reasonable cycle duration accepted by the detector.  Anything
     # longer is rejected as corrupted data and replaced with the
     # _SANITIZE_INVALID_SENTINEL so downstream gates fall through to the
-    # unmatched / no-expected-duration path.
-    _SANITIZE_MAX_EXPECTED_DURATION = 6 * 3600.0  # 6 hours
+    # unmatched / no-expected-duration path. It was 6 h, which made every match
+    # to a longer programme (a 6.8-8 h wash+dry, #502) no match at all here while
+    # the manager showed it: no Smart Termination, no zombie killer, and the
+    # unmatched idle guard instead.
+    _SANITIZE_MAX_EXPECTED_DURATION = float(MAX_PLAUSIBLE_PROGRAMME_S)  # 16 h
     _SANITIZE_INVALID_SENTINEL = 0.0  # 0 == "no valid expected_duration"
 
     def _sanitize_expected_duration(
         self, raw: Any, *, source: str = "update_match"
     ) -> float:
-        """Coerce ``raw`` into a finite float in (0, 6h] or return 0.0.
+        """Coerce ``raw`` into a finite float in (0, 16h] or return 0.0.
 
         The class invariant is that ``self._expected_duration`` is either a
-        finite, strictly positive float ≤ 6 hours, or 0.0 meaning "no valid
+        finite, strictly positive float ≤ 16 hours, or 0.0 meaning "no valid
         expected duration".  Every code path that assigns ``_expected_duration``
         (live profile-match callbacks AND restored snapshots) routes through
         this helper so the gates in STATE_ENDING and ``_should_defer_finish``
         can trust the value without re-validating.
 
         Emits a DEBUG log line distinguishing the rejection reason - the
-        ``<= 0`` and ``> 6h`` markers are part of issue #197's regression
+        ``<= 0`` and ``> 16h`` markers are part of issue #197's regression
         contract and tests assert on them.
         """
         try:
@@ -1783,8 +1787,8 @@ class CycleDetector:
             return self._SANITIZE_INVALID_SENTINEL
         if value > self._SANITIZE_MAX_EXPECTED_DURATION:
             self._logger.debug(
-                "%s: invalid raw_expected_duration %r (> 6h), defaulting to 0.0",
-                source, raw,
+                "%s: invalid raw_expected_duration %r (> %.0fh), defaulting to 0.0",
+                source, raw, self._SANITIZE_MAX_EXPECTED_DURATION / 3600.0,
             )
             return self._SANITIZE_INVALID_SENTINEL
         return value
@@ -3743,7 +3747,10 @@ class CycleDetector:
                         self._expected_duration,
                     )
 
-                # Sanity check: if expected_duration is unreasonable (>6 hours), use fallback
+                # Sanity check: if expected_duration is unreasonable (>6 hours), use fallback.
+                # Deliberately still 6 h, not _SANITIZE_MAX_EXPECTED_DURATION (#502): a
+                # 6-16 h expected duration reached this branch as 0.0 until then, and
+                # takes the same fallback now.
                 max_reasonable = 21600.0  # 6 hours
                 effective_expected = self._expected_duration
 
