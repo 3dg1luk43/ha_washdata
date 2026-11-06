@@ -1641,7 +1641,13 @@ DEFAULT_OFF_DELAY_BY_DEVICE = {
 # feed itself. CYCLE_DURATION_CAP_LEGACY_SLACK_S: how far below 8 h a cap stop
 # stored before the `duration_capped` mark may end (its end snaps back to the last
 # active reading, seconds earlier on a plug reporting every few seconds).
-CYCLE_DURATION_CAP_BASE_S = 28800  # 8 h
+CYCLE_DURATION_CAP_BASE_S = 28800  # 8 h; also the flat cap every older version used
+# A longer base per type: a washer-dryer's first wash+dry past 8 h, before anything
+# is learned to scale on, was still cut in two (#502). Replaying the corpus with a
+# 12 h base for every type moved no cycle end (0/635).
+CYCLE_DURATION_CAP_BASE_BY_DEVICE = {
+    DEVICE_TYPE_WASHER_DRYER: 43200,  # 12 h
+}
 CYCLE_DURATION_CAP_PROGRAMME_FACTOR = 1.5
 CYCLE_DURATION_CAP_LEGACY_SLACK_S = 60
 # Longest programme duration the detector accepts as an expected duration and the

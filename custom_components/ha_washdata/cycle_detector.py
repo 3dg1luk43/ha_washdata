@@ -114,7 +114,6 @@ from .const import (
     QUIET_PULSE_MAX_S,
     RUN_EXPECT_FLOOR_RATIO,
     RUN_EXPECT_GATES,
-    CYCLE_DURATION_CAP_BASE_S,
     MAX_PLAUSIBLE_PROGRAMME_S,
 )
 from . import spin_rhythm
@@ -764,7 +763,8 @@ class CycleDetector:
         self._terminal_drop_provider = terminal_drop_provider
         # () -> the device's longest learned programme in seconds (#502), which the
         # duration cap scales on (`_duration_cap_s`). Read only once a run is past
-        # CYCLE_DURATION_CAP_BASE_S. None: the cap is the base.
+        # its type's base (`match_rules.cycle_duration_cap_base_s`). None: the cap is
+        # the base.
         self._longest_programme_provider = longest_programme_provider
         # (cycle start, when read, value): the provider walks the stored cycles, so
         # it is read once per run and then every _CAP_PROVIDER_REFRESH_S.
@@ -6408,8 +6408,9 @@ class CycleDetector:
         programme, so the cap falls back to the base.
         """
         provider = self._longest_programme_provider
+        device_type = self._config.device_type
         if provider is None or self._current_cycle_start is None:
-            return match_rules.cycle_duration_cap_s(0.0)
+            return match_rules.cycle_duration_cap_s(0.0, device_type)
         cache = self._longest_programme_cache
         if (
             cache is None
@@ -6422,18 +6423,19 @@ class CycleDetector:
                 longest = 0.0
             cache = (self._current_cycle_start, timestamp, longest)
             self._longest_programme_cache = cache
-        return match_rules.cycle_duration_cap_s(cache[2])
+        return match_rules.cycle_duration_cap_s(cache[2], device_type)
 
     def _past_duration_cap(self, timestamp: datetime) -> bool:
         """Whether this run has outlived :meth:`_duration_cap_s`.
 
-        The cap is never below CYCLE_DURATION_CAP_BASE_S, so the provider is only
+        The cap is never below the type's base
+        (:func:`match_rules.cycle_duration_cap_base_s`), so the provider is only
         consulted past that.
         """
         if not self._current_cycle_start:
             return False
         elapsed = (timestamp - self._current_cycle_start).total_seconds()
-        if elapsed <= CYCLE_DURATION_CAP_BASE_S:
+        if elapsed <= match_rules.cycle_duration_cap_base_s(self._config.device_type):
             return False
         cap = self._duration_cap_s(timestamp)
         if elapsed <= cap:

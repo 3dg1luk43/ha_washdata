@@ -53,6 +53,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from .const import (
+    CYCLE_DURATION_CAP_BASE_BY_DEVICE,
     CYCLE_DURATION_CAP_BASE_S,
     CYCLE_DURATION_CAP_LEGACY_SLACK_S,
     CYCLE_DURATION_CAP_PROGRAMME_FACTOR,
@@ -228,19 +229,25 @@ def longest_programme_s(cycles: Any) -> float:
     return max((total / count for total, count in totals.values()), default=0.0)
 
 
-def cycle_duration_cap_s(longest_programme: Any) -> float:
+def cycle_duration_cap_base_s(device_type: Any = None) -> float:
+    """The duration cap's floor for ``device_type``: 12 h for a washer-dryer, 8 h
+    for every other type (#502)."""
+    return float(CYCLE_DURATION_CAP_BASE_BY_DEVICE.get(device_type, CYCLE_DURATION_CAP_BASE_S))
+
+
+def cycle_duration_cap_s(longest_programme: Any, device_type: Any = None) -> float:
     """The detector's hard cap on a cycle's wall-clock length (#502).
 
-    ``max(CYCLE_DURATION_CAP_BASE_S, CYCLE_DURATION_CAP_PROGRAMME_FACTOR x
-    longest)``, ``longest`` being :func:`longest_programme_s` bounded by
+    ``max(cycle_duration_cap_base_s(device_type), CYCLE_DURATION_CAP_PROGRAMME_FACTOR
+    x longest)``, ``longest`` being :func:`longest_programme_s` bounded by
     ``MAX_PLAUSIBLE_PROGRAMME_S``, so at most 24 h. The flat 8 h it replaces cut a
     real 8.3 h wash+dry during its drying phase; a device whose programmes all run
-    under 5 h 20 min keeps 8 h. It reads the learned programmes, matched or not,
-    and never the match's expected duration: that is the profile's average, which
-    takes cap stops in.
+    under two thirds of its base keeps the base. It reads the learned programmes,
+    matched or not, and never the match's expected duration: that is the profile's
+    average, which takes cap stops in.
     """
     return max(
-        float(CYCLE_DURATION_CAP_BASE_S),
+        cycle_duration_cap_base_s(device_type),
         CYCLE_DURATION_CAP_PROGRAMME_FACTOR * plausible_programme_s(longest_programme),
     )
 

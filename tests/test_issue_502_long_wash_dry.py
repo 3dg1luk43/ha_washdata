@@ -113,8 +113,10 @@ def _run(detector: CycleDetector, step: float = 5.0) -> None:
         t += 30.0
 
 
-def _detector(cycles: list[dict[str, Any]], provider=None) -> CycleDetector:
-    config = build_detector_config(OPTIONS, {}, "washer_dryer")
+def _detector(
+    cycles: list[dict[str, Any]], provider=None, device_type: str = "washer_dryer"
+) -> CycleDetector:
+    config = build_detector_config(OPTIONS, {}, device_type)
     return CycleDetector(
         config,
         lambda _old, _new: None,
@@ -127,12 +129,16 @@ def _detector(cycles: list[dict[str, Any]], provider=None) -> CycleDetector:
 # --- the rule ---------------------------------------------------------------
 
 
-def test_cap_is_8h_until_the_device_has_learned_a_long_programme() -> None:
+def test_cap_is_its_base_until_the_device_has_learned_a_long_programme() -> None:
     assert CYCLE_DURATION_CAP_BASE_S == 28800
     assert match_rules.cycle_duration_cap_s(0.0) == 28800.0
+    assert match_rules.cycle_duration_cap_s(0.0, "washing_machine") == 28800.0
+    # A washer-dryer's base is 12 h: its first wash+dry, before anything is learned.
+    assert match_rules.cycle_duration_cap_s(0.0, "washer_dryer") == 43200.0
     assert match_rules.longest_programme_s([]) == 0.0
-    # A device whose programmes all run under 5 h 20 min keeps exactly 8 h.
+    # A device whose programmes all run under two thirds of its base keeps the base.
     assert match_rules.cycle_duration_cap_s(5.3 * 3600.0) == 28800.0
+    assert match_rules.cycle_duration_cap_s(7.9 * 3600.0, "washer_dryer") == 43200.0
 
 
 def test_cap_scales_on_the_mean_of_the_longest_programme() -> None:
@@ -197,7 +203,9 @@ def test_a_cap_stopped_cycle_labelled_into_a_programme_does_not_raise_the_next_c
     assert cap == pytest.approx(1.5 * 7.9 * 3600)
 
     cycles: list[dict[str, Any]] = []
-    det = _detector(cycles, lambda: match_rules.longest_programme_s(learned))
+    det = _detector(
+        cycles, lambda: match_rules.longest_programme_s(learned), "washing_machine"
+    )
     t = 0.0
     while not cycles and t < 25 * 3600:  # a zombie: 120 W that never ends
         det.process_reading(120.0, T0 + timedelta(seconds=t))
@@ -222,14 +230,35 @@ def test_only_a_cap_stop_carries_the_mark() -> None:
 # --- the cut (detector) -----------------------------------------------------
 
 
-def test_without_a_learned_programme_an_8h_plus_run_is_cut_at_8h() -> None:
-    """The reported cut: force_stopped at 8 h 00 m, the drying rest a second cycle."""
+def test_without_a_learned_programme_an_8h_plus_run_is_cut_at_the_8h_base() -> None:
+    """The reported cut, on a type whose base is 8 h: force_stopped at 8 h 00 m,
+    the rest a second cycle."""
     cycles: list[dict[str, Any]] = []
-    _run(_detector(cycles))
+    _run(_detector(cycles, device_type="washing_machine"))
     assert cycles[0]["status"] == "force_stopped"
     assert cycles[0]["duration_capped"] is True
     assert cycles[0]["duration"] == pytest.approx(28800.0, abs=10.0)
     assert len(cycles) == 2
+
+
+def test_a_washer_dryer_first_wash_dry_completes_with_nothing_learned() -> None:
+    """The washer-dryer's 12 h base: the reporter's 8.5 h run on a fresh install."""
+    cycles: list[dict[str, Any]] = []
+    _run(_detector(cycles))
+    assert len(cycles) == 1
+    assert cycles[0]["status"] == "completed"
+    assert cycles[0]["duration"] == pytest.approx(PROGRAMME_S, abs=60.0)
+
+
+def test_a_washer_dryer_zombie_with_nothing_learned_stops_at_12h() -> None:
+    cycles: list[dict[str, Any]] = []
+    det = _detector(cycles)
+    t = 0.0
+    while t < 13 * 3600 and not cycles:
+        det.process_reading(120.0, T0 + timedelta(seconds=t))
+        t += 30.0
+    assert cycles and cycles[0]["status"] == "force_stopped"
+    assert cycles[0]["duration"] == pytest.approx(43200.0, abs=31.0)
 
 
 def test_a_learned_long_programme_lifts_the_cap_and_the_run_completes() -> None:
@@ -245,7 +274,7 @@ def test_a_provider_that_raises_falls_back_to_the_base_cap() -> None:
         raise RuntimeError("store gone")
 
     cycles: list[dict[str, Any]] = []
-    _run(_detector(cycles, _boom))
+    _run(_detector(cycles, _boom, "washing_machine"))
     assert cycles[0]["status"] == "force_stopped"
     assert cycles[0]["duration"] == pytest.approx(28800.0, abs=10.0)
 
@@ -375,7 +404,9 @@ async def test_a_cap_stop_is_stored_with_its_mark(hass, freezer) -> None:
     from .real_manager import boot, feed, make_entry, record_notify
 
     record_notify(hass)
-    entry = make_entry(hass, {**OPTIONS, "min_off_gap": 600})
+    entry = make_entry(
+        hass, {**OPTIONS, "device_type": "washing_machine", "min_off_gap": 600}
+    )
     mgr = await boot(hass, entry)
     await feed(hass, freezer, 300, int(8.1 * 3600), step=120)  # nothing learned: 8 h
 
