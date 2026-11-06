@@ -169,7 +169,10 @@ class TestGateCadence:
         samples.append((5795.8, 2.0))
         samples.append((6093.4, 0.4))  # last real report, below stop_threshold
         _feed(det, samples)
-        assert det.state == STATE_PAUSED, "precondition: the drop is seen as a pause"
+        # The plug held 2.0 W (above the 0.6 W stop) for the 298 s before the
+        # 0.4 W report, so that silence is not quiet past one cadence (#508): the
+        # drop opens the quiet wait rather than landing in PAUSED at once.
+        assert det.is_waiting_low_power(), "precondition: the drop opens a quiet wait"
 
         # Watchdog keepalives at off_delay spacing.
         t = 6093.4

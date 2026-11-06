@@ -3166,6 +3166,28 @@ class CycleDetector:
             timestamp, unobserved > 0 or (synthetic and not observed)
         )
 
+        # #508: the same rule for the quiet tallies. A low reading after one at or
+        # above the threshold closes an interval the appliance spent at that
+        # previous level. A change-only plug sends nothing while a draw stays
+        # flat, and the watchdog injects nothing at high power (#409), so a 10 min
+        # flat 400 W phase ending in a 2 W drum pause reached the detector as one
+        # interval, banked whole as quiet: PAUSED at once and the fallback end two
+        # keepalives later, splitting the wash. With a cycle open such an interval
+        # is quiet for at most one gate cadence (the drop fell somewhere inside a
+        # normal reporting interval, as before); the rest of it was the draw.
+        # Measured (end_gate_eval --loo --all-formats, 635 cycles): no early end
+        # or split moves, 61 ends later by a median 30 s; crediting none of it
+        # moved 307 (some Smart Terminations to the timeout, +23 min). STARTING
+        # keeps its one-reading false-start abort, which only asks whether power
+        # dropped; an unknown cadence (under five intervals) caps nothing, like
+        # the outage ceilings.
+        quiet_cap = dt
+        if (
+            prev_high
+            and prior_cadence_known
+            and self._state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
+        ):
+            quiet_cap = min(dt, self._gate_cadence)
         if (not is_high and not absorbed) or opens_pulse:
             # Quiet nobody saw is not quiet (item 266). The watchdog keeps
             # injecting while the sensor is unavailable, and crediting those
@@ -3174,7 +3196,7 @@ class CycleDetector:
             # rest recorded as a second cycle. Frozen, not reset, so the quiet
             # observed on either side still counts and `is_waiting_low_power`
             # keeps the manager's staleness force-stop armed for a dead sensor.
-            self._time_below_threshold += dt - unobserved
+            self._time_below_threshold += min(dt - unobserved, quiet_cap)
             self._time_below_unobserved += unobserved
             # Gap-free tally: an outage-sized step is unobserved time, so restart
             # the observed-quiet tally from this sample instead of crediting the
@@ -3215,7 +3237,7 @@ class CycleDetector:
             ):
                 self._time_below_threshold_gapfree = 0.0
             else:
-                self._time_below_threshold_gapfree += dt
+                self._time_below_threshold_gapfree += quiet_cap
         if opens_pulse:
             self._quiet_pulse = _QuietPulse(
                 timestamp,

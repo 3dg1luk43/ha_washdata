@@ -245,8 +245,10 @@ def _measured_quiet_span_s(
     have seen, and returns 0.0 for the caller to drop.
 
     Timed like the accumulator too: the interval *preceding* the first
-    below-threshold sample is credited (the detector adds ``dt`` on the reading
-    that takes it below), so a span is ``t[last_below] - t[first_below - 1]``.
+    below-threshold sample is credited, so a span is ``t[last_below] -
+    t[first_below - 1]``. Since #508 the detector credits that interval only up
+    to one gate cadence, so after a long silence this errs long, the safe side
+    for an ``off_delay`` that must outlast every resumed pause.
     """
     return _measured_quiet_span(points, low_start_s, resume_idx, quiet_thr)[0]
 
