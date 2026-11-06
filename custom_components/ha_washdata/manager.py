@@ -266,7 +266,6 @@ from .signal_processing import (
     median_fast,
     percentile_linear,
     integrate_wh,
-    integrate_cycle_wh,
     energy_gap_threshold_s,
     compact_price_timeline,
     cycle_cost,
@@ -284,6 +283,7 @@ from .time_utils import power_data_to_offsets, utc_now
 from . import analysis
 from . import progress as progress_mod
 from . import notification_rules as notif_rules
+from . import ghost_rules
 from . import match_rules
 from . import trigger_rules
 from .maintenance import effective_reminders
@@ -5103,6 +5103,25 @@ class WashDataManager:
             budget = max(budget, DEFAULT_MAX_DEFERRAL_SECONDS + 1800)
         return budget
 
+    def _watchdog_ghost_due(self, elapsed: float, silence: float) -> bool:
+        """The watchdog's ghost-suppressor verdict on this manager's state.
+
+        ``elapsed`` is the cycle's age and ``silence`` the time since the sensor
+        last reported. The rule is ``ghost_rules.watchdog_ghost_due``, which the
+        Playground replay calls on its emulated watchdog ticks (register item 568).
+        """
+        return ghost_rules.watchdog_ghost_due(
+            state=self.detector.state,
+            program=self._current_program,
+            device_type=self.device_type,
+            cycle_start=self.detector.current_cycle_start,
+            last_cycle_end=self._last_cycle_end_time,
+            elapsed_s=elapsed,
+            silence_s=silence,
+            power_w=self._current_power,
+            start_threshold_w=self.detector.config.start_threshold_w,
+        )
+
     async def _watchdog_check_stuck_cycle(self, now: datetime) -> None:
         """Watchdog: check if cycle is stuck (no updates for too long)."""
         if self.detector.state not in (STATE_RUNNING, STATE_STARTING, STATE_PAUSED, STATE_ENDING):
@@ -5271,44 +5290,12 @@ class WashDataManager:
             self._notify_update()
             return
 
-        # 1. GHOST CYCLE SUPPRESSOR
-        # If we are "detecting" for more than 10 minutes and haven't seen an update for 5 minutes,
-        # it's likely a pump-out spike or an accidental start (ghost cycle).
-        # We end it aggressively ONLY if it started shortly after another cycle ended (Suspicious Window).
-        cycle_start = self.detector.current_cycle_start
-        is_suspicious = False
-        if cycle_start and self._last_cycle_end_time:
-            # Dishwashers have a drain pump-out that fires 3-8 min after the main
-            # cycle ends; use a wider suspicious window so the ghost suppressor can
-            # catch it without false-positives on washing machines / dryers.
-            suspicious_window = 600 if self.device_type == "dishwasher" else 180
-            if (cycle_start - self._last_cycle_end_time).total_seconds() < suspicious_window:
-                is_suspicious = True
-
-        # For dishwashers in the suspicious window, kill pump-out ghosts faster.
-        # Pump-outs last 1-3 min then go silent; the standard 10-min wait allows
-        # them to accumulate too much runtime before suppression fires.
-        dishwasher_pump_out = (
-            is_suspicious
-            and self.device_type == "dishwasher"
-            and elapsed > 180   # 3 minutes
-            and time_since_real_update > 60  # 1 minute of silence
-        )
-
-        # Only while the appliance is effectively idle (#509), the sibling #404
-        # guard's test: a change-only plug sends nothing while a draw stays flat,
-        # so silence alone killed a back-to-back wash at a steady 400 W. A ghost
-        # (pump-out, spin-down blip) is back near 0 W when it goes quiet;
-        # _current_power was resynced on the sensor at the top of this method.
-        if (
-            self._current_program == "detecting..."
-            and is_suspicious
-            and self._current_power < self.detector.config.start_threshold_w
-            and (
-                dishwasher_pump_out
-                or (elapsed > 600 and time_since_real_update > 300)
-            )
-        ):
+        # 1. GHOST CYCLE SUPPRESSOR (ghost_rules.watchdog_ghost_due, register item 568)
+        # An unmatched cycle that began shortly after the previous end and went
+        # silent is likely a pump-out spike or an accidental start: end it. Only
+        # while the appliance is effectively idle (#509): _current_power was
+        # resynced on the sensor at the top of this method.
+        if self._watchdog_ghost_due(elapsed, time_since_real_update):
             self._logger.warning(
                 "Watchdog: Ghost cycle suppressed (within suspicious window). Detecting for %.0fs with %.0fs silence.",
                 elapsed, time_since_real_update
@@ -5721,6 +5708,38 @@ class WashDataManager:
         self._cycle_completed_time = utc_now()
         self._start_state_expiry_timer()
 
+    def _cycle_end_discard(
+        self,
+        cycle_data: dict[str, Any],
+        duration: float,
+        energy_wh: float,
+        prev_cycle_end: datetime | None,
+    ) -> tuple[str, float | None] | None:
+        """``(reason, gap_s)`` when this end is never stored, else None.
+
+        The ghost, then the dishwasher pump-out measured from ``prev_cycle_end``
+        (the previous end's detection time), as ``ghost_rules.cycle_end_discard``,
+        which the Playground replay calls (register item 568). The start is
+        parsed only where the pump-out rule reads it.
+        """
+        if ghost_rules.is_ghost_cycle(duration, energy_wh):
+            return ghost_rules.DISCARD_GHOST, None
+        if self.device_type == "dishwasher" and prev_cycle_end is not None:
+            cycle_start_str = cycle_data.get("start_time")
+            cycle_start_dt = (
+                dt_util.parse_datetime(cycle_start_str) if cycle_start_str else None
+            )
+            gap = ghost_rules.pump_out_gap_s(
+                device_type=self.device_type,
+                duration_s=duration,
+                energy_wh=energy_wh,
+                cycle_start=cycle_start_dt,
+                prev_cycle_end=prev_cycle_end,
+            )
+            if gap is not None:
+                return ghost_rules.DISCARD_PUMP_OUT, gap
+        return None
+
     def _on_cycle_end(self, cycle_data: dict[str, Any]) -> None:
         """Handle cycle end - clear all active timers and state."""
         duration = cycle_data["duration"]
@@ -5759,63 +5778,33 @@ class WashDataManager:
         self._last_cycle_end_time = utc_now()
         self._pump_stuck = False  # Reset for next pump cycle
 
-        # Auto-Tune: Check for ghost cycles (short duration AND low energy)
-        # Ghost = duration < 60s AND total energy < 0.05 Wh (avoids killing pump-out spikes)
-        power_data = cycle_data.get("power_data", [])
-        cycle_energy_wh = 0.0
-        if power_data and len(power_data) >= 2:
-            valid: list[tuple[float, float]] = []
-            for p in power_data:
-                try:
-                    valid.append((float(p[0]), float(p[1])))
-                except (TypeError, ValueError, IndexError, OverflowError):
-                    pass
-            if len(valid) >= 2:
-                try:
-                    valid.sort(key=lambda x: x[0])
-                    ts = np.array([v[0] for v in valid])
-                    ps = np.array([v[1] for v in valid])
-                    # Shared stored-cycle integrator (#498; single source with
-                    # ProfileStore.async_add_cycle).
-                    cycle_energy_wh = integrate_cycle_wh(ts, ps)
-                except (TypeError, ValueError, ArithmeticError):
-                    cycle_energy_wh = 0.0
+        # Auto-Tune: Check for ghost cycles (short duration AND low energy).
+        # The stored energy too: the shared stored-cycle integrator (#498).
+        cycle_energy_wh = ghost_rules.cycle_end_energy_wh(cycle_data.get("power_data", []))
 
-        # Ghost cycle: short AND low energy (real cycles have energy even if short).
-        # Suppress it exactly like the dishwasher pump-out branch below: feed the
-        # auto-tune counter but do NOT store it or run the cycle-end pipeline. Without
-        # the return a sub-60 s / sub-0.05 Wh blip would fall through to persistence
-        # and the (un-gated) finish notification, firing a phantom "cycle finished".
-        if duration < 60 and cycle_energy_wh < 0.05:
+        # A ghost (short AND low energy) or a dishwasher pump-out right after the
+        # previous end (ghost_rules, register item 568): feed the auto-tune counter
+        # but do NOT store it or run the cycle-end pipeline. Without the return a
+        # sub-60 s / sub-0.05 Wh blip would fall through to persistence and the
+        # (un-gated) finish notification, firing a phantom "cycle finished".
+        discard = self._cycle_end_discard(
+            cycle_data, duration, cycle_energy_wh, prev_cycle_end_time
+        )
+        if discard is not None:
+            reason, gap = discard
+            if reason == ghost_rules.DISCARD_PUMP_OUT:
+                self._logger.info(
+                    "Suppressing dishwasher pump-out ghost: "
+                    "gap=%.0fs, duration=%.0fs, energy=%.3f Wh",
+                    gap,
+                    duration,
+                    cycle_energy_wh,
+                )
             self._handle_noise_cycle(max_power)
             self._discard_cycle_cleanup()
             if fire_ended:  # its start was announced, so its end is too (#478)
                 self._fire_cycle_ended(cycle_data, cycle_energy_wh)
             return  # Do not store this as a real cycle
-        if self.device_type == "dishwasher" and prev_cycle_end_time is not None:
-            # Pump-out suppression: dishwashers end cycles with a brief drain pump
-            # (typically 30-300 s, < 1 Wh) a few minutes after the main cycle
-            # finishes.  If a short, low-energy cycle starts within 10 minutes of
-            # the previous cycle, treat it as a pump-out ghost and do not store it.
-            cycle_start_str = cycle_data.get("start_time")
-            cycle_start_dt = (
-                dt_util.parse_datetime(cycle_start_str) if cycle_start_str else None
-            )
-            if cycle_start_dt is not None:
-                gap = (cycle_start_dt - prev_cycle_end_time).total_seconds()
-                if 0 < gap < 600 and duration < 300 and cycle_energy_wh < 1.0:
-                    self._logger.info(
-                        "Suppressing dishwasher pump-out ghost: "
-                        "gap=%.0fs, duration=%.0fs, energy=%.3f Wh",
-                        gap,
-                        duration,
-                        cycle_energy_wh,
-                    )
-                    self._handle_noise_cycle(max_power)
-                    self._discard_cycle_cleanup()
-                    if fire_ended:
-                        self._fire_cycle_ended(cycle_data, cycle_energy_wh)
-                    return  # Do not store this as a real cycle
 
         # Store energy for notification and persistence (calculated above for ghost detection)
         cycle_data["energy_wh"] = round(cycle_energy_wh, 3)
