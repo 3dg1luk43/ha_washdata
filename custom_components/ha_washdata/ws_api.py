@@ -72,6 +72,10 @@ from .const import (
     CONF_POWER_OFF_THRESHOLD_W,
     CONF_POWER_SENSOR,
     CONF_ENERGY_PRICE_ENTITY,
+    CONF_NOTIFY_ACTIONS,
+    CONF_NOTIFY_FINISH_SERVICES,
+    CONF_NOTIFY_LIVE_SERVICES,
+    CONF_NOTIFY_START_SERVICES,
     CONF_NOTIFY_PEOPLE,
     RETIRED_OPTION_KEYS,
     CONF_SAMPLING_INTERVAL,
@@ -820,6 +824,17 @@ _ADMIN_COMMANDS = frozenset({
     "history_import_recorder",
     "start_history_import_scan",
     "apply_history_import",
+})
+# Option keys only an administrator may change, whatever the command's level (#507).
+# Each names a service WashData calls, or a script it runs, with no user in the
+# context, which Home Assistant treats as the system: so they pass the check of
+# an admin-only service (restart, add-on control, backups). Authoring them is
+# authoring an automation, which Home Assistant reserves to administrators too.
+_ADMIN_OPTION_KEYS = frozenset({
+    CONF_NOTIFY_ACTIONS,
+    CONF_NOTIFY_START_SERVICES,
+    CONF_NOTIFY_FINISH_SERVICES,
+    CONF_NOTIFY_LIVE_SERVICES,
 })
 # Mutating commands intentionally allowed at the 'read' level. Picking the live
 # program is a benign runtime action (it changes detection, not stored data), so
@@ -2079,6 +2094,20 @@ async def ws_set_options(
     lock = _entry_options_lock(hass, msg["entry_id"])
     await lock.acquire()
     try:
+        # Under the lock, against the value it would replace: a non-admin saving
+        # the rest of the form with these unchanged is not refused (#507).
+        if not getattr(getattr(connection, "user", None), "is_admin", False):
+            blocked = sorted(
+                key for key in _ADMIN_OPTION_KEYS & set(msg["options"])
+                if (msg["options"][key] or []) != (entry.options.get(key) or [])
+            )
+            if blocked:
+                connection.send_error(
+                    msg["id"], "forbidden",
+                    f"Administrator access required to change {', '.join(blocked)}",
+                )
+                return
+
         # Build the new options from the *existing* options plus the submitted
         # values only. Never spread entry.data in: that would copy identity and
         # data-only keys (name, initial_profile, stale creation-time identity) into
