@@ -156,9 +156,9 @@ because the usual miss is rebuilding and then committing only the source. `--no-
 - **`manager.py`** (~10.8k lines) - central orchestrator. Power sensor state changes -> `CycleDetector`,
   async profile matching every 5 min, entity updates. Runs its own long jobs (ML training, health
   recompute) as plain executor/`async_create_task` jobs; the `task_registry` wiring lives in `ws_api.py`.
-- **`cycle_detector.py`** (~7.0k lines) - state machine `OFF -> STARTING -> RUNNING <-> PAUSED -> ENDING -> OFF`,
+- **`cycle_detector.py`** (~7.2k lines) - state machine `OFF -> STARTING -> RUNNING <-> PAUSED -> ENDING -> OFF`,
   power thresholds + energy gates, dryer anti-wrinkle, external triggers.
-- **`profile_store.py`** (~13.1k lines) - learned profiles + matching pipeline orchestration (numeric
+- **`profile_store.py`** (~13.4k lines) - learned profiles + matching pipeline orchestration (numeric
   Stages 1-4 run in `analysis.py::compute_matches_worker`; profile_store adds Stage-5 grouping and
   rebuilds the `MatchResult`). (The live_match ranking-snapshot history was removed in 0.5.8 with
   the ML early commit it trained.)
