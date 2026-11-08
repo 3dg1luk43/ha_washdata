@@ -5313,7 +5313,12 @@ class HaWashdataPanel extends HTMLElement {
   _drawReviewQuestion() {
     const q = this._reviewQ;
     if (!q || !this._reviewOpen) return;
+    // The canvases are keyed by tile position: when an answer or a poll moves
+    // another cycle into a position, that canvas's zoom belonged to the old one.
+    const shown = this._reviewCanvasCids || (this._reviewCanvasCids = {});
     this._reviewQuestionFbs().slice(0, this._REVIEW_TILES_MAX).forEach((fb, i) => {
+      const id = `wd-review-canvas-${i}`;
+      if (shown[id] !== fb.cycle_id) { delete this._canvasZoom[id]; shown[id] = fb.cycle_id; }
       const curve = q.curves[fb.cycle_id];
       const samples = (curve && curve.samples) || [];
       if (samples.length < 2) return;

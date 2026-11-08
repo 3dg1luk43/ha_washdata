@@ -1345,10 +1345,14 @@ def _standby_row_verdict(r: dict[str, Any]) -> dict[str, Any]:
             or (r["final_duration_s"] or 0.0) < 0.9 * pspan
         )
     )
+    early = lag is not None and lag < -60.0
     return {
         "lag": lag,
-        "in_tail": first is not None and float(first) < door,
-        "early": lag is not None and lag < -60.0,
+        # An early end is not a close in the tail: it counts under `early` only,
+        # never as a fast close (its negative lag passes every mark) nor as door.
+        "in_tail": first is not None and float(first) < door and not early,
+        "at_door": first is None or float(first) >= door,
+        "early": early,
         "split": split,
     }
 
@@ -1367,7 +1371,7 @@ def _summarise_standby(rows: list[dict[str, Any]], device_type: str | None) -> d
             f"le_{m}m": sum(1 for lag in closed if lag <= m * 60.0)
             for m in STANDBY_LAG_MARKS
         },
-        "door": sum(1 for v in verdicts if not v["in_tail"]),
+        "door": sum(1 for v in verdicts if v["at_door"]),
         "med_lag_min": round(float(np.median(closed)) / 60.0, 1) if closed else None,
         "early": sum(1 for v in verdicts if v["early"]),
         "split": sum(1 for v in verdicts if v["split"]),

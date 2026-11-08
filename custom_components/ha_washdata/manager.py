@@ -6907,9 +6907,12 @@ class WashDataManager:
         # coalesced write has put this cycle on disk (#511). Cleared here, its small
         # file landed before the store and a crash between lost the cycle; kept
         # until then, a restart restores it and MANAGER-04 sees the stored copy.
+        # A cycle the store did not take keeps it: it is the only copy.
         if ended is not None:
-            ended["clear_snapshot"] = True
-        elif cycle_token is None or self._ranking_snapshot_cycle_id == cycle_token:
+            ended["clear_snapshot"] = cycle_persisted
+        elif cycle_persisted and (
+            cycle_token is None or self._ranking_snapshot_cycle_id == cycle_token
+        ):
             self._spawn_tracked(self.profile_store.async_clear_active_cycle())
 
         # Refresh the artifacts that read the envelopes rebuilt above.
@@ -7172,13 +7175,17 @@ class WashDataManager:
         # No await since the lifetime-energy save that used to write first, so the
         # cycle is durable at the same point as before. Only what the follow-ups
         # derive (refreshed artifacts, suggestions) waits for the debounced write.
+        flushed = True
         try:
             await self.profile_store.async_flush_saves()
         except Exception as e:  # pylint: disable=broad-exception-caught
+            flushed = False
             self._logger.error("Failed to save the finished cycle: %s", e)
-        # Only now, with the cycle on disk (#511). B1: and only while the snapshot
-        # still belongs to THIS cycle; a cycle started since owns it.
-        if clear_snapshot and (
+        # Only now, with the cycle on disk (#511): a failed write keeps the
+        # snapshot, the only copy left, for a restart to restore. B1: and only
+        # while the snapshot still belongs to THIS cycle; a cycle started since
+        # owns it.
+        if clear_snapshot and flushed and (
             cycle_token is None or self._ranking_snapshot_cycle_id == cycle_token
         ):
             try:

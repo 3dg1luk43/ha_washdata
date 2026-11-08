@@ -141,16 +141,13 @@ def _base_data(data: dict) -> dict:
 
 
 def _end_offset(events: list[dict[str, Any]]) -> float | None:
-    """Replay offset of the last transition OUT of ENDING (end_gate_eval's); a
-    run the manager discards (ghost / pump-out, item 568) is not the close."""
-    for ev in reversed(events):
-        if (
-            ev.get("type") == "state"
-            and not ev.get("discarded")
-            and str(ev.get("detail") or "").startswith("ending->")
-        ):
-            return float(ev.get("t") or 0.0)
-    return None
+    """When the run closed: end_gate_eval's own definition (ENDING exits and the
+    anti-crease finalise's direct closes; a discarded ghost / pump-out is not the
+    close). Imported, not copied: a copy here missed the direct closes, so a
+    sim/live gap on those runs read as "same"."""
+    from end_gate_eval import _end_offset as end_gate_end_offset  # noqa: PLC0415
+
+    return end_gate_end_offset(events)
 
 
 def _committed(program: Any) -> Any:

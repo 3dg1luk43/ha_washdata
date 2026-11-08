@@ -89,6 +89,9 @@ reviews:
           unreleased version: symptom, cause, fix, with the issue link and a
           "Thanks to @user" credit where a user reported it. The release's TL;DR must
           still describe the release. Pure test, devtools or CI changes need none.
+          The link names the issue that reported the problem, which can differ from
+          the issue number in the fix commit (e.g. a robustness report against a
+          feature's own issue): do not ask to swap one for the other.
       - name: Tuning backed by a measurement
         mode: warning
         instructions: >-

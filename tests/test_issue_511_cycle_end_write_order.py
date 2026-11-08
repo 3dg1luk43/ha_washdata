@@ -81,3 +81,40 @@ async def test_the_snapshot_is_cleared_only_after_the_cycle_is_stored(
     )
     assert stored_at < cleared_at, [key for key, _ in writes]
     await mgr.async_shutdown()
+
+
+async def test_a_failed_cycle_end_write_keeps_the_snapshot(hass, freezer) -> None:
+    # The flush is what puts the cycle on disk: when it fails, the snapshot is the
+    # only copy left, so it must survive for a restart to restore.
+    record_notify(hass)
+    entry = make_entry(hass)
+    mgr = await boot(hass, entry)
+    await feed(hass, freezer, 500, 900)
+    assert mgr.profile_store.get_active_cycle() is not None
+
+    async def _fail() -> None:
+        raise OSError("disk full")
+
+    mgr.profile_store.async_flush_saves = _fail
+    await feed(hass, freezer, 0, 300)
+    await hass.async_block_till_done()
+    assert mgr.profile_store.get_active_cycle() is not None
+    await mgr.async_shutdown()
+
+
+async def test_a_cycle_the_store_did_not_take_keeps_the_snapshot(hass, freezer) -> None:
+    record_notify(hass)
+    entry = make_entry(hass)
+    mgr = await boot(hass, entry)
+    await feed(hass, freezer, 500, 900)
+    assert mgr.profile_store.get_active_cycle() is not None
+
+    async def _fail(*_a: Any, **_k: Any) -> None:
+        raise ValueError("unstorable")
+
+    mgr.profile_store.async_add_cycle = _fail
+    await feed(hass, freezer, 0, 300)
+    await hass.async_block_till_done()
+    assert mgr.profile_store.get_past_cycles() == []
+    assert mgr.profile_store.get_active_cycle() is not None
+    await mgr.async_shutdown()

@@ -213,6 +213,27 @@ test('picking the runner-up corrects to it and its tile goes', async ({ page }) 
   await expect(page.locator('.wd-review-q-count')).toHaveText('To review: 1');
 });
 
+test('a zoomed tile does not pass its zoom to the cycle that moves into its place', async ({ page }) => {
+  await bootWithQuestion(page, [REQUEST, SECOND]);
+  await openQuestion(page);
+  const q = page.locator('.wd-review-q');
+  await expect(q.locator('.wd-review-tile')).toHaveCount(2);
+  await expect.poll(() => drawnReviewSeries(page)).toHaveLength(2);
+  const zoom0 = () => page.evaluate(() =>
+    (document.getElementById('wd-panel') as any)._canvasZoom['wd-review-canvas-0'] || null);
+  await page.evaluate(() =>
+    (document.getElementById('wd-panel') as any)._setCanvasViewport('wd-review-canvas-0', 0, 600));
+  await expect.poll(zoom0).not.toBeNull();
+
+  await setHandler(page, 'ha_washdata/resolve_feedback', { success: true });
+  await setHandler(page, 'ha_washdata/get_feedbacks', { feedbacks: [SECOND] });
+  await q.locator('.wd-review-tile[data-review-cid="cyc-003"] .wd-review-answers button', { hasText: 'Quick 30°C' }).click();
+  const tiles = page.locator('.wd-review-q .wd-review-tile');
+  await expect(tiles).toHaveCount(1, { timeout: 5_000 });
+  await expect(tiles).toHaveAttribute('data-review-cid', 'cyc-004');
+  await expect.poll(zoom0).toBeNull();
+});
+
 test('a request answered outside the panel is not asked again when the next one arrives', async ({ page }) => {
   await bootWithQuestion(page);
   await openQuestion(page);
