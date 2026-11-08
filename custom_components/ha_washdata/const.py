@@ -130,6 +130,10 @@ NOTIFY_EVENT_LIVE = "cycle_live"
 NOTIFY_EVENT_CLEAN = "cycle_clean"  # Laundry still inside after cycle ends
 NOTIFY_EVENT_TIMER = "cycle_timer"  # User-configured mid-cycle countdown timer
 
+# Notification actions run as one queued Script per device (#517): a burst (the
+# finished alert and the Live Activity clear) must not drop its second run.
+NOTIFY_ACTIONS_MAX_QUEUED = 20
+
 CONF_NOTIFY_TITLE = "notify_title"
 CONF_NOTIFY_ICON = "notify_icon"
 # Per-device accent colour (#454). One setting, three companion-app keys: `color`

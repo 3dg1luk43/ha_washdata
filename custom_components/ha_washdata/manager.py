@@ -101,6 +101,7 @@ from .const import (
     SIGNAL_WASHER_UPDATE,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
+    NOTIFY_ACTIONS_MAX_QUEUED,
     NOTIFY_EVENT_LIVE,
     NOTIFY_EVENT_CLEAN,
     NOTIFY_EVENT_TIMER,
@@ -8184,12 +8185,20 @@ class WashDataManager:
                 # as the literal text `{{ device }}`, which makes the documented
                 # notification variables useless. Found by the test box's
                 # check_notify_actions.sh; register item 323.
+                # Queued, not the default `single` (#517): notifications go out in
+                # bursts (the finished alert and the clear that ends the Live
+                # Activity; the start alert and the first live card), and `single`
+                # rejected the second run while the first still awaited its notify
+                # call, so the clear was lost. The bound only matters if a notify
+                # service hangs.
                 self._notify_script = script_helper.Script(
                     self.hass,
                     cv.SCRIPT_SCHEMA(actions),
                     name=f"{self.config_entry.title} notification",
                     domain=DOMAIN,
                     logger=_LOGGER,
+                    script_mode=script_helper.SCRIPT_MODE_QUEUED,
+                    max_runs=NOTIFY_ACTIONS_MAX_QUEUED,
                 )
             except vol.Invalid as err:
                 self._logger.error(
@@ -8460,9 +8469,11 @@ class WashDataManager:
             self._time_remaining = None
             self._total_duration = None
             # A probe out of a completed cycle keeps its 100 % (item 515): most
-            # abort back to Finished; RUNNING zeroes it when one commits.
+            # abort back to Finished; RUNNING zeroes it when one commits. So does
+            # the anti-wrinkle tail after it (#512): the dashboard card counts
+            # anti_wrinkle as active and drew the finished wash as 0 %.
             if not (
-                self.detector.state == STATE_STARTING
+                self.detector.state in (STATE_STARTING, STATE_ANTI_WRINKLE)
                 and self._cycle_completed_time is not None
             ):
                 self._cycle_progress = 0.0
