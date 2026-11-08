@@ -576,7 +576,7 @@
       "cycle_resumed": "Döngü devam etti",
       "still_tumbling": "Döngüden sonra hâlâ dönüyor",
       "unloaded": "Boşaltıldı",
-      "state_changed": "Durum değişti",
+      "state_changed": "Cihaz durumu değişti",
       "maintenance_due": "Bakım gerekiyor",
       "milestone_reached": "Döngü kilometre taşına ulaşıldı",
       "pump_stuck": "Pompa takıldı"
@@ -716,7 +716,7 @@
       "description": "Çamaşır bir döngüden sonra çıkarıldığında tetiklenir: kapı açıldı veya boşaltma onaylandı."
     },
     "state_changed": {
-      "name": "Durum değişti",
+      "name": "Cihaz durumu değişti",
       "description": "WashData durumu değiştiğinde tetiklenir.",
       "fields": {
         "from": {

@@ -576,7 +576,7 @@
       "cycle_resumed": "Cikls atsākās",
       "still_tumbling": "Trumulis vēl griežas pēc cikla",
       "unloaded": "Izkrauts",
-      "state_changed": "Statuss mainījās",
+      "state_changed": "Ierīces statuss mainījās",
       "maintenance_due": "Apkope nepieciešama",
       "milestone_reached": "Cikla atskaites punkts sasniegts",
       "pump_stuck": "Sūknis iestrēdzis"
@@ -716,7 +716,7 @@
       "description": "Aktivizējas, kad veļa tiek izņemta pēc cikla: durvis atvērtas vai izkraušana apstiprināta."
     },
     "state_changed": {
-      "name": "Statuss mainījās",
+      "name": "Ierīces statuss mainījās",
       "description": "Aktivizējas, kad mainās WashData statuss.",
       "fields": {
         "from": {

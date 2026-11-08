@@ -576,7 +576,7 @@
       "cycle_resumed": "Lota haldið áfram",
       "still_tumbling": "Tromlan snýst enn eftir lotu",
       "unloaded": "Losað",
-      "state_changed": "Staða breytt",
+      "state_changed": "Staða tækis breytt",
       "maintenance_due": "Viðhald tímabært",
       "milestone_reached": "Lotumark náð",
       "pump_stuck": "Dæla föst"
@@ -716,7 +716,7 @@
       "description": "Kveikir þegar þvotturinn er tekinn út eftir lotu: hurðin var opnuð eða losun staðfest."
     },
     "state_changed": {
-      "name": "Staða breytt",
+      "name": "Staða tækis breytt",
       "description": "Kveikir þegar WashData-staðan breytist.",
       "fields": {
         "from": {

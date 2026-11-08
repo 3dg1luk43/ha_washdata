@@ -2299,7 +2299,7 @@
       "name": "Razloženo"
     },
     "state_changed": {
-      "name": "Stanje se je spremenilo"
+      "name": "Stanje naprave se je spremenilo"
     },
     "maintenance_due": {
       "name": "Vzdrževanje potrebno"

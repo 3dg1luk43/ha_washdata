@@ -80,7 +80,7 @@
       "still_tumbling": "Still tumbling after the cycle",
       "unload_pending": "Unload pending",
       "unloaded": "Unloaded",
-      "state_changed": "State changed",
+      "state_changed": "Appliance state changed",
       "maintenance_due": "Maintenance due",
       "milestone_reached": "Cycle milestone reached",
       "pump_stuck": "Pump stuck"
@@ -505,7 +505,7 @@
       "description": "Triggers when the load is taken out after a cycle: the door opened or the unload was confirmed."
     },
     "state_changed": {
-      "name": "State changed",
+      "name": "Appliance state changed",
       "description": "Triggers when the WashData state changes.",
       "fields": {
         "from": {

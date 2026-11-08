@@ -2259,7 +2259,7 @@
             "name": "Kirakva"
         },
         "state_changed": {
-            "name": "Állapot megváltozott"
+            "name": "Készülék állapota megváltozott"
         },
         "maintenance_due": {
             "name": "Karbantartás esedékes"

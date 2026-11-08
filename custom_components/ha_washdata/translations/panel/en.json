@@ -2259,7 +2259,7 @@
       "name": "Unloaded"
     },
     "state_changed": {
-      "name": "State changed"
+      "name": "Appliance state changed"
     },
     "maintenance_due": {
       "name": "Maintenance due"

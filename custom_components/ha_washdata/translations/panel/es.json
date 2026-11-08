@@ -2279,7 +2279,7 @@
       "name": "Descargado"
     },
     "state_changed": {
-      "name": "Estado cambiado"
+      "name": "Estado del electrodoméstico cambiado"
     },
     "maintenance_due": {
       "name": "Mantenimiento pendiente"

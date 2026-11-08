@@ -2239,7 +2239,7 @@
             "name": "꺼냄 완료"
         },
         "state_changed": {
-            "name": "상태가 변경됨"
+            "name": "가전제품 상태가 변경됨"
         },
         "maintenance_due": {
             "name": "유지보수 필요"

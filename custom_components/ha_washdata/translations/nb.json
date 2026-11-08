@@ -576,7 +576,7 @@
       "cycle_resumed": "Syklus gjenopptatt",
       "still_tumbling": "Trommelen roterer fortsatt etter syklusen",
       "unloaded": "Tømt",
-      "state_changed": "Tilstand endret",
+      "state_changed": "Apparatets tilstand endret",
       "maintenance_due": "Vedlikehold forfaller",
       "milestone_reached": "Syklusmilepæl nådd",
       "pump_stuck": "Pumpe satt fast"
@@ -716,7 +716,7 @@
       "description": "Utløses når tøyet tas ut etter en syklus: døren ble åpnet eller utlastingen ble bekreftet."
     },
     "state_changed": {
-      "name": "Tilstand endret",
+      "name": "Apparatets tilstand endret",
       "description": "Utløses når WashData-tilstanden endres.",
       "fields": {
         "from": {

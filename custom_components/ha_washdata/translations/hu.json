@@ -576,7 +576,7 @@
       "cycle_resumed": "Ciklus folytatódott",
       "still_tumbling": "A ciklus után még forog a dob",
       "unloaded": "Kirakva",
-      "state_changed": "Állapot megváltozott",
+      "state_changed": "Készülék állapota megváltozott",
       "maintenance_due": "Karbantartás esedékes",
       "milestone_reached": "Ciklus mérföldkő elérve",
       "pump_stuck": "Szivattyú elakadt"
@@ -716,7 +716,7 @@
       "description": "Aktiválódik, amikor a töltetet kiveszi egy ciklus után: az ajtó kinyílt vagy a kirakást megerősítették."
     },
     "state_changed": {
-      "name": "Állapot megváltozott",
+      "name": "Készülék állapota megváltozott",
       "description": "Aktiválódik, amikor a WashData állapota megváltozik.",
       "fields": {
         "from": {

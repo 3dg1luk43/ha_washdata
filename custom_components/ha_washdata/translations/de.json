@@ -576,7 +576,7 @@
       "cycle_resumed": "Zyklus fortgesetzt",
       "still_tumbling": "Trommel bewegt sich noch nach dem Zyklus",
       "unloaded": "Entnommen",
-      "state_changed": "Zustand geändert",
+      "state_changed": "Gerätezustand geändert",
       "maintenance_due": "Wartung fällig",
       "milestone_reached": "Zyklusmeilenstein erreicht",
       "pump_stuck": "Pumpe klemmt"
@@ -716,7 +716,7 @@
       "description": "Wird ausgelöst, wenn die Ladung nach einem Zyklus entnommen wird: Tür geöffnet oder Entnahme bestätigt."
     },
     "state_changed": {
-      "name": "Zustand geändert",
+      "name": "Gerätezustand geändert",
       "description": "Wird ausgelöst, wenn sich der WashData-Zustand ändert.",
       "fields": {
         "from": {

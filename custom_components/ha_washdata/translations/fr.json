@@ -576,7 +576,7 @@
       "cycle_resumed": "Cycle repris",
       "still_tumbling": "Toujours en rotation après le cycle",
       "unloaded": "Déchargé",
-      "state_changed": "État modifié",
+      "state_changed": "État de l'appareil modifié",
       "maintenance_due": "Maintenance due",
       "milestone_reached": "Jalon de cycles atteint",
       "pump_stuck": "Pompe bloquée"
@@ -716,7 +716,7 @@
       "description": "Se déclenche quand le linge est sorti après un cycle : la porte a été ouverte ou le déchargement a été confirmé."
     },
     "state_changed": {
-      "name": "État modifié",
+      "name": "État de l'appareil modifié",
       "description": "Se déclenche quand l'état WashData change.",
       "fields": {
         "from": {

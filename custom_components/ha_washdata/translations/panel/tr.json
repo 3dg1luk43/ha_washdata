@@ -2259,7 +2259,7 @@
             "name": "Boşaltıldı"
         },
         "state_changed": {
-            "name": "Durum değişti"
+            "name": "Cihaz durumu değişti"
         },
         "maintenance_due": {
             "name": "Bakım gerekiyor"

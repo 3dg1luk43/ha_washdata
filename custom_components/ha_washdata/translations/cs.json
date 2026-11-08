@@ -576,7 +576,7 @@
       "cycle_resumed": "Cyklus obnoven",
       "still_tumbling": "Stále otáčí bubnem po skončení",
       "unloaded": "Vyloženo",
-      "state_changed": "Stav změněn",
+      "state_changed": "Stav spotřebiče změněn",
       "maintenance_due": "Servis potřebný",
       "milestone_reached": "Dosažen milník cyklu",
       "pump_stuck": "Čerpadlo zaseknuté"
@@ -716,7 +716,7 @@
       "description": "Spustí se, když je náplň po cyklu vytažena: dveře se otevřely nebo bylo vyložení potvrzeno."
     },
     "state_changed": {
-      "name": "Stav změněn",
+      "name": "Stav spotřebiče změněn",
       "description": "Spustí se při změně stavu WashData.",
       "fields": {
         "from": {

@@ -131,7 +131,7 @@ const _WD_TRIGGERS = [
   { key: 'still_tumbling', name: 'Still tumbling after the cycle', only: _TRIGGER_TUMBLING_TYPES, options: { minutes: 15 } },
   { key: 'unload_pending', name: 'Unload pending' },
   { key: 'unloaded', name: 'Unloaded' },
-  { key: 'state_changed', name: 'State changed' },
+  { key: 'state_changed', name: 'Appliance state changed' },
   { key: 'maintenance_due', name: 'Maintenance due' },
   { key: 'milestone_reached', name: 'Cycle milestone reached' },
   { key: 'pump_stuck', name: 'Pump stuck', only: ['pump'] },

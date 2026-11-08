@@ -576,7 +576,7 @@
       "cycle_resumed": "Cykl wznowiony",
       "still_tumbling": "Nadal obraca bębnem po zakończeniu",
       "unloaded": "Wyładowany",
-      "state_changed": "Stan zmieniony",
+      "state_changed": "Stan urządzenia zmieniony",
       "maintenance_due": "Wymagana konserwacja",
       "milestone_reached": "Osiągnięto kamień milowy cyklu",
       "pump_stuck": "Pompa zablokowana"
@@ -716,7 +716,7 @@
       "description": "Wyzwala, gdy bielizna zostaje wyjęta po cyklu: otwarto drzwi lub potwierdzono wyładunek."
     },
     "state_changed": {
-      "name": "Stan zmieniony",
+      "name": "Stan urządzenia zmieniony",
       "description": "Wyzwala, gdy zmienia się stan WashData.",
       "fields": {
         "from": {

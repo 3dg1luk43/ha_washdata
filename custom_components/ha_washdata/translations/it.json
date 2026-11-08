@@ -576,7 +576,7 @@
       "cycle_resumed": "Ciclo ripreso",
       "still_tumbling": "Ancora in rotazione dopo il ciclo",
       "unloaded": "Scaricato",
-      "state_changed": "Stato cambiato",
+      "state_changed": "Stato dell'elettrodomestico cambiato",
       "maintenance_due": "Manutenzione in scadenza",
       "milestone_reached": "Traguardo cicli raggiunto",
       "pump_stuck": "Pompa bloccata"
@@ -716,7 +716,7 @@
       "description": "Si attiva quando il carico viene rimosso dopo un ciclo: la porta è stata aperta o lo scarico è stato confermato."
     },
     "state_changed": {
-      "name": "Stato cambiato",
+      "name": "Stato dell'elettrodomestico cambiato",
       "description": "Si attiva quando lo stato di WashData cambia.",
       "fields": {
         "from": {

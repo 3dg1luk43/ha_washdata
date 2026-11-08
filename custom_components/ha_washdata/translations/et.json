@@ -576,7 +576,7 @@
       "cycle_resumed": "Tsükkel jätkus",
       "still_tumbling": "Trummel pöörleb veel pärast tsüklit",
       "unloaded": "Mahalaadimine tehtud",
-      "state_changed": "Olek muutus",
+      "state_changed": "Seadme olek muutus",
       "maintenance_due": "Hooldus on vajalik",
       "milestone_reached": "Tsükli verstapost saavutati",
       "pump_stuck": "Pump on ummistunud"
@@ -716,7 +716,7 @@
       "description": "Käivitub, kui koorma eemaldatakse pärast tsüklit: uks avati või mahalaadimine kinnitati."
     },
     "state_changed": {
-      "name": "Olek muutus",
+      "name": "Seadme olek muutus",
       "description": "Käivitub, kui WashData olek muutub.",
       "fields": {
         "from": {

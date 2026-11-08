@@ -576,7 +576,7 @@
       "cycle_resumed": "サイクルが再開された",
       "still_tumbling": "サイクル後もまだ回転中",
       "unloaded": "取り出し済み",
-      "state_changed": "状態が変わった",
+      "state_changed": "家電の状態が変わった",
       "maintenance_due": "メンテナンスが必要",
       "milestone_reached": "サイクルのマイルストーンに達した",
       "pump_stuck": "ポンプが詰まっている"
@@ -716,7 +716,7 @@
       "description": "サイクル後に洗濯物が取り出されたときにトリガーします: ドアが開いたか、取り出しが確認されました。"
     },
     "state_changed": {
-      "name": "状態が変わった",
+      "name": "家電の状態が変わった",
       "description": "WashData の状態が変わったときにトリガーします。",
       "fields": {
         "from": {

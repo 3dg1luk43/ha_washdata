@@ -576,7 +576,7 @@
       "cycle_resumed": "Ciklas atnaujintas",
       "still_tumbling": "Vis dar sukasi po ciklo",
       "unloaded": "Iškrauta",
-      "state_changed": "Būsena pasikeitė",
+      "state_changed": "Prietaiso būsena pasikeitė",
       "maintenance_due": "Reikalinga priežiūra",
       "milestone_reached": "Ciklo riba pasiekta",
       "pump_stuck": "Siurblys įstrigo"
@@ -716,7 +716,7 @@
       "description": "Suaktyvinamas, kai skalbiniai išimami po ciklo: durys atidarytos arba iškrovimas patvirtintas."
     },
     "state_changed": {
-      "name": "Būsena pasikeitė",
+      "name": "Prietaiso būsena pasikeitė",
       "description": "Suaktyvinamas, kai pasikeičia WashData būsena.",
       "fields": {
         "from": {

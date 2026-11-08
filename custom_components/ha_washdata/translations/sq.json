@@ -576,7 +576,7 @@
       "cycle_resumed": "Cikli u vazhdua",
       "still_tumbling": "Vazhdon të rrotullohet pas ciklit",
       "unloaded": "U shkarkua",
-      "state_changed": "Gjendja ndryshoi",
+      "state_changed": "Gjendja e pajisjes ndryshoi",
       "maintenance_due": "Mirëmbajtja është e nevojshme",
       "milestone_reached": "Pika kyçe e ciklit u arrit",
       "pump_stuck": "Pompa u bllokua"
@@ -716,7 +716,7 @@
       "description": "Aktivizohet kur ngarkesa nxirret pas një cikli: dera u hap ose shkarkimi u konfirmua."
     },
     "state_changed": {
-      "name": "Gjendja ndryshoi",
+      "name": "Gjendja e pajisjes ndryshoi",
       "description": "Aktivizohet kur gjendja e WashData ndryshon.",
       "fields": {
         "from": {

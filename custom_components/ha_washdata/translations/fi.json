@@ -576,7 +576,7 @@
       "cycle_resumed": "Sykli jatkui",
       "still_tumbling": "Rumpu pyörii yhä syklin jälkeen",
       "unloaded": "Purettu",
-      "state_changed": "Tila muuttui",
+      "state_changed": "Laitteen tila muuttui",
       "maintenance_due": "Huolto tarpeen",
       "milestone_reached": "Sykliverstaspylväs saavutettu",
       "pump_stuck": "Pumppu jumissa"
@@ -716,7 +716,7 @@
       "description": "Käynnistyy, kun pyykki otetaan ulos syklin jälkeen: ovi avattiin tai purku vahvistettiin."
     },
     "state_changed": {
-      "name": "Tila muuttui",
+      "name": "Laitteen tila muuttui",
       "description": "Käynnistyy, kun WashData tila muuttuu.",
       "fields": {
         "from": {

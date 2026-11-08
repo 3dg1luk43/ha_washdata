@@ -2239,7 +2239,7 @@
             "name": "取り出し済み"
         },
         "state_changed": {
-            "name": "状態が変わった"
+            "name": "家電の状態が変わった"
         },
         "maintenance_due": {
             "name": "メンテナンスが必要"

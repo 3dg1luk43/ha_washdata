@@ -576,7 +576,7 @@
       "cycle_resumed": "Ciclu reluat",
       "still_tumbling": "Încă se rotește după ciclu",
       "unloaded": "Descărcat",
-      "state_changed": "Stare schimbată",
+      "state_changed": "Starea aparatului schimbată",
       "maintenance_due": "Mentenanță necesară",
       "milestone_reached": "Reper de cicluri atins",
       "pump_stuck": "Pompă blocată"
@@ -716,7 +716,7 @@
       "description": "Se declanșează când rufele sunt scoase după un ciclu: ușa a fost deschisă sau descărcarea a fost confirmată."
     },
     "state_changed": {
-      "name": "Stare schimbată",
+      "name": "Starea aparatului schimbată",
       "description": "Se declanșează când starea WashData se schimbă.",
       "fields": {
         "from": {

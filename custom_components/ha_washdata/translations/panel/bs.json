@@ -2279,7 +2279,7 @@
             "name": "Istovaren"
         },
         "state_changed": {
-            "name": "Stanje promijenjeno"
+            "name": "Stanje uređaja promijenjeno"
         },
         "maintenance_due": {
             "name": "Servis potreban"

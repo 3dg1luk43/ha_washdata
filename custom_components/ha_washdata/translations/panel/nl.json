@@ -2259,7 +2259,7 @@
       "name": "Uitgeladen"
     },
     "state_changed": {
-      "name": "Status gewijzigd"
+      "name": "Apparaatstatus gewijzigd"
     },
     "maintenance_due": {
       "name": "Onderhoud vereist"

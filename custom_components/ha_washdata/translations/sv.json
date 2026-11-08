@@ -576,7 +576,7 @@
       "cycle_resumed": "Cykel återupptagen",
       "still_tumbling": "Torktumlaren tumlar fortfarande efter cykeln",
       "unloaded": "Tömd",
-      "state_changed": "Tillstånd ändrat",
+      "state_changed": "Apparatens tillstånd ändrat",
       "maintenance_due": "Dags för underhåll",
       "milestone_reached": "Cykelmilstolpe uppnådd",
       "pump_stuck": "Pumpen fastnad"
@@ -716,7 +716,7 @@
       "description": "Utlöses när tvätten tas ut efter en cykel: dörren öppnades eller lossningen bekräftades."
     },
     "state_changed": {
-      "name": "Tillstånd ändrat",
+      "name": "Apparatens tillstånd ändrat",
       "description": "Utlöses när WashData-tillståndet ändras.",
       "fields": {
         "from": {

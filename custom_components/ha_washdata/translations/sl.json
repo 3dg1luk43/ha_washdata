@@ -576,7 +576,7 @@
       "cycle_resumed": "Cikel je nadaljeval",
       "still_tumbling": "Po koncu še vedno vrti boben",
       "unloaded": "Razloženo",
-      "state_changed": "Stanje se je spremenilo",
+      "state_changed": "Stanje naprave se je spremenilo",
       "maintenance_due": "Vzdrževanje potrebno",
       "milestone_reached": "Dosežen mejnik cikla",
       "pump_stuck": "Črpalka se je zataknila"
@@ -716,7 +716,7 @@
       "description": "Sproži, ko je pranje po ciklu vzeto ven: vrata so se odprla ali razlaganje je potrjeno."
     },
     "state_changed": {
-      "name": "Stanje se je spremenilo",
+      "name": "Stanje naprave se je spremenilo",
       "description": "Sproži, ko se stanje WashData spremeni.",
       "fields": {
         "from": {

@@ -2259,7 +2259,7 @@
       "name": "Entnommen"
     },
     "state_changed": {
-      "name": "Zustand geändert"
+      "name": "Gerätezustand geändert"
     },
     "maintenance_due": {
       "name": "Wartung fällig"

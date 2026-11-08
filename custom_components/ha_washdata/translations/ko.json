@@ -576,7 +576,7 @@
       "cycle_resumed": "사이클이 재개됨",
       "still_tumbling": "사이클 후에도 계속 회전 중",
       "unloaded": "꺼냄 완료",
-      "state_changed": "상태가 변경됨",
+      "state_changed": "가전제품 상태가 변경됨",
       "maintenance_due": "유지보수 필요",
       "milestone_reached": "사이클 이정표에 도달함",
       "pump_stuck": "펌프가 막힘"
@@ -716,7 +716,7 @@
       "description": "사이클 후 세탁물을 꺼낼 때 트리거됩니다. 문이 열렸거나 꺼내기가 확인된 경우."
     },
     "state_changed": {
-      "name": "상태가 변경됨",
+      "name": "가전제품 상태가 변경됨",
       "description": "WashData 상태가 변경될 때 트리거됩니다.",
       "fields": {
         "from": {

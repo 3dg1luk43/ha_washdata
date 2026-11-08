@@ -576,7 +576,7 @@
       "cycle_resumed": "Cyclus hervat",
       "still_tumbling": "Trommel draait nog na de cyclus",
       "unloaded": "Uitgeladen",
-      "state_changed": "Status gewijzigd",
+      "state_changed": "Apparaatstatus gewijzigd",
       "maintenance_due": "Onderhoud vereist",
       "milestone_reached": "Cyclusmijlpaal bereikt",
       "pump_stuck": "Pomp vastgelopen"
@@ -716,7 +716,7 @@
       "description": "Wordt geactiveerd wanneer de lading na een cyclus wordt uitgehaald: de deur is geopend of het uitladen is bevestigd."
     },
     "state_changed": {
-      "name": "Status gewijzigd",
+      "name": "Apparaatstatus gewijzigd",
       "description": "Wordt geactiveerd wanneer de WashData-status wijzigt.",
       "fields": {
         "from": {

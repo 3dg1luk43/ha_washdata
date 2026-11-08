@@ -2299,7 +2299,7 @@
       "name": "Wyładowany"
     },
     "state_changed": {
-      "name": "Stan zmieniony"
+      "name": "Stan urządzenia zmieniony"
     },
     "maintenance_due": {
       "name": "Wymagana konserwacja"

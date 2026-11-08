@@ -576,7 +576,7 @@
       "cycle_resumed": "Ciklus nastavljen",
       "still_tumbling": "Još uvijek okreće bubanj nakon ciklusa",
       "unloaded": "Istovaren",
-      "state_changed": "Stanje promijenjeno",
+      "state_changed": "Stanje uređaja promijenjeno",
       "maintenance_due": "Servis potreban",
       "milestone_reached": "Dostignut miljokaz ciklusa",
       "pump_stuck": "Pumpa zaglavljena"
@@ -716,7 +716,7 @@
       "description": "Pokreće se kad je veš izvađen nakon ciklusa: vrata su otvorena ili istovar je potvrđen."
     },
     "state_changed": {
-      "name": "Stanje promijenjeno",
+      "name": "Stanje uređaja promijenjeno",
       "description": "Pokreće se kad se WashData stanje promijeni.",
       "fields": {
         "from": {

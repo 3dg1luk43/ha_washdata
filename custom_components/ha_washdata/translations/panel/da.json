@@ -2259,7 +2259,7 @@
       "name": "Tømt"
     },
     "state_changed": {
-      "name": "Tilstand ændret"
+      "name": "Apparatets tilstand ændret"
     },
     "maintenance_due": {
       "name": "Vedligeholdelse forfalder"

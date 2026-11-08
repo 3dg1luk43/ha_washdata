@@ -2259,7 +2259,7 @@
       "name": "Purettu"
     },
     "state_changed": {
-      "name": "Tila muuttui"
+      "name": "Laitteen tila muuttui"
     },
     "maintenance_due": {
       "name": "Huolto tarpeen"

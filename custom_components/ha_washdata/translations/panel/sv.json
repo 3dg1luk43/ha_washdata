@@ -2259,7 +2259,7 @@
       "name": "Tömd"
     },
     "state_changed": {
-      "name": "Tillstånd ändrat"
+      "name": "Apparatens tillstånd ändrat"
     },
     "maintenance_due": {
       "name": "Dags för underhåll"

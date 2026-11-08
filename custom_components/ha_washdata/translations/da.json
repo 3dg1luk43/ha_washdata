@@ -576,7 +576,7 @@
       "cycle_resumed": "Cyklus genoptaget",
       "still_tumbling": "Tromlen drejer stadig efter cyklus",
       "unloaded": "Tømt",
-      "state_changed": "Tilstand ændret",
+      "state_changed": "Apparatets tilstand ændret",
       "maintenance_due": "Vedligeholdelse forfalder",
       "milestone_reached": "Cyklusmilepæl nået",
       "pump_stuck": "Pumpe sidder fast"
@@ -716,7 +716,7 @@
       "description": "Udløses når vasketøjet tages ud efter en cyklus: døren er åbnet eller tømningen er bekræftet."
     },
     "state_changed": {
-      "name": "Tilstand ændret",
+      "name": "Apparatets tilstand ændret",
       "description": "Udløses når WashData-tilstanden ændres.",
       "fields": {
         "from": {

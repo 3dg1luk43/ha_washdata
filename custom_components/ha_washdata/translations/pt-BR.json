@@ -576,7 +576,7 @@
       "cycle_resumed": "Ciclo retomado",
       "still_tumbling": "Ainda girando após o ciclo",
       "unloaded": "Descarregado",
-      "state_changed": "Estado alterado",
+      "state_changed": "Estado do eletrodoméstico alterado",
       "maintenance_due": "Manutenção devida",
       "milestone_reached": "Marco de ciclos alcançado",
       "pump_stuck": "Bomba travada"
@@ -716,7 +716,7 @@
       "description": "Aciona quando a carga é retirada após um ciclo: a porta foi aberta ou a descarga foi confirmada."
     },
     "state_changed": {
-      "name": "Estado alterado",
+      "name": "Estado do eletrodoméstico alterado",
       "description": "Aciona quando o estado do WashData muda.",
       "fields": {
         "from": {

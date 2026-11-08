@@ -2239,7 +2239,7 @@
             "name": "已取出"
         },
         "state_changed": {
-            "name": "状态已变更"
+            "name": "家电状态已变更"
         },
         "maintenance_due": {
             "name": "需要维护"
