@@ -81,6 +81,13 @@ def test_rules_on_a_synthetic_plug_pull(corpus: Path) -> None:
     assert pp.playground.terminal_drop_may_fire is pp.detector_config.terminal_drop_may_fire
 
 
+def test_ml_on_rule_is_the_ungated_toggle_path(corpus: Path) -> None:
+    """``ml_on`` (#516): "Apply smart models" on, so no committed match is needed."""
+    (row,) = _run(corpus, "ml_on")
+    assert row["fired"] is True
+    assert pp.playground.terminal_drop_enabled is pp.detector_config.terminal_drop_enabled
+
+
 def test_summarise_counts_fires_and_closes() -> None:
     rows = [
         {"frac": 0.15, "fired": True, "close_min": 4.0, "n_finished": 1},

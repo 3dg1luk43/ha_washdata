@@ -540,8 +540,9 @@ CLUSTER_RESAMPLE_N = 50                      # points for pairwise comparison
 # gated on CONF_ENABLE_ML_MODELS; detector_config.terminal_drop_enabled decides
 # for the manager and the Playground). A hard cliff-to-~0 at an elapsed offset EARLIER than this
 # device has ever legitimately gone quiet (learned from its own completed
-# cycles) is an anomaly - almost certainly a real stop (plug pulled / cancelled)
-# rather than a soak pause - so the cycle is finalized quickly instead of waiting
+# cycles: a pause, or since #516 a cycle's own end) is an anomaly - almost
+# certainly a real stop (plug pulled / cancelled) rather than a soak pause -
+# so the cycle is finalized quickly instead of waiting
 # out the full soak-bridging min_off_gap (up to 8 min for washers, 1 h for
 # dishwashers). Asymmetric like the ML end-guard, but the opposite direction: it
 # can only SHORTEN the end wait, and only for anomalously-early drops.

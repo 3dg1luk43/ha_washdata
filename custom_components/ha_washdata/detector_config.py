@@ -315,6 +315,7 @@ def terminal_drop_baseline_for(
         float(stop_threshold_w),
         TERMINAL_DROP_MIN_QUIET_SPAN_S,
         TERMINAL_DROP_MIN_CLEAN_CYCLES,
+        TERMINAL_DROP_MIN_PEAK_RATIO,
     )
 
 

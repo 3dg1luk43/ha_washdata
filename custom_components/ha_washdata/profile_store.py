@@ -50,6 +50,7 @@ from .const import (
     CLUSTER_RESAMPLE_N,
     CLUSTER_SHAPE_SIMILARITY_THRESHOLD,
     GROUP_MIN_COHESION,
+    TERMINAL_DROP_MIN_PEAK_RATIO,
     TERMINAL_EVENT_MAX_PEAK_FRAC,
     TERMINAL_EVENT_PEAK_FRAC,
     TERMINAL_QUIET_MIN_S,
@@ -848,14 +849,28 @@ def earliest_sustained_quiet_offset(
     stop_threshold_w: float,
     min_quiet_span_s: float,
     min_clean_cycles: int,
+    min_peak_ratio: float = TERMINAL_DROP_MIN_PEAK_RATIO,
 ) -> float | None:
-    """Smallest elapsed offset (s) at which any *completed* cycle first shows a
-    sustained (>= ``min_quiet_span_s``) near-zero (< ``stop_threshold_w``) span.
+    """Smallest elapsed offset (s) at which any *completed* cycle legitimately went
+    quiet: its first sustained (>= ``min_quiet_span_s``) near-zero
+    (< ``stop_threshold_w``) span, or its own end.
 
     This is the device's learned "we have never legitimately been quiet before
     this many seconds into a cycle" baseline, used by the opt-in terminal-drop
     detector: a hard cliff-to-~0 that begins *earlier* than this is anomalous and
     almost certainly a real stop rather than a soak pause.
+
+    **A completed cycle's end is a legitimate quiet onset too (#516).** Only a
+    dishwasher stores the quiet after its last activity (``keep_tail``); every
+    other type's trace is cut there, so on a washer without sub-threshold pauses
+    only an odd late quiet (the standby tail of an over-long run read at a raised
+    Stop Threshold) seeded the baseline, later than every normal end, and each
+    normal end fired as a terminal drop. The end counted is where the trailing
+    quiet begins (the last active reading when the trace is cut there), and only
+    of a cycle that was clearly on (peak >= ``min_peak_ratio`` x the stop
+    threshold, ``is_terminal_drop``'s own bar): a stored few-watt blip must not
+    stand for a programme that ended. The end only CAPS a baseline the quiet
+    spans set; it never creates one, so the change can only remove fires.
 
     Only ``completed`` cycles seed the baseline - interrupted / force-stopped /
     terminal-drop cycles are exactly the anomalies we are trying to catch, so
@@ -870,6 +885,8 @@ def earliest_sustained_quiet_offset(
     if not cycles:
         return None
     earliest: float | None = None
+    earliest_end: float | None = None
+    min_peak = min_peak_ratio * max(stop_threshold_w, 1.0)
     clean = 0
     for cycle in cycles:
         if cycle.get("status") != "completed":
@@ -879,18 +896,35 @@ def earliest_sustained_quiet_offset(
             continue
         clean += 1
         span_start: float | None = None
+        first_quiet: float | None = None
+        last_active: float | None = None
+        peak = 0.0
         for offset, power in points:
             if power < stop_threshold_w:
                 if span_start is None:
                     span_start = offset
-                elif (offset - span_start) >= min_quiet_span_s:
-                    if earliest is None or span_start < earliest:
-                        earliest = span_start
-                    break
+                elif first_quiet is None and (offset - span_start) >= min_quiet_span_s:
+                    first_quiet = span_start
             else:
                 span_start = None
+                last_active = offset
+                peak = max(peak, power)
+        if first_quiet is not None and (earliest is None or first_quiet < earliest):
+            earliest = first_quiet
+        # The end as the live check reads a drop: where the trailing quiet run
+        # begins, or the last active reading of a trace cut there.
+        end = span_start if span_start is not None else last_active
+        if (
+            end is not None
+            and last_active is not None
+            and peak >= min_peak
+            and (earliest_end is None or end < earliest_end)
+        ):
+            earliest_end = end
     if clean < min_clean_cycles:
         return None
+    if earliest is not None and earliest_end is not None:
+        return min(earliest, earliest_end)
     return earliest
 
 
@@ -925,6 +959,7 @@ def terminal_drop_baseline(
     stop_threshold_w: float,
     min_quiet_span_s: float,
     min_clean_cycles: int,
+    min_peak_ratio: float = TERMINAL_DROP_MIN_PEAK_RATIO,
 ) -> tuple[float | None, tuple[float, float] | None]:
     """Combined ``(earliest_quiet_offset, peak_range)`` baseline.
 
@@ -932,7 +967,7 @@ def terminal_drop_baseline(
     the manager can offload the whole per-cycle scan to an executor thread in one
     hop instead of decompressing every trace on the event loop (issue #311)."""
     earliest = earliest_sustained_quiet_offset(
-        cycles, stop_threshold_w, min_quiet_span_s, min_clean_cycles
+        cycles, stop_threshold_w, min_quiet_span_s, min_clean_cycles, min_peak_ratio
     )
     peak_range = device_active_peak_range(cycles, min_clean_cycles)
     return earliest, peak_range
