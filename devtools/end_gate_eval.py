@@ -141,6 +141,34 @@ cycle's own Smart Termination end (one washer; unpaused it ends from RUNNING, wh
 as stalled, so item 511 already banked most of it): 9 -> 6 split at 50%, 14 -> 9 at
 90%, early ends 1 -> 0.
 
+**Held standby tail (#518).** The corpus traces end at ~0 W, so they cannot show an
+appliance that idles ABOVE its stop threshold after the programme. ``--standby-tail
+LEVEL`` cuts each trace after its last above-stop reading and holds it at LEVEL for
+``--standby-min`` minutes (default 120, the #518 reporter's 1 h 55 min), then 0 W (the
+door opened); LEVEL is ``Nx`` (N x the stop threshold the replay runs with), ``+D``
+(stop + D W) or watts, and an export whose LEVEL is not above its stop and below its
+start threshold is skipped (at or above start the level would open the next cycle:
+the flat-power stop's case). ``--standby-cadence`` is how the held level reaches the
+detector: ``dense`` (a plug that re-reports every step, the trace's median gap
+clamped to 10-60 s), ``keepalive`` (a change-only plug: one report, then what the
+live watchdog injects -
+``manager._watchdog_check_stuck_cycle``'s low-power branch at or below Min Power,
+once the plug has been silent past ``off_delay`` or ``no_update_active_timeout``, on
+each ``watchdog_interval`` tick; the Playground emulates only the below-stop branch,
+so the harness writes these readings into the trace, as a 0.5.7+ recording holds
+them; nothing above Min Power), or ``silent`` (one report, nothing else).
+``--standby-lift`` also raises every earlier reading below LEVEL to it, so the
+drying phase sits on the same flat level (the reporter's dishwasher never read below
+1.7 W while on; the stored profile cycles are not lifted). ``--no-dishwasher-band``
+is the before arm (no standby-band finalise on a dishwasher, as before #518).
+``--standby-floor`` is the other candidate fix: replay with the #458 stop floor for
+LEVEL applied (``suggestion_engine.STANDBY_FLOOR_*``: stop raised to max(1.25 x
+LEVEL, LEVEL + 0.2 W), start to at least 1.25 x that). Rows record when the cycle first finished
+against the programme end (the last above-stop reading of the unmodified trace), and
+a summary per device type counts the closes within 5 / 10 / 15 / 30 / 60 min, the
+ones held until the door opened, and lists every early end (> 1 min before the
+programme end) and split.
+
 **Option overrides (register item 469).** ``--set KEY=VALUE`` layers an option onto
 every replayed export as Apply all would save it (the active-span yardstick keeps
 the export's own stop threshold), e.g. ``--set profile_match_interval=45`` for the
@@ -496,6 +524,88 @@ def _with_tumble_tail(
     return tailed
 
 
+def _standby_level(stop: float, spec: str) -> float:
+    """``--standby-tail``: ``Nx`` = N x stop, ``+D`` = stop + D W, else watts."""
+    spec = spec.strip()
+    if spec.endswith("x"):
+        return float(spec[:-1]) * stop
+    if spec.startswith("+"):
+        return stop + float(spec[1:])
+    return float(spec)
+
+
+def _standby_floor_overrides(cfg: Any, level: float) -> dict[str, Any]:
+    """``--standby-floor``: the #458 stop floor for ``level``, as Apply would save it."""
+    from custom_components.ha_washdata import suggestion_engine as se  # noqa: PLC0415
+
+    floor = round(max(level * se.STANDBY_FLOOR_RATIO, level + se.STANDBY_FLOOR_MIN_MARGIN_W), 2)
+    start = max(float(cfg.start_threshold_w), round(floor * se.STANDBY_FLOOR_RATIO, 2))
+    return {"stop_threshold_w": floor, "start_threshold_w": start}
+
+
+def _keepalive_offsets(
+    t0: float, until: float, level: float, cfg: Any, opts: dict[str, Any], watchdog_s: float
+) -> list[float]:
+    """Offsets the live watchdog injects ``level`` at after a report at ``t0`` (#518).
+
+    ``manager._watchdog_check_stuck_cycle``'s low-power fallback: the cached power
+    at or below Min Power, and silence past ``off_delay`` (any update, keepalives
+    included) or ``no_update_active_timeout`` (real updates only), checked on every
+    tick. Ticks sit half an interval into each period, the Playground's phase.
+    Nothing above Min Power: the high-power branch defers without injecting (#409).
+    """
+    from custom_components.ha_washdata.const import (  # noqa: PLC0415
+        CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+        DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
+    )
+
+    if watchdog_s <= 0 or level > float(cfg.min_power):
+        return []
+    off_delay = float(cfg.off_delay)
+    nuat = float(opts.get(CONF_NO_UPDATE_ACTIVE_TIMEOUT) or DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT)
+    out: list[float] = []
+    last_any = t0
+    k = 1
+    while True:
+        tick = t0 + (k + 0.5) * watchdog_s
+        if tick >= until:
+            return out
+        if tick - last_any > off_delay or tick - t0 > nuat:
+            out.append(tick)
+            last_any = tick
+        k += 1
+
+
+def _with_standby_tail(
+    cycle: dict[str, Any], pts: list[tuple[float, float]], stop: float, level: float,
+    minutes: float, cadence: str, lift: bool, keepalives: Any,
+) -> tuple[dict[str, Any], float, float]:
+    """The cycle held at ``level`` after its programme (#518).
+
+    Returns ``(cycle, tail_start_s, tail_end_s)``; ``keepalives(t0, until)`` gives
+    the offsets the live watchdog would inject at (``cadence == "keepalive"``).
+    """
+    active = [t for t, p in pts if p > stop]
+    t_end = active[-1]
+    gaps = [b - a for (a, _p), (b, _q) in zip(pts, pts[1:]) if b > a]
+    step = min(60.0, max(10.0, float(np.median(gaps)) if gaps else 30.0))
+    head = [
+        [float(t), max(float(p), level) if lift else float(p)] for t, p in pts if t <= t_end
+    ]
+    t0 = t_end + step
+    t1 = t0 + minutes * 60.0
+    if cadence == "dense":
+        times = [float(t) for t in np.arange(t0, t1, step)]
+    elif cadence == "keepalive":
+        times = [t0, *keepalives(t0, t1)]
+    else:
+        times = [t0]
+    tail = [[round(t, 1), level] for t in times]
+    out = dict(cycle)
+    out["power_data"] = head + tail + [[t1, 0.0], [t1 + 600.0, 0.0]]
+    return out, t0, t1
+
+
 class _Entry:
     def __init__(self, data: dict, options: dict, title: str) -> None:
         self.data, self.options, self.title = data, options, title
@@ -708,6 +818,7 @@ def _export_setup(
     anti_wrinkle: str = "export",
     device_types: tuple[str, ...] | None = None,
     overrides: dict[str, Any] | None = None,
+    standby: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
     """Everything the per-cycle loop shares: the production store, rebuilt envelopes."""
     found = _export_doc(path, all_formats, device_types)
@@ -723,6 +834,23 @@ def _export_setup(
     base["profiles"] = {k: dict(v) if isinstance(v, dict) else v
                         for k, v in (base.get("profiles") or {}).items()}
     base["envelopes"] = dict(base.get("envelopes") or {})
+    standby_level = None
+    if standby is not None:
+        # The held level follows the stop threshold the replay runs with (#518),
+        # and with --standby-floor so does the #458 floor it then runs under. Only
+        # the #518 shape: above stop and below start (at or above start it would
+        # open the next cycle, the flat-power stop's case), else the export is
+        # not replayed.
+        run_cfg = _production(
+            doc, base, shipped_watchdog=shipped_watchdog, overrides=overrides
+        )[0]
+        standby_level = _standby_level(float(run_cfg.stop_threshold_w), standby["level"])
+        if not (
+            float(run_cfg.stop_threshold_w) < standby_level < float(run_cfg.start_threshold_w)
+        ):
+            return None
+        if standby.get("floor"):
+            overrides = {**(overrides or {}), **_standby_floor_overrides(run_cfg, standby_level)}
     cfg, store, opts = _production(
         doc, base, shipped_watchdog=shipped_watchdog, force_anti_wrinkle=force_aw,
         overrides=overrides,
@@ -749,6 +877,7 @@ def _export_setup(
         "doc": doc, "device_type": device_type, "ac_device": ac_device,
         "force_aw": force_aw, "base": base, "cfg": cfg, "store": store,
         "opts": opts, "stop": stop, "level": level, "prebuilt": prebuilt,
+        "overrides": overrides, "standby_level": standby_level,
     }
 
 
@@ -770,6 +899,7 @@ def _replay_export(
     overrides: dict[str, Any] | None = None,
     halt: tuple[float, str, str] | None = None,
     user_pause: bool = False,
+    standby: dict[str, Any] | None = None,
     only: frozenset[int] | None = None,
     memo: bool = False,
 ) -> list[tuple[int, dict[str, Any]]]:
@@ -782,7 +912,7 @@ def _replay_export(
     setup_kw = {
         "all_formats": all_formats, "shipped_watchdog": shipped_watchdog,
         "anti_wrinkle": anti_wrinkle, "device_types": device_types,
-        "overrides": overrides,
+        "overrides": overrides, "standby": standby,
     }
     if memo:
         key = json.dumps([str(path), setup_kw], sort_keys=True, default=str)
@@ -798,6 +928,10 @@ def _replay_export(
     device_type, ac_device, force_aw = ctx["device_type"], ctx["ac_device"], ctx["force_aw"]
     doc, base, cfg, store, opts = ctx["doc"], ctx["base"], ctx["cfg"], ctx["store"], ctx["opts"]
     stop, level, prebuilt = ctx["stop"], ctx["level"], ctx["prebuilt"]
+    overrides, standby_level = ctx["overrides"], ctx["standby_level"]
+    watchdog_s = float(
+        opts.get(CONF_WATCHDOG_INTERVAL) or resolve_watchdog_interval_default(device_type)
+    )
     cycles = base["past_cycles"]
     rows: list[tuple[int, dict[str, Any]]] = []
     for ci, cyc in enumerate(cycles):
@@ -831,6 +965,14 @@ def _replay_export(
                 _halt_level(stop, halt[2]),
             )
             halt_s = (h0, h1)
+        standby_s: tuple[float, float] | None = None
+        if standby is not None and standby_level is not None:
+            replayed, s0, s1 = _with_standby_tail(
+                replayed, _cycle_readings(replayed), stop, standby_level,
+                float(standby["minutes"]), standby["cadence"], bool(standby.get("lift")),
+                lambda a, b: _keepalive_offsets(a, b, standby_level, cfg, opts, watchdog_s),
+            )
+            standby_s = (s0, s1)
         _AC.clear()
         if user_pause and halt_s is not None:
             _b = playground._cycle_base_time(replayed)  # noqa: SLF001
@@ -897,6 +1039,19 @@ def _replay_export(
                 halt_s is not None and halt_s[0] <= t < halt_s[1] for t in finishes
             ),
         }
+        # #518 held standby tail: only on such a run, so the rows of every other
+        # run (and the baseline) are unchanged.
+        standby_fields: dict[str, Any] = {}
+        if standby_s is not None:
+            standby_fields = {
+                "standby_level_w": round(float(standby_level), 3),
+                "standby_cadence": standby["cadence"],
+                "standby_lift": bool(standby.get("lift")),
+                "standby_floor": bool(standby.get("floor")),
+                "standby_start_s": round(standby_s[0], 1),
+                "standby_end_s": round(standby_s[1], 1),
+                "finishes_s": [round(t, 1) for t in finishes],
+            }
         rows.append((ci, {
             "export": _export_key(path),
             "device_type": device_type,
@@ -941,6 +1096,7 @@ def _replay_export(
             "label_profile": out.get("label_profile"),
             "label_reason": out.get("label_reason"),
             **stall_fields,
+            **standby_fields,
         }))
     return rows
 
@@ -1171,6 +1327,94 @@ def _print_stall_summary(rows: list[dict[str, Any]]) -> None:
     )
 
 
+#: ``--standby-tail``: the close-lag marks the summary counts, minutes.
+STANDBY_LAG_MARKS = (5, 10, 15, 30, 60)
+
+
+def _standby_row_verdict(r: dict[str, Any]) -> dict[str, Any]:
+    """One held-tail row (#518): its first finish against the programme end."""
+    pend = r.get("prog_end_s") if r.get("prog_end_s") is not None else r.get("active_end_s")
+    first = r.get("first_end_s")
+    door = float(r["standby_end_s"])
+    lag = (float(first) - float(pend)) if first is not None and pend is not None else None
+    pspan = float(r.get("prog_span_s") or r["active_span_s"])
+    split = bool(
+        r["detected"]
+        and (
+            (r["detected_count"] > 1 and lag is not None and lag < -60.0)
+            or (r["final_duration_s"] or 0.0) < 0.9 * pspan
+        )
+    )
+    return {
+        "lag": lag,
+        "in_tail": first is not None and float(first) < door,
+        "early": lag is not None and lag < -60.0,
+        "split": split,
+    }
+
+
+def _summarise_standby(rows: list[dict[str, Any]], device_type: str | None) -> dict[str, Any]:
+    sel = [
+        r for r in rows
+        if r.get("standby_start_s") is not None
+        and (device_type is None or r["device_type"] == device_type)
+    ]
+    verdicts = [_standby_row_verdict(r) for r in sel]
+    closed = [v["lag"] for v in verdicts if v["in_tail"] and v["lag"] is not None]
+    return {
+        "n": len(sel),
+        **{
+            f"le_{m}m": sum(1 for lag in closed if lag <= m * 60.0)
+            for m in STANDBY_LAG_MARKS
+        },
+        "door": sum(1 for v in verdicts if not v["in_tail"]),
+        "med_lag_min": round(float(np.median(closed)) / 60.0, 1) if closed else None,
+        "early": sum(1 for v in verdicts if v["early"]),
+        "split": sum(1 for v in verdicts if v["split"]),
+        "sb_fired": sum(1 for r in sel if r.get("sb_final_s") is not None),
+    }
+
+
+def _print_standby_summary(rows: list[dict[str, Any]]) -> None:
+    held = [r for r in rows if r.get("standby_start_s") is not None]
+    if not held:
+        return
+    r0 = held[0]
+    print(
+        f"\nheld standby tail (#518): cadence {r0['standby_cadence']}, "
+        f"lift {r0['standby_lift']}, #458 floor {r0['standby_floor']}"
+    )
+    marks = "".join(f"{f'<={m}m':>7}" for m in STANDBY_LAG_MARKS)
+    hdr = f"{'scope':<18}{'n':>5}{marks}{'door':>7}{'med lag':>9}{'early':>7}{'split':>7}{'sb fin':>8}"
+    print(hdr)
+    print("-" * len(hdr))
+    for scope in [None, *sorted({r["device_type"] for r in held})]:
+        st = _summarise_standby(held, scope)
+        if not st["n"]:
+            continue
+        cells = "".join(f"{st[f'le_{m}m']:>7}" for m in STANDBY_LAG_MARKS)
+        print(
+            f"{scope or 'ALL':<18}{st['n']:>5}{cells}{st['door']:>7}"
+            f"{st['med_lag_min']!s:>9}{st['early']:>7}{st['split']:>7}{st['sb_fired']:>8}"
+        )
+    print(
+        "<=Nm = first finish within N min of the programme end (the unmodified trace's "
+        "last above-stop\nreading), during the held tail; door = not before the held "
+        "tail ended (the door opened);\nearly = first finish > 1 min before the "
+        "programme end; sb fin = standby-band finalizes."
+    )
+    for r in held:
+        v = _standby_row_verdict(r)
+        if v["early"] or v["split"]:
+            print(
+                f"  {'EARLY' if v['early'] else 'SPLIT':<6}{r['export']} {r['id']} "
+                f"label={r['label']} matched={r['matched_profile']} "
+                f"lag={round(v['lag'] / 60.0, 1) if v['lag'] is not None else None} min "
+                f"pieces={r['detected_count']} sb={r.get('sb_final_s')} "
+                f"reason={r['termination_reason']}"
+            )
+
+
 def _print_summary(rows: list[dict[str, Any]]) -> None:
     devices = sorted({r["device_type"] for r in rows})
     hdr = (
@@ -1196,6 +1440,7 @@ def _print_summary(rows: list[dict[str, Any]]) -> None:
     print("weak = matched cycles whose final confidence is below 0.4 (the gate's bar).")
     _print_ac_summary(rows)
     _print_stall_summary(rows)
+    _print_standby_summary(rows)
 
 
 def _compare(before_path: str, after_path: str) -> None:
@@ -1429,7 +1674,10 @@ def default_jobs() -> int:
     return max(1, min((os.cpu_count() or 2) - 1, MAX_JOBS))
 
 
-def _setup_replay(no_shortening: bool, no_stall_guard: bool, repo: str | None = None) -> None:
+def _setup_replay(
+    no_shortening: bool, no_stall_guard: bool, repo: str | None = None,
+    no_dishwasher_band: bool = False,
+) -> None:
     """Patches and probes every replay needs; idempotent (also the pool initializer)."""
     global REPO  # noqa: PLW0603
     if repo is not None:
@@ -1446,6 +1694,13 @@ def _setup_replay(no_shortening: bool, no_stall_guard: bool, repo: str | None = 
 
         _const.END_GATE_LATE_RATIO = 1e9
         _const.END_GATE_LATE_RATIO_BY_DEVICE = {}
+
+    if no_dishwasher_band:
+        # The #518 before arm: the standby-band finalise for its pre-#518 device
+        # types only (no dishwasher), everything else the code under test.
+        from custom_components.ha_washdata import cycle_detector as _cd  # noqa: PLC0415
+
+        _cd.STANDBY_BAND_TERMINAL_EVENT_DEVICE_TYPES = ()
 
     if no_stall_guard:
         from custom_components.ha_washdata import cycle_detector as _cd  # noqa: PLC0415
@@ -1536,7 +1791,7 @@ def _granted(jobs: int, jobs_file: Path | None) -> int:
 def _replay_parallel(
     paths: list[Path], jobs: int, no_shortening: bool, no_stall_guard: bool,
     loo: bool, kw: dict[str, Any], timings_path: Path | None = None,
-    jobs_file: Path | None = None,
+    jobs_file: Path | None = None, no_dishwasher_band: bool = False,
 ) -> list[dict[str, Any]]:
     """The serial loop's rows, in its order, from ``jobs`` worker processes.
 
@@ -1559,7 +1814,8 @@ def _replay_parallel(
     with ProcessPoolExecutor(
         max(jobs, MAX_JOBS) if jobs_file else jobs,
         mp_context=multiprocessing.get_context("spawn"),
-        initializer=_setup_replay, initargs=(no_shortening, no_stall_guard, str(REPO)),
+        initializer=_setup_replay,
+        initargs=(no_shortening, no_stall_guard, str(REPO), no_dishwasher_band),
     ) as ex:
         inflight: dict[Any, str] = {}
 
@@ -1685,6 +1941,31 @@ def main(argv: list[str] | None = None) -> int:
         "--no-stall-guard", action="store_true",
         help="before arm: the stall display does not hold the standby-band finalize",
     )
+    ap.add_argument(
+        "--no-dishwasher-band", action="store_true",
+        help="#518 before arm: no standby-band finalise on a dishwasher",
+    )
+    ap.add_argument(
+        "--standby-tail", default=None, metavar="LEVEL",
+        help="#518: hold each trace at LEVEL after its programme ('Nx' = N x stop, "
+        "'+D' = stop + D W, or W) instead of the 0 W tail",
+    )
+    ap.add_argument(
+        "--standby-cadence", choices=("dense", "keepalive", "silent"), default="keepalive",
+        help="with --standby-tail: how the held level reaches the detector (see the docstring)",
+    )
+    ap.add_argument(
+        "--standby-min", type=float, default=120.0, metavar="M",
+        help="with --standby-tail: minutes the level is held before the door opens (0 W)",
+    )
+    ap.add_argument(
+        "--standby-lift", action="store_true",
+        help="with --standby-tail: raise every earlier reading below the level to it",
+    )
+    ap.add_argument(
+        "--standby-floor", action="store_true",
+        help="with --standby-tail: replay with the #458 stop floor for the level applied",
+    )
 
     args = ap.parse_args(argv)
     overrides: dict[str, Any] = {}
@@ -1721,13 +2002,25 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.user_pause and args.halt_at is None:
         ap.error("--user-pause needs --halt-at (the plateau it pauses over)")
-    _setup_replay(args.no_shortening, args.no_stall_guard)
+    _setup_replay(args.no_shortening, args.no_stall_guard, None, args.no_dishwasher_band)
     halt = (
         (float(args.halt_at), str(args.halt_min), str(args.halt_level))
         if args.halt_at is not None else None
     )
     if args.check and halt is not None:
         ap.error("--check replays the baseline's corpus unmodified: drop --halt-at")
+    standby = (
+        {
+            "level": str(args.standby_tail), "cadence": args.standby_cadence,
+            "minutes": float(args.standby_min), "lift": bool(args.standby_lift),
+            "floor": bool(args.standby_floor),
+        }
+        if args.standby_tail is not None else None
+    )
+    if args.check and standby is not None:
+        ap.error("--check replays the baseline's corpus unmodified: drop --standby-tail")
+    if standby is not None and halt is not None:
+        ap.error("--standby-tail and --halt-at both replace the trace's tail: pick one")
     rows: list[dict[str, Any]] = []
     corpus = REPO / "cycle_data"
     if args.all_formats:
@@ -1743,12 +2036,14 @@ def main(argv: list[str] | None = None) -> int:
         "device_types": device_types or None, "overrides": overrides or None,
         "halt": halt,
         "user_pause": bool(args.user_pause),
+        "standby": standby,
     }
     if (args.jobs > 1 or args.jobs_file) and paths:
         rows = _replay_parallel(
             paths, args.jobs, args.no_shortening, args.no_stall_guard, args.loo, kw,
             Path(args.timings) if args.timings else None,
             Path(args.jobs_file) if args.jobs_file else None,
+            args.no_dishwasher_band,
         )
     else:
         for path in paths:
