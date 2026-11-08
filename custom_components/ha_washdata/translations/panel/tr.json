@@ -1565,7 +1565,7 @@
         },
         "dishwasher_end_spike_quiet_release": {
             "label": "Pasif Kurutma Sessiz Serbest Bırakma",
-            "doc": "Beklenen süreye ulaşıldıktan sonra, bulaşık makinesi son etkinliğinden beri bu kadar süre Durdurma Eşiği'nin altında kaldığında WashData son tahliyeyi beklemeyi bırakır (bu süre programın kaydedilmiş en uzun kurutma duraklamasından asla kısa olmaz). Uzun bir kurutmadan sonraki geç tahliye kaçırılıyorsa yükseltin. Bekleme asla 30 dakikayı aşmaz."
+            "doc": "Beklenen süreye ulaşıldıktan sonra, bulaşık makinesi son etkinliğinden beri bu kadar süre Durdurma Eşiği'nin altında kaldığında WashData son tahliyeyi beklemeyi bırakır (program 3 kaydedilmiş döngüye ulaştığında, bu süre programın kaydedilmiş en uzun kurutma duraklamasından asla kısa olmaz). Uzun bir kurutmadan sonraki geç tahliye kaçırılıyorsa yükseltin. Bekleme asla 30 dakikayı aşmaz."
         },
         "profile_evidence_sources": {
             "label": "Bir programı şekillendiren döngüler",

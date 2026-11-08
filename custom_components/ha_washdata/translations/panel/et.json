@@ -1238,7 +1238,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Passiivkuivatuse vaikne vabastamine",
-      "doc": "Kui eeldatav kestus on täis, lõpetab WashData lõpliku tühjenduse ootamise, kui nõudepesumasin on oma viimasest tegevusest saadik püsinud nii kaua allpool seadet Peatumise Lävi (mitte kunagi vähem kui programmi pikim salvestatud kuivatuspaus). Suurendage seda, kui pika kuivatuse järel hiline tühjendus jääb märkamata. Ootamine ei ületa kunagi 30 minutit."
+      "doc": "Kui eeldatav kestus on täis, lõpetab WashData lõpliku tühjenduse ootamise, kui nõudepesumasin on oma viimasest tegevusest saadik püsinud nii kaua allpool seadet Peatumise Lävi (kui programmil on juba 3 salvestatud tsüklit, mitte kunagi vähem kui selle pikim salvestatud kuivatuspaus). Suurendage seda, kui pika kuivatuse järel hiline tühjendus jääb märkamata. Ootamine ei ületa kunagi 30 minutit."
     },
     "anti_crease_finalize_ratio": {
       "label": "Kortsudevastase lõpetamise suhe",

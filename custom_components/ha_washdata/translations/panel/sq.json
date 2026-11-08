@@ -1549,7 +1549,7 @@
         },
         "dishwasher_end_spike_quiet_release": {
             "label": "Lirim në qetësi gjatë tharjes pasive",
-            "doc": "Pasi arrihet kohëzgjatja e pritshme, WashData ndalon pritjen për zbrazjen përfundimtare të ujit kur pjatalarësja ka qëndruar kaq gjatë nën Pragun e ndalimit që nga aktiviteti i saj i fundit (kurrë më pak se pauza më e gjatë e regjistruar e tharjes së programit). Rriteni nëse humbet një zbrazje e vonë pas një tharjeje të gjatë. Pritja nuk i kalon kurrë 30 minuta."
+            "doc": "Pasi arrihet kohëzgjatja e pritshme, WashData ndalon pritjen për zbrazjen përfundimtare të ujit kur pjatalarësja ka qëndruar kaq gjatë nën Pragun e ndalimit që nga aktiviteti i saj i fundit (sapo programi të ketë 3 cikle të regjistruara, kurrë më pak se pauza më e gjatë e regjistruar e tharjes së tij). Rriteni nëse humbet një zbrazje e vonë pas një tharjeje të gjatë. Pritja nuk i kalon kurrë 30 minuta."
         },
         "profile_evidence_sources": {
             "label": "Ciklet që formojnë një program",

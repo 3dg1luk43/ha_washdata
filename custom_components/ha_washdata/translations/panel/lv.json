@@ -1237,7 +1237,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Pasīvās žāvēšanas klusā atbrīvošana",
-      "doc": "Kad paredzētais ilgums ir sasniegts, WashData pārtrauc gaidīt beigu ūdens izvadīšanu, ja trauku mazgājamā mašīna kopš pēdējās darbības tik ilgi ir palikusi zem Apstāšanās sliekšņa (nekad ne īsāk par programmas garāko reģistrēto žāvēšanas pauzi). Palieliniet to, ja vēla izvadīšana pēc ilgas žāvēšanas tiek palaista garām. Gaidīšana nekad nepārsniedz 30 minūtes."
+      "doc": "Kad paredzētais ilgums ir sasniegts, WashData pārtrauc gaidīt beigu ūdens izvadīšanu, ja trauku mazgājamā mašīna kopš pēdējās darbības tik ilgi ir palikusi zem Apstāšanās sliekšņa (kad programmai ir 3 reģistrēti cikli, nekad ne īsāk par tās garāko reģistrēto žāvēšanas pauzi). Palieliniet to, ja vēla izvadīšana pēc ilgas žāvēšanas tiek palaista garām. Gaidīšana nekad nepārsniedz 30 minūtes."
     },
     "anti_crease_finalize_ratio": {
       "doc": "Programmas vidējā ilguma daļa, kas ciklam jāsasniedz, pirms tā zemas jaudas griešanās tiek uzskatīta par pretgrumbu asti. Žāvētājiem ar slodzes sensoru samaziniet to (piem., 0,75). Veļas mašīnām atstājiet noklusējumu (0,98), citādi mazgāšana var beigties pusceļā.",

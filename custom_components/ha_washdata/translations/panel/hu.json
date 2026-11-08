@@ -1219,7 +1219,7 @@
     "setting": {
         "dishwasher_end_spike_quiet_release": {
             "label": "Passzív szárítás csendes feloldása",
-            "doc": "A várható időtartam elérése után a WashData már nem vár a végső vízleeresztésre, ha a mosogatógép az utolsó aktivitása óta ennyi ideig a Leállítási küszöb alatt maradt (de sosem rövidebb ideig, mint a program leghosszabb rögzített szárítási szünete). Növelje, ha egy hosszú szárítás utáni késői leeresztés kimarad. A várakozás sosem haladja meg a 30 percet."
+            "doc": "A várható időtartam elérése után a WashData már nem vár a végső vízleeresztésre, ha a mosogatógép az utolsó aktivitása óta ennyi ideig a Leállítási küszöb alatt maradt (de ha a programnak már 3 rögzített ciklusa van, sosem rövidebb ideig, mint a leghosszabb rögzített szárítási szünete). Növelje, ha egy hosszú szárítás utáni késői leeresztés kimarad. A várakozás sosem haladja meg a 30 percet."
         },
         "anti_wrinkle_enabled": {
             "doc": "A szárítógép fő fűtési fázis utáni rövid, alacsony teljesítményű dobpulzusai a befejezett ciklushoz tartoznak, nem számítanak új ciklusnak.",

@@ -1202,7 +1202,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Liberación en silencio del secado pasivo",
-      "doc": "Una vez alcanzada la duración esperada, WashData deja de esperar el vaciado final cuando el lavavajillas lleva este tiempo por debajo del Umbral de parada desde su última actividad (nunca menos que la pausa de secado más larga registrada del programa). Súbalo si se pierde un vaciado tardío después de un secado largo. La espera nunca supera los 30 minutos."
+      "doc": "Una vez alcanzada la duración esperada, WashData deja de esperar el vaciado final cuando el lavavajillas lleva este tiempo por debajo del Umbral de parada desde su última actividad (una vez que el programa tenga 3 ciclos registrados, nunca menos que su pausa de secado más larga registrada). Súbalo si se pierde un vaciado tardío después de un secado largo. La espera nunca supera los 30 minutos."
     },
     "anti_crease_finalize_ratio": {
       "label": "Proporción de finalización antiarrugas",

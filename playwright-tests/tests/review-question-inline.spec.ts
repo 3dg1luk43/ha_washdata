@@ -348,6 +348,28 @@ test('the cycle dialog banner offers the same answers without a confidence figur
   await expect(legend.locator('[data-leg="expected"]')).toHaveText('Expected (Quick 30°C)');
 });
 
+test('answering the other programme in the dialog drops the old programme\'s curve', async ({ page }) => {
+  await bootWithQuestion(page);
+  await clickTab(page, 'history');
+  await page.locator('tr[data-cid="cyc-003"]').click();
+  const modal = page.locator('.wd-modal');
+  await expect(modal.locator('.wd-review-answers button')).toHaveCount(4, { timeout: 5_000 });
+  const env = () => page.evaluate(() => {
+    const m = (document.getElementById('wd-panel') as any)._modal;
+    return m && m.profileEnv ? 'set' : 'none';
+  });
+  await expect.poll(env).toBe('set');   // the suspected Eco 60°C curve
+
+  // The new programme's envelope cannot be fetched: Eco 60°C's curve must not stay
+  // on the chart under the name Quick 30°C.
+  await page.evaluate(() => (window as any).__set_error('ha_washdata/get_profile_envelope'));
+  await setHandler(page, 'ha_washdata/resolve_feedback', { success: true });
+  await setHandler(page, 'ha_washdata/get_feedbacks', { feedbacks: [] });
+  await modal.locator('.wd-review-answers button', { hasText: 'Quick 30°C' }).click();
+  await assertWsCalled(page, 'ha_washdata/resolve_feedback', 1);
+  await expect.poll(env).toBe('none');
+});
+
 test('a viewer sees no question and no answers', async ({ page }) => {
   await page.goto('/');
   await bootPanel(page, {

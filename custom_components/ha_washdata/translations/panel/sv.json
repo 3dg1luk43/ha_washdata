@@ -1238,7 +1238,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Frisläpp efter tyst torkfas",
-      "doc": "När den förväntade längden har nåtts slutar WashData vänta på den sista tömningen om diskmaskinen har legat under Stopptröskel så länge sedan sin senaste aktivitet (aldrig kortare än programmets längsta registrerade torkpaus). Höj den om en sen tömning efter lång torkning missas. Väntan överstiger aldrig 30 minuter."
+      "doc": "När den förväntade längden har nåtts slutar WashData vänta på den sista tömningen om diskmaskinen har legat under Stopptröskel så länge sedan sin senaste aktivitet (när programmet har 3 registrerade cykler, aldrig kortare än dess längsta registrerade torkpaus). Höj den om en sen tömning efter lång torkning missas. Väntan överstiger aldrig 30 minuter."
     },
     "anti_crease_finalize_ratio": {
       "label": "Kvot för skrynkelskyddsavslut",

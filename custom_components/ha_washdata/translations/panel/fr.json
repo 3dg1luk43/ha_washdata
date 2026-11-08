@@ -1202,7 +1202,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Libération au silence du séchage passif",
-      "doc": "Une fois la durée attendue atteinte, WashData cesse d'attendre la vidange finale lorsque le lave-vaisselle est resté sous le Seuil d'arrêt pendant cette durée depuis sa dernière activité (jamais moins que la plus longue pause de séchage enregistrée du programme). Augmentez-le si une vidange tardive après un long séchage est manquée. L'attente ne dépasse jamais 30 minutes."
+      "doc": "Une fois la durée attendue atteinte, WashData cesse d'attendre la vidange finale lorsque le lave-vaisselle est resté sous le Seuil d'arrêt pendant cette durée depuis sa dernière activité (une fois que le programme compte 3 cycles enregistrés, jamais moins que sa plus longue pause de séchage enregistrée). Augmentez-le si une vidange tardive après un long séchage est manquée. L'attente ne dépasse jamais 30 minutes."
     },
     "anti_crease_finalize_ratio": {
       "label": "Ratio de finalisation anti-froissement",

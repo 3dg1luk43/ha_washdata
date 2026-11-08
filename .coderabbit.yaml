@@ -132,7 +132,10 @@ reviews:
         - NumPy is the only third-party dependency, ml/ included. Flag any new import of scipy, sklearn, pandas or torch.
         - All HA code is async. CPU-heavy NumPy work runs in the executor; long jobs go through task_registry.py, never tied only to a WebSocket request.
         - Timestamps: dt_util.now(), never datetime.now(). Intervals (elapsed, dt, durations): time_utils.utc_now() and dt_util.as_utc(); local-time subtraction is an hour off across DST.
-        - Energy: signal_processing.integrate_wh() + energy_gap_threshold_s(). Flag a new inline trapezoid.
+        - Energy: a STORED cycle's energy_wh (cycle end, add, trim, merge, split, history import,
+          the v18 migration) goes through signal_processing.integrate_cycle_wh() (each reading held
+          to the next, only gaps > 1 h dropped; #498). End gates, cost weighting and ML features
+          keep integrate_wh() + energy_gap_threshold_s(). Flag a new inline integral.
         - No user-facing English in Python: HA labels go in strings.json and translations/en.json. Exception: ws_api send_error() diagnostics are inline by design (the panel wraps them in its own translated toast).
         - Tunables live in entry.options, identity keys in entry.data. Device type, brand and model are in entry.options; reading them from entry.data breaks detection.
         - HA event data has a 32 KB limit: never put power_data, debug_data or power_trace in an event.

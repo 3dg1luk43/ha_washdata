@@ -1238,7 +1238,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Losun eftir hljóðláta þurrkun",
-      "doc": "Þegar væntanlegri lengd er náð hættir WashData að bíða eftir lokaútdælingunni ef uppþvottavélin hefur verið undir Stöðvunarþröskuldi svona lengi frá síðustu virkni (aldrei skemur en lengsta skráða þurrkhlé kerfisins). Hækkaðu það ef sein útdæling eftir langa þurrkun fer fram hjá. Biðin fer aldrei yfir 30 mínútur."
+      "doc": "Þegar væntanlegri lengd er náð hættir WashData að bíða eftir lokaútdælingunni ef uppþvottavélin hefur verið undir Stöðvunarþröskuldi svona lengi frá síðustu virkni (þegar kerfið hefur 3 skráðar lotur, aldrei skemur en lengsta skráða þurrkhlé þess). Hækkaðu það ef sein útdæling eftir langa þurrkun fer fram hjá. Biðin fer aldrei yfir 30 mínútur."
     },
     "anti_crease_finalize_ratio": {
       "label": "Hlutfall fyrir lok hrukkuvarnar",
