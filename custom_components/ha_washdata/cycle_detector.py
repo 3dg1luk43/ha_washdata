@@ -367,12 +367,21 @@ def effective_anticrease_finalize_ratio(value: Any) -> float:
     )
 
 
-def effective_smart_termination_ratio(value: float) -> float:
+def effective_smart_termination_ratio(value: Any) -> float:
     """The Smart Termination duration ratio the gate applies: held to the
     documented [0.50, 1.00]. Shared with the Playground's config summary, which
-    reported a typed 2.0 that ran as 1.0 (#487).
+    reported a typed 2.0 that ran as 1.0 (#487). Anything unusable (non-numeric,
+    an oversized int, non-finite) falls back to the default, as
+    :func:`effective_anticrease_finalize_ratio` does: a NaN would otherwise clamp
+    to the loosest 0.50.
     """
-    return min(1.0, max(0.5, float(value)))
+    try:
+        ratio = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return DEFAULT_SMART_TERMINATION_DURATION_RATIO
+    if not math.isfinite(ratio):
+        return DEFAULT_SMART_TERMINATION_DURATION_RATIO
+    return min(1.0, max(0.5, ratio))
 
 
 def effective_curve_preroll_seconds(value: Any) -> float:

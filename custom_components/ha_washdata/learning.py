@@ -1062,6 +1062,14 @@ class LearningManager:
             return False
         if profile_name not in self.profile_store.get_profiles():
             return False
+        if not any(c.get("id") == cycle_id for c in self.profile_store.get_past_cycles()):
+            # The cycle went (a replace import, say) and left its request behind: a
+            # tap on its old notification must not record an answer that labels
+            # nothing and still spends the programme's review budget.
+            self.profile_store.get_pending_feedback().pop(cycle_id, None)
+            await self.profile_store.async_save()
+            async_dispatcher_send(self.hass, f"ha_washdata_update_{self.entry_id}")
+            return False
         if profile_name == pending.get("detected_profile"):
             return await self.async_submit_cycle_feedback(cycle_id, user_confirmed=True)
         return await self.async_submit_cycle_feedback(

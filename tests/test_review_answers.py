@@ -133,6 +133,17 @@ async def test_an_unknown_programme_or_no_request_answers_nothing(mock_hass_lear
     assert "c1" in store.pending and store.feedback == {}
 
 
+async def test_an_answer_for_a_cycle_no_longer_stored_drops_the_request(mock_hass_learning) -> None:  # noqa: F811
+    # A replace import took the cycle and left its request: a tap on the old
+    # notification records nothing (no budget spent) and clears the request.
+    mgr, store = _learning_manager(mock_hass_learning, labeled_count=6)
+    _pending(store)
+    store.past_cycles.clear()
+    assert await mgr.async_answer_review("c1", "Eco 60") is False
+    assert store.feedback == {}
+    assert "c1" not in store.pending
+
+
 # ── get_feedbacks ─────────────────────────────────────────────────────────────
 
 def _get_feedbacks(pending: dict[str, Any], cycles: list[dict[str, Any]]) -> list[dict[str, Any]]:

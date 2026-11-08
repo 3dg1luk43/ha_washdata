@@ -228,6 +228,35 @@ def test_an_elastic_stage_gets_the_cores_nothing_else_can_use(tmp_path, monkeypa
     assert row.split()[2] == "1>2"
 
 
+def test_an_elastic_stage_still_grows_while_an_alone_stage_waits(tmp_path, monkeypatch):
+    """`full --box`: the box stays queued until the rest finish; it must not stop the
+    elastic stage growing into the cores the others free."""
+    def waits_for_two(c, logs):
+        grant = logs / "grow.cores"
+        return [_py(
+            "import pathlib, sys, time\n"
+            f"p = pathlib.Path({str(grant)!r})\n"
+            "end = time.monotonic() + 20\n"
+            "while time.monotonic() < end:\n"
+            "    if p.read_text().strip() == '2':\n"
+            "        sys.exit(0)\n"
+            "    time.sleep(0.05)\n"
+            "sys.exit(1)\n"
+        )]
+
+    stages = [
+        verify.Stage("grow", ("quick",), waits_for_two, 100, max_cores=2, elastic=True),
+        verify.Stage("short", ("quick",), lambda c, logs: [_py("")], 50),
+        verify.Stage("box", ("quick",), lambda c, logs: [_py("")], 1000, alone=True),
+    ]
+    monkeypatch.setattr(verify, "_stages", lambda: stages)
+    monkeypatch.setattr(verify, "changed_files", lambda: [])
+    args = verify.parse_args(["--cores", "2", "--timings", "", "--logs", str(tmp_path)])
+    lines: list[str] = []
+    assert verify.run(args, verify.select(args), out=lines.append) == 0
+    assert any("grow  grow to 2 cores" in ln for ln in lines), lines
+
+
 
 def test_an_alone_stage_starts_after_every_other_stage(tmp_path, monkeypatch):
     """The box waits for the rest and runs on an idle host (register item 589)."""

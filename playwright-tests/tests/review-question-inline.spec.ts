@@ -213,6 +213,27 @@ test('picking the runner-up corrects to it and its tile goes', async ({ page }) 
   await expect(page.locator('.wd-review-q-count')).toHaveText('To review: 1');
 });
 
+test('a request answered outside the panel is not asked again when the next one arrives', async ({ page }) => {
+  await bootWithQuestion(page);
+  await openQuestion(page);
+  const tiles = page.locator('.wd-review-q .wd-review-tile');
+  await expect(tiles).toHaveAttribute('data-review-cid', 'cyc-003');
+  const poll = () => page.evaluate(() => (document.getElementById('wd-panel') as any)._fetchAll());
+
+  // A notification action answers it: the next poll sees no request waiting.
+  await setHandler(page, 'ha_washdata/get_devices', devices(deviceIdle, { feedback_count: 0 }));
+  await setHandler(page, 'ha_washdata/get_feedbacks', { feedbacks: [] });
+  await poll();
+  await expect(page.locator('.wd-review-q')).toHaveCount(0, { timeout: 5_000 });
+
+  // A new request brings the count back to 1: it is fetched and asked.
+  await setHandler(page, 'ha_washdata/get_devices', devices(deviceIdle, { feedback_count: 1 }));
+  await setHandler(page, 'ha_washdata/get_feedbacks', { feedbacks: [SECOND] });
+  await poll();
+  await expect(tiles).toHaveCount(1, { timeout: 5_000 });
+  await expect(tiles).toHaveAttribute('data-review-cid', 'cyc-004');
+});
+
 test('picking the detected programme confirms it', async ({ page }) => {
   await bootWithQuestion(page);
   await openQuestion(page);

@@ -5200,6 +5200,10 @@ class HaWashdataPanel extends HTMLElement {
     if (!dev || !this._canEdit() || !dev.feedback_count) {
       const had = !!this._reviewQ;
       this._reviewQ = null;
+      // An answer from outside the panel (a notification action) took the count
+      // to 0: forget the count seen, or the next request, bringing it back to the
+      // same number, would not refetch and the old request would still show.
+      this._feedbacksSeenCount = null;
       return had;
     }
     const eid = dev.entry_id;

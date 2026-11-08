@@ -67,6 +67,11 @@ nag_count() {
   grep -c "$NAG" "$CAPTURE" || true
 }
 
+# --reuse keeps the capture file, and an earlier run's reminders with it: count
+# only the ones sent after this run's baseline (taken before the cycle).
+NAG0=0
+nag_sent() { echo $(( $(nag_count) - NAG0 )); }
+
 FAIL=0
 check() {  # check <label> <got> <expected>
   if [ "$2" = "$3" ]; then
@@ -95,6 +100,8 @@ $HACTL restart > /dev/null
 # door is seeded after it (closed: only a closed door enters Clean).
 $HACTL set-state "$DOOR" off device_class=door > /dev/null
 
+NAG0=$(nag_count)
+
 echo
 echo "== one cycle through both"
 $HACTL set "$SENSOR" 0
@@ -114,10 +121,10 @@ check "door sensor: Clean" "$(state_of sensor.clean_door_state)" clean
 echo
 echo "== the reminder goes out once (the expiry tick runs every 60 s)"
 for _ in $(seq 1 30); do
-  [ "$(nag_count)" -ge 1 ] && break
+  [ "$(nag_sent)" -ge 1 ] && break
   sleep 5
 done
-check "reminder sent" "$(nag_count)" 1
+check "reminder sent" "$(nag_sent)" 1
 START_A=$(clean_record "$ENTRY_A" start)
 check "written while HA runs (no unload on a restart)" \
   "$(clean_record "$ENTRY_A" notified)" True
@@ -128,8 +135,10 @@ $HACTL restart > /dev/null
 sleep 5
 check "no door sensor: still Clean" "$(state_of sensor.clean_restart_state)" clean
 check "door sensor: still Clean" "$(state_of sensor.clean_door_state)" clean
+# Not unavailable: `unknown` on a fresh box, an earlier run's press time on --reuse.
+BTN=$(state_of button.clean_restart_mark_unloaded)
 check "Mark Unloaded still available" \
-  "$(state_of button.clean_restart_mark_unloaded)" unknown
+  "$([ "$BTN" != unavailable ] && echo available || echo "$BTN")" available
 check "original Clean start kept" "$(clean_record "$ENTRY_A" start)" "$START_A"
 
 echo
@@ -142,7 +151,7 @@ check "no door sensor: Clean after a crash" "$(state_of sensor.clean_restart_sta
 check "original Clean start kept" "$(clean_record "$ENTRY_A" start)" "$START_A"
 echo "  [ ..  ] waiting 150 s: a resent reminder would arrive in that time"
 sleep 150
-check "reminder not sent again" "$(nag_count)" 1
+check "reminder not sent again" "$(nag_sent)" 1
 
 echo
 echo "== the unload is still confirmable after the restarts"

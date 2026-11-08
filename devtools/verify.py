@@ -619,9 +619,9 @@ def run(
         if res.grant is not None:
             write_grant(res.grant, cores)
 
-    def remaining_work() -> float:
+    def remaining_work(skip_alone: bool = False) -> float:
         now = clock()
-        left = sum(work[s.name] for s in queued)
+        left = sum(work[s.name] for s in queued if not (skip_alone and s.alone))
         for name, r in running.items():
             used = r.core_s + (now - r.since) * r.cores_now
             left += max(0.0, work[name] - used)
@@ -642,7 +642,9 @@ def run(
             startable = [q for q in queued if not (q.alone and others_left)]
             if any(stage_alone.get(n) for n in running):
                 startable = []
-            for s, c, kind in plan(startable, work, free, budget, remaining_work(),
+            # A waiting alone stage cannot take a share yet, so its work does not
+            # shrink the others'.
+            for s, c, kind in plan(startable, work, free, budget, remaining_work(others_left),
                                    bool(running), slot_taken):
                 queued.remove(s)
                 free -= c if kind == "budget" else 0
@@ -658,8 +660,10 @@ def run(
                 threading.Thread(target=_run_stage, args=(s, c, logs, res, done, procs),
                                  daemon=True).start()
             # Nothing left to start: cores that would sit idle go to running stages
-            # that can take more workers mid-run (largest remaining work first).
-            if not queued and free > 0:
+            # that can take more workers mid-run (largest remaining work first). An
+            # alone stage still queued starts only once these have finished, so it
+            # does not hold them back.
+            if free > 0 and all(q.alone for q in queued):
                 stage_of = {st.name: st for st in stages}
                 now = clock()
                 for name in sorted(running, key=lambda n: -work[n]):
