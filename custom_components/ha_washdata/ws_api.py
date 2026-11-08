@@ -644,9 +644,11 @@ _OPTIONS_IDENTITY_KEYS = frozenset({CONF_NAME})
 # post-3.6, so they arrived through the other door. Found by the test box
 # (devtools/testbox) on its first run; see register item 317.
 #
-# Deliberately NOT here: the notify_*_services lists. They also name the source
-# user's targets, but they are shown plainly in the panel's Notifications
-# section, and carrying them is usually the point when migrating your own setup.
+# The notification actions and the notify_*_services lists are here too since
+# GHSA-2c9v-w74f-jgqw (#507): WashData calls them with no user in the context,
+# so a shared export could plant a service or script an admin then runs as the
+# system by importing it. An import keeps this device's own notification
+# targets; restoring your own export means picking them again.
 _IMPORT_LOCAL_BINDING_KEYS = _OPTIONS_IDENTITY_KEYS | frozenset({
     CONF_POWER_SENSOR,
     CONF_ENERGY_SENSOR,
@@ -657,6 +659,10 @@ _IMPORT_LOCAL_BINDING_KEYS = _OPTIONS_IDENTITY_KEYS | frozenset({
     CONF_EXTERNAL_END_TRIGGER,
     CONF_LINKED_DEVICE,
     CONF_NOTIFY_PEOPLE,
+    CONF_NOTIFY_ACTIONS,
+    CONF_NOTIFY_START_SERVICES,
+    CONF_NOTIFY_FINISH_SERVICES,
+    CONF_NOTIFY_LIVE_SERVICES,
 })
 
 # Everything an import drops from the payload's options: this device's bindings,

@@ -191,3 +191,32 @@ async def test_the_guard_covers_the_keys_a_selector_can_clear():
     assert {CONF_DOOR_SENSOR_ENTITY, CONF_SWITCH_ENTITY} <= cleared, cleared
     not_guarded = cleared - ws_api._IMPORT_LOCAL_BINDING_KEYS
     assert not not_guarded, f"not guarded on import: {sorted(not_guarded)}"
+
+
+async def test_import_never_plants_notification_actions_or_services():
+    """GHSA-2c9v-w74f-jgqw: WashData runs notify_actions and calls the notify
+    services with no user in the context, so a shared export must not set them;
+    the device keeps its own."""
+    own = {
+        "notify_actions": [{"action": "notify.mobile_app_mine", "data": {"message": "x"}}],
+        "notify_finish_services": ["notify.mobile_app_mine"],
+    }
+    entry = _entry({**own, CONF_MIN_POWER: 5.0})
+    hass, manager = _hass()
+
+    saved = await _import(
+        entry, hass, manager,
+        {
+            "notify_actions": [{"action": "homeassistant.restart"}],
+            "notify_start_services": ["script.anything"],
+            "notify_finish_services": ["hassio.backup_full"],
+            "notify_live_services": ["shell_command.x"],
+            CONF_OFF_DELAY: 300,
+        },
+    )
+
+    assert saved.get("notify_actions") == own["notify_actions"]
+    assert saved.get("notify_finish_services") == own["notify_finish_services"]
+    assert "notify_start_services" not in saved
+    assert "notify_live_services" not in saved
+    assert saved[CONF_OFF_DELAY] == 300
