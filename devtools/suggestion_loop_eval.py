@@ -741,9 +741,9 @@ def run_passes(mgr: Any, cad: tuple[float, float] | None) -> dict[str, Any]:
     passed: dict[str, Any] = {}
     orig_apply = eng.apply_suggestions
 
-    def _capture(sug: dict[str, Any]) -> None:
+    def _capture(sug: dict[str, Any], **kwargs: Any) -> None:
         passed.update(copy.deepcopy(sug))
-        orig_apply(sug)
+        orig_apply(sug, **kwargs)
 
     eng.apply_suggestions = _capture
     try:

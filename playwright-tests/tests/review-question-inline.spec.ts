@@ -234,6 +234,42 @@ test('a zoomed tile does not pass its zoom to the cycle that moves into its plac
   await expect.poll(zoom0).toBeNull();
 });
 
+test('a failed request-list refetch is retried on the next poll', async ({ page }) => {
+  await bootWithQuestion(page, [REQUEST, SECOND]);
+  await openQuestion(page);
+  const tiles = page.locator('.wd-review-q .wd-review-tile');
+  await expect(tiles).toHaveCount(2);
+  const poll = () => page.evaluate(() => (document.getElementById('wd-panel') as any)._fetchAll());
+
+  // cyc-003 is answered outside the panel; the refetch that follows fails.
+  await setHandler(page, 'ha_washdata/get_devices', devices(deviceIdle, { feedback_count: 1 }));
+  await setHandler(page, 'ha_washdata/get_feedbacks', { feedbacks: [SECOND] });
+  await page.evaluate(() => (window as any).__set_error('ha_washdata/get_feedbacks'));
+  await poll();
+  // The next poll (same count) fetches again and drops the answered request.
+  await page.evaluate(() => { delete (window as any).__ws_errors['ha_washdata/get_feedbacks']; });
+  await poll();
+  await expect(tiles).toHaveCount(1, { timeout: 5_000 });
+  await expect(tiles).toHaveAttribute('data-review-cid', 'cyc-004');
+});
+
+test('a failed candidate-curve fetch is retried on the next poll', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {
+    'ha_washdata/get_devices': devices(deviceIdle, { feedback_count: 1 }),
+    'ha_washdata/get_feedbacks': { feedbacks: [REQUEST] },
+    'ha_washdata/get_profile_envelope': ENVELOPE,
+  });
+  await page.evaluate(() => (window as any).__set_error('ha_washdata/get_profile_envelope'));
+  await openQuestion(page);
+  await expect(page.locator('#wd-review-canvas-0')).toBeVisible({ timeout: 5_000 });
+  await expect.poll(() => drawnReviewSeries(page)).toEqual([]);
+
+  await page.evaluate(() => { delete (window as any).__ws_errors['ha_washdata/get_profile_envelope']; });
+  await page.evaluate(() => (document.getElementById('wd-panel') as any)._fetchAll());
+  await expect.poll(() => drawnReviewSeries(page), { timeout: 5_000 }).toHaveLength(2);
+});
+
 test('a request answered outside the panel is not asked again when the next one arrives', async ({ page }) => {
   await bootWithQuestion(page);
   await openQuestion(page);

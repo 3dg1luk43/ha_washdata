@@ -2244,7 +2244,7 @@ class SuggestionEngine:
         # sit inside the cycles, so 0.8 x it is under standby (#458).
         return apply_standby_floor(suggestions, self._standby_floor(_batch_opts))
 
-    def apply_suggestions(self, suggestions: dict[str, Any]) -> None:
+    def apply_suggestions(self, suggestions: dict[str, Any], *, changed: bool = False) -> None:
         """Persist suggestions to the profile store, then reconcile the full set.
 
         After storing the new values, cross-parameter invariants are enforced
@@ -2255,7 +2255,9 @@ class SuggestionEngine:
         A suggestion already stored with the same value and reason is left as it
         is, and the store is saved only when something changed (#510): the
         operational pass re-sends the same pending values every five minutes of a
-        running cycle, and each re-send rewrote the whole store.
+        running cycle, and each re-send rewrote the whole store. ``changed``: the
+        caller already changed the stored set (it deleted a suggestion), so save
+        even when nothing here does.
         """
         stored = self.profile_store.get_suggestions()
         updated: list[str] = []
@@ -2275,7 +2277,7 @@ class SuggestionEngine:
 
         reconciled = self._reconcile_stored_suggestions()
 
-        if self.hass and (updated or reconciled):
+        if self.hass and (updated or reconciled or changed):
             save = self.profile_store.async_save()
             if self._spawn_fn is not None:
                 self._spawn_fn(save)

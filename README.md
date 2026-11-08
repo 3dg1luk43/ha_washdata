@@ -116,6 +116,8 @@ wait before WashData calls the end; `clean` means finished with the load still i
 | `ha_washdata.record_start` / `record_stop` | record a program from a button |
 | `ha_washdata.label_cycle`, `auto_label_cycles` | label stored cycles |
 | `ha_washdata.mark_unloaded` | confirm the load is out (NFC tag, button) |
+| `ha_washdata.mark_maintenance_done` | tick off a maintenance task (kiosk button, NFC tag) |
+| `ha_washdata.delete_cycle` | delete a stored cycle, e.g. with `trigger.cycle_id` |
 | `ha_washdata.export_config` / `import_config` | back up or restore one device (administrators) |
 
 ```yaml

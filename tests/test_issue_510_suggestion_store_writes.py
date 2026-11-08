@@ -200,3 +200,25 @@ async def test_a_changed_suggestion_is_still_saved(
     engine.apply_suggestions({key: {**item, "value": item["value"] + 7}})
     await hass.async_block_till_done()
     assert len(writes) == 1
+
+
+async def test_a_deleted_suggestion_is_saved_when_the_rest_is_unchanged(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """The learning pass drops a locked key and re-sends the rest unchanged:
+    apply_suggestions changes nothing itself, but the deletion must reach disk, or
+    the locked suggestion comes back at the next restart."""
+    entry = await setup_washdata_entry(power_sensor=POWER, options=FAST)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    await _one_cycle_then_idle(hass, freezer, manager)
+    store = manager.profile_store
+    stored = {k: dict(v) for k, v in store.get_suggestions().items()}
+    assert len(stored) >= 2, "the cycle should leave at least two suggestions"
+    gone = next(iter(stored))
+    store._data["locked_suggestions"] = [gone]  # locked, still pending
+
+    writes = _count_main_store_writes(manager)
+    manager.learning_manager._apply_suggestions_and_notify(stored)
+    await hass.async_block_till_done()
+    assert gone not in store.get_suggestions()
+    assert len(writes) == 1

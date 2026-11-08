@@ -11461,6 +11461,18 @@ class ProfileStore:
             # Try to match
             result = await self.async_match_profile(power_data, cycle["duration"])
 
+            # The match awaited the executor. A cycle deleted, merged or split
+            # away meanwhile (the delete action and the panel's per-cycle edits
+            # take no write lock) is not labelled, so no profile is rebuilt for a
+            # cycle the store no longer holds.
+            pool = (
+                self.get_backfill_cycles() if is_backfill
+                else self._data.get("past_cycles", [])
+            )
+            if not any(c is cycle for c in pool):
+                stats["skipped"] += 1
+                continue
+
             # The same verdict the cycle-end labeller applies (item 387c).
             if label_verdict(result, confidence_threshold)[0]:
                 current_label = cycle.get("profile_name")

@@ -367,7 +367,9 @@ class LearningManager:
                 self._spawn(self.profile_store.async_save())
             return
 
-        self.suggestion_engine.apply_suggestions(filtered_suggestions)
+        # A deletion above is unsaved until a write: apply_suggestions saves only
+        # when it changes something itself (#510), so tell it.
+        self.suggestion_engine.apply_suggestions(filtered_suggestions, changed=any_deleted)
 
     def process_power_reading(
         self, _power: float, now: datetime, last_reading_time: datetime | None

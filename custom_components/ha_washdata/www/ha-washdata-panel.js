@@ -4375,7 +4375,8 @@ class HaWashdataPanel extends HTMLElement {
   async _fetchFeedbacks(eid) {
     // `_feedbacksEid` names the device the list belongs to, so the Overview's
     // review question never shows another device's request after a switch.
-    try { const r = await this._ws({ type: `${_DOMAIN}/get_feedbacks`, entry_id: eid }); this._feedbacks = r.feedbacks || []; this._feedbacksEid = eid; } catch (_) {}
+    // True when the list was fetched (a caller that tracks it can retry otherwise).
+    try { const r = await this._ws({ type: `${_DOMAIN}/get_feedbacks`, entry_id: eid }); this._feedbacks = r.feedbacks || []; this._feedbacksEid = eid; return true; } catch (_) { return false; }
   }
 
   async _fetchPhases(eid) {
@@ -5209,8 +5210,10 @@ class HaWashdataPanel extends HTMLElement {
     const eid = dev.entry_id;
     let changed = false;
     if (this._feedbacksEid !== eid || this._feedbacksSeenCount !== dev.feedback_count) {
-      this._feedbacksSeenCount = dev.feedback_count;
-      await this._fetchFeedbacks(eid);
+      // Recorded only once the list is in: a failed fetch is retried next poll
+      // instead of leaving the old requests matched to the new count.
+      const count = dev.feedback_count;
+      if (await this._fetchFeedbacks(eid)) this._feedbacksSeenCount = count;
       changed = true;
     }
     if (!this._reviewQ || this._reviewQ.eid !== eid) this._reviewQ = { eid, curves: {}, envs: {} };
@@ -5223,14 +5226,17 @@ class HaWashdataPanel extends HTMLElement {
     // Claimed before the await, so an overlapping poll does not fetch them again.
     cids.forEach(c => { q.curves[c] = null; });
     names.forEach(n => { q.envs[n] = null; });
+    // A failed request resolves to undefined and is dropped from the cache, so the
+    // next poll retries it; a profile with no envelope stays cached as null.
     const [curves, envs] = await Promise.all([
-      Promise.all(cids.map(cid => this._ws({ type: `${_DOMAIN}/get_cycle_power_data`, entry_id: eid, cycle_id: cid }).catch(() => null))),
+      Promise.all(cids.map(cid => this._ws({ type: `${_DOMAIN}/get_cycle_power_data`, entry_id: eid, cycle_id: cid }).catch(() => undefined))),
       Promise.all(names.map(n => this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: eid, profile_name: n })
-        .then(r => (r && r.envelope) || null).catch(() => null))),
+        .then(r => (r && r.envelope) || null).catch(() => undefined))),
     ]);
     if (this._reviewQ !== q) return true;  // switched device or answered meanwhile
-    cids.forEach((c, i) => { q.curves[c] = curves[i]; });
-    names.forEach((n, i) => { q.envs[n] = envs[i]; });
+    const keep = (cache, k, v) => { if (v === undefined) delete cache[k]; else cache[k] = v; };
+    cids.forEach((c, i) => keep(q.curves, c, curves[i]));
+    names.forEach((n, i) => keep(q.envs, n, envs[i]));
     return true;
   }
 
