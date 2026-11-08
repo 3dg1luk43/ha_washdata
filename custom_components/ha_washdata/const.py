@@ -1257,6 +1257,17 @@ STANDBY_BAND_FINALIZE_DEVICE_TYPES = (
     DEVICE_TYPE_WASHER_DRYER,
     DEVICE_TYPE_DRYER,
 )
+# #518: a dishwasher can idle above its stop threshold too (1.7 W on a 1.2 W stop),
+# and then nothing closes the cycle until the power changes. It gets the finalise's
+# near-stop tier only, and only once the run has had its programme's terminal event:
+# the last run above TERMINAL_EVENT_PEAK_FRAC of the peak is a low-power event
+# (<= TERMINAL_EVENT_MAX_PEAK_FRAC) ending at >= DISHWASHER_END_SPIKE_MIN_PROGRESS of
+# the expected duration, after a quiet of at least half the matched profile's measured
+# terminal quiet (element 11; unmeasured = no finalise). A dishwasher's drying is a
+# flat standby-level plateau too, so without that evidence a run matched to a
+# shorter programme would be closed before its pump-out. Not in the tuple above:
+# that one also arms the stall display and the #399 spin guard.
+STANDBY_BAND_TERMINAL_EVENT_DEVICE_TYPES = (DEVICE_TYPE_DISHWASHER,)
 # Only past the programme's own expected duration (#445). Was 2.0, which on the
 # reporter's 91 min Miele meant 91.5 minutes of idle before the cycle closed:
 # that machine sits at 3.2-3.5 W after a programme ends, above its 2.56 W stop

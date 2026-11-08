@@ -36,6 +36,8 @@ from .time_utils import utc_now
 from .const import (
     DEFAULT_ANTI_WRINKLE_EXIT_POWER,
     TERMINAL_EVENT_PEAK_FRAC,
+    TERMINAL_EVENT_MAX_PEAK_FRAC,
+    TERMINAL_QUIET_MIN_S,
     DISHWASHER_QUIET_RELEASE_TERMINAL_MARGIN,
     ANTI_WRINKLE_ELIGIBLE_REASONS,
     TerminationReason,
@@ -81,6 +83,7 @@ from .const import (
     END_GATE_HAZARD_MIN_CYCLES,
     END_GATE_HAZARD_POSITION_SLACK,
     STANDBY_BAND_FINALIZE_DEVICE_TYPES,
+    STANDBY_BAND_TERMINAL_EVENT_DEVICE_TYPES,
     STANDBY_BAND_MIN_RATIO,
     STANDBY_BAND_LOOSE_MIN_RATIO,
     STANDBY_BAND_NEAR_STOP_FACTOR,
@@ -197,7 +200,9 @@ from .signal_processing import (
     integrate_wh,
     median_fast,
     percentile_linear,
+    TERMINAL_QUIET_SEEN_FRAC,
     terminal_event_end,
+    terminal_event_measure,
     terminal_quiet_seen,
 )
 
@@ -1039,6 +1044,9 @@ class CycleDetector:
         # (`_release_orphaned_pause`). 0.0: no evidence, the floor applies.
         self._orphaned_pause_evidence_s: float = 0.0
         self._terminal_quiet_memo: tuple[Any, bool] | None = None
+        # `_terminal_event_so_far`'s memo (#518): (cycle start, gate spans, readings
+        # checked, the last of them, the event threshold, the result).
+        self._terminal_event_memo: tuple[Any, int, int, datetime, float, Any] | None = None
         # One-shot per cycle, so the held-finalise reason is visible in the log
         # without repeating it on every reading.
         self._anticrease_spin_wait_logged: bool = False
@@ -4951,7 +4959,9 @@ class CycleDetector:
         an active low-power phase:
 
         * the device is a wet appliance where a stuck baseline is unambiguously
-          anomalous (``STANDBY_BAND_FINALIZE_DEVICE_TYPES``);
+          anomalous (``STANDBY_BAND_FINALIZE_DEVICE_TYPES``), or a dishwasher
+          that has had its programme's terminal event (#518,
+          ``STANDBY_BAND_TERMINAL_EVENT_DEVICE_TYPES``: near-stop tier only);
         * a profile is matched and elapsed >= ``STANDBY_BAND_MIN_RATIO`` x the
           expected duration (well past when it should have ended);
         * not user-paused;
@@ -4963,7 +4973,8 @@ class CycleDetector:
         The expensive window scan runs only after the cheap duration gate passes,
         so normal cycles never pay for it.
         """
-        if self._config.device_type not in STANDBY_BAND_FINALIZE_DEVICE_TYPES:
+        needs_event = self._config.device_type in STANDBY_BAND_TERMINAL_EVENT_DEVICE_TYPES
+        if self._config.device_type not in STANDBY_BAND_FINALIZE_DEVICE_TYPES and not needs_event:
             return None
         if getattr(self, "_verified_pause", False):
             return None
@@ -5082,11 +5093,98 @@ class CycleDetector:
             # loose tier below still bounds it at STANDBY_BAND_LOOSE_MIN_RATIO x
             # expected.
             and not self._stall_holds_standby_band()
+            # #518: a dishwasher's drying is this same plateau, so only a run that
+            # has had its terminal event is past it (the pump-out it dries for).
+            and (not needs_event or self._terminal_event_seen(timestamp))
         ):
             return hi
+        if needs_event:
+            return None  # #518: the near-stop tier only
         if current_duration >= self._expected_duration * STANDBY_BAND_LOOSE_MIN_RATIO:
             return hi
         return None
+
+    def _terminal_event_seen(self, timestamp: datetime) -> bool:
+        """Has this dishwasher run had its programme's terminal event? (#518)
+
+        The pump-out after the drying phase, read the way the matched profile's
+        terminal signature reads it (``terminal_event_measure`` at its thresholds):
+        the last run above ``TERMINAL_EVENT_PEAK_FRAC`` of the cycle's peak is a
+        low-power event (``TERMINAL_EVENT_MAX_PEAK_FRAC``), after a quiet of at
+        least ``TERMINAL_QUIET_SEEN_FRAC`` x the profile's measured terminal quiet
+        (element 11, as ``terminal_quiet_seen``), and it ended at or after
+        ``DISHWASHER_END_SPIKE_MIN_PROGRESS`` of the expected duration, the bar
+        the ENDING end spike arms at. Its end, not its start: on a machine that
+        dries with a fan (#424's Beko, 15-20 W on a 1.97 kW peak) the run above
+        the threshold is the whole fan-drying phase and the pump-out, and begins
+        at ~59% of the programme. And it ended a whole ``STANDBY_BAND_WINDOW_S``
+        before ``timestamp``, so the plateau the window judges is all standby after
+        it: a standby above the event threshold would otherwise run on as part of
+        the event, and a pump-out inside the near-stop band (a 9.6 W stop) would
+        pass for standby and be trimmed off the stored cycle. Fails closed: with
+        no measured quiet there is no event to recognise, and the standby-band
+        finalise does not fire.
+
+        On a run still drying the last run is its main activity (a heating block
+        or the wash's own drain right after it), so a drying plateau past a
+        SHORTER matched programme's expected end is not taken for the standby
+        after the pump-out.
+        """
+        quiet = self._matched_terminal_quiet_s
+        expected = float(self._expected_duration or 0.0)
+        if not quiet or expected <= 0:
+            return False
+        found = self._terminal_event_so_far()
+        if found is None:
+            return False
+        gap, at = found
+        return (
+            gap >= TERMINAL_QUIET_SEEN_FRAC * float(quiet)
+            and at >= expected * DISHWASHER_END_SPIKE_MIN_PROGRESS
+            and at <= self._gate_elapsed_s(timestamp) - STANDBY_BAND_WINDOW_S
+        )
+
+    def _terminal_event_so_far(self) -> tuple[float, float] | None:
+        """``(quiet before, programme-time offset of its end)`` of this run's
+        terminal event, or None (see :meth:`_terminal_event_seen`).
+
+        On programme time (`_cut_readings` of the gate spans, item 511/514), like
+        the expected duration it is compared with. Memoised: a reading at or below
+        the event threshold cannot change the answer (the event, its quiet and the
+        peak stay where they are), so a long plateau costs one walk, not one per
+        reading.
+        """
+        start = self._current_cycle_start
+        readings = self._power_readings
+        if start is None or not readings:
+            return None
+        n = len(readings)
+        spans = self._gate_spans()
+        memo = self._terminal_event_memo
+        if (
+            memo is not None
+            and memo[0] == start
+            and memo[1] == len(spans)
+            and 0 < memo[2] <= n
+            and readings[memo[2] - 1][0] == memo[3]
+            and all(float(p) <= memo[4] for _ts, p in itertools.islice(readings, memo[2], None))
+        ):
+            self._terminal_event_memo = (*memo[:2], n, readings[-1][0], *memo[4:])
+            return memo[5]
+        pts = [
+            ((ts - start).total_seconds(), float(p)) for ts, p in self._cut_readings(spans)
+        ]
+        measure = terminal_event_measure(
+            pts, TERMINAL_EVENT_PEAK_FRAC, TERMINAL_QUIET_MIN_S, TERMINAL_EVENT_MAX_PEAK_FRAC
+        )
+        result: tuple[float, float] | None = None
+        if measure is not None and len(measure) == 5:
+            gap, seconds, _watts, _frac, position = measure
+            span = pts[-1][0] - pts[0][0]
+            result = (float(gap), pts[0][0] + float(position) * span + float(seconds))
+        threshold = max(p for _o, p in pts) * TERMINAL_EVENT_PEAK_FRAC if pts else 0.0
+        self._terminal_event_memo = (start, len(spans), n, readings[-1][0], threshold, result)
+        return result
 
     def _maybe_finalize_standby_band(self, timestamp: datetime, power: float) -> bool:
         """Finish the cycle when it is stuck on a standby plateau; True if it did.

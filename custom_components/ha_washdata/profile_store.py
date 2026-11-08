@@ -124,6 +124,7 @@ from .signal_processing import (
     energy_gap_threshold_s,
     resumed_pauses as _resumed_pauses,
     terminal_event_end as _terminal_event_end,
+    terminal_event_measure as _terminal_event_walk,
     terminal_quiet_seen as _terminal_quiet_seen,
 )
 from . import analysis, spin_rhythm
@@ -2693,57 +2694,11 @@ _PART_FAILED = object()
 def _terminal_event_measure(points: list[tuple[float, float]]) -> tuple[float, ...] | None:
     """One cycle's input to :meth:`ProfileStore.compute_profile_terminal_signature`.
 
-    None: not measurable (too few points, all-zero, zero span). ``()``: measured,
-    no run above the threshold. ``(tail,)``: the last run is main activity, with
-    the quiet tail after it (item 469). Otherwise ``(gap, seconds, event_peak,
-    event_peak_frac, position)``.
+    :func:`signal_processing.terminal_event_measure` at the signature's own
+    thresholds; the live standby-band finalise (#518) asks the same walk.
     """
-    if len(points) < 5:
-        return None
-    peak = max(p for _t, p in points)
-    if peak <= 0:
-        return None
-    threshold = peak * TERMINAL_EVENT_PEAK_FRAC
-    span = points[-1][0] - points[0][0]
-    if span <= 0:
-        return None
-    # Walk back to the last run above the threshold, then to the start of that
-    # run, then to the end of the quiet stretch before it.
-    end_i = None
-    for i in range(len(points) - 1, -1, -1):
-        if points[i][1] > threshold:
-            end_i = i
-            break
-    if end_i is None:
-        return ()
-    start_i = end_i
-    while start_i > 0 and points[start_i - 1][1] > threshold:
-        start_i -= 1
-    # The quiet PHASE, not the sample interval: walk back to the previous activity.
-    # Measuring the gap to the preceding sample would just report the plug's
-    # reporting rate, since a plug that keeps sampling through the drying phase has
-    # no large interval.
-    prev_i = None
-    for i in range(start_i - 1, -1, -1):
-        if points[i][1] > threshold:
-            prev_i = i
-            break
-    event_peak = max(p for _t, p in points[start_i : end_i + 1])
-    if (
-        prev_i is None  # the run reaches the start, or nothing precedes it
-        or points[start_i][0] - points[prev_i][0] < TERMINAL_QUIET_MIN_S
-        or event_peak > peak * TERMINAL_EVENT_MAX_PEAK_FRAC
-    ):
-        # The last run is the main activity (item 469): no event seen, only how
-        # long the trace stayed quiet after it.
-        return (points[-1][0] - points[end_i][0],)
-    gap = points[start_i][0] - points[prev_i][0]
-    return (
-        gap,
-        points[end_i][0] - points[start_i][0],
-        event_peak,
-        event_peak / peak,
-        (points[start_i][0] - points[0][0]) / span,
+    return _terminal_event_walk(
+        points, TERMINAL_EVENT_PEAK_FRAC, TERMINAL_QUIET_MIN_S, TERMINAL_EVENT_MAX_PEAK_FRAC
     )
 
 
