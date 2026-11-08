@@ -1079,6 +1079,7 @@
         "hist_scan_failed": "Pretraživanje nije uspjelo.",
         "hist_scan_expired": "To skeniranje više nije dostupno. Skenirajte ponovo.",
         "hist_import_failed": "Uvoz nije uspio.",
+        "imported_history_note": "Pronađeno u uvezenoj historiji snage. Pomaže podudaranju, ali se ne broji u statistiku i ne može se podijeliti. Označite ga da imenujete program.",
         "odometer_intro": "Ovaj zbir samo raste. Brisanje ciklusa ga ne smanjuje, pa podsjetnici za servis ostaju tačni.",
         "odometer_correct_hint": "Postavite ovo ako je WashData izbrojao ciklus koji se nije dogodio ili je uređaj radio cikluse prije instalacije WashData.",
         "no_reminders_set": "Još nema postavljenih podsjetnika za servis.",

@@ -1026,6 +1026,7 @@
     "hist_scan_failed": "El análisis falló.",
     "hist_scan_expired": "Ese análisis ya no está disponible. Vuelva a analizar.",
     "hist_import_failed": "La importación falló.",
+    "imported_history_note": "Encontrado en un historial de potencia importado. Ayuda a la coincidencia, pero no cuenta en sus estadísticas y no se puede dividir. Etiquételo para poner nombre al programa.",
     "odometer_intro": "Este total solo sube. Eliminar un ciclo no lo reduce, así que los recordatorios de servicio siguen siendo correctos.",
     "odometer_correct_hint": "Ajuste este valor si WashData contó un ciclo que nunca ocurrió, o si el electrodoméstico ya hizo ciclos antes de instalar WashData.",
     "no_reminders_set": "Aún no hay recordatorios de servicio configurados.",

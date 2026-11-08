@@ -1064,6 +1064,7 @@
     "hist_scan_failed": "Skannimine ebaõnnestus.",
     "hist_scan_expired": "See skannimistulemus pole enam saadaval. Skanni uuesti.",
     "hist_import_failed": "Import ebaõnnestus.",
+    "imported_history_note": "Leitud imporditud võimsuse ajaloost. Aitab sobitamisel, kuid ei lähe sinu statistikasse ning seda ei saa poolitada. Programmi nimetamiseks sildista see.",
     "odometer_intro": "See koguarv ainult kasvab. Tsükli kustutamine seda ei vähenda, nii et hoolduse meeldetuletused jäävad õigeks.",
     "odometer_correct_hint": "Määra see, kui WashData loendas käivituse, mida polnud, või kui seade läbis tsükleid juba enne WashData paigaldamist.",
     "no_reminders_set": "Hoolduse meeldetuletusi pole veel määratud.",

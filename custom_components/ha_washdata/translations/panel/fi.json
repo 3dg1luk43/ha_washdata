@@ -1064,6 +1064,7 @@
     "hist_scan_failed": "Läpikäynti epäonnistui.",
     "hist_scan_expired": "Tämä läpikäynti ei ole enää saatavilla. Tee läpikäynti uudelleen.",
     "hist_import_failed": "Tuonti epäonnistui.",
+    "imported_history_note": "Löydetty tuodusta tehohistoriasta. Auttaa täsmäytyksessä, mutta ei näy tilastoissasi, eikä sitä voi jakaa. Nimeä ohjelma Merkitse-toiminnolla.",
     "odometer_intro": "Tämä kokonaismäärä vain kasvaa. Syklin poistaminen ei pienennä sitä, joten huoltomuistutukset pysyvät oikeina.",
     "odometer_correct_hint": "Aseta tämä, jos WashData laski ajon, jota ei tapahtunut, tai laitteella ajettiin syklejä ennen WashDatan asennusta.",
     "no_reminders_set": "Huoltomuistutuksia ei ole vielä asetettu.",

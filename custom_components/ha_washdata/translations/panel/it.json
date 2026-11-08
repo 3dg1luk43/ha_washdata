@@ -1026,6 +1026,7 @@
     "hist_scan_failed": "Scansione non riuscita.",
     "hist_scan_expired": "Quella scansione non è più disponibile. Esegui di nuovo la scansione.",
     "hist_import_failed": "Importazione non riuscita.",
+    "imported_history_note": "Trovato in uno storico di potenza importato. Aiuta la corrispondenza, ma non conta nelle tue statistiche e non può essere diviso. Etichettalo per dare un nome al programma.",
     "odometer_intro": "Questo totale può solo aumentare. Eliminare un ciclo non lo abbassa, così i promemoria di manutenzione restano corretti.",
     "odometer_correct_hint": "Imposta questo valore se WashData ha contato un ciclo mai avvenuto, oppure se l'elettrodomestico ha eseguito cicli prima dell'installazione di WashData.",
     "no_reminders_set": "Non è ancora impostato alcun promemoria di servizio.",

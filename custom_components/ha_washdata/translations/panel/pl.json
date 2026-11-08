@@ -1094,6 +1094,7 @@
     "hist_scan_failed": "Skanowanie nie powiodło się.",
     "hist_scan_expired": "To skanowanie nie jest już dostępne. Zeskanuj ponownie.",
     "hist_import_failed": "Import nie powiódł się.",
+    "imported_history_note": "Wykryty w zaimportowanej historii mocy. Pomaga w dopasowaniu, ale nie liczy się do statystyk i nie można go podzielić. Oznacz go, aby nadać nazwę programu.",
     "odometer_intro": "Ta suma tylko rośnie. Usunięcie cyklu jej nie zmniejsza, więc przypomnienia serwisowe pozostają prawidłowe.",
     "odometer_correct_hint": "Ustaw to, jeśli WashData policzył cykl, który się nie odbył, albo urządzenie wykonało cykle przed instalacją WashData.",
     "no_reminders_set": "Nie ustawiono jeszcze żadnych przypomnień serwisowych.",

@@ -1049,6 +1049,7 @@
         "hist_scan_failed": "扫描失败。",
         "hist_scan_expired": "该次扫描结果已不可用，请重新扫描。",
         "hist_import_failed": "导入失败。",
+        "imported_history_note": "在导入的功率历史中发现。它有助于匹配，但不计入您的统计，且无法拆分。请标记以指定其程序。",
         "odometer_intro": "此累计值只增不减。删除周期不会使它减少，因此保养提醒始终准确。",
         "odometer_correct_hint": "如果 WashData 计入了从未发生的运行，或设备在安装 WashData 之前已运行过周期，请设置此值。",
         "no_reminders_set": "尚未设置保养提醒。",

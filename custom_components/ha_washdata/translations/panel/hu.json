@@ -1064,6 +1064,7 @@
         "hist_scan_failed": "A vizsgálat nem sikerült.",
         "hist_scan_expired": "Ez a vizsgálat már nem elérhető. Futtassa újra.",
         "hist_import_failed": "Az importálás nem sikerült.",
+        "imported_history_note": "Importált teljesítményelőzményekben találva. Segíti az egyeztetést, de nem számít bele a statisztikákba, és nem osztható fel. Címkézze fel a program megnevezéséhez.",
         "odometer_intro": "Ez az összesítés csak nő. Egy ciklus törlése nem csökkenti, így a szervizemlékeztetők pontosak maradnak.",
         "odometer_correct_hint": "Állítsa be, ha a WashData olyan futást számolt, amely meg sem történt, vagy ha a készülék már a WashData telepítése előtt is futtatott ciklusokat.",
         "no_reminders_set": "Még nincs beállítva szerviz emlékeztető.",

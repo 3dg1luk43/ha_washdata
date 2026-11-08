@@ -1026,6 +1026,7 @@
     "hist_scan_failed": "L'analyse a échoué.",
     "hist_scan_expired": "Cette analyse n'est plus disponible. Relancez l'analyse.",
     "hist_import_failed": "L'importation a échoué.",
+    "imported_history_note": "Trouvé dans un historique de puissance importé. Il aide la correspondance, mais n'est pas compté dans vos statistiques et ne peut pas être scindé. Étiquetez-le pour nommer le programme.",
     "odometer_intro": "Ce total ne fait qu'augmenter. Supprimer un cycle ne le fait pas baisser, pour que les rappels d'entretien restent justes.",
     "odometer_correct_hint": "Renseignez cette valeur si WashData a compté un cycle qui n'a jamais eu lieu, ou si l'appareil a effectué des cycles avant l'installation de WashData.",
     "no_reminders_set": "Aucun rappel d'entretien n'est encore configuré.",
