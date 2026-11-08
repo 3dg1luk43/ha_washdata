@@ -5370,6 +5370,9 @@ class HaWashdataPanel extends HTMLElement {
       // "suspected" (#462), and overlays the new label when it is the other one.
       const prev = m.overlayPlan ? m.overlayPlan.name : m.curve.profile_name;
       m.curve.profile_name = label;
+      // An unsaved Review-form choice predates the answer: Save Review would send
+      // it back over the label just set (#469's cyc-review-save drops it too).
+      delete m.reviewLabel;
       if (m.overlayPlan || label !== prev) m.overlayPlan = { name: label, suspected: false, runnerUp: null };
       // The old envelope is the other programme's: drop it, as cyc-review-save does,
       // or it is drawn under the new name until (unless) the fetch returns.

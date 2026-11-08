@@ -127,6 +127,16 @@ def test_the_cycle_end_rules_are_the_managers_on_every_edge() -> None:
         assert got == _old_discard(dev, duration, energy, start, prev), (
             dev, duration, energy, start, prev,
         )
+        # The manager's variant is the same rule, plus the pump-out's gap.
+        with_gap = ghost_rules.cycle_end_discard_with_gap(
+            device_type=dev, duration_s=duration, energy_wh=energy, cycle_start=start,
+            prev_cycle_end=prev,
+        )
+        assert (None if with_gap is None else with_gap[0]) == got
+        if got == ghost_rules.DISCARD_PUMP_OUT:
+            assert with_gap[1] == (start - prev).total_seconds()
+        elif got == ghost_rules.DISCARD_GHOST:
+            assert with_gap[1] is None
 
 
 def test_the_cycle_end_energy_is_the_stored_cycle_integral() -> None:

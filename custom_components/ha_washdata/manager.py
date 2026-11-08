@@ -5759,28 +5759,20 @@ class WashDataManager:
     ) -> tuple[str, float | None] | None:
         """``(reason, gap_s)`` when this end is never stored, else None.
 
-        The ghost, then the dishwasher pump-out measured from ``prev_cycle_end``
-        (the previous end's detection time), as ``ghost_rules.cycle_end_discard``,
-        which the Playground replay calls (register item 568). The start is
-        parsed only where the pump-out rule reads it.
+        ``ghost_rules.cycle_end_discard_with_gap``, the rule the Playground replay
+        shares (register item 568): the ghost, then the dishwasher pump-out
+        measured from ``prev_cycle_end`` (the previous end's detection time).
         """
-        if ghost_rules.is_ghost_cycle(duration, energy_wh):
-            return ghost_rules.DISCARD_GHOST, None
-        if self.device_type == "dishwasher" and prev_cycle_end is not None:
-            cycle_start_str = cycle_data.get("start_time")
-            cycle_start_dt = (
+        cycle_start_str = cycle_data.get("start_time")
+        return ghost_rules.cycle_end_discard_with_gap(
+            device_type=self.device_type,
+            duration_s=duration,
+            energy_wh=energy_wh,
+            cycle_start=(
                 dt_util.parse_datetime(cycle_start_str) if cycle_start_str else None
-            )
-            gap = ghost_rules.pump_out_gap_s(
-                device_type=self.device_type,
-                duration_s=duration,
-                energy_wh=energy_wh,
-                cycle_start=cycle_start_dt,
-                prev_cycle_end=prev_cycle_end,
-            )
-            if gap is not None:
-                return ghost_rules.DISCARD_PUMP_OUT, gap
-        return None
+            ),
+            prev_cycle_end=prev_cycle_end,
+        )
 
     def _on_cycle_end(self, cycle_data: dict[str, Any]) -> None:
         """Handle cycle end - clear all active timers and state."""

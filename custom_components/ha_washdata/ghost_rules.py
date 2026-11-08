@@ -186,6 +186,33 @@ def pump_out_gap_s(
     return None
 
 
+def cycle_end_discard_with_gap(
+    *,
+    device_type: Any,
+    duration_s: float,
+    energy_wh: float,
+    cycle_start: datetime | None,
+    prev_cycle_end: datetime | None,
+) -> tuple[str, float | None] | None:
+    """``(DISCARD_*, gap_s)`` when the manager never stores this ended cycle, else
+    None. The two cycle-end rules in the manager's order: the ghost first (no
+    gap), then the dishwasher pump-out (its gap to the previous end, which the
+    manager logs). The one implementation the manager and the Playground share.
+    """
+    if is_ghost_cycle(duration_s, energy_wh):
+        return DISCARD_GHOST, None
+    gap = pump_out_gap_s(
+        device_type=device_type,
+        duration_s=duration_s,
+        energy_wh=energy_wh,
+        cycle_start=cycle_start,
+        prev_cycle_end=prev_cycle_end,
+    )
+    if gap is not None:
+        return DISCARD_PUMP_OUT, gap
+    return None
+
+
 def cycle_end_discard(
     *,
     device_type: Any,
@@ -194,22 +221,13 @@ def cycle_end_discard(
     cycle_start: datetime | None,
     prev_cycle_end: datetime | None,
 ) -> str | None:
-    """Why the manager never stores this ended cycle (``DISCARD_*``), or None.
-
-    The two cycle-end rules in the manager's order: the ghost first, then the
-    dishwasher pump-out.
-    """
-    if is_ghost_cycle(duration_s, energy_wh):
-        return DISCARD_GHOST
-    if (
-        pump_out_gap_s(
-            device_type=device_type,
-            duration_s=duration_s,
-            energy_wh=energy_wh,
-            cycle_start=cycle_start,
-            prev_cycle_end=prev_cycle_end,
-        )
-        is not None
-    ):
-        return DISCARD_PUMP_OUT
-    return None
+    """Why the manager never stores this ended cycle (``DISCARD_*``), or None:
+    :func:`cycle_end_discard_with_gap` without the gap."""
+    found = cycle_end_discard_with_gap(
+        device_type=device_type,
+        duration_s=duration_s,
+        energy_wh=energy_wh,
+        cycle_start=cycle_start,
+        prev_cycle_end=prev_cycle_end,
+    )
+    return None if found is None else found[0]

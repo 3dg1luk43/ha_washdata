@@ -370,6 +370,28 @@ test('answering the other programme in the dialog drops the old programme\'s cur
   await expect.poll(env).toBe('none');
 });
 
+test('a one-tap answer replaces an unsaved Review-form label', async ({ page }) => {
+  await bootWithQuestion(page);
+  await clickTab(page, 'history');
+  await page.locator('tr[data-cid="cyc-003"]').click();
+  const modal = page.locator('.wd-modal');
+  await expect(modal.locator('.wd-review-answers button')).toHaveCount(4, { timeout: 5_000 });
+  await page.locator('button[data-maction="cyc-review"]').click();
+  await expect(page.locator('#wd-cyc-rev-label')).toHaveValue('');
+  // Any form re-render snapshots the select, storing the unlabelled '' choice.
+  await page.evaluate(() => {
+    const el = document.getElementById('wd-panel') as any;
+    el._snapshotCycleReviewForm(el.shadowRoot);
+  });
+
+  await setHandler(page, 'ha_washdata/resolve_feedback', { success: true });
+  await setHandler(page, 'ha_washdata/get_feedbacks', { feedbacks: [] });
+  await modal.locator('.wd-review-answers button', { hasText: 'Quick 30°C' }).click();
+  await assertWsCalled(page, 'ha_washdata/resolve_feedback', 1);
+  // Save Review would otherwise send '' and unlabel the cycle.
+  await expect(page.locator('#wd-cyc-rev-label')).toHaveValue('Quick 30°C', { timeout: 5_000 });
+});
+
 test('a viewer sees no question and no answers', async ({ page }) => {
   await page.goto('/');
   await bootPanel(page, {
