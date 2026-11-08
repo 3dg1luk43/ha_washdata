@@ -53,19 +53,20 @@ def test_choices_skip_group_keys_deleted_and_repeated_names() -> None:
     # The panel's rule (learning.review_choices): the detected programme first, then
     # the next distinct existing one; a group key without its best member is skipped.
     req = _req("Cotton", "__group__Cottons", "Gone", "Cotton", "Cotton", "Synthetics")
-    assert review_answer_choices(req, _PROFILES) == [("C", "Cotton"), ("R1", "Synthetics")]
+    # The key is the stored ranking entry, not the position among the choices.
+    assert review_answer_choices(req, _PROFILES) == [("C", "Cotton"), ("R4", "Synthetics")]
 
 
 def test_choices_fill_in_the_detected_programme_when_the_ranking_is_short() -> None:
     assert review_answer_choices(_req("Cotton"), _PROFILES) == [("C", "Cotton")]
     assert review_answer_choices(_req("Cotton", "Synthetics"), _PROFILES) == [
-        ("C", "Cotton"), ("R1", "Synthetics"),
+        ("C", "Cotton"), ("R0", "Synthetics"),
     ]
     # Ranked below two others, the detected programme still comes first: the
     # notification offers the same two answers as the panel's buttons.
     assert review_answer_choices(
         _req("Cotton", "Synthetics", "Cotton Eco", "Cotton"), _PROFILES
-    ) == [("C", "Cotton"), ("R1", "Synthetics")]
+    ) == [("C", "Cotton"), ("R0", "Synthetics")]
 
 
 def test_choices_never_raise() -> None:
@@ -89,6 +90,17 @@ def test_resolve_rejects_malformed_keys_and_vanished_programmes() -> None:
         assert resolve_review_answer(req, key, _PROFILES) is None
     assert resolve_review_answer(req, "R1", _PROFILES) is None
     assert resolve_review_answer(_req("Gone"), "C", _PROFILES) is None
+
+
+def test_a_deleted_programme_makes_its_answer_stale_not_another_programme() -> None:
+    # The phone offers Cotton Eco as R1; deleting it must not turn R1 into the next
+    # programme the ranking holds (Synthetics), labelling a cycle the user never chose.
+    req = _req("Cotton", "Cotton", "Cotton Eco", "Synthetics")
+    keys = dict(review_answer_choices(req, _PROFILES))
+    assert keys == {"C": "Cotton", "R1": "Cotton Eco"}
+    after = {"Cotton": {}, "Synthetics": {}}
+    assert resolve_review_answer(req, "R1", after) is None
+    assert resolve_review_answer(req, "C", after) == "Cotton"
 
 
 # ── the real manager ──────────────────────────────────────────────────────────

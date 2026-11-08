@@ -120,8 +120,18 @@ def review_choices(pending: Any, profiles: Any) -> list[str]:
 
 #: Answer key that confirms a review request's own programme.
 REVIEW_ANSWER_CONFIRM = "C"
-#: Prefix of the answer key ``R<i>``: the i-th of :func:`review_choices`.
+#: Prefix of the answer key ``R<j>``: the request's stored ranking entry ``j``.
 REVIEW_ANSWER_RANKED = "R"
+
+
+def _ranked_name(cand: Any) -> Any:
+    """The programme a stored ranking entry names (a group by its best member)."""
+    if not isinstance(cand, dict):
+        return None
+    name = cand.get("name")
+    if isinstance(name, str) and name.startswith("__group__"):
+        return cand.get("group_best_member")
+    return name
 
 
 def review_answer_choices(request: Any, profile_names: Any) -> list[tuple[str, str]]:
@@ -129,26 +139,51 @@ def review_answer_choices(request: Any, profile_names: Any) -> list[tuple[str, s
 
     The same two programmes as the panel's buttons (:func:`review_choices`), keyed
     so the phone carries a position, not a name: ``REVIEW_ANSWER_CONFIRM`` for the
-    request's own programme, ``R<i>`` for the i-th choice otherwise. The key is
-    resolved against the stored request when the tap arrives
-    (:func:`resolve_review_answer`). Pure, never raises.
+    request's own programme, ``R<j>`` for the other, ``j`` being its entry in the
+    request's stored ranking. That list is never reordered (a rename rewrites it in
+    place), so the key keeps naming the programme the phone shows: deleting it
+    makes the tap stale (:func:`resolve_review_answer` returns None) instead of
+    moving the key onto the next programme. Pure, never raises.
     """
     try:
         detected = request.get("detected_profile") if isinstance(request, dict) else None
-        return [
-            (REVIEW_ANSWER_CONFIRM if name == detected else f"{REVIEW_ANSWER_RANKED}{i}", name)
-            for i, name in enumerate(review_choices(request, profile_names))
-        ]
+        ranking = request.get("ranking") if isinstance(request, dict) else None
+        ranked = [_ranked_name(c) for c in ranking] if isinstance(ranking, list) else []
+        out: list[tuple[str, str]] = []
+        for name in review_choices(request, profile_names):
+            if name == detected:
+                out.append((REVIEW_ANSWER_CONFIRM, name))
+            elif name in ranked:
+                out.append((f"{REVIEW_ANSWER_RANKED}{ranked.index(name)}", name))
+        return out
     except Exception:  # noqa: BLE001 - a notification extra must never raise
         return []
 
 
 def resolve_review_answer(request: Any, key: Any, profile_names: Any) -> str | None:
-    """The programme an answer key names on this request now, or None. Never raises."""
-    return next(
-        (name for k, name in review_answer_choices(request, profile_names) if k == key),
-        None,
-    )
+    """The programme an answer key names on this request, or None when it no
+    longer exists or the key is malformed. Never raises."""
+    try:
+        if not isinstance(request, dict) or not isinstance(key, str):
+            return None
+        names = profile_names if profile_names is not None else {}
+        detected = request.get("detected_profile")
+        if key == REVIEW_ANSWER_CONFIRM:
+            name = detected
+        else:
+            idx = key[len(REVIEW_ANSWER_RANKED):]
+            if not key.startswith(REVIEW_ANSWER_RANKED) or not (idx.isascii() and idx.isdigit()):
+                return None
+            ranking = request.get("ranking")
+            j = int(idx)
+            if not isinstance(ranking, list) or j >= len(ranking):
+                return None
+            name = _ranked_name(ranking[j])
+            if name == detected:
+                return None
+        return name if isinstance(name, str) and name and name in names else None
+    except Exception:  # noqa: BLE001 - an answer that cannot be read answers nothing
+        return None
 
 
 class StatisticalModel:
