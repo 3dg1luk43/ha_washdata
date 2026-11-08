@@ -102,6 +102,9 @@ from .const import (
     ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC,
     ANTI_CREASE_TERMINAL_MATCH_FRAC,
     ANTI_CREASE_SPIN_WAIT_MAX_RATIO,
+    ANTI_CREASE_REST_DEVICE_TYPES,
+    ANTI_CREASE_REST_FACTOR,
+    ANTI_CREASE_REST_WAIT_MAX_RATIO,
     ANTI_CREASE_PROGRAMME_END,
     ANTI_CREASE_PROGRAMME_END_DEVICE_TYPES,
     ANTI_CREASE_PROGRAMME_END_QUIET_S,
@@ -1039,6 +1042,7 @@ class CycleDetector:
         # One-shot per cycle, so the held-finalise reason is visible in the log
         # without repeating it on every reading.
         self._anticrease_spin_wait_logged: bool = False
+        self._anticrease_rest_wait_logged: bool = False
         # Register item 393a: set while STATE_ANTI_WRINKLE was entered by the #296
         # anti-crease finalise - the level at or under which a reading is that
         # tail's own baseline rather than a burst. None for every other entry.
@@ -2730,6 +2734,7 @@ class CycleDetector:
         # ambiguous match shorten `effective_off_delay` on no evidence.
         self._longest_candidate_duration = 0.0
         self._anticrease_spin_wait_logged = False
+        self._anticrease_rest_wait_logged = False
         # Per-cycle diagnostic throttle (#346): the "Smart Termination not applied"
         # line only logs when the reason CHANGES. Carrying the previous cycle's
         # reason across a reset swallows the new cycle's very first diagnostic
@@ -5366,6 +5371,7 @@ class CycleDetector:
         oldest_in_window: datetime | None = None
         saw_older = False
         _ac_boundary_ts: datetime | None = None
+        boundary_p = 0.0
         for ts, p in reversed(self._power_readings):
             if (timestamp - ts).total_seconds() <= ANTI_CREASE_CONFIRM_WINDOW_S:
                 window.append(float(p))
@@ -5374,6 +5380,7 @@ class CycleDetector:
             else:
                 saw_older = True
                 _ac_boundary_ts = ts  # boundary: last reading before the window
+                boundary_p = float(p)
                 break
         # The low-power tail must actually SPAN the window (data exists from before
         # it) and have enough points to judge - not just a couple of recent samples.
@@ -5395,6 +5402,77 @@ class CycleDetector:
             return False
         if max(window) > max_power:
             return False  # a heating / high-spin reading in the window - still washing
+        if self._anticrease_rest_pending(
+            timestamp, window_ts, window, _ac_boundary_ts, boundary_p
+        ):
+            return False
+        return True
+
+    def _anticrease_rest_pending(
+        self,
+        timestamp: datetime,
+        window_ts: list[datetime],
+        window: list[float],
+        boundary_ts: datetime | None,
+        boundary_p: float,
+    ) -> bool:
+        """Whether a dryer or washer-dryer past its expected duration is still in
+        its cool-down, not its anti-crease tail, so the finalise must wait (#514).
+
+        After the last heating a dryer can turn its drum for many minutes without a
+        pause (120-230 W on the corpus and the reporter's), then rest near standby
+        between short tumbles until the door opens. Both stay under
+        ``anti_wrinkle_max_power`` (same motor), so the 180 s window alone
+        finalised inside the cool-down, and the rest of it then outlasted
+        anti-wrinkle's burst length and opened a second cycle. What separates the
+        two is the rest: the tail spends most of its time at its base, the
+        cool-down almost none (a drum reversal a sparse plug catches is a single
+        reading, which is why "any reading at rest" is not enough). So at least
+        half the window (step-hold time-weighted median) must sit at or under
+        ``ANTI_CREASE_REST_FACTOR`` x the anti-wrinkle exit level
+        (``max(DEFAULT_ANTI_WRINKLE_EXIT_POWER, stop_threshold_w)``), the bar the
+        washer programme-end test applies to its tail.
+
+        Delay-only and bounded like the #399 guard: never holds past
+        ``ANTI_CREASE_REST_WAIT_MAX_RATIO`` x expected (programme time, item 511),
+        so a tail whose base sits above the bar, or a drum that never rests, still
+        closes. Washers keep the window as it was (no cool-down; their
+        programme-end path already reads the tail's own rest).
+        """
+        if self._config.device_type not in ANTI_CREASE_REST_DEVICE_TYPES:
+            return False
+        expected = self._expected_duration
+        if expected <= 0:
+            return False
+        if self._gate_elapsed_s(timestamp) >= expected * ANTI_CREASE_REST_WAIT_MAX_RATIO:
+            return False
+        rest_w = ANTI_CREASE_REST_FACTOR * max(
+            DEFAULT_ANTI_WRINKLE_EXIT_POWER, float(self._config.stop_threshold_w)
+        )
+        span = ANTI_CREASE_CONFIRM_WINDOW_S
+        t0 = timestamp - timedelta(seconds=span)
+        ts_list = list(reversed(window_ts))
+        p_list = list(reversed(window))
+        if boundary_ts is not None:
+            ts_list.insert(0, boundary_ts)
+            p_list.insert(0, boundary_p)
+        median = spin_rhythm.tw_median(
+            np.asarray([(ts - t0).total_seconds() for ts in ts_list], dtype=float),
+            np.asarray(p_list, dtype=float),
+            0.0,
+            span,
+        )
+        if median is None or median <= rest_w:
+            return False
+        if not self._anticrease_rest_wait_logged:
+            self._anticrease_rest_wait_logged = True
+            self._logger.debug(
+                "Finalize held, no rest in the anti-crease window yet: '%s' "
+                "median %.1fW over the last %.0fs, rest at or under %.1fW "
+                "(elapsed %.0fs of %.0fs expected).",
+                self._matched_profile, median, span, rest_w,
+                self._gate_elapsed_s(timestamp), expected,
+            )
         return True
 
     def _anticrease_spin_pending(self, timestamp: datetime) -> bool:

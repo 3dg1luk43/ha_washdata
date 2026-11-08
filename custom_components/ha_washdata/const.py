@@ -1426,6 +1426,34 @@ ANTI_CREASE_SPIN_WAIT_MAX_RATIO = 1.25      # never block past this x expected
 ANTI_CREASE_SPIN_ARM_MIN_SHARE = 0.5
 ANTI_CREASE_SPIN_ARM_MIN_MEMBERS = 2
 
+# Issue #514: after its last heating a dryer can turn its drum for many minutes
+# without a pause (a cool-down: 120-160 W on the #478 AEG, 150-230 W on the
+# reporter's), then rest near standby between short tumbles until the door opens.
+# Both sit under anti_wrinkle_max_power (same motor), so once the clock above had
+# opened, the 180 s window finalised inside the cool-down, and on some runs the
+# rest of it opened a second cycle. On these device types the window must also be
+# at rest for at least half its time: step-hold median at or under REST_FACTOR x
+# the anti-wrinkle exit level max(0.8 W, stop_threshold_w), the bar the washer
+# programme-end test applies to its tail (QUIET_FACTOR). "Any reading at rest" is
+# not enough: a sparse plug catches a drum reversal as one standby reading.
+# Delay-only, released at REST_WAIT_MAX_RATIO x expected (programme time), so a
+# tail that never rests still closes.
+# Offline, 140 dryer / 91 washer-dryer traces, first window accepted after the
+# last heating vs the end of the last sustained drum stretch, > 1 min early: 90 /
+# 65 as shipped, 15 / 17 with "any reading at or under 2x stop", 4 / 2 with this
+# (3 dryer ones are 60 s plug artefacts); REST_FACTOR 1.5 / 2 / 3 / 4: 3 / 4 / 4 /
+# 4 on dryers, 2 / 2 / 5 / 6 on washer-dryers. end_gate_eval --loo --all-formats
+# --anti-wrinkle force, programme truth: dryers early > 1 / > 5 min 24 / 7 -> 10 /
+# 3, splits 4 -> 3 (24 AEG runs now finalise 1.0-5.0 min after the programme end,
+# was 8.3 min before to 2.0 after; median lag 3.61 -> 4.0 min); washer-dryers 6 /
+# 6 -> 4 / 4, splits 4 -> 4; no run ends earlier or splits more. Washers are left
+# out: no cool-down, 40 of 208 corpus washer tails never rest under the bar (a
+# low Stop Threshold under a 3 W anti-crease base would wait for the cap), and
+# the same replay gains them little (early 13 / 12 -> 11 / 11, splits 12 -> 11).
+ANTI_CREASE_REST_DEVICE_TYPES = (DEVICE_TYPE_DRYER, DEVICE_TYPE_WASHER_DRYER)
+ANTI_CREASE_REST_FACTOR = 2.0
+ANTI_CREASE_REST_WAIT_MAX_RATIO = 1.25
+
 # Audit 2026-11-03 item 9: on a washer whose programmes end in a quiet anti-crease
 # tail (#486 Miele: ~3 W base, 5 s drum pulses until the door opens, up to 36 min)
 # the finalise above fired at 0.98 x a TAIL-inclusive expected duration and the #399

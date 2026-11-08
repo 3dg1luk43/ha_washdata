@@ -267,7 +267,7 @@ def active_end_s(offsets: Any, watts: Any) -> float | None:
         return None
 
 
-def _tw_median(t: np.ndarray, p: np.ndarray, a: float, b: float) -> float | None:
+def tw_median(t: np.ndarray, p: np.ndarray, a: float, b: float) -> float | None:
     """Time-weighted median of a step-hold trace over ``[a, b]``: the reading at or
     before ``a`` holds into it. None when the window holds no time."""
     i0 = max(0, int(np.searchsorted(t, a, side="right")) - 1)
@@ -333,11 +333,11 @@ def programme_end_quiet(
             return None
         if float(np.max(p[t > end], initial=0.0)) > float(ceiling_w):
             return None
-        median = _tw_median(t, p, end, last)
+        median = tw_median(t, p, end, last)
         if median is None or median > float(quiet_w):
             return None
         if head_s > 0:
-            head = _tw_median(t, p, end, min(last, end + float(head_s)))
+            head = tw_median(t, p, end, min(last, end + float(head_s)))
             if head is None or head > float(head_w):
                 return None
         ev = rhythm_events(t, p)
