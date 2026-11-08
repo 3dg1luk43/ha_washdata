@@ -19,7 +19,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - New: last cycle duration, energy and cost sensors; actions to mark maintenance done and delete a cycle.
 - Only administrators can change the notification services and actions.
 - A store file 2.5 to 3.7x smaller and fewer writes while a cycle runs (a downgrade needs a backup restore).
-- Fixes for blank notifications and for panel buttons on light accent themes.
+- Fixes for blank and dropped notifications, and for panel buttons on light accent themes.
 
 ### Features
 
