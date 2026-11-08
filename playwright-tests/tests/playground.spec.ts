@@ -137,6 +137,24 @@ test('workbench: a value outside the setting\'s range says what it runs as (#487
   await expect(page.locator('.wd-pg-held')).toHaveCount(0);
 });
 
+test('workbench: the sim and a publish use the value a row says it runs as (#487)', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const key = 'profile_match_min_duration_ratio';
+  const inp = page.locator(`.wd-pg-param-inp[data-pgkey="${key}"]`);
+  await expect(inp).toBeVisible({ timeout: 8_000 });
+  await inp.fill('5');
+  await expect(page.locator('.wd-pg-held')).toHaveText('runs as 1');
+
+  await page.locator('button[data-action="pg-run"]').click();
+  const sims = await assertWsCalled(page, 'ha_washdata/start_playground_cycle_detail');
+  expect(sims[sims.length - 1].settings_override[key]).toBe(1);
+
+  page.once('dialog', d => d.accept());   // confirm()
+  await page.locator(`.wd-pg-pub[data-pgkey="${key}"]`).click();
+  const saves = await assertWsCalled(page, 'ha_washdata/set_options');
+  expect(saves[saves.length - 1].options[key]).toBe(1);
+});
+
 // ─── Settings control panel: live source, presets, per-setting publish ───────
 
 test('control panel: loads the integration\'s live settings on tab entry', async ({ page }) => {

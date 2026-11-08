@@ -8277,7 +8277,9 @@ class HaWashdataPanel extends HTMLElement {
   async _pgPublishOne(key) {
     const dev = this._devices[this._selIdx];
     if (!dev || !this._canEdit() || !key || !this._pgIsPublishable(key)) return;
-    const val = this._pgStagedVal(key);
+    // Publish what the row says it runs as, not the raw typed value (#487):
+    // set_options does not hold most ranges.
+    const val = this._pgHeld(key, this._pgStagedVal(key));
     if (val === undefined || val === null) return;
     const lbl = this._t('setting.' + key + '.label', {}, key);
     if (!confirm(this._tText('msg.pg_publish_one_confirm', {label: lbl, value: val}, `Save ${lbl} = ${val} to this device's settings?`))) return;
@@ -8818,7 +8820,7 @@ class HaWashdataPanel extends HTMLElement {
     const opts = {};
     for (const key of this._pgChangedKeys()) {
       if (!this._pgIsPublishable(key)) continue;
-      opts[key] = this._pgStagedVal(key);
+      opts[key] = this._pgHeld(key, this._pgStagedVal(key));
     }
     const keys = Object.keys(opts);
     if (!keys.length) return;
@@ -9000,6 +9002,8 @@ class HaWashdataPanel extends HTMLElement {
     const override = { ...this._pgParamOverrides };
     if (this._pgThreshStart != null) override.start_threshold_w = this._pgThreshStart;
     if (this._pgThreshStop != null) override.stop_threshold_w = this._pgThreshStop;
+    // The value the row says it "runs as" (#487); the backend does not hold it.
+    for (const k of Object.keys(override)) override[k] = this._pgHeld(k, override[k]);
     return override;
   }
 
