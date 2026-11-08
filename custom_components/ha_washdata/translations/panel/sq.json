@@ -1056,7 +1056,6 @@
         "hist_scan_failed": "Skanimi dështoi.",
         "hist_scan_expired": "Ai skanim nuk është më i disponueshëm. Skanoni përsëri.",
         "hist_import_failed": "Importimi dështoi.",
-        "imported_history_readonly": "Gjetur në historikun e importuar të fuqisë. Ndihmon përputhjen, por nuk llogaritet në statistikat tuaja dhe nuk mund të shkurtohet ose ndahet. Etiketojeni për të emërtuar programin.",
         "odometer_intro": "Ky total vetëm rritet. Fshirja e një cikli nuk e ul, ndaj kujtesat e servisit mbeten të sakta.",
         "odometer_correct_hint": "Vendoseni nëse WashData numëroi një cikël që nuk ndodhi kurrë, ose nëse pajisja kishte kryer cikle para se të instalohej WashData.",
         "no_reminders_set": "Nuk është caktuar ende asnjë kujtesë servisi.",

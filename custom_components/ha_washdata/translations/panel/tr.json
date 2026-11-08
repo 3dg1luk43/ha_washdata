@@ -1064,7 +1064,6 @@
         "hist_scan_failed": "Tarama başarısız oldu.",
         "hist_scan_expired": "Bu tarama artık kullanılamıyor. Yeniden tarayın.",
         "hist_import_failed": "İçe aktarma başarısız oldu.",
-        "imported_history_readonly": "İçe aktarılan güç geçmişinde bulundu. Eşleştirmeye yardımcı olur, ancak istatistiklerinize sayılmaz ve kırpılamaz ya da bölünemez. Programını adlandırmak için etiketleyin.",
         "odometer_intro": "Bu toplam yalnızca artar. Bir döngüyü silmek onu düşürmez, böylece servis hatırlatıcıları doğru kalır.",
         "odometer_correct_hint": "WashData hiç gerçekleşmemiş bir çalışmayı saydıysa veya cihaz WashData kurulmadan önce döngü çalıştırdıysa bunu ayarlayın.",
         "no_reminders_set": "Henüz servis hatırlatıcısı ayarlanmadı.",

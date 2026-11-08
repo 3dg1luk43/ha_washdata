@@ -1094,7 +1094,6 @@
     "hist_scan_failed": "Skenavimas nepavyko.",
     "hist_scan_expired": "Šio skenavimo rezultatų nebėra. Nuskenuokite dar kartą.",
     "hist_import_failed": "Importavimas nepavyko.",
-    "imported_history_readonly": "Rastas importuotoje galios istorijoje. Padeda atpažinti programas, bet neįskaičiuojamas į jūsų statistiką, jo negalima apkarpyti ar padalyti. Paspauskite „Pažymėti“, kad nurodytumėte programą.",
     "odometer_intro": "Šis bendras skaičius tik didėja. Ištrynus ciklą jis nesumažėja, todėl aptarnavimo priminimai lieka tikslūs.",
     "odometer_correct_hint": "Nustatykite, jei WashData užskaitė ciklą, kurio nebuvo, arba prietaisas atliko ciklų dar prieš įdiegiant WashData.",
     "no_reminders_set": "Kol kas nenustatyta jokių aptarnavimo priminimų.",

@@ -1094,7 +1094,6 @@
     "hist_scan_failed": "Pregledovanje ni uspelo.",
     "hist_scan_expired": "Ta pregled ni več na voljo. Pregled zaženite znova.",
     "hist_import_failed": "Uvoz ni uspel.",
-    "imported_history_readonly": "Najdeno v uvoženi zgodovini moči. Pomaga pri ujemanju, a se ne šteje v statistiko in ga ni mogoče obrezati ali razdeliti. Označite ga, da poimenujete program.",
     "odometer_intro": "Ta vsota samo narašča. Brisanje cikla je ne zmanjša, zato opomniki za servis ostanejo pravilni.",
     "odometer_correct_hint": "Nastavite to, če je WashData štel cikel, ki se ni zgodil, ali je naprava opravila cikle pred namestitvijo WashData.",
     "no_reminders_set": "Opomniki za servis še niso nastavljeni.",

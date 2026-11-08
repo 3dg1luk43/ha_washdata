@@ -1485,7 +1485,9 @@ def import_tail_cut_s(
     (the same shared ``terminal_quiet_seen`` / ``terminal_event_end`` judgement, the
     same ``TERMINAL_QUIET_CAP_S``, ``TRUSTED_LENGTH_FLOOR_FRAC`` and
     ``BANKED_TAIL_REPAIR_MIN_S``), fed the statistics of the programme
-    :func:`async_import_tail_cuts` matched: its measured drying span ``quiet_s``,
+    :func:`async_import_tail_cuts` matched, or the one a stored import was later
+    labelled with (``ProfileStore._cut_backfill_tails_nosave``, #518): its
+    measured drying span ``quiet_s``,
     its trusted length, and - where no span was measured - its expected duration,
     the live cap's fallback. (The live cap's end-spike shortcut needs detector state
     the replay does not keep; the trace test covers the same pump-out.) Every other

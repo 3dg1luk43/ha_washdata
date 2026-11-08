@@ -1068,7 +1068,6 @@
     "hist_scan_failed": "Skönnun mistókst.",
     "hist_scan_expired": "Sú skönnun er ekki lengur tiltæk. Skannaðu aftur.",
     "hist_import_failed": "Innflutningur mistókst.",
-    "imported_history_readonly": "Fannst í innfluttri aflsögu. Hún hjálpar samsvöruninni en telst ekki með í tölfræðinni þinni og ekki er hægt að klippa hana eða skipta henni. Merktu hana til að gefa kerfinu heiti.",
     "odometer_intro": "Þessi samtala hækkar aðeins. Það að eyða lotu lækkar hana ekki, svo þjónustuáminningar haldist réttar.",
     "odometer_correct_hint": "Stilltu þetta ef WashData taldi keyrslu sem aldrei fór fram, eða ef tækið keyrði lotur áður en WashData var sett upp.",
     "no_reminders_set": "Engar þjónustuáminningar hafa enn verið stilltar.",

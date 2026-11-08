@@ -1094,7 +1094,6 @@
     "hist_scan_failed": "Vyhľadávanie sa nepodarilo.",
     "hist_scan_expired": "Toto skenovanie už nie je dostupné. Skenujte znova.",
     "hist_import_failed": "Import sa nepodaril.",
-    "imported_history_readonly": "Nájdené v importovanej histórii výkonu. Pomáha párovaniu, ale nezapočítava sa do štatistík a nedá sa orezať ani rozdeliť. Označením pomenujte program.",
     "odometer_intro": "Tento súčet len rastie. Odstránenie cyklu ho nezníži, takže pripomienky servisu zostávajú správne.",
     "odometer_correct_hint": "Nastavte, ak WashData započítalo cyklus, ktorý neprebehol, alebo spotrebič absolvoval cykly pred inštaláciou WashData.",
     "no_reminders_set": "Zatiaľ nie sú nastavené žiadne pripomienky servisu.",

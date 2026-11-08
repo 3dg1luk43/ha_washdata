@@ -1026,7 +1026,6 @@
     "hist_scan_failed": "A análise falhou.",
     "hist_scan_expired": "Essa análise não está mais disponível. Analise novamente.",
     "hist_import_failed": "A importação falhou.",
-    "imported_history_readonly": "Encontrado em um histórico de potência importado. Ajuda a correspondência, mas não conta nas suas estatísticas e não pode ser cortado nem dividido. Rotule-o para dar nome ao programa.",
     "odometer_intro": "Este total só aumenta. Excluir um ciclo não o reduz, para que os lembretes de manutenção continuem corretos.",
     "odometer_correct_hint": "Defina este valor se o WashData contou um ciclo que nunca aconteceu, ou se o eletrodoméstico já fez ciclos antes de o WashData ser instalado.",
     "no_reminders_set": "Ainda não há lembretes de manutenção definidos.",

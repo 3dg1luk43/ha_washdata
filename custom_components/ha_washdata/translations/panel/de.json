@@ -1068,7 +1068,6 @@
     "hist_scan_failed": "Suche fehlgeschlagen.",
     "hist_scan_expired": "Diese Suche ist nicht mehr verfügbar. Suchen Sie erneut.",
     "hist_import_failed": "Import fehlgeschlagen.",
-    "imported_history_readonly": "Im importierten Leistungsverlauf gefunden. Er hilft beim Abgleich, zählt aber nicht in Ihre Statistik und kann nicht gekürzt oder aufgeteilt werden. Beschriften Sie ihn, um das Programm zu benennen.",
     "odometer_intro": "Diese Gesamtzahl steigt nur. Das Löschen eines Zyklus verringert sie nicht, damit Wartungserinnerungen korrekt bleiben.",
     "odometer_correct_hint": "Setzen Sie diesen Wert, wenn WashData einen Lauf gezählt hat, der nie stattfand, oder wenn das Gerät schon vor der Installation von WashData Zyklen absolviert hat.",
     "no_reminders_set": "Es sind noch keine Service-Erinnerungen eingerichtet.",

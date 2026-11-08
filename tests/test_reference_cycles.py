@@ -390,7 +390,9 @@ def test_cycle_capabilities_are_derived_from_list_membership():
     from custom_components.ha_washdata.ws_api import _cycle_capabilities
 
     real = _cycle_capabilities({"meta": {"source": "recorder"}}, "past")
-    assert real == {"is_reference": False, "labelable": True, "editable": True}
+    assert real == {
+        "is_reference": False, "labelable": True, "editable": True, "trimmable": True,
+    }
 
     downloaded = _cycle_capabilities({"meta": {"source": "store:abc"}}, "reference")
     assert downloaded["is_reference"] is True
@@ -398,14 +400,18 @@ def test_cycle_capabilities_are_derived_from_list_membership():
     # Non-real cycles are labelable (that is how a program gets named) but not editable.
     assert downloaded["labelable"] is True
     assert downloaded["editable"] is False
+    assert downloaded["trimmable"] is False
 
     backfilled = _cycle_capabilities({"meta": {"source": "history_import"}}, "backfill")
     assert backfilled["cycle_origin"] == "backfill"
     assert backfilled["labelable"] is True
     assert backfilled["editable"] is False
+    # Trimmable, though: an import can hold an end wait the user wants gone (#518).
+    assert backfilled["trimmable"] is True
 
     # An unknown origin is treated as non-real rather than as an editable real cycle.
     assert _cycle_capabilities({}, "")["cycle_origin"] == "reference"
+    assert _cycle_capabilities({}, "")["trimmable"] is False
 
 
 # --- The third category: backfilled history cycles (issue #344) --------------

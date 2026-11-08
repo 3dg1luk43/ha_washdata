@@ -156,6 +156,7 @@ export interface GetCyclePowerDataResponse {
   is_reference?: boolean;
   labelable?: boolean;
   editable?: boolean;
+  trimmable?: boolean;
   cycle_origin?: string;
   expected?: number[][] | null;
 }

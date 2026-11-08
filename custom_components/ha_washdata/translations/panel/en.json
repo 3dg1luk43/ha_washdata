@@ -907,7 +907,7 @@
     "import_analyze_hint": "Load an exported file (or paste its JSON). WashData shows what can be imported before anything changes.",
     "import_history_description": "Had a smart plug before WashData? Upload its power history or read it from Home Assistant. Detection runs over it, and past cycles appear in your Cycles list ready to name.",
     "import_undo_hint": "A restore point from before the last import ({when}) is kept: {profiles} profile(s) and {cycles} cycle(s).",
-    "imported_history_readonly": "Found in imported power history. It helps matching but is not counted in your statistics and cannot be trimmed or split. Label it to name the program.",
+    "imported_history_note": "Found in imported power history. It helps matching but is not counted in your statistics and cannot be split. Label it to name the program.",
     "imported_readonly": "Imported from the community store. Used for reference and matching, not counted in your stats, and cannot be edited.",
     "include_settings_hint": "Share this device's detection and matching thresholds (not notifications, entities or energy price). Others choose whether to apply them.",
     "legacy_actions_title": "{count} legacy custom action still running",

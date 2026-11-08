@@ -1094,7 +1094,6 @@
     "hist_scan_failed": "Vyhledávání se nezdařilo.",
     "hist_scan_expired": "Toto skenování už není dostupné. Skenujte znovu.",
     "hist_import_failed": "Import se nezdařil.",
-    "imported_history_readonly": "Nalezeno v importované historii výkonu. Pomáhá párování, ale nezapočítává se do statistik a nelze jej oříznout ani rozdělit. Označením pojmenujte program.",
     "odometer_intro": "Tento součet jen roste. Smazání cyklu jej nesníží, takže připomínky servisu zůstávají správné.",
     "odometer_correct_hint": "Nastavte, pokud WashData započítala cyklus, který neproběhl, nebo spotřebič absolvoval cykly před instalací WashData.",
     "no_reminders_set": "Zatím nejsou nastaveny žádné připomínky servisu.",

@@ -35,6 +35,7 @@ import uuid
 from array import array
 from collections.abc import Callable, Mapping
 from datetime import datetime, timedelta
+from types import SimpleNamespace
 from typing import Any, TypeAlias, cast
 
 import numpy as np
@@ -57,6 +58,7 @@ from .const import (
     TERMINAL_SIGNATURE_MIN_CYCLES,
     SELF_UNMATCHABLE_MIN_CYCLES,
     DEVICE_TYPE_DISHWASHER,
+    BACKFILL_TAIL_CUT_KEY,
     BANKED_TAIL_REPAIR_KEY,
     CYCLE_ENERGY_REBUILD_KEY,
     BANKED_TAIL_REPAIR_MIN_S,
@@ -2967,6 +2969,11 @@ class ProfileStore:
         # The device type, pushed in by the manager like energy_mode. Scopes the
         # nearest-member templates (MATCH_MEMBER_DEVICE_TYPES, #486); None = off.
         self.device_type: str | None = None
+        # The detector's stop threshold, pushed in by the manager like device_type.
+        # Where an imported dishwasher cycle's last activity sits is judged at it
+        # (`_cut_backfill_tails_nosave`, #518); None = the store cannot judge, so
+        # nothing is cut.
+        self.stop_threshold_w: float | None = None
         # Which cycle categories may shape a profile (see CONF_PROFILE_EVIDENCE_SOURCES).
         # Pushed in by the manager from entry options, the way energy_mode is; the store
         # has no access to them itself. Defaults to all three, i.e. pre-setting behaviour.
@@ -3599,7 +3606,8 @@ class ProfileStore:
         """Locate a cycle by id, returning it with the name of the list holding it.
 
         The origin is what decides capability: ``past`` cycles are fully editable,
-        ``reference`` and ``backfill`` cycles can be labelled but not trimmed or split.
+        ``backfill`` cycles can be labelled and trimmed (#518) but not split, and
+        ``reference`` cycles can only be labelled.
         """
         for origin, cycles in (
             ("past", self.get_past_cycles()),
@@ -7584,8 +7592,16 @@ class ProfileStore:
 
         First the profile's trace summaries: every edit of its cycles reaches this
         method, so what the next match tick's statistics read is ready off the loop.
+
+        Then the end wait of its history-imported dishwasher cycles is cut
+        (:meth:`_cut_backfill_tails_nosave`, #518): every path that gives such a
+        cycle a programme (a label, the bulk auto-label, a new profile from it, an
+        import) rebuilds that programme here, so the build never learns the wait.
         """
         await self.async_warm_trace_summaries((profile_name,))
+        if self._cut_backfill_tails_nosave(profile_name)[0]:
+            # The cut traces are new lists: summarise them off the loop too.
+            await self.async_warm_trace_summaries((profile_name,))
         before = self._envelope_inputs(profile_name)
         memo: dict[str, tuple[tuple[Any, ...], tuple[Any, ...], list[Any]]] = (
             self.__dict__.setdefault("_envelope_built_from", {})
@@ -7956,6 +7972,51 @@ class ProfileStore:
         """Whether the envelope rebuild armed by the v18 energy fix still has to run."""
         return bool(self._data.get(CYCLE_ENERGY_REBUILD_KEY))
 
+    def backfill_tail_cut_pending(self) -> bool:
+        """Whether the one-time import tail cut (#518) still has to run. Absent
+        counts as pending, so a store from before it runs it once."""
+        return self._data.get(BACKFILL_TAIL_CUT_KEY, True) is not False
+
+    def arm_backfill_tail_cut(self) -> None:
+        """Ask for the import tail cut again (the stop threshold changed)."""
+        self._data[BACKFILL_TAIL_CUT_KEY] = True
+
+    async def async_cut_backfill_tails(self) -> dict[str, Any]:
+        """Cut the end wait off every labelled imported dishwasher cycle, once (#518).
+
+        For installs that labelled history-imported cycles before the cut existed:
+        new labels are cut by the envelope rebuild they trigger. Rebuilds only the
+        profiles it changed and saves only then; the marker is cleared either way
+        (a cycle the rule declined is retried by its profile's next rebuild). Needs
+        the stop threshold the manager pushes in. Never raises.
+        """
+        summary: dict[str, Any] = {"cut": 0, "reclaimed_s": 0.0, "profiles": 0}
+        try:
+            if self.stop_threshold_w is None:
+                return summary
+            names = sorted({
+                str(c.get("profile_name"))
+                for c in self.get_backfill_cycles()
+                if isinstance(c, dict) and c.get("profile_name")
+            } & set(self._data.get("profiles") or {}))
+            touched: list[str] = []
+            for name in names:
+                cut, reclaimed = self._cut_backfill_tails_nosave(name)
+                if cut:
+                    touched.append(name)
+                    summary["cut"] += cut
+                    summary["reclaimed_s"] += reclaimed
+            self._data[BACKFILL_TAIL_CUT_KEY] = False
+            summary["profiles"] = len(touched)
+            if touched:
+                for name in touched:
+                    with contextlib.suppress(Exception):
+                        await self.async_rebuild_envelope(name)
+                await self.async_save()
+        except Exception as exc:  # noqa: BLE001 - never cost the user their history
+            self._logger.warning("Import tail cut aborted: %s", exc)
+        return summary
+
     async def async_rebuild_envelopes_after_energy_fix(self) -> int:
         """Rebuild every envelope once after the cycle energies were re-integrated
         (#498), so each profile's avg_energy is the mean of its cycles (#495).
@@ -7990,8 +8051,12 @@ class ProfileStore:
         cycles recorded as ``TerminationReason.SMART`` are touched - plus, on a
         dishwasher, ``TerminationReason.TIMEOUT``, whose finish keeps its tail
         through the same cap (#424).
-        ``backfill_cycles`` were replayed from raw history and never went through
-        Smart Termination at all, so they cannot carry a banked tail; a
+        ``backfill_cycles`` are not scanned here, but they DO carry a banked tail:
+        the history replay runs unmatched, so a dishwasher's timeout finish keeps
+        its whole ``min_off_gap`` wait (audit PLAYGROUND-07, #518). They are cut by
+        the same dishwasher rule with their programme's statistics, at import
+        (``history_import.async_import_tail_cuts``) and once labelled
+        (:meth:`_cut_backfill_tails_nosave`, run by every envelope rebuild). A
         user-stopped, unattributed, or hand-corrected cycle is left alone for the
         reasons given at the filter.
 
@@ -8287,6 +8352,155 @@ class ProfileStore:
         # Last, so a row that fails above keeps its old duration with its old trace
         # rather than a cut duration over an uncut one (register item 384).
         cycle["duration"] = round(float(new_duration), 3)
+
+    def _apply_backfill_tail_cut(self, cycle: CycleDict, new_duration: float) -> None:
+        """Cut a history-imported cycle's end wait at ``new_duration`` seconds (#518).
+
+        :meth:`_apply_repaired_duration` does the trim; this re-integrates
+        ``energy_wh`` from the kept trace (a backfill cycle has no meter figure, and
+        its stored energy was integrated over the wait) and stamps
+        ``meta["tail_cut_s"]``, the seconds removed, so the cut never runs twice on
+        one cycle. Shared by the import (``ws_api``) and the label-time cut.
+        """
+        old_duration = float(cycle.get("duration") or 0.0)
+        self._apply_repaired_duration(cycle, new_duration)
+        points = decompress_power_data(cycle)
+        if len(points) > 1:
+            ts = np.asarray([t for t, _ in points], dtype=float)
+            power = np.asarray([p for _, p in points], dtype=float)
+            cycle["energy_wh"] = round(integrate_cycle_wh(ts, power), 3)
+        meta = cycle.get("meta")
+        if not isinstance(meta, dict):
+            meta = cycle["meta"] = {}
+        meta["tail_cut_s"] = round(max(0.0, old_duration - float(new_duration)), 1)
+
+    def _backfill_tail_candidates(self, profile_name: str) -> list[CycleDict]:
+        """``profile_name``'s imported cycles that may still hold their end wait.
+
+        A dishwasher's timeout finish keeps its tail (``keep_tail``), and the
+        unmatched history replay has no expected duration to cap it with, so an
+        imported one stores the whole ``min_off_gap`` wait (audit PLAYGROUND-07). Not
+        a cycle already cut (``meta.tail_cut_s``), trimmed by the user (``meta.edited``
+        / ``meta.trim``) or given a corrected length (``manual_duration``): those are
+        the user's statement of where it ended. Metadata only, no trace decoding.
+        """
+        if self.device_type != DEVICE_TYPE_DISHWASHER or not profile_name:
+            return []
+        out: list[CycleDict] = []
+        for cycle in self.get_backfill_cycles():
+            if not isinstance(cycle, dict) or cycle.get("profile_name") != profile_name:
+                continue
+            if cycle.get("termination_reason") != TerminationReason.TIMEOUT:
+                continue
+            if cycle.get("manual_duration"):
+                continue
+            meta = cycle.get("meta")
+            if isinstance(meta, dict) and (
+                meta.get("tail_cut_s") is not None or meta.get("edited") or meta.get("trim")
+            ):
+                continue
+            out.append(cycle)
+        return out
+
+    def _backfill_tail_expected_s(
+        self, profile_name: str, candidates: list[CycleDict]
+    ) -> float | None:
+        """The programme length the cut falls back to when no drying span is measured.
+
+        The median length of the profile's evidence cycles that cannot hold an
+        uncut import wait - live cycles, references, imports already cut or ended
+        another way - and never ``avg_duration``: that mean includes the very waits
+        being cut (#518: 8,461 -> 10,193 s), so anchoring on it would keep most of
+        each one. None when the profile has no such cycle; the candidates then wait
+        for evidence (each rebuild of the profile asks again).
+        """
+        skip = {id(c) for c in candidates}
+        lengths: list[float] = []
+        for cycle in self.iter_evidence_cycles():
+            if (
+                not isinstance(cycle, dict)
+                or id(cycle) in skip
+                or cycle.get("profile_name") != profile_name
+                or cycle.get("status") not in ("completed", "force_stopped")
+            ):
+                continue
+            try:
+                length = float(cycle.get("manual_duration") or cycle.get("duration") or 0.0)
+            except (TypeError, ValueError, OverflowError):
+                continue
+            if math.isfinite(length) and length > 60:
+                lengths.append(length)
+        return float(statistics.median(lengths)) if lengths else None
+
+    def _cut_backfill_tails_nosave(self, profile_name: str) -> tuple[int, float]:
+        """Cut the end wait off ``profile_name``'s imported dishwasher cycles (#518).
+
+        The import cuts a candidate only when it confidently matches an existing
+        programme (``history_import.async_import_tail_cuts``), so on a first import,
+        with no programme yet, nothing was cut, and once labelled each cycle carried
+        its whole ``min_off_gap`` wait into the profile. Here the programme is known
+        (the label), so the SAME rule, :func:`history_import.import_tail_cut_s`, is
+        applied with its statistics: the measured drying span before the terminal
+        pump-out (from the traces, so the waits after it cannot inflate it), the
+        user-vouched length floor, and only without a span the length of its other
+        cycles (:meth:`_backfill_tail_expected_s`). Shorten-only, at least
+        ``BANKED_TAIL_REPAIR_MIN_S``; statistics are read once, before any cut.
+
+        A cycle the rule declines is not stamped, so a later rebuild (more evidence,
+        a new stop threshold) can still cut it; a cut one never runs again. Returns
+        ``(cycles cut, seconds removed)``; the caller rebuilds and saves. Never raises.
+        """
+        try:
+            stop = self.stop_threshold_w
+            if stop is None or not math.isfinite(float(stop)):
+                return 0, 0.0
+            candidates = self._backfill_tail_candidates(profile_name)
+            if not candidates:
+                return 0, 0.0
+            from . import history_import  # pylint: disable=import-outside-toplevel
+
+            config = SimpleNamespace(
+                device_type=DEVICE_TYPE_DISHWASHER, stop_threshold_w=float(stop)
+            )
+            quiet = self.profile_terminal_quiet_seconds(profile_name)
+            trusted = self.profile_trusted_min_duration(profile_name)
+            expected = (
+                self._backfill_tail_expected_s(profile_name, candidates)
+                if quiet is None
+                else None
+            )
+            cut = 0
+            reclaimed = 0.0
+            for cycle in candidates:
+                try:
+                    view = {
+                        "power_data": decompress_power_data(cycle),
+                        "duration": cycle.get("duration"),
+                        "termination_reason": cycle.get("termination_reason"),
+                    }
+                    new_duration = history_import.import_tail_cut_s(
+                        view, config, quiet, trusted, expected
+                    )
+                    if new_duration is None:
+                        continue
+                    old_duration = float(cycle.get("duration") or 0.0)
+                    self._apply_backfill_tail_cut(cycle, new_duration)
+                except Exception:  # noqa: BLE001 - one bad row must not stop the rest
+                    self._logger.debug(
+                        "Import tail cut: skipped cycle %s", cycle.get("id"), exc_info=True
+                    )
+                    continue
+                cut += 1
+                reclaimed += old_duration - float(new_duration)
+            if cut:
+                self._logger.info(
+                    "Cut the end wait off %d imported cycle(s) of '%s' (%.0f min)",
+                    cut, profile_name, reclaimed / 60.0,
+                )
+            return cut, reclaimed
+        except Exception:  # noqa: BLE001 - a cut must never break the rebuild
+            self._logger.debug("Import tail cut failed for '%s'", profile_name, exc_info=True)
+            return 0, 0.0
 
     def profile_trusted_min_duration(self, profile_name: str) -> float | None:
         """Shortest user-vouched length of this profile, or None (item 384).
@@ -12538,10 +12752,14 @@ class ProfileStore:
 
         Returns True if successful, False if the cycle was not found or the
         resulting data is empty.
+
+        Real and history-imported (``backfill``) cycles: an import can hold an end
+        wait or a merged neighbour the user wants gone, and deleting it was the
+        only way out (#518). A community-store ``reference`` cycle stays as
+        downloaded.
         """
-        cycles = cast(list[CycleDict], self._data.get("past_cycles", []))
-        cycle = next((c for c in cycles if c.get("id") == cycle_id), None)
-        if cycle is None:
+        cycle, origin = self.find_stored_cycle(cycle_id)
+        if cycle is None or origin not in ("past", "backfill"):
             return False
 
         p_data = decompress_power_data(cycle)

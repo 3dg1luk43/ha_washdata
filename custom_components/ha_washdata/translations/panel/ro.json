@@ -1026,7 +1026,6 @@
     "hist_scan_failed": "Analiza a eșuat.",
     "hist_scan_expired": "Acea analiză nu mai este disponibilă. Reluați analiza.",
     "hist_import_failed": "Importul a eșuat.",
-    "imported_history_readonly": "Găsit într-un istoric de putere importat. Ajută potrivirea, dar nu contează în statisticile dvs. și nu poate fi tăiat sau împărțit. Etichetați-l pentru a denumi programul.",
     "odometer_intro": "Acest total doar crește. Ștergerea unui ciclu nu îl scade, ca mementourile de service să rămână corecte.",
     "odometer_correct_hint": "Setați această valoare dacă WashData a numărat un ciclu care nu a avut loc sau dacă aparatul a rulat cicluri înainte de instalarea WashData.",
     "no_reminders_set": "Încă nu este setat niciun memento de service.",

@@ -1068,7 +1068,6 @@
     "hist_scan_failed": "Zoeken mislukt.",
     "hist_scan_expired": "Die zoekopdracht is niet meer beschikbaar. Zoek opnieuw.",
     "hist_import_failed": "Importeren mislukt.",
-    "imported_history_readonly": "Gevonden in geïmporteerde vermogensgeschiedenis. Helpt bij de herkenning, maar telt niet mee in uw statistieken en kan niet worden bijgesneden of gesplitst. Label het om het programma te benoemen.",
     "odometer_intro": "Dit totaal gaat alleen omhoog. Een cyclus verwijderen verlaagt het niet, zodat onderhoudsherinneringen kloppen.",
     "odometer_correct_hint": "Stel dit in als WashData een run heeft geteld die nooit heeft plaatsgevonden, of als het apparaat al cycli draaide voordat WashData werd geïnstalleerd.",
     "no_reminders_set": "Er zijn nog geen serviceherinneringen ingesteld.",

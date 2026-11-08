@@ -409,13 +409,15 @@ class GetCyclePowerDataResponse(_GetCyclePowerDataBase, total=False):
     energy_kwh: float | None
     artifacts: list[dict[str, Any]]
     restart_gaps: list[Any]
-    # Capability keys spread from _cycle_capabilities(cycle, origin). ``is_reference``
-    # is present for every cycle; the other three ride along for a non-``past`` cycle
-    # (reference/backfill), so declare them or the WS contract check flags them and the
-    # generated ws-types.d.ts omits the fields the panel needs to type.
+    # Capability keys spread from _cycle_capabilities(cycle, origin). ``is_reference``,
+    # ``labelable``, ``editable`` and ``trimmable`` are present for every found cycle;
+    # ``cycle_origin`` rides along for a non-``past`` cycle (reference/backfill), so
+    # declare them or the WS contract check flags them and the generated
+    # ws-types.d.ts omits the fields the panel needs to type.
     is_reference: bool
     labelable: bool
     editable: bool
+    trimmable: bool
     cycle_origin: str
     # Spread from `**meta` when the cycle has a matched profile and
     # `expected_curve_for_cycle` succeeds, so it is optional rather than absent:

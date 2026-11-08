@@ -591,7 +591,7 @@ def _strip_cycle(c: dict[str, Any]) -> dict[str, Any]:
 def _cycle_capabilities(cycle: dict[str, Any], origin: str) -> dict[str, Any]:
     """What the panel may offer for one cycle, given which list it lives in.
 
-    Three separate answers, because "not a real cycle" is not one capability:
+    Separate answers, because "not a real cycle" is not one capability:
 
     * ``is_reference`` - it lives outside ``past_cycles``, so it feeds envelopes and the
       matcher but never usage statistics. Always derived from list membership, never from
@@ -600,8 +600,11 @@ def _cycle_capabilities(cycle: dict[str, Any], origin: str) -> dict[str, Any]:
     * ``labelable`` - a profile can be assigned to it. True everywhere: naming the
       programs found in imported history (#344) is the entire point of that feature, and
       the store labels a non-real cycle in place.
-    * ``editable`` - trim / split / review apply. Real cycles only; those store functions
+    * ``editable`` - split / review apply. Real cycles only; those store functions
       operate on ``past_cycles`` and would silently no-op elsewhere.
+    * ``trimmable`` - trim. Real and history-imported (``backfill``) cycles: an import
+      can hold an end wait the user wants gone (#518). A community-store recording
+      stays as downloaded.
 
     ``origin`` is the list name from :meth:`ProfileStore.find_stored_cycle`
     (``past`` / ``reference`` / ``backfill``) and is passed through so the UI can say
@@ -609,11 +612,12 @@ def _cycle_capabilities(cycle: dict[str, Any], origin: str) -> dict[str, Any]:
     importer detected in the user's own history warrant different wording.
     """
     if origin == "past":
-        return {"is_reference": False, "labelable": True, "editable": True}
+        return {"is_reference": False, "labelable": True, "editable": True, "trimmable": True}
     return {
         "is_reference": True,
         "labelable": True,
         "editable": False,
+        "trimmable": origin == "backfill",
         "cycle_origin": origin or "reference",
     }
 
@@ -8046,8 +8050,9 @@ async def _history_import_apply_task(
                     id_pool=id_pool,
                 )
                 if raw.get("tail_cut_s"):
-                    # The banked-tail repair's own trim (PLAYGROUND-07).
-                    store._apply_repaired_duration(stored, float(raw["tail_cut_s"]))  # noqa: SLF001
+                    # The banked-tail repair's own trim (PLAYGROUND-07), stamped so the
+                    # cut at labelling (#518) does not run on it again.
+                    store._apply_backfill_tail_cut(stored, float(raw["tail_cut_s"]))  # noqa: SLF001
                 if key is not None:
                     existing.add(key)
                 interval = history_import.stored_intervals([{**raw, "duration": duration}])

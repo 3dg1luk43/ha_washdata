@@ -889,6 +889,7 @@ class WashDataManager:
         self._cycle_end_task: Task[Any] | None = None
         self._banked_tail_repair_task: Task[Any] | None = None
         self._energy_rebuild_task: Task[Any] | None = None
+        self._backfill_tail_cut_task: Task[Any] | None = None
         # Detached store-touching tasks (matching trigger, active-cycle clear,
         # post-cycle processing) tracked so async_shutdown can cancel them before a
         # reload/unload swaps the ProfileStore out from under them.
@@ -2269,12 +2270,45 @@ class WashDataManager:
             self._async_rebuild_after_energy_fix()
         )
 
+    async def _async_cut_backfill_tails(self) -> None:
+        """The one-time cut of imported dishwasher cycles' end wait (#518). Never
+        raises."""
+        try:
+            result = await self.profile_store.async_cut_backfill_tails()
+            if result.get("cut"):
+                self._logger.info(
+                    "Cut the end wait off %d imported cycles (%.0f min); %d profile "
+                    "envelopes rebuilt.",
+                    result["cut"], result["reclaimed_s"] / 60.0, result["profiles"],
+                )
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            self._logger.warning("Import tail cut could not run: %s", exc)
+
+    def async_schedule_backfill_tail_cut(self) -> None:
+        """Run the one-time import tail cut in the background if it is pending.
+
+        Labels given after it are cut by the envelope rebuild they trigger, so this
+        only reaches installs that labelled imported cycles before the cut existed.
+        A second call while one runs is a no-op.
+        """
+        if self.profile_store.backfill_tail_cut_pending() is not True:
+            return
+        existing = self._backfill_tail_cut_task
+        if existing is not None and not existing.done():
+            return
+        self._backfill_tail_cut_task = self._spawn_tracked(
+            self._async_cut_backfill_tails()
+        )
+
     def _pin_trace_summary_levels(self) -> bool:
         """Pin the stop levels the live statistics ask at onto the store: the stop
         threshold (pause catalogue, hazard gate, prefix term) and the near-stop
         ceiling (stall catalogue), as those callers pass them. True when changed."""
         try:
             stop = self.detector.config.stop_threshold_w
+            # Where an imported dishwasher cycle's activity ended (#518) is judged
+            # at the same level.
+            self.profile_store.stop_threshold_w = float(stop)
             return self.profile_store.set_trace_summary_levels(
                 (float(stop), float(standby_near_stop_ceiling(stop)))
             )
@@ -2576,6 +2610,7 @@ class WashDataManager:
         # had already swapped out.
         self.async_schedule_banked_tail_repair()
         self.async_schedule_energy_rebuild()
+        self.async_schedule_backfill_tail_cut()
 
     def _load_notify_services(self, config_entry: ConfigEntry) -> None:
         """Load the per-event notification service lists.
@@ -2644,7 +2679,8 @@ class WashDataManager:
         apply_detector_config(self.detector.config, new_detector_config)
         # A new stop threshold is a new pause level for every trace summary: fill
         # them off the loop now rather than on the next match tick.
-        if self._pin_trace_summary_levels():
+        _stop_level_changed = self._pin_trace_summary_levels()
+        if _stop_level_changed:
             self._spawn_tracked(self.profile_store.async_warm_trace_summaries())
 
         self.profile_store.dtw_bandwidth = float(
@@ -2660,6 +2696,11 @@ class WashDataManager:
         # mean power elsewhere (see analysis.stage4_energy_mode).
         self.profile_store.energy_mode = analysis.stage4_energy_mode(self.device_type)
         self.profile_store.device_type = self.device_type
+        if _stop_level_changed:
+            # A new stop threshold can show where an imported dishwasher cycle's
+            # activity really ended (#518: a 1.7 W standby above a 1.2 W stop hid it).
+            self.profile_store.arm_backfill_tail_cut()
+            self.async_schedule_backfill_tail_cut()
         # Which cycle categories may shape a profile. Changing it changes every
         # profile's curve, so rebuild them all now: envelopes are otherwise only rebuilt
         # on a cycle end or a label change, so the user would tick the box and see

@@ -1068,7 +1068,6 @@
     "hist_scan_failed": "Scanningen mislykkedes.",
     "hist_scan_expired": "Den scanning er ikke længere tilgængelig. Scan igen.",
     "hist_import_failed": "Importen mislykkedes.",
-    "imported_history_readonly": "Fundet i importeret effekthistorik. Den hjælper matchningen, men tælles ikke med i din statistik og kan ikke beskæres eller opdeles. Mærk den for at navngive programmet.",
     "odometer_intro": "Denne total stiger kun. Sletning af en cyklus sænker den ikke, så servicepåmindelser forbliver korrekte.",
     "odometer_correct_hint": "Angiv dette, hvis WashData har talt en kørsel, der aldrig fandt sted, eller apparatet kørte cyklusser, før WashData blev installeret.",
     "no_reminders_set": "Der er endnu ikke angivet nogen servicepåmindelser.",

@@ -1079,7 +1079,6 @@
     "hist_scan_failed": "Skenēšana neizdevās.",
     "hist_scan_expired": "Šī skenēšana vairs nav pieejama. Skenējiet vēlreiz.",
     "hist_import_failed": "Importēšana neizdevās.",
-    "imported_history_readonly": "Atrasts importētā jaudas vēsturē. Tas palīdz saskaņošanā, bet netiek ieskaitīts jūsu statistikā, un to nevar apgriezt vai sadalīt. Iezīmējiet to, lai norādītu programmu.",
     "odometer_intro": "Šis kopējais skaits tikai palielinās. Cikla dzēšana to nesamazina, tāpēc apkopes atgādinājumi paliek precīzi.",
     "odometer_correct_hint": "Iestatiet to, ja WashData ir saskaitījis ciklu, kas nekad nav noticis, vai ierīce veica ciklus pirms WashData uzstādīšanas.",
     "no_reminders_set": "Vēl nav iestatīts neviens apkopes atgādinājums.",

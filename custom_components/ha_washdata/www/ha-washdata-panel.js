@@ -12021,12 +12021,14 @@ class HaWashdataPanel extends HTMLElement {
     }
     const cur = m.curve || {};
     const isRef = !!cur.is_reference;  // lives in reference_cycles: outside usage stats
-    // Capabilities come from the backend (`_reference_capabilities`), which derives them
+    // Capabilities come from the backend (`_cycle_capabilities`), which derives them
     // from which list the cycle lives in. An imported cycle can be labelled - that is how
-    // a program gets named from imported history (#344) - but not trimmed, split or
-    // reviewed, because those store functions only operate on past_cycles.
+    // a program gets named from imported history (#344) - but not split or reviewed,
+    // because those store functions only operate on past_cycles. One found in imported
+    // power history can be trimmed (#518); a community-store recording cannot.
     const canLabel = cur.labelable !== false;
     const canEditCycle = cur.editable !== false;
+    const canTrimCycle = canEditCycle || cur.trimmable === true;
     const fromHistory = cur.cycle_origin === 'backfill';
     const full = cur.full_duration_s || cur.duration || 0;
     const kwh = cur.energy_kwh != null ? cur.energy_kwh : null;
@@ -12048,16 +12050,18 @@ class HaWashdataPanel extends HTMLElement {
     const reviewDot = (needsReview && m.mode !== 'review')
       ? ` <span title="${this._t('hdr.automation_needs_review', {}, 'This cycle needs review')}" style="color:var(--warning-color,#ff9800);font-size:1.1em;line-height:0">●</span>`
       : '';
-    // Imported recordings are read-only (they seed matching templates only), so
-    // the edit mode-bar is hidden and a short note explains why.
-    const modeBar = (this._canEdit() && canEditCycle) ? `<div class="wd-mode-bar">
+    // Imported recordings seed matching templates only: a community-store one is
+    // read-only, one found in imported history can only be trimmed (#518). The mode
+    // bar offers what the cycle allows, and a short note says why the rest is missing.
+    const modeBar = (this._canEdit() && canTrimCycle) ? `<div class="wd-mode-bar">
       <button class="wd-btn wd-btn-sm ${m.mode === 'view' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-view">${this._t('btn.inspect', {}, 'Inspect')}</button>
-      <button class="wd-btn wd-btn-sm ${m.mode === 'trim' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-trim">${this._t('btn.trim', {}, 'Trim')}</button>
+      <button class="wd-btn wd-btn-sm ${m.mode === 'trim' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-trim">${this._t('btn.trim', {}, 'Trim')}</button>${canEditCycle ? `
       <button class="wd-btn wd-btn-sm ${m.mode === 'split' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-split">${this._t('btn.split', {}, 'Split')}</button>
-      <button class="wd-btn wd-btn-sm ${m.mode === 'review' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-review" title="${needsReview ? this._t('hdr.automation_needs_review', {}, 'This cycle needs review') : this._t('hdr.automation_review_this_cycle', {}, 'Review this cycle')}">${this._t('btn.review', {}, 'Review')}${reviewDot}</button>
-    </div>` : (isRef ? `<div class="wd-info" style="margin:0 0 8px"><span style="color:var(--info-color,#2196f3)">📥</span> ${fromHistory
-      ? this._t('msg.imported_history_readonly', {}, 'Found in imported power history. It helps matching but is not counted in your statistics and cannot be trimmed or split. Label it to name the program.')
-      : this._t('msg.imported_readonly', {}, 'Imported from the community store. Used for reference and matching, not counted in your stats, and cannot be edited.')}</div>` : '');
+      <button class="wd-btn wd-btn-sm ${m.mode === 'review' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-review" title="${needsReview ? this._t('hdr.automation_needs_review', {}, 'This cycle needs review') : this._t('hdr.automation_review_this_cycle', {}, 'Review this cycle')}">${this._t('btn.review', {}, 'Review')}${reviewDot}</button>` : ''}
+    </div>` : '';
+    const refNote = (isRef && !canEditCycle) ? `<div class="wd-info" data-cyc-ref-note style="margin:0 0 8px"><span style="color:var(--info-color,#2196f3)">📥</span> ${fromHistory
+      ? this._t('msg.imported_history_note', {}, 'Found in imported power history. It helps matching but is not counted in your statistics and cannot be split. Label it to name the program.')
+      : this._t('msg.imported_readonly', {}, 'Imported from the community store. Used for reference and matching, not counted in your stats, and cannot be edited.')}</div>` : '';
 
     // Pending-detection-feedback banner with the one-tap answers (the two candidate
     // programmes, Something else..., Not sure). Built once and shown in BOTH Inspect
@@ -12248,7 +12252,7 @@ class HaWashdataPanel extends HTMLElement {
         ${legItems.map(s => `<span class="wd-leg-i" data-leg="${s.kind}"><span class="wd-leg-sw" style="${legSw(s)};opacity:.8"></span> ${_esc(s.name)}</span>`).join('')}
       </div>` : '';
     return `<h2>${this._t('lbl.cycle', {}, 'Cycle')} · ${_esc(_fmtDate(cur.start_time))}</h2>
-      ${meta}${modeBar}
+      ${meta}${modeBar}${refNote}
       <div class="wd-canvas-wrap"><canvas id="wd-cyc-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_cycle_chart', {}, 'Cycle power trace'))}"></canvas></div>
       ${this._htmlCycleContextBar(m, cur)}
       ${overlayLeg}

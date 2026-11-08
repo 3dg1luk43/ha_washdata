@@ -1068,7 +1068,6 @@
     "hist_scan_failed": "Søket mislyktes.",
     "hist_scan_expired": "Det søket er ikke lenger tilgjengelig. Søk på nytt.",
     "hist_import_failed": "Importen mislyktes.",
-    "imported_history_readonly": "Funnet i importert effekthistorikk. Den hjelper matchingen, men telles ikke med i statistikken din og kan ikke beskjæres eller deles opp. Merk den for å navngi programmet.",
     "odometer_intro": "Denne totalen går bare opp. Å slette en syklus senker den ikke, så servicepåminnelser forblir riktige.",
     "odometer_correct_hint": "Angi dette hvis WashData telte en kjøring som aldri fant sted, eller apparatet kjørte sykluser før WashData ble installert.",
     "no_reminders_set": "Ingen servicepåminnelser er satt opp ennå.",

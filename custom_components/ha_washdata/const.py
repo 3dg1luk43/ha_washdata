@@ -1313,6 +1313,12 @@ BANKED_TAIL_REPAIR_KEY = "_banked_tail_repair_pending"
 # config and can take minutes on a large store, so it runs after setup, not in the
 # migration.
 CYCLE_ENERGY_REBUILD_KEY = "_cycle_energy_rebuild_pending"
+# Store key for the one pass that cuts the end wait off history-imported dishwasher
+# cycles already labelled before the cut existed (#518). Absent counts as pending,
+# so every store that predates it runs the pass once without a storage version;
+# the manager sets it False when the pass is done. New labels are cut by the
+# envelope rebuild (`ProfileStore._cut_backfill_tails_nosave`), not by this pass.
+BACKFILL_TAIL_CUT_KEY = "_backfill_tail_cut_pending"
 # Don't churn a cycle for a few seconds of tail: only rewrite one whose banked
 # span is worth correcting. Measured median banking was 12.6 min, so this only
 # skips noise.
