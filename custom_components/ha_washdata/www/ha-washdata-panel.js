@@ -4376,7 +4376,11 @@ class HaWashdataPanel extends HTMLElement {
     // `_feedbacksEid` names the device the list belongs to, so the Overview's
     // review question never shows another device's request after a switch.
     // True when the list was fetched (a caller that tracks it can retry otherwise).
-    try { const r = await this._ws({ type: `${_DOMAIN}/get_feedbacks`, entry_id: eid }); this._feedbacks = r.feedbacks || []; this._feedbacksEid = eid; return true; } catch (_) { return false; }
+    // A new list voids the count recorded for the old one: a fetch from another
+    // tab (a label, a dismiss-all) would otherwise leave the Overview matching a
+    // later request's count against it and never refetching. The Overview's own
+    // callers record the count again after this returns.
+    try { const r = await this._ws({ type: `${_DOMAIN}/get_feedbacks`, entry_id: eid }); this._feedbacks = r.feedbacks || []; this._feedbacksEid = eid; this._feedbacksSeenCount = null; return true; } catch (_) { return false; }
   }
 
   async _fetchPhases(eid) {
@@ -5388,16 +5392,20 @@ class HaWashdataPanel extends HTMLElement {
       if (label !== prev) { m.curve.expected = []; m.profileEnv = null; m.runnerUpEnv = null; this._fetchCycleProfileEnv(eid, label); }
     }
     if (this._reviewQ && this._reviewQ.eid === eid) this._reviewQ.envs = {};
-    if (this._tab === 'history') await this._fetchCycles(eid);
     const dev = this._devices[this._selIdx];
-    if (dev && dev.entry_id === eid) {
+    const ours = !!(dev && dev.entry_id === eid);
+    if (ours) {
       // The count on the device lags the answer until the next poll.
       dev.feedback_count = Math.max(0, (dev.feedback_count || 0) - 1);
       // Only a fetched list matches the count; after a failed one the next poll
       // must refetch, or the answered request keeps being asked.
       this._feedbacksSeenCount = fetched ? dev.feedback_count : null;
-      if (this._tab === 'status') await this._ensureReviewQuestion(dev);
     }
+    // Paint the answer now: the answered tile must not stay tappable while the
+    // next tiles' curves and the cycle list load (a second tap fails).
+    this._render();
+    if (this._tab === 'history') await this._fetchCycles(eid);
+    if (ours && this._tab === 'status') await this._ensureReviewQuestion(dev);
     this._render();
   }
 

@@ -315,6 +315,44 @@ test('an envelope fetched before an answer does not land in the cache the answer
   expect(await cached()).toEqual([600, 600]);
 });
 
+test('a request list fetched on another tab does not leave the Overview on a stale count', async ({ page }) => {
+  await bootWithQuestion(page);
+  await openQuestion(page);
+  await expect(page.locator('.wd-review-q .wd-review-tile')).toHaveAttribute('data-review-cid', 'cyc-003');
+  await clickTab(page, 'history');
+  // Labelling cyc-003 on the Cycles tab refetches the list there: now empty.
+  await setHandler(page, 'ha_washdata/get_feedbacks', { feedbacks: [] });
+  await page.evaluate(() => (document.getElementById('wd-panel') as any)._fetchFeedbacks('test-entry-001'));
+  // A new request brings the count back to 1 before the Overview polls again.
+  await setHandler(page, 'ha_washdata/get_feedbacks', { feedbacks: [SECOND] });
+  await setHandler(page, 'ha_washdata/get_devices', devices(deviceIdle, { feedback_count: 1 }));
+  await clickTab(page, 'status');
+  await page.evaluate(() => (document.getElementById('wd-panel') as any)._fetchAll());
+  const tiles = page.locator('.wd-review-q .wd-review-tile');
+  await expect(tiles).toHaveCount(1, { timeout: 5_000 });
+  await expect(tiles).toHaveAttribute('data-review-cid', 'cyc-004');
+});
+
+test('an answered tile goes at once, not after the next tiles\' curves load', async ({ page }) => {
+  await bootWithQuestion(page, [REQUEST, SECOND]);
+  await openQuestion(page);
+  const q = page.locator('.wd-review-q');
+  await expect.poll(() => drawnReviewSeries(page)).toHaveLength(2);
+  // Every envelope response from here on is held (a slow remote link).
+  await page.evaluate(() => {
+    const w = window as any;
+    w.__envQ = [];
+    w.__ws_handlers['ha_washdata/get_profile_envelope'] = () => new Promise(r => w.__envQ.push(r));
+  });
+  await setHandler(page, 'ha_washdata/resolve_feedback', { success: true });
+  await setHandler(page, 'ha_washdata/get_feedbacks', { feedbacks: [SECOND] });
+  await q.locator('.wd-review-tile[data-review-cid="cyc-003"] .wd-review-answers button', { hasText: 'Quick 30°C' }).click();
+  await expect.poll(() => page.evaluate(() => (window as any).__envQ.length)).toBeGreaterThan(0);
+  // Still loading, and the answered tile is already gone.
+  await expect(q.locator('.wd-review-tile[data-review-cid="cyc-003"]')).toHaveCount(0, { timeout: 2_000 });
+  await page.evaluate(() => (window as any).__envQ.forEach((r: any) => r(null)));
+});
+
 test('a failed candidate-curve fetch is retried on the next poll', async ({ page }) => {
   await page.goto('/');
   await bootPanel(page, {
