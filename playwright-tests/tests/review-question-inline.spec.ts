@@ -253,6 +253,27 @@ test('a failed request-list refetch is retried on the next poll', async ({ page 
   await expect(tiles).toHaveAttribute('data-review-cid', 'cyc-004');
 });
 
+test('a failed refetch after an answer is retried on the next poll', async ({ page }) => {
+  await bootWithQuestion(page, [REQUEST, SECOND]);
+  await openQuestion(page);
+  const q = page.locator('.wd-review-q');
+  await expect(q.locator('.wd-review-tile')).toHaveCount(2);
+
+  await setHandler(page, 'ha_washdata/resolve_feedback', { success: true });
+  await page.evaluate(() => (window as any).__set_error('ha_washdata/get_feedbacks'));
+  await q.locator('.wd-review-tile[data-review-cid="cyc-003"] .wd-review-answers button', { hasText: 'Quick 30°C' }).click();
+  await assertWsCalled(page, 'ha_washdata/resolve_feedback', 1);
+
+  // The poll that follows sees the backend's count (1) and must still refetch.
+  await page.evaluate(() => { delete (window as any).__ws_errors['ha_washdata/get_feedbacks']; });
+  await setHandler(page, 'ha_washdata/get_feedbacks', { feedbacks: [SECOND] });
+  await setHandler(page, 'ha_washdata/get_devices', devices(deviceIdle, { feedback_count: 1 }));
+  await page.evaluate(() => (document.getElementById('wd-panel') as any)._fetchAll());
+  const tiles = page.locator('.wd-review-q .wd-review-tile');
+  await expect(tiles).toHaveCount(1, { timeout: 5_000 });
+  await expect(tiles).toHaveAttribute('data-review-cid', 'cyc-004');
+});
+
 test('a failed candidate-curve fetch is retried on the next poll', async ({ page }) => {
   await page.goto('/');
   await bootPanel(page, {

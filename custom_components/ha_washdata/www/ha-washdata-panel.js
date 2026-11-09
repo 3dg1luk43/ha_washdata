@@ -5369,7 +5369,7 @@ class HaWashdataPanel extends HTMLElement {
   // rebuilds the envelopes), and stop an open cycle dialog calling its overlay
   // suspected.
   async _afterReviewAnswer(eid, cid, label) {
-    await this._fetchFeedbacks(eid);
+    const fetched = await this._fetchFeedbacks(eid);
     const m = this._modal;
     if (label && m && m.type === 'cycle-detail' && m.cycleId === cid && m.curve) {
       // Answering labels the cycle, so an open dialog stops calling its overlay
@@ -5390,7 +5390,9 @@ class HaWashdataPanel extends HTMLElement {
     if (dev && dev.entry_id === eid) {
       // The count on the device lags the answer until the next poll.
       dev.feedback_count = Math.max(0, (dev.feedback_count || 0) - 1);
-      this._feedbacksSeenCount = dev.feedback_count;
+      // Only a fetched list matches the count; after a failed one the next poll
+      // must refetch, or the answered request keeps being asked.
+      this._feedbacksSeenCount = fetched ? dev.feedback_count : null;
       if (this._tab === 'status') await this._ensureReviewQuestion(dev);
     }
     this._render();
