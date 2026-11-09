@@ -9726,10 +9726,17 @@ class WashDataManager:
         """The cycle_finished / cycle_ended variables. Small and JSON-safe."""
         wh = self._cycle_report_energy_wh(cycle_data) if energy_wh is None else energy_wh
         anomaly = cycle_data.get("anomaly")
+        # The stored cycle's id, for ha_washdata.delete_cycle and friends (#492);
+        # None for an end that stored nothing (a ghost, a pump-out, or an add that
+        # failed: the cycle-end tail still hashes an id onto it then).
+        cycle_id = cycle_data.get("id")
+        try:
+            if cycle_id and self.profile_store.find_stored_cycle(cycle_id)[0] is None:
+                cycle_id = None
+        except Exception:  # noqa: BLE001 - an id the store cannot vouch for is none
+            cycle_id = None
         return {
-            # The stored cycle's id, for ha_washdata.delete_cycle and friends
-            # (#492); None for an end that stored nothing (a ghost or pump-out).
-            "cycle_id": cycle_data.get("id"),
+            "cycle_id": cycle_id,
             "status": cycle_data.get("status"),
             "duration": cycle_data.get("duration"),
             "energy_kwh": round(wh / 1000, 3) if math.isfinite(wh) else None,

@@ -385,6 +385,27 @@ async def test_cycle_ended_survives_a_failed_cycle_end(
     assert seen[0][1]["energy_kwh"] == 0.12
 
 
+async def test_a_cycle_the_store_did_not_take_carries_no_cycle_id(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """The cycle-end tail hashes an id onto a cycle whose add failed; the triggers
+    must not hand that id to ha_washdata.delete_cycle, which cannot find it (#492)."""
+    entry = await setup_washdata_entry(power_sensor=POWER, options=FAST)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    seen = _listen(hass, entry)
+    await feed(hass, freezer, 500, 900)
+
+    async def _fail(*_a, **_k):
+        raise ValueError("unstorable")
+
+    with patch.object(manager.profile_store, "async_add_cycle", side_effect=_fail):
+        await feed(hass, freezer, 0, 300)
+        await hass.async_block_till_done()
+    ends = [v for t, v in seen if t in ("cycle_finished", "cycle_ended")]
+    assert ends, seen
+    assert all(v["cycle_id"] is None for v in ends), ends
+
+
 async def test_a_failed_cycle_end_keeps_its_own_program(
     hass: HomeAssistant, setup_washdata_entry
 ) -> None:
