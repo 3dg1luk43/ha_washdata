@@ -8796,8 +8796,12 @@ class HaWashdataPanel extends HTMLElement {
     const fromN = parseFloat(this._pgSweepFrom), toN = parseFloat(this._pgSweepTo);
     if (isNaN(fromN) || isNaN(toN) || fromN === toN) { this._showToast(this._t('msg.toast_range_required', {}, 'Set a valid From/To range.'), 'error'); return; }
     const steps = Math.max(2, Math.min(12, this._pgSweepSteps || 5));
-    const values = Array.from({length: steps}, (_, i) => +(fromN + (toN - fromN) * i / (steps - 1)).toFixed(3));
     const param = this._pgSweepParam || 'off_delay';
+    // Each point held to the setting's range, as a Simulate runs it (#487): a
+    // sweep must not score, or let Apply save, a value the setting cannot hold.
+    const values = [...new Set(Array.from({length: steps}, (_, i) =>
+      this._pgHeld(param, +(fromN + (toN - fromN) * i / (steps - 1)).toFixed(3))))];
+    if (values.length < 2) { this._showToast(this._t('msg.toast_range_required', {}, 'Set a valid From/To range.'), 'error'); return; }
     const objective = this._pgSweepObjective || 'match_accuracy';
     // The same "Last N" as Test on history (audit PLAYGROUND-18); the backend adds
     // one pass with the current settings, which every value has to beat.
@@ -8861,6 +8865,7 @@ class HaWashdataPanel extends HTMLElement {
     const dev = this._devices[this._selIdx];
     if (!dev || !this._canEdit() || val == null) return;
     const paramKey = this._pgSweepParam;
+    val = this._pgHeld(paramKey, +val);
     const lbl = this._t('setting.' + paramKey + '.label', {}, paramKey);
     if (!confirm(this._tText('msg.pg_apply_confirm', {label: lbl, value: val}, 'Apply best value: ' + lbl + ' = ' + val + '?'))) return;
     await this._busyRun('pg-sweep-apply', async () => {

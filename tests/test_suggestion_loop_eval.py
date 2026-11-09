@@ -206,3 +206,14 @@ def test_a_refused_apply_all_is_a_failure_not_a_fixed_point(tmp_path, monkeypatc
     assert res["refused"] == [0]
     assert res["fixed_point"] is False
     assert any("refused" in line for line in loop.failures([res]))
+
+
+def test_admission_counts_the_capped_window_the_replay_uses(tmp_path, monkeypatch):
+    """A device whose capped window (CYCLE_CAPS) holds too few replayable cycles is
+    not admitted: it would be driven with no work (an endless serial loop, an empty
+    rounds list with workers)."""
+    (tmp_path / "synth").mkdir()
+    (tmp_path / "synth" / "export.json").write_text(json.dumps(_export()))
+    assert loop.device_paths(tmp_path)                       # 8 replayable cycles
+    monkeypatch.setitem(loop.CYCLE_CAPS, "synth", loop.MIN_REPLAYABLE - 1)
+    assert loop.device_paths(tmp_path) == []

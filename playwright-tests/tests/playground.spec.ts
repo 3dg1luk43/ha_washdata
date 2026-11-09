@@ -342,6 +342,19 @@ test('drawer/optimize: running a 1D sweep starts a sweep task', async ({ page })
   await assertWsCalled(page, 'ha_washdata/start_playground_sweep');
 });
 
+test('drawer/optimize: sweep points are held to the setting range (#487)', async ({ page }) => {
+  await clickTab(page, 'playground');
+  await page.locator('.wd-pg-subtabs button[data-subtab="sweep"]').click();
+  await page.locator('#wd-pg-sw-param').selectOption('profile_match_min_duration_ratio');
+  await page.locator('#wd-pg-sw-from').fill('0.5');
+  await page.locator('#wd-pg-sw-to').fill('5');
+  await page.locator('#wd-pg-sw-steps').fill('4');
+  await page.locator('button[data-action="pg-sweep-run2"]').click();
+  const calls = await assertWsCalled(page, 'ha_washdata/start_playground_sweep');
+  // 0.5, 2, 3.5, 5 -> 0.5 and the 1.0 ceiling, once each.
+  expect(calls[calls.length - 1].values).toEqual([0.5, 1]);
+});
+
 // PLAYGROUND-23: both replay cycles against profiles built partly from those same
 // cycles (no leave-one-out), so their results are in-sample and say so.
 test('drawer/history: the result says it is in-sample and optimistic', async ({ page }) => {

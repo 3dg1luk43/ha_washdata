@@ -878,14 +878,24 @@ def _lock_probe(mgr: Any, cad: Any, merged: dict, device_type: str, locked: list
 
 # --------------------------------------------------------------------------- driver
 
+def _cycle_cap(path: str) -> int:
+    """The most recent cycles replayed for a device (``CYCLE_CAPS`` or MAX_CYCLES)."""
+    return min([MAX_CYCLES, *(n for key, n in CYCLE_CAPS.items() if key in path)])
+
+
 def device_paths(corpus: Path, only: list[str] | None = None) -> list[str]:
-    """Corpus files with enough re-detectable history, clones dropped (eval.py rules)."""
+    """Corpus files with enough re-detectable history, clones dropped (eval.py rules).
+
+    Counted in the same window the replay uses (:func:`_cycle_cap`): a device
+    whose capped window held too few replayable cycles would be admitted with no
+    work to drive.
+    """
     devices, _dropped = ev.load_corpus(corpus)
     out = []
     for dev in devices:
         if only and not any(s in dev.path for s in only):
             continue
-        past = list(dev.data.get("past_cycles") or [])[-MAX_CYCLES:]
+        past = list(dev.data.get("past_cycles") or [])[-_cycle_cap(dev.path):]
         if sum(1 for c in past if _replayable(c)) >= MIN_REPLAYABLE:
             out.append(dev.path)
     return out
@@ -913,8 +923,7 @@ class DeviceLoop:
         self.idle_hold = idle_hold
         self.title = ev.public_key(dev.path)
         self.base = ev.base_data(dev)
-        cap = min([MAX_CYCLES, *(n for key, n in CYCLE_CAPS.items() if key in path)])
-        self.past = list(self.base.get("past_cycles") or [])[-cap:]
+        self.past = list(self.base.get("past_cycles") or [])[-_cycle_cap(path):]
         self.entry_data, self.options = ev.entry_dicts(dev, {})
         # Every envelope rebuilt once with the current code (exports carry the ones the
         # exporting version built): the fixed match evidence for every round.
