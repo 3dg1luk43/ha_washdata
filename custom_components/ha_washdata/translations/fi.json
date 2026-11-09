@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Poista sykli",
-      "description": "Poista yksi tallennettu sykli. Sen ohjelma muodostetaan uudelleen ilman sitä. Tätä ei voi kumota.",
+      "description": "Poista yksi tallennettu sykli. Sen ohjelma muodostetaan uudelleen ilman sitä, tai ohjelma poistetaan, jos sykli oli tuotu ja ohjelman viimeinen. Tätä ei voi kumota.",
       "fields": {
         "device_id": {
           "name": "Laite",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "Syklin tunnus",
-          "description": "Poistettavan syklin tunnus, esim. Sykli päättyi -laukaisimen cycle_id-muuttuja."
+          "description": "Poistettavan syklin tunnus, esim. Sykli päättyi -laukaisimen cycle_id-muuttuja (tyhjä, jos kyseinen ajo ei tallentanut sykliä, joten tarkista se ensin)."
         }
       }
     },

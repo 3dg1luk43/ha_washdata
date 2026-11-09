@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Eyða lotu",
-      "description": "Eyddu einni vistaðri lotu. Kerfi hennar er endurbyggt án hennar. Ekki er hægt að afturkalla þetta.",
+      "description": "Eyddu einni vistaðri lotu. Kerfi hennar er endurbyggt án hennar, eða fjarlægt ef innflutt lota var síðasta lota þess. Ekki er hægt að afturkalla þetta.",
       "fields": {
         "device_id": {
           "name": "Tæki",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "Auðkenni lotu",
-          "description": "Auðkenni lotunnar sem á að eyða, t.d. breytan cycle_id úr kveikjunni Lotu lokið."
+          "description": "Auðkenni lotunnar sem á að eyða, t.d. breytan cycle_id úr kveikjunni Lotu lokið (tóm þegar sú keyrsla vistaði enga lotu, svo athugaðu hana fyrst)."
         }
       }
     },

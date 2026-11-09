@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Slet cyklus",
-      "description": "Slet én gemt cyklus. Dens program genopbygges uden den. Kan ikke fortrydes.",
+      "description": "Slet én gemt cyklus. Dens program genopbygges uden den, eller fjernes, hvis en importeret cyklus var dets sidste. Kan ikke fortrydes.",
       "fields": {
         "device_id": {
           "name": "Enhed",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "Cyklus-ID",
-          "description": "ID'et for den cyklus, der skal slettes, f.eks. variablen cycle_id fra udløseren Cyklus afsluttet."
+          "description": "ID'et for den cyklus, der skal slettes, f.eks. variablen cycle_id fra udløseren Cyklus afsluttet (tom, når den kørsel ikke gemte nogen cyklus, så tjek den først)."
         }
       }
     },

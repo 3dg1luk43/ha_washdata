@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Kustuta tsükkel",
-      "description": "Kustutage üks salvestatud tsükkel. Selle programm koostatakse ilma selleta uuesti. Seda ei saa tagasi võtta.",
+      "description": "Kustutage üks salvestatud tsükkel. Selle programm koostatakse ilma selleta uuesti või eemaldatakse, kui see oli programmi viimane tsükkel ja oli imporditud. Seda ei saa tagasi võtta.",
       "fields": {
         "device_id": {
           "name": "Seade",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "Tsükli ID",
-          "description": "Kustutatava tsükli ID, nt päästiku „Tsükkel lõppes“ muutuja cycle_id."
+          "description": "Kustutatava tsükli ID, nt päästiku „Tsükkel lõppes“ muutuja cycle_id (tühi, kui selle käivituse kohta tsüklit ei salvestatud, seega kontrollige see esmalt üle)."
         }
       }
     },

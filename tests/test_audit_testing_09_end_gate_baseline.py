@@ -123,3 +123,16 @@ def test_the_committed_baseline_is_complete() -> None:
                     "early_5min_n", "split_n"):
             assert key in s, (scope, key)
     assert "ALL" in doc["summary"]
+
+
+def test_a_baseline_without_the_programme_metrics_is_not_compared(tmp_path: Path) -> None:
+    # An older baseline (before the programme truth, item 573) carries no prog_*
+    # metrics: a programme regression must not pass a check against it.
+    rows = _rows()
+    base = _baseline(tmp_path, rows)
+    for scope in base["summary"].values():
+        for key in [k for k in scope if k.startswith("prog_")]:
+            del scope[key]
+    worse = [dict(r) for r in rows]
+    worse[-1]["detected_count"] = 2      # a new split, visible only in prog_split_n
+    assert end_gate_eval._check_baseline(base, worse) == 2  # noqa: SLF001

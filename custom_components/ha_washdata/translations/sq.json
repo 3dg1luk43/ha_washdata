@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Fshi ciklin",
-      "description": "Fshi një cikël të ruajtur. Programi i tij rindërtohet pa të. Nuk mund të zhbëhet.",
+      "description": "Fshi një cikël të ruajtur. Programi i tij rindërtohet pa të, ose hiqet nëse ky ishte cikli i tij i fundit dhe ishte i importuar. Nuk mund të zhbëhet.",
       "fields": {
         "device_id": {
           "name": "Pajisja",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "ID e ciklit",
-          "description": "ID-ja e ciklit për t'u fshirë, p.sh. variabli cycle_id i aktivizuesit \"Cikli përfundoi\"."
+          "description": "ID-ja e ciklit për t'u fshirë, p.sh. variabli cycle_id i aktivizuesit \"Cikli përfundoi\" (është bosh kur ai ekzekutim nuk ruajti asnjë cikël, prandaj kontrollojeni më parë)."
         }
       }
     },

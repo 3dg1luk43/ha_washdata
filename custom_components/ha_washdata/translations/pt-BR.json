@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Excluir ciclo",
-      "description": "Exclua um ciclo salvo. Seu programa é reconstruído sem ele. Não pode ser desfeito.",
+      "description": "Exclua um ciclo salvo. Seu programa é reconstruído sem ele, ou removido se um ciclo importado for o último do programa. Não pode ser desfeito.",
       "fields": {
         "device_id": {
           "name": "Dispositivo",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "ID do ciclo",
-          "description": "O ID do ciclo a ser excluído, por exemplo a variável cycle_id do gatilho Ciclo encerrado."
+          "description": "O ID do ciclo a ser excluído, por exemplo a variável cycle_id do gatilho Ciclo encerrado (vazia quando essa execução não salvou nenhum ciclo, então verifique-a primeiro)."
         }
       }
     },

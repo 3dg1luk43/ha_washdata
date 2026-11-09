@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Ștergeți ciclul",
-      "description": "Ștergeți un ciclu salvat. Programul său este reconstruit fără el. Acțiunea nu poate fi anulată.",
+      "description": "Ștergeți un ciclu salvat. Programul său este reconstruit fără el sau eliminat dacă un ciclu importat era ultimul său. Acțiunea nu poate fi anulată.",
       "fields": {
         "device_id": {
           "name": "Dispozitiv",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "ID-ul ciclului",
-          "description": "ID-ul ciclului de șters, de exemplu variabila cycle_id a declanșatorului Ciclu încheiat."
+          "description": "ID-ul ciclului de șters, de exemplu variabila cycle_id a declanșatorului Ciclu încheiat (goală când acea rulare nu a salvat niciun ciclu, deci verificați-o mai întâi)."
         }
       }
     },

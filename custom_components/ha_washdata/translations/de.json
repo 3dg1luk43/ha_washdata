@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Zyklus löschen",
-      "description": "Einen gespeicherten Zyklus löschen. Sein Programm wird ohne ihn neu aufgebaut. Kann nicht rückgängig gemacht werden.",
+      "description": "Einen gespeicherten Zyklus löschen. Sein Programm wird ohne ihn neu aufgebaut oder entfernt, wenn ein importierter Zyklus sein letzter war. Kann nicht rückgängig gemacht werden.",
       "fields": {
         "device_id": {
           "name": "Gerät",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "Zyklus-ID",
-          "description": "Die ID des zu löschenden Zyklus, z. B. die Variable cycle_id des Auslösers „Zyklus beendet“."
+          "description": "Die ID des zu löschenden Zyklus, z. B. die Variable cycle_id des Auslösers „Zyklus beendet“ (leer, wenn dieser Lauf keinen Zyklus gespeichert hat, daher zuerst prüfen)."
         }
       }
     },

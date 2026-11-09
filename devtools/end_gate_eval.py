@@ -1638,6 +1638,9 @@ def _check_baseline(baseline: dict[str, Any], rows: list[dict[str, Any]]) -> int
             continue
         for key, limit in tol.items():
             if key not in b or key not in a:
+                # An older baseline without the metric would let a regression in it
+                # pass: it has to be regenerated, not compared.
+                drift.append(f"{scope}: {key} missing from the {'baseline' if key not in b else 'replay'}")
                 continue
             delta = float(a[key]) - float(b[key])
             flag = ""

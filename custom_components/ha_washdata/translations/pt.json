@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Eliminar ciclo",
-      "description": "Elimine um ciclo guardado. O respetivo programa é reconstruído sem ele. Não pode ser anulado.",
+      "description": "Elimine um ciclo guardado. O respetivo programa é reconstruído sem ele, ou removido se um ciclo importado for o último que lhe resta. Não pode ser anulado.",
       "fields": {
         "device_id": {
           "name": "Dispositivo",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "ID do ciclo",
-          "description": "O ID do ciclo a eliminar, por exemplo a variável cycle_id do acionador Ciclo encerrado."
+          "description": "O ID do ciclo a eliminar, por exemplo a variável cycle_id do acionador Ciclo encerrado (vazia quando essa execução não guardou nenhum ciclo, por isso verifique-a primeiro)."
         }
       }
     },

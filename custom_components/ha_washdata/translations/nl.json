@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Cyclus verwijderen",
-      "description": "Verwijder één opgeslagen cyclus. Het programma ervan wordt zonder deze cyclus opnieuw opgebouwd. Kan niet ongedaan worden gemaakt.",
+      "description": "Verwijder één opgeslagen cyclus. Het programma ervan wordt zonder deze cyclus opnieuw opgebouwd, of verwijderd als een geïmporteerde cyclus de laatste ervan was. Kan niet ongedaan worden gemaakt.",
       "fields": {
         "device_id": {
           "name": "Apparaat",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "Cyclus-ID",
-          "description": "De ID van de te verwijderen cyclus, bijv. de variabele cycle_id van de trigger Cyclus beëindigd."
+          "description": "De ID van de te verwijderen cyclus, bijv. de variabele cycle_id van de trigger Cyclus beëindigd (leeg als bij die uitvoering geen cyclus is opgeslagen, controleer die dus eerst)."
         }
       }
     },

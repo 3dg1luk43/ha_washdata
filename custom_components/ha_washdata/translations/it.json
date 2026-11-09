@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Elimina ciclo",
-      "description": "Elimina un ciclo salvato. Il suo programma viene ricostruito senza di esso. Non può essere annullato.",
+      "description": "Elimina un ciclo salvato. Il suo programma viene ricostruito senza di esso, o rimosso se un ciclo importato era il suo ultimo ciclo. Non può essere annullato.",
       "fields": {
         "device_id": {
           "name": "Dispositivo",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "ID ciclo",
-          "description": "L'ID del ciclo da eliminare, ad esempio la variabile cycle_id dell'attivazione Ciclo concluso."
+          "description": "L'ID del ciclo da eliminare, ad esempio la variabile cycle_id dell'attivazione Ciclo concluso (vuota quando quell'esecuzione non ha salvato alcun ciclo, quindi controllala prima)."
         }
       }
     },

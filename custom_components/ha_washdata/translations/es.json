@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Eliminar ciclo",
-      "description": "Elimina un ciclo guardado. Su programa se reconstruye sin él. No se puede deshacer.",
+      "description": "Elimina un ciclo guardado. Su programa se reconstruye sin él, o se elimina si un ciclo importado era el último que tenía. No se puede deshacer.",
       "fields": {
         "device_id": {
           "name": "Dispositivo",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "ID del ciclo",
-          "description": "El ID del ciclo a eliminar, por ejemplo la variable cycle_id del disparador Ciclo finalizado."
+          "description": "El ID del ciclo a eliminar, por ejemplo la variable cycle_id del disparador Ciclo finalizado (vacía cuando esa ejecución no guardó ningún ciclo, así que compruébala primero)."
         }
       }
     },

@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Dzēst ciklu",
-      "description": "Dzēsiet vienu saglabātu ciklu. Tā programma tiek pārbūvēta bez tā. To nevar atsaukt.",
+      "description": "Dzēsiet vienu saglabātu ciklu. Tā programma tiek pārbūvēta bez tā vai tiek noņemta, ja tas bija tās pēdējais cikls un bija importēts. To nevar atsaukt.",
       "fields": {
         "device_id": {
           "name": "Ierīce",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "Cikla ID",
-          "description": "Dzēšamā cikla ID, piem., aktivizētāja „Cikls beidzās“ mainīgais cycle_id."
+          "description": "Dzēšamā cikla ID, piem., aktivizētāja „Cikls beidzās“ mainīgais cycle_id (tas ir tukšs, ja šī palaišana nesaglabāja ciklu, tāpēc vispirms to pārbaudiet)."
         }
       }
     },

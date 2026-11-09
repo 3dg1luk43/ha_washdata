@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Smazat cyklus",
-      "description": "Smaže jeden uložený cyklus. Jeho program se bez něj znovu sestaví. Nelze vrátit zpět.",
+      "description": "Smaže jeden uložený cyklus. Jeho program se bez něj znovu sestaví, nebo se odstraní, pokud šlo o jeho poslední cyklus a ten byl importovaný. Nelze vrátit zpět.",
       "fields": {
         "device_id": {
           "name": "Zařízení",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "ID cyklu",
-          "description": "ID cyklu ke smazání, např. proměnná cycle_id spouštěče „Cyklus ukončen“."
+          "description": "ID cyklu ke smazání, např. proměnná cycle_id spouštěče „Cyklus ukončen“ (je prázdná, když daný běh neuložil žádný cyklus, proto ji nejprve zkontrolujte)."
         }
       }
     },

@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Ištrinti ciklą",
-      "description": "Ištrinti vieną išsaugotą ciklą. Jo programa perkuriama be jo. To atšaukti negalima.",
+      "description": "Ištrinti vieną išsaugotą ciklą. Jo programa perkuriama be jo arba pašalinama, jei tai buvo paskutinis jos ciklas ir jis buvo importuotas. To atšaukti negalima.",
       "fields": {
         "device_id": {
           "name": "Įrenginys",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "Ciklo ID",
-          "description": "Trinamo ciklo ID, pvz., paleidiklio „Ciklas pasibaigė“ kintamasis cycle_id."
+          "description": "Trinamo ciklo ID, pvz., paleidiklio „Ciklas pasibaigė“ kintamasis cycle_id (jis tuščias, kai tas paleidimas neišsaugojo ciklo, todėl pirmiausia jį patikrinkite)."
         }
       }
     },

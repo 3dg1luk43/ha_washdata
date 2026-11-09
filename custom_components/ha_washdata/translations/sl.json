@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Izbriši cikel",
-      "description": "Izbrišite en shranjen cikel. Njegov program se znova zgradi brez njega. Tega ni mogoče razveljaviti.",
+      "description": "Izbrišite en shranjen cikel. Njegov program se znova zgradi brez njega ali pa se odstrani, če je bil to njegov zadnji cikel in je bil uvožen. Tega ni mogoče razveljaviti.",
       "fields": {
         "device_id": {
           "name": "Naprava",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "ID cikla",
-          "description": "ID cikla za brisanje, npr. spremenljivka cycle_id sprožilca „Cikel je zaključen“."
+          "description": "ID cikla za brisanje, npr. spremenljivka cycle_id sprožilca „Cikel je zaključen“ (prazna je, ko ta zagon ni shranil cikla, zato jo najprej preverite)."
         }
       }
     },

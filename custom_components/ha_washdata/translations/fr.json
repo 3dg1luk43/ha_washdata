@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Supprimer le cycle",
-      "description": "Supprimez un cycle enregistré. Son programme est reconstruit sans lui. Action irréversible.",
+      "description": "Supprimez un cycle enregistré. Son programme est reconstruit sans lui, ou supprimé si un cycle importé était son dernier cycle. Action irréversible.",
       "fields": {
         "device_id": {
           "name": "Appareil",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "Identifiant du cycle",
-          "description": "L'ID du cycle à supprimer, par exemple la variable cycle_id du déclencheur Cycle terminé."
+          "description": "L'ID du cycle à supprimer, par exemple la variable cycle_id du déclencheur Cycle terminé (vide lorsque cette exécution n'a enregistré aucun cycle, vérifiez-la donc d'abord)."
         }
       }
     },

@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Odstrániť cyklus",
-      "description": "Odstráni jeden uložený cyklus. Jeho program sa bez neho znova zostaví. Nedá sa vrátiť späť.",
+      "description": "Odstráni jeden uložený cyklus. Jeho program sa bez neho znova zostaví, alebo sa odstráni, ak išlo o jeho posledný cyklus a ten bol importovaný. Nedá sa vrátiť späť.",
       "fields": {
         "device_id": {
           "name": "Zariadenie",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "ID cyklu",
-          "description": "ID cyklu, ktorý sa má odstrániť, napr. premenná cycle_id spúšťača „Cyklus ukončený“."
+          "description": "ID cyklu, ktorý sa má odstrániť, napr. premenná cycle_id spúšťača „Cyklus ukončený“ (je prázdna, keď daný beh neuložil žiadny cyklus, preto ju najprv skontrolujte)."
         }
       }
     },

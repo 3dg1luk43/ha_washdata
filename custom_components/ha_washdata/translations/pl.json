@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Usuń cykl",
-      "description": "Usuń jeden zapisany cykl. Jego program zostanie przebudowany bez niego. Tej operacji nie można cofnąć.",
+      "description": "Usuń jeden zapisany cykl. Jego program zostanie przebudowany bez niego albo usunięty, jeśli był to jego ostatni cykl i pochodził z importu. Tej operacji nie można cofnąć.",
       "fields": {
         "device_id": {
           "name": "Urządzenie",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "Identyfikator cyklu",
-          "description": "Identyfikator cyklu do usunięcia, np. zmienna cycle_id wyzwalacza „Cykl zakończony”."
+          "description": "Identyfikator cyklu do usunięcia, np. zmienna cycle_id wyzwalacza „Cykl zakończony” (jest pusta, gdy dane uruchomienie nie zapisało cyklu, więc najpierw ją sprawdź)."
         }
       }
     },

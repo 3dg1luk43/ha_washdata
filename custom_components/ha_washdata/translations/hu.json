@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Ciklus törlése",
-      "description": "Töröljön egy tárolt ciklust. A programja nélküle épül újra. Ez nem vonható vissza.",
+      "description": "Töröljön egy tárolt ciklust. A programja nélküle épül újra, vagy maga a program törlődik, ha egy importált ciklus volt az utolsó ciklusa. Ez nem vonható vissza.",
       "fields": {
         "device_id": {
           "name": "Eszköz",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "Ciklusazonosító",
-          "description": "A törlendő ciklus azonosítója, pl. a Ciklus véget ért eseményindító cycle_id változója."
+          "description": "A törlendő ciklus azonosítója, pl. a Ciklus véget ért eseményindító cycle_id változója (üres, ha az adott futás nem tárolt ciklust, ezért előbb ellenőrizze)."
         }
       }
     },

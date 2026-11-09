@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Slett syklus",
-      "description": "Slett én lagret syklus. Programmet bygges opp på nytt uten den. Kan ikke angres.",
+      "description": "Slett én lagret syklus. Programmet bygges opp på nytt uten den, eller fjernes hvis en importert syklus var den siste i det. Kan ikke angres.",
       "fields": {
         "device_id": {
           "name": "Enhet",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "Syklus-ID",
-          "description": "ID-en til syklusen som skal slettes, f.eks. variabelen cycle_id fra utløseren Syklus avsluttet."
+          "description": "ID-en til syklusen som skal slettes, f.eks. variabelen cycle_id fra utløseren Syklus avsluttet (tom når den kjøringen ikke lagret noen syklus, så sjekk den først)."
         }
       }
     },

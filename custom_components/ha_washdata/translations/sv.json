@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Ta bort cykel",
-      "description": "Ta bort en sparad cykel. Dess program byggs om utan den. Kan inte ångras.",
+      "description": "Ta bort en sparad cykel. Dess program byggs om utan den, eller tas bort om en importerad cykel var dess sista. Kan inte ångras.",
       "fields": {
         "device_id": {
           "name": "Enhet",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "Cykel-ID",
-          "description": "ID för cykeln som ska tas bort, t.ex. variabeln cycle_id från utlösaren Cykel avslutad."
+          "description": "ID för cykeln som ska tas bort, t.ex. variabeln cycle_id från utlösaren Cykel avslutad (tom när den körningen inte sparade någon cykel, så kontrollera den först)."
         }
       }
     },

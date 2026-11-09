@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Izbriši ciklus",
-      "description": "Izbrišite jedan spremljeni ciklus. Njegov se program ponovno izgrađuje bez njega. Ne može se poništiti.",
+      "description": "Izbrišite jedan spremljeni ciklus. Njegov se program ponovno izgrađuje bez njega ili se uklanja ako je to bio njegov posljednji ciklus, a bio je uvezen. Ne može se poništiti.",
       "fields": {
         "device_id": {
           "name": "Uređaj",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "ID ciklusa",
-          "description": "ID ciklusa za brisanje, npr. varijabla cycle_id okidača \"Ciklus završen\"."
+          "description": "ID ciklusa za brisanje, npr. varijabla cycle_id okidača \"Ciklus završen\" (prazna je kada to pokretanje nije spremilo ciklus, pa je najprije provjerite)."
         }
       }
     },

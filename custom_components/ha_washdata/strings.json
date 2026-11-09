@@ -360,7 +360,7 @@
     },
     "delete_cycle": {
       "name": "Delete Cycle",
-      "description": "Delete one stored cycle. Its program is rebuilt without it. Cannot be undone.",
+      "description": "Delete one stored cycle. Its program is rebuilt without it, or removed if an imported cycle was its last one. Cannot be undone.",
       "fields": {
         "device_id": {
           "name": "Device",
@@ -368,7 +368,7 @@
         },
         "cycle_id": {
           "name": "Cycle ID",
-          "description": "The ID of the cycle to delete, e.g. the cycle_id variable of the Cycle ended trigger."
+          "description": "The ID of the cycle to delete, e.g. the cycle_id variable of the Cycle ended trigger (empty when that run stored no cycle, so check it first)."
         }
       }
     },

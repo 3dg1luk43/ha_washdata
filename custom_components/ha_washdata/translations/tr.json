@@ -316,7 +316,7 @@
     },
     "delete_cycle": {
       "name": "Döngüyü Sil",
-      "description": "Kaydedilmiş bir döngüyü silin. Programı bu döngü olmadan yeniden oluşturulur. Geri alınamaz.",
+      "description": "Kaydedilmiş bir döngüyü silin. Programı bu döngü olmadan yeniden oluşturulur ya da, programın son döngüsü içe aktarılmış bir döngüyse, program kaldırılır. Geri alınamaz.",
       "fields": {
         "device_id": {
           "name": "Cihaz",
@@ -324,7 +324,7 @@
         },
         "cycle_id": {
           "name": "Döngü Kimliği",
-          "description": "Silinecek döngünün kimliği, örn. Döngü sona erdi tetikleyicisinin cycle_id değişkeni."
+          "description": "Silinecek döngünün kimliği, örn. Döngü sona erdi tetikleyicisinin cycle_id değişkeni (o çalışma döngü kaydetmediğinde boştur, bu yüzden önce kontrol edin)."
         }
       }
     },
