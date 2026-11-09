@@ -14328,24 +14328,32 @@ class HaWashdataPanel extends HTMLElement {
         onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/discard_recording`, entry_id: eid }); this._showToast(this._t('toast.recording_discarded', {}, 'Recording discarded')); await this._fetchRecState(eid); } catch (e) { this._showToast(this._tText('toast.discard_failed', {error: e.message || e}, 'Discard failed: ' + (e.message || e)), 'error'); } } };
       this._render();
 
-    } else if (a === 'fb-confirm' || a === 'fb-pick') {
-      // A one-tap answer (_htmlReviewAnswers): the detected programme confirms,
-      // the other candidate corrects to it (learning.async_answer_review's rule).
+    } else if (a === 'fb-confirm' || a === 'fb-pick' || a === 'fb-ignore') {
+      // A one-tap answer (_htmlReviewAnswers). One per cycle at a time: a second
+      // tap while the first is in flight (the tile stays until the list is
+      // refetched) would send a second resolve_feedback, whose failure toast
+      // replaces the "Saved" one. A Set of its own, not _busy: no header badge.
       const fbCid = btn.dataset.cid;
-      const fb = (this._feedbacks || []).find(f => f.cycle_id === fbCid) || {};
-      const label = a === 'fb-pick' ? btn.dataset.prof : fb.detected_profile;
-      const req = a === 'fb-pick'
-        ? { type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: fbCid, action: 'correct', corrected_profile: label }
-        : { type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: fbCid, action: 'confirm' };
-      this._ws(req).then(() => {
-        this._showToast(label
-          ? this._tText('toast.review_answered', {program: label}, `Saved: ${label}`)
-          : this._t('toast.feedback_confirmed', {}, 'Feedback confirmed'));
-        return this._afterReviewAnswer(eid, fbCid, label);
-      }).catch(e => this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
-    } else if (a === 'fb-ignore') {
-      const fbCid = btn.dataset.cid;
-      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: fbCid, action: 'ignore' }).then(() => { this._showToast(this._t('toast.feedback_dismissed', {}, 'Feedback dismissed')); return this._afterReviewAnswer(eid, fbCid, null); }).catch(e => this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
+      const answering = this._reviewAnswering || (this._reviewAnswering = new Set());
+      if (fbCid && !answering.has(fbCid)) {
+        answering.add(fbCid);
+        // The detected programme confirms, the other candidate corrects to it
+        // (learning.async_answer_review's rule); "Not sure" dismisses.
+        const fb = (this._feedbacks || []).find(f => f.cycle_id === fbCid) || {};
+        const label = a === 'fb-pick' ? btn.dataset.prof : a === 'fb-confirm' ? fb.detected_profile : null;
+        const req = a === 'fb-pick'
+          ? { type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: fbCid, action: 'correct', corrected_profile: label }
+          : { type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: fbCid, action: a === 'fb-ignore' ? 'ignore' : 'confirm' };
+        this._ws(req).then(() => {
+          this._showToast(a === 'fb-ignore'
+            ? this._t('toast.feedback_dismissed', {}, 'Feedback dismissed')
+            : label
+              ? this._tText('toast.review_answered', {program: label}, `Saved: ${label}`)
+              : this._t('toast.feedback_confirmed', {}, 'Feedback confirmed'));
+          return this._afterReviewAnswer(eid, fbCid, label);
+        }).catch(e => this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'))
+          .finally(() => answering.delete(fbCid));
+      }
     } else if (a === 'torn-pick') {
       // "X or Y?" on the Status card: the same manual pick as the dropdown.
       this._setStatusProgram(this._devices[this._selIdx], btn.dataset.prog);

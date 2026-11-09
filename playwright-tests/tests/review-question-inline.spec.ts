@@ -353,6 +353,29 @@ test('an answered tile goes at once, not after the next tiles\' curves load', as
   await page.evaluate(() => (window as any).__envQ.forEach((r: any) => r(null)));
 });
 
+test('a second tap while an answer is in flight sends nothing', async ({ page }) => {
+  await bootWithQuestion(page);
+  await openQuestion(page);
+  // The answer's round trip is held, as on a slow remote link.
+  await page.evaluate(() => {
+    const w = window as any;
+    w.__resolveQ = [];
+    w.__ws_handlers['ha_washdata/resolve_feedback'] = () => new Promise(r => w.__resolveQ.push(r));
+  });
+  const btn = page.locator('.wd-review-q .wd-review-answers button', { hasText: 'Eco 60°C' });
+  await btn.click();
+  await btn.click();
+  await page.locator('.wd-review-q .wd-review-answers button', { hasText: 'Not sure' }).click();
+  await expect.poll(() => page.evaluate(() => (window as any).__resolveQ.length)).toBe(1);
+  await page.waitForTimeout(200);
+  const calls = await page.evaluate(() => (window as any).__get_calls('ha_washdata/resolve_feedback'));
+  expect(calls).toHaveLength(1);
+  expect(calls[0]).toMatchObject({ cycle_id: 'cyc-003', action: 'confirm' });
+  await setHandler(page, 'ha_washdata/get_feedbacks', { feedbacks: [] });
+  await page.evaluate(() => (window as any).__resolveQ.forEach((r: any) => r({ success: true })));
+  await expect(page.locator('.wd-review-q')).toHaveCount(0, { timeout: 5_000 });
+});
+
 test('a failed candidate-curve fetch is retried on the next poll', async ({ page }) => {
   await page.goto('/');
   await bootPanel(page, {
