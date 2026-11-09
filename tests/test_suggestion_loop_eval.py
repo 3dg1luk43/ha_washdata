@@ -242,3 +242,25 @@ def test_a_kept_cycle_still_starts_the_pump_out_window():
     )
     assert m["ghosts"] == 1
     assert [c.get("id") for c in out] == ["main"]
+
+
+def test_a_kept_cycle_with_naive_times_still_starts_the_pump_out_window():
+    """Older stores carry naive timestamps: read as UTC (the Playground's rule), not
+    a TypeError when the pump-out gap subtracts one from an aware start."""
+    from datetime import datetime, timedelta, timezone
+    from types import SimpleNamespace
+
+    end = datetime(2026, 10, 1, 10, 0)                       # naive
+    kept = {"id": "main", "start_time": (end - timedelta(hours=3)).isoformat(),
+            "end_time": end.isoformat(), "duration": 10800.0, "status": "completed"}
+    start = end.replace(tzinfo=timezone.utc) + timedelta(seconds=43)
+    pump = {"start_time": start.isoformat(), "duration": 120.0, "status": "completed",
+            "power_data": [[0.0, 20.0], [60.0, 20.0], [120.0, 0.0]]}
+    rep = {"captured": [pump], "ends": [120.0], "base": start, "committed": [],
+           "work_end": None}
+    store = SimpleNamespace(_add_cycle_data=lambda cd, target, id_pool: target.append(cd))
+    out, _iv, m = loop.assemble(
+        [kept, {"id": "p", "power_data": pump["power_data"]}], {1: rep}, store,
+        SimpleNamespace(stop_threshold_w=2.0), {}, "dishwasher", (),
+    )
+    assert m["ghosts"] == 1 and [c.get("id") for c in out] == ["main"]

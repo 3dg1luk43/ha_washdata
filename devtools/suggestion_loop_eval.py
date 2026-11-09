@@ -132,7 +132,7 @@ import sys  # noqa: E402
 import time  # noqa: E402
 import warnings  # noqa: E402
 from concurrent.futures import ProcessPoolExecutor  # noqa: E402
-from datetime import datetime, timedelta  # noqa: E402
+from datetime import datetime, timedelta, timezone  # noqa: E402
 from pathlib import Path  # noqa: E402
 from typing import Any, Iterator  # noqa: E402
 from unittest.mock import MagicMock  # noqa: E402
@@ -625,12 +625,21 @@ def replay_one(src: dict, cfg: Any, match_store: Any, prebuilt: Any, options: di
     }
 
 
+def _parse_utc(value: Any) -> datetime | None:
+    """An ISO timestamp, a naive one read as UTC (the Playground's
+    ``_cycle_base_time`` rule), so the pump-out gap never mixes naive and aware."""
+    parsed = dt_util.parse_datetime(str(value or ""))
+    if parsed is None:
+        return None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+
+
 def _stored_end(cycle: dict) -> datetime | None:
     """A stored cycle's end: ``end_time``, else ``start_time`` + ``duration``."""
-    end = dt_util.parse_datetime(str(cycle.get("end_time") or ""))
+    end = _parse_utc(cycle.get("end_time"))
     if end is not None:
         return end
-    start = dt_util.parse_datetime(str(cycle.get("start_time") or ""))
+    start = _parse_utc(cycle.get("start_time"))
     try:
         duration = float(cycle.get("duration") or 0.0)
     except (TypeError, ValueError, OverflowError):
@@ -685,7 +694,7 @@ def assemble(
             energy = ghost_rules.cycle_end_energy_wh(cd.get("power_data") or [])
             ends = rep["ends"]
             end_detect = rep["base"] + timedelta(seconds=ends[i] if i < len(ends) else 0.0)
-            start_dt = dt_util.parse_datetime(str(cd.get("start_time") or ""))
+            start_dt = _parse_utc(cd.get("start_time"))
             # manager._on_cycle_end: a ghost (and a dishwasher pump-out right after
             # the previous end) is never stored (ghost_rules, register item 568).
             # Read here rather than from the replay's own `discarded`, which does
