@@ -7695,18 +7695,20 @@ class WashDataManager:
         template: Any,
         *,
         fallback_template: str | None = None,
+        allow_blank: bool = False,
         **kwargs: Any,
     ) -> str:
         """Format templates safely and return a resilient fallback on any error.
 
         A blank template, or one that fills in to blank, also gets the fallback:
         a setting saved empty reached notify services as ``message=""``, which
-        Pushover refuses outright (#496).
+        Pushover refuses outright (#496). ``allow_blank`` keeps blank text for a
+        field where empty is a real choice (the title: cleared means no title).
         """
         text_template = "" if template is None else str(template)
         try:
             text = text_template.format(**kwargs)
-            if text.strip():
+            if text.strip() or (allow_blank and template is not None):
                 return text
             self._logger.debug(
                 "Notification text %r is blank; sending the default text", text_template
@@ -7878,6 +7880,7 @@ class WashDataManager:
             title = self._safe_format_template(
                 title_template,
                 fallback_template=DEFAULT_NOTIFY_TITLE,
+                allow_blank=True,
                 device=self.config_entry.title,
             )
 

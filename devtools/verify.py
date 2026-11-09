@@ -590,8 +590,12 @@ def run(
 
     if args.dry_run:
         out(f"budget {budget} core(s); stages longest first (work = core-seconds last run):")
+        # The same first allocation the real loop makes: an alone stage waits for
+        # the others, so it takes no core and no share yet.
+        others = any(not q.alone for q in queued)
+        now_ok = [q for q in queued if not (q.alone and others)]
         first = {st.name: (c, kind) for st, c, kind in plan(
-            queued, work, budget, budget, sum(work[q.name] for q in queued), False, False)}
+            now_ok, work, budget, budget, sum(work[q.name] for q in now_ok), False, False)}
         for s in queued:
             c, kind = first.get(s.name, (0, ""))
             out(f"  {s.name:<10} work {work[s.name]:7.0f}  max {s.max_cores}  "

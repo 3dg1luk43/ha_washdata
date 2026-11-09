@@ -169,6 +169,24 @@ def test_dry_run_runs_nothing(tmp_path, monkeypatch):
     assert any("absent" in ln and "skip" in ln for ln in lines)
 
 
+def test_dry_run_holds_an_alone_stage_back(tmp_path, monkeypatch):
+    """The box starts last in a real run, so the dry run must not show it starting."""
+    stages = [
+        verify.Stage("box", ("quick",), lambda c, logs: [_py("")], 1000, alone=True),
+        verify.Stage("a", ("quick",), lambda c, logs: [_py("")], 100, max_cores=4),
+        verify.Stage("b", ("quick",), lambda c, logs: [_py("")], 100, max_cores=4),
+    ]
+    monkeypatch.setattr(verify, "_stages", lambda: stages)
+    args = verify.parse_args(["--dry-run", "--cores", "4", "--timings", "",
+                              "--logs", str(tmp_path / "logs")])
+    lines: list[str] = []
+    assert verify.run(args, verify.select(args), out=lines.append) == 0
+    row = {ln.split()[0]: ln for ln in lines if ln.startswith("  ")}
+    assert "queued" in row["box"] and "starts with" not in row["box"], lines
+    # Its 1000 core-seconds do not shrink the others' share either.
+    assert "starts with 2 core(s)" in row["a"] and "starts with 2 core(s)" in row["b"], lines
+
+
 def test_box_hint_names_only_files_a_real_home_assistant_judges():
     files = [
         "custom_components/ha_washdata/manager.py",

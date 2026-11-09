@@ -32,6 +32,7 @@ from homeassistant.core import HomeAssistant
 from custom_components.ha_washdata.const import (
     CONF_NOTIFY_FINISH_MESSAGE,
     CONF_NOTIFY_REMINDER_MESSAGE,
+    CONF_NOTIFY_TITLE,
     DEFAULT_NOTIFY_FINISH_MESSAGE,
     DEFAULT_NOTIFY_REMINDER_MESSAGE,
 )
@@ -130,6 +131,30 @@ def test_dispatch_never_sends_a_blank_message(manager: WashDataManager) -> None:
         )
 
     assert sent and all(m.strip() for m in sent)
+
+
+@pytest.mark.parametrize(("stored", "want"), [("", ""), ("{oops}", "WashData: Tvättmaskin")])
+def test_a_cleared_title_stays_cleared(
+    manager: WashDataManager, mock_entry: Any, stored: str, want: str
+) -> None:
+    """Only the message must never be blank; a title cleared on purpose means none,
+    as in 0.5.9.1. A broken title template still falls back."""
+    mock_entry.options[CONF_NOTIFY_TITLE] = stored
+    manager._notify_finish_services = ["notify.pushover"]
+    manager._notify_actions = []
+    titles: list[Any] = []
+
+    def _capture(_message: str, **kw: Any) -> bool:
+        titles.append(kw.get("title"))
+        return True
+
+    with patch.object(manager, "_send_notification_service", side_effect=_capture):
+        manager._dispatch_notification(
+            "Klar", event_type="cycle_finish", allow_deferral=False,
+            allow_presence_deferral=False,
+        )
+
+    assert titles == [want]
 
 
 def test_panel_reminder_field_defaults_to_the_shipped_text() -> None:
