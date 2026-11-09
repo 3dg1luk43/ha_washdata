@@ -1255,7 +1255,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Sprostitev po tihi fazi sušenja",
-      "doc": "Ko je pričakovano trajanje doseženo, WashData neha čakati na končno izčrpavanje, ko pomivalni stroj od svoje zadnje aktivnosti toliko časa ostane pod Pragom zaustavitve (ko ima program 3 zabeležene cikle, nikoli manj od njegovega najdaljšega zabeleženega premora za sušenje). Zvišajte, če se pozno izčrpavanje po dolgem sušenju zgreši. Čakanje nikoli ne preseže 30 minut."
+      "doc": "Ko je pričakovano trajanje doseženo, WashData neha čakati na končno izčrpavanje, ko pomivalni stroj od svoje zadnje aktivnosti toliko časa ostane pod Pragom zaustavitve, vendar ne več kot 30 minut (in ko ima program 3 zabeležene cikle, ne manj kot njegov najdaljši zabeleženi premor za sušenje). Zvišajte, če se pozno izčrpavanje po dolgem sušenju zgreši."
     },
     "anti_crease_finalize_ratio": {
       "doc": "Delež povprečnega trajanja programa, ki ga mora cikel doseči, preden se vrtenje bobna pri nizki moči šteje za rep zaščite pred gubami. Znižajte ga (npr. 0,75) pri sušilnih strojih, ki čas prilagajajo količini perila. Pri pralnih strojih pustite privzeto (0,98), sicer se pranje lahko konča na polovici.",

@@ -324,7 +324,7 @@ const _SETTINGS_SECTIONS = [
   ] },
   { id: 'dishwasher', label: 'Dishwasher', intro: 'End handling for dishwashers, which often dry quietly for a long time before a short final drain.', onlyDeviceTypes: ['dishwasher'], fields: [
     { key: 'dishwasher_end_spike_quiet_release', label: 'Passive-Dry Quiet Release', unit: 's', type: 'number', step: 60, min: 0, def: 600,
-      doc: 'Once the expected duration is reached, WashData stops waiting for the final drain after the dishwasher has stayed below the Stop Threshold this long since its last activity (once the program has 3 recorded cycles, never less than its longest recorded drying pause). Raise it if a late drain after a long dry is missed. The wait never exceeds 30 minutes.' },
+      doc: 'After the expected duration, WashData stops waiting for the final drain once the dishwasher has been below the Stop Threshold this long since its last activity, at most 30 minutes (and, once the program has 3 recorded cycles, at least its longest recorded drying pause). Raise it if a late drain after a long dry is missed.' },
   ] },
   { id: 'delay', label: 'Delay Start', intro: 'Detects an appliance that is on and waiting for a delayed start.', fields: [
     { key: 'delay_start_detect_enabled', label: 'Enable Delay-Start Detection', type: 'checkbox',

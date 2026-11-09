@@ -1238,7 +1238,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Vrijgave na stille droogfase",
-      "doc": "Zodra de verwachte duur is bereikt, wacht WashData niet meer op het laatste wegpompen als de vaatwasser sinds zijn laatste activiteit zo lang onder de Stopdrempel is gebleven (zodra het programma 3 opgenomen cycli heeft, nooit korter dan zijn langste opgenomen droogpauze). Verhoog als een laat wegpompen na lang drogen wordt gemist. Het wachten duurt nooit langer dan 30 minuten."
+      "doc": "Na de verwachte duur wacht WashData niet meer op het laatste wegpompen zodra de vaatwasser sinds zijn laatste activiteit zo lang onder de Stopdrempel is gebleven, hooguit 30 minuten (en, zodra het programma 3 opgenomen cycli heeft, minstens zijn langste opgenomen droogpauze). Verhoog als een laat wegpompen na lang drogen wordt gemist."
     },
     "anti_crease_finalize_ratio": {
       "label": "Verhouding afsluiten anti-kreuknaloop",

@@ -1238,7 +1238,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Frigjøring etter stille tørkefase",
-      "doc": "Når forventet varighet er nådd, slutter WashData å vente på siste tømming hvis oppvaskmaskinen har holdt seg under Stoppterskel så lenge siden siste aktivitet (når programmet har 3 registrerte sykluser, aldri kortere enn dets lengste registrerte tørkepause). Hev den hvis en sen tømming etter lang tørking blir oversett. Ventetiden er aldri over 30 minutter."
+      "doc": "Etter forventet varighet slutter WashData å vente på siste tømming når oppvaskmaskinen har holdt seg under Stoppterskel så lenge siden siste aktivitet, høyst 30 minutter (og, når programmet har 3 registrerte sykluser, minst dets lengste registrerte tørkepause). Hev den hvis en sen tømming etter lang tørking blir oversett."
     },
     "anti_crease_finalize_ratio": {
       "label": "Forhold for anti-rynke-avslutning",

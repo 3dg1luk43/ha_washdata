@@ -1183,7 +1183,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Eliberare la liniște în uscarea pasivă",
-      "doc": "După atingerea duratei așteptate, WashData nu mai așteaptă evacuarea finală dacă mașina de spălat vase a rămas sub Pragul de Oprire această durată de la ultima sa activitate (după ce programul are 3 cicluri înregistrate, niciodată mai puțin decât cea mai lungă pauză de uscare înregistrată a acestuia). Creșteți-l dacă o evacuare târzie după o uscare lungă este ratată. Așteptarea nu depășește niciodată 30 de minute."
+      "doc": "După durata așteptată, WashData nu mai așteaptă evacuarea finală odată ce mașina de spălat vase a rămas sub Pragul de Oprire această durată de la ultima sa activitate, cel mult 30 de minute (și, după ce programul are 3 cicluri înregistrate, cel puțin cea mai lungă pauză de uscare înregistrată a acestuia). Creșteți-l dacă o evacuare târzie după o uscare lungă este ratată."
     },
     "anti_crease_finalize_ratio": {
       "label": "Raport de finalizare anti-șifonare",

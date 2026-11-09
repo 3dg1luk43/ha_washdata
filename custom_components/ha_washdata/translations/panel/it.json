@@ -1202,7 +1202,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Rilascio al silenzio dell'asciugatura passiva",
-      "doc": "Una volta raggiunta la durata prevista, WashData smette di attendere lo scarico finale quando la lavastoviglie è rimasta sotto la Soglia di arresto per questo tempo dalla sua ultima attività (una volta che il programma ha 3 cicli registrati, mai meno della sua pausa di asciugatura più lunga registrata). Alzalo se uno scarico tardivo dopo una lunga asciugatura viene perso. L'attesa non supera mai i 30 minuti."
+      "doc": "Dopo la durata prevista, WashData smette di attendere lo scarico finale quando la lavastoviglie è rimasta sotto la Soglia di arresto per questo tempo dalla sua ultima attività, al massimo 30 minuti (e, una volta che il programma ha 3 cicli registrati, almeno la sua pausa di asciugatura più lunga registrata). Alzalo se uno scarico tardivo dopo una lunga asciugatura viene perso."
     },
     "anti_crease_finalize_ratio": {
       "label": "Rapporto di finalizzazione antirughe",

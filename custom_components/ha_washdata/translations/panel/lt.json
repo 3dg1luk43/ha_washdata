@@ -1255,7 +1255,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Pasyvaus džiovinimo tylusis atleidimas",
-      "doc": "Pasiekus numatomą trukmę, WashData nustoja laukti galutinio vandens išleidimo, kai indaplovė nuo paskutinės veiklos tiek laiko išbūna žemiau Sustabdymo slenksčio (kai programa turi 3 užfiksuotus ciklus, niekada ne trumpiau nei ilgiausia užfiksuota jos džiovinimo pauzė). Padidinkite, jei praleidžiamas vėlyvas išleidimas po ilgo džiovinimo. Laukimas niekada neviršija 30 minučių."
+      "doc": "Praėjus numatomai trukmei, WashData nustoja laukti galutinio vandens išleidimo, kai indaplovė nuo paskutinės veiklos tiek laiko išbūna žemiau Sustabdymo slenksčio, daugiausia 30 minučių (o kai programa turi 3 užfiksuotus ciklus, ne trumpiau nei ilgiausia užfiksuota jos džiovinimo pauzė). Padidinkite, jei praleidžiamas vėlyvas išleidimas po ilgo džiovinimo."
     },
     "anti_crease_finalize_ratio": {
       "doc": "Programos vidutinės trukmės dalis, kurią ciklas turi pasiekti, kad jo mažos galios būgno sukimas būtų laikomas apsaugos nuo raukšlių uodega. Džiovyklėms su jutikliniu džiovinimu sumažinkite (pvz., 0,75). Skalbyklėms palikite numatytąją (0,98), antraip skalbimas gali baigtis pusiaukelėje.",

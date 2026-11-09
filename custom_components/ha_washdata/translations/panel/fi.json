@@ -1238,7 +1238,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Passiivikuivauksen hiljainen vapautus",
-      "doc": "Kun odotettu kesto on kulunut, WashData lakkaa odottamasta lopullista vedenpoistoa, jos astianpesukone on pysynyt Pysäytyskynnyksen alapuolella näin kauan viimeisestä toiminnastaan (kun ohjelmalla on 3 tallennettua jaksoa, vähintään sen pisimmän tallennetun kuivaustauon ajan). Nosta arvoa, jos pitkän kuivauksen jälkeinen myöhäinen vedenpoisto jää huomaamatta. Odotus ei koskaan ylitä 30 minuuttia."
+      "doc": "Odotetun keston jälkeen WashData lakkaa odottamasta lopullista vedenpoistoa, kun astianpesukone on pysynyt Pysäytyskynnyksen alapuolella näin kauan viimeisestä toiminnastaan, enintään 30 minuuttia (ja kun ohjelmalla on 3 tallennettua jaksoa, vähintään sen pisimmän tallennetun kuivaustauon ajan). Nosta arvoa, jos pitkän kuivauksen jälkeinen myöhäinen vedenpoisto jää huomaamatta."
     },
     "anti_crease_finalize_ratio": {
       "label": "Ryppyjeneston lopetussuhde",

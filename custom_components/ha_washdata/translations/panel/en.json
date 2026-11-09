@@ -1300,7 +1300,7 @@
       "label": "Device Type"
     },
     "dishwasher_end_spike_quiet_release": {
-      "doc": "Once the expected duration is reached, WashData stops waiting for the final drain after the dishwasher has stayed below the Stop Threshold this long since its last activity (once the program has 3 recorded cycles, never less than its longest recorded drying pause). Raise it if a late drain after a long dry is missed. The wait never exceeds 30 minutes.",
+      "doc": "After the expected duration, WashData stops waiting for the final drain once the dishwasher has been below the Stop Threshold this long since its last activity, at most 30 minutes (and, once the program has 3 recorded cycles, at least its longest recorded drying pause). Raise it if a late drain after a long dry is missed.",
       "label": "Passive-Dry Quiet Release"
     },
     "door_end_dwell_seconds": {

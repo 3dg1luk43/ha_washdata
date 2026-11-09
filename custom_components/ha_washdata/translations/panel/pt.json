@@ -1202,7 +1202,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Libertação em silêncio da secagem passiva",
-      "doc": "Quando a duração esperada é atingida, o WashData deixa de esperar pelo escoamento final se a máquina de lavar loiça ficou abaixo do Limiar de Paragem durante este tempo desde a sua última atividade (assim que o programa tiver 3 ciclos registados, nunca menos do que a sua pausa de secagem mais longa registada). Aumente-o se um escoamento tardio após uma secagem longa for perdido. A espera nunca passa dos 30 minutos."
+      "doc": "Após a duração esperada, o WashData deixa de esperar pelo escoamento final logo que a máquina de lavar loiça tenha ficado abaixo do Limiar de Paragem durante este tempo desde a sua última atividade, no máximo 30 minutos (e, assim que o programa tiver 3 ciclos registados, no mínimo a sua pausa de secagem mais longa registada). Aumente-o se um escoamento tardio após uma secagem longa for perdido."
     },
     "anti_crease_finalize_ratio": {
       "label": "Rácio de finalização anti-vincos",

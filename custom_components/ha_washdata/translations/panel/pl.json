@@ -1255,7 +1255,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Zwolnienie po cichej fazie suszenia",
-      "doc": "Po osiągnięciu oczekiwanego czasu trwania WashData przestaje czekać na końcowe odpompowanie, gdy zmywarka pozostaje poniżej Progu Zatrzymania tak długo od swojej ostatniej aktywności (gdy program ma już 3 zapisane cykle, nigdy krócej niż jego najdłuższa zapisana przerwa na suszenie). Zwiększ, jeśli późne odpompowanie po długim suszeniu jest pomijane. Oczekiwanie nigdy nie przekracza 30 minut."
+      "doc": "Po osiągnięciu oczekiwanego czasu trwania WashData przestaje czekać na końcowe odpompowanie, gdy zmywarka pozostaje poniżej Progu Zatrzymania tak długo od swojej ostatniej aktywności, nie dłużej jednak niż 30 minut (a gdy program ma już 3 zapisane cykle, co najmniej tak długo, jak jego najdłuższa zapisana przerwa na suszenie). Zwiększ, jeśli późne odpompowanie po długim suszeniu jest pomijane."
     },
     "anti_crease_finalize_ratio": {
       "doc": "Ułamek średniego czasu trwania programu, który cykl musi osiągnąć, zanim obracanie bębna o niskiej mocy zostanie uznane za ogon antygniotowy. Obniż (np. 0,75) w suszarkach, które dostosowują czas do wsadu. W pralkach zostaw wartość domyślną (0,98), inaczej pranie może się skończyć w połowie.",

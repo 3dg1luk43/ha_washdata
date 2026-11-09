@@ -1238,7 +1238,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Frigivelse efter stille tørrefase",
-      "doc": "Når den forventede varighed er nået, stopper WashData med at vente på den sidste udpumpning, hvis opvaskemaskinen har været under Stoptærskel så længe siden sin seneste aktivitet (når programmet har 3 registrerede cyklusser, aldrig kortere end dets længste registrerede tørrepause). Hæv den, hvis en sen udpumpning efter lang tørring overses. Ventetiden er aldrig over 30 minutter."
+      "doc": "Efter den forventede varighed stopper WashData med at vente på den sidste udpumpning, når opvaskemaskinen har været under Stoptærskel så længe siden sin seneste aktivitet, højst 30 minutter (og, når programmet har 3 registrerede cyklusser, mindst dets længste registrerede tørrepause). Hæv den, hvis en sen udpumpning efter lang tørring overses."
     },
     "anti_crease_finalize_ratio": {
       "label": "Forhold for anti-rynke-afslutning",

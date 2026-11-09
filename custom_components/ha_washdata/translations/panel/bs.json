@@ -1237,7 +1237,7 @@
     "setting": {
         "dishwasher_end_spike_quiet_release": {
             "label": "Otpuštanje nakon tihe faze sušenja",
-            "doc": "Kada se dostigne očekivano trajanje, WashData prestaje čekati završno ispumpavanje nakon što mašina za suđe ostane ispod Praga zaustavljanja ovoliko dugo od svoje posljednje aktivnosti (čim program ima 3 zabilježena ciklusa, nikada kraće od njegove najduže zabilježene pauze za sušenje). Povećajte ako se kasno ispumpavanje nakon dugog sušenja propusti. Čekanje nikada ne prelazi 30 minuta."
+            "doc": "Kada se dostigne očekivano trajanje, WashData prestaje čekati završno ispumpavanje nakon što mašina za suđe ostane ispod Praga zaustavljanja ovoliko dugo od svoje posljednje aktivnosti, ali ne duže od 30 minuta (a čim program ima 3 zabilježena ciklusa, ne kraće od njegove najduže zabilježene pauze za sušenje). Povećajte ako se kasno ispumpavanje nakon dugog sušenja propusti."
         },
         "anti_crease_finalize_ratio": {
             "doc": "Udio prosječnog trajanja programa koji ciklus mora dostići prije nego što se okretanje bubnja niske snage računa kao rep anti-gužvanja. Smanjite ga (npr. 0,75) kod sušilica koje se prilagođavaju količini veša. Kod mašina za veš ostavite zadano (0,98), inače pranje može završiti na pola.",

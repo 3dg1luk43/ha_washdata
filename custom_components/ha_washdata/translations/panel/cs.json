@@ -1255,7 +1255,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Uvolnění po tiché fázi sušení",
-      "doc": "Po dosažení očekávané doby trvání přestane WashData čekat na závěrečné odčerpání, jakmile myčka zůstane pod Prahem zastavení takto dlouho od své poslední aktivity (když má program 3 zaznamenané cykly, nikdy méně než jeho nejdelší zaznamenaná pauza na sušení). Zvyšte, pokud se pozdní odčerpání po dlouhém sušení nezachytí. Čekání nikdy nepřekročí 30 minut."
+      "doc": "Po dosažení očekávané doby trvání přestane WashData čekat na závěrečné odčerpání, jakmile myčka zůstane pod Prahem zastavení takto dlouho od své poslední aktivity, nejvýše však 30 minut (a když má program 3 zaznamenané cykly, nejméně tak dlouho jako jeho nejdelší zaznamenaná pauza na sušení). Zvyšte, pokud se pozdní odčerpání po dlouhém sušení nezachytí."
     },
     "anti_crease_finalize_ratio": {
       "doc": "Zlomek průměrné doby trvání programu, kterého musí cyklus dosáhnout, než se otáčení bubnu s nízkým výkonem počítá jako ocas ochrany před zmačkáním. U sušiček řízených náplní jej snižte (např. 0,75). U praček ponechte výchozí hodnotu (0,98), jinak může praní skončit v polovině.",
