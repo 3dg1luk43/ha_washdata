@@ -264,3 +264,13 @@ def test_a_kept_cycle_with_naive_times_still_starts_the_pump_out_window():
         SimpleNamespace(stop_threshold_w=2.0), {}, "dishwasher", (),
     )
     assert m["ghosts"] == 1 and [c.get("id") for c in out] == ["main"]
+
+
+def test_a_corrupt_stored_time_reads_as_none_not_an_abort():
+    """``parse_datetime`` raises on a well-formed impossible value; one corrupt kept
+    cycle must not end the run for every device."""
+    assert loop._parse_utc("2026-13-01T00:00:00") is None
+    assert loop._parse_utc("2026-01-01T00:00:00+99:00") is None
+    assert loop._stored_end({"end_time": "2026-13-01T00:00:00",
+                             "start_time": "2026-10-01T07:00:00+00:00",
+                             "duration": 3600.0}).hour == 8

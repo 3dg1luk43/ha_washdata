@@ -627,8 +627,12 @@ def replay_one(src: dict, cfg: Any, match_store: Any, prebuilt: Any, options: di
 
 def _parse_utc(value: Any) -> datetime | None:
     """An ISO timestamp, a naive one read as UTC (the Playground's
-    ``_cycle_base_time`` rule), so the pump-out gap never mixes naive and aware."""
-    parsed = dt_util.parse_datetime(str(value or ""))
+    ``_cycle_base_time`` rule), so the pump-out gap never mixes naive and aware.
+    An impossible value (month 13) raises in ``parse_datetime``; it reads as none."""
+    try:
+        parsed = dt_util.parse_datetime(str(value or ""))
+    except (TypeError, ValueError, OverflowError):
+        return None
     if parsed is None:
         return None
     return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
