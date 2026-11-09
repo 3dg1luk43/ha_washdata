@@ -508,12 +508,15 @@ Use `end_gate_eval.py`, `prefix_guard_eval.py` and `decisive_margin_eval.py` for
   candidate's expected energy is the median of its own cycles (`envelope["energy_ref"]`, item 497,
   `MATCH_ENERGY_REF_MIN_CYCLES`), not the warped envelope's mean x duration; mid-cycle keeps the
   template value (the prefix variant was measured and caused early washer ends).
-  **Washers only, completed cycles only (#486):** a fourth term, `MATCH_SPIN_WEIGHT` x the
+  **Washers only (#486):** a fourth term, `MATCH_SPIN_WEIGHT` x the
   spin/heat rhythm agreement (`spin_rhythm.py`: programme end, heater minutes, spike-pair vs
   sustained intermediate spins, final spin), graded against the members' events stored on the
   envelope as `spin_ref`; the other three weights scale by `1 - MATCH_SPIN_WEIGHT`. The query's
   events come from the RAW trace (`spin_trace`; the 5 s grid smears 2 s spikes). Skipped unless
-  every candidate has a `spin_ref` (pre-#486 envelopes gain one at their next rebuild). Mid-cycle it is off: 0.2 moved 67 of 336 replayed washer ends.
+  every candidate has a `spin_ref` (pre-#486 envelopes gain one at their next rebuild). Mid-cycle the
+  end gates' ranking keeps it off (`MATCH_SPIN_WEIGHT_IN_PROGRESS` 0.0: 0.2 moved 67 of 336 replayed
+  washer ends); the live member ranking that drives the shown program and switching uses
+  `MATCH_SPIN_WEIGHT_IN_PROGRESS_DISPLAY` (0.2, washing machines only).
 - **Nearest-member templates (#486, washers/washer-dryers/dryers):** a profile with >=
   `MATCH_MEMBER_MIN_CYCLES` shape cycles is scored on its template AND its `MATCH_MEMBER_MAX` most
   recent cycles (`build_match_snapshots` attaches them as `members`); the worker collapses them to

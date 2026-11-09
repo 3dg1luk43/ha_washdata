@@ -91,7 +91,8 @@ python3 devtools/eval.py run --config-override '{"const": {"MATCH_DURATION_WEIGH
 ## Other harnesses
 
 Each script's docstring says what it measures, on which corpus, and the figures it last produced.
-All but `dtw_ab_eval.py` replay the shipped code; run with `--help` for options.
+All but `dtw_ab_eval.py` and `flat_power_eval.py` (it measures the stored traces itself, no detector)
+replay the shipped code; run with `--help` for options.
 
 | Script | Measures |
 |---|---|
