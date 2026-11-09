@@ -437,3 +437,19 @@ def test_generated_installs_the_panel_build_deps_on_a_fresh_checkout(tmp_path, m
     assert fresh[0].argv[:2] == ["npm", "ci"]
     (tmp_path / "devtools" / "node_modules").mkdir(parents=True)
     assert stage.build(1, tmp_path)[0].argv[:2] == ["node", "devtools/build_panel.mjs"]
+
+
+def test_every_box_script_counts_as_a_busy_box():
+    """`full --box` must not `up.sh --fresh` under a running box check: every
+    script in devtools/testbox that drives the container matches a busy pattern."""
+    import re
+
+    scripts = sorted(p.name for p in (REPO / "devtools" / "testbox").glob("*.sh")
+                     if p.name.startswith("check_") or p.name == "smoke.sh")
+    assert "check_review_actions.sh" in scripts
+    for name in scripts:
+        cmd = f"bash ./{name} --reuse"
+        assert any(re.search(p, cmd) for p in verify._BOX_SCRIPT_PATTERNS), name
+    # The bracket keeps pgrep from matching its own command line.
+    for pat in verify._BOX_SCRIPT_PATTERNS:
+        assert not re.search(pat, f"pgrep -af {pat}")

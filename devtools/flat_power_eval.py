@@ -77,7 +77,6 @@ from __future__ import annotations
 
 import argparse
 import gzip
-import hashlib
 import importlib.util
 import json
 import math
@@ -99,7 +98,6 @@ FLOORS = ("stop", "start")
 #: Device types the guard is meant for (the maintainer's default scope).
 GUARD_TYPES = ("washing_machine", "dryer", "washer_dryer", "dishwasher")
 LISTS = ("past_cycles", "reference_cycles", "backfill_cycles")
-PRIVATE_DIRS = ("user-Contributed",)
 
 
 def _load_module(name: str, rel: str) -> Any:
@@ -117,10 +115,8 @@ def _eval_mod() -> Any:
 
 
 def public_key(rel: str) -> str:
-    top = rel.split("/")[0]
-    if top in PRIVATE_DIRS:
-        return f"{top}/{hashlib.sha1(rel.encode()).hexdigest()[:12]}"
-    return rel
+    """eval.py's: the one list of private corpus directories whose names are hashed."""
+    return _eval_mod().public_key(rel)
 
 
 # ─── Flat stretches ──────────────────────────────────────────────────────────

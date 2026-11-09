@@ -61,6 +61,7 @@ import hashlib
 import json
 import os
 import queue
+import re
 import shutil
 import signal
 import subprocess
@@ -267,10 +268,18 @@ def _stages() -> list[Stage]:
     ]
 
 
+#: pgrep -f patterns of the box scripts that drive the shared container (the bracket
+#: keeps pgrep from matching its own command line). One pattern for every
+#: devtools/testbox/check_*.sh, so a new check cannot be left out of the list.
+_BOX_SCRIPT_PATTERNS = ("[s]moke\\.sh", "[c]heck_[a-z_]+\\.sh")
+
+
 def _box_busy() -> str | None:
-    for pat in ("[s]moke.sh", "[c]heck_notify", "[c]heck_unload", "[c]heck_clean_restart"):
-        if subprocess.run(["pgrep", "-f", pat], capture_output=True).returncode == 0:
-            return f"another test box run is active ({pat.replace('[', '').replace(']', '')})"
+    for pat in _BOX_SCRIPT_PATTERNS:
+        found = subprocess.run(["pgrep", "-af", pat], capture_output=True, text=True)
+        if found.returncode == 0:
+            hit = re.search(pat, found.stdout or "")
+            return f"another test box run is active ({hit.group(0) if hit else pat})"
     return None
 
 
