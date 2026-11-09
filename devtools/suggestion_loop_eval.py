@@ -132,7 +132,7 @@ import sys  # noqa: E402
 import time  # noqa: E402
 import warnings  # noqa: E402
 from concurrent.futures import ProcessPoolExecutor  # noqa: E402
-from datetime import timedelta  # noqa: E402
+from datetime import datetime, timedelta  # noqa: E402
 from pathlib import Path  # noqa: E402
 from typing import Any, Iterator  # noqa: E402
 from unittest.mock import MagicMock  # noqa: E402
@@ -625,6 +625,19 @@ def replay_one(src: dict, cfg: Any, match_store: Any, prebuilt: Any, options: di
     }
 
 
+def _stored_end(cycle: dict) -> datetime | None:
+    """A stored cycle's end: ``end_time``, else ``start_time`` + ``duration``."""
+    end = dt_util.parse_datetime(str(cycle.get("end_time") or ""))
+    if end is not None:
+        return end
+    start = dt_util.parse_datetime(str(cycle.get("start_time") or ""))
+    try:
+        duration = float(cycle.get("duration") or 0.0)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    return start + timedelta(seconds=duration) if start is not None and duration > 0 else None
+
+
 def assemble(
     sources: list[dict], replays: dict[int, dict[str, Any] | None], store: Any, cfg: Any,
     options: dict, device_type: str, legacy: tuple[str, ...],
@@ -654,6 +667,12 @@ def assemble(
         rep = replays.get(idx)
         if rep is None:
             out.append(src)
+            # A kept (not replayed) cycle still ended: the next pump-out is measured
+            # from it, as live measures it from that end. Its stored end, or start +
+            # duration, stands in for the detection time (live's clock reads a little
+            # later, after the off delay, so this is the conservative side: a wider
+            # gap discards less).
+            prev_end = _stored_end(src) or None
             continue
         m["replayed"] += 1
         m["idle_above_stop"] += bool(rep.get("idle_above_stop"))

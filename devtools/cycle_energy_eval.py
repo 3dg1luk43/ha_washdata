@@ -33,6 +33,7 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 from custom_components.ha_washdata.profile_store import decompress_power_data  # noqa: E402
+from custom_components.ha_washdata.trace_codec import decode_store_payload  # noqa: E402
 from custom_components.ha_washdata.signal_processing import (  # noqa: E402
     CYCLE_ENERGY_MAX_GAP_S,
     energy_gap_threshold_s,
@@ -76,6 +77,11 @@ def main() -> int:
             data = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             continue
+        # A raw store file from v19 on holds each trace as compact JSON text, which
+        # `_cycles` would skip; exports and diagnostics never do. Idempotent.
+        if isinstance(data, dict):
+            decode_store_payload(data)
+            decode_store_payload(data.get("data"))
         found: list[dict[str, Any]] = []
         _cycles(data, found)
         for cycle in found:

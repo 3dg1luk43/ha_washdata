@@ -217,3 +217,28 @@ def test_admission_counts_the_capped_window_the_replay_uses(tmp_path, monkeypatc
     assert loop.device_paths(tmp_path)                       # 8 replayable cycles
     monkeypatch.setitem(loop.CYCLE_CAPS, "synth", loop.MIN_REPLAYABLE - 1)
     assert loop.device_paths(tmp_path) == []
+
+
+def test_a_kept_cycle_still_starts_the_pump_out_window():
+    """A stored cycle the loop keeps as is (not replayed) still ended: a replayed
+    dishwasher pump-out 43 s after it is discarded, as live discards it. The loop
+    used to carry no end across a kept cycle, so it stored the pump-out."""
+    from datetime import datetime, timedelta, timezone
+    from types import SimpleNamespace
+
+    end = datetime(2026, 10, 1, 10, 0, tzinfo=timezone.utc)
+    kept = {"id": "main", "start_time": (end - timedelta(hours=3)).isoformat(),
+            "end_time": end.isoformat(), "duration": 10800.0, "status": "completed"}
+    start = end + timedelta(seconds=43)
+    pump = {"start_time": start.isoformat(), "duration": 120.0, "status": "completed",
+            "power_data": [[0.0, 20.0], [60.0, 20.0], [120.0, 0.0]]}   # 0.33 Wh
+    rep = {"captured": [pump], "ends": [120.0], "base": start, "committed": [],
+           "work_end": None}
+    store = SimpleNamespace(_add_cycle_data=lambda cd, target, id_pool: target.append(cd))
+    cfg = SimpleNamespace(stop_threshold_w=2.0)
+    out, _iv, m = loop.assemble(
+        [kept, {"id": "p", "power_data": pump["power_data"]}], {1: rep}, store, cfg,
+        {}, "dishwasher", (),
+    )
+    assert m["ghosts"] == 1
+    assert [c.get("id") for c in out] == ["main"]

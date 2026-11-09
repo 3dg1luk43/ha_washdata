@@ -635,14 +635,11 @@ def replay(readings: list[Reading], config: CycleDetectorConfig, manager: dict[s
             now["t"] = max(due, now["t"]) if now["t"] is not None else due
             det.reset(STATE_OFF, now["t"])
             completed_at["t"] = None
-        if power is None:
-            now["t"] = ts
-            det.mark_sensor_unavailable(ts)
-            prev_raw = None
-            continue
         # Watchdog keepalives inside a silent low-power stretch (item 390), placed
         # half an interval into each period like the Playground's emulation.
-        if last_real is not None and watchdog > 0:
+        # Not before an unavailable reading: the next real one injects them, from
+        # the same last real reading, and would inject them twice.
+        if power is not None and last_real is not None and watchdog > 0:
             prev_ts, prev_w = last_real
             k = 1
             while k <= MAX_KEEPALIVES_PER_GAP:
@@ -664,6 +661,13 @@ def replay(readings: list[Reading], config: CycleDetectorConfig, manager: dict[s
                 now["t"] = tick
                 det.check_flat_power(tick)
                 _expose()
+        # After the flat-power tick above: live runs it on its own timer, so a stop
+        # due before an outage happens before it; the outage then clears the run.
+        if power is None:
+            now["t"] = ts
+            det.mark_sensor_unavailable(ts)
+            prev_raw = None
+            continue
         # manager._async_power_changed's throttle. A re-report (same value) carries
         # no old_state there, so it falls back to the last processed power.
         old = prev_raw if prev_raw is not None and prev_raw != power else current_power
