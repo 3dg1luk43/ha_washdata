@@ -876,8 +876,13 @@ class LearningManager:
         """
         spent = 0
         try:
-            for rec in (self.profile_store.get_pending_feedback() or {}).values():
-                if isinstance(rec, dict) and rec.get("detected_profile") == profile_name:
+            # A request whose cycle is gone (not pruned yet) asks nothing.
+            stored = {c.get("id") for c in self.profile_store.get_past_cycles()}
+            for cid, rec in (self.profile_store.get_pending_feedback() or {}).items():
+                if (
+                    isinstance(rec, dict) and rec.get("detected_profile") == profile_name
+                    and cid in stored
+                ):
                     spent += 1
             for rec in (self.profile_store.get_feedback_history() or {}).values():
                 if not isinstance(rec, dict) or rec.get("original_detected_profile") != profile_name:

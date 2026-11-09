@@ -1629,11 +1629,13 @@ class _DetailSim:
                 i += 1
                 ts = last_ts + timedelta(seconds=step * i)
                 self.tail_step(ts)
-                if self.detector.state in (STATE_OFF, STATE_FINISHED) and self.captured:
+                # `kept`, not `captured`: an end the manager discards (a ghost, item
+                # 568) is not the close, and the cycle it reopened still needs one.
+                if self.detector.state in (STATE_OFF, STATE_FINISHED) and self.kept:
                     break
                 if getattr(self.detector, "_verified_pause", False):
                     budget = min(max_steps, max(budget, i + n_steps))
-            if not self.captured and self.detector.state != STATE_OFF:
+            if not self.kept and self.detector.state != STATE_OFF:
                 flush_ts = last_ts + timedelta(seconds=step * (i + 2))
                 self.cursor["t"] = (flush_ts - self.base).total_seconds()
                 self.detector.force_end(flush_ts)

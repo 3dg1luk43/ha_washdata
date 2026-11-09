@@ -5226,6 +5226,9 @@ class HaWashdataPanel extends HTMLElement {
     // Claimed before the await, so an overlapping poll does not fetch them again.
     cids.forEach(c => { q.curves[c] = null; });
     names.forEach(n => { q.envs[n] = null; });
+    // An answer replaces q.envs while this is in flight (labelling rebuilds the
+    // envelopes): these responses then belong to the old cache, not the new one.
+    const envs0 = q.envs;
     // A failed request resolves to undefined and is dropped from the cache, so the
     // next poll retries it; a profile with no envelope stays cached as null.
     const [curves, envs] = await Promise.all([
@@ -5236,7 +5239,7 @@ class HaWashdataPanel extends HTMLElement {
     if (this._reviewQ !== q) return true;  // switched device or answered meanwhile
     const keep = (cache, k, v) => { if (v === undefined) delete cache[k]; else cache[k] = v; };
     cids.forEach((c, i) => keep(q.curves, c, curves[i]));
-    names.forEach((n, i) => keep(q.envs, n, envs[i]));
+    if (q.envs === envs0) names.forEach((n, i) => keep(q.envs, n, envs[i]));
     return true;
   }
 

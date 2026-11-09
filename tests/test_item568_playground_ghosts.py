@@ -157,3 +157,24 @@ def test_the_same_run_back_at_zero_on_a_silent_plug_is_suppressed(device_type) -
     pts, _start = _trace_509(device_type, 0.0)
     sim, _out = _replay(pts, OPTIONS_509, device_type)
     assert [c["termination_reason"] for c in sim.captured][1] == "force_stopped"
+
+
+def test_a_discarded_end_does_not_stand_in_for_the_tail_flush() -> None:
+    """A first end the manager discards (a ghost) left `captured` non-empty, so the
+    tail never force-ended the cycle the detector reopened: `finalize` reads only
+    the kept ends and reported nothing detected. The flush keys on `kept`."""
+    cfg = build_detector_config(OPTIONS_487, {}, DEVICE_TYPE_DISHWASHER)
+    points = [[float(t), 2000.0] for t in range(0, 1800, 30)]   # still running at the end
+    sim = playground._DetailSim(  # noqa: SLF001
+        {"id": "c568b", "start_time": T0.isoformat(), "power_data": points},
+        cfg, None, None, OPTIONS_487, None,
+    )
+    sim.step(0, sim.n_readings)
+    assert sim.detector.state not in ("off", "finished")
+    sim.captured.append({"duration": 30.0, "status": "interrupted"})   # an earlier ghost
+    sim.discarded.append(ghost_rules.DISCARD_GHOST)
+    sim.tail_step = lambda ts: None          # the tail never closes it on its own
+    flushed: list = []
+    sim.detector.force_end = lambda ts: flushed.append(ts)
+    sim.run_tail()
+    assert len(flushed) == 1

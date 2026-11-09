@@ -568,9 +568,10 @@ def run_tail(sim: Any, cfg: Any) -> None:
     for i in range(1, n_steps + 1):
         ts = last_ts + timedelta(seconds=step * i)
         sim.tail_step(ts)
-        if sim.detector.state in (STATE_OFF, STATE_FINISHED) and sim.captured:
+        # `kept` as playground.run_tail: a discarded ghost end is not the close.
+        if sim.detector.state in (STATE_OFF, STATE_FINISHED) and sim.kept:
             break
-    if not sim.captured and sim.detector.state != STATE_OFF:
+    if not sim.kept and sim.detector.state != STATE_OFF:
         flush_ts = last_ts + timedelta(seconds=step * (n_steps + 2))
         sim.cursor["t"] = (flush_ts - sim.base).total_seconds()
         sim.detector.force_end(flush_ts)

@@ -100,3 +100,13 @@ def test_a_broken_queue_record_never_blocks_the_cycle_end(mock_hass_learning):  
     store.pending["junk"] = "not a dict"
     store.feedback["junk"] = None
     assert _refused(mgr, store) is True
+
+
+def test_requests_whose_cycle_is_gone_do_not_spend_it(mock_hass_learning):  # noqa: F811
+    # A real-history replace import took both cycles; their requests (not pruned
+    # yet) must not block the next question about the programme.
+    mgr, store = _learning_manager(mock_hass_learning, labeled_count=6)
+    assert _refused(mgr, store, "c1") is True
+    assert _refused(mgr, store, "c2") is True
+    store.past_cycles[:] = [c for c in store.past_cycles if c["id"] not in ("c1", "c2")]
+    assert _refused(mgr, store, "c3") is True

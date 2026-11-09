@@ -12603,6 +12603,10 @@ class ProfileStore:
         # the next restart could report a lifetime count below its own retained
         # history. Only ever increases, and idempotent.
         self._heal_lifetime_cycle_count()
+        # A real-history replace can take cycles whose review requests stay
+        # queued: drop them, as a split, merge or load does (#362), so they neither
+        # show nor spend their programme's review budget.
+        self.prune_orphaned_feedback()
         await self.async_save()
 
         settings_out: dict[str, Any] = {}

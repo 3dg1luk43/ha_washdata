@@ -274,6 +274,47 @@ test('a failed refetch after an answer is retried on the next poll', async ({ pa
   await expect(tiles).toHaveAttribute('data-review-cid', 'cyc-004');
 });
 
+test('an envelope fetched before an answer does not land in the cache the answer reset', async ({ page }) => {
+  await bootWithQuestion(page, [REQUEST, SECOND]);
+  await openQuestion(page);
+  const q = page.locator('.wd-review-q');
+  await expect.poll(() => drawnReviewSeries(page)).toHaveLength(2);
+  // Every envelope response is held until the test releases it.
+  await page.evaluate(() => {
+    const w = window as any;
+    w.__envQ = [];
+    w.__ws_handlers['ha_washdata/get_profile_envelope'] = () => new Promise(r => w.__envQ.push(r));
+  });
+  const held = () => page.evaluate(() => (window as any).__envQ.length);
+  // A poll refetches the candidate curves; they stay in flight.
+  await page.evaluate(() => {
+    const el = document.getElementById('wd-panel') as any;
+    el._reviewQ.envs = {};
+    el._fetchAll();
+  });
+  await expect.poll(held).toBe(2);
+
+  // The answer rebuilds the envelopes: the cache is reset and fetched again.
+  await setHandler(page, 'ha_washdata/resolve_feedback', { success: true });
+  await setHandler(page, 'ha_washdata/get_feedbacks', { feedbacks: [SECOND] });
+  await q.locator('.wd-review-tile[data-review-cid="cyc-003"] .wd-review-answers button', { hasText: 'Quick 30°C' }).click();
+  await expect.poll(held).toBe(4);
+  // The fresh responses land first, then the stale ones from before the answer.
+  await page.evaluate(() => {
+    const w = window as any;
+    const env = (watts: number) => ({ envelope: { avg: [[0, watts], [2430, watts]], min: [[0, watts], [2430, watts]], max: [[0, watts], [2430, watts]], target_duration: 2430 } });
+    w.__envQ.slice(2).forEach((r: any) => r(env(600)));
+    w.__envQ.slice(0, 2).forEach((r: any) => r(env(999)));
+  });
+  const cached = () => page.evaluate(() => {
+    const envs = (document.getElementById('wd-panel') as any)._reviewQ.envs;
+    return Object.values(envs).map((e: any) => (e && e.avg ? e.avg[0][1] : null)).sort();
+  });
+  await expect.poll(cached, { timeout: 5_000 }).toEqual([600, 600]);
+  await page.waitForTimeout(200);
+  expect(await cached()).toEqual([600, 600]);
+});
+
 test('a failed candidate-curve fetch is retried on the next poll', async ({ page }) => {
   await page.goto('/');
   await bootPanel(page, {
