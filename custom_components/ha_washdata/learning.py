@@ -270,6 +270,9 @@ class LearningManager:
         # no-update timeouts would be re-suggested from it every five minutes.
         # Bounded like the model itself: only its last 200 survive a commit anyway.
         self._pending_intervals: deque[tuple[float, datetime]] = deque(maxlen=200)
+        # Set by a cadence commit, consumed by run_due_operational_pass once the
+        # cycle is stored, so the pass's pause scan sees the cycle that just ended.
+        self._operational_pass_due: bool = False
         self._last_batch_simulation_count: int = 0  # track when to re-run batch
         self._last_suggestions_labeled_count: int = 0  # gate model/detection passes
 
@@ -381,7 +384,7 @@ class LearningManager:
         model is committed by ``close_cycle_cadence``, the traces it scans are
         stored then), so each one re-derived what the last cycle-end pass had,
         a ~100-trace executor scan for nothing (#510 follow-up). The pass runs
-        once per cycle end, in ``close_cycle_cadence``.
+        once per cycle end, in ``run_due_operational_pass``.
         """
         if last_reading_time:
             delta = (now - last_reading_time).total_seconds()
@@ -419,9 +422,23 @@ class LearningManager:
         for delta, ts in pending:
             self._sample_interval_model.add_sample(delta, ts)
         # The operational pass's one run per cycle: its cadence input changes only
-        # here (process_power_reading runs none during the cycle).
-        self._update_operational_suggestions()
+        # here (process_power_reading runs none during the cycle). Not run here:
+        # this commit comes before the cycle is stored, and the pass's pause scan
+        # reads the stored cycles, so it would miss this one until the next end.
+        self._operational_pass_due = True
         return True
+
+    def run_due_operational_pass(self) -> None:
+        """Run the operational pass a cadence commit left due, once.
+
+        Called once the ended cycle is stored (``process_cycle_end``) and, for an
+        end that stores nothing (ghost, pump-out, failed write), by the manager
+        directly: the stored cycles did not change there, so nothing is missed.
+        """
+        if not self._operational_pass_due:
+            return
+        self._operational_pass_due = False
+        self._update_operational_suggestions()
 
     def process_cycle_end(
         self,
@@ -449,6 +466,10 @@ class LearningManager:
         # (No per-cycle stop/start simulation: re-deriving both from the last cycle
         # alone made them a random walk - audit SUGGEST-06. The batch pass below
         # derives them across cycles.)
+
+        # 1. Operational (off delay, watchdog, timeouts): the cycle is stored now,
+        # so the off-delay pause scan includes it.
+        self.run_due_operational_pass()
 
         # 1b. Standby above the stop threshold (#458). Every cycle end, whatever its
         # status: a force-stopped cycle is the evidence this pass exists for.

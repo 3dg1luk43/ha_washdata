@@ -5787,7 +5787,7 @@ class WashDataManager:
         self._cycle_ended_pending = False
 
         # Coalesce this cycle end's store writes from its first one: the cadence
-        # commit below already spawns a suggestion pass that saves (item 456).
+        # commit below may leave a suggestion pass due that saves (item 456).
         try:
             self.profile_store.coalesce_saves()
         except Exception:  # noqa: BLE001 - a save policy must never break cycle end
@@ -5836,6 +5836,11 @@ class WashDataManager:
                 )
             self._handle_noise_cycle(max_power)
             self._discard_cycle_cleanup()
+            # Nothing is stored, so the pass the cadence commit left due runs now.
+            try:
+                self.learning_manager.run_due_operational_pass()
+            except Exception:  # pylint: disable=broad-exception-caught
+                self._logger.debug("Operational suggestion pass failed", exc_info=True)
             if fire_ended:  # its start was announced, so its end is too (#478)
                 self._fire_cycle_ended(cycle_data, cycle_energy_wh)
             return  # Do not store this as a real cycle
@@ -7186,6 +7191,12 @@ class WashDataManager:
                 self._logger.debug("Clearing the active-cycle snapshot failed", exc_info=True)
         # The idle display's standby level now includes this cycle (#452).
         await self._async_refresh_standby_level()
+        # A cycle end whose steps stopped before the learning pass (failed write,
+        # an exception) still runs the operational pass; a no-op once it ran.
+        try:
+            self.learning_manager.run_due_operational_pass()
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Operational suggestion pass failed", exc_info=True)
 
         if tail_failed and (
             cycle_token is None or self._ranking_snapshot_cycle_id == cycle_token

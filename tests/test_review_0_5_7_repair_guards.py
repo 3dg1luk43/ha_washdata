@@ -172,6 +172,8 @@ def test_every_cycle_end_closes_the_cadence_buffer_even_a_ghost() -> None:
              "termination_reason": "timeout", "power_data": [[0.0, 3.0], [20.0, 3.0]]}
     mgr._on_cycle_end(ghost)
     mgr.learning_manager.close_cycle_cadence.assert_called_once_with(ghost)
+    # Nothing is stored for a ghost, so the operational pass it left due runs now.
+    mgr.learning_manager.run_due_operational_pass.assert_called_once_with()
 
 
 def test_a_start_from_idle_discards_the_buffer() -> None:
