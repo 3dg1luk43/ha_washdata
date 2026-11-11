@@ -83,6 +83,10 @@ def test_rules_on_a_synthetic_plug_pull(corpus: Path) -> None:
 
 def test_ml_on_rule_is_the_ungated_toggle_path(corpus: Path) -> None:
     """``ml_on`` (#516): "Apply smart models" on, so no committed match is needed."""
+    with pp.terminal_drop_rule("ml_on"):
+        # The shipped predicates decide, reading the option the replay sets.
+        assert pp.playground.terminal_drop_may_fire is pp.detector_config.terminal_drop_may_fire
+        assert pp.playground.terminal_drop_enabled is pp.detector_config.terminal_drop_enabled
     (row,) = _run(corpus, "ml_on")
     assert row["fired"] is True
     assert pp.playground.terminal_drop_enabled is pp.detector_config.terminal_drop_enabled

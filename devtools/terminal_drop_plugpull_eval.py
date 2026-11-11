@@ -25,8 +25,9 @@ Playground's terminal-drop rule for an A/B on the same code:
 * ``ungated``  - on for dishwashers, may fire at any time (ML-08 as first written);
 * ``guarded``  - on for dishwashers, fires only on a committed unambiguous match
   (``detector_config.terminal_drop_may_fire``; the shipped rule since 2026-10-04);
-* ``ml_on``    - "Apply smart models" on for every device type: on, may always
-  fire (the toggle path; use with ``--device-types washing_machine,...``, #516).
+* ``ml_on``    - "Apply smart models" on for every device type: the option is set
+  before the manager is built and the shipped predicates decide (the toggle path;
+  use with ``--device-types washing_machine,...``, #516).
 
 ``end_gate_eval --loo --all-formats`` is the other half of any change here: this
 harness measures the benefit, that one the cost (early ends, splits).
@@ -80,7 +81,10 @@ from custom_components.ha_washdata import detector_config, playground  # noqa: E
 from custom_components.ha_washdata.const import (  # noqa: E402
     TERMINAL_DROP_DEFAULT_ON_DEVICE_TYPES,
 )
-from custom_components.ha_washdata.ml.engine import ml_models_enabled  # noqa: E402
+from custom_components.ha_washdata.ml.engine import (  # noqa: E402
+    CONF_ENABLE_ML_MODELS,
+    ml_models_enabled,
+)
 from custom_components.ha_washdata.profile_store import (  # noqa: E402
     decompress_power_data,
 )
@@ -126,9 +130,7 @@ def terminal_drop_rule(rule: str) -> Iterator[None]:
     elif rule == "guarded":
         playground.terminal_drop_enabled = _default_on
         playground.terminal_drop_may_fire = detector_config.terminal_drop_may_fire
-    elif rule == "ml_on":
-        playground.terminal_drop_enabled = lambda _d, _o: True
-        playground.terminal_drop_may_fire = lambda *_a, **_k: True
+    # ``ml_on`` keeps the shipped predicates: replay_export sets the option.
     try:
         yield
     finally:
@@ -162,14 +164,17 @@ def _base(data: dict[str, Any]) -> dict[str, Any]:
 
 
 def replay_export(
-    doc: dict[str, Any], key: str, cuts: tuple[float, ...], per_export: int
+    doc: dict[str, Any], key: str, cuts: tuple[float, ...], per_export: int,
+    rule: str = "shipped",
 ) -> list[dict[str, Any]]:
     """One row per (cycle, cut) for the first ``per_export`` completed cycles."""
     base = _base(doc.get("data") or {})
+    # The toggle the user flips, read by the shipped predicates like any option.
+    overrides = {CONF_ENABLE_ML_MODELS: True} if rule == "ml_on" else None
     # Every envelope rebuilt once with the code under test (exports carry the ones
     # the exporting version built); each fold shares them and rebuilds only the
     # left-out cycle's own programme.
-    _cfg, store, _opts = EG._production(doc, base)  # noqa: SLF001
+    _cfg, store, _opts = EG._production(doc, base, overrides=overrides)  # noqa: SLF001
     # Setup's sample repair, as end_gate_eval, eta_eval and decisive_margin_eval run
     # it: it fixes base["profiles"] in place, and the folds inherit the repair.
     EG._run(store.async_repair_profile_samples())  # noqa: SLF001
@@ -185,7 +190,9 @@ def replay_export(
         if len(points) < MIN_READINGS:
             continue
         done += 1
-        cfg, fold, opts = EG._production(doc, EG._fold_data(base, cyc))  # noqa: SLF001
+        cfg, fold, opts = EG._production(  # noqa: SLF001
+            doc, EG._fold_data(base, cyc), overrides=overrides  # noqa: SLF001
+        )
         name = cyc.get("profile_name")
         if name and name in base["profiles"]:
             EG._rebuild_envelopes(fold, [name])  # noqa: SLF001
@@ -227,7 +234,7 @@ def _export_job(job: tuple[str, str, str, tuple[float, ...], int]) -> list[dict[
     if not doc:
         return []
     with terminal_drop_rule(rule):
-        return replay_export(doc, key, cuts, per_export)
+        return replay_export(doc, key, cuts, per_export, rule)
 
 
 def corpus_jobs(

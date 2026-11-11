@@ -3155,6 +3155,9 @@ class HaWashdataPanel extends HTMLElement {
       this._showToast(this._tText('msg.toast_error', {error: t.error || ''}, 'Error: ' + (t.error || '')), 'error');
     } else if (result) {
       if (isHistory) this._pgHistory = result;
+      // A sweep of a setting no longer selected is not shown under the new one
+      // (it stays in the recent runs).
+      else if (result.param && result.param !== this._pgSweepParam) this._pgSweepNew = null;
       else this._pgSweepNew = (result && !result.error) ? result : null;
     }
     if (isHistory) { this._busy.delete('pg-history'); this._pgHistoryTaskId = null; }
@@ -4380,7 +4383,9 @@ class HaWashdataPanel extends HTMLElement {
     // tab (a label, a dismiss-all) would otherwise leave the Overview matching a
     // later request's count against it and never refetching. The Overview's own
     // callers record the count again after this returns.
-    try { const r = await this._ws({ type: `${_DOMAIN}/get_feedbacks`, entry_id: eid }); this._feedbacks = r.feedbacks || []; this._feedbacksEid = eid; this._feedbacksSeenCount = null; return true; } catch (_) { return false; }
+    // A response for a device switched away from meanwhile is dropped: the Cycles
+    // view reads the list without checking whose it is.
+    try { const r = await this._ws({ type: `${_DOMAIN}/get_feedbacks`, entry_id: eid }); if (!this._isActiveEntry(eid)) return false; this._feedbacks = r.feedbacks || []; this._feedbacksEid = eid; this._feedbacksSeenCount = null; return true; } catch (_) { return false; }
   }
 
   async _fetchPhases(eid) {
@@ -8875,7 +8880,9 @@ class HaWashdataPanel extends HTMLElement {
   async _pgApplySweepValue(val) {
     const dev = this._devices[this._selIdx];
     if (!dev || !this._canEdit() || val == null) return;
-    const paramKey = this._pgSweepParam;
+    // The setting the result was swept on, not the one selected since.
+    const swept = this._pgSweepNew;
+    const paramKey = (swept && swept.param) || this._pgSweepParam;
     val = this._pgHeld(paramKey, +val);
     const lbl = this._t('setting.' + paramKey + '.label', {}, paramKey);
     if (!confirm(this._tText('msg.pg_apply_confirm', {label: lbl, value: val}, 'Apply best value: ' + lbl + ' = ' + val + '?'))) return;
@@ -15330,7 +15337,11 @@ class HaWashdataPanel extends HTMLElement {
         const result = r && r.result;
         if (!result) { this._showToast(this._t('toast.pg_run_gone', {}, 'That run is no longer available.'), 'info'); return; }
         if (t.kind === 'pg_history') { this._pgHistory = result; this._pgAnalysisTab = 'history'; }
-        else { this._pgSweepNew = (!result.error) ? result : null; this._pgAnalysisTab = 'sweep'; }
+        else {
+          this._pgSweepNew = (!result.error) ? result : null; this._pgAnalysisTab = 'sweep';
+          // A loaded run shows under the setting it swept.
+          if (this._pgSweepNew && this._pgSweepNew.param) this._pgSweepParam = this._pgSweepNew.param;
+        }
         this._render();
       }).catch(() => this._showToast(this._t('toast.pg_run_gone', {}, 'That run is no longer available.'), 'info'));
     } else if (a === 'pg-open-cycle') {

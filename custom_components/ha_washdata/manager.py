@@ -776,6 +776,8 @@ class WashDataManager:
         # A Clean state restored at setup re-reads the door once HA has started
         # (#500): it may have been opened while HA was down.
         self._remove_clean_door_recheck: Callable[[], None] | None = None
+        # The restored-Clean door check waiting for the sensor's first usable state.
+        self._clean_door_recheck_pending = False
         # Set by _dispatch_notification when a call is queued for later (quiet
         # hours / presence) rather than sent; read by dedup-flag callers.
         self._last_dispatch_deferred: bool = False
@@ -3355,10 +3357,17 @@ class WashDataManager:
         new_val = new_state.state
         old_val = old_state.state if old_state else None
 
+        if new_val in ("unavailable", "unknown"):
+            return
+        if self._clean_door_recheck_pending:
+            # The sensor was not up when the restored Clean state was checked:
+            # its first usable state is that check (#500).
+            self._clean_door_recheck_pending = False
+            if new_val == "on" and self._is_clean_state:
+                self.mark_unloaded("door open after restart", how="door")
+                return
         # Ignore unavailability transitions
-        if new_val in ("unavailable", "unknown") or (
-            old_val in ("unavailable", "unknown")
-        ):
+        if old_val in ("unavailable", "unknown"):
             return
 
         door_open = new_val == "on"  # binary_sensor: on = open
@@ -3746,7 +3755,12 @@ class WashDataManager:
         if self._is_shutdown or not self._is_clean_state or not self._door_sensor_entity:
             return
         door = self.hass.states.get(self._door_sensor_entity)
-        if door is not None and door.state == "on":  # binary_sensor: on = open
+        if door is None or door.state in ("unavailable", "unknown"):
+            # Not reported yet: the door listener ignores the sensor coming back,
+            # so it reads this check when the sensor first has a usable state.
+            self._clean_door_recheck_pending = True
+            return
+        if door.state == "on":  # binary_sensor: on = open
             self.mark_unloaded("door open after restart", how="door")
 
     def _maybe_arm_door_end_dwell_if_open(self) -> None:

@@ -355,6 +355,38 @@ test('drawer/optimize: sweep points are held to the setting range (#487)', async
   expect(calls[calls.length - 1].values).toEqual([0.5, 1]);
 });
 
+// A sweep result belongs to the setting it swept: Apply best used whatever the
+// dropdown showed by then, so an off_delay result was saved as another setting.
+test('drawer/optimize: Apply best saves the setting the sweep ran on', async ({ page }) => {
+  await clickTab(page, 'playground');
+  await page.locator('.wd-pg-subtabs button[data-subtab="sweep"]').click();
+  await page.evaluate(async () => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    el._pgSweepParam = 'stop_threshold_w';
+    el._pgSweepNew = { param: 'off_delay', objective: 'match_accuracy', points: [], best_value: 240, current_value: 180 };
+    window.confirm = () => true;
+    await el._pgApplySweepValue(240);
+  });
+  const calls = await assertWsCalled(page, 'ha_washdata/set_options');
+  expect(calls[calls.length - 1].options).toEqual({ off_delay: 240 });
+});
+
+test('drawer/optimize: a sweep that finishes after the setting changed is not shown under it', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const kept = await page.evaluate(async () => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    const eid = el._devices[el._selIdx].entry_id;
+    const real = el._ws.bind(el);
+    el._ws = (msg: any) => (msg.type === 'ha_washdata/get_task_result'
+      ? Promise.resolve({ result: { param: 'off_delay', objective: 'match_accuracy', points: [{ value: 240, metric: 1 }] } })
+      : real(msg));
+    el._pgSweepParam = 'stop_threshold_w';   // changed while the off_delay sweep ran
+    await el._pgFinishTask({ id: 't1', entry_id: eid, state: 'done' }, false);
+    return el._pgSweepNew;
+  });
+  expect(kept).toBeNull();
+});
+
 // PLAYGROUND-23: both replay cycles against profiles built partly from those same
 // cycles (no leave-one-out), so their results are in-sample and say so.
 test('drawer/history: the result says it is in-sample and optimistic', async ({ page }) => {

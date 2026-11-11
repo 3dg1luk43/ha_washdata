@@ -142,12 +142,13 @@ drive() {  # drive <watts> <seconds>: a reading every ~2 s, jittered so each is 
 # run_cycle <label> <watts:seconds>...: one cycle, waits until it is stored and
 # its notifications have settled, and leaves its id in $CID.
 run_cycle() {
-  local label=$1 prev step settle_prev=-1 settle_now
+  local label=$1 prev step fin_prev
   shift
   echo
   echo "== cycle $label"
   sleep 12  # past min_off_gap, so it is not merged into the previous one
   prev=$(newest_cycle_id)
+  fin_prev=$(finish_count)
   for step in "$@"; do drive "${step%%:*}" "${step##*:}"; done
   $HACTL set "$SENSOR" 0 > /dev/null
   CID=""
@@ -161,14 +162,30 @@ run_cycle() {
     echo "  FAIL  cycle $label was never stored; nothing below can be judged"
     exit 1
   fi
-  # The finish notification goes out a moment after the store (smoke.sh 6b).
-  for _ in $(seq 1 12); do
-    settle_now=$(wc -l < "$CAPTURE")
-    [ "$settle_now" = "$settle_prev" ] && break
-    settle_prev=$settle_now
+  # The finish notification goes out a moment after the store (smoke.sh 6b):
+  # wait for this cycle's, on both targets, rather than for the capture to stop
+  # growing (a delivery slower than one poll read as settled).
+  for _ in $(seq 1 20); do
+    [ "$(finish_count)" -ge $((fin_prev + 2)) ] && break
     sleep 3
   done
   echo "  stored as $CID ($(cycle_label "$CID"))"
+}
+
+finish_count() {  # finish notifications delivered so far, every target
+  $PY - "$CAPTURE" "$NAME" <<'EOF'
+import json, sys
+path, name = sys.argv[1:3]
+n = 0
+for line in open(path, encoding="utf-8", errors="replace"):
+    try:
+        rec = json.loads(line)
+    except ValueError:
+        continue
+    if str(rec.get("message", "")).startswith(f"{name} finished"):
+        n += 1
+print(n)
+EOF
 }
 
 wait_request() {  # wait_request <cycle_id>: the request is queued just after the store

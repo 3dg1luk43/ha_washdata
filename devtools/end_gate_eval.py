@@ -1148,7 +1148,15 @@ def _summarise(rows: list[dict[str, Any]], device_type: str | None = None) -> di
             return True
         return float(r["first_end_s"]) < float(_pend(r)) - 60.0
 
-    plags = [r["end_offset_s"] - _pspan(r) for r in finished]
+    def _plag(r: dict[str, Any]) -> float:
+        # Both on the trace clock: the programme span starts at the first active
+        # reading, the close offset at the trace start, so a trace that starts
+        # below stop read that lead-in as lag. Older rows keep the span measure.
+        if r.get("prog_end_s") is not None:
+            return float(r["end_offset_s"]) - float(r["prog_end_s"])
+        return float(r["end_offset_s"]) - _pspan(r)
+
+    plags = [_plag(r) for r in finished]
     pfirst = [_first(r) for r in finished]
     psplits = sum(
         1 for r in finished
@@ -1346,11 +1354,18 @@ def _standby_row_verdict(r: dict[str, Any]) -> dict[str, Any]:
         )
     )
     early = lag is not None and lag < -60.0
+    start = r.get("standby_start_s")
+    # A finish before the held level was even fed (an above-stop anti-crease
+    # phase ending on its own) is not a close the tail rule made.
+    pre_tail = (
+        first is not None and not early and start is not None and float(first) < float(start)
+    )
     return {
         "lag": lag,
         # An early end is not a close in the tail: it counts under `early` only,
         # never as a fast close (its negative lag passes every mark) nor as door.
-        "in_tail": first is not None and float(first) < door and not early,
+        "in_tail": first is not None and float(first) < door and not early and not pre_tail,
+        "pre_tail": pre_tail,
         "at_door": first is None or float(first) >= door,
         "early": early,
         "split": split,
@@ -1372,6 +1387,7 @@ def _summarise_standby(rows: list[dict[str, Any]], device_type: str | None) -> d
             for m in STANDBY_LAG_MARKS
         },
         "door": sum(1 for v in verdicts if v["at_door"]),
+        "pre_tail": sum(1 for v in verdicts if v["pre_tail"]),
         "med_lag_min": round(float(np.median(closed)) / 60.0, 1) if closed else None,
         "early": sum(1 for v in verdicts if v["early"]),
         "split": sum(1 for v in verdicts if v["split"]),
@@ -1389,7 +1405,10 @@ def _print_standby_summary(rows: list[dict[str, Any]]) -> None:
         f"lift {r0['standby_lift']}, #458 floor {r0['standby_floor']}"
     )
     marks = "".join(f"{f'<={m}m':>7}" for m in STANDBY_LAG_MARKS)
-    hdr = f"{'scope':<18}{'n':>5}{marks}{'door':>7}{'med lag':>9}{'early':>7}{'split':>7}{'sb fin':>8}"
+    hdr = (
+        f"{'scope':<18}{'n':>5}{marks}{'door':>7}{'med lag':>9}{'early':>7}"
+        f"{'pre':>6}{'split':>7}{'sb fin':>8}"
+    )
     print(hdr)
     print("-" * len(hdr))
     for scope in [None, *sorted({r["device_type"] for r in held})]:
@@ -1399,13 +1418,15 @@ def _print_standby_summary(rows: list[dict[str, Any]]) -> None:
         cells = "".join(f"{st[f'le_{m}m']:>7}" for m in STANDBY_LAG_MARKS)
         print(
             f"{scope or 'ALL':<18}{st['n']:>5}{cells}{st['door']:>7}"
-            f"{st['med_lag_min']!s:>9}{st['early']:>7}{st['split']:>7}{st['sb_fired']:>8}"
+            f"{st['med_lag_min']!s:>9}{st['early']:>7}{st['pre_tail']:>6}{st['split']:>7}"
+            f"{st['sb_fired']:>8}"
         )
     print(
         "<=Nm = first finish within N min of the programme end (the unmodified trace's "
         "last above-stop\nreading), during the held tail; door = not before the held "
         "tail ended (the door opened);\nearly = first finish > 1 min before the "
-        "programme end; sb fin = standby-band finalizes."
+        "programme end; pre = finished after it but before the held tail began\n"
+        "(not counted as a close); sb fin = standby-band finalizes."
     )
     for r in held:
         v = _standby_row_verdict(r)
@@ -1549,7 +1570,7 @@ BASELINE_TOLERANCE: dict[str, float] = {
 #: The replay flags a baseline records and ``--check`` replays with.
 BASELINE_FLAGS = (
     "loo", "all_formats", "shipped_watchdog", "anti_wrinkle", "tumble_tail",
-    "device_types", "no_shortening",
+    "device_types", "no_shortening", "no_dishwasher_band",
 )
 
 
@@ -1997,9 +2018,13 @@ def main(argv: list[str] | None = None) -> int:
         if args.rows:
             return _check_baseline(baseline, json.loads(Path(args.rows).read_text()))
         # Replay exactly what the baseline measured, whatever else was passed.
-        for key, value in (baseline.get("flags") or {}).items():
+        flags = baseline.get("flags") or {}
+        for key, value in flags.items():
             if key in BASELINE_FLAGS:
                 setattr(args, key, ",".join(value) if key == "device_types" else value)
+        # A baseline from before the arm existed measured the default rule.
+        if "no_dishwasher_band" not in flags:
+            args.no_dishwasher_band = False
     elif args.rows:
         ap.error("--rows needs --check")
     _integration()

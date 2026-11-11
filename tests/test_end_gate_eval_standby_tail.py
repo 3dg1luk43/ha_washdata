@@ -37,3 +37,29 @@ def test_an_early_end_counts_as_early_only() -> None:
     assert st["le_5m"] == 1 and st["le_60m"] == 1   # only the 4 min close
     assert st["door"] == 1                          # only the run that never ended
     assert st["med_lag_min"] == 4.0
+
+
+def test_a_finish_before_the_held_tail_began_is_not_a_tail_close() -> None:
+    """After the programme end but before the inserted standby started: the tail
+    rule did not make that close, so it is counted apart."""
+    pre = {**_row(3600.0 + 120.0), "standby_start_s": 3900.0}
+    st = end_gate_eval._summarise_standby([pre, _row(3600.0 + 240.0)], None)
+    assert st["pre_tail"] == 1
+    assert st["le_5m"] == 1 and st["med_lag_min"] == 4.0
+
+
+def test_programme_lag_is_measured_on_the_trace_clock() -> None:
+    """A first active reading at 120 s, programme end 3600 s, close at 3620 s:
+    20 s of lag, not 140 s (the span starts at the first active reading)."""
+    row = {
+        "device_type": "washing_machine", "detected": True, "detected_count": 1,
+        "end_offset_s": 3620.0, "active_span_s": 3480.0, "final_duration_s": 3620.0,
+        "prog_end_s": 3600.0, "prog_span_s": 3480.0, "first_end_s": 3620.0,
+        "matched_profile": None, "confidence": None,
+    }
+    assert end_gate_eval._summarise([row], None)["prog_median_lag_min"] == round(20 / 60, 2)
+
+
+def test_the_dishwasher_band_arm_is_a_baseline_flag() -> None:
+    assert "no_dishwasher_band" in end_gate_eval.BASELINE_FLAGS
+

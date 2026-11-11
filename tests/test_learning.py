@@ -226,7 +226,9 @@ async def test_submit_feedback_lifecycle(learning_manager):
         "detected_profile": "Detected",
         "confidence": 0.7
     }
-    
+    # The Correct dialog offers only programmes that exist.
+    learning_manager.profile_store.profiles.update({"Detected": {}, "Actual": {}})
+
     # User corrects to "Actual"
     await learning_manager.async_submit_cycle_feedback(
         cycle_id=cycle_id, 

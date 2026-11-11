@@ -316,6 +316,17 @@ def measure_corpus(root: Path, grid: list[tuple[float, float]]) -> list[dict[str
     return rows
 
 
+#: An unavailable reading's stand-in: below every floor, so it ends a flat stretch
+#: (the shipped detector restarts its window on an outage) and a silence.
+OUTAGE_W = -1.0
+
+
+def with_outages(readings: list[tuple[Any, float | None]]) -> list[tuple[Any, float]]:
+    """Readings with each unavailable one kept as a boundary, not dropped: dropped,
+    the readings either side of an outage joined into one flat stretch."""
+    return [(ts, OUTAGE_W if w is None else w) for ts, w in readings]
+
+
 def measure_histories(root: Path, grid: list[tuple[float, float]]) -> list[dict[str, Any]]:
     """The start-gate manifest's raw histories, per stored cycle and between them."""
     sg = _load_module("wd_flat_eval_start_gate", "devtools/start_gate_eval.py")
@@ -330,9 +341,9 @@ def measure_histories(root: Path, grid: list[tuple[float, float]]) -> list[dict[
             dump = dump or doc
         readings = sg.clip(sg.merge(histories), sg._utc(src.since) if src.since else None,  # noqa: SLF001
                            sg._utc(src.until) if src.until else None)  # noqa: SLF001
-        readings = [(ts, w) for ts, w in readings if w is not None]
-        if len(readings) < 4:
+        if sum(1 for _ts, w in readings if w is not None) < 4:
             continue
+        readings = with_outages(readings)
         docs = [sg.load_config(Path(sg._resolve(c, root))) for c in src.config] or [dump]  # noqa: SLF001
         device = sg.load_devices(docs, src.device_type)
         cfg, _mgr = sg.detector_setup(device, {})

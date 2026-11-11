@@ -144,6 +144,41 @@ async def test_an_answer_for_a_cycle_no_longer_stored_drops_the_request(mock_has
     assert "c1" not in store.pending
 
 
+async def test_confirming_a_request_whose_programme_was_deleted_records_nothing(
+    mock_hass_learning,  # noqa: F811
+) -> None:
+    """Deleting a programme keeps the requests that detected it; the Cycles
+    dialog's Confirm (resolve_feedback) then labelled the cycle with the deleted
+    name. Correcting to a programme that is gone is refused the same way."""
+    mgr, store = _learning_manager(mock_hass_learning, labeled_count=6)
+    _pending(store)
+    del store.profiles["Eco 60"]
+    assert await mgr.async_submit_cycle_feedback("c1", user_confirmed=True) is False
+    assert await mgr.async_submit_cycle_feedback(
+        "c1", user_confirmed=False, corrected_profile="Gone") is False
+    assert store.past_cycles[0]["profile_name"] is None
+    assert store.feedback == {} and "c1" in store.pending
+    # Ignoring it still works, and so does correcting to a programme that exists.
+    assert await mgr.async_submit_cycle_feedback(
+        "c1", user_confirmed=False, corrected_profile="Quick 30") is True
+    assert store.past_cycles[0]["profile_name"] == "Quick 30"
+
+
+async def test_resolve_feedback_reports_an_answer_it_did_not_record() -> None:
+    hass = SimpleNamespace()
+    manager = MagicMock()
+    manager.learning_manager.async_submit_cycle_feedback = AsyncMock(return_value=False)
+    connection = MagicMock()
+    with patch.object(ws_api, "_get_manager", return_value=manager):
+        await ws_api.ws_resolve_feedback.__wrapped__(hass, connection, {
+            "id": 7, "type": "ha_washdata/resolve_feedback", "entry_id": "e1",
+            "cycle_id": "c1", "action": "confirm",
+        })
+    connection.send_error.assert_called_once()
+    assert connection.send_error.call_args.args[:2] == (7, "not_found")
+    manager.notify_update.assert_not_called()
+
+
 # ── get_feedbacks ─────────────────────────────────────────────────────────────
 
 def _get_feedbacks(pending: dict[str, Any], cycles: list[dict[str, Any]]) -> list[dict[str, Any]]:

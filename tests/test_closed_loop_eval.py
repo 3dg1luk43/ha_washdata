@@ -90,6 +90,13 @@ def test_select_devices_skips_store_twins_small_and_single_programme() -> None:
     assert cl.select_devices(devs, twins, None, "washer") == [keep]
 
 
+def test_select_devices_counts_only_the_cycles_the_replay_uses() -> None:
+    """Every trace under MIN_POINTS: the replay drops them all, so the device
+    must not be selected and reported with empty rows."""
+    short = [dict(_cyc("A" if i % 2 else "B", 1 + i), power_data=[[0, 1.0]] * 3) for i in range(12)]
+    assert cl.select_devices([_dev("u/short.json", short)], {}) == []
+
+
 def _doc(rows: list[dict], path: str = "u/washer.json") -> dict:
     return {"meta": {}, "devices": [{"path": path, "dev": "washing_machine", "seeds": 2,
                                      "arms": {"gate": rows}}]}

@@ -2956,6 +2956,9 @@ class ProfileStore:
         self._cohesion_cache: dict[tuple[str, ...], float] = {}
         self._cohesion_cache_generation: int = 0
         self._cohesion_cache_generation_checked: int = -1
+        # Bumped whenever an import or an undo replaces the stored data: a build
+        # that started before reads the old cycles and must not write into the new.
+        self._data_generation: int = 0
         # group_cohesion runs in executor threads (live matching + Playground can
         # touch the same store concurrently); serialize the read-clear-compute-store
         # sequence so a concurrent call can't clear a half-populated cache or
@@ -7576,6 +7579,7 @@ class ProfileStore:
         )
         generation = generations.get(profile_name, 0) + 1
         generations[profile_name] = generation
+        data_generation = getattr(self, "_data_generation", 0)
         existed = profile_name in (self._data.get("profiles") or {})
         # A rebuild changes this profile's curve, which feeds group cohesion, so
         # invalidate the cohesion cache (not only on group mutations) to avoid stale
@@ -7624,8 +7628,10 @@ class ProfileStore:
             shape_cycles
         )
 
-        if generations.get(profile_name) != generation or (
-            existed and profile_name not in (self._data.get("profiles") or {})
+        if (
+            generations.get(profile_name) != generation
+            or getattr(self, "_data_generation", 0) != data_generation
+            or (existed and profile_name not in (self._data.get("profiles") or {}))
         ):
             self._logger.debug(
                 "Discarding a superseded envelope build for %s", profile_name
@@ -7979,7 +7985,16 @@ class ProfileStore:
         The marker is cleared only after the rebuild, so an interrupted run is
         repeated at the next start. Returns the number of envelopes rebuilt.
         """
-        count = await self.async_rebuild_all_envelopes()
+        # An import or undo while it runs replaces the profiles it walks, and its
+        # in-flight build is discarded: go again on the data now stored, so the
+        # marker is never cleared for profiles that were not rebuilt.
+        for _attempt in range(3):
+            data_generation = getattr(self, "_data_generation", 0)
+            count = await self.async_rebuild_all_envelopes()
+            if getattr(self, "_data_generation", 0) == data_generation:
+                break
+        else:
+            return count
         self._data.pop(CYCLE_ENERGY_REBUILD_KEY, None)
         await self.async_save()
         return count
@@ -11963,6 +11978,7 @@ class ProfileStore:
         data.pop("active_cycle", None)
         data.pop("last_active_save", None)
         self._data = data
+        self._data_generation = getattr(self, "_data_generation", 0) + 1
         self._cached_sample_segments = {}
         self._cohesion_cache_generation += 1
         await self.async_save()
@@ -12026,6 +12042,7 @@ class ProfileStore:
                 "Import payload lacks %s; keeping this device's", ", ".join(sorted(kept))
             )
         self._data = {**data_dict, **kept}
+        self._data_generation = getattr(self, "_data_generation", 0) + 1
         # The payload's envelopes were built without any cycle list kept above, so
         # rebuild the profiles those lists label. A list kept from the target also
         # means a profile kept from it can lack a payload envelope.
@@ -12620,6 +12637,7 @@ class ProfileStore:
         # queued: drop them, as a split, merge or load does (#362), so they neither
         # show nor spend their programme's review budget.
         self.prune_orphaned_feedback()
+        self._data_generation = getattr(self, "_data_generation", 0) + 1
         await self.async_save()
 
         settings_out: dict[str, Any] = {}

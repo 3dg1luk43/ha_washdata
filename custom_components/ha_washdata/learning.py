@@ -1006,10 +1006,30 @@ class LearningManager:
         notes: str = "",
         dismiss: bool = False,
     ) -> bool:
-        """Submit user feedback for a cycle."""
+        """Submit user feedback for a cycle.
+
+        False, with nothing written, when no review is pending for the cycle or
+        the answer names a programme that no longer exists (deleting a programme
+        keeps the requests that detected it, so confirming one labelled the cycle
+        with the deleted name).
+        """
         pending = self.profile_store.get_pending_feedback().get(cycle_id)
         if not pending:
             return False
+        if not dismiss:
+            target = pending.get("detected_profile") if user_confirmed else corrected_profile
+            if (
+                isinstance(target, str)
+                and target
+                and target not in self.profile_store.get_profiles()
+            ):
+                self._logger.info(
+                    "Review answer for cycle %s names programme %r, which no longer "
+                    "exists; nothing recorded",
+                    cycle_id,
+                    target,
+                )
+                return False
 
         # Parse corrected_duration before writing to history so a bad value
         # never leaves a partially-applied state.

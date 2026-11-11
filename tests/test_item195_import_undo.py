@@ -397,3 +397,60 @@ def test_undo_is_admin_only_even_with_rbac_off() -> None:
     msg = {"id": 1, "type": "ha_washdata/undo_import", "entry_id": "e"}
     assert not ws_api._rbac_ok(hass, conn, msg)  # noqa: SLF001
     assert "undo_import" in ws_api._FULL_COMMANDS  # noqa: SLF001
+
+
+async def test_an_envelope_build_in_flight_does_not_write_into_an_imported_store(
+    hass: HomeAssistant, hass_storage: dict[str, Any]
+) -> None:
+    """An import that replaced the store while a build awaited its executor got the
+    old cycles' statistics written over its own programme of the same name."""
+    import asyncio
+
+    ps, _ = await _store(hass)
+    payload = _payload()
+    payload["data"]["profiles"] = {"Mine": {"avg_duration": 999.0}}
+    for c in payload["data"]["past_cycles"]:
+        c["profile_name"] = "Mine"
+    gate, started = asyncio.Event(), asyncio.Event()
+    real = hass.async_add_executor_job
+
+    async def _held(func, *args):
+        if getattr(func, "__name__", "") == "_rebuild_envelope_sync" and not gate.is_set():
+            started.set()
+            await gate.wait()
+        return await real(func, *args)
+
+    with patch.object(hass, "async_add_executor_job", _held):
+        build = asyncio.ensure_future(ps.async_rebuild_envelope("Mine"))
+        await started.wait()
+        await ps.async_import_data(payload)
+        gate.set()
+        assert await build is False
+    assert ps._data["profiles"]["Mine"]["avg_duration"] == 999.0  # noqa: SLF001
+
+
+async def test_the_energy_rebuild_goes_again_after_an_import_replaced_the_store(
+    hass: HomeAssistant, hass_storage: dict[str, Any]
+) -> None:
+    """Its profile list was the old store's: a programme only the import has was
+    never rebuilt, and the import's rebuild marker was cleared all the same."""
+    import asyncio
+
+    from custom_components.ha_washdata.profile_store import CYCLE_ENERGY_REBUILD_KEY
+
+    ps, _ = await _store(hass)
+    rebuilt: list[str] = []
+    real_rebuild = ps.async_rebuild_envelope
+    gate = asyncio.Event()
+
+    async def _rebuild(name: str) -> bool:
+        rebuilt.append(name)
+        if name == "Mine" and not gate.is_set():
+            await ps.async_import_data(_payload())   # replaces the store meanwhile
+            gate.set()
+        return await real_rebuild(name)
+
+    with patch.object(ps, "async_rebuild_envelope", _rebuild):
+        await ps.async_rebuild_envelopes_after_energy_fix()
+    assert "Theirs" in rebuilt
+    assert CYCLE_ENERGY_REBUILD_KEY not in ps._data  # noqa: SLF001

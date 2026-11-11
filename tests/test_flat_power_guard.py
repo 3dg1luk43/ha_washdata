@@ -176,6 +176,20 @@ def _harness() -> Any:
     return mod
 
 
+def test_the_harness_ends_a_flat_stretch_at_an_outage() -> None:
+    """The detector restarts its window when the sensor goes unavailable; the
+    history path dropped those readings and joined 100 W either side of a 5 h
+    outage into one 5 h stretch."""
+    mod = _harness()
+    readings = [(0.0, 100.0), (600.0, 100.0), (1200.0, None), (19200.0, 100.0), (19800.0, 100.0)]
+    pts = mod.with_outages(readings)
+    measured = mod.longest_flat(
+        np.array([t for t, _ in pts]), np.array([w for _, w in pts]), 1.0,
+        FLAT_POWER_STOP_TOLERANCE_W, FLAT_POWER_STOP_TOLERANCE_FRACTION,
+    )
+    assert measured is not None and measured["dur_s"] == pytest.approx(1200.0)
+
+
 # --- the stop --------------------------------------------------------------------
 
 

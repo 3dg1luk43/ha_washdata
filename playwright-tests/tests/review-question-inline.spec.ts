@@ -614,3 +614,21 @@ test('no chips once the match is clear, on a hand-picked program, or when idle',
   await expect(page.locator('#wd-status-prog')).toBeVisible({ timeout: 8_000 });
   await expect(page.locator('.wd-torn')).toHaveCount(0);
 });
+
+// A get_feedbacks answer for a device switched away from meanwhile used to become
+// the shared list, which the Cycles view reads without checking whose it is.
+test('a review list that arrives for another device is dropped', async ({ page }) => {
+  await bootWithQuestion(page);
+  const out = await page.evaluate(async () => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    const before = el._feedbacks;
+    const real = el._ws.bind(el);
+    el._ws = (msg: any) => (msg.type === 'ha_washdata/get_feedbacks' && msg.entry_id === 'other-entry'
+      ? Promise.resolve({ feedbacks: [{ cycle_id: 'foreign' }] })
+      : real(msg));
+    const ok = await el._fetchFeedbacks('other-entry');
+    return { ok, same: el._feedbacks === before, eid: el._feedbacksEid };
+  });
+  expect(out).toEqual({ ok: false, same: true, eid: 'test-entry-001' });
+});
+

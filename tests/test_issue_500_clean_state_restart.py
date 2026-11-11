@@ -30,6 +30,8 @@ import copy
 from datetime import datetime, timedelta
 from typing import Any
 
+import pytest
+
 from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
 from pytest_homeassistant_custom_component.common import (
@@ -281,6 +283,30 @@ async def test_a_door_opened_while_down_took_the_load_out(
     )
     assert manager.is_clean_state is False
     assert _record_on_disk(hass_storage, entry) is None
+
+
+@pytest.mark.parametrize(("first", "clean"), [("on", False), ("off", True)])
+async def test_a_door_sensor_that_comes_up_after_the_restart_is_checked_then(
+    hass: HomeAssistant, setup_washdata_entry, freezer, hass_storage, first: str, clean: bool
+) -> None:
+    """Unavailable when HA started: the listener ignores a sensor coming back, so
+    the restart check runs on its first usable state instead."""
+    hass.states.async_set(DOOR, "off")
+    options = {**FAST, CONF_DOOR_SENSOR_ENTITY: DOOR}
+    entry, _ = await _clean_washer(hass, setup_washdata_entry, freezer, options)
+    manager = await _restart(
+        hass, entry, freezer, hass_storage, 120,
+        before_setup=lambda: hass.states.async_set(DOOR, "unavailable"),
+    )
+    assert manager.is_clean_state is True
+    hass.states.async_set(DOOR, first)
+    await hass.async_block_till_done()
+    assert manager.is_clean_state is clean
+    # Only the first usable state is the restart check; later ones are changes.
+    hass.states.async_set(DOOR, "unavailable")
+    hass.states.async_set(DOOR, "on")
+    await hass.async_block_till_done()
+    assert manager.is_clean_state is clean
 
 
 async def test_power_based_off_keeps_it_past_the_reset_delay(

@@ -4102,13 +4102,19 @@ async def ws_resolve_feedback(
                 if corrected_duration_min is not None
                 else None
             )
-            await manager.learning_manager.async_submit_cycle_feedback(
+            recorded = await manager.learning_manager.async_submit_cycle_feedback(
                 cycle_id=cycle_id,
                 user_confirmed=(action == "confirm"),
                 corrected_profile=msg.get("corrected_profile") if action == "correct" else None,
                 corrected_duration=corrected_duration_s,
                 dismiss=(action == "ignore"),
             )
+            if not recorded:
+                connection.send_error(
+                    msg["id"], "not_found",
+                    "No review is waiting for this cycle, or its programme no longer exists",
+                )
+                return
         else:
             connection.send_error(msg["id"], "not_available", "Learning manager not available")
             return

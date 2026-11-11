@@ -133,8 +133,9 @@ def select_devices(devs: Iterable[E.Device], twins: dict[str, Any],
             continue
         if device_types and device_type_of(d) not in device_types:
             continue
-        pcs = [c for c in (d.data.get("past_cycles") or [])
-               if isinstance(c, dict) and c.get("profile_name") and c.get("power_data")]
+        # The cycles the replay will use: a device of short traces only would
+        # otherwise pass here and report empty rows as a successful run.
+        pcs = replay_cycles(d)
         if len(pcs) >= MIN_CYCLES and len({c["profile_name"] for c in pcs}) >= MIN_PROGRAMMES:
             out.append(d)
     return out

@@ -88,7 +88,8 @@ def main() -> int:
             key = (cycle.get("id"), cycle.get("start_time"))
             if key in seen:
                 continue
-            seen.add(key)
+            # The key is reserved only by a usable copy (below), so a malformed
+            # first copy does not hide a later valid one.
             try:
                 xy = decompress_power_data(cycle)
             except Exception:  # noqa: BLE001 - a malformed row is skipped
@@ -102,6 +103,7 @@ def main() -> int:
             hold = integrate_cycle_wh(ts, pw)
             if hold <= 0:
                 continue
+            seen.add(key)
             old = integrate_wh(ts, pw, max_gap_s=energy_gap_threshold_s(ts))
             rows.append((old / hold, _p95_hold(ts, pw) / hold,
                          float(np.max(np.diff(ts))), bool(np.any(np.diff(ts) > CYCLE_ENERGY_MAX_GAP_S))))
