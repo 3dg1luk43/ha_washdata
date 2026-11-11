@@ -174,15 +174,16 @@ def plausible_programme_s(value: Any) -> float:
 def is_duration_cap_stop(cycle: Any) -> bool:
     """Whether a stored cycle was ended by the detector's duration cap (#502).
 
-    New cap stops carry ``duration_capped``. An older one is recognised as a
+    New cap stops carry ``duration_capped`` True, other force stops False. An older
+    one, without the key, is recognised as a
     ``force_stopped`` run no shorter than ``CYCLE_DURATION_CAP_BASE_S`` less
     ``CYCLE_DURATION_CAP_LEGACY_SLACK_S``: the flat 8 h cap, with the few seconds
     the end may snap back to the last active reading.
     """
     if not isinstance(cycle, dict):
         return False
-    if cycle.get("duration_capped"):
-        return True
+    if "duration_capped" in cycle:  # a stop stored since the mark says which it was
+        return bool(cycle["duration_capped"])
     if cycle.get("status") != "force_stopped":
         return False
     duration = profile_duration(cycle.get("duration"))

@@ -1114,6 +1114,21 @@ class WashDataManager:
                     self.profile_store.profile_trusted_min_duration(
                         self._current_program
                     ),
+                    # Elements 14-17 stay unset, as before: no catalogue, no
+                    # contenders, no member-based run expectation on a pin.
+                    None,
+                    None,
+                    None,
+                    None,
+                    # Element 18: the pinned profile's anti-crease tail. Without
+                    # it a hand-picked tail-bearing washer never armed the
+                    # programme-end finalise and fell back to 0.98 x the pinned
+                    # average (end_gate_eval with every cycle pinned to its label,
+                    # 311 washers: median lag 8.5 -> 6.5 min, p90 26.3 -> 14.5,
+                    # early > 1 min 6 -> 4, splits 5 -> 4).
+                    progress_mod.anticrease_programme_tail(
+                        self.profile_store, self._current_program, self.device_type
+                    ),
                 )
 
             if not readings:

@@ -5215,9 +5215,20 @@ class CycleDetector:
         # phase after the last heating burst - 31 min of a Miele's rinse and
         # spin in one replayed cycle.
         trim_ceiling = plateau_hi + max(0.5, 0.1 * plateau_hi)
+        # A dishwasher's finalise here needed its terminal pump-out (#518): never
+        # trim back past it. A pump-out within the ceiling of a low standby
+        # (8.3 W over 7.9 W, Stop Threshold 4 W) otherwise stored the cycle at
+        # 5190 s instead of 8450 s, its drying and the pump-out cut. Only the
+        # stored end moves; when the finalise fires does not.
+        floor_ts: datetime | None = None
+        if self._config.device_type in STANDBY_BAND_TERMINAL_EVENT_DEVICE_TYPES:
+            event = self._terminal_event_so_far()
+            if event is not None:
+                floor_ts = start_time + timedelta(seconds=self._wall_offset_s(event[1]))
         plateau_start_idx = None
         for i in range(len(self._power_readings) - 1, -1, -1):
-            if float(self._power_readings[i][1]) > trim_ceiling:
+            ts_i, p_i = self._power_readings[i]
+            if float(p_i) > trim_ceiling or (floor_ts is not None and ts_i <= floor_ts):
                 plateau_start_idx = i
                 break
         if (
@@ -5394,18 +5405,38 @@ class CycleDetector:
             )
             if timestamp < due:
                 return ok
-        t0 = readings[0][0]
+        # A finished user pause is not the programme's quiet: it is cut out (later
+        # readings moved back), or a pause just after the final spin read as the
+        # quiet tail on the first reading after the resume, finalising before the
+        # rinse and spin that followed and splitting the wash (end_gate_eval --loo
+        # --all-formats --halt-at 0.8/0.9 --halt-min 10 --user-pause, washers and
+        # washer-dryers: splits 23 -> 22 / 26 -> 24, early > 1 min 23 -> 22 /
+        # 24 -> 22, 11 and 10 of 350 ends moved; unpaused runs read the same input).
+        spans = (
+            sorted(self._user_pause_spans) if USER_PAUSE_EXCLUDED_FROM_GATES else []
+        )
+        src = self._cut_readings(spans) if spans else readings
+        t0 = src[0][0]
         stop = float(self._config.stop_threshold_w)
         found = spin_rhythm.programme_end_quiet(
-            [(ts - t0).total_seconds() for ts, _p in readings],
-            [float(p) for _ts, p in readings],
+            [(ts - t0).total_seconds() for ts, _p in src],
+            [float(p) for _ts, p in src],
             stop * ANTI_CREASE_PROGRAMME_END_QUIET_FACTOR,
             ceiling,
             ANTI_CREASE_PROGRAMME_END_SPIN_GAP_S,
             head_s=ANTI_CREASE_PROGRAMME_END_QUIET_S,
             head_w=stop * ANTI_CREASE_PROGRAMME_END_HEAD_FACTOR,
         )
-        end_ts = t0 + timedelta(seconds=found[0]) if found is not None else None
+        end_ts = None
+        if found is not None:
+            # Back on the wall clock: each pause that began before it moves it later.
+            off = (t0 - start).total_seconds() + found[0] if start is not None else found[0]
+            shift = 0.0
+            for at, length in spans:
+                if off < at - shift:
+                    break
+                shift += length
+            end_ts = (start or t0) + timedelta(seconds=off + shift)
         ok = found is not None and found[1] >= ANTI_CREASE_PROGRAMME_END_QUIET_S
         self._programme_end_memo = (start, timestamp, end_ts, ok)
         if not ok:
@@ -6566,6 +6597,10 @@ class CycleDetector:
             # programme length (`match_rules.is_duration_cap_stop`), so a cap stop
             # labelled into a programme cannot lengthen the next cap.
             cycle_data["duration_capped"] = True
+        elif status == "force_stopped":
+            # Said explicitly, so a long force stop of another kind (the unmatched
+            # guard, a user force-end) is not read as a legacy cap stop by length.
+            cycle_data["duration_capped"] = False
         if flat_power_w is not None:
             # The flat-power stop: like a cap stop, never a learned programme
             # length (`match_rules.is_flat_power_stop`). The level it stopped on is

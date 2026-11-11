@@ -198,6 +198,10 @@ def test_a_cap_stop_is_recognised_marked_or_legacy() -> None:
     assert match_rules.is_duration_cap_stop(_cycle("P", 28750.0, "force_stopped"))
     # The unmatched guard's 7.9 h force stop at the real end is a real length.
     assert not match_rules.is_duration_cap_stop(_cycle("P", 28467.3, "force_stopped"))
+    # A force stop stored since the mark says it was not the cap, however long.
+    other = _cycle("P", 32400.0, "force_stopped", duration_capped=False)
+    assert not match_rules.is_duration_cap_stop(other)
+    assert match_rules.longest_programme_s([{**other, "profile_name": "P"}]) == 32400.0
     assert not match_rules.is_duration_cap_stop(_cycle("P", 30000.0, "completed"))
 
 
@@ -231,6 +235,22 @@ def test_only_a_cap_stop_carries_the_mark() -> None:
     _run(_detector(cycles, lambda: match_rules.longest_programme_s(CYCLES)))
     assert cycles[0]["status"] == "completed"
     assert "duration_capped" not in cycles[0]
+
+
+def test_another_force_stop_is_marked_as_not_the_cap() -> None:
+    """Without the explicit False, a non-cap force stop of 8 h or more read as a
+    legacy cap stop by its length and left the learned programme lengths."""
+    cycles: list[dict[str, Any]] = []
+    det = _detector(cycles)
+    t = 0.0
+    while t < 9 * 3600:
+        det.process_reading(_wash_dry_power(t % PROGRAMME_S), T0 + timedelta(seconds=t))
+        t += 30.0
+        if det.state == "running" and t > 3600:
+            break
+    det.force_end(T0 + timedelta(seconds=t))
+    assert cycles and cycles[-1]["status"] == "force_stopped"
+    assert cycles[-1]["duration_capped"] is False
 
 
 # --- the cut (detector) -----------------------------------------------------

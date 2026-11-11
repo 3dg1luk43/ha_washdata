@@ -222,6 +222,34 @@ def test_a_pump_out_inside_the_near_stop_band_is_not_trimmed_off() -> None:
     assert all(e["duration"] >= DRAIN_S + 300.0 - 10.0 for e in ends), ends
 
 
+def test_the_standby_trim_never_cuts_back_past_the_pump_out() -> None:
+    """A low standby (7.9 W) with a Stop Threshold of 4 W: an 8.3 W pump-out sits
+    inside the trim's ceiling, so the trim walked back past it to the last wash
+    activity and stored 5190 s of an 8450 s cycle. The recognised pump-out floors
+    it; only the stored end moves."""
+    cfg = build_detector_config(
+        {"min_power": 2.0, "stop_threshold_w": 4.0, "start_threshold_w": 10.0}, {}, "dishwasher"
+    )
+    ends: list[dict[str, Any]] = []
+    det = CycleDetector(
+        cfg, lambda *_: None, ends.append,
+        profile_matcher=lambda _r: _match(EXPECTED_S, TERMINAL_QUIET_S),
+    )
+
+    def power(t: float) -> float:
+        if t < LAST_WASH_S:
+            return _power(t)
+        return 8.3 if DRAIN_S <= t < DRAIN_S + 60.0 else 7.9
+
+    t = 0.0
+    with patch("homeassistant.util.dt.now", side_effect=lambda: T0 + timedelta(seconds=t)):
+        while t < DRAIN_S + 7200.0 and not ends:
+            det.process_reading(power(t), T0 + timedelta(seconds=t))
+            t += 10.0
+    assert len(ends) == 1, ends
+    assert 8400.0 <= ends[0]["duration"] <= 8460.0, ends[0]["duration"]
+
+
 def test_the_live_walk_is_the_signature_walk() -> None:
     """The detector reads the event with the profile signature's own walk."""
     pts = [(float(t), _power(float(t))) for t in range(0, int(DRAIN_S) + 1200, 10)]
