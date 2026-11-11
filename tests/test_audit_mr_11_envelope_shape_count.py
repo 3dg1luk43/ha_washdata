@@ -74,3 +74,27 @@ def test_an_envelope_from_before_the_field_falls_back_to_cycle_count():
     assert envelope_shape_count({"cycle_count": 1, "shape_cycle_count": 5}) == 5
     assert envelope_shape_count(None) == 0
     assert envelope_shape_count({"cycle_count": "x"}) == 0
+
+
+async def test_the_template_cache_holds_only_the_current_envelope(store: ProfileStore) -> None:
+    """#521: keyed by the envelope's id and grid step, the cache kept every old
+    envelope and one template per jittered step until 512 entries piled up."""
+    import weakref
+
+    await _backfill_only(store, 1)
+
+    class _Env(dict):  # a dict cannot be weak-referenced
+        pass
+
+    first = _Env(store._data["envelopes"]["Eco"])  # noqa: SLF001
+    gone = weakref.ref(first)
+    store._envelope_template_on_grid("Eco", first, 30.0)  # noqa: SLF001
+    rebuilt = _Env(first, updated="later")
+    del first
+    for step in (30.0, 30.01, 30.02, 30.03, 30.04):   # a change-only plug's median
+        store._envelope_template_on_grid("Eco", rebuilt, step)  # noqa: SLF001
+    cache = store._envelope_template_cache  # noqa: SLF001
+    assert gone() is None
+    assert sorted(k[1] for k in cache if k[0] == "Eco") == [30.03, 30.04]
+    assert store._envelope_template_on_grid("Eco", rebuilt, 30.04) is cache[("Eco", 30.04)][2]  # noqa: SLF001
+

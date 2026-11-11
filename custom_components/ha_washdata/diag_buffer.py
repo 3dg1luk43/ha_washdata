@@ -125,8 +125,21 @@ class DiagBuffer:
     # ------------------------------------------------------------------
 
     def record_power(self, watts: float, ts: datetime) -> None:
-        """Record one raw power-sensor reading (call *before* any throttling)."""
-        self._power.append((ts.timestamp(), watts))
+        """Record one raw power-sensor reading (call *before* any throttling).
+
+        Readings older than the window are dropped as new ones arrive: only the
+        last 24 h is ever read, and the entry cap alone let a 10 s plug hold
+        11.6 days of readings (about 12 MB per device, #521).
+        """
+        now = ts.timestamp()
+        power = self._power
+        power.append((now, watts))
+        try:
+            cutoff = now - _WINDOW.total_seconds()
+            while power and power[0][0] < cutoff:
+                power.popleft()
+        except TypeError:  # a diagnostic buffer must never break the power path
+            pass
 
     def power_samples(self, since_ts: float | None = None) -> list[tuple[float, float]]:
         """Return raw (unix_ts, watts) readings, optionally only those at/after since_ts."""

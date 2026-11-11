@@ -9929,13 +9929,14 @@ class ProfileStore:
         MR-01, MATCH-EVAL-02). Cached per envelope revision and grid step.
         """
         avg = envelope.get("avg") or []
-        key = (name, id(envelope), envelope.get("updated"), float(round(used_dt, 2)))
+        revision = envelope.get("updated")
+        key = (name, float(round(used_dt, 2)))
         cache = getattr(self, "_envelope_template_cache", None)
         if cache is None:
             cache = self._envelope_template_cache = {}
         hit = cache.get(key)
-        if hit is not None and hit[0] is envelope:
-            return hit[1]
+        if hit is not None and hit[0] is envelope and hit[1] == revision:
+            return hit[2]
         values = [float(p[1]) for p in avg]
         try:
             ts = np.asarray([float(p[0]) for p in avg], dtype=float)
@@ -9950,10 +9951,22 @@ class ProfileStore:
                         values = [float(v) for v in seg.power]
         except Exception:  # noqa: BLE001 - fall back to the raw curve, never fail a match
             pass
-        if len(cache) > 512:
+        # Only the current revision of each profile, on at most two grid steps
+        # (live and a Playground replay can alternate): keyed by the envelope's id
+        # and step, every rebuild and every jittered step of a change-only plug
+        # kept a template and its whole old envelope alive until 512 piled up
+        # (#521). Snapshots and pop(), so a concurrent matcher thread is harmless.
+        mine = [k for k in list(cache) if k[0] == name and k != key]
+        for k in mine:
+            old_entry = cache.get(k)
+            if old_entry is None or old_entry[0] is not envelope:
+                cache.pop(k, None)
+        mine = [k for k in list(cache) if k[0] == name and k != key]
+        for k in mine[:-1]:
+            cache.pop(k, None)
+        if len(cache) > 512:  # profiles deleted or renamed since
             cache.clear()
-        # The envelope itself is held, so its id cannot be recycled while cached.
-        cache[key] = (envelope, values)
+        cache[key] = (envelope, revision, values)
         return values
 
     def build_match_snapshots(self, used_dt: float) -> list[dict[str, Any]]:
