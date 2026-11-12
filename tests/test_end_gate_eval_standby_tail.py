@@ -76,3 +76,35 @@ def test_a_baseline_is_never_written_from_a_modified_replay(tmp_path, capsys) ->
         assert exc.value.code == 2
         assert "--write-baseline" in capsys.readouterr().err
     assert not (tmp_path / "b.json").exists()
+
+
+def test_the_dishwasher_band_arm_is_undone_by_a_default_setup() -> None:
+    """A --no-dishwasher-band setup followed by a default one in the same
+    interpreter left the rule off, measuring the before arm under default flags."""
+    from custom_components.ha_washdata import cycle_detector as cd
+    from custom_components.ha_washdata.const import STANDBY_BAND_TERMINAL_EVENT_DEVICE_TYPES
+
+    try:
+        end_gate_eval._set_detector_toggles(True, True)
+        assert cd.STANDBY_BAND_TERMINAL_EVENT_DEVICE_TYPES == ()
+        assert cd.STALL_HOLDS_STANDBY_BAND is False
+        end_gate_eval._set_detector_toggles(False, False)
+        assert cd.STANDBY_BAND_TERMINAL_EVENT_DEVICE_TYPES == STANDBY_BAND_TERMINAL_EVENT_DEVICE_TYPES
+        assert cd.STALL_HOLDS_STANDBY_BAND is True
+    finally:
+        end_gate_eval._set_detector_toggles(False, False)
+
+
+def test_the_held_level_starts_at_the_programme_end() -> None:
+    """A washer whose recorded tail is a quiet phase above stop: the level used to
+    start after that tail (the last above-stop reading), not at the programme end."""
+    pts = [(float(t), 2000.0) for t in range(0, 1800, 30)]
+    pts += [(float(t), 700.0 if t < 3600 else 6.0) for t in range(1800, 5400, 30)]
+    stop = 5.0
+    _cyc, start, _end = end_gate_eval._with_standby_tail(
+        {"power_data": [[t, p] for t, p in pts]}, pts, stop, 2 * stop, 10.0, "dense", False,
+        lambda a, b: [], "washing_machine",
+    )
+    prog_end = end_gate_eval._programme_end(pts, [t for t, p in pts if p > stop], "washing_machine")
+    assert prog_end < pts[-1][0]
+    assert start <= prog_end + 60.0

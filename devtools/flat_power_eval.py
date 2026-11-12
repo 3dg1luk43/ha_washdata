@@ -77,6 +77,7 @@ from __future__ import annotations
 
 import argparse
 import gzip
+import hashlib
 import importlib.util
 import json
 import math
@@ -236,6 +237,24 @@ def _read_json(path: Path) -> Any:
         return None
 
 
+def _trace_key(cycle: dict[str, Any], start_w: float, stop_w: float) -> str | None:
+    """A duplicate of an already measured cycle: the same readings (normalised as
+    the measurement reads them, so a legacy ISO-stamped trace is kept) under the
+    same thresholds (the floors the stretch is measured against)."""
+    from custom_components.ha_washdata.suggestion_engine import (  # noqa: PLC0415
+        _cycle_readings,
+    )
+
+    try:
+        pts = [[round(float(o), 0), round(float(w), 0)] for o, w in _cycle_readings(cycle)]
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if not pts:
+        return None
+    body = json.dumps([pts, round(start_w, 3), round(stop_w, 3)])
+    return hashlib.sha1(body.encode()).hexdigest()[:16]
+
+
 def _offsets(cycle: dict[str, Any]) -> tuple[np.ndarray, np.ndarray] | None:
     from custom_components.ha_washdata.suggestion_engine import (  # noqa: PLC0415
         _cycle_readings,
@@ -283,7 +302,7 @@ def corpus_cycles(root: Path) -> list[dict[str, Any]]:
             for c in data.get(key) or []:
                 if not isinstance(c, dict) or not isinstance(c.get("power_data"), list):
                     continue
-                h = ev.trace_hash(c)
+                h = _trace_key(c, float(cfg.start_threshold_w), float(cfg.stop_threshold_w))
                 if not h or h in seen:
                     continue
                 seen.add(h)

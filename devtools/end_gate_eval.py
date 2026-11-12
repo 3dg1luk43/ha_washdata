@@ -298,6 +298,9 @@ def _programme_end(
     quiet = spin_rhythm.active_end_s([t for t, _p in work], [p for _t, p in work])
     return end if quiet is None else min(end, t0 + float(quiet))
 
+#: The detector's shipped toggles, taken at the first ``_setup_replay``.
+_SHIPPED_DETECTOR_TOGGLES: dict[str, dict[str, Any]] = {}
+
 #: Anti-crease probe state for the replay in progress (one at a time).
 _AC: dict[str, Any] = {}
 
@@ -579,14 +582,18 @@ def _keepalive_offsets(
 def _with_standby_tail(
     cycle: dict[str, Any], pts: list[tuple[float, float]], stop: float, level: float,
     minutes: float, cadence: str, lift: bool, keepalives: Any,
+    device_type: str = "dishwasher",
 ) -> tuple[dict[str, Any], float, float]:
     """The cycle held at ``level`` after its programme (#518).
 
     Returns ``(cycle, tail_start_s, tail_end_s)``; ``keepalives(t0, until)`` gives
     the offsets the live watchdog would inject at (``cadence == "keepalive"``).
+    The level starts at the programme end the lag is measured from
+    (:func:`_programme_end`): on a washer or dryer whose recorded tail is a quiet
+    anti-crease phase above stop, after ``active[-1]`` it started late.
     """
     active = [t for t, p in pts if p > stop]
-    t_end = active[-1]
+    t_end = _programme_end(pts, active, device_type) or active[-1]
     gaps = [b - a for (a, _p), (b, _q) in zip(pts, pts[1:]) if b > a]
     step = min(60.0, max(10.0, float(np.median(gaps)) if gaps else 30.0))
     head = [
@@ -971,6 +978,7 @@ def _replay_export(
                 replayed, _cycle_readings(replayed), stop, standby_level,
                 float(standby["minutes"]), standby["cadence"], bool(standby.get("lift")),
                 lambda a, b: _keepalive_offsets(a, b, standby_level, cfg, opts, watchdog_s),
+                device_type,
             )
             standby_s = (s0, s1)
         _AC.clear()
@@ -1702,6 +1710,22 @@ def default_jobs() -> int:
     return max(1, min((os.cpu_count() or 2) - 1, MAX_JOBS))
 
 
+def _set_detector_toggles(no_dishwasher_band: bool, no_stall_guard: bool) -> None:
+    """Set both detector toggles either way, from the shipped values taken once: a
+    second setup in one interpreter (a test, a sweep) must not inherit the previous
+    arm and report it under the default flags."""
+    from custom_components.ha_washdata import cycle_detector as _cd  # noqa: PLC0415
+
+    shipped = _SHIPPED_DETECTOR_TOGGLES.setdefault("values", {
+        "band": _cd.STANDBY_BAND_TERMINAL_EVENT_DEVICE_TYPES,
+        "stall": _cd.STALL_HOLDS_STANDBY_BAND,
+    })
+    # The #518 before arm: the standby-band finalise for its pre-#518 device
+    # types only (no dishwasher), everything else the code under test.
+    _cd.STANDBY_BAND_TERMINAL_EVENT_DEVICE_TYPES = () if no_dishwasher_band else shipped["band"]
+    _cd.STALL_HOLDS_STANDBY_BAND = False if no_stall_guard else shipped["stall"]
+
+
 def _setup_replay(
     no_shortening: bool, no_stall_guard: bool, repo: str | None = None,
     no_dishwasher_band: bool = False,
@@ -1723,17 +1747,7 @@ def _setup_replay(
         _const.END_GATE_LATE_RATIO = 1e9
         _const.END_GATE_LATE_RATIO_BY_DEVICE = {}
 
-    if no_dishwasher_band:
-        # The #518 before arm: the standby-band finalise for its pre-#518 device
-        # types only (no dishwasher), everything else the code under test.
-        from custom_components.ha_washdata import cycle_detector as _cd  # noqa: PLC0415
-
-        _cd.STANDBY_BAND_TERMINAL_EVENT_DEVICE_TYPES = ()
-
-    if no_stall_guard:
-        from custom_components.ha_washdata import cycle_detector as _cd  # noqa: PLC0415
-
-        _cd.STALL_HOLDS_STANDBY_BAND = False
+    _set_detector_toggles(no_dishwasher_band, no_stall_guard)
 
     logging.getLogger("custom_components.ha_washdata").setLevel(logging.ERROR)
     _install_anticrease_probe()

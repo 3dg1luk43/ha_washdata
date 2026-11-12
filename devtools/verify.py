@@ -660,6 +660,14 @@ def run(
             for s, c, kind in plan(startable, work, free, budget, remaining_work(others_left),
                                    bool(running), slot_taken):
                 queued.remove(s)
+                # A stage held back to run alone waited for the others: what made
+                # it available may be gone (another box check began meanwhile, and
+                # the box stage's up.sh --fresh would reset it under that run).
+                why = s.unavailable() if s.alone else None
+                if why:
+                    results[s.name] = Result(s.name, 0, 0.0, 0.0, "skip", why)
+                    out(f"[{_fmt_s(clock()):>8}] skip  {s.name}: {why}")
+                    continue
                 free -= c if kind == "budget" else 0
                 now = clock()
                 res = Result(s.name, c, now, cores_now=c, since=now, peak=c, kind=kind)
@@ -691,6 +699,8 @@ def run(
                         free -= more
                         regrant(r, r.cores_now + more, now)
                         out(f"[{_fmt_s(now):>8}] grow  {name} to {r.cores_now} cores")
+            if not running:   # the last stage left was skipped: nothing to wait for
+                continue
             mark()
             res = done.get()
             res.end_s = clock()

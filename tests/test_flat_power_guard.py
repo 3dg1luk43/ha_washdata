@@ -202,6 +202,20 @@ def test_the_harness_measures_a_trace_of_three_readings() -> None:
     assert measured is not None and measured["dur_s"] == pytest.approx(18000.0)
 
 
+def test_the_harness_dedupe_keeps_thresholds_and_legacy_traces_apart() -> None:
+    """The same readings under another threshold are another measurement, and a
+    legacy ISO-stamped trace (which the eval clone hash cannot parse) is kept."""
+    mod = _harness()
+    cyc = {"start_time": "2026-10-01T08:00:00+00:00",
+           "power_data": [[0.0, 5.0], [600.0, 5.0], [1200.0, 0.0]]}
+    assert mod._trace_key(cyc, 1.0, 0.5) != mod._trace_key(cyc, 100.0, 0.5)  # noqa: SLF001
+    assert mod._trace_key(cyc, 1.0, 0.5) == mod._trace_key(dict(cyc), 1.0, 0.5)  # noqa: SLF001
+    legacy = {"start_time": "2026-10-01T08:00:00+00:00", "power_data": [
+        ["2026-10-01T08:00:00+00:00", 5.0], ["2026-10-01T08:10:00+00:00", 5.0],
+        ["2026-10-01T08:20:00+00:00", 0.0]]}
+    assert mod._trace_key(legacy, 1.0, 0.5) is not None  # noqa: SLF001
+
+
 # --- the stop --------------------------------------------------------------------
 
 

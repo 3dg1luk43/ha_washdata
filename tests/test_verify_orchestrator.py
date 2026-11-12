@@ -293,6 +293,32 @@ def test_an_alone_stage_starts_after_every_other_stage(tmp_path, monkeypatch):
     assert ["ok", "a"] in events[:box_start] and ["ok", "b"] in events[:box_start], events
 
 
+def test_an_alone_stage_is_rechecked_when_it_finally_starts(tmp_path, monkeypatch):
+    """The box stage waits for every other stage; a box check begun meanwhile must
+    make it skip, not run up.sh --fresh under that check."""
+    state = {"busy": None}
+    stages = [
+        verify.Stage("box", ("quick",), lambda c, logs: [_py("raise SystemExit(9)")], 1000,
+                     alone=True, unavailable=lambda: state["busy"]),
+        verify.Stage("a", ("quick",), lambda c, logs: [_py("import time; time.sleep(0.3)")], 50),
+    ]
+    monkeypatch.setattr(verify, "_stages", lambda: stages)
+    monkeypatch.setattr(verify, "changed_files", lambda: [])
+    args = verify.parse_args(["--cores", "2", "--timings", "", "--logs", str(tmp_path)])
+    selected = verify.select(args)
+    state["busy"] = None
+    lines: list[str] = []
+
+    def _out(line: str) -> None:
+        lines.append(line)
+        if "] start a" in line:
+            state["busy"] = "another test box run is active"
+
+    assert verify.run(args, selected, out=_out) == 0
+    assert any("skip  box" in ln for ln in lines), lines
+    assert not any("] start box" in ln for ln in lines), lines
+
+
 @pytest.mark.parametrize(("dist", "argv", "want"), [
     ("load", [], "-n {n} --dist load"),
     ("loadgroup", ["-q"], "-n {n} --dist loadgroup"),

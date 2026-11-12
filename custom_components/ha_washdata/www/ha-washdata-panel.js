@@ -4804,6 +4804,20 @@ class HaWashdataPanel extends HTMLElement {
     // keyboard focus to <body> (audit UI-04). Remember the control by its identity
     // so the matching control in the new DOM can take it back.
     const focusKeyBefore = (!this._modalFocusActive && sr0 && sr0.activeElement) ? _focusKey(sr0.activeElement) : null;
+    // A Settings value being typed lives only in the field until the form is
+    // snapshotted, so a re-render (a toast, a poll) put the rendered value back
+    // under the user's cursor. Carry the focused field's typed text across. Only
+    // that field: a value staged in code (a suggestion's Use) moved focus away.
+    const typedBefore = (() => {
+      const el = sr0 && sr0.activeElement;
+      if (!focusKeyBefore || !el || !el.dataset || !el.dataset.opt) return null;
+      if (!el.closest || !el.closest('#wd-settings-form, #wd-ml-form')) return null;
+      const textual = el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && !['checkbox', 'radio'].includes(el.type));
+      if (!textual || el.value === el.defaultValue) return null;
+      let start = null, end = null;
+      try { start = el.selectionStart; end = el.selectionEnd; } catch (_) {}
+      return { value: el.value, start, end };
+    })();
     // A pinned touch readout (#413) is anchored to a crosshair this swap is
     // about to erase, so it would be left floating with stale numbers over the
     // new DOM. Drop it with the crosshair it describes.
@@ -4864,6 +4878,12 @@ class HaWashdataPanel extends HTMLElement {
     this._syncModalFocus(focusedBefore);
     if (focusKeyBefore && !this._modalFocusActive) {
       const again = this.shadowRoot.querySelector(focusKeyBefore);
+      if (again && typedBefore && again.value !== typedBefore.value) {
+        again.value = typedBefore.value;
+        try {
+          if (typedBefore.start != null) again.setSelectionRange(typedBefore.start, typedBefore.end);
+        } catch (_) {}
+      }
       if (again && this.shadowRoot.activeElement !== again) {
         try { again.focus({ preventScroll: true }); } catch (_) {}
       }
