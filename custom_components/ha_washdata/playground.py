@@ -102,6 +102,7 @@ from .const import (
     STATE_STARTING,
     STATE_UNKNOWN,
     TerminationReason,
+    WATCHDOG_LATE_TICK_FACTOR,
     resolve_watchdog_interval_default,
 )
 from .cycle_detector import (
@@ -914,7 +915,11 @@ class _DetailSim:
         except (TypeError, ValueError, OverflowError):
             _wd = float(resolve_watchdog_interval_default(self.device_type))
         self.watchdog_s = _wd if math.isfinite(_wd) and _wd > 0 else 0.0
+        # The last trace row fed (a report or a recorded keepalive): the anchor of
+        # the emulated keepalives and of the flat-power tick. `_last_fed_synthetic`:
+        # that row was one the manager injected (item 568).
         self._last_real: tuple[datetime, float] | None = None
+        self._last_fed_synthetic = False
         # The manager's ghost family (ghost_rules, register item 568). Per detector
         # end, aligned with `captured`: why the manager would never store it
         # (DISCARD_*), else None. `_last_end` is `manager._last_cycle_end_time`,
@@ -1483,12 +1488,21 @@ class _DetailSim:
             flags = self.reading_synthetic
             for index, (ts, power) in enumerate(self.readings[i0:i1], start=i0):
                 synthetic = flags[index] if 0 <= index < len(flags) else None
-                self._watchdog_keepalives(ts)
+                # A gap with a recorded keepalive at either edge is one the live
+                # watchdog was ticking through: it fed nothing inside it, or the
+                # trace would hold that row too. No emulated keepalive there.
+                self._watchdog_keepalives(
+                    ts, inject=not (synthetic is True or self._last_fed_synthetic)
+                )
                 self._watchdog_flat_tick(ts)
                 self.cursor["t"] = (ts - self.base).total_seconds()
-                self.detector.process_reading(power, ts)
-                self._note_stall()
+                if synthetic is True:
+                    self._feed_recorded_keepalive(power, ts)
+                else:
+                    self.detector.process_reading(power, ts)
+                    self._note_stall()
                 self._last_real = (ts, power)
+                self._last_fed_synthetic = synthetic is True
                 self._note_report(ts, power, synthetic)
                 self._sample(ts)
         except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -1496,6 +1510,25 @@ class _DetailSim:
             _LOGGER.debug(
                 "Playground detail replay failed for %s: %s", self.cycle.get("id"), exc
             )
+
+    def _feed_recorded_keepalive(self, power: float, ts: datetime) -> None:
+        """A row the cycle lists as injected, fed as the live watchdog fed it (item 568).
+
+        ``manager._watchdog_check_stuck_cycle`` passes ``synthetic=True`` (so the
+        sensor's cadence, idle display and flat run never see it) and
+        ``observed``: False on its low-power branch when the tick itself was late,
+        more than ``WATCHDOG_LATE_TICK_FACTOR`` intervals after the last reading
+        (item 391). An unreadable sensor's keepalive is not in the trace (item
+        266). No stall check either: live runs it on real readings only.
+        """
+        last = self._last_real
+        late = (
+            last is not None
+            and self.watchdog_s > 0
+            and self.detector.is_waiting_low_power()
+            and (ts - last[0]).total_seconds() > WATCHDOG_LATE_TICK_FACTOR * self.watchdog_s
+        )
+        self.detector.process_reading(power, ts, synthetic=True, observed=not late)
 
     def _note_report(
         self, ts: datetime, power: float, synthetic: bool | None = None
@@ -1561,7 +1594,7 @@ class _DetailSim:
             info = self.detector.stall_info() or {}
             self._emit("stalled", f"stalled at {info.get('plateau_w')} W (display only)", "warn")
 
-    def _watchdog_keepalives(self, until: datetime) -> None:
+    def _watchdog_keepalives(self, until: datetime, inject: bool = True) -> None:
         """Inject the keepalives live would have injected before ``until`` (item 390).
 
         Mirrors the low-power branch of ``manager._watchdog_check_stuck_cycle``:
@@ -1576,10 +1609,15 @@ class _DetailSim:
         already hold these readings, so for them this is a no-op. The ghost
         suppressor runs in time order with them (``_watchdog_ghost_ticks``); the
         watchdog's staleness, zombie and unmatched-idle force-ends are not emulated.
+        ``inject=False`` (a gap the cycle's recorded keepalives cover, item 568)
+        runs only the suppressor.
         """
         last = self._last_real
         step = self.watchdog_s
         if last is None or step <= 0:
+            return
+        if not inject:
+            self._watchdog_ghost_ticks(until)
             return
         prev_ts, prev_w = last
         k = 1

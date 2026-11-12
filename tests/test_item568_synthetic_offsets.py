@@ -176,6 +176,102 @@ async def test_a_plug_re_reporting_an_unchanged_value_is_no_ghost_live(
     assert len(ends) == 2 and ends[1]["status"] == "completed", ends[1:]
 
 
+def _sensor_state(det: CycleDetector, start: datetime) -> dict[str, Any]:
+    """What the detector knows of the SENSOR: its cadence window, its last real
+    reading, the flat run and the idle display (synthetic readings feed none)."""
+    def off(ts: datetime | None) -> float | None:
+        return None if ts is None else round((ts - start).total_seconds(), 1)
+
+    return {
+        "dts": [round(d, 1) for d in det._recent_dts],
+        "p95": round(det._p95_dt, 1),
+        "gate": round(det._gate_cadence, 1),
+        "last_real": off(det._last_real_reading_time),
+        "flat": [off(ts) for ts in det._flat_run._ts],
+        "idle": (det._idle_shown, off(det._idle_candidate_since), off(det._idle_off_since)),
+    }
+
+
+async def test_a_replayed_keepalive_leaves_the_sensor_state_as_live(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """A recorded keepalive reaches the replay's detector as the watchdog fed it
+    (``synthetic=True``): the cadence the pause/end gates are sized from, the last
+    real reading, the flat run and the idle display match live's. Fed as a report,
+    the 30 s keepalives trained the 10 s plug's cadence (#424)."""
+    manager, ends, injected = await _boot(hass, setup_washdata_entry)
+    for i in range(25):  # a plug reporting every 10 s
+        await _tick(hass, freezer, 10, 400.0 + i % 2)
+    await _tick(hass, freezer, 10, 0.5)  # then silent at 0.5 W for 150 s
+    for _ in range(15):
+        await _tick(hass, freezer, 10, None)
+    live_at = dt_util.utcnow()
+    assert len(injected) >= 3
+    det = manager.detector
+    start = det.current_cycle_start
+    live = _sensor_state(det, start)
+    for i in range(6):
+        await _tick(hass, freezer, 10, 400.0 + i % 2)
+    await _tick(hass, freezer, 10, 0.0)
+    for _ in range(30):
+        if ends:
+            break
+        await _tick(hass, freezer, 30, None)
+    assert len(ends) == 1
+    await hass.async_block_till_done()
+    stored = manager.profile_store.get_past_cycles()[-1]
+    assert dt_util.parse_datetime(stored["start_time"]) == start
+
+    sim = playground._DetailSim(  # noqa: SLF001
+        stored, build_detector_config(OPTIONS, {}, DEVICE_TYPE_WASHING_MACHINE),
+        None, None, OPTIONS, None,
+    )
+    upto = sum(1 for ts, _p in sim.readings if ts <= live_at)
+    paused = [ts for ts in injected if ts <= live_at]
+    assert sum(1 for syn in sim.reading_synthetic[:upto] if syn) == len(paused)
+    sim.step(0, upto)
+    assert _sensor_state(sim.detector, start) == live
+    assert live["gate"] == 10.0  # the plug's cadence, not the watchdog's
+
+
+def _feeds(cycle: dict[str, Any]) -> list[tuple[float, float, bool, bool]]:
+    """Every reading the replay hands its detector: (offset, W, synthetic, observed)."""
+    cfg = build_detector_config(OPTIONS, {}, DEVICE_TYPE_WASHING_MACHINE)
+    sim = playground._DetailSim(cycle, cfg, None, None, OPTIONS, None)  # noqa: SLF001
+    fed: list[tuple[float, float, bool, bool]] = []
+    original = sim.detector.process_reading
+
+    def _spy(power, timestamp, synthetic=False, observed=True):
+        fed.append((round((timestamp - sim.base).total_seconds(), 1), power, synthetic, observed))
+        return original(power, timestamp, synthetic=synthetic, observed=observed)
+
+    sim.detector.process_reading = _spy
+    sim.step(0, sim.n_readings)
+    return fed
+
+
+def test_recorded_keepalives_are_fed_once_and_as_the_watchdog_fed_them() -> None:
+    """The pause's first keepalive came 57 s (1.9 ticks) after the drop, the last one
+    100 s after the previous (a late tick). The emulation (item 390) used to add one
+    at 45 s; recorded keepalives cover the gap, so only they are fed, synthetic,
+    and the late one unobserved, as ``manager._watchdog_check_stuck_cycle`` passed."""
+    pts = [[float(t), 400.0 + (t // 10) % 2] for t in range(0, 600, 10)]
+    pause = [600.0 + d for d in (57.0, 87.0, 117.0, 217.0)]
+    pts += [[600.0, 0.5]] + [[t, 0.5] for t in pause]
+    pts += [[float(t), 400.0] for t in range(830, 900, 10)] + [[900.0, 0.0]]
+    base = {"id": "c568f", "start_time": T0.isoformat(), "power_data": pts}
+
+    fed = _feeds({**base, SYNTHETIC_OFFSETS_KEY: list(pause)})
+    in_pause = [f for f in fed if 600.0 < f[0] < 830.0]
+    assert in_pause == [(57.0 + 600, 0.5, True, True), (87.0 + 600, 0.5, True, True),
+                        (117.0 + 600, 0.5, True, True), (217.0 + 600, 0.5, True, False)]
+
+    # Without the list: as before, rows are reports and the emulation fills the gaps.
+    legacy = [f for f in _feeds(dict(base)) if 600.0 < f[0] < 830.0]
+    assert [f for f in legacy if not f[2]] == [(t, 0.5, False, True) for t in pause]
+    assert [f[0] for f in legacy if f[2]] == [645.0, 162.0 + 600, 192.0 + 600]
+
+
 # --- (b) replay: a re-reporting plug is not a silent one -----------------------------
 
 
