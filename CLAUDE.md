@@ -269,7 +269,8 @@ Power sensor change -> manager._async_power_changed (sync @callback) -> CycleDet
 
 `homeassistant.helpers.storage.Store` (JSON). Profiles, cycle history, phase catalog, detected
 cycles, `profile_groups`, `suggestions`, per-cycle `ml_review`, `ml_model_versions`. Since v19 a
-stored cycle's `power_data`/`debug_data` and every envelope sit in the file as compact JSON text
+stored cycle's `trace_codec.COMPACT_CYCLE_FIELDS` (`power_data`, `debug_data`, the kept import tail
+`tail_cut_trace`, the keepalive list `synthetic_offsets`) and every envelope sit in the file as compact JSON text
 (`trace_codec.py`, encoded and decoded only by `WashDataStore`, imports and the restore point);
 never read the file directly without `trace_codec.decode_store_payload`.
 
