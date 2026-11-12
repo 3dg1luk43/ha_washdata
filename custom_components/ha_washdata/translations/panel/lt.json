@@ -274,7 +274,11 @@
     "bp_details": "Išsami informacija",
     "bp_copy_yaml": "Kopijuoti YAML",
     "bp_hide_yaml": "Slėpti YAML",
-    "bp_show_yaml": "Rodyti YAML"
+    "bp_show_yaml": "Rodyti YAML",
+    "review_something_else": "Kažkas kita…",
+    "review_not_sure": "Nežinau",
+    "review_prev": "Ankstesnis ciklas",
+    "review_next": "Kitas ciklas"
   },
   "note": {
     "off_delay": {
@@ -588,6 +592,7 @@
     "pg_alert_overrun": "Per ilgai",
     "pg_alert_underrun": "Per trumpai",
     "pg_alert_did_not_finish": "Nebaigta",
+    "pg_alert_discarded": "Atmesta kaip netikras ciklas arba vandens išleidimas",
     "pg_alert_false_end": "Suskilo į kelis ciklus",
     "pg_alert_unmatched": "Be atitikties",
     "pg_alert_ambiguous": "Neaiški atitiktis",
@@ -728,7 +733,10 @@
     "bp_needs": "Reikia",
     "bp_needs_version": "WashData {version} arba naujesnė",
     "bp_author": "Autorius",
-    "bp_required": "privaloma"
+    "bp_required": "privaloma",
+    "pg_runs_as": "naudojama reikšmė {value}",
+    "review_this_cycle": "Šis ciklas",
+    "review_usual": "Įprasta programai {name}"
   },
   "log": {
     "all_levels": "Visi lygiai",
@@ -1087,7 +1095,7 @@
     "hist_scan_failed": "Skenavimas nepavyko.",
     "hist_scan_expired": "Šio skenavimo rezultatų nebėra. Nuskenuokite dar kartą.",
     "hist_import_failed": "Importavimas nepavyko.",
-    "imported_history_readonly": "Rastas importuotoje galios istorijoje. Padeda atpažinti programas, bet neįskaičiuojamas į jūsų statistiką, jo negalima apkarpyti ar padalyti. Paspauskite „Pažymėti“, kad nurodytumėte programą.",
+    "imported_history_note": "Rastas importuotoje galios istorijoje. Padeda atpažinti programas, bet neįskaičiuojamas į jūsų statistiką ir jo negalima padalyti. Paspauskite „Pažymėti“, kad nurodytumėte programą.",
     "odometer_intro": "Šis bendras skaičius tik didėja. Ištrynus ciklą jis nesumažėja, todėl aptarnavimo priminimai lieka tikslūs.",
     "odometer_correct_hint": "Nustatykite, jei WashData užskaitė ciklą, kurio nebuvo, arba prietaisas atliko ciklų dar prieš įdiegiant WashData.",
     "no_reminders_set": "Kol kas nenustatyta jokių aptarnavimo priminimų.",
@@ -1145,7 +1153,17 @@
     "bp_none_yet": "Šiam prietaiso tipui šablonų dar nėra. Pasidalykite pirmuoju.",
     "bp_unreachable": "Ji atsisiunčiama iš GitHub. Patikrinkite, ar Home Assistant gali prisijungti prie interneto, ir bandykite dar kartą.",
     "bp_library_intro": "Paruoštos automatikos, kuriomis WashData naudotojai dalijasi GitHub; prieš įtraukiant į sąrašą jos peržiūrimos. Prieinama tik įjungus interneto funkcijas.",
-    "bp_needs_version": "Reikalinga WashData {version} arba naujesnė versija."
+    "bp_needs_version": "Reikalinga WashData {version} arba naujesnė versija.",
+    "bp_review_check": "Patikrinkite tai prieš išsaugodami: Home Assistant tai vykdys tiksliai taip, kaip parašyta.",
+    "review_q_title": "Kokia tai buvo programa?",
+    "review_q_intro": "WashData nėra tikras dėl šių ciklų. Jūsų atsakymas jį moko.",
+    "review_q_started": "Pradėtas {when}",
+    "review_q_more": "Dar {count} ciklų peržiūrai",
+    "review_q_more_one": "Dar {count} ciklas peržiūrai",
+    "review_q_more_few": "Dar {count} ciklai peržiūrai",
+    "review_q_more_many": "Dar {count} ciklo peržiūrai",
+    "review_q_more_other": "Dar {count} ciklų peržiūrai",
+    "review_which_program": "Kuri tai buvo programa?"
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -1238,7 +1256,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Pasyvaus džiovinimo tylusis atleidimas",
-      "doc": "Kiek laiko po numatytos trukmės indaplovė turi išlikti žemiau Sustabdymo slenksčio, kol WashData nustoja laukti galutinio vandens išleidimo. Padidinkite, jei praleidžiamas vėlyvas išleidimas po ilgo džiovinimo. Laukimas niekada neviršija 30 minučių."
+      "doc": "Praėjus numatomai trukmei, WashData nustoja laukti galutinio vandens išleidimo, kai indaplovė nuo paskutinės veiklos tiek laiko išbūna žemiau Sustabdymo slenksčio, daugiausia 30 minučių (o kai programa turi 3 užfiksuotus ciklus, ne trumpiau nei ilgiausia užfiksuota jos džiovinimo pauzė). Padidinkite, jei praleidžiamas vėlyvas išleidimas po ilgo džiovinimo."
     },
     "anti_crease_finalize_ratio": {
       "doc": "Programos vidutinės trukmės dalis, kurią ciklas turi pasiekti, kad jo mažos galios būgno sukimas būtų laikomas apsaugos nuo raukšlių uodega. Džiovyklėms su jutikliniu džiovinimu sumažinkite (pvz., 0,75). Skalbyklėms palikite numatytąją (0,98), antraip skalbimas gali baigtis pusiaukelėje.",
@@ -1385,7 +1403,7 @@
       "label": "Pranešimo piktograma"
     },
     "notify_live_chronometer": {
-      "doc": "Android: pranešimo teksto šone prideda atgalinę atskaičiavimą iki numatomos pabaigos. Naudokite {finish_time} Žinutėje prieš baigimą, kad pabaigos laikas būtų rodomas vietoje antros atgalinės atskaičiavimo.",
+      "doc": "Android: pranešimo teksto šone prideda atgalinį atskaičiavimą iki numatomos pabaigos. Naudokite {finish_time} nustatyme „Tiesioginio atnaujinimo žinutė“, kad vietoje antro atgalinio atskaičiavimo būtų rodomas pabaigos laikas.",
       "label": "Naudoti tiesioginį chronometrą"
     },
     "notify_live_interval_seconds": {
@@ -1410,11 +1428,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Kiekvieno tiesioginio eigos atnaujinimo tekstas. Šablono kintamieji: {device}, {program}, {minutes} (likusios minutės), {finish_time} (numatoma pabaiga, pvz. 14:30). Su bet kuriuo kitu kintamuoju naudojamas numatytasis tekstas.",
-      "label": "Žinutė prieš baigimą"
+      "label": "Tiesioginio atnaujinimo žinutė"
     },
     "notify_reminder_message": {
       "doc": "Vienkartinio įspėjimo prieš pabaigą tekstas. Šablono kintamieji: {device}, {program}, {minutes} (nustatymas „Įspėjimas prieš pabaigą“). Su bet kuriuo kitu kintamuoju naudojamas numatytasis tekstas.",
-      "label": "Priminimo žinutė"
+      "label": "Įspėjimo prieš pabaigą žinutė"
     },
     "notify_start_message": {
       "doc": "Tekstas, siunčiamas ciklui prasidėjus. Šablono kintamieji: {device}, {program}. Su bet kuriuo kitu kintamuoju naudojamas numatytasis tekstas.",
@@ -1708,7 +1726,9 @@
     "match_uncertain": "Neaišku: {top} ar {runner}",
     "match_uncertain_single": "Neaišku: galbūt {top}",
     "match_sure": "~{pct} % tikrumas",
-    "match_uncertain_tip": "WashData dar nenusprendė, kuri tai programa. Skaičius rodo, kaip dažnai pirmaujantis spėjimas, {top}, ankstesniuose cikluose pasitvirtindavo, kai pirmavo tiek pat. Tik informacija."
+    "match_uncertain_tip": "WashData dar nenusprendė, kuri tai programa. Skaičius rodo, kaip dažnai pirmaujantis spėjimas, {top}, ankstesniuose cikluose pasitvirtindavo, kai pirmavo tiek pat. Tik informacija.",
+    "torn_pick": "{a} ar {b}?",
+    "torn_tip": "WashData dar negali atskirti šių dviejų programų, todėl pasirinkite tą, kuri dabar veikia, kad ja pažymėtumėte šį ciklą (Automatinis aptikimas pasirinkimą atšaukia)."
   },
   "tab": {
     "advanced": "Išplėstinė",
@@ -1905,7 +1925,8 @@
     "bp_automation_created": "Automatika sukurta su numatytosiomis nuostatomis; atidaroma",
     "copied": "Nukopijuota",
     "copy_failed": "Kopijuoti nepavyko. Pasirinkite tekstą ir nukopijuokite rankiniu būdu.",
-    "automation_label_failed": "Automatizavimas sukurtas, tačiau WashData žymos ar kategorijos nepavyko pridėti."
+    "automation_label_failed": "Automatizavimas sukurtas, tačiau WashData žymos ar kategorijos nepavyko pridėti.",
+    "review_answered": "Išsaugota: {program}"
   },
   "suggestion": {
     "observed_label": "Pastebėta",
@@ -2011,7 +2032,7 @@
     "other": "Kita"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Indaplovė: tylos sekundės po numatytos trukmės, kol atleidžiamas ciklo pabaigos vandens išleidimo laukimas",
+    "dishwasher_end_spike_quiet_release": "Indaplovė: sekundės žemiau Sustabdymo slenksčio nuo paskutinės veiklos, reikalingos galutinio vandens išleidimo laukimui užbaigti, praėjus numatomai trukmei",
     "smart_termination_duration_ratio": "Programos vidutinės trukmės dalis, kurią ciklas turi pasiekti, kad išmanusis užbaigimas galėtų jį užbaigti anksčiau; sumažinkite, jei veikimo trukmė svyruoja",
     "anti_crease_finalize_ratio": "Programos vidutinės trukmės dalis, kurią ciklas turi pasiekti, kad apsaugos nuo raukšlių uodega galėtų jį užbaigti; džiovyklėms sumažinkite, skalbyklėms palikite numatytąją",
     "anti_wrinkle_enabled": "Sugerkite būgno impulsus po pagrindinės fazės, o ne skaitykite juos kaip naujus ciklus",
@@ -2279,7 +2300,7 @@
       "name": "Iškrauta"
     },
     "state_changed": {
-      "name": "Būsena pasikeitė"
+      "name": "Prietaiso būsena pasikeitė"
     },
     "maintenance_due": {
       "name": "Reikalinga priežiūra"

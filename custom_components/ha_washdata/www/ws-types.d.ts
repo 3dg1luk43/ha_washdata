@@ -89,6 +89,7 @@ export interface DeviceInfo {
   cycle_progress_pct: number | null;
   envelope_position: number | null;
   match_uncertainty: MatchUncertainty | null;
+  match_choices: string[] | null;
   suggestions_count: number;
   suggestion_keys: string[];
   feedback_count: number;
@@ -155,6 +156,7 @@ export interface GetCyclePowerDataResponse {
   is_reference?: boolean;
   labelable?: boolean;
   editable?: boolean;
+  trimmable?: boolean;
   cycle_origin?: string;
   expected?: number[][] | null;
 }

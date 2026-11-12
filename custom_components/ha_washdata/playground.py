@@ -42,6 +42,7 @@ import numpy as np
 
 from homeassistant.util import dt as dt_util
 
+from . import ghost_rules
 from . import match_rules
 from . import notification_rules as notif_rules
 from . import progress as progress_mod
@@ -101,6 +102,7 @@ from .const import (
     STATE_STARTING,
     STATE_UNKNOWN,
     TerminationReason,
+    WATCHDOG_LATE_TICK_FACTOR,
     resolve_watchdog_interval_default,
 )
 from .cycle_detector import (
@@ -108,6 +110,7 @@ from .cycle_detector import (
     CycleDetector,
     CycleDetectorConfig,
     effective_anticrease_finalize_ratio,
+    effective_smart_termination_ratio,
     effective_curve_preroll_seconds,
     standby_near_stop_ceiling,
     terminal_high_for_guards,
@@ -123,7 +126,7 @@ from .detector_config import (
     terminal_drop_fires,
     terminal_drop_may_fire,
 )
-from .time_utils import power_data_to_offsets
+from .time_utils import offset_key, power_data_to_offsets, synthetic_offset_keys
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -375,8 +378,20 @@ def _cycle_label(cycle: dict[str, Any]) -> str | None:
 _PLAYGROUND_START_DT = 5.0
 
 # Bound on the keepalives emulated inside one silent stretch (8 h at a 30 s
-# watchdog): the detector's own 8 h cap ends any cycle long before this.
+# watchdog): a keepalive is only fed while the detector waits below the stop
+# threshold, and its ENDING fallback ends that wait long before this.
 _MAX_KEEPALIVES_PER_GAP = 960
+
+# The watchdog ghost suppressor's silence clock in a replay (register item 568).
+# A cycle the manager recorded lists the rows it injected (`synthetic_offsets`):
+# those keepalives are silence and every other row is a report, a repeated value
+# included, as live counts it. A cycle without the list (recorded before it, a
+# history import, a store download) cannot tell a keepalive, which since 0.5.7 is
+# recorded at the sensor's last value, from a plug re-reporting that value, so
+# there a reading that repeats the previous value is not a report: a periodic
+# plug's ghosts close earlier than live. The synthetic tail repeats 0 W, read as
+# that silence either way. False: every unlisted reading reports.
+REPLAY_REPEATS_ARE_SILENCE = True
 
 
 def _build_match_snapshots(
@@ -735,8 +750,10 @@ class _DetailSim:
     Drives the REAL :class:`CycleDetector` + the real matcher
     (``ProfileStore.async_match_profile``, via :class:`_SimStore`) over the
     cycle's own trace, applies each match with the manager's own rules
-    (:mod:`match_rules`: switching, verified pause, confident-mismatch revoke)
-    and calls the SAME :mod:`progress` and :mod:`notification_rules` functions
+    (:mod:`match_rules`: switching, verified pause, confident-mismatch revoke),
+    drops the ghosts and pump-outs the manager drops (:mod:`ghost_rules`, on the
+    emulated watchdog ticks and at each end: ``discarded``, ``kept``) and calls
+    the SAME :mod:`progress` and :mod:`notification_rules` functions
     the live integration uses. No detection/matching/progress/notification math
     is implemented here; this only orchestrates the shared code. Read-only:
     nothing is persisted and no notifications are sent.
@@ -778,6 +795,14 @@ class _DetailSim:
         self.device_type = _device_type_of(self.config)
         self.label = _cycle_label(cycle)
         self.readings, _points, self.base = _readings_from_cycle(cycle)
+        # Per reading: True for a row the manager injected, False for a report,
+        # None for every row of a cycle that does not say (item 568).
+        _synthetic = synthetic_offset_keys(cycle)
+        self.reading_synthetic: list[bool | None] = (
+            [None] * len(_points)
+            if _synthetic is None
+            else [offset_key(o) in _synthetic for o, _p in _points]
+        )
         self.stored_duration = _safe_float(cycle.get("duration"))
         # When the appliance actually ran, for the Optimize end-timing objectives
         # (audit PLAYGROUND-08): first/last reading above the LIVE stop threshold,
@@ -890,7 +915,23 @@ class _DetailSim:
         except (TypeError, ValueError, OverflowError):
             _wd = float(resolve_watchdog_interval_default(self.device_type))
         self.watchdog_s = _wd if math.isfinite(_wd) and _wd > 0 else 0.0
+        # The last trace row fed (a report or a recorded keepalive): the anchor of
+        # the emulated keepalives and of the flat-power tick. `_last_fed_synthetic`:
+        # that row was one the manager injected (item 568).
         self._last_real: tuple[datetime, float] | None = None
+        self._last_fed_synthetic = False
+        # The manager's ghost family (ghost_rules, register item 568). Per detector
+        # end, aligned with `captured`: why the manager would never store it
+        # (DISCARD_*), else None. `_last_end` is `manager._last_cycle_end_time`,
+        # the replay time the last end was detected; `_report` the sensor's last
+        # report and current value (REPLAY_REPEATS_ARE_SILENCE); `_wd_next` the
+        # running watchdog's next tick (started on RUNNING, stopped at the end).
+        self.discarded: list[str | None] = []
+        self._last_end: datetime | None = None
+        self._report: tuple[datetime, float] | None = None
+        self._wd_next: datetime | None = None
+        self._piece_ev0 = 0
+        self._discarding = False
 
         if self.ready:
             self.detector = CycleDetector(
@@ -899,7 +940,16 @@ class _DetailSim:
                 terminal_drop_provider=self._terminal_drop_provider(
                     {**self.options, **(settings_override or {})}
                 ),
+                longest_programme_provider=self._longest_programme_s,
             )
+
+    def _longest_programme_s(self) -> float:
+        """``manager._longest_programme_s`` for this replay: the duration cap (#502)
+        scales on the replayed store's cycles, as live does."""
+        getter = getattr(self.store, "iter_evidence_cycles", None)
+        if not callable(getter):
+            return 0.0
+        return match_rules.longest_programme_s(getter())
 
     def _terminal_drop_provider(
         self, options: dict[str, Any]
@@ -945,12 +995,19 @@ class _DetailSim:
         )
         return exp
 
-    def _emit(self, etype: str, detail: str, severity: str = "info") -> None:
+    def _emit(
+        self, etype: str, detail: str, severity: str = "info"
+    ) -> dict[str, Any] | None:
         if len(self.events) < MAX_EVENTS_PER_CYCLE:
-            self.events.append(
-                {"t": round(self.cursor["t"], 1), "type": etype, "detail": detail,
-                 "severity": severity}
-            )
+            event = {"t": round(self.cursor["t"], 1), "type": etype, "detail": detail,
+                     "severity": severity}
+            self.events.append(event)
+            return event
+        return None
+
+    def _now(self) -> datetime:
+        """The replay clock: the timestamp being processed."""
+        return self.base + timedelta(seconds=self.cursor["t"])
 
     def _held(self, offset: float) -> bool:
         # Quiet hours are local clock hours and replay timestamps are UTC, so
@@ -960,7 +1017,18 @@ class _DetailSim:
         )
 
     def _on_state_change(self, old_state: str, new_state: str) -> None:
-        self._emit("state", f"{old_state}->{new_state}")
+        active = ghost_rules.WATCHDOG_STATES
+        if new_state in active and old_state not in active:
+            self._piece_ev0 = len(self.events)  # this detector cycle's first event
+        event = self._emit("state", f"{old_state}->{new_state}")
+        if self._discarding:
+            # The terminal transition of an end the manager discards (item 568).
+            self._discarding = False
+            if event is not None:
+                event["discarded"] = True
+        if new_state == STATE_RUNNING and self._wd_next is None and self.watchdog_s > 0:
+            # `manager._start_watchdog` on RUNNING; it ticks every interval from here.
+            self._wd_next = self._now() + timedelta(seconds=self.watchdog_s)
         # A new cycle: the switching state starts fresh, exactly when
         # `manager._on_state_change` resets it (RUNNING from OFF / STARTING /
         # UNKNOWN). PAUSED/ENDING -> RUNNING is a resume and keeps it.
@@ -982,9 +1050,24 @@ class _DetailSim:
                 self._emit("notify_start", "start notification")
 
     def _on_cycle_end(self, cycle_data: dict[str, Any]) -> None:
+        # `manager._on_cycle_end`: the watchdog stops, the end clock moves to now
+        # and the ghost / pump-out rules read the previous one (item 568).
+        self._wd_next = None
+        prev_end, self._last_end = self._last_end, self._now()
+        discard = self._discard_reason(cycle_data, prev_end)
         self.captured.append(cycle_data)
+        self.discarded.append(discard)
         reason = cycle_data.get("termination_reason")
-        self._emit("finished", f"reason={reason} status={cycle_data.get('status')}", "info")
+        if discard is None:
+            self._emit("finished", f"reason={reason} status={cycle_data.get('status')}", "info")
+        else:
+            # Never stored, never announced as finished: no Finished marker, and
+            # this cycle's state events are flagged so no harness reads its ENDING
+            # exit as the close of the cycle being replayed.
+            for event in self.events[self._piece_ev0:]:
+                if event.get("type") == "state":
+                    event["discarded"] = True
+            self._discarding = True
         # What `manager._async_process_cycle_end` freezes before its first await:
         # the displayed program and the last live match (its label inputs).
         st = self.switch
@@ -1003,6 +1086,41 @@ class _DetailSim:
         st.current_program = "off"
         st.matched_duration = None
         self._last_result = None
+
+    def _discard_reason(
+        self, cycle_data: dict[str, Any], prev_end: datetime | None
+    ) -> str | None:
+        """``manager._cycle_end_discard`` for this replay: ``ghost_rules.DISCARD_*``
+        when the manager would never store this end, else None (item 568)."""
+        start = cycle_data.get("start_time")
+        return ghost_rules.cycle_end_discard(
+            device_type=self.device_type,
+            duration_s=float(cycle_data.get("duration") or 0.0),
+            energy_wh=ghost_rules.cycle_end_energy_wh(cycle_data.get("power_data", [])),
+            cycle_start=dt_util.parse_datetime(start) if start else None,
+            prev_cycle_end=prev_end,
+        )
+
+    def _ghost_due(self, elapsed: float, silence: float, power: float) -> bool:
+        """``manager._watchdog_ghost_due`` for this replay (item 568): the program
+        is the one the manager would display, ``power`` the sensor's value."""
+        det = self.detector
+        return ghost_rules.watchdog_ghost_due(
+            state=det.state,
+            program=self.switch.current_program,
+            device_type=self.device_type,
+            cycle_start=det.current_cycle_start,
+            last_cycle_end=self._last_end,
+            elapsed_s=elapsed,
+            silence_s=silence,
+            power_w=power,
+            start_threshold_w=float(det.config.start_threshold_w),
+        )
+
+    @property
+    def kept(self) -> list[dict[str, Any]]:
+        """The detector's ends the manager would store (ghosts and pump-outs dropped)."""
+        return [c for c, why in zip(self.captured, self.discarded) if why is None]
 
     def _has_real_profiles(self) -> bool:
         """The gate `manager._async_perform_combined_matching` checks first."""
@@ -1025,9 +1143,6 @@ class _DetailSim:
         except Exception:  # pylint: disable=broad-exception-caught
             _LOGGER.debug("Playground alignment check failed", exc_info=True)
             return False, 0.0
-
-    def _get_profile(self, name: str) -> Any:
-        return self.store.get_profile(name)
 
     def _matcher(self, det_readings: list[tuple[datetime, float]]) -> Any:
         """One live match tick: ``manager._async_do_perform_matching`` in sequence.
@@ -1094,11 +1209,11 @@ class _DetailSim:
             program=st.current_program,
         )
         verified = pause.verified_pause
-        match_rules.consistency_override(st, tick, result, verified, self._get_profile)
+        match_rules.consistency_override(st, tick, result, verified)
         # The manager's ENDING pause hold (register item 469b).
         verified = match_rules.hold_in_ending(
             ending=det.state == STATE_ENDING,
-            is_ambiguous=bool(result.is_ambiguous),
+            is_ambiguous=match_rules.detector_inputs(tick, result).is_ambiguous,
             current_matched=current_matched,
             prev_verified=prev_verified,
             verified_pause=verified,
@@ -1157,8 +1272,10 @@ class _DetailSim:
         """The named context the manager builds for ``update_match`` (DETECT-15)."""
         store = self.store
         det = self.detector
-        # The manager's own rule: a divergence revert revokes the detector's match.
-        name, revoke = match_rules.detector_match(tick, result)
+        # The manager's own rule: a divergence revert revokes the detector's match;
+        # with live member templates the store's gate view (#486).
+        gate = match_rules.detector_inputs(tick, result)
+        name, revoke = gate.profile_name, gate.revoke
 
         def _ask(fn: Callable[[], Any]) -> Any:
             # Guarded like the rest of the sim: a partial test double without one
@@ -1171,12 +1288,13 @@ class _DetailSim:
         stop_w = float(det.config.stop_threshold_w)
         return MatchContext(
             profile_name=name,
-            confidence=tick.confidence,
-            expected_duration=tick.matched_duration,
+            # Issue #486: what the end gates read when member templates ran.
+            confidence=gate.confidence,
+            expected_duration=gate.expected_duration,
             phase_name=phase_name,
             is_confident_mismatch=revoke,
-            is_ambiguous=result.is_ambiguous,
-            is_prefix_ambiguous_full_shape=result.is_prefix_ambiguous_full_shape,
+            is_ambiguous=gate.is_ambiguous,
+            is_prefix_ambiguous_full_shape=gate.is_prefix_ambiguous_full_shape,
             tail_power=_ask(lambda: store.profile_tail_power(name)) if name else None,
             # One implementation with the manager's `_terminal_high_for_guards`.
             terminal_high=_ask(lambda: terminal_high_for_guards(
@@ -1198,6 +1316,18 @@ class _DetailSim:
                 (lambda: _ask(lambda: store.profile_pause_catalogue(
                     name, standby_near_stop_ceiling(stop_w)
                 ))) if name else None
+            ),
+            # Element 16, lazy as the manager sends it.
+            hazard_catalogue=(
+                (lambda: _ask(lambda: store.hazard_pause_catalogue(
+                    name, gate.expected_duration, gate.is_ambiguous, gate.contenders, stop_w
+                ))) if name else None
+            ),
+            # Element 17 (audit item 2), as the manager sends it.
+            run_expected_s=gate.run_expected if name else None,
+            # Element 18 (audit 2026-11-03 item 9), as the manager sends it.
+            programme_tail_s=progress_mod.anticrease_programme_tail(
+                store, name, self.device_type
             ),
         )
 
@@ -1316,6 +1446,8 @@ class _DetailSim:
                 dt_seconds=(
                     offset - prev_sample_t if prev_sample_t >= 0.0 else None
                 ),
+                # #486, as live: count down to the programme end.
+                tail_s=progress_mod.programme_tail_s(self.store, program, self.device_type),
             )
             if result is not None:
                 self.smoothed["v"] = result.smoothed
@@ -1353,18 +1485,100 @@ class _DetailSim:
         if self._aborted or not self.ready:
             return
         try:
-            for ts, power in self.readings[i0:i1]:
-                self._watchdog_keepalives(ts)
+            flags = self.reading_synthetic
+            for index, (ts, power) in enumerate(self.readings[i0:i1], start=i0):
+                synthetic = flags[index] if 0 <= index < len(flags) else None
+                # A gap with a recorded keepalive at either edge is one the live
+                # watchdog was ticking through: it fed nothing inside it, or the
+                # trace would hold that row too. No emulated keepalive there.
+                self._watchdog_keepalives(
+                    ts, inject=not (synthetic is True or self._last_fed_synthetic)
+                )
+                self._watchdog_flat_tick(ts)
                 self.cursor["t"] = (ts - self.base).total_seconds()
-                self.detector.process_reading(power, ts)
-                self._note_stall()
+                if synthetic is True:
+                    self._feed_recorded_keepalive(power, ts)
+                else:
+                    self.detector.process_reading(power, ts)
+                    self._note_stall()
                 self._last_real = (ts, power)
+                self._last_fed_synthetic = synthetic is True
+                self._note_report(ts, power, synthetic)
                 self._sample(ts)
         except Exception as exc:  # pylint: disable=broad-exception-caught
             self._aborted = True
             _LOGGER.debug(
                 "Playground detail replay failed for %s: %s", self.cycle.get("id"), exc
             )
+
+    def _feed_recorded_keepalive(self, power: float, ts: datetime) -> None:
+        """A row the cycle lists as injected, fed as the live watchdog fed it (item 568).
+
+        ``manager._watchdog_check_stuck_cycle`` passes ``synthetic=True`` (so the
+        sensor's cadence, idle display and flat run never see it) and
+        ``observed``: False on its low-power branch when the tick itself was late,
+        more than ``WATCHDOG_LATE_TICK_FACTOR`` intervals after the last reading
+        (item 391). An unreadable sensor's keepalive is not in the trace (item
+        266). No stall check either: live runs it on real readings only.
+        """
+        last = self._last_real
+        late = (
+            last is not None
+            and self.watchdog_s > 0
+            and self.detector.is_waiting_low_power()
+            and (ts - last[0]).total_seconds() > WATCHDOG_LATE_TICK_FACTOR * self.watchdog_s
+        )
+        self.detector.process_reading(power, ts, synthetic=True, observed=not late)
+
+    def _note_report(
+        self, ts: datetime, power: float, synthetic: bool | None = None
+    ) -> None:
+        """Advance the sensor's report clock on a report (``REPLAY_REPEATS_ARE_SILENCE``).
+
+        ``synthetic`` is what the cycle says of this row: a keepalive (True) never
+        advances it, a report (False) always does; unknown (None) falls back to
+        reading a repeated value as silence.
+        """
+        if synthetic is True:
+            return
+        last = self._report
+        if (
+            synthetic is False
+            or last is None
+            or not REPLAY_REPEATS_ARE_SILENCE
+            or power != last[1]
+        ):
+            self._report = (ts, power)
+
+    def _watchdog_ghost_ticks(self, until: datetime) -> bool:
+        """The live watchdog's ghost suppressor on every tick before ``until``.
+
+        ``manager._watchdog_check_stuck_cycle`` asks ``ghost_rules.watchdog_ghost_due``
+        on each tick of the watchdog it starts when the cycle runs, so they sit
+        on that timer's own phase, whatever the readings do. The silence is the
+        time since the sensor last reported and the power its current value, as
+        after the manager's resync; a due tick force-ends the cycle there, as live
+        (item 568). Returns True when it did.
+        """
+        step = self.watchdog_s
+        report = self._report
+        if self._last_end is None or report is None or step <= 0:
+            return False  # no previous end: no suspicious window, never due
+        det = self.detector
+        while self._wd_next is not None and self._wd_next < until:
+            tick = self._wd_next
+            self._wd_next = tick + timedelta(seconds=step)
+            start = det.current_cycle_start
+            if start is None:
+                continue
+            if self._ghost_due(
+                (tick - start).total_seconds(), (tick - report[0]).total_seconds(), report[1]
+            ):
+                self.cursor["t"] = (tick - self.base).total_seconds()
+                det.force_end(tick)
+                self._sample(tick)
+                return True
+        return False
 
     def _note_stall(self) -> None:
         """A ``stalled`` event when the detector starts showing a stall (#452).
@@ -1380,7 +1594,7 @@ class _DetailSim:
             info = self.detector.stall_info() or {}
             self._emit("stalled", f"stalled at {info.get('plateau_w')} W (display only)", "warn")
 
-    def _watchdog_keepalives(self, until: datetime) -> None:
+    def _watchdog_keepalives(self, until: datetime, inject: bool = True) -> None:
         """Inject the keepalives live would have injected before ``until`` (item 390).
 
         Mirrors the low-power branch of ``manager._watchdog_check_stuck_cycle``:
@@ -1392,23 +1606,69 @@ class _DetailSim:
         inside it, and a soak that live 0.5.7 ends on (item 290 credits the
         silence) replayed as one cycle. Ticks sit half an interval into each
         period, the mean phase of a free-running timer. Traces recorded on 0.5.7+
-        already hold these readings, so for them this is a no-op. The watchdog's
-        staleness force-end and ghost/zombie branches are not emulated.
+        already hold these readings, so for them this is a no-op. The ghost
+        suppressor runs in time order with them (``_watchdog_ghost_ticks``); the
+        watchdog's staleness, zombie and unmatched-idle force-ends are not emulated.
+        ``inject=False`` (a gap the cycle's recorded keepalives cover, item 568)
+        runs only the suppressor.
         """
         last = self._last_real
         step = self.watchdog_s
         if last is None or step <= 0:
+            return
+        if not inject:
+            self._watchdog_ghost_ticks(until)
             return
         prev_ts, prev_w = last
         k = 1
         while k <= _MAX_KEEPALIVES_PER_GAP:
             ts = prev_ts + timedelta(seconds=step * (k + 0.5))
             if ts >= until or not self.detector.is_waiting_low_power():
+                break
+            if self._watchdog_ghost_ticks(ts):
                 return
             self.cursor["t"] = (ts - self.base).total_seconds()
             self.detector.process_reading(prev_w, ts, synthetic=True, observed=True)
             self._sample(ts)
             k += 1
+        self._watchdog_ghost_ticks(until)
+
+    def _watchdog_flat_tick(self, until: datetime) -> None:
+        """The watchdog tick that asks for the flat-power stop before ``until``.
+
+        Mirrors ``manager._watchdog_check_stuck_cycle``, which calls
+        ``CycleDetector.check_flat_power`` on every tick: in a silent stretch at
+        a flat level nothing else reaches the detector. The first tick at or after
+        the detector's due time, on the keepalives' phase (half an interval into
+        each period after the last real reading); a tick fires only when due, so
+        one call is the whole emulation.
+        """
+        last = self._last_real
+        step = self.watchdog_s
+        if last is None or step <= 0:
+            return
+        due = self.detector.flat_power_due_at()
+        if due is None or due >= until:
+            return
+        k = max(1, math.ceil((due - last[0]).total_seconds() / step - 0.5))
+        ts = last[0] + timedelta(seconds=step * (k + 0.5))
+        if ts >= until:
+            return
+        self.cursor["t"] = (ts - self.base).total_seconds()
+        if self.detector.check_flat_power(ts):
+            self._sample(ts)
+
+    def tail_step(self, ts: datetime) -> None:
+        """One 0 W reading of the synthetic quiet tail at ``ts``.
+
+        The watchdog's ghost ticks run before it, as on a real reading; the tail
+        repeats 0 W, so after its first reading it reads as a silent plug.
+        """
+        self._watchdog_ghost_ticks(ts)
+        self.cursor["t"] = (ts - self.base).total_seconds()
+        self.detector.process_reading(0.0, ts)
+        self._note_report(ts, 0.0)
+        self._sample(ts)
 
     def run_tail(self) -> None:
         """Synthetic quiet tail so a natural end can fire.
@@ -1433,14 +1693,14 @@ class _DetailSim:
             while i < budget:
                 i += 1
                 ts = last_ts + timedelta(seconds=step * i)
-                self.cursor["t"] = (ts - self.base).total_seconds()
-                self.detector.process_reading(0.0, ts)
-                self._sample(ts)
-                if self.detector.state in (STATE_OFF, STATE_FINISHED) and self.captured:
+                self.tail_step(ts)
+                # `kept`, not `captured`: an end the manager discards (a ghost, item
+                # 568) is not the close, and the cycle it reopened still needs one.
+                if self.detector.state in (STATE_OFF, STATE_FINISHED) and self.kept:
                     break
                 if getattr(self.detector, "_verified_pause", False):
                     budget = min(max_steps, max(budget, i + n_steps))
-            if not self.captured and self.detector.state != STATE_OFF:
+            if not self.kept and self.detector.state != STATE_OFF:
                 flush_ts = last_ts + timedelta(seconds=step * (i + 2))
                 self.cursor["t"] = (flush_ts - self.base).total_seconds()
                 self.detector.force_end(flush_ts)
@@ -1452,15 +1712,16 @@ class _DetailSim:
     def finalize(self) -> dict[str, Any]:
         outcome = self.outcome
         last_match = dict(self.last_match)
-        # --- outcome ---
-        if self.captured:
+        # --- outcome --- (only the ends the manager would store, item 568)
+        kept = [i for i, why in enumerate(self.discarded) if why is None]
+        if kept:
             idx = max(
-                range(len(self.captured)),
+                kept,
                 key=lambda i: float(self.captured[i].get("duration") or 0.0),
             )
             primary = self.captured[idx]
             outcome["detected"] = True
-            outcome["detected_count"] = len(self.captured)
+            outcome["detected_count"] = len(kept)
             outcome["termination_reason"] = primary.get("termination_reason")
             outcome["status"] = primary.get("status")
             outcome["final_duration_s"] = _safe_float(primary.get("duration"))
@@ -1497,7 +1758,7 @@ class _DetailSim:
                 break
 
         # --- finish + milestone markers (reuse production predicates) ---
-        if self.captured and self.finish_configured:
+        if kept and self.finish_configured:
             # No finished push for an interrupted cycle (audit MANAGER-10); the
             # milestone below does not depend on it, as live.
             if notif_rules.cycle_end_is_finish(outcome["status"]):
@@ -1526,7 +1787,14 @@ class _DetailSim:
         alerts: list[dict[str, Any]] = []
         expected_dur = float(last_match["expected"] or 0.0)
         final_dur = outcome["final_duration_s"] or 0.0
-        if not outcome["detected"]:
+        dropped = [why for why in self.discarded if why is not None]
+        if not outcome["detected"] and dropped:
+            # It did end, as a run the manager discards (a ghost or a dishwasher
+            # pump-out, item 568): not a replay that never reached an end.
+            alerts.append({"code": "discarded", "severity": "warn",
+                           "detail": "Every end in the replay was discarded: "
+                                     + ", ".join(sorted(set(dropped))) + "."})
+        elif not outcome["detected"]:
             alerts.append({"code": "did_not_finish", "severity": "error",
                            "detail": "Cycle never reached a terminal state in the replay."})
         if outcome["detected"] and (outcome["detected_count"] or 0) > 1:
@@ -1606,7 +1874,11 @@ def _sim_config_summary(config: CycleDetectorConfig) -> dict[str, Any]:
         "anti_wrinkle_max_duration": getattr(config, "anti_wrinkle_max_duration", None),
         "anti_wrinkle_idle_timeout": getattr(config, "anti_wrinkle_idle_timeout", None),
         "dishwasher_end_spike_quiet_release": getattr(config, "dishwasher_end_spike_quiet_release", None),
-        "smart_termination_duration_ratio": getattr(config, "smart_termination_duration_ratio", None),
+        "smart_termination_duration_ratio": (
+            effective_smart_termination_ratio(config.smart_termination_duration_ratio)
+            if isinstance(getattr(config, "smart_termination_duration_ratio", None), (int, float))
+            else None
+        ),
         # Both are clamped by the detector wherever it reads them, so report the
         # effective figure: a summary carrying an out-of-range override would
         # describe a sim that did not run.
@@ -2057,6 +2329,24 @@ def _coerce_param(base_config: CycleDetectorConfig, param: str, value: float) ->
         return coerce(value)
     except (TypeError, ValueError, OverflowError):
         return value
+
+
+def effective_sweep_values(param: str, values: list[Any]) -> list[Any]:
+    """``values`` as the replay will run them (the override map's coercion: an
+    integer setting truncates), distinct, in order. A 0.1-0.9 Off Delay sweep was
+    five runs of the same 0 s. Never raises; a value that cannot be read is dropped."""
+    out: list[Any] = []
+    for value in values:
+        try:
+            number = float(value)
+        except (TypeError, ValueError, OverflowError):
+            continue
+        if not math.isfinite(number):
+            continue
+        coerced = _coerce_param(None, param, number)  # type: ignore[arg-type]
+        if coerced not in out:
+            out.append(coerced)
+    return out
 
 
 def run_playground_sweep(

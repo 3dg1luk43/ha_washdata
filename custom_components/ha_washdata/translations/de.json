@@ -56,6 +56,7 @@
       "timer_pause_action_title": "Zyklus fortsetzen",
       "timer_pause_body_suffix": "Der Zyklus ist angehalten. Öffnen Sie das WashData-Panel, um fortzufahren.",
       "unload_dismiss_action_title": "Nicht mehr erinnern",
+      "review_action_title": "Es war {program}",
       "notify_live_waiting_message": "{device}: Noch kein Profil erkannt.",
       "vs_typical_longer": "{pct}% länger als üblich",
       "vs_typical_shorter": "{pct}% kürzer als üblich",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Wartung als erledigt markieren",
+      "description": "Eine Wartungsaufgabe jetzt als erledigt protokollieren, wie es die Schaltfläche „Erledigt“ im Panel tut.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Das WashData-Gerät, zu dem die Aufgabe gehört."
+        },
+        "task_id": {
+          "name": "Aufgaben-ID",
+          "description": "Die ID der Aufgabe, wie im Attribut due_task_ids des Sensors „Wartung fällig“ aufgeführt (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other oder die custom_-ID einer eigenen Aufgabe)."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Optionale Notiz, die mit dem Protokolleintrag gespeichert wird."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Zyklus löschen",
+      "description": "Einen gespeicherten Zyklus löschen. Sein Programm wird ohne ihn neu aufgebaut oder entfernt, wenn ein importierter Zyklus sein letzter war. Kann nicht rückgängig gemacht werden.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Das WashData-Gerät."
+        },
+        "cycle_id": {
+          "name": "Zyklus-ID",
+          "description": "Die ID des zu löschenden Zyklus, z. B. die Variable cycle_id des Auslösers „Zyklus beendet“ (leer, wenn dieser Lauf keinen Zyklus gespeichert hat, daher zuerst prüfen)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "ML-Training starten",
       "description": "Die ML-Modelle auf dem Gerät manuell aus den eigenen zugeordneten Zyklen dieses Geräts neu trainieren (experimentell).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "Energie gesamt"
+      },
+      "last_cycle_duration": {
+        "name": "Dauer des letzten Zyklus"
+      },
+      "last_cycle_energy": {
+        "name": "Energie des letzten Zyklus"
+      },
+      "last_cycle_cost": {
+        "name": "Kosten des letzten Zyklus"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "Profil konnte nicht zugewiesen werden: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Zyklus nicht gefunden."
+    },
+    "maintenance_task_not_found": {
+      "message": "Keine Wartungsaufgabe mit der ID {task_id} auf diesem Gerät."
+    },
+    "task_id_required": {
+      "message": "Eine gültige task_id ist erforderlich."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "Zyklus fortgesetzt",
       "still_tumbling": "Trommel bewegt sich noch nach dem Zyklus",
       "unloaded": "Entnommen",
-      "state_changed": "Zustand geändert",
+      "state_changed": "Gerätezustand geändert",
       "maintenance_due": "Wartung fällig",
       "milestone_reached": "Zyklusmeilenstein erreicht",
       "pump_stuck": "Pumpe klemmt"
@@ -665,7 +716,7 @@
       "description": "Wird ausgelöst, wenn die Ladung nach einem Zyklus entnommen wird: Tür geöffnet oder Entnahme bestätigt."
     },
     "state_changed": {
-      "name": "Zustand geändert",
+      "name": "Gerätezustand geändert",
       "description": "Wird ausgelöst, wenn sich der WashData-Zustand ändert.",
       "fields": {
         "from": {

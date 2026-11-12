@@ -221,7 +221,11 @@
     "bp_details": "Détails",
     "bp_copy_yaml": "Copier le YAML",
     "bp_hide_yaml": "Masquer le YAML",
-    "bp_show_yaml": "Afficher le YAML"
+    "bp_show_yaml": "Afficher le YAML",
+    "review_something_else": "Autre chose…",
+    "review_not_sure": "Je ne sais pas",
+    "review_prev": "Cycle précédent",
+    "review_next": "Cycle suivant"
   },
   "conflict": {
     "anti_wrinkle_max": {
@@ -535,6 +539,7 @@
     "pg_alert_overrun": "Trop long",
     "pg_alert_underrun": "Trop court",
     "pg_alert_did_not_finish": "N'a pas terminé",
+    "pg_alert_discarded": "Écarté comme fantôme ou vidange",
     "pg_alert_false_end": "Divisé en plusieurs cycles",
     "pg_alert_unmatched": "Sans correspondance",
     "pg_alert_ambiguous": "Correspondance ambiguë",
@@ -667,7 +672,10 @@
     "bp_needs": "Nécessite",
     "bp_needs_version": "WashData {version} ou plus récent",
     "bp_author": "Auteur",
-    "bp_required": "obligatoire"
+    "bp_required": "obligatoire",
+    "pg_runs_as": "simulé avec {value}",
+    "review_this_cycle": "Ce cycle",
+    "review_usual": "Habituel pour {name}"
   },
   "log": {
     "all_levels": "Tous niveaux",
@@ -1019,7 +1027,7 @@
     "hist_scan_failed": "L'analyse a échoué.",
     "hist_scan_expired": "Cette analyse n'est plus disponible. Relancez l'analyse.",
     "hist_import_failed": "L'importation a échoué.",
-    "imported_history_readonly": "Trouvé dans un historique de puissance importé. Il aide la correspondance, mais n'est pas compté dans vos statistiques et ne peut être ni rogné ni scindé. Étiquetez-le pour nommer le programme.",
+    "imported_history_note": "Trouvé dans un historique de puissance importé. Il aide la correspondance, mais n'est pas compté dans vos statistiques et ne peut pas être scindé. Étiquetez-le pour nommer le programme.",
     "odometer_intro": "Ce total ne fait qu'augmenter. Supprimer un cycle ne le fait pas baisser, pour que les rappels d'entretien restent justes.",
     "odometer_correct_hint": "Renseignez cette valeur si WashData a compté un cycle qui n'a jamais eu lieu, ou si l'appareil a effectué des cycles avant l'installation de WashData.",
     "no_reminders_set": "Aucun rappel d'entretien n'est encore configuré.",
@@ -1074,10 +1082,19 @@
     "bp_none_yet": "Aucun modèle pour ce type d'appareil pour l'instant. Partagez le premier.",
     "bp_unreachable": "Elle est téléchargée depuis GitHub. Vérifiez que Home Assistant peut accéder à Internet, puis réessayez.",
     "bp_library_intro": "Des automatisations prêtes à l'emploi partagées par des utilisateurs de WashData sur GitHub, vérifiées avant d'être listées. Disponible uniquement avec les fonctionnalités en ligne activées.",
-    "bp_needs_version": "Nécessite WashData {version} ou plus récent."
+    "bp_needs_version": "Nécessite WashData {version} ou plus récent.",
+    "bp_review_check": "Vérifiez ceci avant d'enregistrer : Home Assistant l'exécutera exactement tel qu'il est écrit.",
+    "review_q_title": "Quel programme était-ce ?",
+    "review_q_intro": "WashData n'est pas sûr de ces cycles. Votre réponse l'aide à apprendre.",
+    "review_q_started": "Démarré le {when}",
+    "review_q_more": "{count} autres à réviser",
+    "review_q_more_one": "{count} autre à réviser",
+    "review_q_more_many": "{count} autres à réviser",
+    "review_q_more_other": "{count} autres à réviser",
+    "review_which_program": "De quel programme s'agissait-il ?"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Lave-vaisselle : secondes de silence après la durée prévue avant de libérer l'attente de vidange de fin de cycle",
+    "dishwasher_end_spike_quiet_release": "Lave-vaisselle : secondes sous le Seuil d'arrêt depuis la dernière activité nécessaires pour mettre fin à l'attente de la vidange finale après la durée attendue",
     "smart_termination_duration_ratio": "Fraction de la durée moyenne du programme qu'un cycle doit atteindre avant que la Terminaison intelligente puisse l'arrêter plus tôt ; baissez-la si les durées varient",
     "anti_crease_finalize_ratio": "Fraction de la durée moyenne du programme qu'un cycle doit atteindre avant que la traîne anti-froissement puisse le terminer ; baissez-la sur les sèche-linge, gardez la valeur par défaut sur les lave-linge",
     "anti_wrinkle_enabled": "Absorber les impulsions de rotation après la phase principale au lieu de les lire comme de nouveaux cycles",
@@ -1186,7 +1203,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Libération au silence du séchage passif",
-      "doc": "Après la durée attendue : temps pendant lequel le lave-vaisselle doit rester sous le Seuil d'arrêt avant que WashData cesse d'attendre la vidange finale. Augmentez-le si une vidange tardive après un long séchage est manquée. L'attente ne dépasse jamais 30 minutes."
+      "doc": "Après la durée attendue, WashData cesse d'attendre la vidange finale dès que le lave-vaisselle est resté sous le Seuil d'arrêt pendant cette durée depuis sa dernière activité, au maximum 30 minutes (et, une fois que le programme compte 3 cycles enregistrés, au moins sa plus longue pause de séchage enregistrée). Augmentez-le si une vidange tardive après un long séchage est manquée."
     },
     "anti_crease_finalize_ratio": {
       "label": "Ratio de finalisation anti-froissement",
@@ -1333,7 +1350,7 @@
       "label": "Icône de notification"
     },
     "notify_live_chronometer": {
-      "doc": "Android : ajoute un compte à rebours jusqu'à la fin estimée à côté du texte de notification. Utilisez {finish_time} dans Message de pré-achèvement pour afficher l'heure de fin à la place d'un second compte à rebours.",
+      "doc": "Android : ajoute un compte à rebours jusqu'à la fin estimée à côté du texte de notification. Utilisez {finish_time} dans Message de mise à jour en direct pour afficher l'heure de fin à la place d'un second compte à rebours.",
       "label": "Utiliser le chronomètre en direct"
     },
     "notify_live_interval_seconds": {
@@ -1358,11 +1375,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Texte de chaque mise à jour de progression en direct. Variables du modèle : {device}, {program}, {minutes} (minutes restantes), {finish_time} (heure de fin estimée, ex. 14:30). Avec toute autre variable, le texte par défaut est utilisé.",
-      "label": "Message de pré-achèvement"
+      "label": "Message de mise à jour en direct"
     },
     "notify_reminder_message": {
       "doc": "Texte de l'Alerte de pré-fin, envoyée une seule fois. Variables du modèle : {device}, {program}, {minutes} (le réglage Alerte de pré-fin). Avec toute autre variable, le texte par défaut est utilisé.",
-      "label": "Message de rappel"
+      "label": "Message de l'alerte de pré-fin"
     },
     "notify_start_message": {
       "doc": "Corps envoyé au démarrage d'un cycle. Variables du modèle : {device}, {program}. Avec toute autre variable, le texte par défaut est utilisé.",
@@ -1653,6 +1670,8 @@
     "preparing": "Préparation…",
     "unlabelling": "Retrait de l'étiquette…",
     "working": "Traitement…",
+    "torn_pick": "{a} ou {b} ?",
+    "torn_tip": "WashData ne sait pas encore distinguer ces deux programmes, choisissez donc celui qui est en cours pour étiqueter ce cycle en conséquence (l'option Détection automatique annule ce choix).",
     "match_uncertain": "Incertain : {top} ou {runner}",
     "match_uncertain_single": "Incertain : peut-être {top}",
     "match_sure": "~{pct} % de certitude",
@@ -1851,7 +1870,8 @@
     "bp_automation_created": "Automatisation créée avec les paramètres par défaut ; ouverture en cours",
     "copied": "Copié",
     "copy_failed": "Échec de la copie. Sélectionnez le texte et copiez-le manuellement.",
-    "automation_label_failed": "Automatisation créée, mais l’étiquette ou la catégorie WashData n’a pas pu être ajoutée."
+    "automation_label_failed": "Automatisation créée, mais l’étiquette ou la catégorie WashData n’a pas pu être ajoutée.",
+    "review_answered": "Enregistré : {program}"
   },
   "suggestion": {
     "observed_label": "Observé",
@@ -2260,7 +2280,7 @@
       "name": "Déchargé"
     },
     "state_changed": {
-      "name": "État modifié"
+      "name": "État de l'appareil modifié"
     },
     "maintenance_due": {
       "name": "Maintenance due"

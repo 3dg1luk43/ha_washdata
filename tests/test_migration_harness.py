@@ -870,3 +870,147 @@ async def test_migrate_3_10_to_3_11_leaves_an_absent_ratio_absent(
 
     assert await async_migrate_entry(hass, entry) is True
     assert CONF_PROFILE_MATCH_MAX_DURATION_RATIO not in entry.options
+
+
+# ── 3.12 -> 3.13: a raised Stage-1 min ratio (register item 571) ──────────
+
+
+def _ratio_entry(minor: int, **opts: Any) -> DummyEntry:
+    return DummyEntry(version=3, minor_version=minor, data={}, options={CONF_OFF_DELAY: 120, **opts})
+
+
+@pytest.mark.asyncio
+async def test_migrate_3_12_to_3_13_heals_a_raised_min_ratio(hass: HomeAssistant) -> None:
+    """Since item 401(e) the min ratio only gates matching, and a stored 0.33-0.80 (the
+    pre-0.5.8 suggestion's p05 - 0.1, old seeded defaults, unsanitised store bundles)
+    forbids any match before that share of a programme. It goes back to the default;
+    the max ratio is left as stored (healing it was measured and rejected)."""
+    from custom_components.ha_washdata.const import (
+        CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+        CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+        DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
+    )
+
+    entry = _ratio_entry(12, **{
+        CONF_PROFILE_MATCH_MIN_DURATION_RATIO: 0.63,
+        CONF_PROFILE_MATCH_MAX_DURATION_RATIO: 1.4,
+    })
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
+
+    assert await async_migrate_entry(hass, entry) is True
+    assert entry.minor_version == 13 == CONFIG_ENTRY_MINOR_VERSION
+    assert entry.options == {
+        CONF_OFF_DELAY: 120,
+        CONF_PROFILE_MATCH_MIN_DURATION_RATIO: DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
+        CONF_PROFILE_MATCH_MAX_DURATION_RATIO: 1.4,
+    }
+
+
+@pytest.mark.asyncio
+async def test_migrate_3_12_to_3_13_leaves_a_dishwasher_floor(hass: HomeAssistant) -> None:
+    """Not on dishwashers: healing the one replayed dishwasher's 0.63 let a weak match
+    to its long Eco profile hold ENDING, 3 of 33 cycles ending 26-67 min later."""
+    from custom_components.ha_washdata.const import (
+        CONF_DEVICE_TYPE,
+        CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+    )
+
+    for where in ("options", "data"):
+        entry = _ratio_entry(12, **{CONF_PROFILE_MATCH_MIN_DURATION_RATIO: 0.63})
+        if where == "options":
+            entry.options = {**entry.options, CONF_DEVICE_TYPE: "dishwasher"}
+        else:
+            entry.data = {CONF_DEVICE_TYPE: "dishwasher"}
+        hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
+        assert await async_migrate_entry(hass, entry) is True
+        assert entry.minor_version == 13
+        assert entry.options[CONF_PROFILE_MATCH_MIN_DURATION_RATIO] == 0.63
+
+
+@pytest.mark.asyncio
+async def test_migrate_3_12_to_3_13_keeps_a_lower_floor_and_absent_keys(
+    hass: HomeAssistant,
+) -> None:
+    """A min at or below the default is kept; an absent key stays absent; a
+    non-numeric value is left to the setup-time strip."""
+    from custom_components.ha_washdata.const import CONF_PROFILE_MATCH_MIN_DURATION_RATIO
+
+    for low in (0.05, 0.1, 0.0, "x"):
+        entry = _ratio_entry(12, **{CONF_PROFILE_MATCH_MIN_DURATION_RATIO: low})
+        hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
+        assert await async_migrate_entry(hass, entry) is True
+        assert entry.options == {CONF_OFF_DELAY: 120, CONF_PROFILE_MATCH_MIN_DURATION_RATIO: low}
+
+    entry = _ratio_entry(12)
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
+    assert await async_migrate_entry(hass, entry) is True
+    assert entry.options == {CONF_OFF_DELAY: 120}
+    assert entry.minor_version == 13
+
+
+@pytest.mark.asyncio
+async def test_migrate_3_12_to_3_13_runs_once(hass: HomeAssistant) -> None:
+    """Deterministic and idempotent: a second pass writes nothing, so a value the
+    user sets in the panel after the upgrade is never touched again."""
+    from custom_components.ha_washdata.const import CONF_PROFILE_MATCH_MIN_DURATION_RATIO
+
+    entry = _ratio_entry(12, **{CONF_PROFILE_MATCH_MIN_DURATION_RATIO: "0.72"})
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
+    assert await async_migrate_entry(hass, entry) is True
+    first = dict(entry.options)
+    assert first[CONF_PROFILE_MATCH_MIN_DURATION_RATIO] == pytest.approx(0.1)
+
+    entry.options = {**first, CONF_PROFILE_MATCH_MIN_DURATION_RATIO: 0.4}  # set in the panel later
+    hass.config_entries.async_update_entry.reset_mock()
+    assert await async_migrate_entry(hass, entry) is True
+    hass.config_entries.async_update_entry.assert_not_called()
+    assert entry.options[CONF_PROFILE_MATCH_MIN_DURATION_RATIO] == 0.4
+
+
+@pytest.mark.asyncio
+async def test_the_chain_from_3_10_heals_the_min_ratio_too(hass: HomeAssistant) -> None:
+    """An older entry walks every step: its seeded 1.5 becomes 1.8 at 3.11, its
+    raised min ratio the default at 3.13."""
+    from custom_components.ha_washdata.const import (
+        CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+        CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+        DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
+    )
+
+    entry = _ratio_entry(10, **{
+        CONF_PROFILE_MATCH_MIN_DURATION_RATIO: 0.5,
+        CONF_PROFILE_MATCH_MAX_DURATION_RATIO: 1.5,
+    })
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
+    assert await async_migrate_entry(hass, entry) is True
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
+    assert entry.options[CONF_PROFILE_MATCH_MIN_DURATION_RATIO] == pytest.approx(0.1)
+    assert entry.options[CONF_PROFILE_MATCH_MAX_DURATION_RATIO] == pytest.approx(
+        DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO
+    )
+
+
+@pytest.mark.asyncio
+async def test_the_one_pass_legacy_migration_heals_the_min_ratio(hass: HomeAssistant) -> None:
+    """A v1 entry takes the one-pass path, whose `setdefault` seeding keeps a stored
+    min ratio: it must land where the chain lands (audit PLATFORM-09)."""
+    from custom_components.ha_washdata.const import (
+        CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+        CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+    )
+
+    def _apply_update(e: DummyEntry, **kwargs: Any) -> None:
+        for key in ("data", "options", "version", "minor_version"):
+            if key in kwargs:
+                setattr(e, key, kwargs[key])
+
+    entry = DummyEntry(
+        version=1, minor_version=1,
+        data={CONF_POWER_SENSOR: "sensor.p", CONF_DEVICE_TYPE: "washing_machine"},
+        options={CONF_PROFILE_MATCH_MIN_DURATION_RATIO: 0.9, CONF_PROFILE_MATCH_MAX_DURATION_RATIO: 1.2},
+    )
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_update)
+    assert await async_migrate_entry(hass, entry) is True
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
+    assert entry.options[CONF_PROFILE_MATCH_MIN_DURATION_RATIO] == pytest.approx(0.1)
+    assert entry.options[CONF_PROFILE_MATCH_MAX_DURATION_RATIO] == pytest.approx(1.2)

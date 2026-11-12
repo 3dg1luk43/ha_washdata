@@ -56,6 +56,7 @@
       "timer_pause_action_title": "Tęsti ciklą",
       "timer_pause_body_suffix": "Ciklas pristabdytas. Atidarykite WashData skydelį, kad tęstumėte.",
       "unload_dismiss_action_title": "Nustoti priminti",
+      "review_action_title": "Tai buvo {program}",
       "notify_live_waiting_message": "{device}: Kol kas neatpažintas joks profilis.",
       "vs_typical_longer": "{pct}% ilgiau nei įprastai",
       "vs_typical_shorter": "{pct}% trumpiau nei įprastai",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Pažymėti priežiūrą kaip atliktą",
+      "description": "Užregistruoti priežiūros užduotį kaip atliktą dabar, kaip tai daro skydelio mygtukas „Atlikta“.",
+      "fields": {
+        "device_id": {
+          "name": "Įrenginys",
+          "description": "WashData įrenginys, kuriam priklauso užduotis."
+        },
+        "task_id": {
+          "name": "Užduoties ID",
+          "description": "Užduoties ID, nurodytas jutiklio „Reikia priežiūros“ atribute due_task_ids (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other arba pasirinktinės užduoties custom_ ID)."
+        },
+        "notes": {
+          "name": "Pastabos",
+          "description": "Pasirenkama pastaba, išsaugoma kartu su žurnalo įrašu."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Ištrinti ciklą",
+      "description": "Ištrinti vieną išsaugotą ciklą. Jo programa perkuriama be jo arba pašalinama, jei tai buvo paskutinis jos ciklas ir jis buvo importuotas. To atšaukti negalima.",
+      "fields": {
+        "device_id": {
+          "name": "Įrenginys",
+          "description": "WashData įrenginys."
+        },
+        "cycle_id": {
+          "name": "Ciklo ID",
+          "description": "Trinamo ciklo ID, pvz., paleidiklio „Ciklas pasibaigė“ kintamasis cycle_id (jis tuščias, kai tas paleidimas neišsaugojo ciklo, todėl pirmiausia jį patikrinkite)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Paleisti ML mokymą",
       "description": "Rankiniu būdu iš naujo apmokyti įrenginyje esančius ML modelius naudojant šio įrenginio pažymėtus ciklus (eksperimentinis).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "Bendra energija"
+      },
+      "last_cycle_duration": {
+        "name": "Paskutinio ciklo trukmė"
+      },
+      "last_cycle_energy": {
+        "name": "Paskutinio ciklo energija"
+      },
+      "last_cycle_cost": {
+        "name": "Paskutinio ciklo kaina"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "Nepavyko priskirti profilio: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Ciklas nerastas."
+    },
+    "maintenance_task_not_found": {
+      "message": "Šiame įrenginyje nėra priežiūros užduoties su ID {task_id}."
+    },
+    "task_id_required": {
+      "message": "Būtinas galiojantis task_id."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "Ciklas atnaujintas",
       "still_tumbling": "Vis dar sukasi po ciklo",
       "unloaded": "Iškrauta",
-      "state_changed": "Būsena pasikeitė",
+      "state_changed": "Prietaiso būsena pasikeitė",
       "maintenance_due": "Reikalinga priežiūra",
       "milestone_reached": "Ciklo riba pasiekta",
       "pump_stuck": "Siurblys įstrigo"
@@ -665,7 +716,7 @@
       "description": "Suaktyvinamas, kai skalbiniai išimami po ciklo: durys atidarytos arba iškrovimas patvirtintas."
     },
     "state_changed": {
-      "name": "Būsena pasikeitė",
+      "name": "Prietaiso būsena pasikeitė",
       "description": "Suaktyvinamas, kai pasikeičia WashData būsena.",
       "fields": {
         "from": {

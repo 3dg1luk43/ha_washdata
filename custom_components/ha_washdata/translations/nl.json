@@ -56,6 +56,7 @@
       "timer_pause_action_title": "Hervat cyclus",
       "timer_pause_body_suffix": "De cyclus is gepauzeerd. Open het WashData-paneel om te hervatten.",
       "unload_dismiss_action_title": "Stop met herinneren",
+      "review_action_title": "Het was {program}",
       "notify_live_waiting_message": "{device}: nog geen profiel herkend.",
       "vs_typical_longer": "{pct}% langer dan gebruikelijk",
       "vs_typical_shorter": "{pct}% korter dan gebruikelijk",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Onderhoud markeren als gedaan",
+      "description": "Registreer een onderhoudstaak nu als gedaan, net als de knop Klaar in het paneel.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat",
+          "description": "Het WashData-apparaat waar de taak bij hoort."
+        },
+        "task_id": {
+          "name": "Taak-ID",
+          "description": "De ID van de taak, zoals vermeld in het attribuut due_task_ids van de sensor Onderhoud nodig (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other, of de custom_-ID van een eigen taak)."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Optionele notitie die bij de logboekregel wordt opgeslagen."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Cyclus verwijderen",
+      "description": "Verwijder één opgeslagen cyclus. Het programma ervan wordt zonder deze cyclus opnieuw opgebouwd, of verwijderd als een geïmporteerde cyclus de laatste ervan was. Kan niet ongedaan worden gemaakt.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat",
+          "description": "Het WashData-apparaat."
+        },
+        "cycle_id": {
+          "name": "Cyclus-ID",
+          "description": "De ID van de te verwijderen cyclus, bijv. de variabele cycle_id van de trigger Cyclus beëindigd (leeg als bij die uitvoering geen cyclus is opgeslagen, controleer die dus eerst)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "ML-training starten",
       "description": "Hertrein de ML-modellen op het apparaat handmatig op basis van gelabelde cycli van dit apparaat (experimenteel).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "Totale energie"
+      },
+      "last_cycle_duration": {
+        "name": "Duur laatste cyclus"
+      },
+      "last_cycle_energy": {
+        "name": "Energie laatste cyclus"
+      },
+      "last_cycle_cost": {
+        "name": "Kosten laatste cyclus"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "Kan profiel niet toewijzen: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Cyclus niet gevonden."
+    },
+    "maintenance_task_not_found": {
+      "message": "Geen onderhoudstaak met de ID {task_id} op dit apparaat."
+    },
+    "task_id_required": {
+      "message": "Een geldige task_id is vereist."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "Cyclus hervat",
       "still_tumbling": "Trommel draait nog na de cyclus",
       "unloaded": "Uitgeladen",
-      "state_changed": "Status gewijzigd",
+      "state_changed": "Apparaatstatus gewijzigd",
       "maintenance_due": "Onderhoud vereist",
       "milestone_reached": "Cyclusmijlpaal bereikt",
       "pump_stuck": "Pomp vastgelopen"
@@ -665,7 +716,7 @@
       "description": "Wordt geactiveerd wanneer de lading na een cyclus wordt uitgehaald: de deur is geopend of het uitladen is bevestigd."
     },
     "state_changed": {
-      "name": "Status gewijzigd",
+      "name": "Apparaatstatus gewijzigd",
       "description": "Wordt geactiveerd wanneer de WashData-status wijzigt.",
       "fields": {
         "from": {

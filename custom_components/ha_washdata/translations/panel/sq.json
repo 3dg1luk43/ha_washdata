@@ -266,7 +266,11 @@
         "bp_details": "Detaje",
         "bp_copy_yaml": "Kopjo YAML",
         "bp_hide_yaml": "Fshih YAML",
-        "bp_show_yaml": "Shfaq YAML"
+        "bp_show_yaml": "Shfaq YAML",
+        "review_something_else": "Diçka tjetër…",
+        "review_not_sure": "Nuk e di",
+        "review_prev": "Cikli i mëparshëm",
+        "review_next": "Cikli tjetër"
     },
     "conflict": {
         "anti_wrinkle_max": {
@@ -573,6 +577,7 @@
         "pg_alert_overrun": "Zgjati më gjatë",
         "pg_alert_underrun": "Zgjati më shkurt",
         "pg_alert_did_not_finish": "Nuk përfundoi",
+        "pg_alert_discarded": "U hodh poshtë si fantazmë ose zbrazje",
         "pg_alert_false_end": "U nda në disa cikle",
         "pg_alert_unmatched": "Pa përputhje",
         "pg_alert_ambiguous": "Përputhje e paqartë",
@@ -709,7 +714,10 @@
         "bp_needs": "Kërkon",
         "bp_needs_version": "WashData {version} ose më i ri",
         "bp_author": "Autori",
-        "bp_required": "i detyrueshëm"
+        "bp_required": "i detyrueshëm",
+        "pg_runs_as": "ekzekutohet me {value}",
+        "review_this_cycle": "Ky cikël",
+        "review_usual": "E zakonshme për {name}"
     },
     "log": {
         "all_levels": "Të gjitha nivelet",
@@ -1049,7 +1057,7 @@
         "hist_scan_failed": "Skanimi dështoi.",
         "hist_scan_expired": "Ai skanim nuk është më i disponueshëm. Skanoni përsëri.",
         "hist_import_failed": "Importimi dështoi.",
-        "imported_history_readonly": "Gjetur në historikun e importuar të fuqisë. Ndihmon përputhjen, por nuk llogaritet në statistikat tuaja dhe nuk mund të shkurtohet ose ndahet. Etiketojeni për të emërtuar programin.",
+        "imported_history_note": "Gjetur në historikun e importuar të fuqisë. Ndihmon përputhjen, por nuk llogaritet në statistikat tuaja dhe nuk mund të ndahet. Etiketojeni për të emërtuar programin.",
         "odometer_intro": "Ky total vetëm rritet. Fshirja e një cikli nuk e ul, ndaj kujtesat e servisit mbeten të sakta.",
         "odometer_correct_hint": "Vendoseni nëse WashData numëroi një cikël që nuk ndodhi kurrë, ose nëse pajisja kishte kryer cikle para se të instalohej WashData.",
         "no_reminders_set": "Nuk është caktuar ende asnjë kujtesë servisi.",
@@ -1106,7 +1114,15 @@
         "bp_none_yet": "Ende nuk ka shabllone për këtë lloj pajisjeje. Ndani të parin.",
         "bp_unreachable": "Ajo shkarkohet nga GitHub. Kontrolloni që Home Assistant të ketë qasje në internet, pastaj provoni përsëri.",
         "bp_library_intro": "Automatizime të gatshme të ndara nga përdoruesit e WashData në GitHub, të shqyrtuara para se të listohen. Të disponueshme vetëm me veçoritë online të aktivizuara.",
-        "bp_needs_version": "Kërkon WashData {version} ose më të ri."
+        "bp_needs_version": "Kërkon WashData {version} ose më të ri.",
+        "bp_review_check": "Kontrollojeni para se ta ruani: Home Assistant do ta ekzekutojë saktësisht siç është shkruar.",
+        "review_q_title": "Cili program ishte ky?",
+        "review_q_intro": "WashData nuk është i sigurt për këto cikle. Përgjigjja juaj e ndihmon të mësojë.",
+        "review_q_started": "Filloi më {when}",
+        "review_q_more": "Edhe {count} për rishikim",
+        "review_q_more_one": "Edhe {count} për rishikim",
+        "review_q_more_other": "Edhe {count} për rishikim",
+        "review_which_program": "Cili program ishte?"
     },
     "phase_desc": {
         "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -1342,7 +1358,7 @@
             "label": "Ikona e njoftimit"
         },
         "notify_live_chronometer": {
-            "doc": "Android: shton një numërim mbrapsht deri te fundi i vlerësuar pranë tekstit të njoftimit. Përdorni {finish_time} në Mesazh para-përfundimi për të treguar orën e mbarimit në vend të një numërimi mbrapsht të dytë.",
+            "doc": "Android: shton një numërim mbrapsht deri te fundi i vlerësuar pranë tekstit të njoftimit. Përdorni {finish_time} te Mesazhi i përditësimit live për të treguar orën e mbarimit në vend të një numërimi të dytë mbrapsht.",
             "label": "Përdor kronometër live"
         },
         "notify_live_interval_seconds": {
@@ -1367,11 +1383,11 @@
         },
         "notify_pre_complete_message": {
             "doc": "Teksti i çdo përditësimi live të progresit. Variablat shabllon: {device}, {program}, {minutes} (minutat e mbetura), {finish_time} (fundi i vlerësuar, p.sh. 14:30). Me çdo variabël tjetër përdoret teksti i paracaktuar.",
-            "label": "Mesazh para-përfundimi"
+            "label": "Mesazhi i përditësimit live"
         },
         "notify_reminder_message": {
             "doc": "Teksti i Alarmit para fundit, që dërgohet një herë. Variablat shabllon: {device}, {program}, {minutes} (cilësimi Alarm para fundit). Me çdo variabël tjetër përdoret teksti i paracaktuar.",
-            "label": "Mesazh kujtues"
+            "label": "Mesazhi i alarmit para fundit"
         },
         "notify_start_message": {
             "doc": "Teksti që dërgohet kur fillon një cikël. Variablat shabllon: {device}, {program}. Me çdo variabël tjetër përdoret teksti i paracaktuar.",
@@ -1534,7 +1550,7 @@
         },
         "dishwasher_end_spike_quiet_release": {
             "label": "Lirim në qetësi gjatë tharjes pasive",
-            "doc": "Pas kohëzgjatjes së pritur, sa gjatë duhet të qëndrojë fuqia e pjatalarëses më e ulët se Pragu i ndalimit përpara se WashData të ndalojë pritjen për zbrazjen përfundimtare të ujit. Rriteni nëse humbet një zbrazje e vonë pas një tharjeje të gjatë. Pritja nuk i kalon kurrë 30 minuta."
+            "doc": "Pas kohëzgjatjes së pritshme, WashData ndalon pritjen për zbrazjen përfundimtare të ujit kur pjatalarësja ka qëndruar kaq gjatë nën Pragun e ndalimit që nga aktiviteti i saj i fundit, më së shumti 30 minuta (dhe, sapo programi të ketë 3 cikle të regjistruara, të paktën sa pauza më e gjatë e regjistruar e tharjes së tij). Rriteni nëse humbet një zbrazje e vonë pas një tharjeje të gjatë."
         },
         "profile_evidence_sources": {
             "label": "Ciklet që formojnë një program",
@@ -1666,6 +1682,8 @@
         "preparing": "Po përgatitet…",
         "unlabelling": "Po hiqet etiketa…",
         "working": "Po përpunohet…",
+        "torn_pick": "{a} apo {b}?",
+        "torn_tip": "WashData ende nuk i dallon dot këto dy programe, ndaj zgjidhni atë që po punon për ta etiketuar këtë cikël me të (opsioni Zbulim automatik e anulon zgjedhjen).",
         "match_uncertain": "E pasigurt: {top} ose {runner}",
         "match_uncertain_single": "E pasigurt: ndoshta {top}",
         "match_sure": "~{pct}% e sigurt",
@@ -1862,7 +1880,8 @@
         "bp_automation_created": "Automatizimi u krijua me cilësimet e parazgjedhura; po hapet",
         "copied": "Kopjuar",
         "copy_failed": "Kopjimi dështoi. Zgjidh tekstin dhe kopjoje me dorë.",
-        "automation_label_failed": "Automatizimi u krijua, por etiketa ose kategoria e WashData nuk mund të shtohej."
+        "automation_label_failed": "Automatizimi u krijua, por etiketa ose kategoria e WashData nuk mund të shtohej.",
+        "review_answered": "U ruajt: {program}"
     },
     "suggestion": {
         "observed_label": "I vëzhguar",
@@ -1981,7 +2000,7 @@
         "anti_wrinkle_max_power": "Një puls mbi këtë e mbaron modalitetin kundër rrudhave dhe hap një cikël të ri",
         "profile_match_min_duration_ratio": "Gjatësia minimale e ciklit si pjesë e kohëzgjatjes së profilit; parazgjedhja 0.1 (10%)",
         "profile_match_max_duration_ratio": "Gjatësia maksimale e ciklit si pjesë e kohëzgjatjes së profilit; parazgjedhja 1.8 (180%)",
-        "dishwasher_end_spike_quiet_release": "Pjatalarëse: sekonda qetësie pas kohëzgjatjes së pritur para se të lirohet pritja e shkarkimit në fund të ciklit",
+        "dishwasher_end_spike_quiet_release": "Pjatalarëse: sekonda nën Pragun e ndalimit që nga aktiviteti i fundit, të nevojshme për t'i dhënë fund pritjes për zbrazjen përfundimtare pas kohëzgjatjes së pritshme",
         "smart_termination_duration_ratio": "Pjesa e kohëzgjatjes mesatare të programit që një cikël duhet të arrijë përpara se Përfundimi i Zgjuar ta mbyllë herët; uleni nëse kohëzgjatjet ndryshojnë",
         "anti_crease_finalize_ratio": "Pjesa e kohëzgjatjes mesatare të programit që një cikël duhet të arrijë përpara se bishti kundër rrudhave ta përfundojë; uleni te tharëset, makinat larëse lërini në vlerën e parazgjedhur",
         "curve_preroll_seconds": "Sekonda leximesh nga përpjekjet e ndërprera për nisje të bartura në fillim të kurbës së një cikli; 0 = joaktiv"
@@ -2241,7 +2260,7 @@
             "name": "U shkarkua"
         },
         "state_changed": {
-            "name": "Gjendja ndryshoi"
+            "name": "Gjendja e pajisjes ndryshoi"
         },
         "maintenance_due": {
             "name": "Mirëmbajtja është e nevojshme"

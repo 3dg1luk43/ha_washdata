@@ -266,7 +266,11 @@
     "bp_details": "Detaljer",
     "bp_copy_yaml": "Kopiér YAML",
     "bp_hide_yaml": "Skjul YAML",
-    "bp_show_yaml": "Vis YAML"
+    "bp_show_yaml": "Vis YAML",
+    "review_something_else": "Noget andet…",
+    "review_not_sure": "Ikke sikker",
+    "review_prev": "Forrige cyklus",
+    "review_next": "Næste cyklus"
   },
   "note": {
     "off_delay": {
@@ -583,6 +587,7 @@
     "pg_alert_overrun": "For lang",
     "pg_alert_underrun": "For kort",
     "pg_alert_did_not_finish": "Blev ikke fuldført",
+    "pg_alert_discarded": "Kasseret som spøgelsescyklus eller udpumpning",
     "pg_alert_false_end": "Opdelt i flere cyklusser",
     "pg_alert_unmatched": "Uden match",
     "pg_alert_ambiguous": "Tvetydig match",
@@ -714,7 +719,10 @@
     "bp_needs": "Kræver",
     "bp_needs_version": "WashData {version} eller nyere",
     "bp_author": "Forfatter",
-    "bp_required": "påkrævet"
+    "bp_required": "påkrævet",
+    "pg_runs_as": "bruges som {value}",
+    "review_this_cycle": "Denne cyklus",
+    "review_usual": "Normalt for {name}"
   },
   "log": {
     "all_levels": "Alle niveauer",
@@ -1061,7 +1069,7 @@
     "hist_scan_failed": "Scanningen mislykkedes.",
     "hist_scan_expired": "Den scanning er ikke længere tilgængelig. Scan igen.",
     "hist_import_failed": "Importen mislykkedes.",
-    "imported_history_readonly": "Fundet i importeret effekthistorik. Den hjælper matchningen, men tælles ikke med i din statistik og kan ikke beskæres eller opdeles. Mærk den for at navngive programmet.",
+    "imported_history_note": "Fundet i importeret effekthistorik. Den hjælper matchningen, men tælles ikke med i din statistik og kan ikke opdeles. Mærk den for at navngive programmet.",
     "odometer_intro": "Denne total stiger kun. Sletning af en cyklus sænker den ikke, så servicepåmindelser forbliver korrekte.",
     "odometer_correct_hint": "Angiv dette, hvis WashData har talt en kørsel, der aldrig fandt sted, eller apparatet kørte cyklusser, før WashData blev installeret.",
     "no_reminders_set": "Der er endnu ikke angivet nogen servicepåmindelser.",
@@ -1111,10 +1119,18 @@
     "bp_none_yet": "Ingen skabeloner til denne apparattype endnu. Del den første.",
     "bp_unreachable": "Det hentes fra GitHub. Kontrollér, at Home Assistant har forbindelse til internettet, og prøv igen.",
     "bp_library_intro": "Færdige automatiseringer delt af WashData-brugere på GitHub og gennemgået, før de vises. Kun tilgængeligt med onlinefunktioner slået til.",
-    "bp_needs_version": "Kræver WashData {version} eller nyere."
+    "bp_needs_version": "Kræver WashData {version} eller nyere.",
+    "bp_review_check": "Kontrollér dette, før du gemmer: Home Assistant kører det præcis, som det er skrevet.",
+    "review_q_title": "Hvilket program var det her?",
+    "review_q_intro": "WashData er ikke sikker på disse cyklusser. Dit svar hjælper den med at lære.",
+    "review_q_started": "Startet {when}",
+    "review_q_more": "{count} mere at gennemgå",
+    "review_q_more_one": "{count} mere at gennemgå",
+    "review_q_more_other": "{count} mere at gennemgå",
+    "review_which_program": "Hvilket program var det?"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Opvaskemaskine: stille sekunder efter den forventede varighed, før ventetiden på udpumpning ved cyklusslut frigives",
+    "dishwasher_end_spike_quiet_release": "Opvaskemaskine: sekunder under Stoptærskel siden seneste aktivitet, der skal til for at afslutte ventetiden på den sidste udpumpning efter den forventede varighed",
     "smart_termination_duration_ratio": "Andel af programmets gennemsnitlige varighed, som en cyklus skal nå, før smart afslutning må afslutte den tidligt; sænk den, hvis køretiderne varierer",
     "completion_min_seconds": "Korteste kørsel, der tæller som en rigtig cyklus",
     "interrupted_min_seconds": "Korte cyklusser markeres som afbrudt",
@@ -1223,7 +1239,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Frigivelse efter stille tørrefase",
-      "doc": "Efter den forventede varighed: hvor længe opvaskemaskinen skal blive under Stoptærskel, før WashData holder op med at vente på den sidste udpumpning. Hæv den, hvis en sen udpumpning efter lang tørring overses. Ventetiden er aldrig over 30 minutter."
+      "doc": "Efter den forventede varighed stopper WashData med at vente på den sidste udpumpning, når opvaskemaskinen har været under Stoptærskel så længe siden sin seneste aktivitet, højst 30 minutter (og, når programmet har 3 registrerede cyklusser, mindst dets længste registrerede tørrepause). Hæv den, hvis en sen udpumpning efter lang tørring overses."
     },
     "anti_crease_finalize_ratio": {
       "label": "Forhold for anti-rynke-afslutning",
@@ -1370,7 +1386,7 @@
       "label": "Notifikationsikon"
     },
     "notify_live_chronometer": {
-      "doc": "Android: tilføjer en nedtælling til det forventede sluttidspunkt ved siden af notifikationsteksten. Brug {finish_time} i Besked om næsten færdig for at vise sluttidspunktet i stedet for en anden nedtælling.",
+      "doc": "Android: tilføjer en nedtælling til det forventede sluttidspunkt ved siden af notifikationsteksten. Brug {finish_time} i Besked til live-opdateringer for at vise sluttidspunktet i stedet for en anden nedtælling.",
       "label": "Brug live kronometer"
     },
     "notify_live_interval_seconds": {
@@ -1395,11 +1411,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Tekst i hver live-statusopdatering. Skabelonvariabler: {device}, {program}, {minutes} (minutter tilbage), {finish_time} (forventet sluttidspunkt, f.eks. 14:30). Med enhver anden variabel bruges standardteksten.",
-      "label": "Besked om næsten færdig"
+      "label": "Besked til live-opdateringer"
     },
     "notify_reminder_message": {
       "doc": "Tekst i Forhåndsadvarsel om afslutning, der sendes én gang. Skabelonvariabler: {device}, {program}, {minutes} (indstillingen Forhåndsadvarsel om afslutning). Med enhver anden variabel bruges standardteksten.",
-      "label": "Påmindelsesbesked"
+      "label": "Besked til forhåndsadvarsel om afslutning"
     },
     "notify_start_message": {
       "doc": "Tekst, der sendes, når en cyklus starter. Skabelonvariabler: {device}, {program}. Med enhver anden variabel bruges standardteksten.",
@@ -1690,6 +1706,8 @@
     "preparing": "Forbereder…",
     "unlabelling": "Fjerner mærkning…",
     "working": "Arbejder…",
+    "torn_pick": "{a} eller {b}?",
+    "torn_tip": "WashData kan endnu ikke skelne mellem disse to, så vælg det program, der kører, for at mærke denne cyklus med det (Automatisk registrering fortryder valget).",
     "match_uncertain": "Usikker: {top} eller {runner}",
     "match_uncertain_single": "Usikker: måske {top}",
     "match_sure": "~{pct}% sikker",
@@ -1974,7 +1992,8 @@
     "bp_automation_created": "Automatisering oprettet med standardindstillinger; åbner",
     "copied": "Kopieret",
     "copy_failed": "Kopiering mislykkedes. Vælg teksten og kopiér manuelt.",
-    "automation_label_failed": "Automatisering oprettet, men WashData-etiketten eller kategorien kunne ikke tilføjes."
+    "automation_label_failed": "Automatisering oprettet, men WashData-etiketten eller kategorien kunne ikke tilføjes.",
+    "review_answered": "Gemt: {program}"
   },
   "trend": {
     "down": "Trend nedad",
@@ -2241,7 +2260,7 @@
       "name": "Tømt"
     },
     "state_changed": {
-      "name": "Tilstand ændret"
+      "name": "Apparatets tilstand ændret"
     },
     "maintenance_due": {
       "name": "Vedligeholdelse forfalder"

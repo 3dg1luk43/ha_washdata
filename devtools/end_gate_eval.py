@@ -26,6 +26,16 @@ What it measures, per replayed cycle:
   profile it is recorded against.
 * **split** - the trace did not survive as one cycle covering its active span.
 
+**Programme truth (register item 573).** The above-stop span counts a quiet tail that
+still reads above the Stop Threshold (a Miele anti-crease phase, a dryer's anti-wrinkle
+tumbles, a standby draw over a sub-watt Stop Threshold) as programme. On washers,
+washer-dryers and dryers each row also carries ``prog_end_s``: where such a tail begins
+(``spin_rhythm.active_end_s``), else the last above-stop reading; dishwashers keep the
+above-stop truth (drying is programme). The ``prog_*`` figures score the FIRST finish
+against it (early > 1 / > 5 min; a split = the programme cut before its end and
+continued, or the kept piece under 90% of it), and ``--check`` gates on them: on the
+2026-11-02 baseline 17 of 19 dryer early/split counts were tail artefacts.
+
 Replay is the real thing, not a model of it: every cycle goes through
 ``playground.simulate_cycle_detail``, which drives the real ``CycleDetector``
 and the real Stage 1-5 matcher over the cycle's own trace.  So
@@ -131,6 +141,34 @@ cycle's own Smart Termination end (one washer; unpaused it ends from RUNNING, wh
 as stalled, so item 511 already banked most of it): 9 -> 6 split at 50%, 14 -> 9 at
 90%, early ends 1 -> 0.
 
+**Held standby tail (#518).** The corpus traces end at ~0 W, so they cannot show an
+appliance that idles ABOVE its stop threshold after the programme. ``--standby-tail
+LEVEL`` cuts each trace after its last above-stop reading and holds it at LEVEL for
+``--standby-min`` minutes (default 120, the #518 reporter's 1 h 55 min), then 0 W (the
+door opened); LEVEL is ``Nx`` (N x the stop threshold the replay runs with), ``+D``
+(stop + D W) or watts, and an export whose LEVEL is not above its stop and below its
+start threshold is skipped (at or above start the level would open the next cycle:
+the flat-power stop's case). ``--standby-cadence`` is how the held level reaches the
+detector: ``dense`` (a plug that re-reports every step, the trace's median gap
+clamped to 10-60 s), ``keepalive`` (a change-only plug: one report, then what the
+live watchdog injects -
+``manager._watchdog_check_stuck_cycle``'s low-power branch at or below Min Power,
+once the plug has been silent past ``off_delay`` or ``no_update_active_timeout``, on
+each ``watchdog_interval`` tick; the Playground emulates only the below-stop branch,
+so the harness writes these readings into the trace, as a 0.5.7+ recording holds
+them; nothing above Min Power), or ``silent`` (one report, nothing else).
+``--standby-lift`` also raises every earlier reading below LEVEL to it, so the
+drying phase sits on the same flat level (the reporter's dishwasher never read below
+1.7 W while on; the stored profile cycles are not lifted). ``--no-dishwasher-band``
+is the before arm (no standby-band finalise on a dishwasher, as before #518).
+``--standby-floor`` is the other candidate fix: replay with the #458 stop floor for
+LEVEL applied (``suggestion_engine.STANDBY_FLOOR_*``: stop raised to max(1.25 x
+LEVEL, LEVEL + 0.2 W), start to at least 1.25 x that). Rows record when the cycle first finished
+against the programme end (the last above-stop reading of the unmodified trace), and
+a summary per device type counts the closes within 5 / 10 / 15 / 30 / 60 min, the
+ones held until the door opened, and lists every early end (> 1 min before the
+programme end) and split.
+
 **Option overrides (register item 469).** ``--set KEY=VALUE`` layers an option onto
 every replayed export as Apply all would save it (the active-span yardstick keeps
 the export's own stop threshold), e.g. ``--set profile_match_interval=45`` for the
@@ -234,6 +272,34 @@ MIN_READINGS = 10
 MIN_CYCLES = 5
 #: Device types the anti-crease finalise can arm for (`_anticrease_gate_open`).
 AC_DEVICE_TYPES = ("washing_machine", "dryer", "washer_dryer")
+#: Device types whose trace can run on past the PROGRAMME in a quiet tail that still
+#: reads above the Stop Threshold (a Miele anti-crease phase, a dryer's anti-wrinkle
+#: tumbles, a door-lock/standby draw over a sub-watt Stop Threshold). For them the
+#: programme truth is where that tail starts (register item 573). Dishwashers are
+#: not here: drying is programme.
+PROGRAMME_TRUTH_TYPES = ("washing_machine", "washer_dryer", "dryer")
+
+
+def _programme_end(
+    work: list[tuple[float, float]], active: list[float], device_type: str
+) -> float | None:
+    """Offset where the programme ended: the last above-stop reading, or earlier,
+    where a quiet tail begins (``spin_rhythm.active_end_s``: the end of the last
+    60 s window at >= 8% of the sustained peak with nothing later above 4%), on
+    :data:`PROGRAMME_TRUTH_TYPES`. None without an above-stop reading."""
+    if not active:
+        return None
+    end = float(active[-1])
+    if device_type not in PROGRAMME_TRUTH_TYPES or len(work) < 8:
+        return end
+    from custom_components.ha_washdata import spin_rhythm  # noqa: PLC0415
+
+    t0 = min(t for t, _p in work)
+    quiet = spin_rhythm.active_end_s([t for t, _p in work], [p for _t, p in work])
+    return end if quiet is None else min(end, t0 + float(quiet))
+
+#: The detector's shipped toggles, taken at the first ``_setup_replay``.
+_SHIPPED_DETECTOR_TOGGLES: dict[str, dict[str, Any]] = {}
 
 #: Anti-crease probe state for the replay in progress (one at a time).
 _AC: dict[str, Any] = {}
@@ -429,6 +495,7 @@ def _with_halt(
         k += 1
     out = dict(cycle)
     out["power_data"] = head + plateau + tail
+    out.pop("synthetic_offsets", None)  # rows moved and added: provenance unknown
     return out, t0, t0 + length_s, yard
 
 
@@ -458,7 +525,95 @@ def _with_tumble_tail(
         t += 37.0
     tailed = dict(cycle)
     tailed["power_data"] = out
+    tailed.pop("synthetic_offsets", None)  # rows added: provenance unknown
     return tailed
+
+
+def _standby_level(stop: float, spec: str) -> float:
+    """``--standby-tail``: ``Nx`` = N x stop, ``+D`` = stop + D W, else watts."""
+    spec = spec.strip()
+    if spec.endswith("x"):
+        return float(spec[:-1]) * stop
+    if spec.startswith("+"):
+        return stop + float(spec[1:])
+    return float(spec)
+
+
+def _standby_floor_overrides(cfg: Any, level: float) -> dict[str, Any]:
+    """``--standby-floor``: the #458 stop floor for ``level``, as Apply would save it."""
+    from custom_components.ha_washdata import suggestion_engine as se  # noqa: PLC0415
+
+    floor = round(max(level * se.STANDBY_FLOOR_RATIO, level + se.STANDBY_FLOOR_MIN_MARGIN_W), 2)
+    start = max(float(cfg.start_threshold_w), round(floor * se.STANDBY_FLOOR_RATIO, 2))
+    return {"stop_threshold_w": floor, "start_threshold_w": start}
+
+
+def _keepalive_offsets(
+    t0: float, until: float, level: float, cfg: Any, opts: dict[str, Any], watchdog_s: float
+) -> list[float]:
+    """Offsets the live watchdog injects ``level`` at after a report at ``t0`` (#518).
+
+    ``manager._watchdog_check_stuck_cycle``'s low-power fallback: the cached power
+    at or below Min Power, and silence past ``off_delay`` (any update, keepalives
+    included) or ``no_update_active_timeout`` (real updates only), checked on every
+    tick. Ticks sit half an interval into each period, the Playground's phase.
+    Nothing above Min Power: the high-power branch defers without injecting (#409).
+    """
+    from custom_components.ha_washdata.const import (  # noqa: PLC0415
+        CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+        DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
+    )
+
+    if watchdog_s <= 0 or level > float(cfg.min_power):
+        return []
+    off_delay = float(cfg.off_delay)
+    nuat = float(opts.get(CONF_NO_UPDATE_ACTIVE_TIMEOUT) or DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT)
+    out: list[float] = []
+    last_any = t0
+    k = 1
+    while True:
+        tick = t0 + (k + 0.5) * watchdog_s
+        if tick >= until:
+            return out
+        if tick - last_any > off_delay or tick - t0 > nuat:
+            out.append(tick)
+            last_any = tick
+        k += 1
+
+
+def _with_standby_tail(
+    cycle: dict[str, Any], pts: list[tuple[float, float]], stop: float, level: float,
+    minutes: float, cadence: str, lift: bool, keepalives: Any,
+    device_type: str = "dishwasher",
+) -> tuple[dict[str, Any], float, float]:
+    """The cycle held at ``level`` after its programme (#518).
+
+    Returns ``(cycle, tail_start_s, tail_end_s)``; ``keepalives(t0, until)`` gives
+    the offsets the live watchdog would inject at (``cadence == "keepalive"``).
+    The level starts at the programme end the lag is measured from
+    (:func:`_programme_end`): on a washer or dryer whose recorded tail is a quiet
+    anti-crease phase above stop, after ``active[-1]`` it started late.
+    """
+    active = [t for t, p in pts if p > stop]
+    t_end = _programme_end(pts, active, device_type) or active[-1]
+    gaps = [b - a for (a, _p), (b, _q) in zip(pts, pts[1:]) if b > a]
+    step = min(60.0, max(10.0, float(np.median(gaps)) if gaps else 30.0))
+    head = [
+        [float(t), max(float(p), level) if lift else float(p)] for t, p in pts if t <= t_end
+    ]
+    t0 = t_end + step
+    t1 = t0 + minutes * 60.0
+    if cadence == "dense":
+        times = [float(t) for t in np.arange(t0, t1, step)]
+    elif cadence == "keepalive":
+        times = [t0, *keepalives(t0, t1)]
+    else:
+        times = [t0]
+    tail = [[round(t, 1), level] for t in times]
+    out = dict(cycle)
+    out["power_data"] = head + tail + [[t1, 0.0], [t1 + 600.0, 0.0]]
+    out.pop("synthetic_offsets", None)  # rows added: provenance unknown
+    return out, t0, t1
 
 
 class _Entry:
@@ -564,14 +719,27 @@ def _end_offset(events: list[dict[str, Any]]) -> float | None:
 
     This is the number the user experiences as "the wash is done" arriving late,
     and the only one the fallback end gate moves.
+
+    The anti-crease finalise can close a run straight from RUNNING or PAUSED into
+    anti-wrinkle, without ENDING; that finish is the close too. Without it those
+    rows had no offset and dropped out of every lag / early / split figure (36 of
+    the 98 #486 Miele runs once the finalise fires at the programme end, audit
+    2026-11-03 item 9), which also changed ``--check``'s per-type n.
+
+    A run the manager discards (a ghost or a dishwasher pump-out, register item
+    568) is not the close: its state events carry ``discarded``.
     """
     for ev in reversed(events):
-        if ev.get("type") != "state":
+        if ev.get("type") != "state" or ev.get("discarded"):
             continue
         detail = str(ev.get("detail") or "")
-        if detail.startswith("ending->"):
+        if detail.startswith("ending->") or detail in _DIRECT_CLOSES:
             return float(ev.get("t") or 0.0)
     return None
+
+
+#: State transitions that close a run without passing through ENDING.
+_DIRECT_CLOSES = frozenset({"running->anti_wrinkle", "paused->anti_wrinkle"})
 
 
 def _active_span(points: list[tuple[float, float]], stop: float) -> float:
@@ -660,6 +828,7 @@ def _export_setup(
     anti_wrinkle: str = "export",
     device_types: tuple[str, ...] | None = None,
     overrides: dict[str, Any] | None = None,
+    standby: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
     """Everything the per-cycle loop shares: the production store, rebuilt envelopes."""
     found = _export_doc(path, all_formats, device_types)
@@ -675,6 +844,23 @@ def _export_setup(
     base["profiles"] = {k: dict(v) if isinstance(v, dict) else v
                         for k, v in (base.get("profiles") or {}).items()}
     base["envelopes"] = dict(base.get("envelopes") or {})
+    standby_level = None
+    if standby is not None:
+        # The held level follows the stop threshold the replay runs with (#518),
+        # and with --standby-floor so does the #458 floor it then runs under. Only
+        # the #518 shape: above stop and below start (at or above start it would
+        # open the next cycle, the flat-power stop's case), else the export is
+        # not replayed.
+        run_cfg = _production(
+            doc, base, shipped_watchdog=shipped_watchdog, overrides=overrides
+        )[0]
+        standby_level = _standby_level(float(run_cfg.stop_threshold_w), standby["level"])
+        if not (
+            float(run_cfg.stop_threshold_w) < standby_level < float(run_cfg.start_threshold_w)
+        ):
+            return None
+        if standby.get("floor"):
+            overrides = {**(overrides or {}), **_standby_floor_overrides(run_cfg, standby_level)}
     cfg, store, opts = _production(
         doc, base, shipped_watchdog=shipped_watchdog, force_anti_wrinkle=force_aw,
         overrides=overrides,
@@ -701,6 +887,7 @@ def _export_setup(
         "doc": doc, "device_type": device_type, "ac_device": ac_device,
         "force_aw": force_aw, "base": base, "cfg": cfg, "store": store,
         "opts": opts, "stop": stop, "level": level, "prebuilt": prebuilt,
+        "overrides": overrides, "standby_level": standby_level,
     }
 
 
@@ -722,6 +909,7 @@ def _replay_export(
     overrides: dict[str, Any] | None = None,
     halt: tuple[float, str, str] | None = None,
     user_pause: bool = False,
+    standby: dict[str, Any] | None = None,
     only: frozenset[int] | None = None,
     memo: bool = False,
 ) -> list[tuple[int, dict[str, Any]]]:
@@ -734,7 +922,7 @@ def _replay_export(
     setup_kw = {
         "all_formats": all_formats, "shipped_watchdog": shipped_watchdog,
         "anti_wrinkle": anti_wrinkle, "device_types": device_types,
-        "overrides": overrides,
+        "overrides": overrides, "standby": standby,
     }
     if memo:
         key = json.dumps([str(path), setup_kw], sort_keys=True, default=str)
@@ -750,6 +938,10 @@ def _replay_export(
     device_type, ac_device, force_aw = ctx["device_type"], ctx["ac_device"], ctx["force_aw"]
     doc, base, cfg, store, opts = ctx["doc"], ctx["base"], ctx["cfg"], ctx["store"], ctx["opts"]
     stop, level, prebuilt = ctx["stop"], ctx["level"], ctx["prebuilt"]
+    overrides, standby_level = ctx["overrides"], ctx["standby_level"]
+    watchdog_s = float(
+        opts.get(CONF_WATCHDOG_INTERVAL) or resolve_watchdog_interval_default(device_type)
+    )
     cycles = base["past_cycles"]
     rows: list[tuple[int, dict[str, Any]]] = []
     for ci, cyc in enumerate(cycles):
@@ -783,6 +975,15 @@ def _replay_export(
                 _halt_level(stop, halt[2]),
             )
             halt_s = (h0, h1)
+        standby_s: tuple[float, float] | None = None
+        if standby is not None and standby_level is not None:
+            replayed, s0, s1 = _with_standby_tail(
+                replayed, _cycle_readings(replayed), stop, standby_level,
+                float(standby["minutes"]), standby["cadence"], bool(standby.get("lift")),
+                lambda a, b: _keepalive_offsets(a, b, standby_level, cfg, opts, watchdog_s),
+                device_type,
+            )
+            standby_s = (s0, s1)
         _AC.clear()
         if user_pause and halt_s is not None:
             _b = playground._cycle_base_time(replayed)  # noqa: SLF001
@@ -813,6 +1014,7 @@ def _replay_export(
             work = [(t + shift if t >= halt_s[0] else t, p) for t, p in pts]
         highs = [t for t, p in work if p > level]
         active = [t for t, p in work if p > stop]
+        prog_end = _programme_end(work, active, device_type)
         ac_final = _AC.get("ac_final_ts")
         base_t = playground._cycle_base_time(replayed)  # noqa: SLF001
         ac_final_s = (ac_final - base_t).total_seconds() if ac_final is not None else None
@@ -848,6 +1050,19 @@ def _replay_export(
                 halt_s is not None and halt_s[0] <= t < halt_s[1] for t in finishes
             ),
         }
+        # #518 held standby tail: only on such a run, so the rows of every other
+        # run (and the baseline) are unchanged.
+        standby_fields: dict[str, Any] = {}
+        if standby_s is not None:
+            standby_fields = {
+                "standby_level_w": round(float(standby_level), 3),
+                "standby_cadence": standby["cadence"],
+                "standby_lift": bool(standby.get("lift")),
+                "standby_floor": bool(standby.get("floor")),
+                "standby_start_s": round(standby_s[0], 1),
+                "standby_end_s": round(standby_s[1], 1),
+                "finishes_s": [round(t, 1) for t in finishes],
+            }
         rows.append((ci, {
             "export": _export_key(path),
             "device_type": device_type,
@@ -873,6 +1088,11 @@ def _replay_export(
             "tumble_tail": bool(tumble_tail and ac_device),
             "first_end_s": round(first_end, 1) if first_end is not None else None,
             "active_end_s": round(active[-1], 1) if active else None,
+            # Programme truth (register item 573): where a quiet tail begins.
+            "prog_end_s": round(prog_end, 1) if prog_end is not None else None,
+            "prog_span_s": (
+                round(prog_end - active[0], 1) if prog_end is not None and active else None
+            ),
             "last_high_s": round(highs[-1], 1) if highs else None,
             "ac_final_s": round(ac_final_s, 1) if ac_final_s is not None else None,
             "ac_held": bool(_AC.get("ac_held")),
@@ -887,6 +1107,7 @@ def _replay_export(
             "label_profile": out.get("label_profile"),
             "label_reason": out.get("label_reason"),
             **stall_fields,
+            **standby_fields,
         }))
     return rows
 
@@ -911,8 +1132,55 @@ def _summarise(rows: list[dict[str, Any]], device_type: str | None = None) -> di
         r for r in matched
         if r["confidence"] is not None and float(r["confidence"]) < 0.4
     ]
+    # Programme truth (item 573): lag of the close against the programme's own end,
+    # an early end = the FIRST finish more than 1 / 5 min before it, a split = the
+    # programme cut before its end and continued as another piece, or the kept
+    # piece covering under 90% of the programme. Rows from before item 573 lack
+    # the field and fall back to the above-stop truth.
+    def _pspan(r: dict[str, Any]) -> float:
+        v = r.get("prog_span_s")
+        return float(v) if v is not None else float(r["active_span_s"])
+
+    def _pend(r: dict[str, Any]) -> float | None:
+        v = r.get("prog_end_s")
+        return float(v) if v is not None else r.get("active_end_s")
+
+    def _first(r: dict[str, Any]) -> float:
+        """The first finish against the programme end; without a recorded first
+        finish, the close against the programme span (the pre-573 measure)."""
+        if r.get("first_end_s") is not None and _pend(r) is not None:
+            return float(r["first_end_s"]) - float(_pend(r))
+        return float(r["end_offset_s"]) - _pspan(r)
+
+    def _cut(r: dict[str, Any]) -> bool:
+        if r["detected_count"] <= 1:
+            return False
+        if r.get("first_end_s") is None or _pend(r) is None:
+            return True
+        return float(r["first_end_s"]) < float(_pend(r)) - 60.0
+
+    def _plag(r: dict[str, Any]) -> float:
+        # Both on the trace clock: the programme span starts at the first active
+        # reading, the close offset at the trace start, so a trace that starts
+        # below stop read that lead-in as lag. Older rows keep the span measure.
+        if r.get("prog_end_s") is not None:
+            return float(r["end_offset_s"]) - float(r["prog_end_s"])
+        return float(r["end_offset_s"]) - _pspan(r)
+
+    plags = [_plag(r) for r in finished]
+    pfirst = [_first(r) for r in finished]
+    psplits = sum(
+        1 for r in finished
+        if _cut(r) or (r["final_duration_s"] or 0.0) < 0.9 * _pspan(r)
+    )
     return {
         "n": len(finished),
+        "prog_median_lag_min": round(float(np.median(plags)) / 60.0, 2),
+        "prog_mean_lag_min": round(float(np.mean(plags)) / 60.0, 2),
+        "prog_p90_lag_min": round(float(np.percentile(plags, 90)) / 60.0, 2),
+        "prog_early_1min_n": sum(1 for x in pfirst if x < -60.0),
+        "prog_early_5min_n": sum(1 for x in pfirst if x < -300.0),
+        "prog_split_n": int(psplits),
         "median_lag_min": round(float(np.median(lags)) / 60.0, 2),
         "mean_lag_min": round(float(np.mean(lags)) / 60.0, 2),
         "p90_lag_min": round(float(np.percentile(lags, 90)) / 60.0, 2),
@@ -1078,6 +1346,111 @@ def _print_stall_summary(rows: list[dict[str, Any]]) -> None:
     )
 
 
+#: ``--standby-tail``: the close-lag marks the summary counts, minutes.
+STANDBY_LAG_MARKS = (5, 10, 15, 30, 60)
+
+
+def _standby_row_verdict(r: dict[str, Any]) -> dict[str, Any]:
+    """One held-tail row (#518): its first finish against the programme end."""
+    pend = r.get("prog_end_s") if r.get("prog_end_s") is not None else r.get("active_end_s")
+    first = r.get("first_end_s")
+    door = float(r["standby_end_s"])
+    lag = (float(first) - float(pend)) if first is not None and pend is not None else None
+    pspan = float(r.get("prog_span_s") or r["active_span_s"])
+    split = bool(
+        r["detected"]
+        and (
+            (r["detected_count"] > 1 and lag is not None and lag < -60.0)
+            or (r["final_duration_s"] or 0.0) < 0.9 * pspan
+        )
+    )
+    early = lag is not None and lag < -60.0
+    start = r.get("standby_start_s")
+    # A finish before the held level was even fed (an above-stop anti-crease
+    # phase ending on its own) is not a close the tail rule made.
+    pre_tail = (
+        first is not None and not early and start is not None and float(first) < float(start)
+    )
+    return {
+        "lag": lag,
+        # An early end is not a close in the tail: it counts under `early` only,
+        # never as a fast close (its negative lag passes every mark) nor as door.
+        "in_tail": first is not None and float(first) < door and not early and not pre_tail,
+        "pre_tail": pre_tail,
+        "at_door": first is None or float(first) >= door,
+        "early": early,
+        "split": split,
+    }
+
+
+def _summarise_standby(rows: list[dict[str, Any]], device_type: str | None) -> dict[str, Any]:
+    sel = [
+        r for r in rows
+        if r.get("standby_start_s") is not None
+        and (device_type is None or r["device_type"] == device_type)
+    ]
+    verdicts = [_standby_row_verdict(r) for r in sel]
+    closed = [v["lag"] for v in verdicts if v["in_tail"] and v["lag"] is not None]
+    return {
+        "n": len(sel),
+        **{
+            f"le_{m}m": sum(1 for lag in closed if lag <= m * 60.0)
+            for m in STANDBY_LAG_MARKS
+        },
+        "door": sum(1 for v in verdicts if v["at_door"]),
+        "pre_tail": sum(1 for v in verdicts if v["pre_tail"]),
+        "med_lag_min": round(float(np.median(closed)) / 60.0, 1) if closed else None,
+        "early": sum(1 for v in verdicts if v["early"]),
+        "split": sum(1 for v in verdicts if v["split"]),
+        "sb_fired": sum(1 for r in sel if r.get("sb_final_s") is not None),
+    }
+
+
+def _print_standby_summary(rows: list[dict[str, Any]]) -> None:
+    held = [r for r in rows if r.get("standby_start_s") is not None]
+    if not held:
+        return
+    r0 = held[0]
+    print(
+        f"\nheld standby tail (#518): cadence {r0['standby_cadence']}, "
+        f"lift {r0['standby_lift']}, #458 floor {r0['standby_floor']}"
+    )
+    marks = "".join(f"{f'<={m}m':>7}" for m in STANDBY_LAG_MARKS)
+    hdr = (
+        f"{'scope':<18}{'n':>5}{marks}{'door':>7}{'med lag':>9}{'early':>7}"
+        f"{'pre':>6}{'split':>7}{'sb fin':>8}"
+    )
+    print(hdr)
+    print("-" * len(hdr))
+    for scope in [None, *sorted({r["device_type"] for r in held})]:
+        st = _summarise_standby(held, scope)
+        if not st["n"]:
+            continue
+        cells = "".join(f"{st[f'le_{m}m']:>7}" for m in STANDBY_LAG_MARKS)
+        print(
+            f"{scope or 'ALL':<18}{st['n']:>5}{cells}{st['door']:>7}"
+            f"{st['med_lag_min']!s:>9}{st['early']:>7}{st['pre_tail']:>6}{st['split']:>7}"
+            f"{st['sb_fired']:>8}"
+        )
+    print(
+        "<=Nm = first finish within N min of the programme end (the unmodified trace's "
+        "last above-stop\nreading), during the held tail; door = not before the held "
+        "tail ended (the door opened);\nearly = first finish > 1 min before the "
+        "programme end; pre = finished after it but before the held tail began\n"
+        "(not counted as a close); sb fin = standby-band finalizes."
+    )
+    for r in held:
+        v = _standby_row_verdict(r)
+        if v["early"] or v["split"]:
+            print(
+                f"  {'EARLY' if v['early'] else 'SPLIT':<6}{r['export']} {r['id']} "
+                f"label={r['label']} matched={r['matched_profile']} "
+                f"lag={round(v['lag'] / 60.0, 1) if v['lag'] is not None else None} min "
+                f"pieces={r['detected_count']} sb={r.get('sb_final_s')} "
+                f"reason={r['termination_reason']}"
+            )
+
+
 def _print_summary(rows: list[dict[str, Any]]) -> None:
     devices = sorted({r["device_type"] for r in rows})
     hdr = (
@@ -1103,6 +1476,7 @@ def _print_summary(rows: list[dict[str, Any]]) -> None:
     print("weak = matched cycles whose final confidence is below 0.4 (the gate's bar).")
     _print_ac_summary(rows)
     _print_stall_summary(rows)
+    _print_standby_summary(rows)
 
 
 def _compare(before_path: str, after_path: str) -> None:
@@ -1121,11 +1495,16 @@ def _compare(before_path: str, after_path: str) -> None:
             continue
         name = scope or "ALL"
         print(f"=== {name} (n={as_['n']})")
+        # The programme-truth figures too: they are the ones --check gates on.
         for key, unit in (
             ("median_lag_min", " min"), ("mean_lag_min", " min"), ("p90_lag_min", " min"),
             ("early_1min_pct", "%"), ("early_5min_pct", "%"), ("split_pct", "%"),
+            ("prog_median_lag_min", " min"), ("prog_mean_lag_min", " min"),
+            ("prog_p90_lag_min", " min"), ("prog_early_1min_n", ""),
+            ("prog_early_5min_n", ""), ("prog_split_n", ""),
         ):
-            print(f"    {key:<18} {bs[key]:>8}{unit} -> {as_[key]:>8}{unit}")
+            if key in bs and key in as_:
+                print(f"    {key:<20} {bs[key]:>8}{unit} -> {as_[key]:>8}{unit}")
         print()
 
     ac_scopes = [None, *sorted({
@@ -1192,18 +1571,22 @@ def _compare(before_path: str, after_path: str) -> None:
 #: ``--check`` regression tolerances (audit TESTING-09): how far a metric may move
 #: the wrong way, per device type, before the check fails. Lags in minutes;
 #: early ends and splits are cycle counts.
+#: Since item 573 the gate reads the PROGRAMME truth: the above-stop yardstick counts
+#: a quiet tail as programme, so on the 2026-11-02 baseline 17 of 19 dryer early/split
+#: counts were artefacts and the zero tolerance blocked any change that ends a tail
+#: device at its programme end. The above-stop figures are still summarised.
 BASELINE_TOLERANCE: dict[str, float] = {
-    "median_lag_min": 0.25,
-    "mean_lag_min": 0.5,
-    "p90_lag_min": 1.0,
-    "early_1min_n": 0,
-    "early_5min_n": 0,
-    "split_n": 0,
+    "prog_median_lag_min": 0.25,
+    "prog_mean_lag_min": 0.5,
+    "prog_p90_lag_min": 1.0,
+    "prog_early_1min_n": 0,
+    "prog_early_5min_n": 0,
+    "prog_split_n": 0,
 }
 #: The replay flags a baseline records and ``--check`` replays with.
 BASELINE_FLAGS = (
     "loo", "all_formats", "shipped_watchdog", "anti_wrinkle", "tumble_tail",
-    "device_types", "no_shortening",
+    "device_types", "no_shortening", "no_dishwasher_band",
 )
 
 
@@ -1226,6 +1609,10 @@ def _baseline_summary(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
             "early_1min_pct": s["early_1min_pct"],
             "early_5min_pct": s["early_5min_pct"],
             "split_pct": s["split_pct"],
+            **{k: s[k] for k in (
+                "prog_median_lag_min", "prog_mean_lag_min", "prog_p90_lag_min",
+                "prog_early_1min_n", "prog_early_5min_n", "prog_split_n",
+            )},
         }
     return out
 
@@ -1288,6 +1675,9 @@ def _check_baseline(baseline: dict[str, Any], rows: list[dict[str, Any]]) -> int
             continue
         for key, limit in tol.items():
             if key not in b or key not in a:
+                # An older baseline without the metric would let a regression in it
+                # pass: it has to be regenerated, not compared.
+                drift.append(f"{scope}: {key} missing from the {'baseline' if key not in b else 'replay'}")
                 continue
             delta = float(a[key]) - float(b[key])
             flag = ""
@@ -1328,7 +1718,26 @@ def default_jobs() -> int:
     return max(1, min((os.cpu_count() or 2) - 1, MAX_JOBS))
 
 
-def _setup_replay(no_shortening: bool, no_stall_guard: bool, repo: str | None = None) -> None:
+def _set_detector_toggles(no_dishwasher_band: bool, no_stall_guard: bool) -> None:
+    """Set both detector toggles either way, from the shipped values taken once: a
+    second setup in one interpreter (a test, a sweep) must not inherit the previous
+    arm and report it under the default flags."""
+    from custom_components.ha_washdata import cycle_detector as _cd  # noqa: PLC0415
+
+    shipped = _SHIPPED_DETECTOR_TOGGLES.setdefault("values", {
+        "band": _cd.STANDBY_BAND_TERMINAL_EVENT_DEVICE_TYPES,
+        "stall": _cd.STALL_HOLDS_STANDBY_BAND,
+    })
+    # The #518 before arm: the standby-band finalise for its pre-#518 device
+    # types only (no dishwasher), everything else the code under test.
+    _cd.STANDBY_BAND_TERMINAL_EVENT_DEVICE_TYPES = () if no_dishwasher_band else shipped["band"]
+    _cd.STALL_HOLDS_STANDBY_BAND = False if no_stall_guard else shipped["stall"]
+
+
+def _setup_replay(
+    no_shortening: bool, no_stall_guard: bool, repo: str | None = None,
+    no_dishwasher_band: bool = False,
+) -> None:
     """Patches and probes every replay needs; idempotent (also the pool initializer)."""
     global REPO  # noqa: PLW0603
     if repo is not None:
@@ -1346,10 +1755,7 @@ def _setup_replay(no_shortening: bool, no_stall_guard: bool, repo: str | None = 
         _const.END_GATE_LATE_RATIO = 1e9
         _const.END_GATE_LATE_RATIO_BY_DEVICE = {}
 
-    if no_stall_guard:
-        from custom_components.ha_washdata import cycle_detector as _cd  # noqa: PLC0415
-
-        _cd.STALL_HOLDS_STANDBY_BAND = False
+    _set_detector_toggles(no_dishwasher_band, no_stall_guard)
 
     logging.getLogger("custom_components.ha_washdata").setLevel(logging.ERROR)
     _install_anticrease_probe()
@@ -1435,7 +1841,7 @@ def _granted(jobs: int, jobs_file: Path | None) -> int:
 def _replay_parallel(
     paths: list[Path], jobs: int, no_shortening: bool, no_stall_guard: bool,
     loo: bool, kw: dict[str, Any], timings_path: Path | None = None,
-    jobs_file: Path | None = None,
+    jobs_file: Path | None = None, no_dishwasher_band: bool = False,
 ) -> list[dict[str, Any]]:
     """The serial loop's rows, in its order, from ``jobs`` worker processes.
 
@@ -1458,7 +1864,8 @@ def _replay_parallel(
     with ProcessPoolExecutor(
         max(jobs, MAX_JOBS) if jobs_file else jobs,
         mp_context=multiprocessing.get_context("spawn"),
-        initializer=_setup_replay, initargs=(no_shortening, no_stall_guard, str(REPO)),
+        initializer=_setup_replay,
+        initargs=(no_shortening, no_stall_guard, str(REPO), no_dishwasher_band),
     ) as ex:
         inflight: dict[Any, str] = {}
 
@@ -1584,6 +1991,31 @@ def main(argv: list[str] | None = None) -> int:
         "--no-stall-guard", action="store_true",
         help="before arm: the stall display does not hold the standby-band finalize",
     )
+    ap.add_argument(
+        "--no-dishwasher-band", action="store_true",
+        help="#518 before arm: no standby-band finalise on a dishwasher",
+    )
+    ap.add_argument(
+        "--standby-tail", default=None, metavar="LEVEL",
+        help="#518: hold each trace at LEVEL after its programme ('Nx' = N x stop, "
+        "'+D' = stop + D W, or W) instead of the 0 W tail",
+    )
+    ap.add_argument(
+        "--standby-cadence", choices=("dense", "keepalive", "silent"), default="keepalive",
+        help="with --standby-tail: how the held level reaches the detector (see the docstring)",
+    )
+    ap.add_argument(
+        "--standby-min", type=float, default=120.0, metavar="M",
+        help="with --standby-tail: minutes the level is held before the door opens (0 W)",
+    )
+    ap.add_argument(
+        "--standby-lift", action="store_true",
+        help="with --standby-tail: raise every earlier reading below the level to it",
+    )
+    ap.add_argument(
+        "--standby-floor", action="store_true",
+        help="with --standby-tail: replay with the #458 stop floor for the level applied",
+    )
 
     args = ap.parse_args(argv)
     overrides: dict[str, Any] = {}
@@ -1608,9 +2040,13 @@ def main(argv: list[str] | None = None) -> int:
         if args.rows:
             return _check_baseline(baseline, json.loads(Path(args.rows).read_text()))
         # Replay exactly what the baseline measured, whatever else was passed.
-        for key, value in (baseline.get("flags") or {}).items():
+        flags = baseline.get("flags") or {}
+        for key, value in flags.items():
             if key in BASELINE_FLAGS:
                 setattr(args, key, ",".join(value) if key == "device_types" else value)
+        # A baseline from before the arm existed measured the default rule.
+        if "no_dishwasher_band" not in flags:
+            args.no_dishwasher_band = False
     elif args.rows:
         ap.error("--rows needs --check")
     _integration()
@@ -1620,13 +2056,29 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.user_pause and args.halt_at is None:
         ap.error("--user-pause needs --halt-at (the plateau it pauses over)")
-    _setup_replay(args.no_shortening, args.no_stall_guard)
+    _setup_replay(args.no_shortening, args.no_stall_guard, None, args.no_dishwasher_band)
     halt = (
         (float(args.halt_at), str(args.halt_min), str(args.halt_level))
         if args.halt_at is not None else None
     )
     if args.check and halt is not None:
         ap.error("--check replays the baseline's corpus unmodified: drop --halt-at")
+    standby = (
+        {
+            "level": str(args.standby_tail), "cadence": args.standby_cadence,
+            "minutes": float(args.standby_min), "lift": bool(args.standby_lift),
+            "floor": bool(args.standby_floor),
+        }
+        if args.standby_tail is not None else None
+    )
+    if args.check and standby is not None:
+        ap.error("--check replays the baseline's corpus unmodified: drop --standby-tail")
+    if standby is not None and halt is not None:
+        ap.error("--standby-tail and --halt-at both replace the trace's tail: pick one")
+    # A baseline records the flags --check restores, and --check replays the corpus
+    # unmodified: one written from a modified replay could never be reproduced.
+    if args.write_baseline and (standby is not None or halt is not None):
+        ap.error("--write-baseline measures the corpus unmodified: drop --standby-tail / --halt-at")
     rows: list[dict[str, Any]] = []
     corpus = REPO / "cycle_data"
     if args.all_formats:
@@ -1642,12 +2094,14 @@ def main(argv: list[str] | None = None) -> int:
         "device_types": device_types or None, "overrides": overrides or None,
         "halt": halt,
         "user_pause": bool(args.user_pause),
+        "standby": standby,
     }
     if (args.jobs > 1 or args.jobs_file) and paths:
         rows = _replay_parallel(
             paths, args.jobs, args.no_shortening, args.no_stall_guard, args.loo, kw,
             Path(args.timings) if args.timings else None,
             Path(args.jobs_file) if args.jobs_file else None,
+            args.no_dishwasher_band,
         )
     else:
         for path in paths:

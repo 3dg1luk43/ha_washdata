@@ -89,6 +89,9 @@ reviews:
           unreleased version: symptom, cause, fix, with the issue link and a
           "Thanks to @user" credit where a user reported it. The release's TL;DR must
           still describe the release. Pure test, devtools or CI changes need none.
+          The link names the issue that reported the problem, which can differ from
+          the issue number in the fix commit (e.g. a robustness report against a
+          feature's own issue): do not ask to swap one for the other.
       - name: Tuning backed by a measurement
         mode: warning
         instructions: >-
@@ -129,7 +132,10 @@ reviews:
         - NumPy is the only third-party dependency, ml/ included. Flag any new import of scipy, sklearn, pandas or torch.
         - All HA code is async. CPU-heavy NumPy work runs in the executor; long jobs go through task_registry.py, never tied only to a WebSocket request.
         - Timestamps: dt_util.now(), never datetime.now(). Intervals (elapsed, dt, durations): time_utils.utc_now() and dt_util.as_utc(); local-time subtraction is an hour off across DST.
-        - Energy: signal_processing.integrate_wh() + energy_gap_threshold_s(). Flag a new inline trapezoid.
+        - Energy: a STORED cycle's energy_wh (cycle end, add, trim, merge, split, history import,
+          the v18 migration) goes through signal_processing.integrate_cycle_wh() (each reading held
+          to the next, only gaps > 1 h dropped; #498). End gates, cost weighting and ML features
+          keep integrate_wh() + energy_gap_threshold_s(). Flag a new inline integral.
         - No user-facing English in Python: HA labels go in strings.json and translations/en.json. Exception: ws_api send_error() diagnostics are inline by design (the panel wraps them in its own translated toast).
         - Tunables live in entry.options, identity keys in entry.data. Device type, brand and model are in entry.options; reading them from entry.data breaks detection.
         - HA event data has a 32 KB limit: never put power_data, debug_data or power_trace in an event.
@@ -151,6 +157,7 @@ reviews:
         - Every auto-label goes through profile_store.label_verdict(). Labelling or persisting uses MatchResult.label_confidence, not confidence (they differ on a Stage-5 group win).
         - New gates should use the top1-top2 margin, not the absolute confidence. MATCH_AMBIGUITY_MARGIN stays 0.05 because it also gates Smart Termination.
         - Cycle lookups go through iter_stored_cycles()/find_stored_cycle(); only the profile-shaping readers use iter_evidence_cycles(). Profile GC or a lookup gated on the evidence view deletes import-only profiles.
+        - Review requests exist only for observed cycles: whether a request is live (prune_orphaned_feedback, the review budget, an answer's guard) is read on past_cycles, because an answer can only label a past cycle. Do not widen those checks to iter_stored_cycles().
         - Rejected designs, do not re-add: the Stage-5 aggregate group snapshot, the additive _stage5_rerank tie-break, the #364 prefix-fit guard, a global phase_match fill role.
         - prefix_shape_arrays caps the grid at the candidate's k on purpose (a candidate-independent grid measured worse on the split guard).
         - Detector config is clamped where it is read, not in a constructor: an options reload assigns detector.config fields directly.

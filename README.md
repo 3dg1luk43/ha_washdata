@@ -66,8 +66,9 @@ reports often enough: see [Smart plugs](https://github.com/3dg1luk43/ha_washdata
 
 WashData ships no programs, because every machine is different. Teach it your 2-3 most common ones:
 
-- **Record:** on the panel's **Overview** tab, use **Manual Recording > Start Recording**, run the
-  program, stop the recording, then save it to a profile.
+- **Record:** open **WashData** in the Home Assistant sidebar and, on its **Overview** tab, press
+  **Manual Recording > Start Recording**. Run the program, stop the recording, then save it to a
+  profile.
 - **Or label afterwards:** just use the machine. Each run is stored as an unlabelled cycle; open it
   in **Cycles** and assign it to a new profile.
 
@@ -94,6 +95,7 @@ wash + dry combination.
 | `sensor.<name>_current_phase` | The phase you defined for the program at this point ("Rinse", "Spin"), else `unknown` |
 | `sensor.<name>_cycle_count` | Lifetime runs, for maintenance by count |
 | `sensor.<name>_energy_total` | Lifetime kWh, for the Energy dashboard |
+| `sensor.<name>_last_cycle_duration` / `_last_cycle_energy` / `_last_cycle_cost` | The last finished run: minutes, kWh, and cost in your currency (unknown without a price). Diagnostic. |
 | `sensor.<name>_suggested_settings_available` | Number of tuning suggestions waiting in Settings |
 | `binary_sensor.<name>_maintenance_due` | On when a maintenance reminder is due |
 | `select.<name>_cycle_program` | Pick the program by hand |
@@ -114,6 +116,8 @@ wait before WashData calls the end; `clean` means finished with the load still i
 | `ha_washdata.record_start` / `record_stop` | record a program from a button |
 | `ha_washdata.label_cycle`, `auto_label_cycles` | label stored cycles |
 | `ha_washdata.mark_unloaded` | confirm the load is out (NFC tag, button) |
+| `ha_washdata.mark_maintenance_done` | tick off a maintenance task (kiosk button, NFC tag) |
+| `ha_washdata.delete_cycle` | delete a stored cycle, e.g. with `trigger.cycle_id` |
 | `ha_washdata.export_config` / `import_config` | back up or restore one device (administrators) |
 
 ```yaml

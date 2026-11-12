@@ -22,6 +22,7 @@ import itertools
 import logging
 import math
 import traceback
+from collections import deque
 from dataclasses import dataclass, replace
 from datetime import datetime, timedelta
 from typing import Any, Callable, cast
@@ -31,10 +32,12 @@ from homeassistant.util import dt as dt_util
 
 from . import match_rules
 from .log_utils import DeviceLoggerAdapter
-from .time_utils import utc_now
+from .time_utils import SYNTHETIC_OFFSETS_KEY, utc_now
 from .const import (
     DEFAULT_ANTI_WRINKLE_EXIT_POWER,
     TERMINAL_EVENT_PEAK_FRAC,
+    TERMINAL_EVENT_MAX_PEAK_FRAC,
+    TERMINAL_QUIET_MIN_S,
     DISHWASHER_QUIET_RELEASE_TERMINAL_MARGIN,
     ANTI_WRINKLE_ELIGIBLE_REASONS,
     TerminationReason,
@@ -80,6 +83,7 @@ from .const import (
     END_GATE_HAZARD_MIN_CYCLES,
     END_GATE_HAZARD_POSITION_SLACK,
     STANDBY_BAND_FINALIZE_DEVICE_TYPES,
+    STANDBY_BAND_TERMINAL_EVENT_DEVICE_TYPES,
     STANDBY_BAND_MIN_RATIO,
     STANDBY_BAND_LOOSE_MIN_RATIO,
     STANDBY_BAND_NEAR_STOP_FACTOR,
@@ -101,9 +105,32 @@ from .const import (
     ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC,
     ANTI_CREASE_TERMINAL_MATCH_FRAC,
     ANTI_CREASE_SPIN_WAIT_MAX_RATIO,
+    ANTI_CREASE_REST_DEVICE_TYPES,
+    ANTI_CREASE_REST_FACTOR,
+    ANTI_CREASE_REST_WAIT_MAX_RATIO,
+    ANTI_CREASE_PROGRAMME_END,
+    ANTI_CREASE_PROGRAMME_END_DEVICE_TYPES,
+    ANTI_CREASE_PROGRAMME_END_QUIET_S,
+    ANTI_CREASE_PROGRAMME_END_SPIN_GAP_S,
+    ANTI_CREASE_PROGRAMME_END_MIN_RATIO,
+    ANTI_CREASE_PROGRAMME_END_QUIET_FACTOR,
+    ANTI_CREASE_PROGRAMME_END_HEAD_FACTOR,
+    ANTI_CREASE_PROGRAMME_END_HOLD_S,
+    ANTI_CREASE_PROGRAMME_END_EVAL_S,
     QUIET_PULSE_DEVICE_TYPES,
     QUIET_PULSE_MAX_S,
+    RUN_EXPECT_FLOOR_RATIO,
+    RUN_EXPECT_GATES,
+    MAX_PLAUSIBLE_PROGRAMME_S,
+    FLAT_POWER_STOP_DEVICE_TYPES,
+    FLAT_POWER_STOP_WINDOW_S,
+    FLAT_POWER_STOP_TOLERANCE_W,
+    FLAT_POWER_STOP_TOLERANCE_FRACTION,
 )
+from . import spin_rhythm
+
+#: How often a run past 8 h re-reads the device's longest learned programme (#502).
+_CAP_PROVIDER_REFRESH_S = 600.0
 
 # The dishwasher end-spike wait window is shared between two code paths
 # (Smart Termination's wait branch and _should_defer_finish's no-end-spike
@@ -173,7 +200,9 @@ from .signal_processing import (
     integrate_wh,
     median_fast,
     percentile_linear,
+    TERMINAL_QUIET_SEEN_FRAC,
     terminal_event_end,
+    terminal_event_measure,
     terminal_quiet_seen,
 )
 
@@ -280,6 +309,21 @@ STALL_CURRENT_EXCLUDED_FROM_PROGRESS = True
 # 6 / 5 / 18 -> 5 / 7 / 8 (each new one the unpaused cycle's own end, or a former
 # split); paused on the display level, 9 -> 6 and 14 -> 9 (50% / 90%).
 USER_PAUSE_EXCLUDED_FROM_GATES = True
+# Register item 620: the duration cap (#502) reads programme time too
+# (`_cap_elapsed_s`): the wall clock less every finished user pause, and it does
+# not fire while one lasts (the watchdog's zombie and unmatched guards and the
+# flat-power stop already wait a user pause out). On the wall clock a wash paused
+# for hours was force-stopped at the cap, in the pause or after the resume.
+# Measured (`end_gate_eval --loo --all-formats --halt-at 0.5 --halt-min 300
+# --halt-level 5 --user-pause`, 635 rows): cap stops 66 -> 0 (58 of them
+# dishwashers), programme splits 21 -> 8 and early ends > 5 min 16 -> 8, as on the
+# unpaused corpus (9 and 8), whose 635 rows are unchanged. A finished stall still
+# counts: left out as well, an unmatched washer on a 4-5 W standby with a 2 min
+# burst every 40-90 min was never capped (30 h on; 8 h on the wall clock), each
+# burst banking the run before it, and that zombie is the cap's case. It would
+# have kept 1 of 635 rows whole on the same run as a halt (no --user-pause),
+# where the flat-power stop ends 426. The A/B switch for the revert checks.
+USER_PAUSE_EXCLUDED_FROM_CAP = True
 # Register item 514: a halt is abrupt. A programme winds down to its end (the last
 # spin's ramp, then quiet), so the reading before a display left on is low; a halt
 # stops the machine where it is. A flat run whose previous reading was at least
@@ -338,6 +382,23 @@ def effective_anticrease_finalize_ratio(value: Any) -> float:
     )
 
 
+def effective_smart_termination_ratio(value: Any) -> float:
+    """The Smart Termination duration ratio the gate applies: held to the
+    documented [0.50, 1.00]. Shared with the Playground's config summary, which
+    reported a typed 2.0 that ran as 1.0 (#487). Anything unusable (non-numeric,
+    an oversized int, non-finite) falls back to the default, as
+    :func:`effective_anticrease_finalize_ratio` does: a NaN would otherwise clamp
+    to the loosest 0.50.
+    """
+    try:
+        ratio = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return DEFAULT_SMART_TERMINATION_DURATION_RATIO
+    if not math.isfinite(ratio):
+        return DEFAULT_SMART_TERMINATION_DURATION_RATIO
+    return min(1.0, max(0.5, ratio))
+
+
 def effective_curve_preroll_seconds(value: Any) -> float:
     """The pre-roll window actually applied for a stored value (0 = off).
 
@@ -377,6 +438,81 @@ class _QuietPulse:
     resume: bool = False
 
 
+def flat_band_holds(lo: float, hi: float) -> bool:
+    """Whether readings spanning ``lo``..``hi`` W have not moved (flat-power stop).
+
+    The spread is held to max(FLAT_POWER_STOP_TOLERANCE_W,
+    FLAT_POWER_STOP_TOLERANCE_FRACTION x the mid-range). Monotone: a narrower span
+    holds whenever a wider one does, so the longest flat run is well defined.
+    """
+    spread = hi - lo
+    return spread <= max(
+        FLAT_POWER_STOP_TOLERANCE_W,
+        FLAT_POWER_STOP_TOLERANCE_FRACTION * (hi + lo) / 2.0,
+    )
+
+
+class _FlatRun:
+    """The longest flat run of REAL readings ending at the latest one.
+
+    Every reading of the run is at or above the floor it was pushed with and the
+    run's spread holds :func:`flat_band_holds`. O(1) amortised per reading: a
+    reading that breaks the band drops the oldest readings until it holds again
+    (monotone queues keep the run's min and max), so the run always starts where
+    the longest flat stretch ending now starts. A silence adds nothing, so the
+    last reading's level is carried forward until the next one.
+    """
+
+    __slots__ = ("_ts", "_maxq", "_minq", "_first", "_next")
+
+    def __init__(self) -> None:
+        self._ts: deque[datetime] = deque()
+        # (sequence number, power): the run's max / min candidates, oldest first.
+        self._maxq: deque[tuple[int, float]] = deque()
+        self._minq: deque[tuple[int, float]] = deque()
+        self._first = 0  # sequence number of the run's oldest reading
+        self._next = 0
+
+    def clear(self) -> None:
+        self._ts.clear()
+        self._maxq.clear()
+        self._minq.clear()
+        self._first = self._next
+
+    @property
+    def start(self) -> datetime | None:
+        return self._ts[0] if self._ts else None
+
+    @property
+    def band(self) -> tuple[float, float] | None:
+        if not self._ts:
+            return None
+        return (self._minq[0][1], self._maxq[0][1])
+
+    def push(self, timestamp: datetime, power: float, floor: float) -> None:
+        if not math.isfinite(power) or power < floor:
+            self.clear()
+            return
+        if self._ts and timestamp < self._ts[-1]:
+            self.clear()
+        seq = self._next
+        self._next += 1
+        self._ts.append(timestamp)
+        while self._maxq and self._maxq[-1][1] <= power:
+            self._maxq.pop()
+        self._maxq.append((seq, power))
+        while self._minq and self._minq[-1][1] >= power:
+            self._minq.pop()
+        self._minq.append((seq, power))
+        while not flat_band_holds(self._minq[0][1], self._maxq[0][1]):
+            self._ts.popleft()
+            if self._maxq[0][0] == self._first:
+                self._maxq.popleft()
+            if self._minq[0][0] == self._first:
+                self._minq.popleft()
+            self._first += 1
+
+
 @dataclass(frozen=True)
 class MatchContext:
     """One live match as the detector consumes it (audit DETECT-15).
@@ -408,12 +544,26 @@ class MatchContext:
     # long enough to be judged, so the profile's traces are not walked for it on
     # every cycle (`test_perf_budgets`).
     stall_catalogue: Any = None
+    # 16 (hazard end gate): its evidence where element 14 cannot serve, an
+    # ambiguous match (every contender's catalogue) or a profile with too few
+    # traced cycles (the device's pooled one): `ProfileStore.hazard_pause_catalogue`.
+    hazard_catalogue: Any = None
+    # 17 (audit item 2): this run's own expected duration from the matched
+    # profile's nearest members (`match_rules.GateInputs.run_expected`); the Smart
+    # Termination bar, the late shortening and the finish deferral may read it
+    # below `expected_duration` (`CycleDetector._gate_expected_s`).
+    run_expected_s: Any = None
+    # 18 (audit 2026-11-03 item 9): the matched profile's quiet tail after its
+    # programme end, 0.0 when only the device has one
+    # (`progress.anticrease_programme_tail`). Set, the anti-crease finalise opens
+    # only on the programme-end event. None: not armed.
+    programme_tail_s: Any = None
 
     def __getitem__(self, index: Any) -> Any:
         return self.as_sequence()[index]
 
     def __len__(self) -> int:
-        return 15
+        return 18
 
     def as_sequence(self) -> tuple[Any, ...]:
         return (
@@ -421,7 +571,9 @@ class MatchContext:
             self.is_confident_mismatch, self.is_ambiguous, False,
             self.is_prefix_ambiguous_full_shape, self.tail_power, self.terminal_high,
             self.terminal_quiet_s, self.longest_candidate_s, self.trusted_min_s,
-            self.pause_catalogue, self.stall_catalogue,
+            self.pause_catalogue, self.stall_catalogue, self.hazard_catalogue,
+            self.run_expected_s,
+            self.programme_tail_s,
         )
 
 
@@ -677,6 +829,29 @@ def _merge_spans(spans: list[tuple[float, float]]) -> list[tuple[float, float]]:
     return merged
 
 
+def _immutable_catalogue(raw: Any) -> bool:
+    """Whether a pause catalogue can never change in place: exactly
+    ``(int, ((number, number), ...))`` built of tuples, the store's form."""
+    if type(raw) is not tuple or len(raw) != 2 or type(raw[0]) is not int:
+        return False
+    pauses = raw[1]
+    return (
+        type(pauses) is tuple
+        and set(map(type, pauses)) <= {tuple}
+        and set(map(len, pauses)) <= {2}
+        and set(map(type, itertools.chain.from_iterable(pauses))) <= {float, int}
+    )
+
+
+# Programmes whose element 14 the detector keeps sanitised, one entry each
+# (`_sanitized_match_catalogue`). Before the first commit the match visits many
+# programmes in turn (12 in the first 22 ticks on the tron4r washer), so a few
+# shared slots sanitised the big catalogue again each time it came back. An entry
+# keeps its catalogue and the sanitised copy alive (~14 MB at 1000 traced washer
+# cycles in one programme); the store caches the same catalogue anyway.
+_PAUSE_CATALOGUE_MEMO_MAX = 64
+
+
 class CycleDetector:
     """Detects washing machine cycles based on power usage.
 
@@ -703,8 +878,17 @@ class CycleDetector:
         terminal_drop_provider: (
             Callable[[list[tuple[float, float]], float], bool | None] | None
         ) = None,
+        longest_programme_provider: Callable[[], float] | None = None,
+        record_synthetic_offsets: bool = False,
     ) -> None:
-        """Initialize the cycle detector."""
+        """Initialize the cycle detector.
+
+        ``record_synthetic_offsets``: the finished cycle lists which of its
+        ``power_data`` rows are not a sensor report (``SYNTHETIC_OFFSETS_KEY``,
+        register item 568). Only the manager sets it: there every other row is a
+        report the sensor sent. A replay or a history import feeds rows of unknown
+        provenance, so its cycles say nothing.
+        """
         self._logger = DeviceLoggerAdapter(_LOGGER, device_name)
         self._config = config
         self._on_state_change = on_state_change
@@ -720,6 +904,14 @@ class CycleDetector:
         # Injected by the manager; None disables it (existing behavior). Opposite
         # asymmetry to the end-guard: it can only ever *shorten* the end wait.
         self._terminal_drop_provider = terminal_drop_provider
+        # () -> the device's longest learned programme in seconds (#502), which the
+        # duration cap scales on (`_duration_cap_s`). Read only once a run is past
+        # its type's base (`match_rules.cycle_duration_cap_base_s`). None: the cap is
+        # the base.
+        self._longest_programme_provider = longest_programme_provider
+        # (cycle start, when read, value): the provider walks the stored cycles, so
+        # it is read once per run and then every _CAP_PROVIDER_REFRESH_S.
+        self._longest_programme_cache: tuple[datetime, datetime, float] | None = None
         # Throttle caches for the two providers, scoped to the cycle + expectation:
         # (last_reading_ts, expected_duration, cycle_start, result). Reused only
         # within the recompute window when expected_duration and cycle_start match.
@@ -739,6 +931,14 @@ class CycleDetector:
 
         # Data
         self._power_readings: list[tuple[datetime, float]] = []  # (time, raw_power)
+        # The timestamps of the synthetic readings processed (the manager's
+        # keepalives), for the finished cycle's SYNTHETIC_OFFSETS_KEY (item 568).
+        # Pruned to the readings still held at every reset. `_synthetic_known` is
+        # False while the trace holds readings restored from a snapshot that did
+        # not record them: that cycle then says nothing.
+        self._record_synthetic = bool(record_synthetic_offsets)
+        self._synthetic_ts: set[datetime] = set()
+        self._synthetic_known = True
         # Rolling pre-cycle readings, so a start that took several probes to
         # commit can recover the readings the aborted probes took with them
         # (#430). Only appended to while no cycle is open, trimmed to
@@ -858,18 +1058,49 @@ class CycleDetector:
         # (traced cycles, ((start_fraction, seconds), ...)), for the hazard end
         # gate. None: no catalogue, the fallback waits as before.
         self._matched_pause_catalogue: tuple[int, tuple[tuple[float, float], ...]] | None = None
+        # Programme -> (the last immutable element-14 object handed in for it, its
+        # sanitised form) (`_sanitized_match_catalogue`).
+        self._pause_catalogue_memo: dict[
+            str, tuple[Any, tuple[int, tuple[tuple[float, float], ...]] | None]
+        ] = {}
+        # Element 16: the hazard gate's evidence for an ambiguous match or a thinly
+        # traced profile (`_hazard_evidence`), or its lazy producer. None: element
+        # 14's rule alone.
+        self._matched_hazard_catalogue: Any = None
+        # Element 17 (audit item 2): this run's expected duration from the matched
+        # profile's nearest members, or None (`_gate_expected_s`).
+        self._matched_run_expected_s: float | None = None
+        # Element 18 (audit 2026-11-03 item 9): the matched profile's median quiet
+        # tail after its programme end (0.0: only the device has one). Set, the
+        # anti-crease finalise opens only on the programme end
+        # (`_anticrease_programme_ended`). None: not armed.
+        self._matched_programme_tail_s: float | None = None
+        # `_anticrease_programme_ended`'s throttle: (cycle start, the reading it
+        # last read the trace at, the programme end it found or None, whether that
+        # read opened the gate).
+        self._programme_end_memo: tuple[Any, datetime, datetime | None, bool] | None = None
         # Register item 498: the longest pause in the catalogue of every match
         # revoked this cycle, which bounds a verified pause the revoke orphaned
         # (`_release_orphaned_pause`). 0.0: no evidence, the floor applies.
         self._orphaned_pause_evidence_s: float = 0.0
         self._terminal_quiet_memo: tuple[Any, bool] | None = None
+        # `_terminal_event_so_far`'s memo (#518): (cycle start, gate spans, readings
+        # checked, the last of them, the event threshold, the result).
+        self._terminal_event_memo: tuple[Any, int, int, datetime, float, Any] | None = None
         # One-shot per cycle, so the held-finalise reason is visible in the log
         # without repeating it on every reading.
         self._anticrease_spin_wait_logged: bool = False
+        self._anticrease_rest_wait_logged: bool = False
         # Register item 393a: set while STATE_ANTI_WRINKLE was entered by the #296
         # anti-crease finalise - the level at or under which a reading is that
         # tail's own baseline rather than a burst. None for every other entry.
         self._anticrease_tail_floor_w: float | None = None
+        # Audit 2026-11-03 item 9: set when that finalise came from the programme
+        # end (`_anticrease_programme_ended`), ANTI_CREASE_PROGRAMME_END_HOLD_S
+        # later. Until then a long burst is still the tail (`burst_limit` is not
+        # applied in anti-wrinkle, and OFF starts nothing at or under
+        # anti_wrinkle_max_power); a reading above it still opens the next cycle.
+        self._anticrease_tail_hold_until: datetime | None = None
         self._last_smart_term_block_reason: str | None = None  # #346 diagnostic throttle
 
         # Anti-wrinkle tracking (dryers only)
@@ -937,6 +1168,14 @@ class CycleDetector:
         self._probe_hidden: bool = False
         self._probe_hidden_state: str = STATE_OFF
         self._probe_hidden_sub_state: str | None = None
+        # Flat-power stop (FLAT_POWER_STOP_*): the flat run of real readings at or
+        # above max(start, stop threshold) that ends at the latest one, and after a
+        # stop the (lo, hi) of the run it stopped on. While that is set no cycle
+        # starts: every reading inside the band is ignored, the first real one
+        # outside it releases the lockout. In memory only: a restart forgets both,
+        # so a run restored or restarted on a stuck level waits the window again.
+        self._flat_run = _FlatRun()
+        self._flat_lockout: tuple[float, float] | None = None
         # Discussion #452, display only (see the STALL_* / IDLE_* constants).
         # Element 15: the matched profile's low stretches below the near-stop
         # ceiling, as element 14's (traced, ((fraction, seconds), ...)).
@@ -1125,6 +1364,26 @@ class CycleDetector:
             except Exception:  # noqa: BLE001 - missing evidence, not an error
                 return None
         return cls._sanitize_stall_catalogue(raw) if raw is not None else None
+
+    @classmethod
+    def _resolve_hazard_catalogue(
+        cls, raw: Any
+    ) -> tuple[int, tuple[tuple[float, float], ...]] | None:
+        """Element 16 as data: a lazy producer (the manager's and the Playground's
+        form, like element 15) is called here, only where the hazard gate needs it."""
+        if callable(raw):
+            try:
+                raw = raw()
+            except Exception:  # noqa: BLE001 - missing evidence, not an error
+                return None
+        return cls._sanitize_pause_catalogue(raw) if raw is not None else None
+
+    def _matched_hazard(self) -> tuple[int, tuple[tuple[float, float], ...]] | None:
+        """The current match's element 16, resolved once and kept."""
+        raw = self._matched_hazard_catalogue
+        if callable(raw):
+            raw = self._matched_hazard_catalogue = self._resolve_hazard_catalogue(raw)
+        return raw
 
     def _seed_stall_run(self) -> None:
         """Re-derive the flat near-stop run in progress from the trace (#452)."""
@@ -1485,6 +1744,7 @@ class CycleDetector:
             self._time_in_state = max(0.0, (timestamp - entered).total_seconds())
         self._sub_state = sub_state
         self._power_readings = []
+        self._prune_synthetic()
         self._current_cycle_start = None
         self._last_active_time = None
         self._cycle_max_power = 0.0
@@ -1657,24 +1917,27 @@ class CycleDetector:
     # Maximum reasonable cycle duration accepted by the detector.  Anything
     # longer is rejected as corrupted data and replaced with the
     # _SANITIZE_INVALID_SENTINEL so downstream gates fall through to the
-    # unmatched / no-expected-duration path.
-    _SANITIZE_MAX_EXPECTED_DURATION = 6 * 3600.0  # 6 hours
+    # unmatched / no-expected-duration path. It was 6 h, which made every match
+    # to a longer programme (a 6.8-8 h wash+dry, #502) no match at all here while
+    # the manager showed it: no Smart Termination, no zombie killer, and the
+    # unmatched idle guard instead.
+    _SANITIZE_MAX_EXPECTED_DURATION = float(MAX_PLAUSIBLE_PROGRAMME_S)  # 16 h
     _SANITIZE_INVALID_SENTINEL = 0.0  # 0 == "no valid expected_duration"
 
     def _sanitize_expected_duration(
         self, raw: Any, *, source: str = "update_match"
     ) -> float:
-        """Coerce ``raw`` into a finite float in (0, 6h] or return 0.0.
+        """Coerce ``raw`` into a finite float in (0, 16h] or return 0.0.
 
         The class invariant is that ``self._expected_duration`` is either a
-        finite, strictly positive float ≤ 6 hours, or 0.0 meaning "no valid
+        finite, strictly positive float ≤ 16 hours, or 0.0 meaning "no valid
         expected duration".  Every code path that assigns ``_expected_duration``
         (live profile-match callbacks AND restored snapshots) routes through
         this helper so the gates in STATE_ENDING and ``_should_defer_finish``
         can trust the value without re-validating.
 
         Emits a DEBUG log line distinguishing the rejection reason - the
-        ``<= 0`` and ``> 6h`` markers are part of issue #197's regression
+        ``<= 0`` and ``> 16h`` markers are part of issue #197's regression
         contract and tests assert on them.
         """
         try:
@@ -1699,8 +1962,8 @@ class CycleDetector:
             return self._SANITIZE_INVALID_SENTINEL
         if value > self._SANITIZE_MAX_EXPECTED_DURATION:
             self._logger.debug(
-                "%s: invalid raw_expected_duration %r (> 6h), defaulting to 0.0",
-                source, raw,
+                "%s: invalid raw_expected_duration %r (> %.0fh), defaulting to 0.0",
+                source, raw, self._SANITIZE_MAX_EXPECTED_DURATION / 3600.0,
             )
             return self._SANITIZE_INVALID_SENTINEL
         return value
@@ -1729,6 +1992,18 @@ class CycleDetector:
         return min(value, TERMINAL_QUIET_CAP_S)
 
     @staticmethod
+    def _sanitize_programme_tail(raw: Any) -> float | None:
+        """Element 18 as a finite non-negative float (0.0: only the device has a
+        tail), else None (not armed)."""
+        if raw is None or isinstance(raw, bool):
+            return None
+        try:
+            value = float(raw)
+        except (TypeError, ValueError, OverflowError):
+            return None
+        return value if math.isfinite(value) and value >= 0 else None
+
+    @staticmethod
     def _sanitize_positive(raw: Any) -> float | None:
         """A finite positive float from a snapshot, else None."""
         if raw is None or isinstance(raw, bool):
@@ -1738,6 +2013,30 @@ class CycleDetector:
         except (TypeError, ValueError, OverflowError):
             return None
         return value if math.isfinite(value) and value > 0.0 else None
+
+    @staticmethod
+    def _sanitize_run_expected(raw: Any) -> float | None:
+        """Coerce element 17 to a positive duration or None (no per-run expectation)."""
+        return CycleDetector._sanitize_trusted_min(raw)
+
+    def _gate_expected_s(self, gate: str) -> float:
+        """The expected duration ``gate`` reads (audit item 2): the matched
+        profile's, or this run's own from its nearest members when that is
+        SHORTER, never below ``RUN_EXPECT_FLOOR_RATIO`` of it, never while the
+        match is ambiguous. ``gate`` is one of ``RUN_EXPECT_GATES``. Shorten-only.
+        """
+        exp = float(self._expected_duration)
+        run = self._matched_run_expected_s
+        if (
+            gate not in RUN_EXPECT_GATES
+            or run is None
+            or exp <= 0
+            or self._match_ambiguous
+            or not self._matched_profile
+            or not run < exp
+        ):
+            return exp
+        return max(float(run), RUN_EXPECT_FLOOR_RATIO * exp)
 
     @staticmethod
     def _sanitize_trusted_min(raw: Any) -> float | None:
@@ -1767,6 +2066,38 @@ class CycleDetector:
         except (TypeError, ValueError, OverflowError):
             return None
 
+    def _sanitized_match_catalogue(
+        self, raw: Any, profile_name: Any,
+    ) -> tuple[int, tuple[tuple[float, float], ...]] | None:
+        """:meth:`_sanitize_pause_catalogue` of ``profile_name``'s element 14,
+        memoised on the object.
+
+        Both producers (the manager and the Playground) hand in the store's cached
+        catalogue, one object per evidence fingerprint and stop threshold, so the
+        same object arrives on every match tick until a cycle joins or leaves the
+        profile, a trace is rewritten or the threshold moves, each of which builds
+        a new one. Sanitising walked every pause of the profile's traced evidence,
+        on the event loop: 1.6 / 28 / 112 ms per tick at 23 / 300 / 1000 cycles
+        (since item 601 the store hands in its frontier, a handful of pairs).
+        Only a catalogue that cannot change in place is memoised (a tuple of
+        ``(int, tuple of (number, number) tuples)``), and the memo holds the
+        object, so an identity hit is always the value a fresh sanitise returns.
+        The programme only picks the entry: a new object replaces it.
+        """
+        if not isinstance(profile_name, str):
+            return self._sanitize_pause_catalogue(raw)
+        memo = self._pause_catalogue_memo
+        hit = memo.pop(profile_name, None)
+        if hit is not None and hit[0] is raw:
+            memo[profile_name] = hit  # most recently used last
+            return hit[1]
+        out = self._sanitize_pause_catalogue(raw)
+        if _immutable_catalogue(raw):
+            memo[profile_name] = (raw, out)
+            while len(memo) > _PAUSE_CATALOGUE_MEMO_MAX:
+                del memo[next(iter(memo))]
+        return out
+
     def _hazard_wait(self, timestamp: datetime, base: float) -> float:
         """The ENDING fallback wait the matched profile's own pauses justify.
 
@@ -1774,26 +2105,46 @@ class CycleDetector:
         soak this programme has ever shown from this position": END_GATE_HAZARD_
         MARGIN x the longest resumed pause its traced evidence began at or after
         this quiet's start (less a slack), clamped to [off_delay, base]. Shorten-
-        only, unambiguous matches only, and only with END_GATE_HAZARD_MIN_CYCLES
-        traced cycles; otherwise ``base``. Measured (prototype, 292 cycles): washer
-        median lag 16.17 -> 12.50 min, early ends 0 -> 0, splits unchanged.
+        only, and only with END_GATE_HAZARD_MIN_CYCLES traced cycles of evidence
+        (:meth:`_hazard_evidence`: an ambiguous match reads every contender's,
+        a thin profile the device's pool); otherwise ``base``. Measured (prototype,
+        292 cycles): washer median lag 16.17 -> 12.50 min, early ends 0 -> 0,
+        splits unchanged; the 2026-11-03 extension in const.py.
         """
         return self._hazard_wait_for(
             timestamp, base, self._matched_pause_catalogue,
-            self._expected_duration, self._match_ambiguous,
+            self._expected_duration, self._match_ambiguous, self._matched_hazard,
         )
 
+    @classmethod
+    def _hazard_evidence(cls, cat: Any, ambiguous: bool, ext: Any) -> Any:
+        """The catalogue the hazard gate reads, or None (no evidence: ``base``).
+
+        The matched profile's own (element 14) for an unambiguous match with
+        END_GATE_HAZARD_MIN_CYCLES traced cycles; otherwise element 16, which the
+        producer builds for exactly the cases element 14 cannot serve: an ambiguous
+        match (the catalogues of every programme within the ambiguity margin) and
+        a thinly traced profile (the device's pooled catalogue). ``ext`` may be
+        lazy; it is resolved only here, past element 14.
+        """
+        if not ambiguous and cat is not None and cat[0] >= END_GATE_HAZARD_MIN_CYCLES:
+            return cat
+        ext = cls._resolve_hazard_catalogue(ext)
+        if ext is not None and ext[0] >= END_GATE_HAZARD_MIN_CYCLES:
+            return ext
+        return None
+
     def _hazard_wait_for(
-        self, timestamp: datetime, base: float, cat: Any, expected: float, ambiguous: bool
+        self, timestamp: datetime, base: float, cat: Any, expected: float, ambiguous: bool,
+        ext: Any = None,
     ) -> float:
         """:meth:`_hazard_wait` for a match with these values (register item 469b)."""
+        cat = self._hazard_evidence(cat, ambiguous, ext)
         if (
             cat is None
-            or cat[0] < END_GATE_HAZARD_MIN_CYCLES
             or not self._matched_profile
             or expected <= 0
             or self._current_cycle_start is None
-            or ambiguous
         ):
             return base
         elapsed = self._gate_elapsed_s(timestamp)  # programme time (item 511)
@@ -2051,6 +2402,8 @@ class CycleDetector:
             and self.ambiguous_ending_match_defers(
                 result[2], result[1], result[11] if len(result) >= 12 else 0.0,
                 result[13] if len(result) >= 14 else None,
+                result[15] if len(result) >= 16 else None,
+                profile_name=result[0],
             )
         ):
             self._logger.debug(
@@ -2177,13 +2530,26 @@ class CycleDetector:
                 result_seq[12] if len(result_seq) >= 13 else None
             )
             # Element 14: cleared by a shorter tuple, like elements 9-13.
-            self._matched_pause_catalogue = self._sanitize_pause_catalogue(
-                result_seq[13] if len(result_seq) >= 14 else None
+            self._matched_pause_catalogue = self._sanitized_match_catalogue(
+                result_seq[13] if len(result_seq) >= 14 else None, match_name
             )
             # Element 15 (#452): likewise. A run already in progress keeps the
             # match it began under (`_stall_match`).
             self._matched_stall_catalogue = self._sanitize_stall_catalogue(
                 result_seq[14] if len(result_seq) >= 15 else None
+            )
+            # Element 16: likewise; a lazy producer is kept as is (`_matched_hazard`).
+            _hz = result_seq[15] if len(result_seq) >= 16 else None
+            self._matched_hazard_catalogue = (
+                _hz if callable(_hz) else self._sanitize_pause_catalogue(_hz)
+            )
+            # Element 17 (audit item 2): likewise cleared by a shorter tuple.
+            self._matched_run_expected_s = self._sanitize_run_expected(
+                result_seq[16] if len(result_seq) >= 17 else None
+            )
+            # Element 18 (audit 2026-11-03 item 9): likewise.
+            self._matched_programme_tail_s = self._sanitize_programme_tail(
+                result_seq[17] if len(result_seq) >= 18 else None
             )
             self._stall_now = None  # the current match is re-read for a run in progress
         else:
@@ -2208,6 +2574,9 @@ class CycleDetector:
             self._matched_trusted_min_s = None
             self._matched_pause_catalogue = None
             self._matched_stall_catalogue = None
+            self._matched_hazard_catalogue = None
+            self._matched_run_expected_s = None
+            self._matched_programme_tail_s = None
 
         elif match_name:
             # If sanitization rejected the expected_duration, treat the match
@@ -2323,6 +2692,8 @@ class CycleDetector:
         decision (see ``process_reading``). Idempotent: an ongoing outage keeps
         its first start.
         """
+        # No flat run survives an outage: nobody saw the level in it.
+        self._flat_run.clear()
         if self._sensor_outage_since is None:
             self._sensor_outage_since = dt_util.as_utc(timestamp)
             in_cycle = self._state in (
@@ -2357,6 +2728,9 @@ class CycleDetector:
             and self._state in (STATE_FINISHED, STATE_INTERRUPTED, STATE_FORCE_STOPPED)
         )
         carried = (self._standby_reprobe, self._preroll_buffer) if idle_carry else None
+        # The flat-power lockout outlives that expiry the same way: the stuck level
+        # is still there once the display shows Off. Any other reset drops it.
+        flat_lockout = self._flat_lockout if idle_carry else None
         self._transition_to(
             target_state,
             dt_util.as_utc(timestamp) if timestamp is not None else utc_now(),
@@ -2395,6 +2769,10 @@ class CycleDetector:
         self._matched_trusted_min_s = None
         self._matched_pause_catalogue = None
         self._matched_stall_catalogue = None
+        self._matched_hazard_catalogue = None
+        self._matched_run_expected_s = None
+        self._matched_programme_tail_s = None
+        self._programme_end_memo = None
         self._orphaned_pause_evidence_s = 0.0
         # Element 12 belongs with them: its own comment claims a stale value can
         # never license a shortening for a different match, and that was only
@@ -2405,6 +2783,7 @@ class CycleDetector:
         # ambiguous match shorten `effective_off_delay` on no evidence.
         self._longest_candidate_duration = 0.0
         self._anticrease_spin_wait_logged = False
+        self._anticrease_rest_wait_logged = False
         # Per-cycle diagnostic throttle (#346): the "Smart Termination not applied"
         # line only logs when the reason CHANGES. Carrying the previous cycle's
         # reason across a reset swallows the new cycle's very first diagnostic
@@ -2420,6 +2799,7 @@ class CycleDetector:
         self._anti_wrinkle_candidate_peak = 0.0
         self._anti_wrinkle_candidate_start_power = 0.0
         self._anticrease_tail_floor_w = None
+        self._anticrease_tail_hold_until = None
         # Reset idle time tracker for anti-wrinkle
         self._anti_wrinkle_idle_time = 0.0
         # Reset delayed-start tracking
@@ -2435,6 +2815,18 @@ class CycleDetector:
         self._probe_terminal_from = None
         if carried is not None:
             self._standby_reprobe, self._preroll_buffer = carried
+        self._flat_lockout = flat_lockout
+        self._prune_synthetic()
+
+    def _prune_synthetic(self) -> None:
+        """Forget synthetic timestamps no held reading carries (item 568); a fresh
+        trace is recorded from the start, so its rows are known again."""
+        if not self._power_readings:
+            self._synthetic_known = True
+        if self._synthetic_ts:
+            held = {ts for ts, _p in self._power_readings}
+            held.update(ts for ts, _p in self._preroll_buffer)
+            self._synthetic_ts &= held
 
     @property
     def state(self) -> str:
@@ -2528,7 +2920,7 @@ class CycleDetector:
         # value persisted by an import or an older schema is read here unclamped): a
         # 0.0 would drop the duration floor entirely and let Smart Termination fire the
         # moment its other conditions pass.
-        configured_ratio = min(1.0, max(0.5, configured_ratio))
+        configured_ratio = effective_smart_termination_ratio(configured_ratio)
         if (
             device_type == "dishwasher"
             and end_spike_seen
@@ -2683,6 +3075,8 @@ class CycleDetector:
         # transitions, and mixed-zone comparisons elsewhere stay correct.
         timestamp = dt_util.as_utc(timestamp)
         outage_since = self._sensor_outage_since
+        if synthetic and self._record_synthetic:
+            self._synthetic_ts.add(timestamp)
         if not synthetic:
             self._last_real_reading_time = timestamp
             if outage_since is not None:
@@ -2754,6 +3148,25 @@ class CycleDetector:
                     STOP_LOCKOUT_RELEASE_SECONDS,
                 )
                 # Fall through: the state machine will start a new cycle.
+
+        # Flat-power lockout: the cycle was stopped on a level the power has not
+        # left, so a reading still on it must not start the next one (it would
+        # start at once, the level being at or above the start threshold). Only a
+        # real reading outside the band releases it; nothing else is touched, as in
+        # the manual stop lockout above.
+        if self._flat_lockout is not None:
+            if synthetic or self._in_flat_lockout(power):
+                self._last_process_time = timestamp
+                self._last_power = power
+                return
+            self._logger.info(
+                "Power left the flat band (%.1fW outside %.1f-%.1fW): flat-power "
+                "lockout released",
+                power,
+                self._flat_lockout[0],
+                self._flat_lockout[1],
+            )
+            self._flat_lockout = None
 
         # Snapshot the cadence BEFORE folding this reading in: the gap-free tally
         # below classifies `dt` against a ceiling derived from the cadence, and an
@@ -2881,6 +3294,28 @@ class CycleDetector:
             timestamp, unobserved > 0 or (synthetic and not observed)
         )
 
+        # #508: the same rule for the quiet tallies. A low reading after one at or
+        # above the threshold closes an interval the appliance spent at that
+        # previous level. A change-only plug sends nothing while a draw stays
+        # flat, and the watchdog injects nothing at high power (#409), so a 10 min
+        # flat 400 W phase ending in a 2 W drum pause reached the detector as one
+        # interval, banked whole as quiet: PAUSED at once and the fallback end two
+        # keepalives later, splitting the wash. With a cycle open such an interval
+        # is quiet for at most one gate cadence (the drop fell somewhere inside a
+        # normal reporting interval, as before); the rest of it was the draw.
+        # Measured (end_gate_eval --loo --all-formats, 635 cycles): no early end
+        # or split moves, 61 ends later by a median 30 s; crediting none of it
+        # moved 307 (some Smart Terminations to the timeout, +23 min). STARTING
+        # keeps its one-reading false-start abort, which only asks whether power
+        # dropped; an unknown cadence (under five intervals) caps nothing, like
+        # the outage ceilings.
+        quiet_cap = dt
+        if (
+            prev_high
+            and prior_cadence_known
+            and self._state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
+        ):
+            quiet_cap = min(dt, self._gate_cadence)
         if (not is_high and not absorbed) or opens_pulse:
             # Quiet nobody saw is not quiet (item 266). The watchdog keeps
             # injecting while the sensor is unavailable, and crediting those
@@ -2889,7 +3324,7 @@ class CycleDetector:
             # rest recorded as a second cycle. Frozen, not reset, so the quiet
             # observed on either side still counts and `is_waiting_low_power`
             # keeps the manager's staleness force-stop armed for a dead sensor.
-            self._time_below_threshold += dt - unobserved
+            self._time_below_threshold += min(dt - unobserved, quiet_cap)
             self._time_below_unobserved += unobserved
             # Gap-free tally: an outage-sized step is unobserved time, so restart
             # the observed-quiet tally from this sample instead of crediting the
@@ -2930,7 +3365,7 @@ class CycleDetector:
             ):
                 self._time_below_threshold_gapfree = 0.0
             else:
-                self._time_below_threshold_gapfree += dt
+                self._time_below_threshold_gapfree += quiet_cap
         if opens_pulse:
             self._quiet_pulse = _QuietPulse(
                 timestamp,
@@ -2960,6 +3395,10 @@ class CycleDetector:
         if not synthetic:
             # #452 idle display: real readings only (a keepalive is not a level).
             self._update_idle(timestamp, power)
+            # Flat-power stop: real readings only too. A keepalive repeats a value
+            # the sensor did not send; the run's last reading is carried forward
+            # through a silence instead.
+            self._track_flat(timestamp, power)
 
         # A keepalive inside a recorded outage carries no observation, only the
         # clock (item 266). Stepping the state machine on it would hand every
@@ -2972,6 +3411,12 @@ class CycleDetector:
             and outage_since is not None
             and self._state in (STATE_STARTING, STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
         ):
+            return
+
+        # Flat-power stop, ahead of every end gate: on any reading, a keepalive
+        # included (it only advances the clock of the level carried forward).
+        if self._flat_power_due(timestamp):
+            self._finish_flat_power(timestamp)
             return
 
         anti_wrinkle_active = (
@@ -3035,11 +3480,24 @@ class CycleDetector:
                 burst_limit = float(self._config.anti_wrinkle_max_duration)
                 if tail_floor is not None:
                     burst_limit = max(burst_limit, ANTI_CREASE_CONFIRM_WINDOW_S)
+                # Audit 2026-11-03 item 9: a finalise at the programme end leaves
+                # the whole tail to absorb, and a send-on-change plug skips the base
+                # between pulses for minutes (#486 bca48d5907b7: 3.5 min of 14-83 W,
+                # which opened a phantom cycle from the tail). Within the hold only
+                # the power test opens the next one.
+                hold = self._anticrease_tail_hold_until
                 exceeds = (
                     self._anti_wrinkle_candidate_peak
                     > self._config.anti_wrinkle_max_power
                     or power > self._config.anti_wrinkle_max_power
-                    or candidate_duration > burst_limit
+                    or (
+                        candidate_duration > burst_limit
+                        and not (
+                            tail_floor is not None
+                            and hold is not None
+                            and timestamp < hold
+                        )
+                    )
                 )
 
                 if exceeds:
@@ -3051,6 +3509,7 @@ class CycleDetector:
                     self._anti_wrinkle_candidate_start_power = 0.0
                     self._transition_to(STATE_STARTING, timestamp)
                     started_from_anti_wrinkle = True
+                    self._anticrease_tail_hold_until = None
                     self._current_cycle_start = candidate_start or timestamp
 
                     # Preserve the anti-wrinkle candidate window instead of dropping ramp-up samples.
@@ -3109,6 +3568,17 @@ class CycleDetector:
                     # Safety timeout: 2 hours in anti-wrinkle
                     self._transition_to(STATE_OFF, timestamp)
                 return
+
+            # Audit 2026-11-03 item 9: anti-wrinkle left on idle inside the tail of
+            # a programme-end finalise (a pulse gap or a plug dropout longer than
+            # the idle timeout: 5 of 87 #486 tails, up to 938 s). The tail's next
+            # pulses are not a new cycle; only a reading above
+            # anti_wrinkle_max_power starts one until the hold is over.
+            hold = self._anticrease_tail_hold_until
+            if hold is not None and self._state == STATE_OFF and not started_from_anti_wrinkle:
+                if timestamp < hold and power <= float(self._config.anti_wrinkle_max_power):
+                    return
+                self._anticrease_tail_hold_until = None
 
             # Delayed-start "standby band" detection (only from STATE_OFF).
             #
@@ -3442,15 +3912,14 @@ class CycleDetector:
             if self._maybe_finalize_standby_band(timestamp, power):
                 return
 
-            # Max duration safety
-            if (
-                self._current_cycle_start
-                and (timestamp - self._current_cycle_start).total_seconds() > 28800
-            ):  # 8h safety
+            # Max duration safety: 8 h, or longer for a device with long programmes
+            # (#502).
+            if self._past_duration_cap(timestamp):
                 self._finish_cycle(
                     timestamp,
                     status="force_stopped",
                     termination_reason=TerminationReason.FORCE_STOPPED,
+                    duration_capped=True,
                 )
 
         elif self._state == STATE_PAUSED:
@@ -3482,16 +3951,14 @@ class CycleDetector:
             self._power_readings.append((timestamp, power))
             self._update_stall(timestamp, power)  # #452
 
-            # Hard cap: ENDING must not run longer than RUNNING's 8 h safety limit.
+            # Hard cap: ENDING must not run longer than RUNNING's safety limit.
             # Without this a standby baseline can hold the state open indefinitely.
-            if (
-                self._current_cycle_start
-                and (timestamp - self._current_cycle_start).total_seconds() > 28800
-            ):
+            if self._past_duration_cap(timestamp):
                 self._finish_cycle(
                     timestamp,
                     status="force_stopped",
                     termination_reason=TerminationReason.FORCE_STOPPED,
+                    duration_capped=True,
                 )
                 return
 
@@ -3527,7 +3994,17 @@ class CycleDetector:
                 # matched profile (expected==0) the gating is bypassed so the
                 # legacy "any spike counts" behaviour is preserved for unmatched
                 # cycles (relied on by the dishwasher unmatched-cap path).
-                if (
+                # #487: and only on a reading that looks like a terminal event, at
+                # the level the profile's terminal quiet is measured at. A Siemens
+                # dries at 0.7-1.0 W; with Stop at 1.0 W one 1.0 W sample counted as
+                # "high" here while terminal_quiet_seen (strict >) called it quiet,
+                # so it armed the spike, the 0.90 ratio relief let Smart Termination
+                # through, and the cycle ended before its real pump-out.
+                spike_floor = max(
+                    float(self._config.stop_threshold_w),
+                    TERMINAL_EVENT_PEAK_FRAC * float(self._cycle_max_power),
+                )
+                if power > spike_floor and (
                     self._expected_duration <= 0
                     or current_duration
                     >= self._expected_duration * DISHWASHER_END_SPIKE_MIN_PROGRESS
@@ -3542,14 +4019,19 @@ class CycleDetector:
                     )
                 else:
                     self._logger.debug(
-                        "Mid-cycle spike in ENDING ignored for end-spike "
-                        "tracking (%.0fs < %.0f%% of expected %.0fs)",
+                        "Spike in ENDING not counted as the end spike (%.1f W, "
+                        "floor %.1f W; %.0fs, needs %.0f%% of expected %.0fs)",
+                        power,
+                        spike_floor,
                         current_duration,
                         DISHWASHER_END_SPIKE_MIN_PROGRESS * 100,
                         self._expected_duration,
                     )
 
-                # Sanity check: if expected_duration is unreasonable (>6 hours), use fallback
+                # Sanity check: if expected_duration is unreasonable (>6 hours), use fallback.
+                # Deliberately still 6 h, not _SANITIZE_MAX_EXPECTED_DURATION (#502): a
+                # 6-16 h expected duration reached this branch as 0.0 until then, and
+                # takes the same fallback now.
                 max_reasonable = 21600.0  # 6 hours
                 effective_expected = self._expected_duration
 
@@ -3668,9 +4150,12 @@ class CycleDetector:
                     # Surface why the fast end-path is (not) firing, throttled to
                     # reason changes so a stuck cycle's cause is visible in the log
                     # without spamming every reading. Pure diagnostic (#346).
+                    # Audit item 2: this run's own expected duration where its
+                    # nearest members put it shorter (`_gate_expected_s`).
+                    _smart_expected = self._gate_expected_s("smart")
                     _block_reason = self._smart_term_block_reason(
                         current_duration,
-                        self._expected_duration,
+                        _smart_expected,
                         smart_ratio,
                         is_confident_match,
                         self._match_ambiguous,
@@ -3684,7 +4169,7 @@ class CycleDetector:
                                 "ambiguous=%s trailing_power=%s profile_tail=%s",
                                 _block_reason,
                                 current_duration,
-                                self._expected_duration * smart_ratio,
+                                _smart_expected * smart_ratio,
                                 getattr(self, "_last_match_confidence", 0.0),
                                 self._match_ambiguous,
                                 self._trailing_mean_power(timestamp, self._tail_window_s()),
@@ -3692,7 +4177,7 @@ class CycleDetector:
                             )
 
                     if (
-                        current_duration >= (self._expected_duration * smart_ratio)
+                        current_duration >= (_smart_expected * smart_ratio)
                         and is_confident_match
                         and not self._match_ambiguous
                         # A user pause is authoritative: every other finisher honours
@@ -3923,8 +4408,9 @@ class CycleDetector:
                 # the floor (only the blind prior shrinks), and is inert when
                 # nothing matched. The bar it waits for is DEVICE-RESOLVED, not a
                 # fixed 1.05x (register item 355): `resolve_end_gate_late_ratio`
-                # returns 0.90 for `washing_machine` / `washer_dryer` and
-                # `END_GATE_LATE_RATIO` (1.05) for everything else - so on a washer
+                # returns 0.80 for `washing_machine` / `washer_dryer` (the finish-
+                # deferral floor; 0.90 until 2026-11-03) and `END_GATE_LATE_RATIO`
+                # (1.05) for everything else - so on a washer
                 # the shortening starts BEFORE the expected end. That is the point:
                 # a washer's programme is load-adaptive, so a run sits below its
                 # profile mean about half the time by definition and the median
@@ -4013,7 +4499,7 @@ class CycleDetector:
                     # cannot hide from the bar - which it could when this read
                     # `MatchResult.candidates`, i.e. `candidates[:5]`.
                     _bar_s = self._fallback_shortening_bar(
-                        self._expected_duration,
+                        self._gate_expected_s("late"),
                         self._match_ambiguous,
                         self._longest_candidate_duration,
                     )
@@ -4026,19 +4512,26 @@ class CycleDetector:
                     # the expected duration - it is the longest plausible
                     # programme, and it was raised precisely to say "a much longer
                     # look-alike is still on the table, so past the expected end
-                    # does not mean done". Discounting that by 0.90 would shorten
-                    # the wait 10% BEFORE the candidate it represents could even
+                    # does not mean done". Discounting that by 0.80 would shorten
+                    # the wait 20% BEFORE the candidate it represents could even
                     # finish, and on the shipped washer defaults that drops the
                     # wait from `min_off_gap` to `max(off_delay, 300)` - one quiet
                     # interval away from finalising mid-programme and recording the
                     # rest as a second cycle, which is #288. The item-355 measurement
                     # was taken against the expected duration and says nothing about
                     # this case, so a raised bar keeps the original 1.05.
+                    #
+                    # Shorten-only against the hazard wait too: a hazard wait under
+                    # END_GATE_LATE_SECONDS is the profile's own evidence that no
+                    # pause that long is left from here, and swapping it for the
+                    # late wait at the bar ended cycles LATER (7 Miele washes by
+                    # 1-3 min at the 0.80 bar; with the min, 0 later and 45 ends
+                    # 0.5-3 min sooner, end_gate_eval --loo --all-formats).
                     if _bar_s is not None and _elapsed >= _bar_s:
-                        effective_off_delay = max(
+                        effective_off_delay = min(effective_off_delay, max(
                             self._config.off_delay,
                             min(self._config.min_off_gap, END_GATE_LATE_SECONDS),
-                        )
+                        ))
 
                 # Energy gate always looks back off_delay seconds by default;
                 # overridden below for the dishwasher cap case so the window
@@ -4520,7 +5013,9 @@ class CycleDetector:
         an active low-power phase:
 
         * the device is a wet appliance where a stuck baseline is unambiguously
-          anomalous (``STANDBY_BAND_FINALIZE_DEVICE_TYPES``);
+          anomalous (``STANDBY_BAND_FINALIZE_DEVICE_TYPES``), or a dishwasher
+          that has had its programme's terminal event (#518,
+          ``STANDBY_BAND_TERMINAL_EVENT_DEVICE_TYPES``: near-stop tier only);
         * a profile is matched and elapsed >= ``STANDBY_BAND_MIN_RATIO`` x the
           expected duration (well past when it should have ended);
         * not user-paused;
@@ -4532,7 +5027,8 @@ class CycleDetector:
         The expensive window scan runs only after the cheap duration gate passes,
         so normal cycles never pay for it.
         """
-        if self._config.device_type not in STANDBY_BAND_FINALIZE_DEVICE_TYPES:
+        needs_event = self._config.device_type in STANDBY_BAND_TERMINAL_EVENT_DEVICE_TYPES
+        if self._config.device_type not in STANDBY_BAND_FINALIZE_DEVICE_TYPES and not needs_event:
             return None
         if getattr(self, "_verified_pause", False):
             return None
@@ -4651,11 +5147,98 @@ class CycleDetector:
             # loose tier below still bounds it at STANDBY_BAND_LOOSE_MIN_RATIO x
             # expected.
             and not self._stall_holds_standby_band()
+            # #518: a dishwasher's drying is this same plateau, so only a run that
+            # has had its terminal event is past it (the pump-out it dries for).
+            and (not needs_event or self._terminal_event_seen(timestamp))
         ):
             return hi
+        if needs_event:
+            return None  # #518: the near-stop tier only
         if current_duration >= self._expected_duration * STANDBY_BAND_LOOSE_MIN_RATIO:
             return hi
         return None
+
+    def _terminal_event_seen(self, timestamp: datetime) -> bool:
+        """Has this dishwasher run had its programme's terminal event? (#518)
+
+        The pump-out after the drying phase, read the way the matched profile's
+        terminal signature reads it (``terminal_event_measure`` at its thresholds):
+        the last run above ``TERMINAL_EVENT_PEAK_FRAC`` of the cycle's peak is a
+        low-power event (``TERMINAL_EVENT_MAX_PEAK_FRAC``), after a quiet of at
+        least ``TERMINAL_QUIET_SEEN_FRAC`` x the profile's measured terminal quiet
+        (element 11, as ``terminal_quiet_seen``), and it ended at or after
+        ``DISHWASHER_END_SPIKE_MIN_PROGRESS`` of the expected duration, the bar
+        the ENDING end spike arms at. Its end, not its start: on a machine that
+        dries with a fan (#424's Beko, 15-20 W on a 1.97 kW peak) the run above
+        the threshold is the whole fan-drying phase and the pump-out, and begins
+        at ~59% of the programme. And it ended a whole ``STANDBY_BAND_WINDOW_S``
+        before ``timestamp``, so the plateau the window judges is all standby after
+        it: a standby above the event threshold would otherwise run on as part of
+        the event, and a pump-out inside the near-stop band (a 9.6 W stop) would
+        pass for standby and be trimmed off the stored cycle. Fails closed: with
+        no measured quiet there is no event to recognise, and the standby-band
+        finalise does not fire.
+
+        On a run still drying the last run is its main activity (a heating block
+        or the wash's own drain right after it), so a drying plateau past a
+        SHORTER matched programme's expected end is not taken for the standby
+        after the pump-out.
+        """
+        quiet = self._matched_terminal_quiet_s
+        expected = float(self._expected_duration or 0.0)
+        if not quiet or expected <= 0:
+            return False
+        found = self._terminal_event_so_far()
+        if found is None:
+            return False
+        gap, at = found
+        return (
+            gap >= TERMINAL_QUIET_SEEN_FRAC * float(quiet)
+            and at >= expected * DISHWASHER_END_SPIKE_MIN_PROGRESS
+            and at <= self._gate_elapsed_s(timestamp) - STANDBY_BAND_WINDOW_S
+        )
+
+    def _terminal_event_so_far(self) -> tuple[float, float] | None:
+        """``(quiet before, programme-time offset of its end)`` of this run's
+        terminal event, or None (see :meth:`_terminal_event_seen`).
+
+        On programme time (`_cut_readings` of the gate spans, item 511/514), like
+        the expected duration it is compared with. Memoised: a reading at or below
+        the event threshold cannot change the answer (the event, its quiet and the
+        peak stay where they are), so a long plateau costs one walk, not one per
+        reading.
+        """
+        start = self._current_cycle_start
+        readings = self._power_readings
+        if start is None or not readings:
+            return None
+        n = len(readings)
+        spans = self._gate_spans()
+        memo = self._terminal_event_memo
+        if (
+            memo is not None
+            and memo[0] == start
+            and memo[1] == len(spans)
+            and 0 < memo[2] <= n
+            and readings[memo[2] - 1][0] == memo[3]
+            and all(float(p) <= memo[4] for _ts, p in itertools.islice(readings, memo[2], None))
+        ):
+            self._terminal_event_memo = (*memo[:2], n, readings[-1][0], *memo[4:])
+            return memo[5]
+        pts = [
+            ((ts - start).total_seconds(), float(p)) for ts, p in self._cut_readings(spans)
+        ]
+        measure = terminal_event_measure(
+            pts, TERMINAL_EVENT_PEAK_FRAC, TERMINAL_QUIET_MIN_S, TERMINAL_EVENT_MAX_PEAK_FRAC
+        )
+        result: tuple[float, float] | None = None
+        if measure is not None and len(measure) == 5:
+            gap, seconds, _watts, _frac, position = measure
+            span = pts[-1][0] - pts[0][0]
+            result = (float(gap), pts[0][0] + float(position) * span + float(seconds))
+        threshold = max(p for _o, p in pts) * TERMINAL_EVENT_PEAK_FRAC if pts else 0.0
+        self._terminal_event_memo = (start, len(spans), n, readings[-1][0], threshold, result)
+        return result
 
     def _maybe_finalize_standby_band(self, timestamp: datetime, power: float) -> bool:
         """Finish the cycle when it is stuck on a standby plateau; True if it did.
@@ -4677,9 +5260,20 @@ class CycleDetector:
         # phase after the last heating burst - 31 min of a Miele's rinse and
         # spin in one replayed cycle.
         trim_ceiling = plateau_hi + max(0.5, 0.1 * plateau_hi)
+        # A dishwasher's finalise here needed its terminal pump-out (#518): never
+        # trim back past it. A pump-out within the ceiling of a low standby
+        # (8.3 W over 7.9 W, Stop Threshold 4 W) otherwise stored the cycle at
+        # 5190 s instead of 8450 s, its drying and the pump-out cut. Only the
+        # stored end moves; when the finalise fires does not.
+        floor_ts: datetime | None = None
+        if self._config.device_type in STANDBY_BAND_TERMINAL_EVENT_DEVICE_TYPES:
+            event = self._terminal_event_so_far()
+            if event is not None:
+                floor_ts = start_time + timedelta(seconds=self._wall_offset_s(event[1]))
         plateau_start_idx = None
         for i in range(len(self._power_readings) - 1, -1, -1):
-            if float(self._power_readings[i][1]) > trim_ceiling:
+            ts_i, p_i = self._power_readings[i]
+            if float(p_i) > trim_ceiling or (floor_ts is not None and ts_i <= floor_ts):
                 plateau_start_idx = i
                 break
         if (
@@ -4730,6 +5324,11 @@ class CycleDetector:
         matched profile's OWN tail level, which is equally low, and
         ``_anticrease_spin_pending`` fails open when the profile carries no
         terminal high block.
+
+        A washer whose programmes end in a quiet anti-crease tail (element 18 set)
+        does not use that fraction at all: it opens only on the observed programme
+        end (``_anticrease_programme_ended``, audit 2026-11-03 item 9), an event on
+        the trace (final spin, then minutes at the tail's base level), not a clock.
         """
         if not self._config.anti_wrinkle_enabled:
             return False
@@ -4744,13 +5343,6 @@ class CycleDetector:
         if not (self._matched_profile and self._expected_duration > 0):
             return False
         if self._last_match_confidence < self._config.match_confidence_threshold:
-            return False
-        # The #288 full-shape verdict only (the wider #364 prefix-fit flag never
-        # reached this gate, and was removed in 0.5.8): a false block here
-        # disables the finalise AND the match freeze, and because
-        # the tumble bursts recur faster than off_delay neither the fallback timeout
-        # nor ENDING_HARD_FINALIZE can close the cycle - that is the #296 hang.
-        if self._match_ambiguous or self._match_prefix_ambiguous_full_shape:
             return False
         if self._cycle_max_power <= float(self._config.anti_wrinkle_max_power):
             return False  # never a hot/energetic cycle - leave low-power programs alone
@@ -4768,7 +5360,29 @@ class CycleDetector:
         finalize_ratio = effective_anticrease_finalize_ratio(
             self._config.anti_crease_finalize_ratio
         )
-        if current_duration < self._expected_duration * finalize_ratio:
+        if self._anticrease_programme_end_armed():
+            # Audit 2026-11-03 item 9: on a washer whose programmes end in a quiet
+            # tail only the observed programme end opens it
+            # (`_anticrease_programme_ended`), not the clock below. That clock is
+            # safe there only while every stored run carries its whole tail: with
+            # the runs this path stores (programme + ~5 min) the profiles shrink
+            # and 0.98 x expected opened in a rinse on 4 of 98 replayed Miele runs
+            # (a shrunk Baumwolle 60, a tail-less Wolle kalt), each then split.
+            # The two flags below do not apply either: they ask whether "past
+            # expected" means past the wash, which the event answers on the trace
+            # itself, and most #486 Miele ticks are ambiguous between programmes
+            # that all end in the same tail (59 of 98 runs never finalised; keeping
+            # them, an earlier variant finalised 53 runs instead of 82).
+            if not self._anticrease_programme_ended(timestamp, current_duration):
+                return False
+        elif current_duration < self._expected_duration * finalize_ratio:
+            return False
+        # The #288 full-shape verdict only (the wider #364 prefix-fit flag never
+        # reached this gate, and was removed in 0.5.8): a false block here
+        # disables the finalise AND the match freeze, and because
+        # the tumble bursts recur faster than off_delay neither the fallback timeout
+        # nor ENDING_HARD_FINALIZE can close the cycle - that is the #296 hang.
+        elif self._match_ambiguous or self._match_prefix_ambiguous_full_shape:
             return False
         # #364: "past expected" only means "past the wash" when expected belongs to
         # the RIGHT profile. A whole washer wash phase sits below
@@ -4777,6 +5391,112 @@ class CycleDetector:
         # profile's own tail restores the guarantee the ratio alone used to give.
         if not self._smart_term_power_plausible(timestamp):
             return False
+        return True
+
+    def _anticrease_programme_end_armed(self) -> bool:
+        """Whether the finalise opens only on the programme end (element 18 set:
+        the matched profile, or at least the device, ends in a quiet tail)."""
+        return (
+            ANTI_CREASE_PROGRAMME_END
+            and self._config.device_type in ANTI_CREASE_PROGRAMME_END_DEVICE_TYPES
+            and self._matched_programme_tail_s is not None
+        )
+
+    def _anticrease_programme_ended(
+        self, timestamp: datetime, current_duration: float
+    ) -> bool:
+        """Whether the programme ended at least ``ANTI_CREASE_PROGRAMME_END_QUIET_S``
+        ago and the run has been in its anti-crease tail since (audit 2026-11-03
+        item 9): the clock half of ``_anticrease_gate_open`` when armed
+        (``_anticrease_programme_end_armed``).
+
+        Element 18 (``progress.anticrease_programme_tail``) is the matched
+        profile's tail, 0.0 when only the device has the habit. Not before
+        programme time reaches ``ANTI_CREASE_PROGRAMME_END_MIN_RATIO`` x that
+        profile's programme (expected less its tail). The event itself is
+        ``spin_rhythm.programme_end_quiet`` on the trace so far: the end closed on
+        a sustained final spin, then a stretch at or under the Stop Threshold
+        (time-weighted median) with nothing above ``anti_wrinkle_max_power``.
+
+        The trace is read at most every ``ANTI_CREASE_PROGRAMME_END_EVAL_S``, and
+        not again before a found end is ``..._QUIET_S`` old; a read's verdict holds
+        until the next one (never past a reading above ``anti_wrinkle_max_power``).
+        """
+        tail = self._matched_programme_tail_s
+        if tail is None or not self._anticrease_programme_end_armed():
+            return False
+        programme = self._expected_duration - tail
+        if programme <= 0 or current_duration < programme * ANTI_CREASE_PROGRAMME_END_MIN_RATIO:
+            return False
+        readings = self._power_readings
+        ceiling = float(self._config.anti_wrinkle_max_power)
+        if readings and float(readings[-1][1]) > ceiling:
+            # Activity again: a held positive verdict ends here, or the next low
+            # reading inside its re-read interval returned it and held the gate
+            # open (and match updates frozen) through a resumed wash.
+            self._programme_end_memo = None
+            return False
+        if len(readings) < 8:
+            return False
+        start = self._current_cycle_start
+        memo = self._programme_end_memo
+        if memo is not None and memo[0] == start:
+            _start, last_read, end_ts, ok = memo
+            # An end found, its tail still short: read again when it can be long
+            # enough. Otherwise every EVAL_S, and a positive read holds until then:
+            # the 180 s window of `_is_anticrease_tail` passes or fails with the
+            # phase of a sparse plug's readings, so a verdict held only at the read
+            # instant finished 20 of the 98 Miele runs 0.2-12.3 min later (median
+            # first-finish lag 6.62 -> 7.39 min). A reading above the ceiling has
+            # already returned False above.
+            due = (
+                end_ts + timedelta(seconds=ANTI_CREASE_PROGRAMME_END_QUIET_S)
+                if end_ts is not None and not ok
+                else last_read + timedelta(seconds=ANTI_CREASE_PROGRAMME_END_EVAL_S)
+            )
+            if timestamp < due:
+                return ok
+        # A finished user pause is not the programme's quiet: it is cut out (later
+        # readings moved back), or a pause just after the final spin read as the
+        # quiet tail on the first reading after the resume, finalising before the
+        # rinse and spin that followed and splitting the wash (end_gate_eval --loo
+        # --all-formats --halt-at 0.8/0.9 --halt-min 10 --user-pause, washers and
+        # washer-dryers: splits 23 -> 22 / 26 -> 24, early > 1 min 23 -> 22 /
+        # 24 -> 22, 11 and 10 of 350 ends moved; unpaused runs read the same input).
+        spans = (
+            sorted(self._user_pause_spans) if USER_PAUSE_EXCLUDED_FROM_GATES else []
+        )
+        src = self._cut_readings(spans) if spans else readings
+        t0 = src[0][0]
+        stop = float(self._config.stop_threshold_w)
+        found = spin_rhythm.programme_end_quiet(
+            [(ts - t0).total_seconds() for ts, _p in src],
+            [float(p) for _ts, p in src],
+            stop * ANTI_CREASE_PROGRAMME_END_QUIET_FACTOR,
+            ceiling,
+            ANTI_CREASE_PROGRAMME_END_SPIN_GAP_S,
+            head_s=ANTI_CREASE_PROGRAMME_END_QUIET_S,
+            head_w=stop * ANTI_CREASE_PROGRAMME_END_HEAD_FACTOR,
+        )
+        end_ts = None
+        if found is not None:
+            # Back on the wall clock: each pause that began before it moves it later.
+            off = (t0 - start).total_seconds() + found[0] if start is not None else found[0]
+            shift = 0.0
+            for at, length in spans:
+                if off < at - shift:
+                    break
+                shift += length
+            end_ts = (start or t0) + timedelta(seconds=off + shift)
+        ok = found is not None and found[1] >= ANTI_CREASE_PROGRAMME_END_QUIET_S
+        self._programme_end_memo = (start, timestamp, end_ts, ok)
+        if not ok:
+            return False
+        self._logger.debug(
+            "Programme end seen: '%s' ended at %.0fs, anti-crease tail for %.0fs "
+            "(expected %.0fs incl. a %.0fs tail).",
+            self._matched_profile, found[0], found[1], self._expected_duration, tail,
+        )
         return True
 
     def _in_anticrease_freeze(self, timestamp: datetime) -> bool:
@@ -4840,6 +5560,7 @@ class CycleDetector:
         oldest_in_window: datetime | None = None
         saw_older = False
         _ac_boundary_ts: datetime | None = None
+        boundary_p = 0.0
         for ts, p in reversed(self._power_readings):
             if (timestamp - ts).total_seconds() <= ANTI_CREASE_CONFIRM_WINDOW_S:
                 window.append(float(p))
@@ -4848,6 +5569,7 @@ class CycleDetector:
             else:
                 saw_older = True
                 _ac_boundary_ts = ts  # boundary: last reading before the window
+                boundary_p = float(p)
                 break
         # The low-power tail must actually SPAN the window (data exists from before
         # it) and have enough points to judge - not just a couple of recent samples.
@@ -4869,6 +5591,77 @@ class CycleDetector:
             return False
         if max(window) > max_power:
             return False  # a heating / high-spin reading in the window - still washing
+        if self._anticrease_rest_pending(
+            timestamp, window_ts, window, _ac_boundary_ts, boundary_p
+        ):
+            return False
+        return True
+
+    def _anticrease_rest_pending(
+        self,
+        timestamp: datetime,
+        window_ts: list[datetime],
+        window: list[float],
+        boundary_ts: datetime | None,
+        boundary_p: float,
+    ) -> bool:
+        """Whether a dryer or washer-dryer past its expected duration is still in
+        its cool-down, not its anti-crease tail, so the finalise must wait (#514).
+
+        After the last heating a dryer can turn its drum for many minutes without a
+        pause (120-230 W on the corpus and the reporter's), then rest near standby
+        between short tumbles until the door opens. Both stay under
+        ``anti_wrinkle_max_power`` (same motor), so the 180 s window alone
+        finalised inside the cool-down, and the rest of it then outlasted
+        anti-wrinkle's burst length and opened a second cycle. What separates the
+        two is the rest: the tail spends most of its time at its base, the
+        cool-down almost none (a drum reversal a sparse plug catches is a single
+        reading, which is why "any reading at rest" is not enough). So at least
+        half the window (step-hold time-weighted median) must sit at or under
+        ``ANTI_CREASE_REST_FACTOR`` x the anti-wrinkle exit level
+        (``max(DEFAULT_ANTI_WRINKLE_EXIT_POWER, stop_threshold_w)``), the bar the
+        washer programme-end test applies to its tail.
+
+        Delay-only and bounded like the #399 guard: never holds past
+        ``ANTI_CREASE_REST_WAIT_MAX_RATIO`` x expected (programme time, item 511),
+        so a tail whose base sits above the bar, or a drum that never rests, still
+        closes. Washers keep the window as it was (no cool-down; their
+        programme-end path already reads the tail's own rest).
+        """
+        if self._config.device_type not in ANTI_CREASE_REST_DEVICE_TYPES:
+            return False
+        expected = self._expected_duration
+        if expected <= 0:
+            return False
+        if self._gate_elapsed_s(timestamp) >= expected * ANTI_CREASE_REST_WAIT_MAX_RATIO:
+            return False
+        rest_w = ANTI_CREASE_REST_FACTOR * max(
+            DEFAULT_ANTI_WRINKLE_EXIT_POWER, float(self._config.stop_threshold_w)
+        )
+        span = ANTI_CREASE_CONFIRM_WINDOW_S
+        t0 = timestamp - timedelta(seconds=span)
+        ts_list = list(reversed(window_ts))
+        p_list = list(reversed(window))
+        if boundary_ts is not None:
+            ts_list.insert(0, boundary_ts)
+            p_list.insert(0, boundary_p)
+        median = spin_rhythm.tw_median(
+            np.asarray([(ts - t0).total_seconds() for ts in ts_list], dtype=float),
+            np.asarray(p_list, dtype=float),
+            0.0,
+            span,
+        )
+        if median is None or median <= rest_w:
+            return False
+        if not self._anticrease_rest_wait_logged:
+            self._anticrease_rest_wait_logged = True
+            self._logger.debug(
+                "Finalize held, no rest in the anti-crease window yet: '%s' "
+                "median %.1fW over the last %.0fs, rest at or under %.1fW "
+                "(elapsed %.0fs of %.0fs expected).",
+                self._matched_profile, median, span, rest_w,
+                self._gate_elapsed_s(timestamp), expected,
+            )
         return True
 
     def _anticrease_spin_pending(self, timestamp: datetime) -> bool:
@@ -5050,10 +5843,14 @@ class CycleDetector:
                 default=0.0,
             ),
         )
+        # Audit 2026-11-03 item 9: opened by the programme-end event rather than
+        # the tail-inclusive expected end; the rest of the tail is still ahead.
+        at_programme_end = self._anticrease_programme_end_armed()
         self._logger.info(
-            "Anti-crease finalize: matched '%s' past expected %.0fs (elapsed %.0fs), "
+            "Anti-crease finalize: matched '%s' %s (expected %.0fs, elapsed %.0fs), "
             "settled into the low-power tumble tail — finalizing into anti-wrinkle.",
             self._matched_profile,
+            "at its programme end" if at_programme_end else "past expected",
             self._expected_duration,
             current_duration,
         )
@@ -5090,6 +5887,10 @@ class CycleDetector:
         # After _finish_cycle, whose reset() clears it (register item 393a).
         if self._state == STATE_ANTI_WRINKLE:
             self._anticrease_tail_floor_w = tail_floor
+            if at_programme_end:
+                self._anticrease_tail_hold_until = timestamp + timedelta(
+                    seconds=ANTI_CREASE_PROGRAMME_END_HOLD_S
+                )
         return True
 
     def _is_terminal_drop(self) -> bool:
@@ -5305,13 +6106,15 @@ class CycleDetector:
             )
             return False
 
-        # Primary check: Is duration significantly below expectation?
-        if duration < (self._expected_duration * ratio):
+        # Primary check: Is duration significantly below expectation? (Audit item
+        # 2: this run's own expectation where its nearest members put it shorter.)
+        _defer_expected = self._gate_expected_s("defer")
+        if duration < (_defer_expected * ratio):
             self._logger.debug(
                 "Deferring cycle finish: duration %.0fs < %.0f%% of expected %.0fs (profile: %s, confidence %.2f)",
                 duration,
                 ratio * 100,
-                self._expected_duration,
+                _defer_expected,
                 self._matched_profile,
                 self._last_match_confidence,
             )
@@ -5349,14 +6152,16 @@ class CycleDetector:
         return ratio * bar
 
     def _ending_wait_left_s(
-        self, expected: float, ambiguous: bool, longest: float, confidence: float, cat: Any
+        self, expected: float, ambiguous: bool, longest: float, confidence: float, cat: Any,
+        ext: Any = None, late_expected: float | None = None,
+        defer_expected: float | None = None,
     ) -> float:
         """Seconds until the ENDING fallback would finish under continued quiet, for
         a match with these values (register item 469b).
 
         The fallback gate in ``process_reading``, run forward: the hazard wait
-        before the shortening bar, the shortened wait after it (the gate swaps one
-        for the other, so the shortening can also lengthen), then
+        before the shortening bar, the shorter of it and the late wait after it,
+        then
         ``_should_defer_finish``'s duration floor, which needs the confidence. The
         energy gate and Smart Termination are left out: neither depends on which
         programme is matched in a way an ambiguous tick changes, except that the
@@ -5366,22 +6171,27 @@ class CycleDetector:
         elapsed = self._gate_elapsed_s(now)  # the gate's own clock (item 511)
         quiet = float(self._time_below_threshold)
         hazard = self._hazard_wait_for(
-            now, max(self._config.off_delay, self._config.min_off_gap), cat, expected, ambiguous
+            now, max(self._config.off_delay, self._config.min_off_gap), cat, expected, ambiguous,
+            ext,
         )
         left = max(0.0, hazard - quiet)
-        bar = self._fallback_shortening_bar(expected, ambiguous, longest)
+        bar = self._fallback_shortening_bar(
+            expected if late_expected is None else late_expected, ambiguous, longest
+        )
         if bar is not None and elapsed + left >= bar:
-            short = max(
+            short = min(hazard, max(
                 self._config.off_delay,
                 min(self._config.min_off_gap, END_GATE_LATE_SECONDS),
-            )
+            ))
             left = max(0.0, short - quiet, bar - elapsed)
         if confidence >= DEFAULT_DEFER_FINISH_CONFIDENCE:
-            left = max(left, expected * float(self._config.min_duration_ratio) - elapsed)
+            floor = expected if defer_expected is None else defer_expected
+            left = max(left, floor * float(self._config.min_duration_ratio) - elapsed)
         return left
 
     def ambiguous_ending_match_defers(
-        self, expected: Any, confidence: Any, longest: Any, catalogue: Any = None
+        self, expected: Any, confidence: Any, longest: Any, catalogue: Any = None,
+        hazard_catalogue: Any = None, *, profile_name: str | None = None,
     ) -> bool:
         """Would an AMBIGUOUS match with these values make this ENDING wait longer?
 
@@ -5402,6 +6212,8 @@ class CycleDetector:
         alone, so there a longer one is refused outright.
 
         False outside ENDING or without a matched programme: nothing to keep.
+        ``profile_name`` (the incoming match's) only lets ``catalogue`` reuse
+        its sanitised form (`_sanitized_match_catalogue`).
         """
         if (
             self._state != STATE_ENDING
@@ -5426,12 +6238,14 @@ class CycleDetector:
             return True
         new_left = self._ending_wait_left_s(
             new_expected, True, new_longest, new_confidence,
-            self._sanitize_pause_catalogue(catalogue),
+            self._sanitized_match_catalogue(catalogue, profile_name), hazard_catalogue,
         )
         old_left = self._ending_wait_left_s(
             self._expected_duration, self._match_ambiguous,
             self._longest_candidate_duration, self._last_match_confidence,
-            self._matched_pause_catalogue,
+            self._matched_pause_catalogue, self._matched_hazard,
+            late_expected=self._gate_expected_s("late"),
+            defer_expected=self._gate_expected_s("defer"),
         )
         if new_left > old_left + 1.0:
             return True
@@ -5730,6 +6544,8 @@ class CycleDetector:
         termination_reason: str = TerminationReason.TIMEOUT,
         keep_tail: bool = False,
         tail_cap: datetime | None = None,
+        duration_capped: bool = False,
+        flat_power_w: float | None = None,
     ) -> None:
         """Finalize cycle.
 
@@ -5786,6 +6602,7 @@ class CycleDetector:
         # Ensure power_data covers the full duration until end_time
         # (especially important for manual recordings or drying phases with no sensor updates)
         final_readings = list(trimmed_readings)
+        invented_end: datetime | None = None
         if final_readings:
             last_t, last_p = final_readings[-1]
             if last_t < end_time:
@@ -5803,6 +6620,7 @@ class CycleDetector:
                     if later is not None and later < self._config.stop_threshold_w:
                         last_p = later
                 final_readings.append((end_time, last_p))
+                invented_end = end_time
 
         start_ts = self._current_cycle_start.timestamp()
         # Store timestamps in canonical UTC (#369). Reading timestamps arrive from
@@ -5818,6 +6636,16 @@ class CycleDetector:
             "termination_reason": termination_reason,
             "power_data": [[round(t.timestamp() - start_ts, 1), p] for t, p in final_readings],
         }
+        if self._record_synthetic and self._synthetic_known:
+            # Item 568: the rows the sensor did not send (the keepalives, the end
+            # point added above), so a replay can tell a plug re-reporting an
+            # unchanged value from a silent one. Same offsets as `power_data`.
+            synthetic = self._synthetic_ts
+            cycle_data[SYNTHETIC_OFFSETS_KEY] = [
+                round(t.timestamp() - start_ts, 1)
+                for t, _p in final_readings
+                if t in synthetic or t == invented_end
+            ]
         spans = [
             [round(at, 1), round(n, 1)]
             for at, n in _merge_spans([*self._stall_spans, *self._user_pause_spans])
@@ -5827,6 +6655,21 @@ class CycleDetector:
             # Item 514: the finished stalls and user pauses, so the cycle-end label
             # match reads the trace in programme time (`match_rules.final_match_input`).
             cycle_data["halt_spans"] = spans
+        if duration_capped:
+            # #502: a run the duration cap ended never counts as a learned
+            # programme length (`match_rules.is_duration_cap_stop`), so a cap stop
+            # labelled into a programme cannot lengthen the next cap.
+            cycle_data["duration_capped"] = True
+        elif status == "force_stopped":
+            # Said explicitly, so a long force stop of another kind (the unmatched
+            # guard, a user force-end) is not read as a legacy cap stop by length.
+            cycle_data["duration_capped"] = False
+        if flat_power_w is not None:
+            # The flat-power stop: like a cap stop, never a learned programme
+            # length (`match_rules.is_flat_power_stop`). The level it stopped on is
+            # kept for diagnostics (a standby above the start threshold shows here).
+            cycle_data["flat_power_stop"] = True
+            cycle_data["flat_power_w"] = round(float(flat_power_w), 2)
 
         self._logger.info("Cycle Finished: %s, %.1f min", status, duration / 60)
         self._on_cycle_end(cycle_data)
@@ -5900,6 +6743,25 @@ class CycleDetector:
         """Return the current power trace."""
         return list(self._power_readings)
 
+    def _restore_synthetic(self, raw: Any) -> None:
+        """The restored trace's synthetic timestamps (item 568). A snapshot that
+        holds readings but no list (written before it) leaves them unknown."""
+        self._synthetic_ts = set()
+        if not isinstance(raw, list):
+            self._synthetic_known = not self._power_readings
+            return
+        for item in raw:
+            try:
+                parsed = dt_util.parse_datetime(item) if isinstance(item, str) else None
+            except (TypeError, ValueError, OverflowError):
+                parsed = None
+            if parsed is None:
+                continue
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=dt_util.now().tzinfo)
+            self._synthetic_ts.add(dt_util.as_utc(parsed))
+        self._synthetic_known = True
+
     def get_state_snapshot(self) -> dict[str, Any]:
         """Get a snapshot of the current state for persistence."""
         return {
@@ -5911,6 +6773,13 @@ class CycleDetector:
                 else None
             ),
             "power_readings": [(t.isoformat(), p) for t, p in self._power_readings],
+            # Item 568: which of them the manager injected (None: unknown), so a
+            # cycle restored across a restart still says which rows are reports.
+            "synthetic_readings": (
+                [t.isoformat() for t, _p in self._power_readings if t in self._synthetic_ts]
+                if self._record_synthetic and self._synthetic_known
+                else None
+            ),
             "accumulated_energy_wh": self._energy_since_idle_wh,
             "time_above": self._time_above_threshold,
             "time_below": self._time_below_threshold,
@@ -5935,6 +6804,9 @@ class CycleDetector:
             # Element 14. A dishwasher restored into its terminal-tail match freeze
             # never re-matches, so without it the item-465 release floor was gone
             # for the rest of the cycle (the hazard gate only lost a shortening).
+            # The store's frontier (item 601): a handful of pairs, which answer
+            # every reader as the full list did, so the restore needs no store. A
+            # snapshot written before it holds the full list and restores as is.
             "matched_pause_catalogue": (
                 [
                     self._matched_pause_catalogue[0],
@@ -5943,6 +6815,20 @@ class CycleDetector:
                 if self._matched_pause_catalogue is not None
                 else None
             ),
+            # Element 16 once resolved (a frontier of a few pairs); a producer not
+            # yet called is not, so a restore loses at most a shortening.
+            "matched_hazard_catalogue": (
+                [
+                    self._matched_hazard_catalogue[0],
+                    [list(p) for p in self._matched_hazard_catalogue[1]],
+                ]
+                if isinstance(self._matched_hazard_catalogue, tuple)
+                else None
+            ),
+            # Element 17 (audit item 2); an older snapshot restores None.
+            "matched_run_expected_s": self._matched_run_expected_s,
+            # Element 18: a run restored into its match freeze never re-matches.
+            "matched_programme_tail_s": self._matched_programme_tail_s,
             "longest_candidate_duration": self._longest_candidate_duration,
             "ml_defer_start_duration": self._ml_defer_start_duration,
             # Without it a restart dropped the confidence to 0.0: Smart Termination
@@ -5953,6 +6839,10 @@ class CycleDetector:
             # the anti-wrinkle state. Without the floor a restart mid-tail fell
             # back to the configured burst length, which splits the tail again.
             "anticrease_tail_floor_w": self._anticrease_tail_floor_w,
+            "anticrease_tail_hold_until": (
+                self._anticrease_tail_hold_until.isoformat()
+                if self._anticrease_tail_hold_until else None
+            ),
             "anti_wrinkle_idle_time": self._anti_wrinkle_idle_time,
             # Item 511: the stalls already over, which the end gates' clock
             # excludes (the one in progress is re-derived from the trace).
@@ -5972,6 +6862,12 @@ class CycleDetector:
             and self._anticrease_tail_floor_w is not None
         )
 
+    @property
+    def anticrease_hold_pending(self) -> bool:
+        """OFF inside a programme-end finalise's tail hold (audit 2026-11-03 item 9):
+        anti-wrinkle left on idle, and the tail's next pulses must not start a cycle."""
+        return self._state == STATE_OFF and self._anticrease_tail_hold_until is not None
+
     def get_elapsed_seconds(self) -> float:
         """Return seconds elapsed in current cycle."""
         if self._current_cycle_start:
@@ -5984,6 +6880,279 @@ class CycleDetector:
             self._state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
             and self._time_below_threshold > 0
         )
+
+    def restore_terminal_state(
+        self, state: str, entered_at: datetime | None = None
+    ) -> bool:
+        """Put an idle detector back in the terminal state a restart lost (#500).
+
+        Only from OFF and only into FINISHED / INTERRUPTED / FORCE_STOPPED. No
+        state-change callback, as in :meth:`restore_state_snapshot`: the cycle
+        ended before the restart, so nothing is transitioning. Returns True when
+        applied.
+        """
+        if self._state != STATE_OFF or state not in (
+            STATE_FINISHED, STATE_INTERRUPTED, STATE_FORCE_STOPPED
+        ):
+            return False
+        self._state = state
+        self._sub_state = state.capitalize()
+        self._state_enter_time = (
+            dt_util.as_utc(entered_at) if entered_at is not None else utc_now()
+        )
+        self._time_in_state = 0.0
+        self._standby_reprobe = False
+        return True
+
+    def ordinary_end_pending(self, power: float, grace_s: float = 0.0) -> bool:
+        """True while a drop below the stop threshold is still inside the quiet
+        this detector's own end path waits for (#502).
+
+        The manager's unmatched idle guard defers to it: on the #502 washer-dryer
+        the plug fell to 0 W at the programme's end, 7 h 55 min in, and the guard
+        force-ended the cycle 24 s later, so a run the ENDING fallback was about to
+        close as ``completed`` was stored ``force_stopped``. The wait is the
+        longest an unmatched quiet needs (``max(off_delay, min_off_gap)`` and the
+        PAUSED -> ENDING threshold), plus ``grace_s``. A standby draw at or above
+        the stop threshold never counts: the detector cannot end that one itself,
+        and the guard is what does.
+        """
+        if self._state not in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
+            return False
+        try:
+            low = float(power) < float(self._config.stop_threshold_w)
+        except (TypeError, ValueError, OverflowError):
+            return False
+        if not low:
+            return False
+        wait = max(
+            float(self._config.off_delay),
+            float(self._config.min_off_gap),
+            float(self._dynamic_end_threshold),
+        )
+        return self._time_below_threshold < wait + max(0.0, float(grace_s))
+
+    def _duration_cap_s(self, timestamp: datetime) -> float:
+        """This run's hard cap on its length (#502), in programme time (item 620).
+
+        :func:`match_rules.cycle_duration_cap_s` on the device's longest learned
+        programme. Not on the match's expected duration: that is the profile's
+        average, which counts cap stops. A provider that raises reads as no
+        programme, so the cap falls back to the base.
+        """
+        provider = self._longest_programme_provider
+        device_type = self._config.device_type
+        if provider is None or self._current_cycle_start is None:
+            return match_rules.cycle_duration_cap_s(0.0, device_type)
+        cache = self._longest_programme_cache
+        if (
+            cache is None
+            or cache[0] != self._current_cycle_start
+            or (timestamp - cache[1]).total_seconds() >= _CAP_PROVIDER_REFRESH_S
+        ):
+            try:
+                longest = float(provider() or 0.0)
+            except Exception:  # pylint: disable=broad-exception-caught
+                longest = 0.0
+            cache = (self._current_cycle_start, timestamp, longest)
+            self._longest_programme_cache = cache
+        return match_rules.cycle_duration_cap_s(cache[2], device_type)
+
+    def _past_duration_cap(self, timestamp: datetime) -> bool:
+        """Whether this run has outlived :meth:`_duration_cap_s`.
+
+        The cap is never below the type's base
+        (:func:`match_rules.cycle_duration_cap_base_s`), so the provider is only
+        consulted past that.
+        """
+        if not self._current_cycle_start:
+            return False
+        if USER_PAUSE_EXCLUDED_FROM_CAP and self._user_paused:
+            return False  # item 620: a user pause holds the cycle open while it lasts
+        elapsed = self._cap_elapsed_s(timestamp)
+        if elapsed <= match_rules.cycle_duration_cap_base_s(self._config.device_type):
+            return False
+        cap = self._duration_cap_s(timestamp)
+        if elapsed <= cap:
+            return False
+        self._logger.warning(
+            "Cycle ran %.1f h (%.1f h wall clock), past its %.1f h duration cap; "
+            "force-stopping",
+            elapsed / 3600.0,
+            (timestamp - self._current_cycle_start).total_seconds() / 3600.0,
+            cap / 3600.0,
+        )
+        return True
+
+    def _cap_elapsed_s(self, timestamp: datetime) -> float:
+        """The clock the duration cap reads (item 620): the cycle's wall clock less
+        every finished user pause. Finished stalls count (see
+        USER_PAUSE_EXCLUDED_FROM_CAP). 0.0 with no cycle open."""
+        start = self._current_cycle_start
+        if start is None:
+            return 0.0
+        elapsed = (timestamp - start).total_seconds()
+        if USER_PAUSE_EXCLUDED_FROM_CAP and self._user_pause_spans:
+            elapsed = max(0.0, elapsed - sum(n for _at, n in self._user_pause_spans))
+        return elapsed
+
+    # --- Flat-power stop (FLAT_POWER_STOP_*) -----------------------------------
+
+    def _flat_floor_w(self) -> float:
+        """The level a flat run must hold: the higher of the start and stop
+        thresholds, i.e. a level that keeps a cycle open AND would start one."""
+        return max(float(self._config.start_threshold_w), float(self._config.stop_threshold_w))
+
+    def _track_flat(self, timestamp: datetime, power: float) -> None:
+        """Fold one real reading into the flat run (every state, so a run on a
+        stuck level covers the reading a cycle started on)."""
+        if self._config.device_type not in FLAT_POWER_STOP_DEVICE_TYPES:
+            return
+        try:
+            self._flat_run.push(timestamp, float(power), self._flat_floor_w())
+        except (TypeError, ValueError, OverflowError):
+            self._flat_run.clear()
+
+    def _in_flat_lockout(self, power: float) -> bool:
+        """Whether ``power`` is still on the level the last flat-power stop ended."""
+        band = self._flat_lockout
+        if band is None:
+            return False
+        try:
+            p = float(power)
+        except (TypeError, ValueError, OverflowError):
+            return False
+        if not math.isfinite(p) or p < self._flat_floor_w():
+            return False
+        return flat_band_holds(min(band[0], p), max(band[1], p))
+
+    def _flat_power_since(self) -> datetime | None:
+        """Where the open cycle went flat: the flat run's first reading, not before
+        the cycle's start. None when there is no open cycle or no run."""
+        run_start = self._flat_run.start
+        start = self._current_cycle_start
+        if run_start is None or start is None:
+            return None
+        return max(run_start, start)
+
+    def flat_power_due_at(self) -> datetime | None:
+        """When the flat-power stop fires if the power does not move, else None.
+
+        Washers, dryers, washer-dryers and dishwashers only
+        (``FLAT_POWER_STOP_DEVICE_TYPES``), in RUNNING / PAUSED / ENDING, never
+        while a pause is verified (a user pause or the envelope's, as the zombie
+        killer) or the sensor is in a recorded outage. Matched or not: no real
+        programme holds one level that long (``devtools/flat_power_eval.py``).
+        """
+        if self._config.device_type not in FLAT_POWER_STOP_DEVICE_TYPES:
+            return None
+        if self._state not in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
+            return None
+        if getattr(self, "_verified_pause", False) or self._sensor_outage_since is not None:
+            return None
+        since = self._flat_power_since()
+        if since is None:
+            return None
+        due = since + timedelta(seconds=FLAT_POWER_STOP_WINDOW_S)
+        # A finished user pause is not flat time: held 4 h on the display level,
+        # it force-stopped the cycle on the first tick after the resume and the
+        # resumed wash became a second cycle (end_gate_eval --loo --all-formats
+        # --halt-at 0.5 --halt-min 300 --halt-level 5 --user-pause, 635 rows:
+        # flat stops 38 -> 2, splits 9.23% -> 3.62%, early ends unchanged). The
+        # window restarts at the resume; where the stored cycle ends does not move.
+        if self._user_pause_spans and self._current_cycle_start is not None:
+            resumed = self._current_cycle_start + timedelta(
+                seconds=max(at + n for at, n in self._user_pause_spans)
+            )
+            due = max(due, resumed + timedelta(seconds=FLAT_POWER_STOP_WINDOW_S))
+        return due
+
+    def _flat_power_due(self, timestamp: datetime) -> bool:
+        due = self.flat_power_due_at()
+        return due is not None and timestamp >= due
+
+    def check_flat_power(self, timestamp: datetime) -> bool:
+        """Watchdog tick: the flat-power stop without a reading; True if it stopped.
+
+        A change-only plug reports nothing while its power is flat, so without a
+        tick the stop would wait for the next report. The tick reads only the
+        clock: the level is the last real reading, carried forward.
+        """
+        timestamp = dt_util.as_utc(timestamp)
+        if self._last_process_time is not None and timestamp < self._last_process_time:
+            return False
+        if not self._flat_power_due(timestamp):
+            return False
+        self._finish_flat_power(timestamp)
+        return True
+
+    def _finish_flat_power(self, timestamp: datetime) -> None:
+        """Force-stop a cycle stuck on one level; see FLAT_POWER_STOP_WINDOW_S.
+
+        The stored cycle ends where the power went flat, so it keeps none of the
+        stuck level beyond that first reading, and it is marked
+        ``flat_power_stop`` so it never counts as a learned programme length
+        (``match_rules.longest_programme_s``). The level is then locked out: a
+        reading on it would start the next cycle at once.
+        """
+        since = self._flat_power_since()
+        band = self._flat_run.band
+        if since is None or band is None:
+            return
+        lo, hi = band
+        start = self._current_cycle_start or since
+        self._power_readings = [r for r in self._power_readings if r[0] <= since]
+        self._last_active_time = since
+        self._logger.warning(
+            "Power flat at %.1f-%.1fW for %.1f h (since %.1f h into the cycle): not "
+            "a programme; force-stopping the cycle where it went flat, and no new "
+            "cycle starts until the power leaves that level",
+            lo,
+            hi,
+            (timestamp - since).total_seconds() / 3600.0,
+            (since - start).total_seconds() / 3600.0,
+        )
+        self._finish_cycle(
+            timestamp,
+            status="force_stopped",
+            termination_reason=TerminationReason.FORCE_STOPPED,
+            keep_tail=False,
+            flat_power_w=(lo + hi) / 2.0,
+        )
+        self._lock_flat_band(band)
+
+    def _lock_flat_band(self, band: tuple[float, float] | None) -> None:
+        """After a stop on a stuck level: no cycle starts until a real reading leaves
+        ``band`` (``_in_flat_lockout``). Shared by the flat-power stop and
+        :meth:`force_end_stuck`; called after the stop's reset, which drops any
+        earlier lockout. None: nothing to lock (the level was below the floor)."""
+        self._flat_run.clear()
+        self._flat_lockout = band
+
+    def force_end_stuck(self, timestamp: datetime) -> None:
+        """Force-end a cycle whose sensor fell silent on its last level, and lock
+        that level out like the flat-power stop.
+
+        The manager's high-power staleness branch: a silent or frozen plug still
+        shows the value it last sent, which would start the next cycle on its next
+        report. The band is the flat run ending at the last real reading (that
+        reading at least), so it exists only on the flat-power stop's device types
+        and at or above its floor; anything else ends as :meth:`force_end` does.
+        """
+        band = (
+            self._flat_run.band
+            if self._state in (STATE_STARTING, STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
+            else None
+        )
+        self.force_end(timestamp)
+        if band is not None:
+            self._logger.info(
+                "Stopped on a silent sensor at %.1f-%.1fW: no new cycle starts until "
+                "the power leaves that level",
+                band[0],
+                band[1],
+            )
+            self._lock_flat_band(band)
 
     def restore_state_snapshot(self, snapshot: dict[str, Any]) -> bool:
         """Restore state from snapshot; False when it could not be restored.
@@ -5998,6 +7167,10 @@ class CycleDetector:
             self._sub_state = snapshot.get("sub_state")
             # Not persisted (item 501): a restored probe is shown.
             self._standby_reprobe = False
+            # Not persisted either: the restart is unobserved time, so the flat run
+            # starts again at the first reading after it (flat-power stop).
+            self._flat_run.clear()
+            self._flat_lockout = None
             self._probe_hidden = False
             self._energy_since_idle_wh = snapshot.get("accumulated_energy_wh", 0.0)
             self._time_above_threshold = snapshot.get("time_above", 0.0)
@@ -6066,6 +7239,16 @@ class CycleDetector:
             self._matched_pause_catalogue = self._sanitize_pause_catalogue(
                 snapshot.get("matched_pause_catalogue")
             )
+            self._matched_hazard_catalogue = self._sanitize_pause_catalogue(
+                snapshot.get("matched_hazard_catalogue")
+            )
+            self._matched_run_expected_s = self._sanitize_run_expected(
+                snapshot.get("matched_run_expected_s")
+            )
+            self._matched_programme_tail_s = self._sanitize_programme_tail(
+                snapshot.get("matched_programme_tail_s")
+            )
+            self._programme_end_memo = None
             # Unconditionally, because the hazard is the value already on the
             # object, not the one in the snapshot: this restores the ambiguity
             # flags the ENDING gate reads, so leaving the bound untouched pairs
@@ -6092,6 +7275,15 @@ class CycleDetector:
             self._anti_wrinkle_idle_time = (
                 self._sanitize_positive(snapshot.get("anti_wrinkle_idle_time")) or 0.0
                 if in_tail else 0.0
+            )
+            _hold = snapshot.get("anticrease_tail_hold_until")
+            _hold_dt = (
+                dt_util.parse_datetime(_hold)
+                if self._state in (STATE_ANTI_WRINKLE, STATE_OFF) and isinstance(_hold, str)
+                else None
+            )
+            self._anticrease_tail_hold_until = (
+                dt_util.as_utc(_hold_dt) if _hold_dt is not None else None
             )
             self._anti_wrinkle_candidate_start = None
             self._anti_wrinkle_candidate_peak = 0.0
@@ -6154,6 +7346,7 @@ class CycleDetector:
                     "Restored %d power readings with Naive timestamps (fixed to local)",
                     len(self._power_readings),
                 )
+            self._restore_synthetic(snapshot.get("synthetic_readings"))
 
             # Restore last active
             last_active = snapshot.get("last_active_time")

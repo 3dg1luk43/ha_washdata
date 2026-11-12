@@ -56,6 +56,7 @@
       "timer_pause_action_title": "Atsākt ciklu",
       "timer_pause_body_suffix": "Cikls ir apturēts. Atveriet WashData paneli, lai atsāktu.",
       "unload_dismiss_action_title": "Pārtraukt atgādināšanu",
+      "review_action_title": "Tā bija {program}",
       "notify_live_waiting_message": "{device}: Vēl nav atpazīts neviens profils.",
       "vs_typical_longer": "{pct}% ilgāk nekā parasti",
       "vs_typical_shorter": "{pct}% īsāk nekā parasti",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Atzīmēt apkopi kā veiktu",
+      "description": "Reģistrējiet apkopes uzdevumu kā veiktu tagad, tāpat kā paneļa poga Gatavs.",
+      "fields": {
+        "device_id": {
+          "name": "Ierīce",
+          "description": "WashData ierīce, kurai pieder uzdevums."
+        },
+        "task_id": {
+          "name": "Uzdevuma ID",
+          "description": "Uzdevuma ID, kā norādīts sensora Jāveic apkope atribūtā due_task_ids (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other vai pielāgota uzdevuma custom_ ID)."
+        },
+        "notes": {
+          "name": "Piezīmes",
+          "description": "Izvēles piezīme, kas tiek saglabāta kopā ar žurnāla ierakstu."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Dzēst ciklu",
+      "description": "Dzēsiet vienu saglabātu ciklu. Tā programma tiek pārbūvēta bez tā vai tiek noņemta, ja tas bija tās pēdējais cikls un bija importēts. To nevar atsaukt.",
+      "fields": {
+        "device_id": {
+          "name": "Ierīce",
+          "description": "WashData ierīce."
+        },
+        "cycle_id": {
+          "name": "Cikla ID",
+          "description": "Dzēšamā cikla ID, piem., aktivizētāja „Cikls beidzās“ mainīgais cycle_id (tas ir tukšs, ja šī palaišana nesaglabāja ciklu, tāpēc vispirms to pārbaudiet)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Aktivizēt ML apmācību",
       "description": "Manuāli pārapmāciet ierīcē esošos ML modeļus, izmantojot šīs ierīces pašas iezīmētos ciklus (eksperimentāls).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "Kopējā enerģija"
+      },
+      "last_cycle_duration": {
+        "name": "Pēdējā cikla ilgums"
+      },
+      "last_cycle_energy": {
+        "name": "Pēdējā cikla enerģija"
+      },
+      "last_cycle_cost": {
+        "name": "Pēdējā cikla izmaksas"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "Neizdevās piešķirt profilu: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Cikls nav atrasts."
+    },
+    "maintenance_task_not_found": {
+      "message": "Šajā ierīcē nav apkopes uzdevuma ar ID {task_id}."
+    },
+    "task_id_required": {
+      "message": "Nepieciešams derīgs task_id."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "Cikls atsākās",
       "still_tumbling": "Trumulis vēl griežas pēc cikla",
       "unloaded": "Izkrauts",
-      "state_changed": "Statuss mainījās",
+      "state_changed": "Ierīces statuss mainījās",
       "maintenance_due": "Apkope nepieciešama",
       "milestone_reached": "Cikla atskaites punkts sasniegts",
       "pump_stuck": "Sūknis iestrēdzis"
@@ -665,7 +716,7 @@
       "description": "Aktivizējas, kad veļa tiek izņemta pēc cikla: durvis atvērtas vai izkraušana apstiprināta."
     },
     "state_changed": {
-      "name": "Statuss mainījās",
+      "name": "Ierīces statuss mainījās",
       "description": "Aktivizējas, kad mainās WashData statuss.",
       "fields": {
         "from": {

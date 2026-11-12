@@ -101,6 +101,39 @@ def integrate_wh(
     return float(np.sum(avg_power[mask] * dt_hours[mask]))
 
 
+#: A stored cycle's interval longer than this is an outage, not a held reading.
+#: The top of ``energy_gap_threshold_s``'s range; 0.2% of 1018 recorded cycles have
+#: one (``devtools/cycle_energy_eval.py``).
+CYCLE_ENERGY_MAX_GAP_S = 3600.0
+
+
+def integrate_cycle_wh(timestamps: np.ndarray, power: np.ndarray) -> float:
+    """Energy (Wh) of a stored cycle trace: every stored-energy writer uses it.
+
+    Each reading holds until the next one, which is what a Home Assistant power
+    sensor means (a state lasts until it changes) and how the live accumulator
+    counts. Only an interval over ``CYCLE_ENERGY_MAX_GAP_S`` is left out.
+
+    The trapezoid with the median gap rule (``integrate_wh`` +
+    ``energy_gap_threshold_s``, kept for the end gates) stored 429 Wh for a 1566 Wh
+    dishwasher cycle (#498): the watchdog's 30 s keepalives in the quiet stretches
+    set the median, so a heater the plug did not re-report for 5 minutes counted as
+    nothing, and trimming the 0 W tail moved the figure. A cadence-derived ceiling
+    of any kind fails the same way on a change-only plug, whose silences are its
+    steady states; under the hold an interval after a low reading costs little
+    whichever way it is judged.
+    """
+    ts = np.asarray(timestamps, dtype=float)
+    pw = np.asarray(power, dtype=float)
+    if ts.size < 2 or pw.size != ts.size:
+        return 0.0
+    order = np.argsort(ts, kind="stable")
+    ts, pw = ts[order], pw[order]
+    dt = np.diff(ts)
+    mask = (dt > 0) & (dt <= CYCLE_ENERGY_MAX_GAP_S)
+    return float(np.sum(pw[:-1][mask] * dt[mask]) / 3600.0)
+
+
 
 # ─── Time-weighted energy cost (#426) ─────────────────────────────────────────
 #
@@ -479,6 +512,11 @@ def quiet_run_before(
     return max(0.0, run_start - prev_active)
 
 
+#: How much of a profile's measured terminal quiet a run must have been through to
+#: count as having had it (:func:`terminal_quiet_seen`, the #518 standby finalise).
+TERMINAL_QUIET_SEEN_FRAC = 0.5
+
+
 def terminal_quiet_seen(
     points: list[tuple[float, float]],
     last_active: float,
@@ -513,7 +551,7 @@ def terminal_quiet_seen(
     try:
         if quiet_s <= 0 or not points:
             return False
-        need = 0.5 * float(quiet_s)
+        need = TERMINAL_QUIET_SEEN_FRAC * float(quiet_s)
         if quiet_run_before(points, last_active, stop_threshold_w) >= need:
             return True
         peak = max(p for _o, p in points)
@@ -555,6 +593,75 @@ def terminal_event_end(
         return last_active
     except Exception:  # noqa: BLE001
         return last_active
+
+
+def terminal_event_measure(
+    points: Sequence[tuple[float, float]],
+    peak_frac: float,
+    quiet_min_s: float,
+    max_peak_frac: float,
+) -> tuple[float, ...] | None:
+    """The trace's terminal event: the last run above ``peak * peak_frac`` and the
+    quiet before it.
+
+    None: not measurable (too few points, all-zero, zero span). ``()``: measured,
+    no run above the threshold. ``(tail,)``: the last run is main activity (it
+    peaks above ``max_peak_frac`` of the peak, or follows the previous activity
+    within ``quiet_min_s``, or nothing precedes it), with the quiet tail after it
+    (item 469). Otherwise ``(gap, seconds, event_peak, event_peak_frac, position)``.
+
+    One walk for the profile's terminal signature
+    (``profile_store._terminal_event_measure``) and the live dishwasher
+    standby-band finalise (#518), so "this run has had its terminal event" means
+    what the profile's statistic means. Pure.
+    """
+    if len(points) < 5:
+        return None
+    peak = max(p for _t, p in points)
+    if peak <= 0:
+        return None
+    threshold = peak * peak_frac
+    span = points[-1][0] - points[0][0]
+    if span <= 0:
+        return None
+    # Walk back to the last run above the threshold, then to the start of that
+    # run, then to the end of the quiet stretch before it.
+    end_i = None
+    for i in range(len(points) - 1, -1, -1):
+        if points[i][1] > threshold:
+            end_i = i
+            break
+    if end_i is None:
+        return ()
+    start_i = end_i
+    while start_i > 0 and points[start_i - 1][1] > threshold:
+        start_i -= 1
+    # The quiet PHASE, not the sample interval: walk back to the previous activity.
+    # Measuring the gap to the preceding sample would just report the plug's
+    # reporting rate, since a plug that keeps sampling through the drying phase has
+    # no large interval.
+    prev_i = None
+    for i in range(start_i - 1, -1, -1):
+        if points[i][1] > threshold:
+            prev_i = i
+            break
+    event_peak = max(p for _t, p in points[start_i : end_i + 1])
+    if (
+        prev_i is None  # the run reaches the start, or nothing precedes it
+        or points[start_i][0] - points[prev_i][0] < quiet_min_s
+        or event_peak > peak * max_peak_frac
+    ):
+        # The last run is the main activity (item 469): no event seen, only how
+        # long the trace stayed quiet after it.
+        return (points[-1][0] - points[end_i][0],)
+    gap = points[start_i][0] - points[prev_i][0]
+    return (
+        gap,
+        points[end_i][0] - points[start_i][0],
+        event_peak,
+        event_peak / peak,
+        (points[start_i][0] - points[0][0]) / span,
+    )
 
 
 def has_resumed_pause(

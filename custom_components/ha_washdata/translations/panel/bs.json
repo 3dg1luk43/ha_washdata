@@ -270,7 +270,11 @@
         "bp_details": "Detalji",
         "bp_copy_yaml": "Kopiraj YAML",
         "bp_hide_yaml": "Sakrij YAML",
-        "bp_show_yaml": "Prikaži YAML"
+        "bp_show_yaml": "Prikaži YAML",
+        "review_something_else": "Nešto drugo…",
+        "review_not_sure": "Ne znam sigurno",
+        "review_prev": "Prethodni ciklus",
+        "review_next": "Sljedeći ciklus"
     },
     "note": {
         "off_delay": {
@@ -584,6 +588,7 @@
         "pg_alert_overrun": "Produženje",
         "pg_alert_underrun": "Skraćenje",
         "pg_alert_did_not_finish": "Nije završeno",
+        "pg_alert_discarded": "Odbačeno kao lažni ciklus ili ispumpavanje",
         "pg_alert_false_end": "Podijeljeno na više ciklusa",
         "pg_alert_unmatched": "Bez podudaranja",
         "pg_alert_ambiguous": "Dvosmisleno podudaranje",
@@ -721,7 +726,10 @@
         "bp_needs": "Zahtjevi",
         "bp_needs_version": "WashData {version} ili noviji",
         "bp_author": "Autor",
-        "bp_required": "obavezno"
+        "bp_required": "obavezno",
+        "pg_runs_as": "simulacija koristi {value}",
+        "review_this_cycle": "Ovaj ciklus",
+        "review_usual": "Uobičajeno za {name}"
     },
     "log": {
         "all_levels": "Svi nivoi",
@@ -1072,7 +1080,7 @@
         "hist_scan_failed": "Pretraživanje nije uspjelo.",
         "hist_scan_expired": "To skeniranje više nije dostupno. Skenirajte ponovo.",
         "hist_import_failed": "Uvoz nije uspio.",
-        "imported_history_readonly": "Pronađeno u uvezenoj historiji snage. Pomaže podudaranju, ali se ne broji u statistiku i ne može se skratiti ni podijeliti. Označite ga da imenujete program.",
+        "imported_history_note": "Pronađeno u uvezenoj historiji snage. Pomaže podudaranju, ali se ne broji u statistiku i ne može se podijeliti. Označite ga da imenujete program.",
         "odometer_intro": "Ovaj zbir samo raste. Brisanje ciklusa ga ne smanjuje, pa podsjetnici za servis ostaju tačni.",
         "odometer_correct_hint": "Postavite ovo ako je WashData izbrojao ciklus koji se nije dogodio ili je uređaj radio cikluse prije instalacije WashData.",
         "no_reminders_set": "Još nema postavljenih podsjetnika za servis.",
@@ -1128,7 +1136,16 @@
         "bp_none_yet": "Za ovaj tip uređaja još nema predložaka. Podijelite prvi.",
         "bp_unreachable": "Preuzima se s GitHuba. Provjerite ima li Home Assistant pristup internetu pa pokušajte ponovo.",
         "bp_library_intro": "Gotove automatizacije koje korisnici WashData dijele na GitHubu, pregledane prije objave na listi. Dostupno samo s uključenim online funkcijama.",
-        "bp_needs_version": "Zahtijeva WashData {version} ili noviji."
+        "bp_needs_version": "Zahtijeva WashData {version} ili noviji.",
+        "bp_review_check": "Provjerite ovo prije nego što sačuvate: Home Assistant će to izvršiti tačno onako kako je napisano.",
+        "review_q_title": "Koji je ovo bio program?",
+        "review_q_intro": "WashData nije siguran u ove cikluse. Vaš odgovor ga uči.",
+        "review_q_started": "Pokrenuto {when}",
+        "review_q_more": "Još {count} ciklusa za pregled",
+        "review_q_more_one": "Još {count} ciklus za pregled",
+        "review_q_more_few": "Još {count} ciklusa za pregled",
+        "review_q_more_other": "Još {count} ciklusa za pregled",
+        "review_which_program": "Koji je to bio program?"
     },
     "phase_desc": {
         "anti_crease": "Povremeno kratko okretanje bubnja nakon završetka za smanjenje bora.",
@@ -1221,7 +1238,7 @@
     "setting": {
         "dishwasher_end_spike_quiet_release": {
             "label": "Otpuštanje nakon tihe faze sušenja",
-            "doc": "Nakon očekivanog trajanja: koliko dugo mašina za suđe mora ostati ispod Praga zaustavljanja prije nego što WashData prestane čekati završno ispumpavanje. Povećajte ako se kasno ispumpavanje nakon dugog sušenja propusti. Čekanje nikada ne prelazi 30 minuta."
+            "doc": "Kada se dostigne očekivano trajanje, WashData prestaje čekati završno ispumpavanje nakon što mašina za suđe ostane ispod Praga zaustavljanja ovoliko dugo od svoje posljednje aktivnosti, ali ne duže od 30 minuta (a čim program ima 3 zabilježena ciklusa, ne kraće od njegove najduže zabilježene pauze za sušenje). Povećajte ako se kasno ispumpavanje nakon dugog sušenja propusti."
         },
         "anti_crease_finalize_ratio": {
             "doc": "Udio prosječnog trajanja programa koji ciklus mora dostići prije nego što se okretanje bubnja niske snage računa kao rep anti-gužvanja. Smanjite ga (npr. 0,75) kod sušilica koje se prilagođavaju količini veša. Kod mašina za veš ostavite zadano (0,98), inače pranje može završiti na pola.",
@@ -1368,7 +1385,7 @@
             "label": "Ikona obavijesti"
         },
         "notify_live_chronometer": {
-            "doc": "Android: dodaje odbrojavanje do procijenjenog završetka pored teksta obavještenja. Koristite {finish_time} u Poruci pred završetak da prikažete vrijeme završetka umjesto drugog odbrojavanja.",
+            "doc": "Android: dodaje odbrojavanje do procijenjenog završetka pored teksta obavještenja. Koristite {finish_time} u Poruci ažuriranja uživo da prikažete vrijeme završetka umjesto drugog odbrojavanja.",
             "label": "Koristiti hronometar uživo"
         },
         "notify_live_interval_seconds": {
@@ -1393,11 +1410,11 @@
         },
         "notify_pre_complete_message": {
             "doc": "Tekst svakog ažuriranja napretka uživo. Varijable predloška: {device}, {program}, {minutes} (preostale minute), {finish_time} (procijenjeni završetak, npr. 14:30). Za svaku drugu varijablu koristi se zadani tekst.",
-            "label": "Poruka pred završetak"
+            "label": "Poruka ažuriranja uživo"
         },
         "notify_reminder_message": {
             "doc": "Tekst jednokratnog Upozorenja pred kraj. Varijable predloška: {device}, {program}, {minutes} (postavka Upozorenje pred kraj). Za svaku drugu varijablu koristi se zadani tekst.",
-            "label": "Poruka podsjetnika"
+            "label": "Poruka upozorenja pred kraj"
         },
         "notify_start_message": {
             "doc": "Tekst koji se šalje kada ciklus počne. Varijable predloška: {device}, {program}. Za svaku drugu varijablu koristi se zadani tekst.",
@@ -1691,7 +1708,9 @@
         "match_uncertain": "Nesigurno: {top} ili {runner}",
         "match_uncertain_single": "Nesigurno: možda {top}",
         "match_sure": "~{pct}% sigurnosti",
-        "match_uncertain_tip": "WashData se još nije odlučio za program. Broj pokazuje koliko je često vodeća pretpostavka, {top}, bila tačna u prošlim ciklusima uz ovakvu prednost. Samo informativno."
+        "match_uncertain_tip": "WashData se još nije odlučio za program. Broj pokazuje koliko je često vodeća pretpostavka, {top}, bila tačna u prošlim ciklusima uz ovakvu prednost. Samo informativno.",
+        "torn_pick": "{a} ili {b}?",
+        "torn_tip": "WashData još ne može razlikovati ova dva programa, pa odaberite onaj koji radi kako biste njime označili ovaj ciklus (Automatsko otkrivanje poništava izbor)."
     },
     "suggestion": {
         "observed_label": "Izmjereno",
@@ -1974,7 +1993,8 @@
         "bp_automation_created": "Automatizacija kreirana s zadanim postavkama; otvaranje",
         "copied": "Kopirano",
         "copy_failed": "Kopiranje nije uspjelo. Odaberite tekst i kopirajte ga ručno.",
-        "automation_label_failed": "Automatizacija kreirana, ali etiketa ili kategorija WashData nije mogla biti dodana."
+        "automation_label_failed": "Automatizacija kreirana, ali etiketa ili kategorija WashData nije mogla biti dodana.",
+        "review_answered": "Sačuvano: {program}"
     },
     "trend": {
         "down": "Opadajući trend",
@@ -1992,7 +2012,7 @@
         "other": "Ostalo"
     },
     "pg_desc": {
-        "dishwasher_end_spike_quiet_release": "Mašina za pranje posuđa: sekunde tišine nakon očekivanog trajanja prije nego što se otpusti čekanje na završno ispumpavanje vode",
+        "dishwasher_end_spike_quiet_release": "Mašina za pranje posuđa: sekunde ispod Praga zaustavljanja od posljednje aktivnosti potrebne da se okonča čekanje na završno ispumpavanje nakon isteka očekivanog trajanja",
         "smart_termination_duration_ratio": "Udio prosječnog trajanja programa koji ciklus mora dostići prije nego što ga Pametni završetak smije ranije završiti; smanjite ako vremena rada variraju",
         "anti_crease_finalize_ratio": "Udio prosječnog trajanja programa koji ciklus mora dostići prije nego što ga rep anti-gužvanja smije dovršiti; smanjite kod sušilica, kod mašina za veš ostavite zadano",
         "anti_wrinkle_enabled": "Upij impulse bubnja nakon glavne faze, a ne čitaj ih kao nove cikluse",
@@ -2260,7 +2280,7 @@
             "name": "Istovaren"
         },
         "state_changed": {
-            "name": "Stanje promijenjeno"
+            "name": "Stanje uređaja promijenjeno"
         },
         "maintenance_due": {
             "name": "Servis potreban"

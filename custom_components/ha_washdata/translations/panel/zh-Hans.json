@@ -262,7 +262,11 @@
         "bp_details": "详情",
         "bp_copy_yaml": "复制 YAML",
         "bp_hide_yaml": "隐藏 YAML",
-        "bp_show_yaml": "显示 YAML"
+        "bp_show_yaml": "显示 YAML",
+        "review_something_else": "其他…",
+        "review_not_sure": "不确定",
+        "review_prev": "上一个周期",
+        "review_next": "下一个周期"
     },
     "note": {
         "off_delay": {
@@ -573,6 +577,7 @@
         "pg_alert_overrun": "运行过长",
         "pg_alert_underrun": "运行过短",
         "pg_alert_did_not_finish": "未完成",
+        "pg_alert_discarded": "判为误检周期或排水并丢弃",
         "pg_alert_false_end": "拆分为多个周期",
         "pg_alert_unmatched": "未匹配",
         "pg_alert_ambiguous": "匹配不明确",
@@ -707,7 +712,10 @@
         "bp_needs": "要求",
         "bp_needs_version": "WashData {version} 或更高版本",
         "bp_author": "作者",
-        "bp_required": "必填"
+        "bp_required": "必填",
+        "pg_runs_as": "按 {value} 运行",
+        "review_this_cycle": "此周期",
+        "review_usual": "{name} 的通常值"
     },
     "log": {
         "all_levels": "所有级别",
@@ -1042,7 +1050,7 @@
         "hist_scan_failed": "扫描失败。",
         "hist_scan_expired": "该次扫描结果已不可用，请重新扫描。",
         "hist_import_failed": "导入失败。",
-        "imported_history_readonly": "在导入的功率历史中发现。它有助于匹配，但不计入您的统计，且无法裁剪或拆分。请标记以指定其程序。",
+        "imported_history_note": "在导入的功率历史中发现。它有助于匹配，但不计入您的统计，且无法拆分。请标记以指定其程序。",
         "odometer_intro": "此累计值只增不减。删除周期不会使它减少，因此保养提醒始终准确。",
         "odometer_correct_hint": "如果 WashData 计入了从未发生的运行，或设备在安装 WashData 之前已运行过周期，请设置此值。",
         "no_reminders_set": "尚未设置保养提醒。",
@@ -1094,7 +1102,14 @@
         "bp_none_yet": "此家电类型还没有模板。来分享第一个吧。",
         "bp_unreachable": "模板库从 GitHub 下载。请检查 Home Assistant 能否访问互联网，然后重试。",
         "bp_library_intro": "WashData 用户在 GitHub 上分享的现成自动化，上架前经过审核。仅在开启在线功能时可用。",
-        "bp_needs_version": "需要 WashData {version} 或更高版本。"
+        "bp_needs_version": "需要 WashData {version} 或更高版本。",
+        "bp_review_check": "保存前请检查：Home Assistant 会完全按照所写内容执行。",
+        "review_q_title": "这是哪个程序？",
+        "review_q_intro": "WashData 对这些周期还不确定。您的回答将帮助它学习。",
+        "review_q_started": "开始于 {when}",
+        "review_q_more": "还有 {count} 个待审查",
+        "review_q_more_other": "还有 {count} 个待审查",
+        "review_which_program": "是哪个程序？"
     },
     "pg_desc": {
         "completion_min_seconds": "计为真实周期的最短运行时间",
@@ -1110,7 +1125,7 @@
         "anti_wrinkle_max_power": "高于此值的脉冲将结束防皱并开启新周期",
         "profile_match_min_duration_ratio": "最短周期时长占配置文件时长的比例；默认 0.1 (10%)",
         "profile_match_max_duration_ratio": "最长周期时长占配置文件时长的比例；默认 1.8 (180%)",
-        "dishwasher_end_spike_quiet_release": "洗碗机：预期时长过后、解除周期结束排水等待之前保持静止的秒数",
+        "dishwasher_end_spike_quiet_release": "洗碗机：达到预期时长后，结束最终排水等待所需的、自上次活动以来低于停止阈值的秒数",
         "smart_termination_duration_ratio": "智能终止可以提前结束周期之前，周期必须达到的程序平均时长比例；运行时间波动大时请调低",
         "anti_crease_finalize_ratio": "防皱尾段可以结束周期之前，周期必须达到的程序平均时长比例；烘干机请调低，洗衣机保持默认值",
         "curve_preroll_seconds": "并入周期曲线开头的中止启动尝试读数秒数；0 = 关闭"
@@ -1341,7 +1356,7 @@
             "label": "通知图标"
         },
         "notify_live_chronometer": {
-            "doc": "Android: 在通知文字旁边添加倒计时至预计完成时间。在完成前消息中使用 {finish_time} 可显示完成时间，而不是第二个倒计时。",
+            "doc": "Android: 在通知文字旁边添加倒计时至预计完成时间。在实时更新消息中使用 {finish_time} 可显示完成时间，而不是第二个倒计时。",
             "label": "使用实时计时器"
         },
         "notify_live_interval_seconds": {
@@ -1366,11 +1381,11 @@
         },
         "notify_pre_complete_message": {
             "doc": "每次实时进度更新的正文。模板变量：{device}、{program}、{minutes}（剩余分钟数）、{finish_time}（预计完成时间，例如 14:30）。使用其他变量时将改用默认文本。",
-            "label": "完成前消息"
+            "label": "实时更新消息"
         },
         "notify_reminder_message": {
             "doc": "仅发送一次的结束前提醒的正文。模板变量：{device}、{program}、{minutes}（结束前提醒的设置值）。使用其他变量时将改用默认文本。",
-            "label": "提醒消息"
+            "label": "结束前提醒消息"
         },
         "notify_start_message": {
             "doc": "周期开始时发送的正文。模板变量：{device}、{program}。使用其他变量时将改用默认文本。",
@@ -1533,7 +1548,7 @@
         },
         "dishwasher_end_spike_quiet_release": {
             "label": "自然干燥静止释放",
-            "doc": "超过预期时长后，洗碗机必须保持低于停止阈值多长时间，WashData 才会停止等待最终排水。如果长时间干燥后的较晚排水被漏检，请调高。等待时间绝不会超过 30 分钟。"
+            "doc": "达到预期时长后，如果洗碗机自上次活动以来保持低于停止阈值达到此时长，WashData 将停止等待最终排水，等待时间最多 30 分钟（并且在该程序记录到 3 个周期后，至少为其记录到的最长干燥暂停）。如果长时间干燥后的较晚排水被漏检，请调高。"
         },
         "profile_evidence_sources": {
             "label": "用于构建程序的周期",
@@ -1676,7 +1691,9 @@
         "match_uncertain": "不确定：{top} 或 {runner}",
         "match_uncertain_single": "不确定：可能是 {top}",
         "match_sure": "约 {pct}% 把握",
-        "match_uncertain_tip": "WashData 尚未确定程序。该数值表示在过去的周期中，领先猜测 {top} 领先这么多时猜对的频率。仅供参考。"
+        "match_uncertain_tip": "WashData 尚未确定程序。该数值表示在过去的周期中，领先猜测 {top} 领先这么多时猜对的频率。仅供参考。",
+        "torn_pick": "{a} 还是 {b}？",
+        "torn_tip": "WashData 暂时还无法区分这两个程序，因此请选择正在运行的程序，将此周期标记为该程序（选择“自动检测”可撤销此选择）。"
     },
     "tab": {
         "advanced": "高级",
@@ -1867,7 +1884,8 @@
         "bp_automation_created": "已使用默认设置创建自动化; 正在打开",
         "copied": "已复制",
         "copy_failed": "复制失败。请选择文本并手动复制。",
-        "automation_label_failed": "自动化已创建，但无法添加 WashData 标签或类别。"
+        "automation_label_failed": "自动化已创建，但无法添加 WashData 标签或类别。",
+        "review_answered": "已保存：{program}"
     },
     "suggestion": {
         "observed_label": "观测值",
@@ -2222,7 +2240,7 @@
             "name": "已取出"
         },
         "state_changed": {
-            "name": "状态已变更"
+            "name": "家电状态已变更"
         },
         "maintenance_due": {
             "name": "需要维护"

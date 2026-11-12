@@ -61,6 +61,17 @@ def test_power_samples_returns_all_when_no_cutoff():
     buf.uninstall()
 
 
+def test_power_older_than_the_window_is_dropped_as_readings_arrive():
+    """Only the last 24 h is ever read; the 100 000 entry cap alone held 11.6
+    days of a 10 s plug in memory (#521)."""
+    buf = DiagBuffer("TestDevice")
+    buf.record_power(1.0, _ts(-25 * 3600))
+    buf.record_power(2.0, _ts(-23 * 3600))
+    buf.record_power(3.0, _ts())
+    assert [w for _, w in buf.power_samples()] == [2.0, 3.0]
+    buf.uninstall()
+
+
 def test_power_samples_filters_by_since_ts():
     buf = DiagBuffer("TestDevice")
     past = _ts(-200)

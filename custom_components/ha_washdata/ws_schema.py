@@ -100,6 +100,10 @@ class DeviceInfo(TypedDict):
     # Set while a cycle runs with no committed program, or with a runner-up within
     # the ambiguity margin; None otherwise. The program sensor keeps `detecting...`.
     match_uncertainty: MatchUncertainty | None
+    # [top, runner_up] while a live match is ambiguous or leads by less than
+    # MATCH_LABEL_MIN_MARGIN (the cycle would end in a review); None otherwise.
+    # The Status card offers both as a manual pick. Display only.
+    match_choices: list[str] | None
     suggestions_count: int
     suggestion_keys: list[str]
     feedback_count: int
@@ -405,13 +409,15 @@ class GetCyclePowerDataResponse(_GetCyclePowerDataBase, total=False):
     energy_kwh: float | None
     artifacts: list[dict[str, Any]]
     restart_gaps: list[Any]
-    # Capability keys spread from _cycle_capabilities(cycle, origin). ``is_reference``
-    # is present for every cycle; the other three ride along for a non-``past`` cycle
-    # (reference/backfill), so declare them or the WS contract check flags them and the
-    # generated ws-types.d.ts omits the fields the panel needs to type.
+    # Capability keys spread from _cycle_capabilities(cycle, origin). ``is_reference``,
+    # ``labelable``, ``editable`` and ``trimmable`` are present for every found cycle;
+    # ``cycle_origin`` rides along for a non-``past`` cycle (reference/backfill), so
+    # declare them or the WS contract check flags them and the generated
+    # ws-types.d.ts omits the fields the panel needs to type.
     is_reference: bool
     labelable: bool
     editable: bool
+    trimmable: bool
     cycle_origin: str
     # Spread from `**meta` when the cycle has a matched profile and
     # `expected_curve_for_cycle` succeeds, so it is optional rather than absent:

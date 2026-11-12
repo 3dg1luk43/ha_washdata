@@ -56,6 +56,7 @@
       "timer_pause_action_title": "Nadaljuj cikel",
       "timer_pause_body_suffix": "Cikel je zaustavljen. Odprite ploščo WashData za nadaljevanje.",
       "unload_dismiss_action_title": "Nehaj opominjati",
+      "review_action_title": "To je bil {program}",
       "notify_live_waiting_message": "{device}: Noben profil se še ne ujema.",
       "vs_typical_longer": "{pct}% dlje kot običajno",
       "vs_typical_shorter": "{pct}% krajše kot običajno",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Označi vzdrževanje kot opravljeno",
+      "description": "Zabeležite vzdrževalno opravilo kot opravljeno zdaj, enako kot gumb Končano na plošči.",
+      "fields": {
+        "device_id": {
+          "name": "Naprava",
+          "description": "Naprava WashData, ki ji opravilo pripada."
+        },
+        "task_id": {
+          "name": "ID opravila",
+          "description": "ID opravila, kot je naveden v atributu due_task_ids senzorja Vzdrževanje na vrsti (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other ali custom_ ID opravila po meri)."
+        },
+        "notes": {
+          "name": "Opombe",
+          "description": "Neobvezna opomba, shranjena z vnosom v dnevniku."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Izbriši cikel",
+      "description": "Izbrišite en shranjen cikel. Njegov program se znova zgradi brez njega ali pa se odstrani, če je bil to njegov zadnji cikel in je bil uvožen. Tega ni mogoče razveljaviti.",
+      "fields": {
+        "device_id": {
+          "name": "Naprava",
+          "description": "Naprava WashData."
+        },
+        "cycle_id": {
+          "name": "ID cikla",
+          "description": "ID cikla za brisanje, npr. spremenljivka cycle_id sprožilca „Cikel je zaključen“ (prazna je, ko ta zagon ni shranil cikla, zato jo najprej preverite)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Sproži usposabljanje ML",
       "description": "Ročno ponovno usposobite modele ML v napravi iz lastnih označenih ciklov te naprave (eksperimentalno).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "Skupna energija"
+      },
+      "last_cycle_duration": {
+        "name": "Trajanje zadnjega cikla"
+      },
+      "last_cycle_energy": {
+        "name": "Energija zadnjega cikla"
+      },
+      "last_cycle_cost": {
+        "name": "Strošek zadnjega cikla"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "Profila ni bilo mogoče dodeliti: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Cikla ni bilo mogoče najti."
+    },
+    "maintenance_task_not_found": {
+      "message": "Na tej napravi ni vzdrževalnega opravila z ID-jem {task_id}."
+    },
+    "task_id_required": {
+      "message": "Potreben je veljaven task_id."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "Cikel je nadaljeval",
       "still_tumbling": "Po koncu še vedno vrti boben",
       "unloaded": "Razloženo",
-      "state_changed": "Stanje se je spremenilo",
+      "state_changed": "Stanje naprave se je spremenilo",
       "maintenance_due": "Vzdrževanje potrebno",
       "milestone_reached": "Dosežen mejnik cikla",
       "pump_stuck": "Črpalka se je zataknila"
@@ -665,7 +716,7 @@
       "description": "Sproži, ko je pranje po ciklu vzeto ven: vrata so se odprla ali razlaganje je potrjeno."
     },
     "state_changed": {
-      "name": "Stanje se je spremenilo",
+      "name": "Stanje naprave se je spremenilo",
       "description": "Sproži, ko se stanje WashData spremeni.",
       "fields": {
         "from": {

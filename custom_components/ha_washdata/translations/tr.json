@@ -56,6 +56,7 @@
       "timer_pause_action_title": "Döngüyü Devam Ettir",
       "timer_pause_body_suffix": "Döngü duraklatıldı. Devam ettirmek için WashData panelini açın.",
       "unload_dismiss_action_title": "Hatırlatmayı durdur",
+      "review_action_title": "{program} idi",
       "notify_live_waiting_message": "{device}: Henüz eşleşen profil yok.",
       "vs_typical_longer": "olağandan %{pct} daha uzun",
       "vs_typical_shorter": "olağandan %{pct} daha kısa",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Bakımı Yapıldı Olarak İşaretle",
+      "description": "Bir bakım görevini, paneldeki Tamam düğmesi gibi, şu an yapıldı olarak kaydedin.",
+      "fields": {
+        "device_id": {
+          "name": "Cihaz",
+          "description": "Görevin ait olduğu WashData cihazı."
+        },
+        "task_id": {
+          "name": "Görev Kimliği",
+          "description": "Bakım zamanı sensörünün due_task_ids özniteliğinde listelenen görev kimliği (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other veya özel bir görevin custom_ kimliği)."
+        },
+        "notes": {
+          "name": "Notlar",
+          "description": "Günlük kaydıyla birlikte saklanan isteğe bağlı not."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Döngüyü Sil",
+      "description": "Kaydedilmiş bir döngüyü silin. Programı bu döngü olmadan yeniden oluşturulur ya da, programın son döngüsü içe aktarılmış bir döngüyse, program kaldırılır. Geri alınamaz.",
+      "fields": {
+        "device_id": {
+          "name": "Cihaz",
+          "description": "WashData cihazı."
+        },
+        "cycle_id": {
+          "name": "Döngü Kimliği",
+          "description": "Silinecek döngünün kimliği, örn. Döngü sona erdi tetikleyicisinin cycle_id değişkeni (o çalışma döngü kaydetmediğinde boştur, bu yüzden önce kontrol edin)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "ML Eğitimini Başlat",
       "description": "Cihazdaki ML modellerini bu cihazın kendi etiketlenmiş döngülerinden manuel olarak yeniden eğitin (deneysel).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "Toplam enerji"
+      },
+      "last_cycle_duration": {
+        "name": "Son Döngü Süresi"
+      },
+      "last_cycle_energy": {
+        "name": "Son Döngü Enerjisi"
+      },
+      "last_cycle_cost": {
+        "name": "Son Döngü Maliyeti"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "Profil atanamadı: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Döngü bulunamadı."
+    },
+    "maintenance_task_not_found": {
+      "message": "Bu cihazda {task_id} kimlikli bakım görevi yok."
+    },
+    "task_id_required": {
+      "message": "Geçerli bir task_id gereklidir."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "Döngü devam etti",
       "still_tumbling": "Döngüden sonra hâlâ dönüyor",
       "unloaded": "Boşaltıldı",
-      "state_changed": "Durum değişti",
+      "state_changed": "Cihaz durumu değişti",
       "maintenance_due": "Bakım gerekiyor",
       "milestone_reached": "Döngü kilometre taşına ulaşıldı",
       "pump_stuck": "Pompa takıldı"
@@ -665,7 +716,7 @@
       "description": "Çamaşır bir döngüden sonra çıkarıldığında tetiklenir: kapı açıldı veya boşaltma onaylandı."
     },
     "state_changed": {
-      "name": "Durum değişti",
+      "name": "Cihaz durumu değişti",
       "description": "WashData durumu değiştiğinde tetiklenir.",
       "fields": {
         "from": {

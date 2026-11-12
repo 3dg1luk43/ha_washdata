@@ -24,7 +24,10 @@ Playground's terminal-drop rule for an A/B on the same code:
 * ``off``      - no terminal drop at all (what an ML-off dishwasher had before ML-08);
 * ``ungated``  - on for dishwashers, may fire at any time (ML-08 as first written);
 * ``guarded``  - on for dishwashers, fires only on a committed unambiguous match
-  (``detector_config.terminal_drop_may_fire``; the shipped rule since 2026-10-04).
+  (``detector_config.terminal_drop_may_fire``; the shipped rule since 2026-10-04);
+* ``ml_on``    - "Apply smart models" on for every device type: the option is set
+  before the manager is built and the shipped predicates decide (the toggle path;
+  use with ``--device-types washing_machine,...``, #516).
 
 ``end_gate_eval --loo --all-formats`` is the other half of any change here: this
 harness measures the benefit, that one the cost (early ends, splits).
@@ -41,6 +44,14 @@ fires / 95 and median close after the cut; ungated and guarded re-run 2026-10-07
 ``end_gate_eval`` on the same day: ungated split one real cycle ("Quick wash", a
 programme new to the device at its familiar heater power, on its first pause:
 dishwasher splits 0.47% -> 0.94%); guarded moved no cycle at all.
+
+#516 (2026-11-08), a completed cycle's end counted as quiet evidence: every
+dishwasher cell above unchanged (shipped and ``ml_on``). ``ml_on`` on 106 washer,
+washer-dryer and dryer cycles: fires 27/23/14 -> 21/16/6 at 15/30/50%, all 21 lost
+on one washer whose baseline (5170 s) sat past its own Quick Wash ends, where the
+same rule closed 4 of 13 real ends as terminal drops (``end_gate_eval --loo
+--all-formats --set enable_ml_models=true``: 6 -> 1 corpus-wide, the one left the
+Quick wash above).
 
 Run from the repo root:
 
@@ -70,12 +81,15 @@ from custom_components.ha_washdata import detector_config, playground  # noqa: E
 from custom_components.ha_washdata.const import (  # noqa: E402
     TERMINAL_DROP_DEFAULT_ON_DEVICE_TYPES,
 )
-from custom_components.ha_washdata.ml.engine import ml_models_enabled  # noqa: E402
+from custom_components.ha_washdata.ml.engine import (  # noqa: E402
+    CONF_ENABLE_ML_MODELS,
+    ml_models_enabled,
+)
 from custom_components.ha_washdata.profile_store import (  # noqa: E402
     decompress_power_data,
 )
 
-RULES = ("shipped", "off", "ungated", "guarded")
+RULES = ("shipped", "off", "ungated", "guarded", "ml_on")
 DEFAULT_CUTS = (0.15, 0.30, 0.50)
 #: The 0 W tail after the cut: 2 h at 30 s, longer than any dishwasher soak gap.
 TAIL_SAMPLES = 240
@@ -116,6 +130,7 @@ def terminal_drop_rule(rule: str) -> Iterator[None]:
     elif rule == "guarded":
         playground.terminal_drop_enabled = _default_on
         playground.terminal_drop_may_fire = detector_config.terminal_drop_may_fire
+    # ``ml_on`` keeps the shipped predicates: replay_export sets the option.
     try:
         yield
     finally:
@@ -133,6 +148,7 @@ def cut_cycle(
     tail = [(last_t + TAIL_STEP_S * (i + 1), 0.0) for i in range(TAIL_SAMPLES)]
     out = copy.deepcopy(cycle)
     out["power_data"] = [[round(t - t0, 1), p] for t, p in pre + tail]
+    out.pop("synthetic_offsets", None)  # re-based and a tail added: provenance unknown
     out["duration"] = last_t - t0
     return out, last_t - t0
 
@@ -149,14 +165,17 @@ def _base(data: dict[str, Any]) -> dict[str, Any]:
 
 
 def replay_export(
-    doc: dict[str, Any], key: str, cuts: tuple[float, ...], per_export: int
+    doc: dict[str, Any], key: str, cuts: tuple[float, ...], per_export: int,
+    rule: str = "shipped",
 ) -> list[dict[str, Any]]:
     """One row per (cycle, cut) for the first ``per_export`` completed cycles."""
     base = _base(doc.get("data") or {})
+    # The toggle the user flips, read by the shipped predicates like any option.
+    overrides = {CONF_ENABLE_ML_MODELS: True} if rule == "ml_on" else None
     # Every envelope rebuilt once with the code under test (exports carry the ones
     # the exporting version built); each fold shares them and rebuilds only the
     # left-out cycle's own programme.
-    _cfg, store, _opts = EG._production(doc, base)  # noqa: SLF001
+    _cfg, store, _opts = EG._production(doc, base, overrides=overrides)  # noqa: SLF001
     # Setup's sample repair, as end_gate_eval, eta_eval and decisive_margin_eval run
     # it: it fixes base["profiles"] in place, and the folds inherit the repair.
     EG._run(store.async_repair_profile_samples())  # noqa: SLF001
@@ -172,7 +191,9 @@ def replay_export(
         if len(points) < MIN_READINGS:
             continue
         done += 1
-        cfg, fold, opts = EG._production(doc, EG._fold_data(base, cyc))  # noqa: SLF001
+        cfg, fold, opts = EG._production(  # noqa: SLF001
+            doc, EG._fold_data(base, cyc), overrides=overrides  # noqa: SLF001
+        )
         name = cyc.get("profile_name")
         if name and name in base["profiles"]:
             EG._rebuild_envelopes(fold, [name])  # noqa: SLF001
@@ -214,7 +235,7 @@ def _export_job(job: tuple[str, str, str, tuple[float, ...], int]) -> list[dict[
     if not doc:
         return []
     with terminal_drop_rule(rule):
-        return replay_export(doc, key, cuts, per_export)
+        return replay_export(doc, key, cuts, per_export, rule)
 
 
 def corpus_jobs(

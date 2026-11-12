@@ -121,6 +121,33 @@ async def test_auto_label_cycles_basic(store):
         assert c2["profile_name"] == "Existing"
 
 @pytest.mark.asyncio
+async def test_a_cycle_deleted_during_its_match_is_not_labelled(store):
+    """The delete action / panel delete take no write lock: a cycle removed while
+    its match awaited the executor must not be labelled, nor its profile rebuilt."""
+    store._data["past_cycles"] = [
+        {"id": "c1", "profile_name": None, "duration": 3600, "power_data": []},
+    ]
+    gone = store._data["past_cycles"][0]
+
+    async def _match(*_a, **_k):
+        store._data["past_cycles"].remove(gone)   # deleted mid-await
+        return MatchResult(
+            best_profile="DetectedProfile", confidence=0.9, expected_duration=3600.0,
+            matched_phase=None, candidates=[], is_ambiguous=False, ambiguity_margin=1.0,
+        )
+
+    with patch.object(store, "async_match_profile", side_effect=_match), \
+         patch.object(store, "async_rebuild_envelope", AsyncMock()) as rebuild, \
+         patch("custom_components.ha_washdata.profile_store.decompress_power_data",
+               return_value=[("t", 1.0)] * 20):
+        stats = await store.auto_label_cycles(confidence_threshold=0.8, overwrite=False)
+
+    assert stats["labeled"] == 0 and stats["skipped"] == 1
+    assert gone.get("profile_name") is None
+    rebuild.assert_not_awaited()
+
+
+@pytest.mark.asyncio
 async def test_auto_label_cycles_overwrite(store):
     """Test relabeling cycles with overwrite=True."""
     store._data["past_cycles"] = [

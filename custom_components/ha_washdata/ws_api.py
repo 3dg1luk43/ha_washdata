@@ -40,6 +40,7 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .const import (
+    BACKFILL_TAIL_TRACE_KEY,
     coerce_numeric_option,
     drop_invalid_numeric_options,
     numeric_option_keys,
@@ -72,6 +73,10 @@ from .const import (
     CONF_POWER_OFF_THRESHOLD_W,
     CONF_POWER_SENSOR,
     CONF_ENERGY_PRICE_ENTITY,
+    CONF_NOTIFY_ACTIONS,
+    CONF_NOTIFY_FINISH_SERVICES,
+    CONF_NOTIFY_LIVE_SERVICES,
+    CONF_NOTIFY_START_SERVICES,
     CONF_NOTIFY_PEOPLE,
     RETIRED_OPTION_KEYS,
     CONF_SAMPLING_INTERVAL,
@@ -126,6 +131,7 @@ from .detector_config import (
     effective_option_values,
     inverted_threshold_pair,
 )
+from .learning import review_choices
 from .maintenance import editor_types, effective_reminders
 from .options_utils import retire_device_type, strip_null_options
 from .setup_advisor import compute_setup_phase
@@ -199,8 +205,13 @@ def _send_result(
     connection.send_result(msg_id, data)
 
 
-# Fields too large or not serialisable to send over WebSocket.
-_CYCLE_STRIP_KEYS = frozenset({"power_data", "power_trace", "debug_data", "samples"})
+# Fields too large or not serialisable to send over WebSocket. The kept tail of a
+# cut import (register item 618) is store-internal: only a later cut reads it. The
+# keepalive offsets (item 568) are trace data the panel never reads.
+_CYCLE_STRIP_KEYS = frozenset(
+    {"power_data", "power_trace", "debug_data", "samples", BACKFILL_TAIL_TRACE_KEY,
+     "synthetic_offsets"}
+)
 
 # Settings keys that can be staged from suggestions. Mirrors the OptionsFlow's
 # _suggestion_keys_to_apply so the panel and the flow agree on what is tunable.
@@ -586,7 +597,7 @@ def _strip_cycle(c: dict[str, Any]) -> dict[str, Any]:
 def _cycle_capabilities(cycle: dict[str, Any], origin: str) -> dict[str, Any]:
     """What the panel may offer for one cycle, given which list it lives in.
 
-    Three separate answers, because "not a real cycle" is not one capability:
+    Separate answers, because "not a real cycle" is not one capability:
 
     * ``is_reference`` - it lives outside ``past_cycles``, so it feeds envelopes and the
       matcher but never usage statistics. Always derived from list membership, never from
@@ -595,8 +606,11 @@ def _cycle_capabilities(cycle: dict[str, Any], origin: str) -> dict[str, Any]:
     * ``labelable`` - a profile can be assigned to it. True everywhere: naming the
       programs found in imported history (#344) is the entire point of that feature, and
       the store labels a non-real cycle in place.
-    * ``editable`` - trim / split / review apply. Real cycles only; those store functions
+    * ``editable`` - split / review apply. Real cycles only; those store functions
       operate on ``past_cycles`` and would silently no-op elsewhere.
+    * ``trimmable`` - trim. Real and history-imported (``backfill``) cycles: an import
+      can hold an end wait the user wants gone (#518). A community-store recording
+      stays as downloaded.
 
     ``origin`` is the list name from :meth:`ProfileStore.find_stored_cycle`
     (``past`` / ``reference`` / ``backfill``) and is passed through so the UI can say
@@ -604,11 +618,12 @@ def _cycle_capabilities(cycle: dict[str, Any], origin: str) -> dict[str, Any]:
     importer detected in the user's own history warrant different wording.
     """
     if origin == "past":
-        return {"is_reference": False, "labelable": True, "editable": True}
+        return {"is_reference": False, "labelable": True, "editable": True, "trimmable": True}
     return {
         "is_reference": True,
         "labelable": True,
         "editable": False,
+        "trimmable": origin == "backfill",
         "cycle_origin": origin or "reference",
     }
 
@@ -639,9 +654,11 @@ _OPTIONS_IDENTITY_KEYS = frozenset({CONF_NAME})
 # post-3.6, so they arrived through the other door. Found by the test box
 # (devtools/testbox) on its first run; see register item 317.
 #
-# Deliberately NOT here: the notify_*_services lists. They also name the source
-# user's targets, but they are shown plainly in the panel's Notifications
-# section, and carrying them is usually the point when migrating your own setup.
+# The notification actions and the notify_*_services lists are here too since
+# GHSA-2c9v-w74f-jgqw (#507): WashData calls them with no user in the context,
+# so a shared export could plant a service or script an admin then runs as the
+# system by importing it. An import keeps this device's own notification
+# targets; restoring your own export means picking them again.
 _IMPORT_LOCAL_BINDING_KEYS = _OPTIONS_IDENTITY_KEYS | frozenset({
     CONF_POWER_SENSOR,
     CONF_ENERGY_SENSOR,
@@ -652,6 +669,10 @@ _IMPORT_LOCAL_BINDING_KEYS = _OPTIONS_IDENTITY_KEYS | frozenset({
     CONF_EXTERNAL_END_TRIGGER,
     CONF_LINKED_DEVICE,
     CONF_NOTIFY_PEOPLE,
+    CONF_NOTIFY_ACTIONS,
+    CONF_NOTIFY_START_SERVICES,
+    CONF_NOTIFY_FINISH_SERVICES,
+    CONF_NOTIFY_LIVE_SERVICES,
 })
 
 # Everything an import drops from the payload's options: this device's bindings,
@@ -819,6 +840,17 @@ _ADMIN_COMMANDS = frozenset({
     "history_import_recorder",
     "start_history_import_scan",
     "apply_history_import",
+})
+# Option keys only an administrator may change, whatever the command's level (#507).
+# Each names a service WashData calls, or a script it runs, with no user in the
+# context, which Home Assistant treats as the system: so they pass the check of
+# an admin-only service (restart, add-on control, backups). Authoring them is
+# authoring an automation, which Home Assistant reserves to administrators too.
+_ADMIN_OPTION_KEYS = frozenset({
+    CONF_NOTIFY_ACTIONS,
+    CONF_NOTIFY_START_SERVICES,
+    CONF_NOTIFY_FINISH_SERVICES,
+    CONF_NOTIFY_LIVE_SERVICES,
 })
 # Mutating commands intentionally allowed at the 'read' level. Picking the live
 # program is a benign runtime action (it changes detection, not stored data), so
@@ -1680,6 +1712,9 @@ def ws_get_devices(
             "envelope_position": None,
             # Top two of an undecided live match (MATCH-DECIDE-15): display only.
             "match_uncertainty": None,
+            # The two programmes a live match is torn between: the Status card's
+            # "X or Y?" manual pick (match_rules.live_torn_choices).
+            "match_choices": None,
             # Merged data+options, matching ``ws_get_options`` and the
             # options-first resolution in WashDataManager (#450). An entry added
             # after its last schema migration carries the structural keys in
@@ -1743,6 +1778,11 @@ def ws_get_devices(
                 # raw `detecting...` value, which automations compare against.
                 _unc = getattr(manager, "match_uncertainty", None)
                 info["match_uncertainty"] = _unc if isinstance(_unc, dict) else None
+                _choices = getattr(manager, "match_choices", None)
+                info["match_choices"] = (
+                    [str(n) for n in _choices[:2]]
+                    if isinstance(_choices, list) and len(_choices) >= 2 else None
+                )
 
                 store = getattr(manager, "profile_store", None)
                 if store is not None:
@@ -2070,6 +2110,20 @@ async def ws_set_options(
     lock = _entry_options_lock(hass, msg["entry_id"])
     await lock.acquire()
     try:
+        # Under the lock, against the value it would replace: a non-admin saving
+        # the rest of the form with these unchanged is not refused (#507).
+        if not getattr(getattr(connection, "user", None), "is_admin", False):
+            blocked = sorted(
+                key for key in _ADMIN_OPTION_KEYS & set(msg["options"])
+                if (msg["options"][key] or []) != (entry.options.get(key) or [])
+            )
+            if blocked:
+                connection.send_error(
+                    msg["id"], "forbidden",
+                    f"Administrator access required to change {', '.join(blocked)}",
+                )
+                return
+
         # Build the new options from the *existing* options plus the submitted
         # values only. Never spread entry.data in: that would copy identity and
         # data-only keys (name, initial_profile, stale creation-time identity) into
@@ -3968,16 +4022,54 @@ def ws_get_feedbacks(
 
     feedbacks: list[dict[str, Any]] = []
     try:
-        pending: dict[str, Any] = manager.profile_store.get_pending_feedback()
+        store = manager.profile_store
+        pending: dict[str, Any] = store.get_pending_feedback()
         feedbacks = sorted(
             [{"cycle_id": cid, **item} for cid, item in pending.items()],
             key=lambda x: x.get("created_at", ""),
             reverse=True,
         )
+        _review_answer_fields(store, feedbacks)
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Error fetching feedbacks for %s: %s", entry_id, exc)
 
     _send_result(connection, msg["id"], "get_feedbacks", {"feedbacks": feedbacks})
+
+
+def _review_answer_fields(store: Any, feedbacks: list[dict[str, Any]]) -> None:
+    """Add what the panel's inline review question shows to each request, in place.
+
+    ``choices``: the one-tap answers (``learning.review_choices``) with each
+    programme's typical duration (s) and energy (kWh). ``cycle``: the cycle's
+    start, duration and energy, or None when it is no longer stored (an orphan
+    the device badge already leaves out, #362). Never raises.
+    """
+    try:
+        profiles = store.get_profiles() or {}
+        cycles = {c.get("id"): c for c in store.get_past_cycles() if isinstance(c, dict)}
+    except Exception:  # pylint: disable=broad-exception-caught
+        return
+    for fb in feedbacks:
+        try:
+            choices = []
+            for name in review_choices(fb, profiles):
+                prof = profiles.get(name) or {}
+                env = store.get_envelope(name) or {}
+                choices.append({
+                    "name": name,
+                    "avg_duration_s": prof.get("avg_duration") or None,
+                    "avg_energy_kwh": env.get("avg_energy"),
+                })
+            fb["choices"] = choices
+            cyc = cycles.get(fb.get("cycle_id"))
+            fb["cycle"] = None if cyc is None else {
+                "start_time": cyc.get("start_time"),
+                "duration_s": cyc.get("duration"),
+                "energy_kwh": _cycle_kwh(cyc),
+                "profile_name": cyc.get("profile_name"),
+            }
+        except Exception:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("Review answer fields failed for %s", fb.get("cycle_id"), exc_info=True)
 
 
 @websocket_api.websocket_command(
@@ -4016,13 +4108,19 @@ async def ws_resolve_feedback(
                 if corrected_duration_min is not None
                 else None
             )
-            await manager.learning_manager.async_submit_cycle_feedback(
+            recorded = await manager.learning_manager.async_submit_cycle_feedback(
                 cycle_id=cycle_id,
                 user_confirmed=(action == "confirm"),
                 corrected_profile=msg.get("corrected_profile") if action == "correct" else None,
                 corrected_duration=corrected_duration_s,
                 dismiss=(action == "ignore"),
             )
+            if not recorded:
+                connection.send_error(
+                    msg["id"], "not_found",
+                    "No review is waiting for this cycle, or its programme no longer exists",
+                )
+                return
         else:
             connection.send_error(msg["id"], "not_available", "Learning manager not available")
             return
@@ -4441,6 +4539,7 @@ async def ws_import_config(
             # entry - so an import that carries no options would otherwise leave
             # the imported tails inflating avg_duration until the next restart.
             manager.async_schedule_banked_tail_repair()
+            manager.async_schedule_energy_rebuild()
             manager.notify_update()
             _send_result(connection, msg["id"], "import_config", result)
         except json.JSONDecodeError as exc:
@@ -4678,6 +4777,7 @@ async def ws_import_config_selective(
             # above, so nothing reloads the entry and the re-armed repair would
             # wait for a restart.
             manager.async_schedule_banked_tail_repair()
+            manager.async_schedule_energy_rebuild()
             manager.notify_update()
             _send_result(
                 connection, msg["id"], "import_config_selective",
@@ -4773,6 +4873,7 @@ async def ws_undo_import(
             if entry is not None and isinstance(snapshot_options, dict):
                 await _async_restore_entry_options(hass, entry, snapshot_options)
             manager.async_schedule_banked_tail_repair()
+            manager.async_schedule_energy_rebuild()
             manager.notify_update()
             _send_result(connection, msg["id"], "undo_import", result)
         except ValueError as exc:
@@ -7314,13 +7415,22 @@ def ws_start_playground_sweep(
         return
     if _pg_refuse_busy(hass, connection, msg["id"], entry_id):
         return
+    # The values the replay will actually run: an integer setting truncates, so a
+    # narrow range collapsed to one value scored the same configuration N times.
+    values = playground.effective_sweep_values(msg["param"], list(msg.get("values") or []))
+    if len(values) < 2:
+        connection.send_error(
+            msg["id"], "invalid_format",
+            "The range holds fewer than two distinct values for this setting",
+        )
+        return
     reg = task_registry.get_registry(hass)
     task = reg.create(
         entry_id, "pg_sweep", f"Optimize: {msg['param']}",
         label_key="task.pg_sweep.optimize", label_params={"param": msg["param"]},
     )
     _raw = hass.async_create_task(_pg_sweep_task(
-        hass, task, entry_id, msg["param"], list(msg.get("values") or []),
+        hass, task, entry_id, msg["param"], values,
         msg["objective"], list(msg.get("cycle_ids") or []), msg.get("count"),
     ))
     if _raw is not None:
@@ -7961,8 +8071,12 @@ async def _history_import_apply_task(
                     id_pool=id_pool,
                 )
                 if raw.get("tail_cut_s"):
-                    # The banked-tail repair's own trim (PLAYGROUND-07).
-                    store._apply_repaired_duration(stored, float(raw["tail_cut_s"]))  # noqa: SLF001
+                    # The banked-tail repair's own trim (PLAYGROUND-07), stamped so the
+                    # cut at labelling (#518) does not run on it again; the readings it
+                    # removes are kept with the level it was judged at (item 618).
+                    store._apply_backfill_tail_cut(  # noqa: SLF001
+                        stored, float(raw["tail_cut_s"]), stop_w=raw.get("tail_cut_stop_w")
+                    )
                 if key is not None:
                     existing.add(key)
                 interval = history_import.stored_intervals([{**raw, "duration": duration}])

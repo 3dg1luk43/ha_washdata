@@ -266,7 +266,11 @@
     "bp_details": "Details",
     "bp_copy_yaml": "YAML kopieren",
     "bp_hide_yaml": "YAML ausblenden",
-    "bp_show_yaml": "YAML anzeigen"
+    "bp_show_yaml": "YAML anzeigen",
+    "review_something_else": "Etwas anderes…",
+    "review_not_sure": "Nicht sicher",
+    "review_prev": "Vorheriger Zyklus",
+    "review_next": "Nächster Zyklus"
   },
   "note": {
     "off_delay": {
@@ -583,6 +587,7 @@
     "pg_alert_overrun": "Zu lang",
     "pg_alert_underrun": "Zu kurz",
     "pg_alert_did_not_finish": "Nicht abgeschlossen",
+    "pg_alert_discarded": "Als Geisterzyklus oder Abpumpen verworfen",
     "pg_alert_false_end": "In mehrere Zyklen geteilt",
     "pg_alert_unmatched": "Nicht zugeordnet",
     "pg_alert_ambiguous": "Mehrdeutige Übereinstimmung",
@@ -714,7 +719,10 @@
     "bp_needs": "Benötigt",
     "bp_needs_version": "WashData {version} oder neuer",
     "bp_author": "Autor",
-    "bp_required": "erforderlich"
+    "bp_required": "erforderlich",
+    "pg_runs_as": "läuft mit {value}",
+    "review_this_cycle": "Dieser Zyklus",
+    "review_usual": "Üblich für {name}"
   },
   "log": {
     "all_levels": "Alle Ebenen",
@@ -1061,7 +1069,7 @@
     "hist_scan_failed": "Suche fehlgeschlagen.",
     "hist_scan_expired": "Diese Suche ist nicht mehr verfügbar. Suchen Sie erneut.",
     "hist_import_failed": "Import fehlgeschlagen.",
-    "imported_history_readonly": "Im importierten Leistungsverlauf gefunden. Er hilft beim Abgleich, zählt aber nicht in Ihre Statistik und kann nicht gekürzt oder aufgeteilt werden. Beschriften Sie ihn, um das Programm zu benennen.",
+    "imported_history_note": "Im importierten Leistungsverlauf gefunden. Er hilft beim Abgleich, zählt aber nicht in Ihre Statistik und kann nicht aufgeteilt werden. Beschriften Sie ihn, um das Programm zu benennen.",
     "odometer_intro": "Diese Gesamtzahl steigt nur. Das Löschen eines Zyklus verringert sie nicht, damit Wartungserinnerungen korrekt bleiben.",
     "odometer_correct_hint": "Setzen Sie diesen Wert, wenn WashData einen Lauf gezählt hat, der nie stattfand, oder wenn das Gerät schon vor der Installation von WashData Zyklen absolviert hat.",
     "no_reminders_set": "Es sind noch keine Service-Erinnerungen eingerichtet.",
@@ -1111,10 +1119,18 @@
     "bp_none_yet": "Noch keine Vorlagen für diesen Gerätetyp. Teilen Sie die erste.",
     "bp_unreachable": "Sie wird von GitHub heruntergeladen. Prüfen Sie, ob Home Assistant das Internet erreicht, und versuchen Sie es dann erneut.",
     "bp_library_intro": "Fertige Automatisierungen, die WashData-Nutzer auf GitHub teilen und die vor der Aufnahme geprüft werden. Nur mit eingeschalteten Onlinefunktionen verfügbar.",
-    "bp_needs_version": "Benötigt WashData {version} oder neuer."
+    "bp_needs_version": "Benötigt WashData {version} oder neuer.",
+    "bp_review_check": "Prüfen Sie dies vor dem Speichern: Home Assistant führt es genau so aus, wie es geschrieben ist.",
+    "review_q_title": "Welches Programm war das?",
+    "review_q_intro": "WashData ist sich bei diesen Zyklen nicht sicher. Mit Ihrer Antwort lernt es dazu.",
+    "review_q_started": "Gestartet: {when}",
+    "review_q_more": "Noch {count} zu bewerten",
+    "review_q_more_one": "Noch {count} zu bewerten",
+    "review_q_more_other": "Noch {count} zu bewerten",
+    "review_which_program": "Welches Programm war es?"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Geschirrspüler: Ruhesekunden nach der erwarteten Dauer, bevor die Wartezeit auf das Abpumpen am Zyklusende freigegeben wird",
+    "dishwasher_end_spike_quiet_release": "Geschirrspüler: Sekunden unter dem Stoppschwellenwert seit der letzten Aktivität, die nötig sind, um nach der erwarteten Dauer das Warten auf das letzte Abpumpen zu beenden",
     "smart_termination_duration_ratio": "Anteil der durchschnittlichen Programmdauer, den ein Zyklus erreichen muss, bevor die intelligente Beendigung ihn vorzeitig beenden darf; senken, wenn die Laufzeiten schwanken",
     "completion_min_seconds": "Kürzester Lauf, der als echter Zyklus zählt",
     "interrupted_min_seconds": "Kurze Zyklen werden als unterbrochen markiert",
@@ -1223,7 +1239,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Ruhefreigabe nach Passivtrocknung",
-      "doc": "Nach der erwarteten Dauer: wie lange der Geschirrspüler unter dem Stoppschwellenwert bleiben muss, bevor WashData nicht mehr auf das letzte Abpumpen wartet. Erhöhen, wenn ein spätes Abpumpen nach langem Trocknen verpasst wird. Die Wartezeit überschreitet nie 30 Minuten."
+      "doc": "Nach Erreichen der erwarteten Dauer wartet WashData nicht mehr auf das letzte Abpumpen, sobald der Geschirrspüler seit seiner letzten Aktivität so lange unter dem Stoppschwellenwert geblieben ist, höchstens 30 Minuten (und ab 3 aufgezeichneten Zyklen des Programms mindestens dessen längste aufgezeichnete Trocknungspause). Erhöhen, wenn ein spätes Abpumpen nach langem Trocknen verpasst wird."
     },
     "anti_crease_finalize_ratio": {
       "label": "Verhältnis für Knitterschutz-Abschluss",
@@ -1366,7 +1382,7 @@
       "label": "Benachrichtigungssymbol"
     },
     "notify_live_chronometer": {
-      "doc": "Android: Fügt der Benachrichtigung einen Countdown bis zum voraussichtlichen Ende hinzu. Mit {finish_time} in der Vorend-Nachricht wird die Endzeit statt eines zweiten Countdowns angezeigt.",
+      "doc": "Android: Fügt neben dem Benachrichtigungstext einen Countdown bis zum voraussichtlichen Ende hinzu. Mit {finish_time} in der Nachricht der Live-Aktualisierung wird die Endzeit statt eines zweiten Countdowns angezeigt.",
       "label": "Live-Chronometer verwenden"
     },
     "notify_live_interval_seconds": {
@@ -1391,11 +1407,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Text jedes Live-Fortschrittsupdates. Vorlagenvariablen: {device}, {program}, {minutes} (verbleibende Minuten), {finish_time} (voraussichtliche Endzeit, z. B. 14:30). Bei jeder anderen Variable wird der Standardtext verwendet.",
-      "label": "Vorend-Nachricht"
+      "label": "Nachricht der Live-Aktualisierung"
     },
     "notify_reminder_message": {
       "doc": "Text des einmaligen Vorend-Alarms. Vorlagenvariablen: {device}, {program}, {minutes} (die Einstellung Vorend-Alarm). Bei jeder anderen Variable wird der Standardtext verwendet.",
-      "label": "Erinnerungsnachricht"
+      "label": "Nachricht des Vorend-Alarms"
     },
     "notify_start_message": {
       "doc": "Text, der beim Start eines Zyklus gesendet wird. Vorlagenvariablen: {device}, {program}. Bei jeder anderen Variable wird der Standardtext verwendet.",
@@ -1690,6 +1706,8 @@
     "preparing": "Wird vorbereitet…",
     "unlabelling": "Beschriftung wird entfernt…",
     "working": "Wird ausgeführt…",
+    "torn_pick": "{a} oder {b}?",
+    "torn_tip": "WashData kann diese beiden noch nicht unterscheiden, wählen Sie also das laufende Programm, um diesen Zyklus damit zu beschriften (Automatische Erkennung macht die Auswahl rückgängig).",
     "match_uncertain": "Unsicher: {top} oder {runner}",
     "match_uncertain_single": "Unsicher: vielleicht {top}",
     "match_sure": "~{pct}% sicher",
@@ -1974,7 +1992,8 @@
     "bp_automation_created": "Automatisierung mit Standardeinstellungen erstellt; wird geöffnet",
     "copied": "Kopiert",
     "copy_failed": "Kopieren fehlgeschlagen. Text auswählen und manuell kopieren.",
-    "automation_label_failed": "Automatisierung erstellt, aber das WashData-Label oder die Kategorie konnte nicht hinzugefügt werden."
+    "automation_label_failed": "Automatisierung erstellt, aber das WashData-Label oder die Kategorie konnte nicht hinzugefügt werden.",
+    "review_answered": "Gespeichert: {program}"
   },
   "trend": {
     "down": "Abwärtstrend",
@@ -2241,7 +2260,7 @@
       "name": "Entnommen"
     },
     "state_changed": {
-      "name": "Zustand geändert"
+      "name": "Gerätezustand geändert"
     },
     "maintenance_due": {
       "name": "Wartung fällig"

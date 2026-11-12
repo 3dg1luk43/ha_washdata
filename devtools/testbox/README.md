@@ -30,15 +30,15 @@ when this was written), not a fixed release. Read it with
 ```bash
 cd devtools/testbox
 ./up.sh --fresh        # ~40 s: container, config, owner user, long-lived token
-./smoke.sh             # ~12 min: one full cycle end to end, then the assertions
+./smoke.sh             # ~4 min: one full cycle end to end, then the assertions
 ./down.sh              # stop (add --wipe to delete config/ too)
 ```
 
 `./smoke.sh` is the whole point in one command: it creates a device through the
-real config flow, seeds it from a real export, replays a recorded 76 min washing
+real config flow, seeds it from a real export, replays a recorded 133 min washing
 machine cycle at 60x, waits for the cycle to close, and then runs the 22 checks
 in `assert_run.py` that no mocked Home Assistant can make (see *What smoke.sh
-proves* below). Most of the ~12 min is the wait for the cycle to close (see
+proves* below). Most of the ~4 min is the wait for the cycle to close (see
 *Current known state*).
 
 **The default seed data is private.** Without `--export`, `smoke.sh` seeds from
@@ -48,7 +48,20 @@ for `--type dishwasher`), so on any other checkout it stops at
 `export not found`. Pass your own WashData export instead:
 `./smoke.sh --fresh --export /path/to/washdata_export.json [--cycle N]`. It needs
 at least one stored cycle with its power trace; `--cycle` picks which one is
-replayed (default 0), and its profiles seed the matcher.
+replayed (default 0 with `--export`), and its profiles seed the matcher.
+
+**Why the default washer cycle is #30, not #0** (register item 582). At 60x the
+matcher scores nothing until the replay has `MATCH_MIN_RESAMPLED_POINTS` (12)
+points on its 5 s grid, ~55 s in, and then needs 3 straight wins to commit, 6
+if the tick is ambiguous. Cycle #0 (76 min) sits between the rpm-only twins
+`30° / 2:09 / 800rpm` and `1000rpm`: the winner flipped with the tick timing and
+often never committed in its 76 s, so "a matched live update was delivered"
+failed, mostly under host load. #30 (`30° / 1:07 / utility`, 133 min) has no
+twin; replayed offline through the Playground with smoke's timings and jittered
+sample times, it won every tick and committed 66-83 s into its 133 s, also
+with itself held out; on the box it committed 72-73 s in on 5 of 5 runs
+(2026-11-06, two of them under `./run_tests.sh -n 2`). With your own export, pick a `--cycle` the same way: long
+enough (well over 1 h) and a programme with no near-duplicate.
 
 ## Paths
 
@@ -64,6 +77,8 @@ Everything lives under `devtools/testbox/`:
 | `assert_run.py` | the acceptance checks, run by `smoke.sh` step 7 |
 | `check_notify_actions.sh` | the notification-ACTION delivery path, ~1 min, standalone |
 | `check_unload_confirm.sh` | unload confirmation without a door sensor (#451): the button entity, the service and the confirmation-entity listener, ~3 min, standalone |
+| `check_clean_restart.sh` | the Clean state across a graceful restart and a SIGKILL crash (#500): original start kept, reminder not resent, door and Mark Unloaded still clear it, ~8 min, standalone |
+| `check_review_actions.sh` | the finish notification's review answers (audit item 1): two actions on the mobile target only, a tap resolves the request, a second tap does nothing, and the listener survives a restart, ~10 min, standalone |
 | `support/configuration.yaml` | baseline HA config, copied into `config/` on first start |
 | `config/.compressed_export.json` | the time-rescaled export `smoke.sh` seeds from |
 | `support/custom_components/testbox_notify/` | notify platform that records every payload |
@@ -148,7 +163,7 @@ literal `{{ device }}` text, because the sequence never went through
 
 ### Time compression
 
-A 76 min cycle replayed at 60x takes 76 s, which is the only reason a full run
+A 133 min cycle replayed at 60x takes 133 s, which is the only reason a full run
 fits in minutes. Three things have to move together, and getting any of them
 wrong looks like a bug in the integration:
 
@@ -311,3 +326,5 @@ there. Register item 320.
   still only verifiable on a phone.
 - `mobile_app:` is loaded so the `mobile_app_notification_action` event exists,
   but no device is registered, so mobile action round-trips are not covered.
+  `check_review_actions.sh` fires that event on the bus itself, with the action
+  id the notification carried: it proves the listener, not the phone.

@@ -56,6 +56,7 @@
       "timer_pause_action_title": "Riprendi ciclo",
       "timer_pause_body_suffix": "Il ciclo è in pausa. Apri il pannello WashData per riprendere.",
       "unload_dismiss_action_title": "Interrompi promemoria",
+      "review_action_title": "Era {program}",
       "notify_live_waiting_message": "{device}: nessun profilo ancora riconosciuto.",
       "vs_typical_longer": "{pct}% più lungo del solito",
       "vs_typical_shorter": "{pct}% più corto del solito",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Segna manutenzione come fatta",
+      "description": "Registra ora un'attività di manutenzione come fatta, come fa il pulsante Fatto del pannello.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "Il dispositivo WashData a cui appartiene l'attività."
+        },
+        "task_id": {
+          "name": "ID attività",
+          "description": "L'ID dell'attività, come elencato nell'attributo due_task_ids del sensore Manutenzione in scadenza (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other, oppure l'ID custom_ di un'attività personalizzata)."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Nota facoltativa salvata con la voce del registro."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Elimina ciclo",
+      "description": "Elimina un ciclo salvato. Il suo programma viene ricostruito senza di esso, o rimosso se un ciclo importato era il suo ultimo ciclo. Non può essere annullato.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "Il dispositivo WashData."
+        },
+        "cycle_id": {
+          "name": "ID ciclo",
+          "description": "L'ID del ciclo da eliminare, ad esempio la variabile cycle_id dell'attivazione Ciclo concluso (vuota quando quell'esecuzione non ha salvato alcun ciclo, quindi controllala prima)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Avvia addestramento ML",
       "description": "Riaddestra manualmente i modelli ML sul dispositivo usando i cicli etichettati di questo dispositivo (sperimentale).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "Energia totale"
+      },
+      "last_cycle_duration": {
+        "name": "Durata ultimo ciclo"
+      },
+      "last_cycle_energy": {
+        "name": "Energia ultimo ciclo"
+      },
+      "last_cycle_cost": {
+        "name": "Costo ultimo ciclo"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "Impossibile assegnare il profilo: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Ciclo non trovato."
+    },
+    "maintenance_task_not_found": {
+      "message": "Nessuna attività di manutenzione con ID {task_id} su questo dispositivo."
+    },
+    "task_id_required": {
+      "message": "È richiesto un task_id valido."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "Ciclo ripreso",
       "still_tumbling": "Ancora in rotazione dopo il ciclo",
       "unloaded": "Scaricato",
-      "state_changed": "Stato cambiato",
+      "state_changed": "Stato dell'elettrodomestico cambiato",
       "maintenance_due": "Manutenzione in scadenza",
       "milestone_reached": "Traguardo cicli raggiunto",
       "pump_stuck": "Pompa bloccata"
@@ -665,7 +716,7 @@
       "description": "Si attiva quando il carico viene rimosso dopo un ciclo: la porta è stata aperta o lo scarico è stato confermato."
     },
     "state_changed": {
-      "name": "Stato cambiato",
+      "name": "Stato dell'elettrodomestico cambiato",
       "description": "Si attiva quando lo stato di WashData cambia.",
       "fields": {
         "from": {

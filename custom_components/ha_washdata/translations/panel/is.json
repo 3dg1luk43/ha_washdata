@@ -266,7 +266,11 @@
     "bp_details": "Nánar",
     "bp_copy_yaml": "Afrita YAML",
     "bp_hide_yaml": "Fela YAML",
-    "bp_show_yaml": "Sýna YAML"
+    "bp_show_yaml": "Sýna YAML",
+    "review_something_else": "Eitthvað annað…",
+    "review_not_sure": "Veit ekki",
+    "review_prev": "Fyrri lota",
+    "review_next": "Næsta lota"
   },
   "note": {
     "off_delay": {
@@ -583,6 +587,7 @@
     "pg_alert_overrun": "Of lengi",
     "pg_alert_underrun": "Of stutt",
     "pg_alert_did_not_finish": "Lauk ekki",
+    "pg_alert_discarded": "Fleygt sem draugalotu eða útdælingu",
     "pg_alert_false_end": "Skipt í margar lotur",
     "pg_alert_unmatched": "Engin samsvörun",
     "pg_alert_ambiguous": "Óljós samsvörun",
@@ -714,7 +719,10 @@
     "bp_needs": "Krefst",
     "bp_needs_version": "WashData {version} eða nýrra",
     "bp_author": "Höfundur",
-    "bp_required": "nauðsynlegt"
+    "bp_required": "nauðsynlegt",
+    "pg_runs_as": "notað sem {value}",
+    "review_this_cycle": "Þessi lota",
+    "review_usual": "Venjulegt fyrir {name}"
   },
   "log": {
     "all_levels": "Öll stig",
@@ -1061,7 +1069,7 @@
     "hist_scan_failed": "Skönnun mistókst.",
     "hist_scan_expired": "Sú skönnun er ekki lengur tiltæk. Skannaðu aftur.",
     "hist_import_failed": "Innflutningur mistókst.",
-    "imported_history_readonly": "Fannst í innfluttri aflsögu. Hún hjálpar samsvöruninni en telst ekki með í tölfræðinni þinni og ekki er hægt að klippa hana eða skipta henni. Merktu hana til að gefa kerfinu heiti.",
+    "imported_history_note": "Fannst í innfluttri aflsögu. Hún hjálpar samsvöruninni en telst ekki með í tölfræðinni þinni og ekki er hægt að skipta henni. Merktu hana til að gefa kerfinu heiti.",
     "odometer_intro": "Þessi samtala hækkar aðeins. Það að eyða lotu lækkar hana ekki, svo þjónustuáminningar haldist réttar.",
     "odometer_correct_hint": "Stilltu þetta ef WashData taldi keyrslu sem aldrei fór fram, eða ef tækið keyrði lotur áður en WashData var sett upp.",
     "no_reminders_set": "Engar þjónustuáminningar hafa enn verið stilltar.",
@@ -1111,10 +1119,18 @@
     "bp_none_yet": "Engin sniðmát enn fyrir þessa tækjategund. Deildu því fyrsta.",
     "bp_unreachable": "Það er sótt frá GitHub. Gakktu úr skugga um að Home Assistant nái sambandi við internetið og reyndu svo aftur.",
     "bp_library_intro": "Tilbúin sjálfvirkni sem WashData-notendur deila á GitHub, yfirfarin áður en hún er birt. Aðeins í boði þegar kveikt er á nettengdum eiginleikum.",
-    "bp_needs_version": "Krefst WashData {version} eða nýrra."
+    "bp_needs_version": "Krefst WashData {version} eða nýrra.",
+    "bp_review_check": "Athugaðu þetta áður en þú vistar: Home Assistant keyrir það nákvæmlega eins og það er skrifað.",
+    "review_q_title": "Hvaða kerfi var þetta?",
+    "review_q_intro": "WashData er í vafa um þessar lotur. Svarið þitt kennir því.",
+    "review_q_started": "Hófst {when}",
+    "review_q_more": "{count} í viðbót til yfirferðar",
+    "review_q_more_one": "{count} í viðbót til yfirferðar",
+    "review_q_more_other": "{count} í viðbót til yfirferðar",
+    "review_which_program": "Hvaða kerfi var það?"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Uppþvottavél: hljóðlátar sekúndur eftir áætlaða lengd áður en biðin eftir útdælingu í lok lotu er losuð",
+    "dishwasher_end_spike_quiet_release": "Uppþvottavél: sekúndur undir Stöðvunarþröskuldi frá síðustu virkni sem þarf til að ljúka biðinni eftir lokaútdælingu að lokinni væntanlegri lengd",
     "smart_termination_duration_ratio": "Hlutfall af meðallengd kerfisins sem lota þarf að ná áður en snjöll lokun má ljúka henni snemma; lækkaðu það ef keyrslutímar eru breytilegir",
     "completion_min_seconds": "Stysta keyrsla sem telst raunveruleg lota",
     "interrupted_min_seconds": "Stuttar lotur merktar sem truflaðar",
@@ -1223,7 +1239,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Losun eftir hljóðláta þurrkun",
-      "doc": "Eftir væntanlega lengd: hversu lengi uppþvottavélin þarf að vera undir Stöðvunarþröskuldi áður en WashData hættir að bíða eftir lokaútdælingunni. Hækkaðu það ef sein útdæling eftir langa þurrkun fer fram hjá. Biðin fer aldrei yfir 30 mínútur."
+      "doc": "Eftir að væntanlegri lengd er náð hættir WashData að bíða eftir lokaútdælingunni þegar uppþvottavélin hefur verið undir Stöðvunarþröskuldi svona lengi frá síðustu virkni, í mesta lagi 30 mínútur (og, þegar kerfið hefur 3 skráðar lotur, að minnsta kosti lengsta skráða þurrkhlé þess). Hækkaðu það ef sein útdæling eftir langa þurrkun fer fram hjá."
     },
     "anti_crease_finalize_ratio": {
       "label": "Hlutfall fyrir lok hrukkuvarnar",
@@ -1370,7 +1386,7 @@
       "label": "Tilkynningatákn"
     },
     "notify_live_chronometer": {
-      "doc": "Android: bætir við niðurtalningu að áætluðum lokum við hliðina á tilkynningartextanum. Notaðu {finish_time} í For-lokarskilaboðin til að sýna lokatímann í stað annarrar niðurtalningar.",
+      "doc": "Android: bætir við niðurtalningu að áætluðum lokum við hliðina á tilkynningartextanum. Notaðu {finish_time} í stillingunni Skilaboð uppfærslu í beinni til að sýna lokatímann í stað annarrar niðurtalningar.",
       "label": "Nota beina tímamæling"
     },
     "notify_live_interval_seconds": {
@@ -1395,11 +1411,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Texti hverrar framvinduuppfærslu í beinni. Sniðbreytur: {device}, {program}, {minutes} (mínútur eftir), {finish_time} (áætlaður lokatími, t.d. 14:30). Ef önnur breyta er notuð gildir sjálfgefni textinn.",
-      "label": "For-lokar­skilaboð"
+      "label": "Skilaboð uppfærslu í beinni"
     },
     "notify_reminder_message": {
       "doc": "Texti Forlokaviðvörunar, sem er send einu sinni. Sniðbreytur: {device}, {program}, {minutes} (stillingin Forlokaviðvörun). Ef önnur breyta er notuð gildir sjálfgefni textinn.",
-      "label": "Minningarboð"
+      "label": "Skilaboð forlokaviðvörunar"
     },
     "notify_start_message": {
       "doc": "Meginmál sent þegar lota hefst. Sniðbreytur: {device}, {program}. Ef önnur breyta er notuð gildir sjálfgefni textinn.",
@@ -1690,6 +1706,8 @@
     "preparing": "Undirbý…",
     "unlabelling": "Fjarlægi merkingu…",
     "working": "Í vinnslu…",
+    "torn_pick": "{a} eða {b}?",
+    "torn_tip": "WashData getur ekki enn greint þessi tvö kerfi í sundur, svo veldu kerfið sem er í gangi til að merkja þessa lotu með því (Sjálfvirk skynjun afturkallar valið).",
     "match_uncertain": "Óvíst: {top} eða {runner}",
     "match_uncertain_single": "Óvíst: kannski {top}",
     "match_sure": "~{pct}% vissa",
@@ -1974,7 +1992,8 @@
     "bp_automation_created": "Sjálfvirkni búin til með sjálfgefnum stillingum; opnar hana",
     "copied": "Afritað",
     "copy_failed": "Afritun mistókst. Veldu textann og afritu handvirkt.",
-    "automation_label_failed": "Sjálvvirkni búinn til, en WashData-merkimiðann eða flokkinn var ekki hægt að bæta við."
+    "automation_label_failed": "Sjálvvirkni búinn til, en WashData-merkimiðann eða flokkinn var ekki hægt að bæta við.",
+    "review_answered": "Vistað: {program}"
   },
   "trend": {
     "down": "Stefnir niður",
@@ -2241,7 +2260,7 @@
       "name": "Losað"
     },
     "state_changed": {
-      "name": "Staða breytt"
+      "name": "Staða tækis breytt"
     },
     "maintenance_due": {
       "name": "Viðhald tímabært"

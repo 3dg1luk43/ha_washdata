@@ -110,7 +110,7 @@ async def test_service_without_events_goes_to_start_finish_and_live(
 
     assert await async_migrate_entry(hass, entry) is True
 
-    assert (entry.version, entry.minor_version) == (3, 12)
+    assert (entry.version, entry.minor_version) == (3, CONFIG_ENTRY_MINOR_VERSION)
     assert _lists(entry) == {k: [SVC] for k in LISTS}
     _no_retired_keys(entry)
     assert entry.options[CONF_OFF_DELAY] == 120
@@ -210,7 +210,7 @@ async def test_a_clean_3_11_entry_only_advances(hass: HomeAssistant) -> None:
 
     assert await async_migrate_entry(hass, entry) is True
 
-    assert entry.minor_version == 12
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
     assert dict(entry.options) == before
 
 
@@ -307,11 +307,12 @@ async def test_import_of_an_old_export_strips_the_retired_keys(hass: HomeAssista
     assert entry.options[CONF_OFF_DELAY] == 300, "real tunables must still be imported"
 
 
-async def test_import_of_only_retired_keys_writes_only_their_conversion(
+async def test_import_of_only_retired_keys_writes_nothing(
     hass: HomeAssistant,
 ) -> None:
-    """Import converts the legacy service like the migration (maintainer decision,
-    2026-10-27); nothing else of the retired keys is written."""
+    """An import never sets notification targets (GHSA-2c9v-w74f-jgqw, maintainer
+    decision 2026-11-08, superseding the 2026-10-27 conversion on import): the
+    legacy service is neither written nor converted into the lists."""
     entry = _entry(hass, {}, minor=CONFIG_ENTRY_MINOR_VERSION)
     before = dict(entry.options)
 
@@ -320,7 +321,7 @@ async def test_import_of_only_retired_keys_writes_only_their_conversion(
             hass, entry, {"entry_options": {CONF_NOTIFY_SERVICE: SVC}}, "import_config"
         )
 
-    assert dict(entry.options) == {**before, **{k: [SVC] for k in LISTS}}
+    assert dict(entry.options) == before
     _no_retired_keys(entry)
 
 
@@ -400,12 +401,13 @@ async def test_old_entry_boots_converted_and_clearing_the_lists_stops_it(
     assert len(calls) == 1, "clearing every list must stop the notifications"
 
 
-async def test_undoing_an_old_restore_point_converts_the_legacy_service(
+async def test_undoing_an_old_restore_point_keeps_the_current_targets(
     hass: HomeAssistant,
 ) -> None:
-    """A restore point saved by 0.5.8 still holds notify_service with empty lists:
-    undoing it after the upgrade converts it like the migration, instead of the
-    strip dropping it and the device going quiet."""
+    """A restore point saved by 0.5.8 still holds notify_service with empty lists.
+    Notification targets are this device's own since GHSA-2c9v-w74f-jgqw (an
+    import never changes them), so undo keeps the current ones, and the device does
+    not go quiet; the retired keys are still dropped."""
     entry = _entry(hass, {CONF_NOTIFY_FINISH_SERVICES: ["notify.mobile_app_new"]},
                    minor=CONFIG_ENTRY_MINOR_VERSION)
     with patch.object(ws_api, "_record_option_changes", AsyncMock()):
@@ -415,16 +417,17 @@ async def test_undoing_an_old_restore_point_converts_the_legacy_service(
              CONF_NOTIFY_START_SERVICES: [], CONF_NOTIFY_FINISH_SERVICES: [],
              CONF_NOTIFY_LIVE_SERVICES: []},
         )
-    assert entry.options[CONF_NOTIFY_FINISH_SERVICES] == [SVC]
+    assert entry.options[CONF_NOTIFY_FINISH_SERVICES] == ["notify.mobile_app_new"]
+    assert entry.options[CONF_OFF_DELAY] == 120
     assert not entry.options.get(CONF_NOTIFY_START_SERVICES)
     _no_retired_keys(entry)
 
 
-async def test_importing_an_old_export_converts_the_legacy_service(
+async def test_importing_an_old_export_sets_no_notification_targets(
     hass: HomeAssistant,
 ) -> None:
-    """An export from before 0.5.9 carries notify_service with no lists: the import
-    converts it like the migration instead of stripping the target."""
+    """An export from before 0.5.9 carries notify_service with no lists: since
+    GHSA-2c9v-w74f-jgqw the import writes no notification target, converted or not."""
     entry = _entry(hass, {}, minor=CONFIG_ENTRY_MINOR_VERSION)
     with patch.object(ws_api, "_record_option_changes", AsyncMock()):
         await ws_api.async_apply_imported_entry_options(
@@ -432,6 +435,6 @@ async def test_importing_an_old_export_converts_the_legacy_service(
             {"entry_options": {CONF_NOTIFY_SERVICE: SVC, CONF_NOTIFY_EVENTS: [NOTIFY_EVENT_START]}},
             "import_config",
         )
-    assert entry.options[CONF_NOTIFY_START_SERVICES] == [SVC]
+    assert not entry.options.get(CONF_NOTIFY_START_SERVICES)
     assert not entry.options.get(CONF_NOTIFY_FINISH_SERVICES)
     _no_retired_keys(entry)

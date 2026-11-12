@@ -23,9 +23,10 @@ This harness closes that loop on the real corpus.
    manager resolves them - never a partial config).
 2. Every stored cycle that ended on its own is **re-detected** under that config: its
    trace goes through the Playground replay (real ``CycleDetector`` + real Stage 1-5
-   matcher + emulated watchdog keepalives, ``playground._DetailSim``, with a quiet
-   tail long enough for a dishwasher's end waits: :func:`run_tail`). What the detector
-   emits passes the manager's ghost / dishwasher pump-out suppression and
+   matcher + emulated watchdog keepalives and ghost suppressor, ``playground._DetailSim``,
+   with a quiet tail long enough for a dishwasher's end waits: :func:`run_tail`). What
+   the detector emits passes the manager's ghost / dishwasher pump-out discard
+   (``ghost_rules``, the previous end carried across stored cycles) and
    ``ProfileStore._add_cycle_data`` (the production normaliser: trim, sampling interval,
    signature, energy) and replaces the stored cycle.
 3. The update-cadence model behind the operational pass is rebuilt from the
@@ -127,11 +128,12 @@ import hashlib  # noqa: E402
 import importlib.util  # noqa: E402
 import json  # noqa: E402
 import logging  # noqa: E402
+import math  # noqa: E402
 import sys  # noqa: E402
 import time  # noqa: E402
 import warnings  # noqa: E402
 from concurrent.futures import ProcessPoolExecutor  # noqa: E402
-from datetime import timedelta  # noqa: E402
+from datetime import datetime, timedelta, timezone  # noqa: E402
 from pathlib import Path  # noqa: E402
 from typing import Any, Iterator  # noqa: E402
 from unittest.mock import MagicMock  # noqa: E402
@@ -144,7 +146,7 @@ if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
 from custom_components.ha_washdata import analysis as analysis_mod  # noqa: E402
-from custom_components.ha_washdata import playground, ws_api  # noqa: E402
+from custom_components.ha_washdata import ghost_rules, playground, ws_api  # noqa: E402
 from custom_components.ha_washdata.const import (  # noqa: E402
     CONF_AUTO_LABEL_CONFIDENCE,
     CADENCE_RESET_FROM_STATES,
@@ -163,10 +165,6 @@ from custom_components.ha_washdata.const import (  # noqa: E402
     STATE_STARTING,
     TerminationReason,
     resolve_sampling_interval_default,
-)
-from custom_components.ha_washdata.signal_processing import (  # noqa: E402
-    energy_gap_threshold_s,
-    integrate_wh,
 )
 from custom_components.ha_washdata.suggestion_engine import (  # noqa: E402
     SuggestionEngine,
@@ -187,6 +185,9 @@ MIN_REPLAYABLE = 5
 MIN_READINGS = 10
 #: The engine reads at most the last 200 stored cycles (the retention cap).
 MAX_CYCLES = 200
+#: Per-device replay caps for a time-budgeted run (path substring -> most recent
+#: cycles replayed). Empty for the CLI; the slow test sets it (see there).
+CYCLE_CAPS: dict[str, int] = {}
 #: Applies in one direction, still moving at the end, before a key is a ladder.
 LADDER_MIN_APPLIES = 3
 LEGACY_RULES = ("sampling_interval", "completion_min", "confidence")
@@ -459,18 +460,6 @@ def _throttle(points: list[tuple[float, float]], s: float, min_p: float) -> list
     return kept
 
 
-def _energy_wh(points: list) -> float:
-    try:
-        arr = sorted((float(p[0]), float(p[1])) for p in points)
-    except (TypeError, ValueError, IndexError):
-        return 0.0
-    if len(arr) < 2:
-        return 0.0
-    ts = np.array([a for a, _ in arr])
-    ps = np.array([b for _, b in arr])
-    return float(integrate_wh(ts, ps, max_gap_s=energy_gap_threshold_s(ts)))
-
-
 def _active_span(points: list[tuple[float, float]], stop: float) -> float:
     act = [t for t, p in points if p > stop]
     return (act[-1] - act[0]) if len(act) >= 2 else 0.0
@@ -579,12 +568,11 @@ def run_tail(sim: Any, cfg: Any) -> None:
     n_steps = int(span / step) + 1
     for i in range(1, n_steps + 1):
         ts = last_ts + timedelta(seconds=step * i)
-        sim.cursor["t"] = (ts - sim.base).total_seconds()
-        sim.detector.process_reading(0.0, ts)
-        sim._sample(ts)  # noqa: SLF001
-        if sim.detector.state in (STATE_OFF, STATE_FINISHED) and sim.captured:
+        sim.tail_step(ts)
+        # `kept` as playground.run_tail: a discarded ghost end is not the close.
+        if sim.detector.state in (STATE_OFF, STATE_FINISHED) and sim.kept:
             break
-    if not sim.captured and sim.detector.state != STATE_OFF:
+    if not sim.kept and sim.detector.state != STATE_OFF:
         flush_ts = last_ts + timedelta(seconds=step * (n_steps + 2))
         sim.cursor["t"] = (flush_ts - sim.base).total_seconds()
         sim.detector.force_end(flush_ts)
@@ -638,6 +626,34 @@ def replay_one(src: dict, cfg: Any, match_store: Any, prebuilt: Any, options: di
     }
 
 
+def _parse_utc(value: Any) -> datetime | None:
+    """An ISO timestamp, a naive one read as UTC (the Playground's
+    ``_cycle_base_time`` rule), so the pump-out gap never mixes naive and aware.
+    An impossible value (month 13) raises in ``parse_datetime``; it reads as none."""
+    try:
+        parsed = dt_util.parse_datetime(str(value or ""))
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if parsed is None:
+        return None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+
+
+def _stored_end(cycle: dict) -> datetime | None:
+    """A stored cycle's end: ``end_time``, else ``start_time`` + ``duration``."""
+    end = _parse_utc(cycle.get("end_time"))
+    if end is not None:
+        return end
+    start = _parse_utc(cycle.get("start_time"))
+    try:
+        duration = float(cycle.get("duration") or 0.0)
+        if start is None or not math.isfinite(duration) or duration <= 0:
+            return None
+        return start + timedelta(seconds=duration)
+    except (TypeError, ValueError, OverflowError):
+        return None  # a corrupt length: the end is unknown, the cycle is kept
+
+
 def assemble(
     sources: list[dict], replays: dict[int, dict[str, Any] | None], store: Any, cfg: Any,
     options: dict, device_type: str, legacy: tuple[str, ...],
@@ -667,6 +683,12 @@ def assemble(
         rep = replays.get(idx)
         if rep is None:
             out.append(src)
+            # A kept (not replayed) cycle still ended: the next pump-out is measured
+            # from it, as live measures it from that end. Its stored end, or start +
+            # duration, stands in for the detection time (live's clock reads a little
+            # later, after the off delay, so this is the conservative side: a wider
+            # gap discards less).
+            prev_end = _stored_end(src) or None
             continue
         m["replayed"] += 1
         m["idle_above_stop"] += bool(rep.get("idle_above_stop"))
@@ -675,20 +697,20 @@ def assemble(
         end_at: dict[int, float] = {}
         for i, cd in enumerate(rep["captured"]):
             duration = float(cd.get("duration") or 0.0)
-            energy = _energy_wh(cd.get("power_data") or [])
+            # What manager._on_cycle_end stores and tests the discards on (#498).
+            energy = ghost_rules.cycle_end_energy_wh(cd.get("power_data") or [])
             ends = rep["ends"]
             end_detect = rep["base"] + timedelta(seconds=ends[i] if i < len(ends) else 0.0)
-            start_dt = dt_util.parse_datetime(str(cd.get("start_time") or ""))
+            start_dt = _parse_utc(cd.get("start_time"))
             # manager._on_cycle_end: a ghost (and a dishwasher pump-out right after
-            # the previous end) is never stored.
-            ghost = duration < 60 and energy < 0.05
-            if (
-                not ghost and device_type == "dishwasher" and prev_end is not None
-                and start_dt is not None
-                and 0 < (start_dt - prev_end).total_seconds() < 600
-                and duration < 300 and energy < 1.0
-            ):
-                ghost = True
+            # the previous end) is never stored (ghost_rules, register item 568).
+            # Read here rather than from the replay's own `discarded`, which does
+            # the same for every end after a replay's first: only this loop knows
+            # the previous stored cycle's end, and replays run in parallel.
+            ghost = ghost_rules.cycle_end_discard(
+                device_type=device_type, duration_s=duration, energy_wh=energy,
+                cycle_start=start_dt, prev_cycle_end=prev_end,
+            ) is not None
             prev_end = end_detect
             if ghost:
                 m["ghosts"] += 1
@@ -755,9 +777,9 @@ def run_passes(mgr: Any, cad: tuple[float, float] | None) -> dict[str, Any]:
     passed: dict[str, Any] = {}
     orig_apply = eng.apply_suggestions
 
-    def _capture(sug: dict[str, Any]) -> None:
+    def _capture(sug: dict[str, Any], **kwargs: Any) -> None:
         passed.update(copy.deepcopy(sug))
-        orig_apply(sug)
+        orig_apply(sug, **kwargs)
 
     eng.apply_suggestions = _capture
     try:
@@ -892,14 +914,24 @@ def _lock_probe(mgr: Any, cad: Any, merged: dict, device_type: str, locked: list
 
 # --------------------------------------------------------------------------- driver
 
+def _cycle_cap(path: str) -> int:
+    """The most recent cycles replayed for a device (``CYCLE_CAPS`` or MAX_CYCLES)."""
+    return min([MAX_CYCLES, *(n for key, n in CYCLE_CAPS.items() if key in path)])
+
+
 def device_paths(corpus: Path, only: list[str] | None = None) -> list[str]:
-    """Corpus files with enough re-detectable history, clones dropped (eval.py rules)."""
+    """Corpus files with enough re-detectable history, clones dropped (eval.py rules).
+
+    Counted in the same window the replay uses (:func:`_cycle_cap`): a device
+    whose capped window held too few replayable cycles would be admitted with no
+    work to drive.
+    """
     devices, _dropped = ev.load_corpus(corpus)
     out = []
     for dev in devices:
         if only and not any(s in dev.path for s in only):
             continue
-        past = list(dev.data.get("past_cycles") or [])[-MAX_CYCLES:]
+        past = list(dev.data.get("past_cycles") or [])[-_cycle_cap(dev.path):]
         if sum(1 for c in past if _replayable(c)) >= MIN_REPLAYABLE:
             out.append(dev.path)
     return out
@@ -927,7 +959,7 @@ class DeviceLoop:
         self.idle_hold = idle_hold
         self.title = ev.public_key(dev.path)
         self.base = ev.base_data(dev)
-        self.past = list(self.base.get("past_cycles") or [])[-MAX_CYCLES:]
+        self.past = list(self.base.get("past_cycles") or [])[-_cycle_cap(path):]
         self.entry_data, self.options = ev.entry_dicts(dev, {})
         # Every envelope rebuilt once with the current code (exports carry the ones the
         # exporting version built): the fixed match evidence for every round.

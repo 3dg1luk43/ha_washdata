@@ -92,7 +92,11 @@ async def test_settings_save_during_the_cycle_end_tail(hass, freezer):
 
     mgr._async_apply_cycle_cost = slow_cost
     await feed(hass, freezer, 500, 900)
-    await feed(hass, freezer, 0, 300, block=False)
+    # The first 0 W lands on its own: unblocked, every report is processed at the
+    # final instant, and the drop's 300 s interval after 500 W is quiet for one
+    # 30 s cadence only (#508).
+    await feed(hass, freezer, 0, 30)
+    await feed(hass, freezer, 0, 270, block=False)
     for _ in range(20):
         await asyncio.sleep(0)
     assert mgr.detector.state == "finished"

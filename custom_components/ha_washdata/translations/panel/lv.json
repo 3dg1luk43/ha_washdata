@@ -270,7 +270,11 @@
     "bp_details": "Sīkāka informācija",
     "bp_copy_yaml": "Kopēt YAML",
     "bp_hide_yaml": "Paslēpt YAML",
-    "bp_show_yaml": "Rādīt YAML"
+    "bp_show_yaml": "Rādīt YAML",
+    "review_something_else": "Kaut kas cits…",
+    "review_not_sure": "Nezinu",
+    "review_prev": "Iepriekšējais cikls",
+    "review_next": "Nākamais cikls"
   },
   "note": {
     "off_delay": {
@@ -583,6 +587,7 @@
     "pg_alert_overrun": "Par ilgu",
     "pg_alert_underrun": "Par īsu",
     "pg_alert_did_not_finish": "Nepabeidzās",
+    "pg_alert_discarded": "Atmests kā viltus cikls vai ūdens izvadīšana",
     "pg_alert_false_end": "Sadalījās vairākos ciklos",
     "pg_alert_unmatched": "Bez atbilstības",
     "pg_alert_ambiguous": "Neskaidra atbilstība",
@@ -721,7 +726,10 @@
     "bp_needs": "Nepieciešams",
     "bp_needs_version": "WashData {version} vai jaunāks",
     "bp_author": "Autors",
-    "bp_required": "obligāts"
+    "bp_required": "obligāts",
+    "pg_runs_as": "tiek izmantots {value}",
+    "review_this_cycle": "Šis cikls",
+    "review_usual": "Parasti programmai {name}"
   },
   "log": {
     "all_levels": "Visi līmeņi",
@@ -1072,7 +1080,7 @@
     "hist_scan_failed": "Skenēšana neizdevās.",
     "hist_scan_expired": "Šī skenēšana vairs nav pieejama. Skenējiet vēlreiz.",
     "hist_import_failed": "Importēšana neizdevās.",
-    "imported_history_readonly": "Atrasts importētā jaudas vēsturē. Tas palīdz saskaņošanā, bet netiek ieskaitīts jūsu statistikā, un to nevar apgriezt vai sadalīt. Iezīmējiet to, lai norādītu programmu.",
+    "imported_history_note": "Atrasts importētā jaudas vēsturē. Tas palīdz saskaņošanā, bet netiek ieskaitīts jūsu statistikā, un to nevar sadalīt. Iezīmējiet to, lai norādītu programmu.",
     "odometer_intro": "Šis kopējais skaits tikai palielinās. Cikla dzēšana to nesamazina, tāpēc apkopes atgādinājumi paliek precīzi.",
     "odometer_correct_hint": "Iestatiet to, ja WashData ir saskaitījis ciklu, kas nekad nav noticis, vai ierīce veica ciklus pirms WashData uzstādīšanas.",
     "no_reminders_set": "Vēl nav iestatīts neviens apkopes atgādinājums.",
@@ -1128,7 +1136,16 @@
     "bp_none_yet": "Šim ierīces tipam veidņu vēl nav. Kopīgojiet pirmo.",
     "bp_unreachable": "Tā tiek lejupielādēta no GitHub. Pārbaudiet, vai Home Assistant var piekļūt internetam, un mēģiniet vēlreiz.",
     "bp_library_intro": "Gatavas automatizācijas, ko WashData lietotāji kopīgo GitHub un kas tiek pārskatītas pirms iekļaušanas sarakstā. Pieejamas tikai ar ieslēgtām tiešsaistes funkcijām.",
-    "bp_needs_version": "Nepieciešams WashData {version} vai jaunāks."
+    "bp_needs_version": "Nepieciešams WashData {version} vai jaunāks.",
+    "bp_review_check": "Pārbaudiet to pirms saglabāšanas: Home Assistant to izpildīs tieši tā, kā tas ir uzrakstīts.",
+    "review_q_title": "Kāda programma tā bija?",
+    "review_q_intro": "WashData nav pārliecināts par šiem cikliem. Jūsu atbilde to apmāca.",
+    "review_q_started": "Sākts {when}",
+    "review_q_more": "Vēl {count} cikli pārskatīšanai",
+    "review_q_more_zero": "Vēl {count} cikli pārskatīšanai",
+    "review_q_more_one": "Vēl {count} cikls pārskatīšanai",
+    "review_q_more_other": "Vēl {count} cikli pārskatīšanai",
+    "review_which_program": "Kura programma tā bija?"
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas trumulis īsi griežas, lai samazinātu grumbiņas.",
@@ -1221,7 +1238,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Pasīvās žāvēšanas klusā atbrīvošana",
-      "doc": "Pēc paredzētā ilguma: cik ilgi trauku mazgājamai mašīnai jāpaliek zem Apstāšanās sliekšņa, pirms WashData pārtrauc gaidīt beigu ūdens izvadīšanu. Palieliniet to, ja vēla izvadīšana pēc ilgas žāvēšanas tiek palaista garām. Gaidīšana nekad nepārsniedz 30 minūtes."
+      "doc": "Pēc paredzētā ilguma WashData pārtrauc gaidīt beigu ūdens izvadīšanu, kad trauku mazgājamā mašīna kopš pēdējās darbības tik ilgi ir palikusi zem Apstāšanās sliekšņa, ne ilgāk par 30 minūtēm (un, kad programmai ir 3 reģistrēti cikli, ne īsāk par tās garāko reģistrēto žāvēšanas pauzi). Palieliniet to, ja vēla izvadīšana pēc ilgas žāvēšanas tiek palaista garām."
     },
     "anti_crease_finalize_ratio": {
       "doc": "Programmas vidējā ilguma daļa, kas ciklam jāsasniedz, pirms tā zemas jaudas griešanās tiek uzskatīta par pretgrumbu asti. Žāvētājiem ar slodzes sensoru samaziniet to (piem., 0,75). Veļas mašīnām atstājiet noklusējumu (0,98), citādi mazgāšana var beigties pusceļā.",
@@ -1368,7 +1385,7 @@
       "label": "Paziņojuma ikona"
     },
     "notify_live_chronometer": {
-      "doc": "Android: pievieno atpakaļskaitīšanu līdz paredzamajam beigu laikam blakus paziņojuma tekstam. Lai beigu laiku rādītu otrās atpakaļskaitīšanas vietā, izmantojiet {finish_time} Gandrīz pabeigšanas ziņojumā.",
+      "doc": "Android: pievieno atpakaļskaitīšanu līdz paredzamajam beigu laikam blakus paziņojuma tekstam. Lai beigu laiku rādītu otrās atpakaļskaitīšanas vietā, izmantojiet {finish_time} iestatījumā Tiešraides atjauninājuma ziņojums.",
       "label": "Izmantot tiešraides hronometru"
     },
     "notify_live_interval_seconds": {
@@ -1393,11 +1410,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Katra tiešraides progresa atjauninājuma teksts. Veidnes mainīgie: {device}, {program}, {minutes} (atlikušās minūtes), {finish_time} (paredzamais beigu laiks, piem. 14:30). Ar jebkuru citu mainīgo tiek izmantots noklusējuma teksts.",
-      "label": "Gandrīz pabeigšanas ziņojums"
+      "label": "Tiešraides atjauninājuma ziņojums"
     },
     "notify_reminder_message": {
       "doc": "Vienreizējā Brīdinājuma pirms beigām teksts. Veidnes mainīgie: {device}, {program}, {minutes} (iestatījums Brīdinājums pirms beigām). Ar jebkuru citu mainīgo tiek izmantots noklusējuma teksts.",
-      "label": "Atgādinājuma ziņojums"
+      "label": "Brīdinājuma pirms beigām ziņojums"
     },
     "notify_start_message": {
       "doc": "Teksts, ko nosūta, kad cikls sākas. Veidnes mainīgie: {device}, {program}. Ar jebkuru citu mainīgo tiek izmantots noklusējuma teksts.",
@@ -1691,7 +1708,9 @@
     "match_uncertain": "Nenoteikti: {top} vai {runner}",
     "match_uncertain_single": "Nenoteikti: varbūt {top}",
     "match_sure": "~{pct}% pārliecība",
-    "match_uncertain_tip": "WashData vēl nav izlēmis par programmu. Skaitlis rāda, cik bieži vadošais minējums, {top}, iepriekšējos ciklos bija pareizs, kad tas vadīja ar tik lielu pārsvaru. Tikai informācijai."
+    "match_uncertain_tip": "WashData vēl nav izlēmis par programmu. Skaitlis rāda, cik bieži vadošais minējums, {top}, iepriekšējos ciklos bija pareizs, kad tas vadīja ar tik lielu pārsvaru. Tikai informācijai.",
+    "torn_pick": "{a} vai {b}?",
+    "torn_tip": "WashData vēl nespēj atšķirt šīs divas programmas, tāpēc izvēlieties to, kas pašlaik darbojas, lai ar to iezīmētu šo ciklu (Automātiska noteikšana izvēli atceļ)."
   },
   "tab": {
     "advanced": "Papildu",
@@ -1886,7 +1905,8 @@
     "bp_automation_created": "Automatizācija izveidota ar noklusējuma iestatījumiem; atvēršana",
     "copied": "Nokopēts",
     "copy_failed": "Kopēšana neizdevās. Atlasiet tekstu un kopējiet to manuāli.",
-    "automation_label_failed": "Automatizācija izveidota, bet WashData etiķeti vai kategoriju nevarēja pievienot."
+    "automation_label_failed": "Automatizācija izveidota, bet WashData etiķeti vai kategoriju nevarēja pievienot.",
+    "review_answered": "Saglabāts: {program}"
   },
   "suggestion": {
     "observed_label": "Novērotais",
@@ -1992,7 +2012,7 @@
     "other": "Cits"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Trauku mazgājamā mašīna: klusās sekundes pēc paredzētā ilguma, pirms tiek atbrīvota cikla beigu ūdens izvadīšanas gaidīšana",
+    "dishwasher_end_spike_quiet_release": "Trauku mazgājamā mašīna: sekundes zem Apstāšanās sliekšņa kopš pēdējās darbības, kas vajadzīgas, lai pārtrauktu beigu ūdens izvadīšanas gaidīšanu pēc paredzētā ilguma sasniegšanas",
     "smart_termination_duration_ratio": "Programmas vidējā ilguma daļa, kas ciklam jāsasniedz, pirms Viedā pabeigšana drīkst to beigt agrāk; samaziniet, ja darbības laiks mainās",
     "anti_crease_finalize_ratio": "Programmas vidējā ilguma daļa, kas ciklam jāsasniedz, pirms pretgrumbu aste drīkst to pabeigt; žāvētājiem samaziniet, veļas mašīnām atstājiet noklusējumu",
     "anti_wrinkle_enabled": "Absorbējiet griešanās impulsus pēc galvenās fāzes, nevis nolasiet tos kā jaunus ciklus",
@@ -2260,7 +2280,7 @@
       "name": "Izkrauts"
     },
     "state_changed": {
-      "name": "Statuss mainījās"
+      "name": "Ierīces statuss mainījās"
     },
     "maintenance_due": {
       "name": "Apkope nepieciešama"

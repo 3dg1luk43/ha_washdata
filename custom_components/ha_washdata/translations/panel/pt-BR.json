@@ -221,7 +221,11 @@
     "bp_details": "Detalhes",
     "bp_copy_yaml": "Copiar YAML",
     "bp_hide_yaml": "Ocultar o YAML",
-    "bp_show_yaml": "Mostrar o YAML"
+    "bp_show_yaml": "Mostrar o YAML",
+    "review_something_else": "Outra coisa…",
+    "review_not_sure": "Não sei",
+    "review_prev": "Ciclo anterior",
+    "review_next": "Próximo ciclo"
   },
   "conflict": {
     "anti_wrinkle_max": {
@@ -535,6 +539,7 @@
     "pg_alert_overrun": "Longo demais",
     "pg_alert_underrun": "Curto demais",
     "pg_alert_did_not_finish": "Não terminou",
+    "pg_alert_discarded": "Descartado como fantasma ou escoamento",
     "pg_alert_false_end": "Dividido em vários ciclos",
     "pg_alert_unmatched": "Sem correspondência",
     "pg_alert_ambiguous": "Correspondência ambígua",
@@ -667,7 +672,10 @@
     "bp_needs": "Requer",
     "bp_needs_version": "WashData {version} ou mais recente",
     "bp_author": "Autor",
-    "bp_required": "obrigatório"
+    "bp_required": "obrigatório",
+    "pg_runs_as": "simulado com {value}",
+    "review_this_cycle": "Este ciclo",
+    "review_usual": "Habitual de {name}"
   },
   "log": {
     "all_levels": "Todos os níveis",
@@ -1019,7 +1027,7 @@
     "hist_scan_failed": "A análise falhou.",
     "hist_scan_expired": "Essa análise não está mais disponível. Analise novamente.",
     "hist_import_failed": "A importação falhou.",
-    "imported_history_readonly": "Encontrado em um histórico de potência importado. Ajuda a correspondência, mas não conta nas suas estatísticas e não pode ser cortado nem dividido. Rotule-o para dar nome ao programa.",
+    "imported_history_note": "Encontrado em um histórico de potência importado. Ajuda a correspondência, mas não conta nas suas estatísticas e não pode ser dividido. Rotule-o para dar nome ao programa.",
     "odometer_intro": "Este total só aumenta. Excluir um ciclo não o reduz, para que os lembretes de manutenção continuem corretos.",
     "odometer_correct_hint": "Defina este valor se o WashData contou um ciclo que nunca aconteceu, ou se o eletrodoméstico já fez ciclos antes de o WashData ser instalado.",
     "no_reminders_set": "Ainda não há lembretes de manutenção definidos.",
@@ -1074,7 +1082,16 @@
     "bp_none_yet": "Ainda não há modelos para este tipo de eletrodoméstico. Compartilhe o primeiro.",
     "bp_unreachable": "Ela é baixada do GitHub. Verifique se o Home Assistant consegue acessar a internet e tente novamente.",
     "bp_library_intro": "Automações prontas para usar compartilhadas por usuários do WashData no GitHub, revisadas antes de serem listadas. Disponível apenas com os recursos online ativados.",
-    "bp_needs_version": "Requer o WashData {version} ou mais recente."
+    "bp_needs_version": "Requer o WashData {version} ou mais recente.",
+    "bp_review_check": "Verifique isto antes de salvar: o Home Assistant vai executá-lo exatamente como está escrito.",
+    "review_q_title": "Qual programa era este?",
+    "review_q_intro": "O WashData não tem certeza sobre estes ciclos. Sua resposta o ajuda a aprender.",
+    "review_q_started": "Iniciado em {when}",
+    "review_q_more": "Mais {count} para revisar",
+    "review_q_more_one": "Mais {count} para revisar",
+    "review_q_more_many": "Mais {count} para revisar",
+    "review_q_more_other": "Mais {count} para revisar",
+    "review_which_program": "Qual foi o programa?"
   },
   "phase_desc": {
     "anti_crease": "Giros curtos ocasionais após a conclusão para reduzir amassados.",
@@ -1167,7 +1184,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Liberação em silêncio da secagem passiva",
-      "doc": "Após a duração esperada: quanto tempo a lava-louças deve ficar abaixo do Limite de Parada antes de o WashData parar de esperar pelo escoamento final. Aumente se um escoamento tardio após uma secagem longa for perdido. A espera nunca passa de 30 minutos."
+      "doc": "Após a duração esperada, o WashData para de esperar pelo escoamento final quando a lava-louças fica abaixo do Limite de Parada por esse tempo desde a última atividade, no máximo 30 minutos (e, assim que o programa tiver 3 ciclos registrados, no mínimo sua pausa de secagem mais longa registrada). Aumente se um escoamento tardio após uma secagem longa for perdido."
     },
     "anti_crease_finalize_ratio": {
       "label": "Proporção de finalização antiamasso",
@@ -1314,7 +1331,7 @@
       "label": "Ícone da Notificação"
     },
     "notify_live_chronometer": {
-      "doc": "Android: adiciona uma contagem regressiva até o fim estimado ao lado do texto da notificação. Use {finish_time} em Mensagem Pré-Conclusão para exibir a hora de término em vez de uma segunda contagem.",
+      "doc": "Android: adiciona uma contagem regressiva até o fim estimado ao lado do texto da notificação. Use {finish_time} em Mensagem de Atualização ao Vivo para exibir a hora de término em vez de uma segunda contagem.",
       "label": "Usar Cronômetro ao Vivo"
     },
     "notify_live_interval_seconds": {
@@ -1339,11 +1356,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Texto de cada atualização de progresso ao vivo. Variáveis de modelo: {device}, {program}, {minutes} (minutos restantes), {finish_time} (hora de término estimada, ex. 14:30). Com qualquer outra variável, é usado o texto padrão.",
-      "label": "Mensagem Pré-Conclusão"
+      "label": "Mensagem de Atualização ao Vivo"
     },
     "notify_reminder_message": {
       "doc": "Texto do Alerta Pré-Fim, enviado uma única vez. Variáveis de modelo: {device}, {program}, {minutes} (a configuração Alerta Pré-Fim). Com qualquer outra variável, é usado o texto padrão.",
-      "label": "Mensagem de Lembrete"
+      "label": "Mensagem do Alerta Pré-Fim"
     },
     "notify_start_message": {
       "doc": "Corpo enviado quando um ciclo começa. Variáveis de modelo: {device}, {program}. Com qualquer outra variável, é usado o texto padrão.",
@@ -1634,6 +1651,8 @@
     "preparing": "Preparando…",
     "unlabelling": "Removendo rótulo…",
     "working": "Processando…",
+    "torn_pick": "{a} ou {b}?",
+    "torn_tip": "O WashData ainda não consegue diferenciar estes dois programas, então escolha o que está em execução para rotular este ciclo com ele (a opção Detectar automaticamente desfaz a escolha).",
     "match_uncertain": "Incerto: {top} ou {runner}",
     "match_uncertain_single": "Incerto: talvez {top}",
     "match_sure": "~{pct}% de certeza",
@@ -1832,7 +1851,8 @@
     "bp_automation_created": "Automação criada com as configurações padrão; abrindo",
     "copied": "Copiado",
     "copy_failed": "Falha ao copiar. Selecione o texto e copie-o manualmente.",
-    "automation_label_failed": "Automação criada, mas o rótulo ou categoria WashData não pôde ser adicionado."
+    "automation_label_failed": "Automação criada, mas o rótulo ou categoria WashData não pôde ser adicionado.",
+    "review_answered": "Salvo: {program}"
   },
   "suggestion": {
     "observed_label": "Observado",
@@ -1938,7 +1958,7 @@
     "other": "Outro"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Lava-louças: segundos de silêncio após a duração esperada antes de liberar a espera da descarga de fim de ciclo",
+    "dishwasher_end_spike_quiet_release": "Lava-louças: segundos abaixo do Limite de Parada desde a última atividade necessários para encerrar a espera pelo escoamento final após a duração esperada",
     "smart_termination_duration_ratio": "Fração da duração média do programa que um ciclo deve atingir antes de o Encerramento inteligente poder finalizá-lo mais cedo; reduza se os tempos de execução variarem",
     "anti_crease_finalize_ratio": "Fração da duração média do programa que um ciclo deve atingir antes de a cauda antiamasso poder finalizá-lo; reduza em secadoras, deixe as lavadoras no padrão",
     "anti_wrinkle_enabled": "Absorver os pulsos de giro após a fase principal em vez de lê-los como novos ciclos",
@@ -2260,7 +2280,7 @@
       "name": "Descarregado"
     },
     "state_changed": {
-      "name": "Estado alterado"
+      "name": "Estado do eletrodoméstico alterado"
     },
     "maintenance_due": {
       "name": "Manutenção devida"

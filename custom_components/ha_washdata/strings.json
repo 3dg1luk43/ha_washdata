@@ -57,6 +57,7 @@
       "timer_pause_action_title": "Resume Cycle",
       "timer_pause_body_suffix": "The cycle is paused. Open the WashData panel to resume.",
       "unload_dismiss_action_title": "Stop reminding",
+      "review_action_title": "It was {program}",
       "vs_typical_longer": "{pct}% longer than usual",
       "vs_typical_shorter": "{pct}% shorter than usual",
       "notify_live_waiting_message": "{device}: No profile matched yet.",
@@ -79,7 +80,7 @@
       "still_tumbling": "Still tumbling after the cycle",
       "unload_pending": "Unload pending",
       "unloaded": "Unloaded",
-      "state_changed": "State changed",
+      "state_changed": "Appliance state changed",
       "maintenance_due": "Maintenance due",
       "milestone_reached": "Cycle milestone reached",
       "pump_stuck": "Pump stuck"
@@ -339,6 +340,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Mark Maintenance Done",
+      "description": "Log a maintenance task as done now, as the panel's Done button does.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The WashData device the task belongs to."
+        },
+        "task_id": {
+          "name": "Task ID",
+          "description": "The task's id, as listed in the maintenance-due sensor's due_task_ids attribute (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other, or a custom task's custom_ id)."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Optional note stored with the log entry."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Delete Cycle",
+      "description": "Delete one stored cycle. Its program is rebuilt without it, or removed if an imported cycle was its last one. Cannot be undone.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The WashData device."
+        },
+        "cycle_id": {
+          "name": "Cycle ID",
+          "description": "The ID of the cycle to delete, e.g. the cycle_id variable of the Cycle ended trigger (empty when that run stored no cycle, so check it first)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Trigger ML Training",
       "description": "Manually retrain the on-device ML models from this device's own labelled cycles (experimental).",
@@ -472,7 +505,7 @@
       "description": "Triggers when the load is taken out after a cycle: the door opened or the unload was confirmed."
     },
     "state_changed": {
-      "name": "State changed",
+      "name": "Appliance state changed",
       "description": "Triggers when the WashData state changes.",
       "fields": {
         "from": {
@@ -619,6 +652,15 @@
       },
       "energy_total": {
         "name": "Energy Total"
+      },
+      "last_cycle_duration": {
+        "name": "Last Cycle Duration"
+      },
+      "last_cycle_energy": {
+        "name": "Last Cycle Energy"
+      },
+      "last_cycle_cost": {
+        "name": "Last Cycle Cost"
       }
     },
     "select": {
@@ -695,6 +737,15 @@
     },
     "assign_profile_failed": {
       "message": "Could not assign profile: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Cycle not found."
+    },
+    "maintenance_task_not_found": {
+      "message": "No maintenance task with the id {task_id} on this device."
+    },
+    "task_id_required": {
+      "message": "A valid task_id is required."
     }
   }
 }

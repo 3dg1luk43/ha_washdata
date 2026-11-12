@@ -56,6 +56,7 @@
       "timer_pause_action_title": "Genoptag cyklus",
       "timer_pause_body_suffix": "Cyklussen er sat på pause. Åbn WashData-panelet for at genoptage.",
       "unload_dismiss_action_title": "Stop påmindelser",
+      "review_action_title": "Det var {program}",
       "notify_live_waiting_message": "{device}: Ingen profil genkendt endnu.",
       "vs_typical_longer": "{pct}% længere end normalt",
       "vs_typical_shorter": "{pct}% kortere end normalt",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Markér vedligeholdelse som udført",
+      "description": "Log en vedligeholdelsesopgave som udført nu, ligesom panelets knap Færdig gør.",
+      "fields": {
+        "device_id": {
+          "name": "Enhed",
+          "description": "WashData-enheden, som opgaven hører til."
+        },
+        "task_id": {
+          "name": "Opgave-ID",
+          "description": "Opgavens id, som angivet i attributten due_task_ids på sensoren Vedligeholdelse forfalder (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other eller en brugerdefineret opgaves custom_-id)."
+        },
+        "notes": {
+          "name": "Noter",
+          "description": "Valgfri note, der gemmes sammen med logposten."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Slet cyklus",
+      "description": "Slet én gemt cyklus. Dens program genopbygges uden den, eller fjernes, hvis en importeret cyklus var dets sidste. Kan ikke fortrydes.",
+      "fields": {
+        "device_id": {
+          "name": "Enhed",
+          "description": "WashData-enheden."
+        },
+        "cycle_id": {
+          "name": "Cyklus-ID",
+          "description": "ID'et for den cyklus, der skal slettes, f.eks. variablen cycle_id fra udløseren Cyklus afsluttet (tom, når den kørsel ikke gemte nogen cyklus, så tjek den først)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Start ML-træning",
       "description": "Gentræn ML-modellerne på enheden manuelt ud fra enhedens egne mærkede cyklusser (eksperimentel).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "Energi i alt"
+      },
+      "last_cycle_duration": {
+        "name": "Varighed af sidste cyklus"
+      },
+      "last_cycle_energy": {
+        "name": "Energi for sidste cyklus"
+      },
+      "last_cycle_cost": {
+        "name": "Omkostning ved sidste cyklus"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "Kunne ikke tildele profil: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Cyklus ikke fundet."
+    },
+    "maintenance_task_not_found": {
+      "message": "Ingen vedligeholdelsesopgave med id'et {task_id} på denne enhed."
+    },
+    "task_id_required": {
+      "message": "Et gyldigt task_id er påkrævet."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "Cyklus genoptaget",
       "still_tumbling": "Tromlen drejer stadig efter cyklus",
       "unloaded": "Tømt",
-      "state_changed": "Tilstand ændret",
+      "state_changed": "Apparatets tilstand ændret",
       "maintenance_due": "Vedligeholdelse forfalder",
       "milestone_reached": "Cyklusmilepæl nået",
       "pump_stuck": "Pumpe sidder fast"
@@ -665,7 +716,7 @@
       "description": "Udløses når vasketøjet tages ud efter en cyklus: døren er åbnet eller tømningen er bekræftet."
     },
     "state_changed": {
-      "name": "Tilstand ændret",
+      "name": "Apparatets tilstand ændret",
       "description": "Udløses når WashData-tilstanden ændres.",
       "fields": {
         "from": {

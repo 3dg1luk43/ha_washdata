@@ -358,6 +358,7 @@ def test_an_unread_keepalive_does_not_close_a_pulse():
         if observed:  # back to where the pulse's first reading left it
             assert det._time_below_threshold == quiet + 5.0  # noqa: SLF001
         else:
-            assert det._time_below_threshold == 10.0  # noqa: SLF001
+            # The pulse's 10 s were at 125 W: one 5 s cadence of quiet at most (#508).
+            assert det._time_below_threshold == 5.0  # noqa: SLF001
             assert det._time_below_threshold_gapfree == 0.0  # noqa: SLF001
             assert not det._quiet_pulse_spans  # noqa: SLF001

@@ -1083,6 +1083,7 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `is_reference` | no | bool |
 | `labelable` | no | bool |
 | `editable` | no | bool |
+| `trimmable` | no | bool |
 | `cycle_origin` | no | str |
 | `expected` | no | list[list[number]] \| null |
 

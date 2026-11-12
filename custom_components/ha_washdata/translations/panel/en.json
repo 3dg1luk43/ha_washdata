@@ -266,7 +266,11 @@
     "bp_details": "Details",
     "bp_copy_yaml": "Copy YAML",
     "bp_hide_yaml": "Hide the YAML",
-    "bp_show_yaml": "Show the YAML"
+    "bp_show_yaml": "Show the YAML",
+    "review_something_else": "Something else…",
+    "review_not_sure": "Not sure",
+    "review_prev": "Previous cycle",
+    "review_next": "Next cycle"
   },
   "note": {
     "off_delay": {
@@ -550,6 +554,7 @@
     "per_cycle_short": "cycle",
     "pg_alert_ambiguous": "Ambiguous match",
     "pg_alert_did_not_finish": "Did not finish",
+    "pg_alert_discarded": "Discarded as a ghost or pump-out",
     "pg_alert_energy": "Energy anomaly",
     "pg_alert_false_end": "Split into multiple cycles",
     "pg_alert_indefinite": "Would run indefinitely",
@@ -714,7 +719,10 @@
     "bp_needs": "Needs",
     "bp_needs_version": "WashData {version} or newer",
     "bp_author": "Author",
-    "bp_required": "required"
+    "bp_required": "required",
+    "pg_runs_as": "runs as {value}",
+    "review_this_cycle": "This cycle",
+    "review_usual": "Usual for {name}"
   },
   "log": {
     "all_levels": "All levels",
@@ -900,7 +908,7 @@
     "import_analyze_hint": "Load an exported file (or paste its JSON). WashData shows what can be imported before anything changes.",
     "import_history_description": "Had a smart plug before WashData? Upload its power history or read it from Home Assistant. Detection runs over it, and past cycles appear in your Cycles list ready to name.",
     "import_undo_hint": "A restore point from before the last import ({when}) is kept: {profiles} profile(s) and {cycles} cycle(s).",
-    "imported_history_readonly": "Found in imported power history. It helps matching but is not counted in your statistics and cannot be trimmed or split. Label it to name the program.",
+    "imported_history_note": "Found in imported power history. It helps matching but is not counted in your statistics and cannot be split. Label it to name the program.",
     "imported_readonly": "Imported from the community store. Used for reference and matching, not counted in your stats, and cannot be edited.",
     "include_settings_hint": "Share this device's detection and matching thresholds (not notifications, entities or energy price). Others choose whether to apply them.",
     "legacy_actions_title": "{count} legacy custom action still running",
@@ -1122,7 +1130,15 @@
     "bp_none_yet": "No templates for this appliance type yet. Share the first one.",
     "bp_unreachable": "It is downloaded from GitHub. Check that Home Assistant can reach the internet, then try again.",
     "bp_library_intro": "Ready-made automations shared by WashData users on GitHub, reviewed before they are listed. Available only with online features on.",
-    "bp_needs_version": "Needs WashData {version} or newer."
+    "bp_needs_version": "Needs WashData {version} or newer.",
+    "bp_review_check": "Check this before saving: Home Assistant will run it exactly as written.",
+    "review_q_title": "Which program was this?",
+    "review_q_intro": "WashData is not sure about these cycles. Your answer teaches it.",
+    "review_q_started": "Started {when}",
+    "review_q_more": "{count} more to review",
+    "review_q_more_one": "{count} more to review",
+    "review_q_more_other": "{count} more to review",
+    "review_which_program": "Which program was it?"
   },
   "pg_desc": {
     "completion_min_seconds": "Shortest run that counts as a real cycle",
@@ -1135,7 +1151,7 @@
     "profile_match_min_duration_ratio": "Minimum cycle length as a fraction of the profile's duration; default 0.1 (10%)",
     "profile_match_max_duration_ratio": "Maximum cycle length as a fraction of the profile's duration; default 1.8 (180%)",
     "anti_wrinkle_idle_timeout": "Quiet time allowed between two tumble pulses before anti-wrinkle ends",
-    "dishwasher_end_spike_quiet_release": "Dishwasher: quiet seconds after expected duration before the end-of-cycle drain wait is released",
+    "dishwasher_end_spike_quiet_release": "Dishwasher: seconds below Stop since the last activity needed to end the final-drain wait after the expected duration",
     "smart_termination_duration_ratio": "Fraction of the program's average duration a cycle must reach before Smart Termination may end it early; lower it if run times vary",
     "anti_crease_finalize_ratio": "Fraction of the program's average duration a cycle must reach before the anti-crease tail may finish it; lower it on dryers, keep washers at the default",
     "anti_wrinkle_max_power": "A pulse above this ends anti-wrinkle and opens a new cycle",
@@ -1285,7 +1301,7 @@
       "label": "Device Type"
     },
     "dishwasher_end_spike_quiet_release": {
-      "doc": "After the expected duration, how long the dishwasher must stay below the Stop Threshold before WashData stops waiting for the final drain. Raise it if a late drain after a long dry is missed. The wait never exceeds 30 minutes.",
+      "doc": "After the expected duration, WashData stops waiting for the final drain once the dishwasher has been below the Stop Threshold this long since its last activity, at most 30 minutes (and, once the program has 3 recorded cycles, at least its longest recorded drying pause). Raise it if a late drain after a long dry is missed.",
       "label": "Passive-Dry Quiet Release"
     },
     "door_end_dwell_seconds": {
@@ -1397,7 +1413,7 @@
       "label": "Notification Colour"
     },
     "notify_live_chronometer": {
-      "doc": "Android: adds a countdown to the estimated finish next to the notification text. Use {finish_time} in the Pre-Complete Message to show the finish time instead of a second countdown.",
+      "doc": "Android: adds a countdown to the estimated finish next to the notification text. Use {finish_time} in the Live Update Message to show the finish time instead of a second countdown.",
       "label": "Use Live Chronometer"
     },
     "notify_live_click_action": {
@@ -1442,7 +1458,7 @@
     },
     "notify_pre_complete_message": {
       "doc": "Text of each live progress update. Template variables: {device}, {program}, {minutes} (minutes left), {finish_time} (estimated finish, e.g. 14:30). Any other variable falls back to the default text.",
-      "label": "Pre-Complete Message"
+      "label": "Live Update Message"
     },
     "notify_quiet_end_hour": {
       "doc": "End of the do-not-disturb window (0-23); held notifications are sent then. Blank disables it.",
@@ -1454,7 +1470,7 @@
     },
     "notify_reminder_message": {
       "doc": "Text of the one-time Pre-End Alert. Template variables: {device}, {program}, {minutes} (the Pre-End Alert setting). Any other variable falls back to the default text.",
-      "label": "Reminder Message"
+      "label": "Pre-End Alert Message"
     },
     "notify_start_message": {
       "doc": "Body sent when a cycle starts. Template variables: {device}, {program}. Any other variable falls back to the default text.",
@@ -1704,7 +1720,9 @@
     "training": "Training…",
     "trimming": "Trimming…",
     "unlabelling": "Unlabelling…",
-    "working": "Working…"
+    "working": "Working…",
+    "torn_pick": "{a} or {b}?",
+    "torn_tip": "WashData cannot tell these two apart yet, so pick the one that is running to label this cycle with it (Auto-detect undoes the choice)."
   },
   "suggestion": {
     "observed_label": "Observed",
@@ -1985,7 +2003,8 @@
     "bp_automation_created": "Automation created with the default settings; opening it",
     "copied": "Copied",
     "copy_failed": "Copy failed. Select the text and copy it by hand.",
-    "automation_label_failed": "Automation created, but the WashData label or category could not be added."
+    "automation_label_failed": "Automation created, but the WashData label or category could not be added.",
+    "review_answered": "Saved: {program}"
   },
   "trend": {
     "down": "Trending down",
@@ -2241,7 +2260,7 @@
       "name": "Unloaded"
     },
     "state_changed": {
-      "name": "State changed"
+      "name": "Appliance state changed"
     },
     "maintenance_due": {
       "name": "Maintenance due"

@@ -55,6 +55,7 @@ from .const import (
     CONF_MIN_POWER,
     CONF_OFF_DELAY,
     CONF_DEVICE_TYPE,
+    DEVICE_TYPE_DISHWASHER,
     CONF_POWER_SENSOR,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_EVENTS,
@@ -112,6 +113,7 @@ from .const import (
     resolve_watchdog_interval_default,
     resolve_start_duration_default,
     CONF_RUNNING_DEAD_ZONE,
+    coerce_numeric_option,
 )
 from .log_utils import DeviceLoggerAdapter
 from .options_utils import retire_device_type, strip_null_options
@@ -212,6 +214,9 @@ _SERVICE_SCHEMAS: dict[str, vol.Schema] = {
     "pause_cycle": _svc({}),
     "resume_cycle": _svc({}),
     "mark_unloaded": _svc({}),
+    "mark_maintenance_done": _svc({vol.Required("task_id"): cv.string,
+                                   vol.Optional("notes"): _OPT_STR}),
+    "delete_cycle": _svc({vol.Required("cycle_id"): cv.string}),
     "trigger_ml_training": _svc({}),
 }
 
@@ -282,6 +287,36 @@ def _heal_seeded_cadence(options: dict[str, Any], device_type: Any) -> list[str]
             healed.append(CONF_START_DURATION_THRESHOLD)
     return healed
 
+
+def _heal_raised_min_ratio(options: dict[str, Any], device_type: Any = None) -> list[str]:
+    """Return a stored Stage-1 min ratio above the default to it (item 571), in place.
+
+    Since item 401(e) the key only gates matching: a stored 0.33-0.80 forbids any
+    match before that share of a programme. None of those values is a choice about
+    the gate as it works now: old seeded defaults (0.30 / 0.90 / 0.96), the pre-0.5.8
+    suggestion (p05 - 0.1 of complete-cycle durations, from when the key also drove
+    the finish deferral) or unsanitised store adoptions (audit STORE-06 clamps the
+    same direction on adopt, and the corrective suggestion proposes it since 0.5.8).
+    A lower floor is kept, and the step runs once: a value set in the panel
+    afterwards is never touched. The max ratio is NOT healed here (the 3.10 -> 3.11
+    step heals only its seeded 1.5): dropping the corpus's stored 1.14-1.44 gained
+    +2/-1 folds on complete cycles only and cost washer end lag (end_gate_eval
+    --loo --all-formats: the maintainer's washer 7 cycles 2-21 min later, median
+    +0.26 min, the late shortening blocked by the wider candidate set). One helper
+    for the 3.12 -> 3.13 step and the one-pass legacy path.
+
+    Not on dishwashers: the one replayed dishwasher with a raised floor (0.63) ended
+    3 of 33 cycles 26-67 min later once the floor no longer blocked a weak
+    (0.25-0.44) match to its long Eco profile from holding ENDING (programme lag
+    mean/p90 17.34/45.70 -> 17.91/57.19 min, over the end-gate tolerance).
+    """
+    if str(device_type or options.get(CONF_DEVICE_TYPE) or "") == DEVICE_TYPE_DISHWASHER:
+        return []
+    low = coerce_numeric_option(options.get(CONF_PROFILE_MATCH_MIN_DURATION_RATIO), float)
+    if low is not None and low > DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO:
+        options[CONF_PROFILE_MATCH_MIN_DURATION_RATIO] = DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
+        return [CONF_PROFILE_MATCH_MIN_DURATION_RATIO]
+    return []
 
 def _convert_legacy_notify_service(options: dict[str, Any]) -> list[str]:
     """Convert the deprecated ``notify_service`` to per-event lists, in place (#472).
@@ -474,7 +509,9 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         # Replaced ONLY where it still equals the old seeded default, exactly as
         # the 3.9 -> 3.10 cadence heal is scoped: a user who tuned this produced
         # a value like 1.44 or 1.51, not the old constant on the nose. Item 311
-        # measured the wider gate as 4 appliances better and none worse.
+        # measured the wider gate as 4 appliances better and none worse. (Those
+        # tuned values were the pre-0.5.8 suggestion's p95 + 0.1; healing them too
+        # was measured for item 571 and rejected, see _heal_raised_min_ratio.)
         healed: list[str] = []
         if new_opts.get(CONF_PROFILE_MATCH_MAX_DURATION_RATIO) == _OLD_SEEDED_MAX_DURATION_RATIO:
             new_opts[CONF_PROFILE_MATCH_MAX_DURATION_RATIO] = (
@@ -526,6 +563,30 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             removed or "none",
             converted or "none",
             trigger_cleared,
+        )
+
+    # 3.12 -> 3.13: a raised Stage-1 min ratio back to the default (register item
+    # 571, _heal_raised_min_ratio). eval.py full, whole corpus, every export's options
+    # healed: top-1 at 75/50/25% elapsed 71.3/64.4/64.6 -> 74.1/69.4/69.8 (folds
+    # won/lost 27/1, 48/0, 48/0; 5 devices at 0.33-0.80; complete cycles unchanged).
+    # end_gate_eval --loo --all-formats: no new early end or split; the one replayed
+    # device with a raised floor (a dishwasher at 0.63) ends 3 of 33 cycles 26-67 min
+    # later (dishwasher programme lag mean/p90 17.34/45.70 -> 17.91/57.19 min): a weak
+    # (0.25-0.44) match to its long Eco profile, which the floor used to block until
+    # 63% of Eco, holds ENDING where the unmatched timeout ended.
+    if version == 3 and minor_version == 12:
+        new_opts = dict(entry.options)
+        healed_ratios = _heal_raised_min_ratio(
+            new_opts, entry.options.get(CONF_DEVICE_TYPE) or entry.data.get(CONF_DEVICE_TYPE)
+        )
+        hass.config_entries.async_update_entry(
+            entry, options=new_opts, minor_version=13
+        )
+        minor_version = 13
+        _log.debug(
+            "Migrated WashData entry from 3.12 to 3.13 (raised Stage-1 min ratio "
+            "healed: %s)",
+            healed_ratios or "none",
         )
 
     if version == CONFIG_ENTRY_VERSION and minor_version >= CONFIG_ENTRY_MINOR_VERSION:
@@ -691,6 +752,9 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         options[CONF_PROFILE_MATCH_MAX_DURATION_RATIO] = (
             DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO
         )
+    # And the 3.12 -> 3.13 heal (item 571), which the `setdefault` above would keep
+    # a stored min ratio from.
+    _heal_raised_min_ratio(options)
 
     # 3.6: coffee_machine / ev / heat_pump / oven device types were removed.
     # Remap any entry still on one of them to DEVICE_TYPE_OTHER (Threshold Device),
@@ -1527,6 +1591,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             # reloads the entry unless the payload brought settings with it, so
             # schedule it directly rather than leaving it for the next restart.
             manager.async_schedule_banked_tail_repair()
+            manager.async_schedule_energy_rebuild()
 
             manager._logger.info("Imported ha_washdata entry %s from %s", entry_id, source)
 
@@ -1689,6 +1754,50 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.services.async_register(
             DOMAIN, "mark_unloaded", _guarded_service(hass, "mark_unloaded", handle_mark_unloaded),
             schema=_SERVICE_SCHEMAS["mark_unloaded"]
+        )
+
+    # Tick off a maintenance task from a dashboard button, an NFC tag or an
+    # automation (#490): the same log entry the panel's "done" writes.
+    if not hass.services.has_service(DOMAIN, "mark_maintenance_done"):
+        async def handle_mark_maintenance_done(call: ServiceCall) -> None:
+            device_id = _require_str(call.data.get("device_id"), "device_id")
+            task_id = _require_str(call.data.get("task_id"), "task_id")
+            _entry_id, manager = _service_manager(hass, device_id)
+            try:
+                await manager.profile_store.async_add_maintenance_event(
+                    task_id, None, call.data.get("notes") or ""
+                )
+            except ValueError as err:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="maintenance_task_not_found",
+                    translation_placeholders={"task_id": task_id},
+                ) from err
+            manager.notify_update()
+
+        hass.services.async_register(
+            DOMAIN, "mark_maintenance_done",
+            _guarded_service(hass, "mark_maintenance_done", handle_mark_maintenance_done),
+            schema=_SERVICE_SCHEMAS["mark_maintenance_done"]
+        )
+
+    # Delete one stored cycle (#492), e.g. from an automation on the cycle_ended
+    # trigger, whose variables carry the cycle_id. The panel's delete, same store call.
+    if not hass.services.has_service(DOMAIN, "delete_cycle"):
+        async def handle_delete_cycle(call: ServiceCall) -> None:
+            device_id = _require_str(call.data.get("device_id"), "device_id")
+            cycle_id = _require_str(call.data.get("cycle_id"), "cycle_id")
+            _entry_id, manager = _service_manager(hass, device_id)
+            if not await manager.profile_store.delete_cycle(cycle_id):
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="cycle_not_found",
+                )
+            manager.notify_update()
+
+        hass.services.async_register(
+            DOMAIN, "delete_cycle", _guarded_service(hass, "delete_cycle", handle_delete_cycle),
+            schema=_SERVICE_SCHEMAS["delete_cycle"]
         )
 
     return True

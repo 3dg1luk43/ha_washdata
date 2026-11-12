@@ -42,6 +42,11 @@ import numpy as np
 from .const import (
     CYCLE_OVERRUN_ANOMALY_RATIO,
     DEVICE_SMOOTHING_THRESHOLDS,
+    ETA_PROGRAMME_END,
+    ETA_TAIL_DEVICE_TYPES,
+    ETA_TAIL_MIN_MEMBERS,
+    ETA_TAIL_MIN_S,
+    ETA_TAIL_MIN_SHARE,
     STATE_ENDING,
     STATE_PAUSED,
     STATE_RUNNING,
@@ -129,6 +134,65 @@ def profile_end_expectation(
 
 
 EndExpFn = Any  # Callable[[str, float], dict[str, float] | None]
+
+
+def programme_tail_s(store: Any, program: str | None, device_type: str | None) -> float:
+    """Seconds a matched profile usually runs after its programme ended (#486).
+
+    The median quiet tail of the profile's members (the envelope's ``tail_ref``,
+    :func:`spin_rhythm.member_tail_reference`), when it is a habit of the programme: at least
+    ``ETA_TAIL_MIN_SHARE`` of at least ``ETA_TAIL_MIN_MEMBERS`` members have one and
+    the median is at least ``ETA_TAIL_MIN_S``. 0.0 otherwise, off
+    (``ETA_PROGRAMME_END``), for other device types, or on any error. The remaining
+    time counts down to the programme end by this much less (``compute_progress``).
+    """
+    try:
+        if not ETA_PROGRAMME_END or device_type not in ETA_TAIL_DEVICE_TYPES or not program:
+            return 0.0
+        env = store.get_envelope(program)
+        if not isinstance(env, dict):
+            return 0.0
+        ref = env.get("tail_ref")
+        if not isinstance(ref, dict) or int(ref.get("n") or 0) < ETA_TAIL_MIN_MEMBERS:
+            return 0.0
+        if int(ref.get("with_tail") or 0) < ETA_TAIL_MIN_SHARE * int(ref["n"]):
+            return 0.0
+        tail = float(ref["median_s"])
+        return tail if math.isfinite(tail) and tail >= ETA_TAIL_MIN_S else 0.0
+    except Exception:  # noqa: BLE001 - a statistic must never break the estimate
+        return 0.0
+
+
+def anticrease_programme_tail(
+    store: Any, program: str | None, device_type: str | None
+) -> float | None:
+    """MatchContext element 18 (audit 2026-11-03 item 9): the matched profile's
+    :func:`programme_tail_s` when it has one, 0.0 when only the DEVICE has the habit
+    (at least ``ETA_TAIL_MIN_SHARE`` of its profiles with a ``tail_ref`` of
+    ``ETA_TAIL_MIN_MEMBERS`` members), None when neither (the anti-crease finalise's
+    programme-end path is not armed). The device half is what keeps a match to a
+    tail-less programme (a mismatch, a cold wool wash) on the same event-only
+    finalise. Shared by the manager and the Playground; never raises.
+    """
+    try:
+        if not program:
+            return None
+        tail = programme_tail_s(store, program, device_type)
+        if tail > 0:
+            return tail
+        if not ETA_PROGRAMME_END or device_type not in ETA_TAIL_DEVICE_TYPES:
+            return None
+        rated = habit = 0
+        for name in store.get_profiles() or {}:
+            env = store.get_envelope(name)
+            ref = env.get("tail_ref") if isinstance(env, dict) else None
+            if not isinstance(ref, dict) or int(ref.get("n") or 0) < ETA_TAIL_MIN_MEMBERS:
+                continue
+            rated += 1
+            habit += programme_tail_s(store, name, device_type) > 0
+        return 0.0 if habit and habit >= ETA_TAIL_MIN_SHARE * rated else None
+    except Exception:  # noqa: BLE001 - a guard input must never break matching
+        return None
 
 
 def ml_energy_total(
@@ -698,6 +762,17 @@ def ema_seed(
     return prev_smoothed
 
 
+def _to_programme_end(remaining: float, tail_s: float) -> float:
+    """``remaining`` less the profile's usual post-programme tail (#486), never < 0.
+
+    Only the countdown moves: progress and its EMA state stay on the full expected
+    duration, so the phase readout and the projected energy are unchanged, and the
+    anti-crease tail reads as "0 min left" rather than as programme time."""
+    if tail_s > 0 and math.isfinite(tail_s):
+        return max(0.0, remaining - tail_s)
+    return remaining
+
+
 def _compute_progress_base(
     device_type: str,
     matched_duration: float,
@@ -706,6 +781,7 @@ def _compute_progress_base(
     phase_result: tuple[float, float] | None,
     logger: logging.Logger | None = None,
     dt_seconds: float | None = None,
+    tail_s: float = 0.0,
 ) -> ProgressResult | None:
     """The EMA + monotonicity + back-calculation body of the estimate loop.
 
@@ -777,6 +853,7 @@ def _compute_progress_base(
             # long as the run lasts, re-arming the live chronometer "now + 36 s"
             # every tick (audit PROGRESS-06). The linear branch already says 0.
             remaining = 0.0
+        remaining = _to_programme_end(remaining, tail_s)
         total = duration_so_far + remaining
 
         logger.debug(
@@ -802,7 +879,7 @@ def _compute_progress_base(
     # carried 146% into the correct longer programme (audit PROGRESS-09).
     smoothed = max(0.0, min(smoothed, 100.0))
     progress = smoothed
-    remaining = max(matched_dur * (1.0 - progress / 100.0), 0.0)
+    remaining = _to_programme_end(max(matched_dur * (1.0 - progress / 100.0), 0.0), tail_s)
     total = duration_so_far + remaining
     logger.debug(
         "Linear estimate: remaining=%smin, progress=%.1f%%",
@@ -820,6 +897,7 @@ def compute_progress(
     phase_result: tuple[float, float] | None,
     logger: logging.Logger | None = None,
     dt_seconds: float | None = None,
+    tail_s: float = 0.0,
 ) -> ProgressResult | None:
     """Progress/remaining estimate: the one entry point for the manager and the
     Playground replay (the phase-resolved ETA blend that used to sit here was
@@ -827,7 +905,7 @@ def compute_progress(
     10% worse at 25% on washers)."""
     return _compute_progress_base(
         device_type, matched_duration, duration_so_far, prev_smoothed,
-        phase_result, logger, dt_seconds,
+        phase_result, logger, dt_seconds, tail_s,
     )
 
 

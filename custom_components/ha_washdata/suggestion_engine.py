@@ -245,8 +245,10 @@ def _measured_quiet_span_s(
     have seen, and returns 0.0 for the caller to drop.
 
     Timed like the accumulator too: the interval *preceding* the first
-    below-threshold sample is credited (the detector adds ``dt`` on the reading
-    that takes it below), so a span is ``t[last_below] - t[first_below - 1]``.
+    below-threshold sample is credited, so a span is ``t[last_below] -
+    t[first_below - 1]``. Since #508 the detector credits that interval only up
+    to one gate cadence, so after a long silence this errs long, the safe side
+    for an ``off_delay`` that must outlast every resumed pause.
     """
     return _measured_quiet_span(points, low_start_s, resume_idx, quiet_thr)[0]
 
@@ -849,6 +851,21 @@ def _num(value: Any) -> float | None:
     # Reject NaN/inf (e.g. from a malformed "nan"/"inf" string or bad option)
     # so they can't poison the invariant arithmetic downstream.
     return result if np.isfinite(result) else None
+
+
+def _same_suggestion(stored: Any, data: dict[str, Any]) -> bool:
+    """Is ``data`` already the stored suggestion (value, reason and its sidecars)?
+
+    The ``updated`` stamp is ignored: re-sending a pending value is not a change.
+    """
+    if not isinstance(stored, dict):
+        return False
+    return (
+        stored.get("value") == data.get("value")
+        and stored.get("reason") == data.get("reason")
+        and stored.get("reason_key") == data.get("reason_key")
+        and stored.get("reason_params") == data.get("reason_params")
+    )
 
 
 def reconcile_suggestions(
@@ -2227,15 +2244,26 @@ class SuggestionEngine:
         # sit inside the cycles, so 0.8 x it is under standby (#458).
         return apply_standby_floor(suggestions, self._standby_floor(_batch_opts))
 
-    def apply_suggestions(self, suggestions: dict[str, Any]) -> None:
+    def apply_suggestions(self, suggestions: dict[str, Any], *, changed: bool = False) -> None:
         """Persist suggestions to the profile store, then reconcile the full set.
 
         After storing the new values, cross-parameter invariants are enforced
         over the *entire* accumulated suggestion set so that suggesting one
         parameter never leaves it inconsistent with another (see
         :func:`reconcile_suggestions`).
+
+        A suggestion already stored with the same value and reason is left as it
+        is, and the store is saved only when something changed (#510): the
+        operational pass re-sends the same pending values every five minutes of a
+        running cycle, and each re-send rewrote the whole store. ``changed``: the
+        caller already changed the stored set (it deleted a suggestion), so save
+        even when nothing here does.
         """
+        stored = self.profile_store.get_suggestions()
+        updated: list[str] = []
         for key, data in suggestions.items():
+            if _same_suggestion(stored.get(key), data):
+                continue
             self.profile_store.set_suggestion(
                 key,
                 data["value"],
@@ -2243,23 +2271,27 @@ class SuggestionEngine:
                 reason_key=data.get("reason_key"),
                 reason_params=data.get("reason_params"),
             )
-        if suggestions:
-            _LOGGER.info("Applied %d setting suggestion(s): %s", len(suggestions), ", ".join(sorted(suggestions)))
+            updated.append(key)
+        if updated:
+            _LOGGER.info("Applied %d setting suggestion(s): %s", len(updated), ", ".join(sorted(updated)))
 
-        self._reconcile_stored_suggestions()
+        reconciled = self._reconcile_stored_suggestions()
 
-        if self.hass and suggestions:
+        if self.hass and (updated or reconciled or changed):
             save = self.profile_store.async_save()
             if self._spawn_fn is not None:
                 self._spawn_fn(save)
             else:
                 self.hass.async_create_task(save)
 
-    def _reconcile_stored_suggestions(self) -> None:
-        """Reconcile the accumulated stored suggestions against current options."""
+    def _reconcile_stored_suggestions(self) -> bool:
+        """Reconcile the accumulated stored suggestions against current options.
+
+        Returns whether any stored suggestion was adjusted.
+        """
         stored = self.profile_store.get_suggestions()
         if not stored:
-            return
+            return False
         adjusted, changed = reconcile_suggestions(stored, self._entry_options())
         for key in changed:
             entry = adjusted[key]
@@ -2272,3 +2304,4 @@ class SuggestionEngine:
             )
         if changed:
             _LOGGER.info("Reconciled coupled parameters for consistency: %s", ", ".join(sorted(changed)))
+        return bool(changed)

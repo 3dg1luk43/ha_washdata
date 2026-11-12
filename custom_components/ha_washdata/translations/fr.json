@@ -56,6 +56,7 @@
       "timer_pause_action_title": "Reprendre le cycle",
       "timer_pause_body_suffix": "Le cycle est en pause. Ouvrez le panneau WashData pour reprendre.",
       "unload_dismiss_action_title": "Arrêter les rappels",
+      "review_action_title": "C'était {program}",
       "notify_live_waiting_message": "{device} : aucun profil reconnu pour le moment.",
       "vs_typical_longer": "{pct}% plus long que d'habitude",
       "vs_typical_shorter": "{pct}% plus court que d'habitude",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Marquer l'entretien comme fait",
+      "description": "Enregistrez une tâche d'entretien comme faite maintenant, comme le fait le bouton Fait du panneau.",
+      "fields": {
+        "device_id": {
+          "name": "Appareil",
+          "description": "L'appareil WashData auquel appartient la tâche."
+        },
+        "task_id": {
+          "name": "ID de la tâche",
+          "description": "L'ID de la tâche, tel qu'indiqué dans l'attribut due_task_ids du capteur Entretien à effectuer (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other, ou l'ID custom_ d'une tâche personnalisée)."
+        },
+        "notes": {
+          "name": "Remarques",
+          "description": "Remarque facultative enregistrée avec l'entrée du journal."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Supprimer le cycle",
+      "description": "Supprimez un cycle enregistré. Son programme est reconstruit sans lui, ou supprimé si un cycle importé était son dernier cycle. Action irréversible.",
+      "fields": {
+        "device_id": {
+          "name": "Appareil",
+          "description": "L'appareil WashData."
+        },
+        "cycle_id": {
+          "name": "Identifiant du cycle",
+          "description": "L'ID du cycle à supprimer, par exemple la variable cycle_id du déclencheur Cycle terminé (vide lorsque cette exécution n'a enregistré aucun cycle, vérifiez-la donc d'abord)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Déclencher la formation ML",
       "description": "Réentraîner manuellement les modèles ML sur l'appareil à partir des cycles étiquetés de cet appareil (expérimental).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "Énergie totale"
+      },
+      "last_cycle_duration": {
+        "name": "Durée du dernier cycle"
+      },
+      "last_cycle_energy": {
+        "name": "Énergie du dernier cycle"
+      },
+      "last_cycle_cost": {
+        "name": "Coût du dernier cycle"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "Impossible d'attribuer le profil : {error}"
+    },
+    "cycle_not_found": {
+      "message": "Cycle introuvable."
+    },
+    "maintenance_task_not_found": {
+      "message": "Aucune tâche d'entretien avec l'ID {task_id} sur cet appareil."
+    },
+    "task_id_required": {
+      "message": "Un task_id valide est requis."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "Cycle repris",
       "still_tumbling": "Toujours en rotation après le cycle",
       "unloaded": "Déchargé",
-      "state_changed": "État modifié",
+      "state_changed": "État de l'appareil modifié",
       "maintenance_due": "Maintenance due",
       "milestone_reached": "Jalon de cycles atteint",
       "pump_stuck": "Pompe bloquée"
@@ -665,7 +716,7 @@
       "description": "Se déclenche quand le linge est sorti après un cycle : la porte a été ouverte ou le déchargement a été confirmé."
     },
     "state_changed": {
-      "name": "État modifié",
+      "name": "État de l'appareil modifié",
       "description": "Se déclenche quand l'état WashData change.",
       "fields": {
         "from": {

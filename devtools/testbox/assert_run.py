@@ -236,7 +236,8 @@ async def main() -> int:
             f"a matched live update was delivered ({len(matched_live)})",
             "Every live update was the pre-match placeholder, so the progress / "
             "chronometer / content_state payload was never exercised. Check that "
-            "profile_match_interval is compressed for this run.",
+            "profile_match_interval is compressed for this run and that the "
+            "replayed cycle's programme has no near-twin (README, item 582).",
         )
         for record in matched_live[:1]:
             data = record["data"]

@@ -17,8 +17,10 @@ Tiers:
   fresh ``run --mode fast`` compared with ``eval_baseline.json``; nothing is
   rewritten).
 * ``--box`` adds the real-HA test box (``up.sh --fresh``, ``smoke.sh``, the
-  notification-action and unload checks). Never by default: it is minutes, it is
-  shared, and it only proves things a MagicMock cannot (CLAUDE.md). When the
+  notification-action, unload and Clean-restart checks). It runs last and alone:
+  its compressed-time replay is load-sensitive (register item 589). Never by
+  default: it is minutes, it is shared, and it only proves things a MagicMock
+  cannot (CLAUDE.md). When the
   changed files touch setup, services, entities, the WS API or notifications the
   summary says so, so you can decide.
 
@@ -59,6 +61,7 @@ import hashlib
 import json
 import os
 import queue
+import re
 import shutil
 import signal
 import subprocess
@@ -127,6 +130,10 @@ class Stage:
     #: A deterministic stage: it is skipped as ``cached`` when these inputs are
     #: byte-identical to the last run that passed (``--no-cache`` runs it anyway).
     inputs: Inputs | None = None
+    #: Starts only once every other stage has finished, on an otherwise idle host:
+    #: the box's compressed-time replay misses its matched live update under load
+    #: (register item 589).
+    alone: bool = False
 
 
 @dataclass
@@ -256,14 +263,23 @@ def _stages() -> list[Stage]:
             Command(["./smoke.sh"], cwd=REPO / "devtools" / "testbox"),
             Command(["./check_notify_actions.sh"], cwd=REPO / "devtools" / "testbox"),
             Command(["./check_unload_confirm.sh"], cwd=REPO / "devtools" / "testbox"),
-        ], 1000, unavailable=lambda: _box_busy() or _need("docker")()),
+            Command(["./check_clean_restart.sh"], cwd=REPO / "devtools" / "testbox"),
+        ], 1000, unavailable=lambda: _box_busy() or _need("docker")(), alone=True),
     ]
 
 
+#: pgrep -f patterns of the box scripts that drive the shared container (the bracket
+#: keeps pgrep from matching its own command line). One pattern for every
+#: devtools/testbox/check_*.sh, so a new check cannot be left out of the list.
+_BOX_SCRIPT_PATTERNS = ("[s]moke\\.sh", "[c]heck_[a-z_]+\\.sh")
+
+
 def _box_busy() -> str | None:
-    for pat in ("[s]moke.sh", "[c]heck_notify", "[c]heck_unload"):
-        if subprocess.run(["pgrep", "-f", pat], capture_output=True).returncode == 0:
-            return f"another test box run is active ({pat.replace('[', '').replace(']', '')})"
+    for pat in _BOX_SCRIPT_PATTERNS:
+        found = subprocess.run(["pgrep", "-af", pat], capture_output=True, text=True)
+        if found.returncode == 0:
+            hit = re.search(pat, found.stdout or "")
+            return f"another test box run is active ({hit.group(0) if hit else pat})"
     return None
 
 
@@ -574,8 +590,12 @@ def run(
 
     if args.dry_run:
         out(f"budget {budget} core(s); stages longest first (work = core-seconds last run):")
+        # The same first allocation the real loop makes: an alone stage waits for
+        # the others, so it takes no core and no share yet.
+        others = any(not q.alone for q in queued)
+        now_ok = [q for q in queued if not (q.alone and others)]
         first = {st.name: (c, kind) for st, c, kind in plan(
-            queued, work, budget, budget, sum(work[q.name] for q in queued), False, False)}
+            now_ok, work, budget, budget, sum(work[q.name] for q in now_ok), False, False)}
         for s in queued:
             c, kind = first.get(s.name, (0, ""))
             out(f"  {s.name:<10} work {work[s.name]:7.0f}  max {s.max_cores}  "
@@ -594,6 +614,7 @@ def run(
     procs: dict[str, subprocess.Popen] = {}
     running: dict[str, Result] = {}
     free = budget
+    stage_alone = {st.name: st.alone for st in stages}
     #: (time, cores held by the non-tiny running stages) after every change.
     timeline: list[tuple[float, int]] = []
 
@@ -611,9 +632,9 @@ def run(
         if res.grant is not None:
             write_grant(res.grant, cores)
 
-    def remaining_work() -> float:
+    def remaining_work(skip_alone: bool = False) -> float:
         now = clock()
-        left = sum(work[s.name] for s in queued)
+        left = sum(work[s.name] for s in queued if not (skip_alone and s.alone))
         for name, r in running.items():
             used = r.core_s + (now - r.since) * r.cores_now
             left += max(0.0, work[name] - used)
@@ -629,9 +650,24 @@ def run(
     try:
         while queued or running:
             slot_taken = any(r.kind == "slot" for r in running.values())
-            for s, c, kind in plan(queued, work, free, budget, remaining_work(), bool(running),
-                                   slot_taken):
+            # A stage that runs alone waits for every other stage to finish.
+            others_left = bool(running) or any(not q.alone for q in queued)
+            startable = [q for q in queued if not (q.alone and others_left)]
+            if any(stage_alone.get(n) for n in running):
+                startable = []
+            # A waiting alone stage cannot take a share yet, so its work does not
+            # shrink the others'.
+            for s, c, kind in plan(startable, work, free, budget, remaining_work(others_left),
+                                   bool(running), slot_taken):
                 queued.remove(s)
+                # A stage held back to run alone waited for the others: what made
+                # it available may be gone (another box check began meanwhile, and
+                # the box stage's up.sh --fresh would reset it under that run).
+                why = s.unavailable() if s.alone else None
+                if why:
+                    results[s.name] = Result(s.name, 0, 0.0, 0.0, "skip", why)
+                    out(f"[{_fmt_s(clock()):>8}] skip  {s.name}: {why}")
+                    continue
                 free -= c if kind == "budget" else 0
                 now = clock()
                 res = Result(s.name, c, now, cores_now=c, since=now, peak=c, kind=kind)
@@ -645,8 +681,10 @@ def run(
                 threading.Thread(target=_run_stage, args=(s, c, logs, res, done, procs),
                                  daemon=True).start()
             # Nothing left to start: cores that would sit idle go to running stages
-            # that can take more workers mid-run (largest remaining work first).
-            if not queued and free > 0:
+            # that can take more workers mid-run (largest remaining work first). An
+            # alone stage still queued starts only once these have finished, so it
+            # does not hold them back.
+            if free > 0 and all(q.alone for q in queued):
                 stage_of = {st.name: st for st in stages}
                 now = clock()
                 for name in sorted(running, key=lambda n: -work[n]):
@@ -661,6 +699,8 @@ def run(
                         free -= more
                         regrant(r, r.cores_now + more, now)
                         out(f"[{_fmt_s(now):>8}] grow  {name} to {r.cores_now} cores")
+            if not running:   # the last stage left was skipped: nothing to wait for
+                continue
             mark()
             res = done.get()
             res.end_s = clock()

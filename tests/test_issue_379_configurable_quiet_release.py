@@ -104,7 +104,9 @@ def test_outage_gap_does_not_satisfy_quiet_release():
     # real quiet the cycle is still waiting (pre-fix, the gap-inclusive tally would
     # have crossed 600 s and finalized).
     assert det._time_below_threshold_gapfree < 600.0
-    assert det._time_below_threshold >= 600.0  # the plain tally did absorb the gap
+    # Since #508 the plain tally does not absorb it either: the gap followed a
+    # 120 W reading, so it is quiet for one gate cadence at most.
+    assert det._time_below_threshold < 600.0
     assert det.state != STATE_FINISHED
 
 

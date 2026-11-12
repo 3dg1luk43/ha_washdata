@@ -56,6 +56,7 @@
       "timer_pause_action_title": "Halda lotu áfram",
       "timer_pause_body_suffix": "Lotan er í bið. Opnaðu WashData-spjaldið til að halda henni áfram.",
       "unload_dismiss_action_title": "Hætta að minna",
+      "review_action_title": "Það var {program}",
       "notify_live_waiting_message": "{device}: Ekkert snið hefur enn verið greint.",
       "vs_typical_longer": "{pct}% lengri en venjulega",
       "vs_typical_shorter": "{pct}% styttri en venjulega",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Merkja viðhald sem lokið",
+      "description": "Skráðu viðhaldsverk sem lokið núna, eins og hnappurinn Búið í spjaldinu gerir.",
+      "fields": {
+        "device_id": {
+          "name": "Tæki",
+          "description": "WashData tækið sem verkið tilheyrir."
+        },
+        "task_id": {
+          "name": "Auðkenni verks",
+          "description": "Auðkenni verksins eins og það birtist í eigindinni due_task_ids á skynjaranum Viðhald tímabært (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other, eða custom_ auðkenni sérsniðins verks)."
+        },
+        "notes": {
+          "name": "Skýringar",
+          "description": "Valfrjáls athugasemd sem vistast með skráningunni."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Eyða lotu",
+      "description": "Eyddu einni vistaðri lotu. Kerfi hennar er endurbyggt án hennar, eða fjarlægt ef innflutt lota var síðasta lota þess. Ekki er hægt að afturkalla þetta.",
+      "fields": {
+        "device_id": {
+          "name": "Tæki",
+          "description": "WashData tækið."
+        },
+        "cycle_id": {
+          "name": "Auðkenni lotu",
+          "description": "Auðkenni lotunnar sem á að eyða, t.d. breytan cycle_id úr kveikjunni Lotu lokið (tóm þegar sú keyrsla vistaði enga lotu, svo athugaðu hana fyrst)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Kveikja á ML þjálfun",
       "description": "Endurþjálfaðu ML-líkönin á tækinu handvirkt út frá merktum lotum þessa tækis (tilraunaeiginleiki).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "Heildarorka"
+      },
+      "last_cycle_duration": {
+        "name": "Lengd síðustu lotu"
+      },
+      "last_cycle_energy": {
+        "name": "Orka síðustu lotu"
+      },
+      "last_cycle_cost": {
+        "name": "Kostnaður síðustu lotu"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "Ekki tókst að úthluta prófíl: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Lota fannst ekki."
+    },
+    "maintenance_task_not_found": {
+      "message": "Ekkert viðhaldsverk með auðkennið {task_id} á þessu tæki."
+    },
+    "task_id_required": {
+      "message": "Gilt task_id er krafist."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "Lota haldið áfram",
       "still_tumbling": "Tromlan snýst enn eftir lotu",
       "unloaded": "Losað",
-      "state_changed": "Staða breytt",
+      "state_changed": "Staða tækis breytt",
       "maintenance_due": "Viðhald tímabært",
       "milestone_reached": "Lotumark náð",
       "pump_stuck": "Dæla föst"
@@ -665,7 +716,7 @@
       "description": "Kveikir þegar þvotturinn er tekinn út eftir lotu: hurðin var opnuð eða losun staðfest."
     },
     "state_changed": {
-      "name": "Staða breytt",
+      "name": "Staða tækis breytt",
       "description": "Kveikir þegar WashData-staðan breytist.",
       "fields": {
         "from": {

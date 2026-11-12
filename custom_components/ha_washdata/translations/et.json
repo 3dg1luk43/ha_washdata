@@ -56,6 +56,7 @@
       "timer_pause_action_title": "Tsükli jätkamine",
       "timer_pause_body_suffix": "Tsükkel on peatatud. Jätkamiseks avage WashData paneel.",
       "unload_dismiss_action_title": "Lõpeta meeldetuletused",
+      "review_action_title": "See oli {program}",
       "notify_live_waiting_message": "{device}: Ühtki profiili pole veel tuvastatud.",
       "vs_typical_longer": "{pct}% tavapärasest pikem",
       "vs_typical_shorter": "{pct}% tavapärasest lühem",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Märgi hooldus tehtuks",
+      "description": "Märkige hooldustöö praeguse ajaga tehtuks, nagu teeb paneeli nupp „Valmis“.",
+      "fields": {
+        "device_id": {
+          "name": "Seade",
+          "description": "WashData seade, millele ülesanne kuulub."
+        },
+        "task_id": {
+          "name": "Ülesande ID",
+          "description": "Ülesande ID, nagu see on toodud anduri „Hooldus vajalik“ atribuudis due_task_ids (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other või kohandatud ülesande custom_ ID)."
+        },
+        "notes": {
+          "name": "Märkmed",
+          "description": "Valikuline märkus, mis salvestatakse koos logikirjega."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Kustuta tsükkel",
+      "description": "Kustutage üks salvestatud tsükkel. Selle programm koostatakse ilma selleta uuesti või eemaldatakse, kui see oli programmi viimane tsükkel ja oli imporditud. Seda ei saa tagasi võtta.",
+      "fields": {
+        "device_id": {
+          "name": "Seade",
+          "description": "WashData seade."
+        },
+        "cycle_id": {
+          "name": "Tsükli ID",
+          "description": "Kustutatava tsükli ID, nt päästiku „Tsükkel lõppes“ muutuja cycle_id (tühi, kui selle käivituse kohta tsüklit ei salvestatud, seega kontrollige see esmalt üle)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Käivita ML koolitus",
       "description": "Treeni käsitsi seadme ML-mudeleid uuesti selle seadme enda märgistatud tsüklite põhjal (eksperimentaalne).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "Energia kokku"
+      },
+      "last_cycle_duration": {
+        "name": "Viimase tsükli kestus"
+      },
+      "last_cycle_energy": {
+        "name": "Viimase tsükli energia"
+      },
+      "last_cycle_cost": {
+        "name": "Viimase tsükli maksumus"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "Profiili määramine ebaõnnestus: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Tsüklit ei leitud."
+    },
+    "maintenance_task_not_found": {
+      "message": "Selles seadmes pole hooldustööd ID-ga {task_id}."
+    },
+    "task_id_required": {
+      "message": "Nõutav on kehtiv task_id."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "Tsükkel jätkus",
       "still_tumbling": "Trummel pöörleb veel pärast tsüklit",
       "unloaded": "Mahalaadimine tehtud",
-      "state_changed": "Olek muutus",
+      "state_changed": "Seadme olek muutus",
       "maintenance_due": "Hooldus on vajalik",
       "milestone_reached": "Tsükli verstapost saavutati",
       "pump_stuck": "Pump on ummistunud"
@@ -665,7 +716,7 @@
       "description": "Käivitub, kui koorma eemaldatakse pärast tsüklit: uks avati või mahalaadimine kinnitati."
     },
     "state_changed": {
-      "name": "Olek muutus",
+      "name": "Seadme olek muutus",
       "description": "Käivitub, kui WashData olek muutub.",
       "fields": {
         "from": {

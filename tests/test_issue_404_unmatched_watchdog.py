@@ -92,6 +92,9 @@ def _make_manager(hass: MagicMock, options: dict) -> WashDataManager:
         # Explicit False so the guard's `not _verified_pause` gate is reachable
         # (a bare MagicMock attribute would be truthy and short-circuit it).
         mock_cd._verified_pause = False
+        # A stuck cycle: the detector's own end wait has run out (#502 defers the
+        # guard only while it has not).
+        mock_cd.ordinary_end_pending.return_value = False
 
         mgr = WashDataManager(hass, entry)
         mgr.detector = mock_cd
@@ -220,3 +223,18 @@ async def test_washing_machine_idle_past_new_ceiling_is_force_ended() -> None:
     await mgr._watchdog_check_stuck_cycle(NOW)
 
     mgr.detector.force_end.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_a_user_pause_does_not_count_toward_the_unmatched_ceiling() -> None:
+    """Item 620 follow-up: the guard read the wall clock, so a long user pause put
+    the resumed cycle past the ceiling and it was force-ended on the next idle
+    tick. Net of the pause (as the pump and zombie guards above it) it is not."""
+    hass = _make_hass()
+    mgr = _make_manager(hass, {CONF_DEVICE_TYPE: "washer_dryer"})
+    _prime_cycle(mgr, elapsed=26100, power=0.0)      # 7 h 15 min on the wall clock
+    mgr._total_user_paused_seconds = 3 * 3600.0      # of which 3 h paused
+
+    await mgr._watchdog_check_stuck_cycle(NOW)
+
+    mgr.detector.force_end.assert_not_called()

@@ -169,6 +169,24 @@ def test_dry_run_runs_nothing(tmp_path, monkeypatch):
     assert any("absent" in ln and "skip" in ln for ln in lines)
 
 
+def test_dry_run_holds_an_alone_stage_back(tmp_path, monkeypatch):
+    """The box starts last in a real run, so the dry run must not show it starting."""
+    stages = [
+        verify.Stage("box", ("quick",), lambda c, logs: [_py("")], 1000, alone=True),
+        verify.Stage("a", ("quick",), lambda c, logs: [_py("")], 100, max_cores=4),
+        verify.Stage("b", ("quick",), lambda c, logs: [_py("")], 100, max_cores=4),
+    ]
+    monkeypatch.setattr(verify, "_stages", lambda: stages)
+    args = verify.parse_args(["--dry-run", "--cores", "4", "--timings", "",
+                              "--logs", str(tmp_path / "logs")])
+    lines: list[str] = []
+    assert verify.run(args, verify.select(args), out=lines.append) == 0
+    row = {ln.split()[0]: ln for ln in lines if ln.startswith("  ")}
+    assert "queued" in row["box"] and "starts with" not in row["box"], lines
+    # Its 1000 core-seconds do not shrink the others' share either.
+    assert "starts with 2 core(s)" in row["a"] and "starts with 2 core(s)" in row["b"], lines
+
+
 def test_box_hint_names_only_files_a_real_home_assistant_judges():
     files = [
         "custom_components/ha_washdata/manager.py",
@@ -226,6 +244,79 @@ def test_an_elastic_stage_gets_the_cores_nothing_else_can_use(tmp_path, monkeypa
     assert any("grow  grow to 2 cores" in ln for ln in lines), lines
     row = next(ln for ln in lines if ln.startswith("grow ") and " ok " in ln)
     assert row.split()[2] == "1>2"
+
+
+def test_an_elastic_stage_still_grows_while_an_alone_stage_waits(tmp_path, monkeypatch):
+    """`full --box`: the box stays queued until the rest finish; it must not stop the
+    elastic stage growing into the cores the others free."""
+    def waits_for_two(c, logs):
+        grant = logs / "grow.cores"
+        return [_py(
+            "import pathlib, sys, time\n"
+            f"p = pathlib.Path({str(grant)!r})\n"
+            "end = time.monotonic() + 20\n"
+            "while time.monotonic() < end:\n"
+            "    if p.read_text().strip() == '2':\n"
+            "        sys.exit(0)\n"
+            "    time.sleep(0.05)\n"
+            "sys.exit(1)\n"
+        )]
+
+    stages = [
+        verify.Stage("grow", ("quick",), waits_for_two, 100, max_cores=2, elastic=True),
+        verify.Stage("short", ("quick",), lambda c, logs: [_py("")], 50),
+        verify.Stage("box", ("quick",), lambda c, logs: [_py("")], 1000, alone=True),
+    ]
+    monkeypatch.setattr(verify, "_stages", lambda: stages)
+    monkeypatch.setattr(verify, "changed_files", lambda: [])
+    args = verify.parse_args(["--cores", "2", "--timings", "", "--logs", str(tmp_path)])
+    lines: list[str] = []
+    assert verify.run(args, verify.select(args), out=lines.append) == 0
+    assert any("grow  grow to 2 cores" in ln for ln in lines), lines
+
+
+
+def test_an_alone_stage_starts_after_every_other_stage(tmp_path, monkeypatch):
+    """The box waits for the rest and runs on an idle host (register item 589)."""
+    stages = [
+        verify.Stage("box", ("quick",), lambda c, logs: [_py("")], 1000, alone=True),
+        verify.Stage("a", ("quick",), lambda c, logs: [_py("import time; time.sleep(0.3)")], 50),
+        verify.Stage("b", ("quick",), lambda c, logs: [_py("import time; time.sleep(0.3)")], 40),
+    ]
+    monkeypatch.setattr(verify, "_stages", lambda: stages)
+    monkeypatch.setattr(verify, "changed_files", lambda: [])
+    args = verify.parse_args(["--cores", "4", "--timings", "", "--logs", str(tmp_path)])
+    lines: list[str] = []
+    assert verify.run(args, verify.select(args), out=lines.append) == 0
+    events = [ln.split("] ", 1)[1].split()[:2] for ln in lines if "] start " in ln or "] ok " in ln]
+    box_start = events.index(["start", "box"])
+    assert ["ok", "a"] in events[:box_start] and ["ok", "b"] in events[:box_start], events
+
+
+def test_an_alone_stage_is_rechecked_when_it_finally_starts(tmp_path, monkeypatch):
+    """The box stage waits for every other stage; a box check begun meanwhile must
+    make it skip, not run up.sh --fresh under that check."""
+    state = {"busy": None}
+    stages = [
+        verify.Stage("box", ("quick",), lambda c, logs: [_py("raise SystemExit(9)")], 1000,
+                     alone=True, unavailable=lambda: state["busy"]),
+        verify.Stage("a", ("quick",), lambda c, logs: [_py("import time; time.sleep(0.3)")], 50),
+    ]
+    monkeypatch.setattr(verify, "_stages", lambda: stages)
+    monkeypatch.setattr(verify, "changed_files", lambda: [])
+    args = verify.parse_args(["--cores", "2", "--timings", "", "--logs", str(tmp_path)])
+    selected = verify.select(args)
+    state["busy"] = None
+    lines: list[str] = []
+
+    def _out(line: str) -> None:
+        lines.append(line)
+        if "] start a" in line:
+            state["busy"] = "another test box run is active"
+
+    assert verify.run(args, selected, out=_out) == 0
+    assert any("skip  box" in ln for ln in lines), lines
+    assert not any("] start box" in ln for ln in lines), lines
 
 
 @pytest.mark.parametrize(("dist", "argv", "want"), [
@@ -390,3 +481,19 @@ def test_generated_installs_the_panel_build_deps_on_a_fresh_checkout(tmp_path, m
     assert fresh[0].argv[:2] == ["npm", "ci"]
     (tmp_path / "devtools" / "node_modules").mkdir(parents=True)
     assert stage.build(1, tmp_path)[0].argv[:2] == ["node", "devtools/build_panel.mjs"]
+
+
+def test_every_box_script_counts_as_a_busy_box():
+    """`full --box` must not `up.sh --fresh` under a running box check: every
+    script in devtools/testbox that drives the container matches a busy pattern."""
+    import re
+
+    scripts = sorted(p.name for p in (REPO / "devtools" / "testbox").glob("*.sh")
+                     if p.name.startswith("check_") or p.name == "smoke.sh")
+    assert "check_review_actions.sh" in scripts
+    for name in scripts:
+        cmd = f"bash ./{name} --reuse"
+        assert any(re.search(p, cmd) for p in verify._BOX_SCRIPT_PATTERNS), name
+    # The bracket keeps pgrep from matching its own command line.
+    for pat in verify._BOX_SCRIPT_PATTERNS:
+        assert not re.search(pat, f"pgrep -af {pat}")

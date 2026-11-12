@@ -90,7 +90,9 @@ def _cfg(entry_data: dict, options: dict, device_type: str, min_off_gap: int | N
 
 def _replay(cfg: Any, options: dict, points: list[tuple[float, float]]) -> list[dict]:
     """Feed (offset, power) points through the unmatched Playground replay; return
-    the cycles it ended (the real detector, live keepalives, the synthetic tail)."""
+    the cycles it ended that the manager would store (the real detector, live
+    keepalives and ghost suppressor, the synthetic tail; ghosts and dishwasher
+    pump-outs dropped, register item 568)."""
     from custom_components.ha_washdata import playground  # noqa: PLC0415
 
     cycle = {
@@ -105,7 +107,7 @@ def _replay(cfg: Any, options: dict, points: list[tuple[float, float]]) -> list[
         return []
     sim.step(0, sim.n_readings)
     sim.run_tail()
-    return list(sim.captured)
+    return list(sim.kept)
 
 
 def _active_span(points: list[tuple[float, float]], stop: float) -> float:

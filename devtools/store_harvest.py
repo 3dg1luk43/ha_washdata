@@ -125,6 +125,14 @@ class Counter:
             )
 
 
+def _shown(path: Path) -> str:
+    """``path`` relative to the repo when it is inside it (``--out`` may be anywhere)."""
+    try:
+        return str(path.relative_to(REPO))
+    except ValueError:
+        return str(path)
+
+
 def _local_device_type(store_type: Any) -> str:
     """Store appliance type -> the integration's ``device_type``."""
     text = str(store_type or "").strip()
@@ -352,7 +360,7 @@ async def _harvest(args: argparse.Namespace) -> int:
                     print(
                         f"  [{i}/{len(devices)}] {label}: "
                         f"{doc['_counts']['reference_cycles']} cycles -> "
-                        f"{path.relative_to(REPO)}"
+                        f"{_shown(path)}"
                     )
                 await asyncio.sleep(DEVICE_DELAY_S)
         except ReadBudget as stop:
@@ -370,7 +378,7 @@ async def _harvest(args: argparse.Namespace) -> int:
         f"documents read: {budget.reads} / {budget.limit}"
     )
     if not args.dry_run:
-        print(f"manifest: {manifest_path.relative_to(REPO)}")
+        print(f"manifest: {_shown(manifest_path)}")
     return 1 if stopped_early else 0
 
 

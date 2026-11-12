@@ -266,7 +266,11 @@
     "bp_details": "Details",
     "bp_copy_yaml": "YAML kopiëren",
     "bp_hide_yaml": "YAML verbergen",
-    "bp_show_yaml": "YAML tonen"
+    "bp_show_yaml": "YAML tonen",
+    "review_something_else": "Iets anders…",
+    "review_not_sure": "Niet zeker",
+    "review_prev": "Vorige cyclus",
+    "review_next": "Volgende cyclus"
   },
   "note": {
     "off_delay": {
@@ -583,6 +587,7 @@
     "pg_alert_overrun": "Te lang",
     "pg_alert_underrun": "Te kort",
     "pg_alert_did_not_finish": "Niet voltooid",
+    "pg_alert_discarded": "Verworpen als spookcyclus of wegpompen",
     "pg_alert_false_end": "Opgesplitst in meerdere cycli",
     "pg_alert_unmatched": "Geen match",
     "pg_alert_ambiguous": "Dubbelzinnige match",
@@ -714,7 +719,10 @@
     "bp_needs": "Vereist",
     "bp_needs_version": "WashData {version} of nieuwer",
     "bp_author": "Auteur",
-    "bp_required": "verplicht"
+    "bp_required": "verplicht",
+    "pg_runs_as": "rekent met {value}",
+    "review_this_cycle": "Deze cyclus",
+    "review_usual": "Gebruikelijk voor {name}"
   },
   "log": {
     "all_levels": "Alle niveaus",
@@ -1061,7 +1069,7 @@
     "hist_scan_failed": "Zoeken mislukt.",
     "hist_scan_expired": "Die zoekopdracht is niet meer beschikbaar. Zoek opnieuw.",
     "hist_import_failed": "Importeren mislukt.",
-    "imported_history_readonly": "Gevonden in geïmporteerde vermogensgeschiedenis. Helpt bij de herkenning, maar telt niet mee in uw statistieken en kan niet worden bijgesneden of gesplitst. Label het om het programma te benoemen.",
+    "imported_history_note": "Gevonden in geïmporteerde vermogensgeschiedenis. Helpt bij de herkenning, maar telt niet mee in uw statistieken en kan niet worden gesplitst. Label het om het programma te benoemen.",
     "odometer_intro": "Dit totaal gaat alleen omhoog. Een cyclus verwijderen verlaagt het niet, zodat onderhoudsherinneringen kloppen.",
     "odometer_correct_hint": "Stel dit in als WashData een run heeft geteld die nooit heeft plaatsgevonden, of als het apparaat al cycli draaide voordat WashData werd geïnstalleerd.",
     "no_reminders_set": "Er zijn nog geen serviceherinneringen ingesteld.",
@@ -1111,10 +1119,18 @@
     "bp_none_yet": "Nog geen sjablonen voor dit apparaattype. Deel het eerste.",
     "bp_unreachable": "Deze wordt van GitHub gedownload. Controleer of Home Assistant het internet kan bereiken en probeer het daarna opnieuw.",
     "bp_library_intro": "Kant-en-klare automatiseringen die WashData-gebruikers op GitHub delen, gecontroleerd voordat ze worden opgenomen. Alleen beschikbaar als onlinefuncties aan staan.",
-    "bp_needs_version": "Vereist WashData {version} of nieuwer."
+    "bp_needs_version": "Vereist WashData {version} of nieuwer.",
+    "bp_review_check": "Controleer dit voordat u opslaat: Home Assistant voert het precies zo uit als het er staat.",
+    "review_q_title": "Welk programma was dit?",
+    "review_q_intro": "WashData twijfelt over deze cycli. Van uw antwoord leert het.",
+    "review_q_started": "Gestart: {when}",
+    "review_q_more": "Nog {count} te beoordelen",
+    "review_q_more_one": "Nog {count} te beoordelen",
+    "review_q_more_other": "Nog {count} te beoordelen",
+    "review_which_program": "Welk programma was het?"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Vaatwasser: stille seconden na de verwachte duur voordat de wachttijd op het wegpompen aan het einde van de cyclus wordt vrijgegeven",
+    "dishwasher_end_spike_quiet_release": "Vaatwasser: seconden onder de Stopdrempel sinds de laatste activiteit die nodig zijn om na de verwachte duur het wachten op het laatste wegpompen te beëindigen",
     "smart_termination_duration_ratio": "Deel van de gemiddelde programmaduur dat een cyclus moet halen voordat de slimme beëindiging hem vroeg mag afsluiten; verlaag als de looptijden variëren",
     "completion_min_seconds": "Kortste run die als een echte cyclus telt",
     "interrupted_min_seconds": "Korte cycli gemarkeerd als onderbroken",
@@ -1223,7 +1239,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Vrijgave na stille droogfase",
-      "doc": "Na de verwachte duur: hoe lang de vaatwasser onder de Stopdrempel moet blijven voordat WashData niet meer op het laatste wegpompen wacht. Verhoog als een laat wegpompen na lang drogen wordt gemist. Het wachten duurt nooit langer dan 30 minuten."
+      "doc": "Na de verwachte duur wacht WashData niet meer op het laatste wegpompen zodra de vaatwasser sinds zijn laatste activiteit zo lang onder de Stopdrempel is gebleven, hooguit 30 minuten (en, zodra het programma 3 opgenomen cycli heeft, minstens zijn langste opgenomen droogpauze). Verhoog als een laat wegpompen na lang drogen wordt gemist."
     },
     "anti_crease_finalize_ratio": {
       "label": "Verhouding afsluiten anti-kreuknaloop",
@@ -1370,7 +1386,7 @@
       "label": "Meldingspictogram"
     },
     "notify_live_chronometer": {
-      "doc": "Android: voegt een afteltimer tot het verwachte einde toe naast de meldingstekst. Gebruik {finish_time} in het Bijna klaar-bericht om de eindtijd te tonen in plaats van een tweede afteltimer.",
+      "doc": "Android: voegt naast de meldingstekst een afteltimer tot het verwachte einde toe. Gebruik {finish_time} in het Bericht voor live-updates om de eindtijd te tonen in plaats van een tweede afteltimer.",
       "label": "Live chronometer gebruiken"
     },
     "notify_live_interval_seconds": {
@@ -1395,11 +1411,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Tekst van elke live voortgangsupdate. Sjabloonvariabelen: {device}, {program}, {minutes} (resterende minuten), {finish_time} (geschatte eindtijd, bijv. 14:30). Bij elke andere variabele wordt de standaardtekst gebruikt.",
-      "label": "Bijna klaar-bericht"
+      "label": "Bericht voor live-updates"
     },
     "notify_reminder_message": {
       "doc": "Tekst van de eenmalige Pre-eindalert. Sjabloonvariabelen: {device}, {program}, {minutes} (de instelling Pre-eindalert). Bij elke andere variabele wordt de standaardtekst gebruikt.",
-      "label": "Herinneringsbericht"
+      "label": "Bericht voor Pre-eindalert"
     },
     "notify_start_message": {
       "doc": "Tekst die wordt verstuurd als een cyclus start. Sjabloonvariabelen: {device}, {program}. Bij elke andere variabele wordt de standaardtekst gebruikt.",
@@ -1690,6 +1706,8 @@
     "preparing": "Voorbereiden…",
     "unlabelling": "Label verwijderen…",
     "working": "Bezig…",
+    "torn_pick": "{a} of {b}?",
+    "torn_tip": "WashData kan deze twee nog niet van elkaar onderscheiden, dus kies het programma dat draait om deze cyclus daarmee te labelen (Automatische detectie maakt de keuze ongedaan).",
     "match_uncertain": "Onzeker: {top} of {runner}",
     "match_uncertain_single": "Onzeker: misschien {top}",
     "match_sure": "~{pct}% zeker",
@@ -1974,7 +1992,8 @@
     "bp_automation_created": "Automatisering aangemaakt met standaardinstellingen; wordt geopend",
     "copied": "Gekopieerd",
     "copy_failed": "Kopiëren mislukt. Selecteer de tekst en kopieer het handmatig.",
-    "automation_label_failed": "Automatisering aangemaakt, maar het WashData-label of de categorie kon niet worden toegevoegd."
+    "automation_label_failed": "Automatisering aangemaakt, maar het WashData-label of de categorie kon niet worden toegevoegd.",
+    "review_answered": "Opgeslagen: {program}"
   },
   "trend": {
     "down": "Trend naar beneden",
@@ -2241,7 +2260,7 @@
       "name": "Uitgeladen"
     },
     "state_changed": {
-      "name": "Status gewijzigd"
+      "name": "Apparaatstatus gewijzigd"
     },
     "maintenance_due": {
       "name": "Onderhoud vereist"

@@ -56,6 +56,7 @@
       "timer_pause_action_title": "Reanudar ciclo",
       "timer_pause_body_suffix": "El ciclo está en pausa. Abre el panel de WashData para reanudarlo.",
       "unload_dismiss_action_title": "Dejar de recordar",
+      "review_action_title": "Era {program}",
       "notify_live_waiting_message": "{device}: todavía no se ha reconocido ningún perfil.",
       "vs_typical_longer": "{pct}% más largo de lo habitual",
       "vs_typical_shorter": "{pct}% más corto de lo habitual",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Marcar mantenimiento como hecho",
+      "description": "Registra ahora una tarea de mantenimiento como hecha, igual que el botón Hecho del panel.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "El dispositivo WashData al que pertenece la tarea."
+        },
+        "task_id": {
+          "name": "ID de la tarea",
+          "description": "El ID de la tarea, tal como aparece en el atributo due_task_ids del sensor Mantenimiento pendiente (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other, o el ID custom_ de una tarea personalizada)."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Nota opcional guardada con la entrada del registro."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Eliminar ciclo",
+      "description": "Elimina un ciclo guardado. Su programa se reconstruye sin él, o se elimina si un ciclo importado era el último que tenía. No se puede deshacer.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "El dispositivo WashData."
+        },
+        "cycle_id": {
+          "name": "ID del ciclo",
+          "description": "El ID del ciclo a eliminar, por ejemplo la variable cycle_id del disparador Ciclo finalizado (vacía cuando esa ejecución no guardó ningún ciclo, así que compruébala primero)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Activar entrenamiento de ML",
       "description": "Reentrenar manualmente los modelos de ML del dispositivo usando los ciclos etiquetados propios de este dispositivo (experimental).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "Energía total"
+      },
+      "last_cycle_duration": {
+        "name": "Duración del último ciclo"
+      },
+      "last_cycle_energy": {
+        "name": "Energía del último ciclo"
+      },
+      "last_cycle_cost": {
+        "name": "Costo del último ciclo"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "No se pudo asignar el perfil: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Ciclo no encontrado."
+    },
+    "maintenance_task_not_found": {
+      "message": "No hay ninguna tarea de mantenimiento con el ID {task_id} en este dispositivo."
+    },
+    "task_id_required": {
+      "message": "Se requiere un task_id válido."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "Ciclo reanudado",
       "still_tumbling": "Aún girando después del ciclo",
       "unloaded": "Descargado",
-      "state_changed": "Estado cambiado",
+      "state_changed": "Estado del electrodoméstico cambiado",
       "maintenance_due": "Mantenimiento pendiente",
       "milestone_reached": "Hito de ciclos alcanzado",
       "pump_stuck": "Bomba atascada"
@@ -665,7 +716,7 @@
       "description": "Se activa cuando se saca la carga tras un ciclo: la puerta se abrió o se confirmó la descarga."
     },
     "state_changed": {
-      "name": "Estado cambiado",
+      "name": "Estado del electrodoméstico cambiado",
       "description": "Se activa cuando cambia el estado de WashData.",
       "fields": {
         "from": {

@@ -56,6 +56,7 @@
       "timer_pause_action_title": "사이클 재개",
       "timer_pause_body_suffix": "사이클이 일시 정지되었습니다. 재개하려면 WashData 패널을 여세요.",
       "unload_dismiss_action_title": "알림 중지",
+      "review_action_title": "{program} 맞음",
       "notify_live_waiting_message": "{device}: 아직 일치하는 프로필이 없습니다.",
       "vs_typical_longer": "평소보다 {pct}% 더 김",
       "vs_typical_shorter": "평소보다 {pct}% 더 짧음",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "유지보수 완료로 표시",
+      "description": "패널의 완료 버튼처럼 유지보수 작업을 지금 완료한 것으로 기록합니다.",
+      "fields": {
+        "device_id": {
+          "name": "장치",
+          "description": "작업이 속한 WashData 장치입니다."
+        },
+        "task_id": {
+          "name": "작업 ID",
+          "description": "유지보수 예정 센서의 due_task_ids 속성에 나열된 작업 ID입니다(descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other 또는 사용자 지정 작업의 custom_ ID)."
+        },
+        "notes": {
+          "name": "메모",
+          "description": "기록 항목과 함께 저장되는 선택적 메모입니다."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "사이클 삭제",
+      "description": "저장된 사이클 하나를 삭제합니다. 해당 프로그램은 이 사이클을 빼고 다시 만들어지며, 가져온 사이클이 그 프로그램의 마지막 사이클이었다면 프로그램이 삭제됩니다. 되돌릴 수 없습니다.",
+      "fields": {
+        "device_id": {
+          "name": "장치",
+          "description": "WashData 장치입니다."
+        },
+        "cycle_id": {
+          "name": "사이클 ID",
+          "description": "삭제할 사이클의 ID입니다(예: 사이클 종료됨 트리거의 cycle_id 변수). 해당 실행에서 저장된 사이클이 없으면 이 변수는 비어 있으므로 먼저 확인하세요."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "ML 훈련 시작",
       "description": "이 기기의 자체 라벨이 지정된 주기에서 기기 내 ML 모델을 수동으로 재교육합니다(실험용).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "총 에너지"
+      },
+      "last_cycle_duration": {
+        "name": "마지막 사이클 소요 시간"
+      },
+      "last_cycle_energy": {
+        "name": "마지막 사이클 에너지"
+      },
+      "last_cycle_cost": {
+        "name": "마지막 사이클 비용"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "프로필을 할당할 수 없습니다: {error}"
+    },
+    "cycle_not_found": {
+      "message": "사이클을 찾을 수 없습니다."
+    },
+    "maintenance_task_not_found": {
+      "message": "이 장치에 ID가 {task_id}인 유지보수 작업이 없습니다."
+    },
+    "task_id_required": {
+      "message": "유효한 task_id가 필요합니다."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "사이클이 재개됨",
       "still_tumbling": "사이클 후에도 계속 회전 중",
       "unloaded": "꺼냄 완료",
-      "state_changed": "상태가 변경됨",
+      "state_changed": "가전제품 상태가 변경됨",
       "maintenance_due": "유지보수 필요",
       "milestone_reached": "사이클 이정표에 도달함",
       "pump_stuck": "펌프가 막힘"
@@ -665,7 +716,7 @@
       "description": "사이클 후 세탁물을 꺼낼 때 트리거됩니다. 문이 열렸거나 꺼내기가 확인된 경우."
     },
     "state_changed": {
-      "name": "상태가 변경됨",
+      "name": "가전제품 상태가 변경됨",
       "description": "WashData 상태가 변경될 때 트리거됩니다.",
       "fields": {
         "from": {

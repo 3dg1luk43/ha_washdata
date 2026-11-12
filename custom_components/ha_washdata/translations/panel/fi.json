@@ -266,7 +266,11 @@
     "bp_details": "Tiedot",
     "bp_copy_yaml": "Kopioi YAML",
     "bp_hide_yaml": "Piilota YAML",
-    "bp_show_yaml": "Näytä YAML"
+    "bp_show_yaml": "Näytä YAML",
+    "review_something_else": "Jokin muu…",
+    "review_not_sure": "En ole varma",
+    "review_prev": "Edellinen sykli",
+    "review_next": "Seuraava sykli"
   },
   "note": {
     "off_delay": {
@@ -578,6 +582,7 @@
     "pg_alert_overrun": "Ylitys",
     "pg_alert_underrun": "Alitus",
     "pg_alert_did_not_finish": "Ei valmistunut",
+    "pg_alert_discarded": "Hylätty haamujaksona tai vedenpoistona",
     "pg_alert_false_end": "Jakautui useaan sykliin",
     "pg_alert_unmatched": "Ei osumaa",
     "pg_alert_ambiguous": "Epäselvä osuma",
@@ -714,7 +719,10 @@
     "bp_needs": "Vaatii",
     "bp_needs_version": "WashData {version} tai uudempi",
     "bp_author": "Tekijä",
-    "bp_required": "pakollinen"
+    "bp_required": "pakollinen",
+    "pg_runs_as": "ajetaan arvolla {value}",
+    "review_this_cycle": "Tämä sykli",
+    "review_usual": "{name} tavallisesti"
   },
   "log": {
     "all_levels": "Kaikki tasot",
@@ -1057,7 +1065,7 @@
     "hist_scan_failed": "Läpikäynti epäonnistui.",
     "hist_scan_expired": "Tämä läpikäynti ei ole enää saatavilla. Tee läpikäynti uudelleen.",
     "hist_import_failed": "Tuonti epäonnistui.",
-    "imported_history_readonly": "Löydetty tuodusta tehohistoriasta. Auttaa täsmäytyksessä, mutta ei näy tilastoissasi, eikä sitä voi rajata tai jakaa. Nimeä ohjelma Merkitse-toiminnolla.",
+    "imported_history_note": "Löydetty tuodusta tehohistoriasta. Auttaa täsmäytyksessä, mutta ei näy tilastoissasi, eikä sitä voi jakaa. Nimeä ohjelma Merkitse-toiminnolla.",
     "odometer_intro": "Tämä kokonaismäärä vain kasvaa. Syklin poistaminen ei pienennä sitä, joten huoltomuistutukset pysyvät oikeina.",
     "odometer_correct_hint": "Aseta tämä, jos WashData laski ajon, jota ei tapahtunut, tai laitteella ajettiin syklejä ennen WashDatan asennusta.",
     "no_reminders_set": "Huoltomuistutuksia ei ole vielä asetettu.",
@@ -1111,10 +1119,18 @@
     "bp_none_yet": "Tälle laitetyypille ei ole vielä malleja. Jaa ensimmäinen.",
     "bp_unreachable": "Se ladataan GitHubista. Tarkista, että Home Assistant pääsee internetiin, ja yritä uudelleen.",
     "bp_library_intro": "Valmiita automaatioita, joita WashData-käyttäjät jakavat GitHubissa ja jotka tarkistetaan ennen listalle pääsyä. Käytettävissä vain, kun verkkotoiminnot ovat käytössä.",
-    "bp_needs_version": "Vaatii WashData {version} tai uudemman."
+    "bp_needs_version": "Vaatii WashData {version} tai uudemman.",
+    "bp_review_check": "Tarkista tämä ennen tallentamista: Home Assistant suorittaa sen täsmälleen niin kuin se on kirjoitettu.",
+    "review_q_title": "Mikä ohjelma tämä oli?",
+    "review_q_intro": "WashData ei ole varma näistä sykleistä. Vastauksesi opettaa sitä.",
+    "review_q_started": "Alkoi {when}",
+    "review_q_more": "Vielä {count} tarkistettavana",
+    "review_q_more_one": "Vielä {count} tarkistettavana",
+    "review_q_more_other": "Vielä {count} tarkistettavana",
+    "review_which_program": "Mikä ohjelma se oli?"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Astianpesukone: hiljaiset sekunnit odotetun keston jälkeen ennen kuin syklin lopun vedenpoiston odotus vapautetaan",
+    "dishwasher_end_spike_quiet_release": "Astianpesukone: sekunnit Pysäytyskynnyksen alapuolella viimeisestä toiminnasta, joita tarvitaan lopullisen vedenpoiston odotuksen päättämiseen odotetun keston jälkeen",
     "smart_termination_duration_ratio": "Osuus ohjelman keskimääräisestä kestosta, joka syklin on saavutettava ennen kuin älykäs lopetus voi päättää sen aikaisin; laske sitä, jos ajoajat vaihtelevat",
     "anti_wrinkle_enabled": "Sulauta päävaiheen jälkeiset rumpupulssit sen sijaan, että lukisit ne uusina sykleinä",
     "anti_wrinkle_idle_timeout": "Kahden rumpupulssin välillä sallittu hiljainen aika ennen kuin ryppyjenesto päättyy",
@@ -1223,7 +1239,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Passiivikuivauksen hiljainen vapautus",
-      "doc": "Kun odotettu kesto on ylitetty: kuinka kauan astianpesukoneen on pysyttävä Pysäytyskynnyksen alapuolella, ennen kuin WashData lakkaa odottamasta lopullista vedenpoistoa. Nosta arvoa, jos pitkän kuivauksen jälkeinen myöhäinen vedenpoisto jää huomaamatta. Odotus ei koskaan ylitä 30 minuuttia."
+      "doc": "Odotetun keston jälkeen WashData lakkaa odottamasta lopullista vedenpoistoa, kun astianpesukone on pysynyt Pysäytyskynnyksen alapuolella näin kauan viimeisestä toiminnastaan, enintään 30 minuuttia (ja kun ohjelmalla on 3 tallennettua jaksoa, vähintään sen pisimmän tallennetun kuivaustauon ajan). Nosta arvoa, jos pitkän kuivauksen jälkeinen myöhäinen vedenpoisto jää huomaamatta."
     },
     "anti_crease_finalize_ratio": {
       "label": "Ryppyjeneston lopetussuhde",
@@ -1370,7 +1386,7 @@
       "label": "Ilmoituksen kuvake"
     },
     "notify_live_chronometer": {
-      "doc": "Android: lisää ilmoitustekstin viereen laskevan ajastimen arvioituun valmistumiseen. Käytä {finish_time} Ennen valmistumista -viestissä, jos haluat näyttää valmistumisajan toisen laskevan ajastimen sijaan.",
+      "doc": "Android: lisää ilmoitustekstin viereen laskevan ajastimen arvioituun valmistumiseen. Käytä asetuksessa Live-päivityksen viesti muuttujaa {finish_time}, jos haluat näyttää valmistumisajan toisen laskevan ajastimen sijaan.",
       "label": "Käytä suoraa kronometriä"
     },
     "notify_live_interval_seconds": {
@@ -1395,11 +1411,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Jokaisen live-edistymispäivityksen teksti. Mallin muuttujat: {device}, {program}, {minutes} (jäljellä olevat minuutit), {finish_time} (arvioitu valmistumisaika, esim. 14:30). Muulla muuttujalla käytetään oletustekstiä.",
-      "label": "Ennen valmistumista -viesti"
+      "label": "Live-päivityksen viesti"
     },
     "notify_reminder_message": {
       "doc": "Kerran lähetettävän Lopetusennakkoilmoituksen teksti. Mallin muuttujat: {device}, {program}, {minutes} (Lopetusennakkoilmoitus-asetus). Muulla muuttujalla käytetään oletustekstiä.",
-      "label": "Muistutusviesti"
+      "label": "Lopetusennakkoilmoituksen viesti"
     },
     "notify_start_message": {
       "doc": "Syklin alkaessa lähetettävä teksti. Mallin muuttujat: {device}, {program}. Muulla muuttujalla käytetään oletustekstiä.",
@@ -1693,7 +1709,9 @@
     "match_uncertain": "Epävarma: {top} tai {runner}",
     "match_uncertain_single": "Epävarma: ehkä {top}",
     "match_sure": "~{pct} % varma",
-    "match_uncertain_tip": "WashData ei ole vielä päättänyt ohjelmaa. Luku kertoo, kuinka usein johtava arvaus, {top}, osui oikeaan aiemmissa sykleissä, kun se johti näin paljon. Vain tiedoksi."
+    "match_uncertain_tip": "WashData ei ole vielä päättänyt ohjelmaa. Luku kertoo, kuinka usein johtava arvaus, {top}, osui oikeaan aiemmissa sykleissä, kun se johti näin paljon. Vain tiedoksi.",
+    "torn_pick": "{a} vai {b}?",
+    "torn_tip": "WashData ei vielä osaa erottaa näitä kahta toisistaan, joten valitse käynnissä oleva ohjelma, niin tämä sykli merkitään sillä (Automaattinen tunnistus kumoaa valinnan)."
   },
   "suggestion": {
     "observed_label": "Havaittu",
@@ -1974,7 +1992,8 @@
     "bp_automation_created": "Automaatio luotu oletusasetuksilla; avataan",
     "copied": "Kopioitu",
     "copy_failed": "Kopiointi epäonnistui. Valitse teksti ja kopioi käsin.",
-    "automation_label_failed": "Automaatio luotu, mutta WashData-etikettiä tai -luokkaa ei voitu lisätä."
+    "automation_label_failed": "Automaatio luotu, mutta WashData-etikettiä tai -luokkaa ei voitu lisätä.",
+    "review_answered": "Tallennettu: {program}"
   },
   "trend": {
     "down": "Trendikäs alaspäin",
@@ -2241,7 +2260,7 @@
       "name": "Purettu"
     },
     "state_changed": {
-      "name": "Tila muuttui"
+      "name": "Laitteen tila muuttui"
     },
     "maintenance_due": {
       "name": "Huolto tarpeen"

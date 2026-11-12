@@ -56,6 +56,7 @@
       "timer_pause_action_title": "Jatka sykliä",
       "timer_pause_body_suffix": "Sykli on keskeytetty. Avaa WashData-paneeli jatkaaksesi.",
       "unload_dismiss_action_title": "Lopeta muistuttaminen",
+      "review_action_title": "Se oli {program}",
       "notify_live_waiting_message": "{device}: Yhtään profiilia ei ole vielä tunnistettu.",
       "vs_typical_longer": "{pct}% tavallista pidempi",
       "vs_typical_shorter": "{pct}% tavallista lyhyempi",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Merkitse huolto tehdyksi",
+      "description": "Kirjaa huoltotehtävä tehdyksi nyt, kuten paneelin Tehty-painike tekee.",
+      "fields": {
+        "device_id": {
+          "name": "Laite",
+          "description": "WashData-laite, johon tehtävä kuuluu."
+        },
+        "task_id": {
+          "name": "Tehtävän tunnus",
+          "description": "Tehtävän tunnus sellaisena kuin se näkyy Huolto tarpeen -anturin due_task_ids-attribuutissa (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other tai mukautetun tehtävän custom_-tunnus)."
+        },
+        "notes": {
+          "name": "Huomautukset",
+          "description": "Valinnainen huomautus, joka tallennetaan lokimerkinnän mukana."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Poista sykli",
+      "description": "Poista yksi tallennettu sykli. Sen ohjelma muodostetaan uudelleen ilman sitä, tai ohjelma poistetaan, jos sykli oli tuotu ja ohjelman viimeinen. Tätä ei voi kumota.",
+      "fields": {
+        "device_id": {
+          "name": "Laite",
+          "description": "WashData-laite."
+        },
+        "cycle_id": {
+          "name": "Syklin tunnus",
+          "description": "Poistettavan syklin tunnus, esim. Sykli päättyi -laukaisimen cycle_id-muuttuja (tyhjä, jos kyseinen ajo ei tallentanut sykliä, joten tarkista se ensin)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Käynnistä ML-koulutus",
       "description": "Kouluta laitteen ML-mallit manuaalisesti uudelleen tämän laitteen omien merkittyjen syklien perusteella (kokeellinen).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "Energia yhteensä"
+      },
+      "last_cycle_duration": {
+        "name": "Viimeisimmän syklin kesto"
+      },
+      "last_cycle_energy": {
+        "name": "Viimeisimmän syklin energia"
+      },
+      "last_cycle_cost": {
+        "name": "Viimeisimmän syklin kustannus"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "Profiilin määrittäminen epäonnistui: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Sykliä ei löydy."
+    },
+    "maintenance_task_not_found": {
+      "message": "Tällä laitteella ei ole huoltotehtävää tunnuksella {task_id}."
+    },
+    "task_id_required": {
+      "message": "Kelvollinen task_id vaaditaan."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "Sykli jatkui",
       "still_tumbling": "Rumpu pyörii yhä syklin jälkeen",
       "unloaded": "Purettu",
-      "state_changed": "Tila muuttui",
+      "state_changed": "Laitteen tila muuttui",
       "maintenance_due": "Huolto tarpeen",
       "milestone_reached": "Sykliverstaspylväs saavutettu",
       "pump_stuck": "Pumppu jumissa"
@@ -665,7 +716,7 @@
       "description": "Käynnistyy, kun pyykki otetaan ulos syklin jälkeen: ovi avattiin tai purku vahvistettiin."
     },
     "state_changed": {
-      "name": "Tila muuttui",
+      "name": "Laitteen tila muuttui",
       "description": "Käynnistyy, kun WashData tila muuttuu.",
       "fields": {
         "from": {

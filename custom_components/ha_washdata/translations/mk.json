@@ -56,6 +56,7 @@
       "timer_pause_action_title": "Продолжи со циклусот",
       "timer_pause_body_suffix": "Циклусот е паузиран. Отворете го WashData панелот за да продолжите.",
       "unload_dismiss_action_title": "Престани да потсетуваш",
+      "review_action_title": "Тоа беше {program}",
       "notify_live_waiting_message": "{device}: Сè уште нема совпаднат профил.",
       "vs_typical_longer": "{pct}% подолго од вообичаено",
       "vs_typical_shorter": "{pct}% пократко од вообичаено",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Означи одржување како завршено",
+      "description": "Евидентирајте задача за одржување како завршена сега, исто како копчето Готово во панелот.",
+      "fields": {
+        "device_id": {
+          "name": "Уред",
+          "description": "Уредот WashData на кој му припаѓа задачата."
+        },
+        "task_id": {
+          "name": "ID на задача",
+          "description": "ID на задачата, како што е наведен во атрибутот due_task_ids на сензорот Треба одржување (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other или custom_ ID на сопствена задача)."
+        },
+        "notes": {
+          "name": "Забелешки",
+          "description": "Опционална забелешка зачувана со записот во дневникот."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Избриши циклус",
+      "description": "Избришете еден зачуван циклус. Неговата програма повторно се гради без него или се отстранува, ако тоа беше нејзиниот последен циклус, а тој беше увезен. Не може да се врати.",
+      "fields": {
+        "device_id": {
+          "name": "Уред",
+          "description": "Уредот WashData."
+        },
+        "cycle_id": {
+          "name": "ID на циклус",
+          "description": "ID на циклусот за бришење, на пр. променливата cycle_id на окидачот \"Циклусот завршен\" (празна е кога со тоа извршување не е зачуван циклус, па прво проверете ја)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Покрени ML обука",
       "description": "Рачно обучете ги моделите ML на уредот од означените циклуси на овој уред (експериментални).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "Вкупна енергија"
+      },
+      "last_cycle_duration": {
+        "name": "Времетраење на последниот циклус"
+      },
+      "last_cycle_energy": {
+        "name": "Енергија на последниот циклус"
+      },
+      "last_cycle_cost": {
+        "name": "Цена на последниот циклус"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "Не може да се додели профил: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Циклусот не е пронајден."
+    },
+    "maintenance_task_not_found": {
+      "message": "На овој уред нема задача за одржување со ID {task_id}."
+    },
+    "task_id_required": {
+      "message": "Потребен е валиден task_id."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "Циклусот е продолжен",
       "still_tumbling": "Барабанот сè уште се врти по циклусот",
       "unloaded": "Истоварено",
-      "state_changed": "Состојбата се промени",
+      "state_changed": "Состојбата на апаратот се промени",
       "maintenance_due": "Потребно одржување",
       "milestone_reached": "Достигната пресвртница на циклусот",
       "pump_stuck": "Пумпата е заглавена"
@@ -665,7 +716,7 @@
       "description": "Се активира кога содржината е извадена по циклусот: вратата е отворена или истоварот е потврден."
     },
     "state_changed": {
-      "name": "Состојбата се промени",
+      "name": "Состојбата на апаратот се промени",
       "description": "Се активира кога состојбата на WashData се промени.",
       "fields": {
         "from": {

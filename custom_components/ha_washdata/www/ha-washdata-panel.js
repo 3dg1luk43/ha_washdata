@@ -131,7 +131,7 @@ const _WD_TRIGGERS = [
   { key: 'still_tumbling', name: 'Still tumbling after the cycle', only: _TRIGGER_TUMBLING_TYPES, options: { minutes: 15 } },
   { key: 'unload_pending', name: 'Unload pending' },
   { key: 'unloaded', name: 'Unloaded' },
-  { key: 'state_changed', name: 'State changed' },
+  { key: 'state_changed', name: 'Appliance state changed' },
   { key: 'maintenance_due', name: 'Maintenance due' },
   { key: 'milestone_reached', name: 'Cycle milestone reached' },
   { key: 'pump_stuck', name: 'Pump stuck', only: ['pump'] },
@@ -324,7 +324,7 @@ const _SETTINGS_SECTIONS = [
   ] },
   { id: 'dishwasher', label: 'Dishwasher', intro: 'End handling for dishwashers, which often dry quietly for a long time before a short final drain.', onlyDeviceTypes: ['dishwasher'], fields: [
     { key: 'dishwasher_end_spike_quiet_release', label: 'Passive-Dry Quiet Release', unit: 's', type: 'number', step: 60, min: 0, def: 600,
-      doc: 'After the expected duration, how long the dishwasher must stay below the Stop Threshold before WashData stops waiting for the final drain. Raise it if a late drain after a long dry is missed. The wait never exceeds 30 minutes.' },
+      doc: 'After the expected duration, WashData stops waiting for the final drain once the dishwasher has been below the Stop Threshold this long since its last activity, at most 30 minutes (and, once the program has 3 recorded cycles, at least its longest recorded drying pause). Raise it if a late drain after a long dry is missed.' },
   ] },
   { id: 'delay', label: 'Delay Start', intro: 'Detects an appliance that is on and waiting for a delayed start.', fields: [
     { key: 'delay_start_detect_enabled', label: 'Enable Delay-Start Detection', type: 'checkbox',
@@ -388,7 +388,7 @@ const _SETTINGS_SECTIONS = [
       { key: 'notify_live_overrun_percent', label: 'Live Overrun % Before Alert', unit: '%', type: 'number', min: 0, def: 20,
         doc: 'Live updates stop once a cycle runs this percent past its expected duration (20 = up to 1.2x the expected time).' },
       { key: 'notify_live_chronometer', label: 'Use Live Chronometer', type: 'checkbox',
-        doc: 'Android: adds a countdown to the estimated finish next to the notification text. Use {finish_time} in the Pre-Complete Message to show the finish time instead of a second countdown.' },
+        doc: 'Android: adds a countdown to the estimated finish next to the notification text. Use {finish_time} in the Live Update Message to show the finish time instead of a second countdown.' },
       { key: 'notify_live_silent', label: 'Silent Live Updates', type: 'checkbox', def: true,
         doc: 'iOS only. Update live progress silently, at a battery-saving priority that iOS may batch. The first update and the start/finish notifications still alert. Off: every update alerts.' },
       { key: 'notify_live_sticky', label: 'Keep Live Notification On Tap', type: 'checkbox',
@@ -409,9 +409,9 @@ const _SETTINGS_SECTIONS = [
         doc: 'Body sent when a cycle starts. Template variables: {device}, {program}. Any other variable falls back to the default text.' },
       { key: 'notify_finish_message', label: 'Finish Message', type: 'textarea', def: '{device} finished. Duration: {duration} min.', basic: true,
         doc: 'Body sent when a cycle finishes. Variables: {device}, {program}, {duration} (minutes), {duration_hm} (1 h 05 min), {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}, {status} (completed or force_stopped; interrupted cycles send nothing). Any other variable falls back to the default text.' },
-      { key: 'notify_pre_complete_message', label: 'Pre-Complete Message', type: 'textarea', def: '{device}: Less than {minutes} minutes remaining.',
+      { key: 'notify_pre_complete_message', label: 'Live Update Message', type: 'textarea', def: '{device}: Less than {minutes} minutes remaining.',
         doc: 'Text of each live progress update. Template variables: {device}, {program}, {minutes} (minutes left), {finish_time} (estimated finish, e.g. 14:30). Any other variable falls back to the default text.' },
-      { key: 'notify_reminder_message', label: 'Reminder Message', type: 'textarea', def: '',
+      { key: 'notify_reminder_message', label: 'Pre-End Alert Message', type: 'textarea', def: '{device}: about {minutes} minutes left.',
         doc: 'Text of the one-time Pre-End Alert. Template variables: {device}, {program}, {minutes} (the Pre-End Alert setting). Any other variable falls back to the default text.' },
       { key: 'notify_channel', label: 'Android Channel (start/live)', type: 'text', def: '',
         placeholder: 'e.g. WashData', suggestions: ['WashData', 'WashData Status', 'Appliance Status'],
@@ -733,6 +733,15 @@ const _CSS = `
   --wd-font-sm: 0.75em;
   --wd-font-xs: 0.7em;
   --wd-white: #fff;
+  /* Text, icons and knobs painted ON a filled colour (#504). HA's convention for
+     text on --primary-color is --text-primary-color (white in HA's own themes), so a
+     theme with a light accent can pair it with a dark one; a hardcoded white went
+     white-on-white there. The status fills follow HA's --ha-color-on-*-loud tokens
+     (also white by default). Info has no HA token and keeps --wd-white. */
+  --wd-on-primary: var(--text-primary-color, #fff);
+  --wd-on-error: var(--ha-color-on-danger-loud, #fff);
+  --wd-on-warning: var(--ha-color-on-warning-loud, #fff);
+  --wd-on-success: var(--ha-color-on-success-loud, #fff);
   --wd-tint-xs: rgba(0,0,0,0.04);
   --wd-tint-sm: rgba(0,0,0,0.08);
   --wd-tint-md: rgba(0,0,0,0.12);
@@ -764,7 +773,7 @@ const _CSS = `
   cursor: pointer; font-size: .85em; transition: background .15s, color .15s;
 }
 .wd-chip:hover { background: var(--secondary-background-color); }
-.wd-chip.active { background: var(--primary-color); color: var(--wd-white); border-color: var(--primary-color); }
+.wd-chip.active { background: var(--primary-color); color: var(--wd-on-primary); border-color: var(--primary-color); }
 .wd-tabs {
   display: flex; gap: 2px;
   border-bottom: 1px solid var(--divider-color, rgba(0,0,0,.1));
@@ -876,9 +885,9 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
 }
 .wd-btn:hover { opacity: .85; }
 .wd-btn:disabled { opacity: .55; cursor: default; }
-.wd-btn-primary { background: var(--primary-color); color: var(--wd-white); }
+.wd-btn-primary { background: var(--primary-color); color: var(--wd-on-primary); }
 .wd-btn-secondary { background: var(--secondary-background-color); color: var(--primary-text-color); border: 1px solid var(--divider-color); }
-.wd-btn-danger { background: var(--error-color, #f44336); color: var(--wd-white); }
+.wd-btn-danger { background: var(--error-color, #f44336); color: var(--wd-on-error); }
 .wd-btn-sm { padding: 4px 10px; font-size: .78em; }
 .wd-btn-xs { padding: 2px 8px; font-size: .72em; }
 .wd-spin {
@@ -924,10 +933,11 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
 .wd-switch-slider { position: absolute; inset: 0; border-radius: 22px; background: var(--switch-unchecked-track-color, rgba(120,120,120,.5)); transition: background .2s; }
 .wd-switch-slider::before { content: ""; position: absolute; height: 16px; width: 16px; left: 3px; top: 3px; border-radius: 50%; background: var(--switch-unchecked-button-color, #fafafa); box-shadow: 0 1px 2px rgba(0,0,0,.3); transition: transform .2s; }
 .wd-switch input:checked + .wd-switch-slider { background: var(--switch-checked-track-color, var(--primary-color, #03a9f4)); }
-/* Force a light thumb: some themes set --switch-checked-button-color to the accent,
-   which made the knob vanish into the (also-accent) track. A white thumb reads on
-   any track colour. */
-.wd-switch input:checked + .wd-switch-slider::before { transform: translateX(18px); background: #fff; }
+/* The checked thumb is the on-primary colour, NOT --switch-checked-button-color:
+   legacy themes set that to the accent for HA's old translucent-track switch, and
+   on this opaque track the knob vanished into it (31444485). --text-primary-color
+   is white unless the theme's accent is light (#504). */
+.wd-switch input:checked + .wd-switch-slider::before { transform: translateX(18px); background: var(--wd-on-primary); }
 .wd-switch input:focus-visible + .wd-switch-slider { outline: 2px solid var(--primary-color, #03a9f4); outline-offset: 2px; }
 /* A11y: a shared keyboard focus ring for all interactive controls (many HA themes
    suppress the UA default outline). */
@@ -971,7 +981,7 @@ th.wd-tc-flags { color: var(--secondary-text-color); font-weight: 500; }
 .wd-auto-edit { flex: none; padding: 7px 9px; border-radius: var(--wd-radius-sm); font-size: .82em; font-weight: 500; color: var(--primary-color); text-decoration: none; }
 .wd-auto-edit:hover { background: var(--secondary-background-color); }
 .wd-auto-del { flex: none; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--secondary-text-color); font-size: 1.2em; line-height: 1; cursor: pointer; }
-.wd-auto-del:hover { background: var(--error-color, #f44336); color: var(--wd-white); }
+.wd-auto-del:hover { background: var(--error-color, #f44336); color: var(--wd-on-error); }
 .wd-auto-start { padding-top: 16px; border-top: 1px solid var(--divider-color); }
 .wd-auto-sub { font-size: .92em; font-weight: 600; color: var(--primary-text-color); }
 .wd-auto-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
@@ -1047,15 +1057,15 @@ a.wd-btn { text-decoration: none; }
   border: 1px solid var(--divider-color); border-radius: var(--wd-radius-md); background: var(--card-background-color); }
 .wd-pillbox:focus-within { border-color: var(--primary-color); }
 .wd-pillbox .wd-pill { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; padding: 2px 4px 2px 9px;
-  font-size: .82em; line-height: 1.4; border-radius: var(--wd-radius-lg); background: var(--primary-color); color: var(--wd-white);
+  font-size: .82em; line-height: 1.4; border-radius: var(--wd-radius-lg); background: var(--primary-color); color: var(--wd-on-primary);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* The label shrinks and ellipsizes; the remove button never does (#467: a long
    notify service pushed it out of the clipped pill). */
 .wd-pill-txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wd-pill-x { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; padding: 0;
-  border: 0; border-radius: 50%; background: rgba(255,255,255,.25); color: var(--wd-white); font-size: 13px; line-height: 1;
+  border: 0; border-radius: 50%; background: color-mix(in srgb, var(--wd-on-primary) 25%, transparent); color: var(--wd-on-primary); font-size: 13px; line-height: 1;
   cursor: pointer; flex: none; }
-.wd-pill-x:hover { background: rgba(255,255,255,.45); }
+.wd-pill-x:hover { background: color-mix(in srgb, var(--wd-on-primary) 45%, transparent); }
 .wd-pill-add { flex: 1; min-width: 90px; border: 0 !important; background: transparent !important; padding: 3px 4px !important;
   font-size: .88em; color: var(--primary-text-color); outline: none; }
 .wd-form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0 20px; }
@@ -1127,13 +1137,13 @@ a.wd-btn { text-decoration: none; }
 .wd-sug-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .wd-sug-sep { display: none; }
 .wd-sug-impact { display: none; }
-.wd-sug-use { border: none; background: var(--warning-color, #ff9800); color: var(--wd-white); border-radius: var(--wd-radius-sm); padding: 2px 8px; font-size: .92em; cursor: pointer; flex-shrink: 0; }
+.wd-sug-use { border: none; background: var(--warning-color, #ff9800); color: var(--wd-on-warning); border-radius: var(--wd-radius-sm); padding: 2px 8px; font-size: .92em; cursor: pointer; flex-shrink: 0; }
 .wd-sug-lock { border: none; background: transparent; color: var(--secondary-text-color); border-radius: var(--wd-radius-sm); padding: 2px 6px; font-size: .92em; cursor: pointer; flex-shrink: 0; opacity: .65; }
 .wd-sug-lock:hover { opacity: 1; background: rgba(255,152,0,.15); }
 .wd-conflict-err { display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
 .wd-conflict-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .8em; color: var(--error-color, #b71c1c); padding: 5px 9px; border-left: 3px solid var(--error-color, #b71c1c); background: rgba(183,28,28,.07); border-radius: 0 5px 5px 0; }
 .wd-conflict-fix { border: 1px solid var(--error-color, #b71c1c); background: none; color: var(--error-color, #b71c1c); border-radius: var(--wd-radius-sm); padding: 1px 7px; font-size: .92em; cursor: pointer; white-space: nowrap; flex: none; }
-.wd-conflict-fix:hover { background: var(--error-color, #b71c1c); color: var(--wd-white); }
+.wd-conflict-fix:hover { background: var(--error-color, #b71c1c); color: var(--wd-on-error); }
 .wd-conflict-sug-note { font-style: italic; opacity: 0.85; flex: none; }
 #wd-settings-form .wd-field.wd-has-conflict { outline: 2px solid var(--error-color, #b71c1c); outline-offset: -1px; }
 .wd-rev-sub { display: flex; align-items: center; gap: 6px; margin: 14px 0 6px; font-size: .85em; font-weight: 600; color: var(--primary-text-color); }
@@ -1152,7 +1162,7 @@ a.wd-btn { text-decoration: none; }
   padding: 5px 14px; border-radius: 14px; border: 1px solid var(--divider-color);
   background: transparent; color: var(--secondary-text-color); font-size: .8em; cursor: pointer; transition: background .15s;
 }
-.wd-sec-btn.active { background: var(--primary-color); color: var(--wd-white); border-color: var(--primary-color); }
+.wd-sec-btn.active { background: var(--primary-color); color: var(--wd-on-primary); border-color: var(--primary-color); }
 .wd-level-toggle { display: inline-flex; gap: 4px; }
 .wd-sec-btn { position: relative; }
 /* Basic/Advanced slide toggle */
@@ -1163,8 +1173,9 @@ a.wd-btn { text-decoration: none; }
 .wd-toggle-track input { opacity: 0; width: 0; height: 0; position: absolute; }
 .wd-toggle-knob { position: absolute; inset: 0; border-radius: 20px; background: var(--divider-color); transition: background .2s; }
 .wd-toggle-knob::after { content: ''; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: transform .2s; }
-.wd-toggle-track input:checked + .wd-toggle-knob { background: var(--primary-color); }
-.wd-toggle-track input:checked + .wd-toggle-knob::after { transform: translateX(16px); }
+/* Same track and thumb as a checked .wd-switch (#504). */
+.wd-toggle-track input:checked + .wd-toggle-knob { background: var(--switch-checked-track-color, var(--primary-color)); }
+.wd-toggle-track input:checked + .wd-toggle-knob::after { transform: translateX(16px); background: var(--wd-on-primary); }
 .wd-sec-sug-dot { position: absolute; top: 2px; right: 3px; width: 6px; height: 6px; border-radius: 50%; background: var(--warning-color, #ff9800); display: inline-block; pointer-events: none; }
 .wd-sec-conf-dot { position: absolute; top: 2px; right: 3px; width: 6px; height: 6px; border-radius: 50%; background: var(--error-color, #b71c1c); display: inline-block; pointer-events: none; }
 .wd-subtabs { display: flex; gap: 2px; border-bottom: 1px solid var(--divider-color); margin-bottom: 18px; flex-wrap: wrap; }
@@ -1305,10 +1316,10 @@ button.wd-profile-card { display: block; }
 .wd-swatch { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; display: inline-block; }
 .wd-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 200; padding: 10px 20px; border-radius: var(--wd-radius-md); font-size: .9em; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,.25); animation: wd-toast-in .2s ease; }
 @keyframes wd-toast-in { from { opacity: 0; transform: translateX(-50%) translateY(10px); } }
-.wd-toast-success { background: var(--success-color, #4caf50); color: var(--wd-white); }
-.wd-toast-error   { background: var(--error-color, #f44336); color: var(--wd-white); }
+.wd-toast-success { background: var(--success-color, #4caf50); color: var(--wd-on-success); }
+.wd-toast-error   { background: var(--error-color, #f44336); color: var(--wd-on-error); }
 .wd-toast-info    { background: var(--info-color, #2196f3); color: var(--wd-white); }
-.wd-toast-warning { background: var(--warning-color, #ff9800); color: var(--wd-white); }
+.wd-toast-warning { background: var(--warning-color, #ff9800); color: var(--wd-on-warning); }
 /* D4: undo toast — action button + row layout */
 .wd-toast { display: flex; align-items: center; gap: 14px; }
 .wd-toast-action { background: rgba(255,255,255,.22); color: inherit; border: none; border-radius: 6px; padding: 5px 12px; font: inherit; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: .04em; font-size: .85em; }
@@ -1357,7 +1368,7 @@ button.wd-profile-card { display: block; }
 .wd-devname { font-weight: 600; }
 .wd-devsub { font-size: .72em; color: var(--secondary-text-color); }
 .wd-dbadge { font-size: .72em; padding: 1px 7px; border-radius: 10px; background: var(--secondary-background-color); }
-.wd-dbadge.rec { background: var(--error-color, #f44336); color: var(--wd-white); }
+.wd-dbadge.rec { background: var(--error-color, #f44336); color: var(--wd-on-error); }
 .wd-dbadge.fb { background: rgba(33,150,243,.22); }
 .wd-dbadge.conf { background: rgba(183,28,28,.18); color: var(--error-color, #b71c1c); }
 /* Attention cards (status dashboard) */
@@ -1368,6 +1379,29 @@ button.wd-profile-card { display: block; }
 .wd-attn-body { flex: 1; min-width: 0; }
 .wd-attn-title { font-weight: 600; }
 .wd-attn-sub { font-size: .76em; color: var(--secondary-text-color); }
+/* Waiting review question on the Overview (audit item 1) */
+.wd-review-q { border-left: 3px solid var(--info-color, #2196f3); padding-top: 10px; padding-bottom: 10px; }
+.wd-review-q-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.wd-review-q-toggle { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; min-width: 0; background: none; border: 0; padding: 4px 0; margin: 0; color: inherit; font: inherit; text-align: start; cursor: pointer; }
+.wd-review-q-chev { display: inline-block; transition: transform .15s; color: var(--secondary-text-color); }
+.wd-review-q.open .wd-review-q-chev { transform: rotate(90deg); }
+.wd-review-q-count { font-size: .8em; padding: 2px 8px; border-radius: 10px; background: rgba(33,150,243,.16); white-space: nowrap; }
+.wd-review-q-steps { display: inline-flex; gap: 4px; flex-shrink: 0; }
+.wd-review-q-step { min-width: 34px; font-size: 1.25em; line-height: 1; padding-top: 2px; padding-bottom: 4px; }
+.wd-review-q-step:disabled { opacity: .35; cursor: default; }
+.wd-review-q-queue { font-size: .95em; }
+.wd-review-tiles { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; margin-top: 8px; }
+.wd-review-tile { flex: 0 0 100%; min-width: 0; box-sizing: border-box; scroll-snap-align: start; }
+.wd-review-tiles.multi { padding-bottom: 6px; }
+.wd-review-tiles.multi .wd-review-tile { flex-basis: min(calc(100% - 36px), 560px); padding: 10px 12px; border: 1px solid var(--divider-color); border-radius: 10px; }
+.wd-review-tile-when { font-size: .85em; color: var(--secondary-text-color); }
+.wd-review-q-cmp { margin: 10px 0 12px; }
+.wd-review-q-cmp th, .wd-review-q-cmp td { padding: 6px 8px; }
+.wd-review-q-cmp td:first-child { overflow-wrap: anywhere; }
+.wd-review-answers { display: flex; gap: 8px; flex-wrap: wrap; }
+/* "X or Y?" chips while the live match is torn between two programmes */
+.wd-torn { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: .85em; }
+.wd-torn-chip { padding: 4px 12px; border-color: var(--warning-color, #ff9800); }
 /* F1 first-run onboarding card (Status power-chart area) */
 .wd-onboard { margin-top: 12px; padding: 16px; border-radius: 10px; border: 1px dashed var(--divider-color); background: var(--secondary-background-color); }
 .wd-onboard .wd-card-title { margin-top: 0; }
@@ -1422,7 +1456,7 @@ button.wd-profile-card { display: block; }
   color: var(--secondary-text-color); font-size: 1.1em; line-height: 1; cursor: pointer; }
 .wd-color-clear:hover { color: var(--primary-text-color); }
 .wd-addbtn { flex: 0 0 auto; width: 34px; height: 34px; border-radius: var(--wd-radius-md); border: 1px solid var(--divider-color); background: var(--secondary-background-color); color: var(--primary-text-color); font-size: 1.25em; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
-.wd-addbtn:hover { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+.wd-addbtn:hover { background: var(--primary-color); color: var(--wd-on-primary); border-color: var(--primary-color); }
 .wd-loglvl { font-weight: 700; margin-right: 6px; }
 .wd-logcomp { display: inline-block; font-size: .72em; color: var(--secondary-text-color); background: var(--secondary-background-color); border-radius: 4px; padding: 0 5px; margin-right: 6px; }
 .wd-logdev { display: inline-block; font-size: .72em; color: var(--primary-color); margin-right: 6px; }
@@ -1540,7 +1574,7 @@ button.wd-profile-card { display: block; }
 .wd-pg-preset-name { flex: 1 1 150px; min-width: 120px; max-width: 220px; font-size: .82em; }
 /* Per-setting publish arrow. The empty slot keeps every row's value column aligned
    whether or not that row currently has a publishable change. */
-.wd-pg-pub { width: 20px; height: 20px; flex: 0 0 20px; padding: 0; border: none; border-radius: 5px; cursor: pointer; background: var(--primary-color); color: var(--text-primary-color, #fff); font-size: .8em; line-height: 1; }
+.wd-pg-pub { width: 20px; height: 20px; flex: 0 0 20px; padding: 0; border: none; border-radius: 5px; cursor: pointer; background: var(--primary-color); color: var(--wd-on-primary); font-size: .8em; line-height: 1; }
 .wd-pg-pub:hover { filter: brightness(1.15); }
 .wd-pg-pub-slot { width: 20px; flex: 0 0 20px; display: inline-block; }
 /* Playground: unified workbench (graph+settings always on top) + "Across your
@@ -1886,8 +1920,11 @@ function _num(v, def) { const n = parseFloat(v); return isNaN(n) ? def : n; }
 // Visible, keyboard-focusable descendants of `root` (for modal focus trapping).
 // A selector that finds "the same control" after a full re-render: its id, else the
 // data-* attributes the panel uses to identify buttons, rows and inputs.
+// data-prof / data-dir tell apart controls that share an action: the review
+// answers of one cycle (a button per programme) and the Previous / Next steps.
 const _FOCUS_ATTRS = ['data-action', 'data-cid', 'data-idx', 'data-tab', 'data-sec', 'data-gtab',
-  'data-ptab', 'data-hsub', 'data-proftab', 'data-opt', 'data-pgkey', 'data-gname', 'data-sugkey'];
+  'data-ptab', 'data-hsub', 'data-proftab', 'data-opt', 'data-pgkey', 'data-gname', 'data-sugkey',
+  'data-prof', 'data-dir'];
 function _focusKey(el) {
   if (!el || !el.getAttribute || el.tagName === 'BODY') return null;
   const esc = (v) => (window.CSS && CSS.escape) ? CSS.escape(v) : String(v).replace(/["\\]/g, '\\$&');
@@ -2239,11 +2276,13 @@ const _OVF_SCROLLERS = '.wd-tabs, .wd-table-wrap';
 // Toggle .wd-ovf-l / .wd-ovf-r for the side(s) where `el` hides content. Uses the
 // distance from the START edge, so a right-to-left page (scrollLeft runs 0 to
 // negative) maps onto the right physical side. 1px of slack absorbs subpixel widths.
-function _syncOverflowEdges(el) {
+function _overflowEdges(el) {
   const max = el.scrollWidth - el.clientWidth;
   const fromStart = Math.abs(el.scrollLeft);
-  const atStart = max <= 1 || fromStart <= 1;
-  const atEnd = max <= 1 || fromStart >= max - 1;
+  return { atStart: max <= 1 || fromStart <= 1, atEnd: max <= 1 || fromStart >= max - 1 };
+}
+function _syncOverflowEdges(el) {
+  const { atStart, atEnd } = _overflowEdges(el);
   const rtl = getComputedStyle(el).direction === 'rtl';
   el.classList.toggle(rtl ? 'wd-ovf-r' : 'wd-ovf-l', !atStart);
   el.classList.toggle(rtl ? 'wd-ovf-l' : 'wd-ovf-r', !atEnd);
@@ -2509,6 +2548,8 @@ class HaWashdataPanel extends HTMLElement {
       this._logOpen = false;
       this._logDrawerWidth = 380;
     }
+    // The Overview's review questions start collapsed; opening them is remembered.
+    try { this._reviewOpen = localStorage.getItem('wd-review-open') === '1'; } catch (_) { this._reviewOpen = false; }
     this._tabInitialized = false;
     this._modal = null;
     this._prevModal = null;  // profile-panel modal to restore after cycle-detail closes
@@ -3117,6 +3158,11 @@ class HaWashdataPanel extends HTMLElement {
       this._showToast(this._tText('msg.toast_error', {error: t.error || ''}, 'Error: ' + (t.error || '')), 'error');
     } else if (result) {
       if (isHistory) this._pgHistory = result;
+      // A sweep of a setting or an objective no longer selected is not shown under
+      // the new one: its best value answers another question (it stays in the
+      // recent runs).
+      else if ((result.param && result.param !== this._pgSweepParam)
+        || (result.objective && result.objective !== (this._pgSweepObjective || 'match_accuracy'))) this._pgSweepNew = null;
       else this._pgSweepNew = (result && !result.error) ? result : null;
     }
     if (isHistory) { this._busy.delete('pg-history'); this._pgHistoryTaskId = null; }
@@ -3298,6 +3344,9 @@ class HaWashdataPanel extends HTMLElement {
           if (this._canEdit() && dev.recording) {
             try { this._recState = await this._ws({ type: `${_DOMAIN}/get_recording_state`, entry_id: dev.entry_id }); } catch (_) { /* keep previous */ }
           }
+          // The Overview's waiting review question, in the background so it never
+          // holds the first paint (audit UI-19); refetched only when the count moves.
+          this._refreshReviewQuestion(dev);
         }
       };
       const overlayData = async () => {
@@ -3712,8 +3761,10 @@ class HaWashdataPanel extends HTMLElement {
     const fb = (this._feedbacks || []).find(f => f.cycle_id === cycleId);
     const name = fb && typeof fb.detected_profile === 'string' ? fb.detected_profile : '';
     if (!name) return null;
-    const ru = (Array.isArray(fb.ranking) ? fb.ranking : []).find(c => c && typeof c.name === 'string' && c.name && c.name !== name);
-    return { name, suspected: true, runnerUp: ru ? ru.name : null };
+    // The runner-up is the request's other answer button, so the curves on the
+    // chart are the two programmes the user is asked to choose between.
+    const ru = this._reviewChoiceNames(fb).find(n => n !== name);
+    return { name, suspected: true, runnerUp: ru || null };
   }
 
   // Resolve the overlay plan for a freshly loaded cycle and fetch its envelopes.
@@ -4062,6 +4113,7 @@ class HaWashdataPanel extends HTMLElement {
         if (!this._profiles.length && !this._cycles.length) await this._fetchCycles(eid);
         // D1: matched-profile phases for the compact Status phase timeline.
         await this._ensureStatusPhases(eid, dev.current_program);
+        this._refreshReviewQuestion(dev);
         if (this._pref('show_debug', false)) {
           try { this._matchDebug = await this._ws({ type: `${_DOMAIN}/get_match_debug`, entry_id: eid }); } catch (_) { /* keep */ }
         }
@@ -4080,7 +4132,7 @@ class HaWashdataPanel extends HTMLElement {
         if (!this._profiles.length) await this._fetchProfiles(eid);
         // Always load pending feedbacks (cheap) so the merged "needs review"
         // queue in the Cycles list can flag them.
-        try { const r = await this._ws({ type: `${_DOMAIN}/get_feedbacks`, entry_id: eid }); this._feedbacks = r.feedbacks || []; } catch (_) {}
+        await this._fetchFeedbacks(eid);
         // Refresh store connection state so the golden-cycle "Share to store"
         // action reflects the current account (background; online features only).
         if (this._constants.storeOnlineAvailable && this._onlineEnabled()) {
@@ -4329,7 +4381,16 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   async _fetchFeedbacks(eid) {
-    try { const r = await this._ws({ type: `${_DOMAIN}/get_feedbacks`, entry_id: eid }); this._feedbacks = r.feedbacks || []; } catch (_) {}
+    // `_feedbacksEid` names the device the list belongs to, so the Overview's
+    // review question never shows another device's request after a switch.
+    // True when the list was fetched (a caller that tracks it can retry otherwise).
+    // A new list voids the count recorded for the old one: a fetch from another
+    // tab (a label, a dismiss-all) would otherwise leave the Overview matching a
+    // later request's count against it and never refetching. The Overview's own
+    // callers record the count again after this returns.
+    // A response for a device switched away from meanwhile is dropped: the Cycles
+    // view reads the list without checking whose it is.
+    try { const r = await this._ws({ type: `${_DOMAIN}/get_feedbacks`, entry_id: eid }); if (!this._isActiveEntry(eid)) return false; this._feedbacks = r.feedbacks || []; this._feedbacksEid = eid; this._feedbacksSeenCount = null; return true; } catch (_) { return false; }
   }
 
   async _fetchPhases(eid) {
@@ -4616,7 +4677,7 @@ class HaWashdataPanel extends HTMLElement {
   //     position a moment before the real tree comes back. Carry it instead.
 
   // Reset on navigation, preserved across every other re-render.
-  _SCROLLERS = ['.wd-main', '.wd-modal', '.wd-logs', '.wd-log-drawer-body', '.wd-table-wrap', '.wd-sd-tree'];
+  _SCROLLERS = ['.wd-main', '.wd-modal', '.wd-logs', '.wd-log-drawer-body', '.wd-table-wrap', '.wd-sd-tree', '.wd-review-tiles', '.wd-bp-yaml'];
   // Navigation chrome: preserved across navigation too. Clicking a tab must not also
   // scroll the strip the tab is in - on a narrow screen that strip overflows, and
   // moving it is how the tab you just pressed ends up off-screen.
@@ -4748,6 +4809,20 @@ class HaWashdataPanel extends HTMLElement {
     // keyboard focus to <body> (audit UI-04). Remember the control by its identity
     // so the matching control in the new DOM can take it back.
     const focusKeyBefore = (!this._modalFocusActive && sr0 && sr0.activeElement) ? _focusKey(sr0.activeElement) : null;
+    // A Settings value being typed lives only in the field until the form is
+    // snapshotted, so a re-render (a toast, a poll) put the rendered value back
+    // under the user's cursor. Carry the focused field's typed text across. Only
+    // that field: a value staged in code (a suggestion's Use) moved focus away.
+    const typedBefore = (() => {
+      const el = sr0 && sr0.activeElement;
+      if (!focusKeyBefore || !el || !el.dataset || !el.dataset.opt) return null;
+      if (!el.closest || !el.closest('#wd-settings-form, #wd-ml-form')) return null;
+      const textual = el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && !['checkbox', 'radio'].includes(el.type));
+      if (!textual || el.value === el.defaultValue) return null;
+      let start = null, end = null;
+      try { start = el.selectionStart; end = el.selectionEnd; } catch (_) {}
+      return { value: el.value, start, end };
+    })();
     // A pinned touch readout (#413) is anchored to a crosshair this swap is
     // about to erase, so it would be left floating with stale numbers over the
     // new DOM. Drop it with the crosshair it describes.
@@ -4797,6 +4872,7 @@ class HaWashdataPanel extends HTMLElement {
       this._restoreScroll(scrollBefore);
     }
     this._drawStatusCurve();
+    this._drawReviewQuestion();
     this._drawModalCanvas();
     this._drawProfileSparklines();  // D2
     this._drawHistorySparklines();  // #344 import review
@@ -4807,6 +4883,12 @@ class HaWashdataPanel extends HTMLElement {
     this._syncModalFocus(focusedBefore);
     if (focusKeyBefore && !this._modalFocusActive) {
       const again = this.shadowRoot.querySelector(focusKeyBefore);
+      if (again && typedBefore && again.value !== typedBefore.value) {
+        again.value = typedBefore.value;
+        try {
+          if (typedBefore.start != null) again.setSelectionRange(typedBefore.start, typedBefore.end);
+        } catch (_) {}
+      }
       if (again && this.shadowRoot.activeElement !== again) {
         try { again.focus({ preventScroll: true }); } catch (_) {}
       }
@@ -5058,6 +5140,317 @@ class HaWashdataPanel extends HTMLElement {
     return `<span class="wd-prog-unc" style="font-size:.82em;color:var(--warning-color,#ff9800)">${what}${sure}</span>${tip}`;
   }
 
+  // "X or Y?" while the live match is torn between two programmes (audit item 1):
+  // the backend's match_choices (match_rules.live_torn_choices) is set when the
+  // winner is ambiguous or leads by less than the cycle-end label margin, i.e. the
+  // cycle would end with a review question. A chip pins that program, the same
+  // set_program as the dropdown, which labels the cycle by hand so no question
+  // follows. Shown in place of the "Uncertain" line, which names the same two.
+  _htmlTornChips(dev, isRunning, manual) {
+    const c = dev && dev.match_choices;
+    if (!isRunning || manual || !Array.isArray(c) || c.length < 2 || !c[0] || !c[1]) return '';
+    const chip = n => _html(`<button type="button" class="wd-chip wd-torn-chip" data-action="torn-pick" data-prog="${_esc(n)}">${_esc(n)}</button>`);
+    const tip = _tip(this._tText('status.torn_tip', {},
+      'WashData cannot tell these two apart yet, so pick the one that is running to label this cycle with it (Auto-detect undoes the choice).'));
+    return `<span class="wd-torn">${this._t('status.torn_pick', {a: chip(c[0]), b: chip(c[1])}, '{a} or {b}?')}</span>${tip}`;
+  }
+
+  // Pin a program from the Status card (the dropdown and the torn-match chips).
+  _setStatusProgram(dev, val) {
+    if (!dev || !val) return;
+    // No cycle under way means the choice is armed for the next one (#411), so
+    // say that rather than implying it applies to something running now.
+    const willArm = !_ACTIVE_STATES.includes(dev.detector_state || '');
+    this._ws({ type: `${_DOMAIN}/set_program`, entry_id: dev.entry_id, program: val })
+      .then(() => {
+        this._showToast(
+          val === 'auto_detect'
+            ? this._t('msg.toast_auto_detect_enabled', {}, 'Auto-detect enabled')
+            : willArm
+              ? this._tText('msg.toast_program_armed', {program: val}, `Program armed for the next cycle: ${val}`)
+              : this._tText('msg.toast_program_set', {program: val}, `Program set: ${val}`));
+        return this._fetchAll();
+      })
+      .catch(e => this._showToast(this._tText('msg.toast_failed', {error: e.message || e}, 'Failed: ' + (e.message || e)), 'error'));
+  }
+
+  // ── Waiting review questions, inline on the Overview (audit item 1) ────────
+  //
+  // The pending review requests whose cycle is still stored, asked right on the
+  // Overview instead of behind the Cycles queue and the cycle dialog. Collapsed by
+  // default to one line with the count, so a user who does not want to answer now
+  // is not in the way of it; opened, one tile per request (newest first, side by
+  // side and scrolled sideways when there are several): the cycle's trace with
+  // both candidates' curves (the #462 overlay), when it ran, and its duration and
+  // energy against each candidate's usual values, with the one-tap answers.
+  // Self-contained: _ensureReviewQuestion loads it, _htmlReviewQuestion renders
+  // it, _drawReviewQuestion draws its charts. Nothing is fetched while collapsed.
+
+  // Tiles shown at once; the rest wait in the Cycles review queue.
+  _REVIEW_TILES_MAX = 10;
+
+  // The two programmes a request offers as answers: the backend's `choices`
+  // (learning.review_choices, the same two the finish notification offers), or
+  // for a request from an older backend the detected programme and the ranking's
+  // next distinct name.
+  _reviewChoiceNames(fb) {
+    if (!fb) return [];
+    if (Array.isArray(fb.choices)) return fb.choices.map(c => c && c.name).filter(n => typeof n === 'string' && n).slice(0, 2);
+    const out = [];
+    const add = n => { if (typeof n === 'string' && n && !out.includes(n) && out.length < 2) out.push(n); };
+    add(fb.detected_profile);
+    // A Stage-5 group key names no programme: its scoring member does, else skip it
+    // (the backend's review_choices applies the same rule).
+    (Array.isArray(fb.ranking) ? fb.ranking : []).forEach(c => {
+      if (!c || typeof c.name !== 'string') return;
+      if (c.name.startsWith('__group__')) add(c.group_best_member);
+      else add(c.name);
+    });
+    return out;
+  }
+
+  // One-tap answers for a pending request, shared by the Overview question and the
+  // cycle dialog's banner. The detected programme's button is the existing
+  // confirm, the other programme's a correction to it (learning.async_answer_review
+  // applies the same rule to a notification action), "Something else..." opens the
+  // existing Correct dialog and "Not sure" is the existing ignore.
+  _htmlReviewAnswers(fb) {
+    const cid = _esc(fb.cycle_id);
+    const detected = typeof fb.detected_profile === 'string' ? fb.detected_profile : '';
+    const btns = this._reviewChoiceNames(fb).map(n => n === detected
+      ? `<button class="wd-btn wd-btn-primary wd-btn-sm" data-action="fb-confirm" data-cid="${cid}">${_esc(n)}</button>`
+      : `<button class="wd-btn wd-btn-primary wd-btn-sm" data-action="fb-pick" data-cid="${cid}" data-prof="${_esc(n)}">${_esc(n)}</button>`);
+    btns.push(`<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="fb-correct" data-cid="${cid}" data-prof="${_esc(detected)}">${this._t('btn.review_something_else', {}, 'Something else…')}</button>`);
+    btns.push(`<button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="fb-ignore" data-cid="${cid}">${this._t('btn.review_not_sure', {}, 'Not sure')}</button>`);
+    return `<div class="wd-review-answers">${btns.join('')}</div>`;
+  }
+
+  // Every waiting request that can be asked here (its cycle is still stored).
+  _reviewQuestionFbs() {
+    const dev = this._devices[this._selIdx];
+    if (!dev || !this._canEdit() || this._feedbacksEid !== dev.entry_id) return [];
+    return (this._feedbacks || []).filter(f => f && f.cycle && f.cycle_id);
+  }
+
+  // Keep the questions' data current. The device's feedback_count says whether
+  // one is waiting; the requests are refetched only when it moves. While open,
+  // each shown cycle's trace and each candidate's curve are fetched once
+  // (`this._reviewQ` caches them per device; an answer drops the curves, as
+  // labelling rebuilds the envelopes). True when anything shown changed.
+  async _ensureReviewQuestion(dev) {
+    if (!dev || !this._canEdit() || !dev.feedback_count) {
+      const had = !!this._reviewQ;
+      this._reviewQ = null;
+      // An answer from outside the panel (a notification action) took the count
+      // to 0: forget the count seen, or the next request, bringing it back to the
+      // same number, would not refetch and the old request would still show.
+      this._feedbacksSeenCount = null;
+      return had;
+    }
+    const eid = dev.entry_id;
+    let changed = false;
+    if (this._feedbacksEid !== eid || this._feedbacksSeenCount !== dev.feedback_count) {
+      // Recorded only once the list is in: a failed fetch is retried next poll
+      // instead of leaving the old requests matched to the new count.
+      const count = dev.feedback_count;
+      if (await this._fetchFeedbacks(eid)) {
+        this._feedbacksSeenCount = count;
+        // The count moved without this panel answering (a notification tap):
+        // that answer rebuilt its programme's envelope, which another tile may
+        // draw. A new map, so responses already in flight are dropped (envs0).
+        if (this._reviewQ && this._reviewQ.eid === eid) this._reviewQ.envs = {};
+      }
+      changed = true;
+    }
+    if (!this._reviewQ || this._reviewQ.eid !== eid) this._reviewQ = { eid, curves: {}, envs: {} };
+    const q = this._reviewQ;
+    if (!this._reviewOpen) return changed;
+    const tiles = this._reviewQuestionFbs().slice(0, this._REVIEW_TILES_MAX);
+    const cids = tiles.map(f => f.cycle_id).filter(c => !(c in q.curves));
+    const names = [...new Set(tiles.flatMap(f => this._reviewChoiceNames(f)))].filter(n => !(n in q.envs));
+    if (!cids.length && !names.length) return changed;
+    // Claimed before the await, so an overlapping poll does not fetch them again.
+    cids.forEach(c => { q.curves[c] = null; });
+    names.forEach(n => { q.envs[n] = null; });
+    // An answer replaces q.envs while this is in flight (labelling rebuilds the
+    // envelopes): these responses then belong to the old cache, not the new one.
+    const envs0 = q.envs;
+    // A failed request resolves to undefined and is dropped from the cache, so the
+    // next poll retries it; a profile with no envelope stays cached as null.
+    const [curves, envs] = await Promise.all([
+      Promise.all(cids.map(cid => this._ws({ type: `${_DOMAIN}/get_cycle_power_data`, entry_id: eid, cycle_id: cid }).catch(() => undefined))),
+      Promise.all(names.map(n => this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: eid, profile_name: n })
+        .then(r => (r && r.envelope) || null).catch(() => undefined))),
+    ]);
+    if (this._reviewQ !== q) return true;  // switched device or answered meanwhile
+    const keep = (cache, k, v) => { if (v === undefined) delete cache[k]; else cache[k] = v; };
+    cids.forEach((c, i) => keep(q.curves, c, curves[i]));
+    if (q.envs === envs0) names.forEach((n, i) => keep(q.envs, n, envs[i]));
+    return true;
+  }
+
+  // Background refresh from the poll / tab load: repaint the Overview when the
+  // question changed, unless the user is in a dialog or a field (the poll's rule).
+  _refreshReviewQuestion(dev) {
+    this._ensureReviewQuestion(dev).then(changed => {
+      if (!changed || this._tab !== 'status' || this._modal || this._tabLoading) return;
+      const sr = this.shadowRoot;
+      const ae = sr && sr.activeElement;
+      if (ae && ['SELECT', 'INPUT', 'TEXTAREA', 'OPTION'].includes(ae.tagName)) return;
+      this._render();
+    }).catch(() => {});
+  }
+
+  // A request's overlay series, in answer order: orange then purple, dashed, as in
+  // the cycle dialog's #462 overlay.
+  _reviewQuestionSeries(fb) {
+    const q = this._reviewQ;
+    const cols = ['#ff9800', '#9c27b0'];
+    return this._reviewChoiceNames(fb).map((n, i) => {
+      const env = q ? q.envs[n] : null;
+      return { name: n, stroke: cols[i], env: env && (env.avg || []).length ? env : null };
+    });
+  }
+
+  _htmlReviewTile(fb, i) {
+    const cyc = fb.cycle || {};
+    const q = this._reviewQ;
+    const curve = q ? q.curves[fb.cycle_id] : null;
+    const samples = (curve && curve.samples) || [];
+    const overlays = this._reviewQuestionSeries(fb);
+    const legSw = c => `background:repeating-linear-gradient(90deg,${c} 0 5px,transparent 5px 8px)`;
+    const chart = samples.length > 1 ? `<div class="wd-canvas-wrap" style="margin-top:8px"><canvas id="wd-review-canvas-${i}" role="img" aria-label="${_esc(this._tText('lbl.aria_cycle_chart', {}, 'Cycle power trace'))}" style="height:130px"></canvas></div>` : '';
+    const choices = Array.isArray(fb.choices) ? fb.choices : [];
+    const usual = n => choices.find(c => c && c.name === n) || {};
+    const row = (sw, label, dur, kwh) => `<tr><td><span class="wd-leg-sw" style="${sw};margin-right:6px"></span>${label}</td><td>${_fmtDuration(dur)}</td><td>${_fmtEnergy(kwh)}</td></tr>`;
+    const rows = [row('background:var(--primary-color)', this._t('lbl.review_this_cycle', {}, 'This cycle'), cyc.duration_s, cyc.energy_kwh)]
+      .concat(overlays.map(o => {
+        const u = usual(o.name);
+        return row(legSw(o.stroke), this._t('lbl.review_usual', {name: o.name}, 'Usual for {name}'), u.avg_duration_s, u.avg_energy_kwh);
+      })).join('');
+    return `<div class="wd-review-tile" data-review-cid="${_esc(fb.cycle_id)}">
+      ${cyc.start_time ? `<div class="wd-review-tile-when">${this._t('msg.review_q_started', {when: _fmtDate(cyc.start_time)}, 'Started {when}')}</div>` : ''}
+      ${chart}
+      <table class="wd-table wd-review-q-cmp"><thead><tr><th></th><th>${this._t('lbl.duration', {}, 'Duration')}</th><th>${this._t('lbl.energy', {}, 'Energy')}</th></tr></thead><tbody>${rows}</tbody></table>
+      ${this._htmlReviewAnswers(fb)}
+    </div>`;
+  }
+
+  _htmlReviewQuestion(dev) {
+    const fbs = this._reviewQuestionFbs();
+    if (!fbs.length || !dev || !dev.feedback_count) return '';
+    const open = !!this._reviewOpen;
+    const tiles = fbs.slice(0, this._REVIEW_TILES_MAX);
+    const multi = tiles.length > 1;
+    const step = (dir, glyph, key, fallback) => `<button type="button" class="wd-btn wd-btn-secondary wd-btn-sm wd-review-q-step" data-action="review-q-step" data-dir="${dir}" aria-label="${_esc(this._tText(key, {}, fallback))}" title="${_esc(this._tText(key, {}, fallback))}">${glyph}</button>`;
+    const head = `<div class="wd-review-q-head">
+        <button type="button" class="wd-review-q-toggle" data-action="review-q-toggle" aria-expanded="${open}" aria-controls="wd-review-q-body">
+          <span class="wd-review-q-chev" aria-hidden="true">▸</span>
+          <span class="wd-card-title" style="margin:0">💬 ${this._t('msg.review_q_title', {}, 'Which program was this?')}</span>
+          <span class="wd-review-q-count">${this._t('msg.feedback_cycles_pending', {n: fbs.length}, `To review: ${fbs.length}`)}</span>
+        </button>
+        ${open && multi ? `<span class="wd-review-q-steps">${step(-1, '‹', 'btn.review_prev', 'Previous cycle')}${step(1, '›', 'btn.review_next', 'Next cycle')}</span>` : ''}
+      </div>`;
+    if (!open) return `<div class="wd-card wd-review-q">${head}</div>`;
+    const more = fbs.length - tiles.length;
+    const queueLink = `<button type="button" class="wd-link wd-review-q-queue" data-action="goto-feedbacks">${more > 0
+      ? this._t('msg.review_q_more', {count: more}, `${more} more to review`)
+      : this._t('msg.review_to_cycles', {}, 'Open the Cycles review queue')}</button>`;
+    return `<div class="wd-card wd-review-q open">
+      ${head}
+      <div id="wd-review-q-body">
+        <div class="wd-info" style="margin:4px 0 0">${this._t('msg.review_q_intro', {}, 'WashData is not sure about these cycles. Your answer teaches it.')} ${queueLink}</div>
+        <div class="wd-review-tiles${multi ? ' multi' : ''}">${tiles.map((fb, i) => this._htmlReviewTile(fb, i)).join('')}</div>
+      </div>
+    </div>`;
+  }
+
+  _drawReviewQuestion() {
+    const q = this._reviewQ;
+    if (!q || !this._reviewOpen) return;
+    // The canvases are keyed by tile position: when an answer or a poll moves
+    // another cycle into a position, that canvas's zoom belonged to the old one.
+    const shown = this._reviewCanvasCids || (this._reviewCanvasCids = {});
+    this._reviewQuestionFbs().slice(0, this._REVIEW_TILES_MAX).forEach((fb, i) => {
+      const id = `wd-review-canvas-${i}`;
+      if (shown[id] !== fb.cycle_id) { delete this._canvasZoom[id]; shown[id] = fb.cycle_id; }
+      const curve = q.curves[fb.cycle_id];
+      const samples = (curve && curve.samples) || [];
+      if (samples.length < 2) return;
+      let xMax = curve.full_duration_s || samples[samples.length - 1][0] || 1;
+      const series = [];
+      this._reviewQuestionSeries(fb).forEach(o => {
+        if (!o.env) return;
+        series.push({ kind: 'review_choice', points: o.env.avg, stroke: o.stroke, width: 1.8, alpha: 0.6, dash: true, name: o.name });
+        xMax = Math.max(xMax, o.env.target_duration || o.env.avg[o.env.avg.length - 1][0] || 0);
+      });
+      series.push({ points: samples, stroke: 'primary', fill: true, width: 2, name: this._t('lbl.power', {}, 'Power') });
+      this._drawCurves(`wd-review-canvas-${i}`, { series, xMax });
+      this._attachGraphGestures(`wd-review-canvas-${i}`);
+    });
+    this._syncReviewSteps();
+  }
+
+  // The previous/next buttons step one tile and grey out at either end of the strip.
+  _syncReviewSteps() {
+    const sr = this.shadowRoot;
+    const strip = sr && sr.querySelector('.wd-review-tiles.multi');
+    if (!strip) return;
+    const sync = () => {
+      const { atStart, atEnd } = _overflowEdges(strip);
+      sr.querySelectorAll('.wd-review-q-step').forEach(b => { b.disabled = b.dataset.dir === '-1' ? atStart : atEnd; });
+    };
+    strip.addEventListener('scroll', sync, { passive: true });
+    sync();
+  }
+
+  _stepReviewTiles(dir) {
+    const strip = this.shadowRoot && this.shadowRoot.querySelector('.wd-review-tiles');
+    const tile = strip && strip.querySelector('.wd-review-tile');
+    if (!tile) return;
+    const gap = parseFloat(getComputedStyle(strip).columnGap) || 0;
+    // A right-to-left page scrolls towards negative scrollLeft.
+    const sign = getComputedStyle(strip).direction === 'rtl' ? -1 : 1;
+    strip.scrollBy({ left: dir * sign * (tile.offsetWidth + gap), behavior: 'smooth' });
+  }
+
+  // After a one-tap answer: reload the queue, drop the cached curves (labelling
+  // rebuilds the envelopes), and stop an open cycle dialog calling its overlay
+  // suspected.
+  async _afterReviewAnswer(eid, cid, label) {
+    const fetched = await this._fetchFeedbacks(eid);
+    const m = this._modal;
+    if (label && m && m.type === 'cycle-detail' && m.cycleId === cid && m.curve) {
+      // Answering labels the cycle, so an open dialog stops calling its overlay
+      // "suspected" (#462), and overlays the new label when it is the other one.
+      const prev = m.overlayPlan ? m.overlayPlan.name : m.curve.profile_name;
+      m.curve.profile_name = label;
+      // An unsaved Review-form choice predates the answer: Save Review would send
+      // it back over the label just set (#469's cyc-review-save drops it too).
+      delete m.reviewLabel;
+      if (m.overlayPlan || label !== prev) m.overlayPlan = { name: label, suspected: false, runnerUp: null };
+      // The old envelope is the other programme's: drop it, as cyc-review-save does,
+      // or it is drawn under the new name until (unless) the fetch returns.
+      if (label !== prev) { m.curve.expected = []; m.profileEnv = null; m.runnerUpEnv = null; this._fetchCycleProfileEnv(eid, label); }
+    }
+    if (this._reviewQ && this._reviewQ.eid === eid) this._reviewQ.envs = {};
+    const dev = this._devices[this._selIdx];
+    const ours = !!(dev && dev.entry_id === eid);
+    if (ours) {
+      // The count on the device lags the answer until the next poll.
+      dev.feedback_count = Math.max(0, (dev.feedback_count || 0) - 1);
+      // Only a fetched list matches the count; after a failed one the next poll
+      // must refetch, or the answered request keeps being asked.
+      this._feedbacksSeenCount = fetched ? dev.feedback_count : null;
+    }
+    // Paint the answer now: the answered tile must not stay tappable while the
+    // next tiles' curves and the cycle list load (a second tap fails).
+    this._render();
+    if (this._tab === 'history') await this._fetchCycles(eid);
+    if (ours && this._tab === 'status') await this._ensureReviewQuestion(dev);
+    this._render();
+  }
+
   _htmlStatus() {
     const dev = this._devices[this._selIdx];
     if (!dev) return `<div class="wd-empty">${this._t('msg.no_device_selected', {}, 'No device selected.')}</div>`;
@@ -5092,11 +5485,14 @@ class HaWashdataPanel extends HTMLElement {
           <select id="wd-status-prog">
             <option value="auto_detect" ${selVal === 'auto_detect' ? 'selected' : ''}>${this._t('status.auto_detect', {}, 'Auto-detect')}</option>
             ${profOpts}
-          </select>${tag}${this._htmlMatchUncertainty(dev, isRunning, manual)}</div>`;
+          </select>${tag}${this._htmlTornChips(dev, isRunning, manual) || this._htmlMatchUncertainty(dev, isRunning, manual)}</div>`;
 
     const attn = [];
     if (dev.recording && this._canEdit()) attn.push(`<div class="wd-attn-card"><span class="wd-attn-icon">●</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.recording_in_progress', {}, 'Recording in progress')}</div><div class="wd-attn-sub">${this._t('msg.see_recorder', {}, 'See recorder widget below')}</div></div></div>`);
-    if (dev.feedback_count && this._canEdit()) attn.push(`<button class="wd-attn-card" type="button" data-action="goto-feedbacks"><span class="wd-attn-icon">💬</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.feedback_cycles_pending', {n: dev.feedback_count}, `To review: ${dev.feedback_count}`)}</div><div class="wd-attn-sub">${this._t('msg.review_to_cycles', {}, 'Open the Cycles review queue')}</div></div></button>`);
+    // The waiting questions once the requests are loaded (audit item 1); the count card
+    // stands in until then, or when the backend sends no cycle for any request.
+    const reviewQHtml = this._htmlReviewQuestion(dev);
+    if (dev.feedback_count && this._canEdit() && !reviewQHtml) attn.push(`<button class="wd-attn-card" type="button" data-action="goto-feedbacks"><span class="wd-attn-icon">💬</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.feedback_cycles_pending', {n: dev.feedback_count}, `To review: ${dev.feedback_count}`)}</div><div class="wd-attn-sub">${this._t('msg.review_to_cycles', {}, 'Open the Cycles review queue')}</div></div></button>`);
     const _confKeys = this._conflictKeysFromOpts();
     if (_confKeys.size && this._canEdit()) {
       const n = _confKeys.size, s = n > 1 ? 's' : '';
@@ -5193,8 +5589,10 @@ class HaWashdataPanel extends HTMLElement {
       </div>`;
     })();
 
+    // While a cycle runs its live card comes first; otherwise the question does.
     return `
       ${attnHtml}
+      ${isRunning ? '' : reviewQHtml}
       <div class="wd-card">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px">
           <div class="wd-card-title" style="margin:0">${_esc(dev.title)}</div>
@@ -5215,6 +5613,7 @@ class HaWashdataPanel extends HTMLElement {
         ${showSetupCard ? '' : `<div class="wd-card-title" style="margin-top:18px">${this._t('hdr.live_power', {}, 'Live Power')}</div>`}
         ${curveHtml}
       </div>
+      ${isRunning ? reviewQHtml : ''}
       ${this._canEdit() ? this._htmlRecordingWidget() : ''}
       ${debugHtml}
     `;
@@ -6868,8 +7267,8 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   // A tile's main button (admin-only, like HA's blueprint/save). A template
-  // whose only open input is the device becomes an automation for it in one
-  // click; any other is installed and finished in HA's own blueprint form.
+  // whose only open input is the device becomes an automation for it once its
+  // YAML is confirmed; any other is installed and finished in HA's own form.
   _htmlBlueprintAction(b, admin, cls = 'wd-btn-sm') {
     if (!admin || b.compatible === false) return '';
     const busy = this._busy.has('bp-' + b.id);
@@ -6932,7 +7331,7 @@ class HaWashdataPanel extends HTMLElement {
       importUrl ? `<a class="wd-bp-import" href="${_esc(importUrl)}" target="_blank" rel="noopener noreferrer">${this._t('link.bp_import_my_ha', {}, 'Import with My Home Assistant')} ↗</a>` : '',
     ].join('');
     const yaml = m.showYaml ? `
-      <pre class="wd-bp-yaml" tabindex="0" aria-label="${_esc(this._tText('lbl.bp_yaml', {}, 'Blueprint YAML'))}">${_esc(b.yaml || '')}</pre>
+      ${this._htmlBlueprintYaml(b)}
       <button type="button" class="wd-btn wd-btn-secondary wd-btn-sm" data-maction="bp-copy">${this._t('btn.bp_copy_yaml', {}, 'Copy YAML')}</button>` : '';
     const action = this._htmlBlueprintAction(b, admin, '').replace('data-action="auto-bp-', 'data-maction="bp-');
     return `<div class="wd-bp-dhead">
@@ -6949,6 +7348,37 @@ class HaWashdataPanel extends HTMLElement {
       <div class="wd-modal-actions">
         <button type="button" class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.close', {}, 'Close')}</button>
         ${action}
+      </div>`;
+  }
+
+  // The template's YAML: the library's text, untrusted, so escaped and never
+  // markup. The newline after <pre> is the one the HTML parser drops, so a text
+  // that starts with a blank line still shows it.
+  _htmlBlueprintYaml(b) {
+    return `<pre class="wd-bp-yaml" tabindex="0" aria-label="${_esc(this._tText('lbl.bp_yaml', {}, 'Blueprint YAML'))}">\n${_esc(b.yaml || '')}</pre>`;
+  }
+
+  // The step before anything is saved: the YAML exactly as blueprint/save gets
+  // it (m.bp, the object _bpRun saves, never a fresh catalog lookup). Always
+  // shown, not behind a toggle: reading it is what this dialog is for.
+  _htmlBlueprintReview(m) {
+    const b = m.bp;
+    const dev = this._devices[this._selIdx];
+    const ok = m.save === 'override' ? this._t('btn.replace', {}, 'Replace')
+      : m.mode === 'use' ? this._t('btn.bp_add_to', {device: (dev && dev.title) || 'WashData'}, 'Add to {device}')
+      : this._t('btn.bp_setup_in_ha', {}, 'Set up in Home Assistant');
+    return `<div class="wd-bp-dhead">
+        <span class="wd-bp-port">${this._autoIcon(b.icon)}</span>
+        <div class="wd-bp-titles"><h2 id="wd-modal-title">${_esc(this._bpName(b))}</h2>${this._htmlBlueprintStatus(b)}</div>
+      </div>
+      <div class="wd-bp-dbody">
+        ${m.save === 'override' ? `<p>${this._t('modal.bp_replace_library_msg', {name: this._bpName(b)}, 'Home Assistant has a different version of "{name}". Replace it with the one from the template library? Automations that use it change with it.')}</p>` : ''}
+        <p class="wd-bp-risk">${this._autoIcon('alert')}<span>${this._t('msg.bp_review_check', {}, 'Check this before saving: Home Assistant will run it exactly as written.')}</span></p>
+        ${this._htmlBlueprintYaml(b)}
+      </div>
+      <div class="wd-modal-actions">
+        <button type="button" class="wd-btn wd-btn-secondary" data-maction="cancel">${this._t('btn.cancel', {}, 'Cancel')}</button>
+        <button type="button" class="wd-btn wd-btn-primary" data-maction="ok">${ok}</button>
       </div>`;
   }
 
@@ -6977,11 +7407,16 @@ class HaWashdataPanel extends HTMLElement {
   // the blueprint unless this version is already there, create an automation from
   // it for this device and open it. 'install': install only, then HA's blueprint
   // page, where the user fills in the inputs the template cannot default.
+  // Anything saved is the library's text, which HA then runs as written, so the
+  // admin reads it first; a different installed copy is replaced from the same
+  // dialog. This version already installed: nothing is saved, nothing to read.
   _bpStart(b, mode) {
     if (!this._isAdmin() || this._busy.has('bp-' + b.id)) return;
     const st = this._bpInstalledState(b);
-    if (st === 'different') { this._bpConfirmReplace(b, mode); return; }
-    this._bpRun(b, mode, st === 'same' ? 'skip' : 'save');
+    if (st === 'same') { this._bpRun(b, mode, 'skip'); return; }
+    const save = st === 'different' ? 'override' : 'save';
+    this._modal = { type: 'bp-review', bp: b, mode, save, onOk: () => this._bpRun(b, mode, save) };
+    this._render();
   }
 
   // Never overwrite a different installed copy (the user may have edited it)
@@ -7583,7 +8018,7 @@ class HaWashdataPanel extends HTMLElement {
       ['anti_wrinkle_max_power',  'Max Anti-Wrinkle Power','W', 'A pulse above this ends anti-wrinkle and opens a new cycle', 'advanced'],
       ['anti_wrinkle_max_duration','Max Anti-Wrinkle Duration','s', 'A pulse longer than this ends anti-wrinkle and opens a new cycle', 'advanced'],
       ['anti_wrinkle_idle_timeout','Max Pulse Gap',        's', 'Quiet time allowed between two tumble pulses before anti-wrinkle ends', 'advanced'],
-      ['dishwasher_end_spike_quiet_release','Passive-Dry Quiet Release','s', 'Dishwasher: quiet seconds after expected duration before the end-of-cycle drain wait is released', 'advanced'],
+      ['dishwasher_end_spike_quiet_release','Passive-Dry Quiet Release','s', 'Dishwasher: seconds below Stop since the last activity needed to end the final-drain wait after the expected duration', 'advanced'],
       ['smart_termination_duration_ratio', 'Smart Termination Ratio', '', 'Fraction of the program\'s average duration a cycle must reach before Smart Termination may end it early; lower it if run times vary', 'advanced'],
       ['anti_crease_finalize_ratio', 'Anti-Crease Finalize Ratio', '', 'Fraction of the program\'s average duration a cycle must reach before the anti-crease tail may finish it; lower it on dryers, keep washers at the default', 'advanced'],
       ['curve_preroll_seconds', 'Curve Pre-roll', 's', 'Seconds of readings from aborted start attempts carried into the front of a cycle\'s curve; 0 = off', 'timing'],
@@ -7675,7 +8110,19 @@ class HaWashdataPanel extends HTMLElement {
     if (this._pgThreshStart != null) out.start_threshold_w = this._pgThreshStart;
     if (this._pgThreshStop != null) out.stop_threshold_w = this._pgThreshStop;
     for (const [k, v] of Object.entries(this._pgParamOverrides || {})) out[k] = v;
+    // The sim runs on the settings form's range, as the saved option would (#487).
+    for (const k of Object.keys(out)) out[k] = this._pgHeld(k, out[k]);
     return out;
+  }
+
+  // A numeric Playground value held to its setting's min/max; anything else as is.
+  _pgHeld(key, val) {
+    if (typeof val !== 'number' || isNaN(val)) return val;
+    const f = _FIELD_BY_KEY[key] || {};
+    let held = val;
+    if (typeof f.min === 'number' && held < f.min) held = f.min;
+    if (typeof f.max === 'number' && held > f.max) held = f.max;
+    return held;
   }
 
   // Staged value for one key, or undefined when the field is at the live baseline.
@@ -7896,7 +8343,9 @@ class HaWashdataPanel extends HTMLElement {
   async _pgPublishOne(key) {
     const dev = this._devices[this._selIdx];
     if (!dev || !this._canEdit() || !key || !this._pgIsPublishable(key)) return;
-    const val = this._pgStagedVal(key);
+    // Publish what the row says it runs as, not the raw typed value (#487):
+    // set_options does not hold most ranges.
+    const val = this._pgHeld(key, this._pgStagedVal(key));
     if (val === undefined || val === null) return;
     const lbl = this._t('setting.' + key + '.label', {}, key);
     if (!confirm(this._tText('msg.pg_publish_one_confirm', {label: lbl, value: val}, `Save ${lbl} = ${val} to this device's settings?`))) return;
@@ -8033,6 +8482,11 @@ class HaWashdataPanel extends HTMLElement {
       else curVal = this._pgParamOverrides[key] ?? liveVal;
       const isBool = type === 'bool';
       const isDrag = threshFields.has(key);
+      // A typed value outside the setting's range runs as the nearest end of it (#487).
+      const held = this._pgHeld(key, curVal);
+      const heldNote = (!isBool && typeof curVal === 'number' && held !== curVal)
+        ? `<span class="wd-pg-held" style="font-size:.72em;color:var(--warning-color,#eda100)">${this._t('lbl.pg_runs_as', {value: String(held)}, 'runs as {value}')}</span>`
+        : '';
       const unitTxt = unit ? unit : '';
       const gc = groupColors[group] || '#2a78d6';
       const gl = groupLabels[group] || '';
@@ -8063,6 +8517,7 @@ class HaWashdataPanel extends HTMLElement {
             ? `<input class="wd-pg-param-chk" type="checkbox" data-pgkey="${_esc(key)}" data-pgtype="bool" aria-label="${_esc(lbl)}" ${curVal ? 'checked' : ''} style="width:18px;height:18px;margin:1px 27px 0 27px">`
             : `<input class="wd-pg-param-inp" type="text" inputmode="decimal" data-pgkey="${_esc(key)}" value="${curVal !== '' ? _esc(String(curVal)) : ''}" placeholder="${liveVal !== '' ? _esc(String(liveVal)) : ''}" aria-label="${_esc(lbl)}" style="width:72px">`}
           ${unitTxt ? `<span style="font-size:.75em;color:var(--secondary-text-color);min-width:14px">${_esc(unitTxt)}</span>` : ''}
+          ${heldNote}
           ${pubBtn}
         </div>
       </div>`;
@@ -8148,6 +8603,7 @@ class HaWashdataPanel extends HTMLElement {
       overrun: this._t('lbl.pg_alert_overrun', {}, 'Overrun'),
       underrun: this._t('lbl.pg_alert_underrun', {}, 'Underrun'),
       did_not_finish: this._t('lbl.pg_alert_did_not_finish', {}, 'Did not finish'),
+      discarded: this._t('lbl.pg_alert_discarded', {}, 'Discarded as a ghost or pump-out'),
       false_end: this._t('lbl.pg_alert_false_end', {}, 'Split into multiple cycles'),
       unmatched: this._t('lbl.pg_alert_unmatched', {}, 'Unmatched'),
       ambiguous: this._t('lbl.pg_alert_ambiguous', {}, 'Ambiguous match'),
@@ -8394,8 +8850,12 @@ class HaWashdataPanel extends HTMLElement {
     const fromN = parseFloat(this._pgSweepFrom), toN = parseFloat(this._pgSweepTo);
     if (isNaN(fromN) || isNaN(toN) || fromN === toN) { this._showToast(this._t('msg.toast_range_required', {}, 'Set a valid From/To range.'), 'error'); return; }
     const steps = Math.max(2, Math.min(12, this._pgSweepSteps || 5));
-    const values = Array.from({length: steps}, (_, i) => +(fromN + (toN - fromN) * i / (steps - 1)).toFixed(3));
     const param = this._pgSweepParam || 'off_delay';
+    // Each point held to the setting's range, as a Simulate runs it (#487): a
+    // sweep must not score, or let Apply save, a value the setting cannot hold.
+    const values = [...new Set(Array.from({length: steps}, (_, i) =>
+      this._pgHeld(param, +(fromN + (toN - fromN) * i / (steps - 1)).toFixed(3))))];
+    if (values.length < 2) { this._showToast(this._t('msg.toast_range_required', {}, 'Set a valid From/To range.'), 'error'); return; }
     const objective = this._pgSweepObjective || 'match_accuracy';
     // The same "Last N" as Test on history (audit PLAYGROUND-18); the backend adds
     // one pass with the current settings, which every value has to beat.
@@ -8431,7 +8891,7 @@ class HaWashdataPanel extends HTMLElement {
     const opts = {};
     for (const key of this._pgChangedKeys()) {
       if (!this._pgIsPublishable(key)) continue;
-      opts[key] = this._pgStagedVal(key);
+      opts[key] = this._pgHeld(key, this._pgStagedVal(key));
     }
     const keys = Object.keys(opts);
     if (!keys.length) return;
@@ -8458,7 +8918,10 @@ class HaWashdataPanel extends HTMLElement {
   async _pgApplySweepValue(val) {
     const dev = this._devices[this._selIdx];
     if (!dev || !this._canEdit() || val == null) return;
-    const paramKey = this._pgSweepParam;
+    // The setting the result was swept on, not the one selected since.
+    const swept = this._pgSweepNew;
+    const paramKey = (swept && swept.param) || this._pgSweepParam;
+    val = this._pgHeld(paramKey, +val);
     const lbl = this._t('setting.' + paramKey + '.label', {}, paramKey);
     if (!confirm(this._tText('msg.pg_apply_confirm', {label: lbl, value: val}, 'Apply best value: ' + lbl + ' = ' + val + '?'))) return;
     await this._busyRun('pg-sweep-apply', async () => {
@@ -8613,6 +9076,8 @@ class HaWashdataPanel extends HTMLElement {
     const override = { ...this._pgParamOverrides };
     if (this._pgThreshStart != null) override.start_threshold_w = this._pgThreshStart;
     if (this._pgThreshStop != null) override.stop_threshold_w = this._pgThreshStop;
+    // The value the row says it "runs as" (#487); the backend does not hold it.
+    for (const k of Object.keys(override)) override[k] = this._pgHeld(k, override[k]);
     return override;
   }
 
@@ -10963,6 +11428,7 @@ class HaWashdataPanel extends HTMLElement {
     if (m.type === 'import-wizard') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlImportWizardModal(m)}</div></div>`;
     if (m.type === 'history-import') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlHistoryImportModal(m)}</div></div>`;
     if (m.type === 'bp-details') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg wd-bp-modal" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlBlueprintDetails(m)}</div></div>`;
+    if (m.type === 'bp-review') return `<div class="wd-overlay"><div class="wd-modal wd-modal-lg wd-bp-modal wd-bp-review" role="dialog" aria-modal="true" aria-labelledby="wd-modal-title" tabindex="-1">${this._htmlBlueprintReview(m)}</div></div>`;
 
     let body = '';
     if (m.type === 'confirm') {
@@ -11642,12 +12108,14 @@ class HaWashdataPanel extends HTMLElement {
     }
     const cur = m.curve || {};
     const isRef = !!cur.is_reference;  // lives in reference_cycles: outside usage stats
-    // Capabilities come from the backend (`_reference_capabilities`), which derives them
+    // Capabilities come from the backend (`_cycle_capabilities`), which derives them
     // from which list the cycle lives in. An imported cycle can be labelled - that is how
-    // a program gets named from imported history (#344) - but not trimmed, split or
-    // reviewed, because those store functions only operate on past_cycles.
+    // a program gets named from imported history (#344) - but not split or reviewed,
+    // because those store functions only operate on past_cycles. One found in imported
+    // power history can be trimmed (#518); a community-store recording cannot.
     const canLabel = cur.labelable !== false;
     const canEditCycle = cur.editable !== false;
+    const canTrimCycle = canEditCycle || cur.trimmable === true;
     const fromHistory = cur.cycle_origin === 'backfill';
     const full = cur.full_duration_s || cur.duration || 0;
     const kwh = cur.energy_kwh != null ? cur.energy_kwh : null;
@@ -11669,32 +12137,32 @@ class HaWashdataPanel extends HTMLElement {
     const reviewDot = (needsReview && m.mode !== 'review')
       ? ` <span title="${this._t('hdr.automation_needs_review', {}, 'This cycle needs review')}" style="color:var(--warning-color,#ff9800);font-size:1.1em;line-height:0">●</span>`
       : '';
-    // Imported recordings are read-only (they seed matching templates only), so
-    // the edit mode-bar is hidden and a short note explains why.
-    const modeBar = (this._canEdit() && canEditCycle) ? `<div class="wd-mode-bar">
+    // Imported recordings seed matching templates only: a community-store one is
+    // read-only, one found in imported history can only be trimmed (#518). The mode
+    // bar offers what the cycle allows, and a short note says why the rest is missing.
+    const modeBar = (this._canEdit() && canTrimCycle) ? `<div class="wd-mode-bar">
       <button class="wd-btn wd-btn-sm ${m.mode === 'view' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-view">${this._t('btn.inspect', {}, 'Inspect')}</button>
-      <button class="wd-btn wd-btn-sm ${m.mode === 'trim' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-trim">${this._t('btn.trim', {}, 'Trim')}</button>
+      <button class="wd-btn wd-btn-sm ${m.mode === 'trim' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-trim">${this._t('btn.trim', {}, 'Trim')}</button>${canEditCycle ? `
       <button class="wd-btn wd-btn-sm ${m.mode === 'split' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-split">${this._t('btn.split', {}, 'Split')}</button>
-      <button class="wd-btn wd-btn-sm ${m.mode === 'review' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-review" title="${needsReview ? this._t('hdr.automation_needs_review', {}, 'This cycle needs review') : this._t('hdr.automation_review_this_cycle', {}, 'Review this cycle')}">${this._t('btn.review', {}, 'Review')}${reviewDot}</button>
-    </div>` : (isRef ? `<div class="wd-info" style="margin:0 0 8px"><span style="color:var(--info-color,#2196f3)">📥</span> ${fromHistory
-      ? this._t('msg.imported_history_readonly', {}, 'Found in imported power history. It helps matching but is not counted in your statistics and cannot be trimmed or split. Label it to name the program.')
-      : this._t('msg.imported_readonly', {}, 'Imported from the community store. Used for reference and matching, not counted in your stats, and cannot be edited.')}</div>` : '');
+      <button class="wd-btn wd-btn-sm ${m.mode === 'review' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="cyc-review" title="${needsReview ? this._t('hdr.automation_needs_review', {}, 'This cycle needs review') : this._t('hdr.automation_review_this_cycle', {}, 'Review this cycle')}">${this._t('btn.review', {}, 'Review')}${reviewDot}</button>` : ''}
+    </div>` : '';
+    const refNote = (isRef && !canEditCycle) ? `<div class="wd-info" data-cyc-ref-note style="margin:0 0 8px"><span style="color:var(--info-color,#2196f3)">📥</span> ${fromHistory
+      ? this._t('msg.imported_history_note', {}, 'Found in imported power history. It helps matching but is not counted in your statistics and cannot be split. Label it to name the program.')
+      : this._t('msg.imported_readonly', {}, 'Imported from the community store. Used for reference and matching, not counted in your stats, and cannot be edited.')}</div>` : '';
 
-    // Pending-detection-feedback banner (Confirm / Correct… / Ignore). Built once
-    // and shown in BOTH Inspect and Review modes, so a cycle in the "needs review"
-    // queue exposes the resolve controls without the user having to discover Review
-    // mode (#331). Editors only; imported reference cycles never carry feedback.
+    // Pending-detection-feedback banner with the one-tap answers (the two candidate
+    // programmes, Something else..., Not sure). Built once and shown in BOTH Inspect
+    // and Review modes, so a cycle in the "needs review" queue exposes the resolve
+    // controls without the user having to discover Review mode (#331). No
+    // confidence figure: it is a similarity score, not a probability (item 305).
+    // Editors only; imported reference cycles never carry feedback.
     const pendingFb = this._canEdit() ? (this._feedbacks || []).find(f => f.cycle_id === m.cycleId) : null;
     const fbProf = pendingFb ? (pendingFb.detected_profile || pendingFb.profile_name || this._t('lbl.unknown', {}, 'Unknown')) : '';
     const fbBanner = pendingFb ? `
         <div class="wd-card" style="background:var(--secondary-background-color);border-left:3px solid var(--warning-color,#ff9800);margin:0 0 12px;padding:12px">
           <div style="font-weight:600;margin-bottom:4px">⚠ ${this._t('msg.pending_feedback', {}, 'Pending detection feedback')}</div>
-          <p class="wd-info" style="margin:0 0 8px">${this._t('msg.unsure_detected_prefix', {}, 'WashData is unsure it detected')} <strong>${_esc(fbProf)}</strong>${pendingFb.confidence != null ? ` (${this._t('lbl.confidence', {}, 'confidence').toLowerCase()} ${(pendingFb.confidence * 100).toFixed(0)}%)` : ''}. ${this._t('msg.feedback_prompt', {}, 'Confirm it was right, correct the program, or ignore.')} ${this._t('msg.feedback_relabel_hint', {}, 'Re-labelling this cycle resolves it too.')}</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="wd-btn wd-btn-primary wd-btn-sm" data-action="fb-confirm" data-cid="${_esc(m.cycleId)}">${this._t('btn.confirm', {}, 'Confirm')}</button>
-            <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="fb-correct" data-cid="${_esc(m.cycleId)}" data-prof="${_esc(fbProf)}">${this._t('btn.correct', {}, 'Correct…')}</button>
-            <button class="wd-btn wd-btn-secondary wd-btn-sm" data-action="fb-ignore" data-cid="${_esc(m.cycleId)}">${this._t('btn.ignore', {}, 'Ignore')}</button>
-          </div>
+          <p class="wd-info" style="margin:0 0 8px">${this._t('msg.unsure_detected_prefix', {}, 'WashData is unsure it detected')} <strong>${_esc(fbProf)}</strong>. ${this._t('msg.review_which_program', {}, 'Which program was it?')} ${this._t('msg.feedback_relabel_hint', {}, 'Re-labelling this cycle resolves it too.')}</p>
+          ${this._htmlReviewAnswers({ ...pendingFb, cycle_id: m.cycleId })}
         </div>` : '';
 
     let controls = '';
@@ -11871,7 +12339,7 @@ class HaWashdataPanel extends HTMLElement {
         ${legItems.map(s => `<span class="wd-leg-i" data-leg="${s.kind}"><span class="wd-leg-sw" style="${legSw(s)};opacity:.8"></span> ${_esc(s.name)}</span>`).join('')}
       </div>` : '';
     return `<h2>${this._t('lbl.cycle', {}, 'Cycle')} · ${_esc(_fmtDate(cur.start_time))}</h2>
-      ${meta}${modeBar}
+      ${meta}${modeBar}${refNote}
       <div class="wd-canvas-wrap"><canvas id="wd-cyc-canvas" role="img" aria-label="${_esc(this._t('lbl.aria_cycle_chart', {}, 'Cycle power trace'))}"></canvas></div>
       ${this._htmlCycleContextBar(m, cur)}
       ${overlayLeg}
@@ -13057,22 +13525,7 @@ class HaWashdataPanel extends HTMLElement {
 
     const progSel = sr.getElementById('wd-status-prog');
     if (progSel) progSel.addEventListener('change', () => {
-      const dev = this._devices[this._selIdx]; if (!dev) return;
-      const val = progSel.value;
-      // No cycle under way means the choice is armed for the next one (#411), so
-      // say that rather than implying it applies to something running now.
-      const willArm = !_ACTIVE_STATES.includes(dev.detector_state || '');
-      this._ws({ type: `${_DOMAIN}/set_program`, entry_id: dev.entry_id, program: val })
-        .then(() => {
-          this._showToast(
-            val === 'auto_detect'
-              ? this._t('msg.toast_auto_detect_enabled', {}, 'Auto-detect enabled')
-              : willArm
-                ? this._tText('msg.toast_program_armed', {program: val}, `Program armed for the next cycle: ${val}`)
-                : this._tText('msg.toast_program_set', {program: val}, `Program set: ${val}`));
-          return this._fetchAll();
-        })
-        .catch(e => this._showToast(this._tText('msg.toast_failed', {error: e.message || e}, 'Failed: ' + (e.message || e)), 'error'));
+      this._setStatusProgram(this._devices[this._selIdx], progSel.value);
     });
 
     // Compact cycle rows: toggle selection in select mode, else open the cycle.
@@ -13920,20 +14373,38 @@ class HaWashdataPanel extends HTMLElement {
         onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/discard_recording`, entry_id: eid }); this._showToast(this._t('toast.recording_discarded', {}, 'Recording discarded')); await this._fetchRecState(eid); } catch (e) { this._showToast(this._tText('toast.discard_failed', {error: e.message || e}, 'Discard failed: ' + (e.message || e)), 'error'); } } };
       this._render();
 
-    } else if (a === 'fb-confirm') {
+    } else if (a === 'fb-confirm' || a === 'fb-pick' || a === 'fb-ignore') {
+      // A one-tap answer (_htmlReviewAnswers). One per cycle at a time: a second
+      // tap while the first is in flight (the tile stays until the list is
+      // refetched) would send a second resolve_feedback, whose failure toast
+      // replaces the "Saved" one. A Set of its own, not _busy: no header badge.
       const fbCid = btn.dataset.cid;
-      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: fbCid, action: 'confirm' }).then(() => { this._showToast(this._t('toast.feedback_confirmed', {}, 'Feedback confirmed')); return this._fetchFeedbacks(eid); }).then(() => {
-        // Confirming labels the cycle with the detected profile, so an open dialog
-        // stops calling its overlay "suspected" (#462).
-        const m = this._modal;
-        if (m && m.type === 'cycle-detail' && m.cycleId === fbCid && m.overlayPlan && m.overlayPlan.suspected) {
-          if (m.curve) m.curve.profile_name = m.overlayPlan.name;
-          m.overlayPlan = { name: m.overlayPlan.name, suspected: false, runnerUp: null };
-        }
-        this._render();
-      }).catch(e => this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
-    } else if (a === 'fb-ignore') {
-      this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: btn.dataset.cid, action: 'ignore' }).then(() => { this._showToast(this._t('toast.feedback_dismissed', {}, 'Feedback dismissed')); return this._fetchFeedbacks(eid); }).then(() => this._render()).catch(e => this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'));
+      const answering = this._reviewAnswering || (this._reviewAnswering = new Set());
+      if (fbCid && !answering.has(fbCid)) {
+        answering.add(fbCid);
+        // The detected programme confirms, the other candidate corrects to it
+        // (learning.async_answer_review's rule); "Not sure" dismisses.
+        const fb = (this._feedbacks || []).find(f => f.cycle_id === fbCid) || {};
+        const label = a === 'fb-pick' ? btn.dataset.prof : a === 'fb-confirm' ? fb.detected_profile : null;
+        const req = a === 'fb-pick'
+          ? { type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: fbCid, action: 'correct', corrected_profile: label }
+          : { type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: fbCid, action: a === 'fb-ignore' ? 'ignore' : 'confirm' };
+        // The answer's toast re-renders the cycle dialog: keep unsaved Review-form
+        // edits (quality, tags, notes) for Save Review, whatever the answer does.
+        this._snapshotCycleReviewForm(this.shadowRoot);
+        this._ws(req).then(() => {
+          this._showToast(a === 'fb-ignore'
+            ? this._t('toast.feedback_dismissed', {}, 'Feedback dismissed')
+            : label
+              ? this._tText('toast.review_answered', {program: label}, `Saved: ${label}`)
+              : this._t('toast.feedback_confirmed', {}, 'Feedback confirmed'));
+          return this._afterReviewAnswer(eid, fbCid, label);
+        }).catch(e => this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'))
+          .finally(() => answering.delete(fbCid));
+      }
+    } else if (a === 'torn-pick') {
+      // "X or Y?" on the Status card: the same manual pick as the dropdown.
+      this._setStatusProgram(this._devices[this._selIdx], btn.dataset.prog);
     } else if (a === 'fb-correct') {
       this._fetchProfiles(eid).then(() => { this._modal = { type: 'correct-feedback', cycleId: btn.dataset.cid, detectedProfile: btn.dataset.prof }; this._render(); });
     } else if (a === 'fb-dismiss-all') {
@@ -14134,6 +14605,13 @@ class HaWashdataPanel extends HTMLElement {
       this._toggleLogDrawer();
     } else if (a === 'add-device') {
       this._navigate(`/config/integrations/integration/${_DOMAIN}`);
+    } else if (a === 'review-q-toggle') {
+      this._reviewOpen = !this._reviewOpen;
+      try { localStorage.setItem('wd-review-open', this._reviewOpen ? '1' : '0'); } catch (_) { /* ignore */ }
+      this._render();
+      if (this._reviewOpen) this._refreshReviewQuestion(this._devices[this._selIdx]);
+    } else if (a === 'review-q-step') {
+      this._stepReviewTiles(Number(btn.dataset.dir) || 1);
     } else if (a === 'goto-feedbacks') {
       this._tab = 'history'; this._historySub = 'cycles'; this._cycleFilter = { ...this._cycleFilter, status: 'needs_review' }; this._fetchTabData();
     } else if (a === 'goto-recording') {
@@ -14900,7 +15378,12 @@ class HaWashdataPanel extends HTMLElement {
         const result = r && r.result;
         if (!result) { this._showToast(this._t('toast.pg_run_gone', {}, 'That run is no longer available.'), 'info'); return; }
         if (t.kind === 'pg_history') { this._pgHistory = result; this._pgAnalysisTab = 'history'; }
-        else { this._pgSweepNew = (!result.error) ? result : null; this._pgAnalysisTab = 'sweep'; }
+        else {
+          this._pgSweepNew = (!result.error) ? result : null; this._pgAnalysisTab = 'sweep';
+          // A loaded run shows under the setting and objective it was swept for.
+          if (this._pgSweepNew && this._pgSweepNew.param) this._pgSweepParam = this._pgSweepNew.param;
+          if (this._pgSweepNew && this._pgSweepNew.objective) this._pgSweepObjective = this._pgSweepNew.objective;
+        }
         this._render();
       }).catch(() => this._showToast(this._t('toast.pg_run_gone', {}, 'That run is no longer available.'), 'info'));
     } else if (a === 'pg-open-cycle') {
@@ -15094,7 +15577,7 @@ class HaWashdataPanel extends HTMLElement {
       const corrected = sr.getElementById('wd-fb-profile')?.value;
       const dur = parseFloat(sr.getElementById('wd-fb-dur')?.value || 0) || null;
       this._modal = null;
-      try { await this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: m.cycleId, action: 'correct', corrected_profile: corrected, corrected_duration_min: dur }); this._showToast(this._t('toast.correction_submitted', {}, 'Correction submitted')); await this._fetchFeedbacks(eid); }
+      try { await this._ws({ type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: m.cycleId, action: 'correct', corrected_profile: corrected, corrected_duration_min: dur }); this._showToast(this._t('toast.correction_submitted', {}, 'Correction submitted')); await this._afterReviewAnswer(eid, m.cycleId, null); }
       catch (e) { this._showToast(this._tText('msg.toast_error', {error: e.message || e}, 'Error: ' + (e.message || e)), 'error'); }
       this._render();
     } else if (action === 'auto-run' && eid) {

@@ -127,6 +127,34 @@ test('workbench: editing a param reveals Save-to-settings and it persists', asyn
   await assertWsCalled(page, 'ha_washdata/set_options');
 });
 
+test('workbench: a value outside the setting\'s range says what it runs as (#487)', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const inp = page.locator('.wd-pg-param-inp[data-pgkey="smart_termination_duration_ratio"]');
+  await expect(inp).toBeVisible({ timeout: 8_000 });
+  await inp.fill('2.0');
+  await expect(page.locator('.wd-pg-held')).toHaveText('runs as 1');
+  await page.locator('.wd-pg-param-inp[data-pgkey="smart_termination_duration_ratio"]').fill('0.95');
+  await expect(page.locator('.wd-pg-held')).toHaveCount(0);
+});
+
+test('workbench: the sim and a publish use the value a row says it runs as (#487)', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const key = 'profile_match_min_duration_ratio';
+  const inp = page.locator(`.wd-pg-param-inp[data-pgkey="${key}"]`);
+  await expect(inp).toBeVisible({ timeout: 8_000 });
+  await inp.fill('5');
+  await expect(page.locator('.wd-pg-held')).toHaveText('runs as 1');
+
+  await page.locator('button[data-action="pg-run"]').click();
+  const sims = await assertWsCalled(page, 'ha_washdata/start_playground_cycle_detail');
+  expect(sims[sims.length - 1].settings_override[key]).toBe(1);
+
+  page.once('dialog', d => d.accept());   // confirm()
+  await page.locator(`.wd-pg-pub[data-pgkey="${key}"]`).click();
+  const saves = await assertWsCalled(page, 'ha_washdata/set_options');
+  expect(saves[saves.length - 1].options[key]).toBe(1);
+});
+
 // ─── Settings control panel: live source, presets, per-setting publish ───────
 
 test('control panel: loads the integration\'s live settings on tab entry', async ({ page }) => {
@@ -312,6 +340,68 @@ test('drawer/optimize: running a 1D sweep starts a sweep task', async ({ page })
   await page.locator('#wd-pg-sw-steps').fill('3');
   await page.locator('button[data-action="pg-sweep-run2"]').click();
   await assertWsCalled(page, 'ha_washdata/start_playground_sweep');
+});
+
+test('drawer/optimize: sweep points are held to the setting range (#487)', async ({ page }) => {
+  await clickTab(page, 'playground');
+  await page.locator('.wd-pg-subtabs button[data-subtab="sweep"]').click();
+  await page.locator('#wd-pg-sw-param').selectOption('profile_match_min_duration_ratio');
+  await page.locator('#wd-pg-sw-from').fill('0.5');
+  await page.locator('#wd-pg-sw-to').fill('5');
+  await page.locator('#wd-pg-sw-steps').fill('4');
+  await page.locator('button[data-action="pg-sweep-run2"]').click();
+  const calls = await assertWsCalled(page, 'ha_washdata/start_playground_sweep');
+  // 0.5, 2, 3.5, 5 -> 0.5 and the 1.0 ceiling, once each.
+  expect(calls[calls.length - 1].values).toEqual([0.5, 1]);
+});
+
+// A sweep result belongs to the setting it swept: Apply best used whatever the
+// dropdown showed by then, so an off_delay result was saved as another setting.
+test('drawer/optimize: Apply best saves the setting the sweep ran on', async ({ page }) => {
+  await clickTab(page, 'playground');
+  await page.locator('.wd-pg-subtabs button[data-subtab="sweep"]').click();
+  await page.evaluate(async () => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    el._pgSweepParam = 'stop_threshold_w';
+    el._pgSweepNew = { param: 'off_delay', objective: 'match_accuracy', points: [], best_value: 240, current_value: 180 };
+    window.confirm = () => true;
+    await el._pgApplySweepValue(240);
+  });
+  const calls = await assertWsCalled(page, 'ha_washdata/set_options');
+  expect(calls[calls.length - 1].options).toEqual({ off_delay: 240 });
+});
+
+test('drawer/optimize: a sweep that finishes after the setting changed is not shown under it', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const kept = await page.evaluate(async () => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    const eid = el._devices[el._selIdx].entry_id;
+    const real = el._ws.bind(el);
+    el._ws = (msg: any) => (msg.type === 'ha_washdata/get_task_result'
+      ? Promise.resolve({ result: { param: 'off_delay', objective: 'match_accuracy', points: [{ value: 240, metric: 1 }] } })
+      : real(msg));
+    el._pgSweepParam = 'stop_threshold_w';   // changed while the off_delay sweep ran
+    await el._pgFinishTask({ id: 't1', entry_id: eid, state: 'done' }, false);
+    return el._pgSweepNew;
+  });
+  expect(kept).toBeNull();
+});
+
+test('drawer/optimize: a sweep that finishes after the objective changed is not shown under it', async ({ page }) => {
+  await clickTab(page, 'playground');
+  const kept = await page.evaluate(async () => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    const eid = el._devices[el._selIdx].entry_id;
+    const real = el._ws.bind(el);
+    el._ws = (msg: any) => (msg.type === 'ha_washdata/get_task_result'
+      ? Promise.resolve({ result: { param: 'off_delay', objective: 'match_accuracy', points: [{ value: 240, metric: 1 }] } })
+      : real(msg));
+    el._pgSweepParam = 'off_delay';
+    el._pgSweepObjective = 'false_end_rate';   // changed while the sweep ran
+    await el._pgFinishTask({ id: 't2', entry_id: eid, state: 'done' }, false);
+    return el._pgSweepNew;
+  });
+  expect(kept).toBeNull();
 });
 
 // PLAYGROUND-23: both replay cycles against profiles built partly from those same

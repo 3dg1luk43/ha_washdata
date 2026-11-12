@@ -53,13 +53,19 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from .const import (
+    CYCLE_DURATION_CAP_BASE_BY_DEVICE,
+    CYCLE_DURATION_CAP_BASE_S,
+    CYCLE_DURATION_CAP_LEGACY_SLACK_S,
+    CYCLE_DURATION_CAP_PROGRAMME_FACTOR,
     DEFAULT_MATCH_REVERT_RATIO,
     END_GATE_HAZARD_MARGIN,
     ENDING_HARD_FINALIZE_MIN_QUIET_S,
     MATCH_AMBIGUOUS_COMMIT_FACTOR,
     MATCH_DECISIVE_MARGIN,
+    MATCH_LABEL_MIN_MARGIN,
     MATCH_SURE_KNOTS,
     MATCH_SURE_SINGLE_CANDIDATE,
+    MAX_PLAUSIBLE_PROGRAMME_S,
     ORPHANED_PAUSE_MAX_WAIT_S,
 )
 
@@ -153,6 +159,108 @@ def profile_duration(value: Any) -> float | None:
     return avg
 
 
+def plausible_programme_s(value: Any) -> float:
+    """``value`` as a programme length the duration cap may scale on, else 0.0.
+
+    :func:`profile_duration`, and no longer than ``MAX_PLAUSIBLE_PROGRAMME_S``:
+    a longer one is corrupt data (#502), and must not stretch the cap.
+    """
+    duration = profile_duration(value)
+    if duration is None or duration > MAX_PLAUSIBLE_PROGRAMME_S:
+        return 0.0
+    return duration
+
+
+def is_duration_cap_stop(cycle: Any) -> bool:
+    """Whether a stored cycle was ended by the detector's duration cap (#502).
+
+    New cap stops carry ``duration_capped`` True, other force stops False. An older
+    one, without the key, is recognised as a
+    ``force_stopped`` run no shorter than ``CYCLE_DURATION_CAP_BASE_S`` less
+    ``CYCLE_DURATION_CAP_LEGACY_SLACK_S``: the flat 8 h cap, with the few seconds
+    the end may snap back to the last active reading.
+    """
+    if not isinstance(cycle, dict):
+        return False
+    if "duration_capped" in cycle:  # a stop stored since the mark says which it was
+        return bool(cycle["duration_capped"])
+    if cycle.get("status") != "force_stopped":
+        return False
+    duration = profile_duration(cycle.get("duration"))
+    return duration is not None and duration >= (
+        CYCLE_DURATION_CAP_BASE_S - CYCLE_DURATION_CAP_LEGACY_SLACK_S
+    )
+
+
+def is_flat_power_stop(cycle: Any) -> bool:
+    """Whether a stored cycle was ended by the detector's flat-power stop: the power
+    held one level for ``FLAT_POWER_STOP_WINDOW_S`` (``flat_power_stop`` mark)."""
+    return isinstance(cycle, dict) and bool(cycle.get("flat_power_stop"))
+
+
+def longest_programme_s(cycles: Any) -> float:
+    """The longest programme this device has learned, in seconds (0.0: none).
+
+    Per programme, the mean length of its labelled ``completed`` and
+    ``force_stopped`` cycles (:func:`plausible_programme_s`), then the longest of
+    those means. The duration cap scales on it (#502), so it leaves out every run
+    the cap itself ended (:func:`is_duration_cap_stop`): a cap stop labelled into a
+    programme would otherwise lengthen the next cap, and the next cap stop the one
+    after, the #404 loop. A flat-power stop (:func:`is_flat_power_stop`) is left out
+    too: a watchdog ended it, not the programme. A force stop by anything else
+    counts: on #502 the unmatched guard ended 7.9 h runs at their real end. Profile
+    ``avg_duration`` is not read for the same reason (it averages cap stops in). The
+    manager and the Playground pass their store's ``iter_evidence_cycles()``. Never
+    raises.
+    """
+    if isinstance(cycles, (str, bytes, dict)):
+        return 0.0
+    try:
+        items = list(cycles or ())
+    except TypeError:
+        return 0.0
+    totals: dict[str, tuple[float, int]] = {}
+    for cycle in items:
+        if not isinstance(cycle, dict):
+            continue
+        name = cycle.get("profile_name")
+        if not isinstance(name, str) or not name:
+            continue
+        if cycle.get("status") not in ("completed", "force_stopped"):
+            continue
+        if is_duration_cap_stop(cycle) or is_flat_power_stop(cycle):
+            continue
+        duration = plausible_programme_s(cycle.get("duration"))
+        if duration <= 0:
+            continue
+        total, count = totals.get(name, (0.0, 0))
+        totals[name] = (total + duration, count + 1)
+    return max((total / count for total, count in totals.values()), default=0.0)
+
+
+def cycle_duration_cap_base_s(device_type: Any = None) -> float:
+    """The duration cap's floor for ``device_type``: 12 h for a washer-dryer, 8 h
+    for every other type (#502)."""
+    return float(CYCLE_DURATION_CAP_BASE_BY_DEVICE.get(device_type, CYCLE_DURATION_CAP_BASE_S))
+
+
+def cycle_duration_cap_s(longest_programme: Any, device_type: Any = None) -> float:
+    """The detector's hard cap on a cycle's wall-clock length (#502).
+
+    ``max(cycle_duration_cap_base_s(device_type), CYCLE_DURATION_CAP_PROGRAMME_FACTOR
+    x longest)``, ``longest`` being :func:`longest_programme_s` bounded by
+    ``MAX_PLAUSIBLE_PROGRAMME_S``, so at most 24 h. The flat 8 h it replaces cut a
+    real 8.3 h wash+dry during its drying phase; a device whose programmes all run
+    under two thirds of its base keeps the base. It reads the learned programmes,
+    matched or not, and never the match's expected duration: that is the profile's
+    average, which takes cap stops in.
+    """
+    return max(
+        cycle_duration_cap_base_s(device_type),
+        CYCLE_DURATION_CAP_PROGRAMME_FACTOR * plausible_programme_s(longest_programme),
+    )
+
+
 def analyze_trend(history: list[float]) -> bool:
     """True if the score rose in at least 7 of the last 10 intervals.
 
@@ -173,6 +281,74 @@ def analyze_trend(history: list[float]) -> bool:
 def program_is_committed(program: Any) -> bool:
     """Whether the detector should be told a program is committed (audit LIVE-17)."""
     return program not in _NOT_COMMITTED_FOR_DETECTOR
+
+
+def detector_gate_inputs(
+    result: Any, confidence: float, expected_duration: Any
+) -> tuple[float, Any]:
+    """``(confidence, expected_duration)`` the detector's end gates read (#486).
+
+    With live member templates the result carries the single-template ranking's
+    own confidence and expected duration (``gate_confidence``,
+    ``gate_expected_duration``: that ranking's match, register items 555/567); the
+    end gates read those instead of the member scores. Every other result leaves
+    both as given. Shared by the manager and the Playground sim.
+    """
+    gate_conf = getattr(result, "gate_confidence", None)
+    gate_exp = getattr(result, "gate_expected_duration", None)
+    if isinstance(gate_conf, (int, float)) and not isinstance(gate_conf, bool):
+        confidence = float(gate_conf)
+    if isinstance(gate_exp, (int, float)) and not isinstance(gate_exp, bool):
+        expected_duration = float(gate_exp)
+    return confidence, expected_duration
+
+
+@dataclass(frozen=True)
+class GateInputs:
+    """What the detector's end gates read from one live tick (#486)."""
+
+    profile_name: str | None
+    revoke: bool
+    confidence: float
+    expected_duration: Any
+    is_ambiguous: bool
+    is_prefix_ambiguous_full_shape: bool
+    # The programmes an ambiguous match is torn between, ``(name, expected s)``,
+    # from the same ranking as ``is_ambiguous`` (``MatchResult.ambiguity_contenders``
+    # / ``gate_contenders``): what the hazard end gate reads. None: no such set.
+    contenders: Any = None
+    # This run's own expected duration from the gate profile's nearest members
+    # (``MatchResult.gate_run_expected``, audit item 2), None without one.
+    run_expected: Any = None
+
+
+def detector_inputs(tick: "MatchTick", result: Any) -> GateInputs:
+    """The tick's detector inputs, from the result's gate view when it has one.
+
+    With live member templates the store decides per tick which ranking the end
+    gates read (``MatchResult.gate_*``); every other result hands the detector the
+    tick as before. A divergence revert still revokes (:func:`detector_match`).
+    Shared by the manager and the Playground sim.
+    """
+    name, revoke = detector_match(tick, result)
+    conf, expected = detector_gate_inputs(result, tick.confidence, tick.matched_duration)
+    ambiguous = bool(getattr(result, "is_ambiguous", False))
+    prefix = bool(getattr(result, "is_prefix_ambiguous_full_shape", False))
+    gate_name = getattr(result, "gate_profile", None)
+    if name is not None and isinstance(gate_name, str) and gate_name:
+        name = gate_name
+    contenders = getattr(result, "ambiguity_contenders", None)
+    gate_amb = getattr(result, "gate_ambiguous", None)
+    if isinstance(gate_amb, bool):
+        ambiguous = gate_amb
+        contenders = getattr(result, "gate_contenders", None)
+    gate_pfs = getattr(result, "gate_prefix_full_shape", None)
+    if isinstance(gate_pfs, bool):
+        prefix = gate_pfs
+    run_expected = None
+    if isinstance(gate_amb, bool):
+        run_expected = profile_duration(getattr(result, "gate_run_expected", None))
+    return GateInputs(name, revoke, conf, expected, ambiguous, prefix, contenders, run_expected)
 
 
 def detector_match(tick: "MatchTick", result: Any) -> tuple[str | None, bool]:
@@ -766,7 +942,6 @@ def consistency_override(
     tick: MatchTick,
     result: Any,
     verified_pause: Any,
-    get_profile: Callable[[str], Any],
 ) -> list[LogLine]:
     """Align the displayed program with a verified pause or a confident mismatch.
 
@@ -776,6 +951,13 @@ def consistency_override(
     and non-ambiguity a normal switch needs. A confident mismatch (every candidate
     rejected) has no name, so it drops the program to "detecting..." - the
     manager-side half of the revoke the detector applies on element 5.
+
+    The adopted program's expected duration is the match's own
+    (``tick.matched_duration``, ``MatchResult.expected_duration``), as on every
+    other automatic switch (:func:`decide_switch`). It was the profile's
+    ``avg_duration`` (audit ML-15, register item 572), the rolling mean, where the
+    match sizes an envelope profile by its ``target_duration`` and a Stage-5 win by
+    the picked member's duration.
     """
     log: list[LogLine] = []
     profile_name = tick.profile_name
@@ -787,17 +969,11 @@ def consistency_override(
     if profile_name != state.current_program and (
         pause_switch_ok or result.is_confident_mismatch
     ):
-        if profile_name:
+        if profile_name and profile_name != DETECTING:
             state.current_program = profile_name
             state.last_confidence = tick.confidence
             state.last_member_confidence = result.member_confidence
-            # Try to fetch duration if we switched back to matched
-            try:
-                prof = get_profile(profile_name)
-                if prof:
-                    state.matched_duration = profile_duration(prof.get("avg_duration"))
-            except Exception as e:  # pylint: disable=broad-exception-caught
-                log.append((logging.DEBUG, "Failed to fetch profile duration on switch: %s", (e,)))
+            state.matched_duration = profile_duration(tick.matched_duration)
         else:
             state.current_program = DETECTING
             state.matched_duration = None
@@ -935,6 +1111,20 @@ def display_sure_pct(margin: float | None) -> int:
     return int(5 * round(p * 20))
 
 
+def _live_runner_up(result: Any, best: str) -> str | None:
+    """The live ranking's second programme, a profile group named by its best member."""
+    candidates = getattr(result, "candidates", None) or []
+    for cand in list(candidates)[1:2]:
+        if not isinstance(cand, dict):
+            continue
+        name = cand.get("group_best_member") or cand.get("name")
+        if isinstance(name, str) and name.startswith("__group__"):
+            name = name[len("__group__"):]
+        if name and name != best:
+            return str(name)
+    return None
+
+
 def live_match_uncertainty(result: Any, current_program: Any) -> dict[str, Any] | None:
     """Top two of an undecided live match, for the Status card (MATCH-DECIDE-15).
 
@@ -949,16 +1139,7 @@ def live_match_uncertainty(result: Any, current_program: Any) -> dict[str, Any] 
         return None
     if program_is_committed(current_program) and getattr(result, "is_ambiguous", False) is not True:
         return None
-    runner_up: str | None = None
-    candidates = getattr(result, "candidates", None) or []
-    for cand in list(candidates)[1:2]:
-        if not isinstance(cand, dict):
-            continue
-        name = cand.get("group_best_member") or cand.get("name")
-        if isinstance(name, str) and name.startswith("__group__"):
-            name = name[len("__group__"):]
-        if name and name != best:
-            runner_up = str(name)
+    runner_up = _live_runner_up(result, str(best))
     margin: float | None = None
     if runner_up is not None:
         try:
@@ -971,3 +1152,29 @@ def live_match_uncertainty(result: Any, current_program: Any) -> dict[str, Any] 
         "margin": margin,
         "sure_pct": display_sure_pct(margin),
     }
+
+
+def live_torn_choices(result: Any) -> list[str] | None:
+    """The two programmes a live match is torn between, or None. Never raises.
+
+    Torn: the latest tick's winner is flagged ambiguous, or leads its runner-up by
+    less than ``MATCH_LABEL_MIN_MARGIN``, the margin the cycle-end label verdict
+    needs. A cycle that ends like that is not labelled and asks for a review, so
+    the Status card offers both as a manual pick, which labels it by hand instead.
+    Display only, like :func:`live_match_uncertainty`; nothing that ends, labels
+    or switches a cycle reads it.
+    """
+    try:
+        best = getattr(result, "best_profile", None) if result is not None else None
+        if not best:
+            return None
+        runner_up = _live_runner_up(result, str(best))
+        if runner_up is None:
+            return None
+        if getattr(result, "is_ambiguous", False) is not True:
+            margin = getattr(result, "ambiguity_margin", None)
+            if margin is None or not float(margin) < MATCH_LABEL_MIN_MARGIN:
+                return None
+        return [str(best), runner_up]
+    except (TypeError, ValueError, OverflowError):
+        return None

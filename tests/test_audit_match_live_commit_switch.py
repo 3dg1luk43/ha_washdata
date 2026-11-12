@@ -45,7 +45,7 @@ def _tick(st: mr.SwitchState, res: Any, t: float = 600.0) -> mr.MatchTick:
     tick = mr.begin_tick(st, res, PERSISTENCE, t)
     mr.decide_switch(st, tick, res, PERSISTENCE, UNMATCH)
     mr.record_scores(st, res.candidates)
-    mr.consistency_override(st, tick, res, False, lambda _n: None)
+    mr.consistency_override(st, tick, res, False)
     return tick
 
 

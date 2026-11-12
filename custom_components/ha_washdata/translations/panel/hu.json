@@ -266,7 +266,11 @@
         "bp_details": "Részletek",
         "bp_copy_yaml": "YAML másolása",
         "bp_hide_yaml": "YAML elrejtése",
-        "bp_show_yaml": "YAML megjelenítése"
+        "bp_show_yaml": "YAML megjelenítése",
+        "review_something_else": "Valami más…",
+        "review_not_sure": "Nem vagyok biztos",
+        "review_prev": "Előző ciklus",
+        "review_next": "Következő ciklus"
     },
     "note": {
         "off_delay": {
@@ -578,6 +582,7 @@
         "pg_alert_overrun": "Túlfutás",
         "pg_alert_underrun": "Alulfutás",
         "pg_alert_did_not_finish": "Nem fejeződött be",
+        "pg_alert_discarded": "Fantomciklusként vagy leeresztésként elvetve",
         "pg_alert_false_end": "Több ciklusra bomlott",
         "pg_alert_unmatched": "Nincs egyezés",
         "pg_alert_ambiguous": "Bizonytalan egyezés",
@@ -714,7 +719,10 @@
         "bp_needs": "Szükséges",
         "bp_needs_version": "WashData {version} vagy újabb",
         "bp_author": "Szerző",
-        "bp_required": "kötelező"
+        "bp_required": "kötelező",
+        "pg_runs_as": "{value} értékkel fut",
+        "review_this_cycle": "Ez a ciklus",
+        "review_usual": "{name} esetén szokásos"
     },
     "log": {
         "all_levels": "Minden szinten",
@@ -1057,7 +1065,7 @@
         "hist_scan_failed": "A vizsgálat nem sikerült.",
         "hist_scan_expired": "Ez a vizsgálat már nem elérhető. Futtassa újra.",
         "hist_import_failed": "Az importálás nem sikerült.",
-        "imported_history_readonly": "Importált teljesítményelőzményekben találva. Segíti az egyeztetést, de nem számít bele a statisztikákba, és nem vágható vagy osztható. Címkézze fel a program megnevezéséhez.",
+        "imported_history_note": "Importált teljesítményelőzményekben találva. Segíti az egyeztetést, de nem számít bele a statisztikákba, és nem osztható fel. Címkézze fel a program megnevezéséhez.",
         "odometer_intro": "Ez az összesítés csak nő. Egy ciklus törlése nem csökkenti, így a szervizemlékeztetők pontosak maradnak.",
         "odometer_correct_hint": "Állítsa be, ha a WashData olyan futást számolt, amely meg sem történt, vagy ha a készülék már a WashData telepítése előtt is futtatott ciklusokat.",
         "no_reminders_set": "Még nincs beállítva szerviz emlékeztető.",
@@ -1111,7 +1119,15 @@
         "bp_none_yet": "Ehhez a készüléktípushoz még nincsenek sablonok. Ossza meg az elsőt.",
         "bp_unreachable": "A GitHubról töltődik le. Ellenőrizze, hogy a Home Assistant eléri-e az internetet, majd próbálja újra.",
         "bp_library_intro": "Kész automatizálások, amelyeket WashData-felhasználók osztanak meg a GitHubon, és listázás előtt átnézésre kerülnek. Csak bekapcsolt online funkciókkal érhető el.",
-        "bp_needs_version": "WashData {version} vagy újabb szükséges."
+        "bp_needs_version": "WashData {version} vagy újabb szükséges.",
+        "bp_review_check": "Mentés előtt ellenőrizze ezt: a Home Assistant pontosan úgy futtatja, ahogy le van írva.",
+        "review_q_title": "Melyik program volt ez?",
+        "review_q_intro": "A WashData nem biztos ezekben a ciklusokban. Az Ön válaszából tanul.",
+        "review_q_started": "Indult: {when}",
+        "review_q_more": "Még {count} vár felülvizsgálatra",
+        "review_q_more_one": "Még {count} vár felülvizsgálatra",
+        "review_q_more_other": "Még {count} vár felülvizsgálatra",
+        "review_which_program": "Melyik program volt?"
     },
     "phase_desc": {
         "anti_crease": "Alkalmankénti rövid dobforgások a befejezés után a ráncok csökkentése érdekében.",
@@ -1204,7 +1220,7 @@
     "setting": {
         "dishwasher_end_spike_quiet_release": {
             "label": "Passzív szárítás csendes feloldása",
-            "doc": "A várható időtartam után mennyi ideig kell a mosogatógépnek a Leállítási küszöb alatt maradnia, mielőtt a WashData már nem vár a végső vízleeresztésre. Növelje, ha egy hosszú szárítás utáni késői leeresztés kimarad. A várakozás sosem haladja meg a 30 percet."
+            "doc": "A várható időtartam letelte után a WashData már nem vár a végső vízleeresztésre, ha a mosogatógép az utolsó aktivitása óta ennyi ideig a Leállítási küszöb alatt maradt, legfeljebb 30 percig (és ha a programnak már 3 rögzített ciklusa van, legalább annyi ideig, mint a leghosszabb rögzített szárítási szünete). Növelje, ha egy hosszú szárítás utáni késői leeresztés kimarad."
         },
         "anti_wrinkle_enabled": {
             "doc": "A szárítógép fő fűtési fázis utáni rövid, alacsony teljesítményű dobpulzusai a befejezett ciklushoz tartoznak, nem számítanak új ciklusnak.",
@@ -1343,7 +1359,7 @@
             "label": "Értesítés ikonja"
         },
         "notify_live_chronometer": {
-            "doc": "Android: visszaszámlálót ad hozzá az értesítési szöveg mellé a becsült befejezésig. A {finish_time} változóval a Befejezés előtti üzenetben a befejezési idő jelenik meg egy második visszaszámláló helyett.",
+            "doc": "Android: visszaszámlálót ad hozzá az értesítési szöveg mellé a becsült befejezésig. Ha az Élő frissítés üzenete beállításban a {finish_time} változót használja, egy második visszaszámláló helyett a befejezési idő jelenik meg.",
             "label": "Élő kronométer használata"
         },
         "notify_live_interval_seconds": {
@@ -1368,11 +1384,11 @@
         },
         "notify_pre_complete_message": {
             "doc": "Minden élő folyamatfrissítés szövege. Sablonváltozók: {device}, {program}, {minutes} (hátralévő perc), {finish_time} (becsült befejezés, pl. 14:30). Más változóval az alapértelmezett szöveget küldi.",
-            "label": "Befejezés előtti üzenet"
+            "label": "Élő frissítés üzenete"
         },
         "notify_reminder_message": {
             "doc": "Az egyszeri Befejezés előtti riasztás szövege. Sablonváltozók: {device}, {program}, {minutes} (a Befejezés előtti riasztás beállítása). Más változóval az alapértelmezett szöveget küldi.",
-            "label": "Emlékeztető üzenet"
+            "label": "Befejezés előtti riasztás üzenete"
         },
         "notify_start_message": {
             "doc": "A ciklus indulásakor küldött szöveg. Sablonváltozók: {device}, {program}. Más változóval az alapértelmezett szöveget küldi.",
@@ -1674,7 +1690,9 @@
         "match_uncertain": "Bizonytalan: {top} vagy {runner}",
         "match_uncertain_single": "Bizonytalan: talán {top}",
         "match_sure": "~{pct}% biztos",
-        "match_uncertain_tip": "A WashData még nem döntött a programról. A szám azt mutatja, a korábbi ciklusokban milyen gyakran volt helyes a vezető tipp, {top}, amikor ennyivel vezetett. Csak tájékoztató."
+        "match_uncertain_tip": "A WashData még nem döntött a programról. A szám azt mutatja, a korábbi ciklusokban milyen gyakran volt helyes a vezető tipp, {top}, amikor ennyivel vezetett. Csak tájékoztató.",
+        "torn_pick": "{a} vagy {b}?",
+        "torn_tip": "A WashData még nem tudja megkülönböztetni ezt a kettőt, ezért válassza ki a futó programot, hogy a ciklus azt a címkét kapja (az Automatikus felismerés visszavonja a választást)."
     },
     "tab": {
         "advanced": "Fejlett",
@@ -1867,7 +1885,8 @@
         "bp_automation_created": "Automatizálás létrehozva az alapértelmezett beállításokkal; megnyitás",
         "copied": "Másolva",
         "copy_failed": "Másolás sikertelen. Jelölje ki a szöveget, és másolja kézzel.",
-        "automation_label_failed": "Automatizálás létrehozva, de a WashData-címkét vagy -kategóriát nem sikerült hozzáadni."
+        "automation_label_failed": "Automatizálás létrehozva, de a WashData-címkét vagy -kategóriát nem sikerült hozzáadni.",
+        "review_answered": "Mentve: {program}"
     },
     "suggestion": {
         "observed_label": "Megfigyelt",
@@ -1973,7 +1992,7 @@
         "other": "Egyéb"
     },
     "pg_desc": {
-        "dishwasher_end_spike_quiet_release": "Mosogatógép: csendes másodpercek a várható időtartam után, mielőtt a ciklus végi leeresztésre való várakozás feloldódik",
+        "dishwasher_end_spike_quiet_release": "Mosogatógép: a Leállítási küszöb alatt töltött másodpercek az utolsó aktivitás óta, amelyek a várható időtartam után szükségesek a végső leeresztésre való várakozás befejezéséhez",
         "smart_termination_duration_ratio": "A program átlagos időtartamának hányada, amelyet a ciklusnak el kell érnie, mielőtt az intelligens leállítás korán befejezheti; csökkentse, ha a futásidők ingadoznak",
         "anti_wrinkle_enabled": "Nyelje el a fő fázis utáni dobpulzusokat, ahelyett hogy új ciklusként olvasná őket",
         "anti_wrinkle_idle_timeout": "Két dobpulzus között engedélyezett csendes idő, mielőtt a ránctalanítás véget ér",
@@ -2241,7 +2260,7 @@
             "name": "Kirakva"
         },
         "state_changed": {
-            "name": "Állapot megváltozott"
+            "name": "Készülék állapota megváltozott"
         },
         "maintenance_due": {
             "name": "Karbantartás esedékes"

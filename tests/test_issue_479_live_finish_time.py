@@ -113,3 +113,18 @@ async def test_unknown_variable_warns_once_and_falls_back(hass: Any) -> None:
     mgr._last_live_notification_time = None
     _send_live(mgr)
     assert mgr._logger.warning.call_count == 1
+
+
+async def test_the_live_bar_shows_the_progress_sensors_value(hass: Any) -> None:
+    """On a profile with an anti-crease tail the countdown stops at the programme
+    end, so total minus remaining ran the bar ahead of the progress sensor (67%
+    shown for 50%). The bar reads the shared progress; the countdown keeps its
+    tail-adjusted remaining time."""
+    mgr = await _manager(hass)
+    mgr._total_duration = 5400.0       # 60 min done + 30 min to the programme end
+    mgr._time_remaining = 1800.0
+    mgr._cycle_progress = 50.0         # progress.py: half of the 120 min profile
+    _msg, extra = _send_live(mgr)
+    assert extra["progress_max"] == 5400
+    assert extra["progress"] == 2700
+    assert extra["time_remaining_seconds"] == 1800

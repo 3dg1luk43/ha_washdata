@@ -206,3 +206,78 @@ def test_a_refused_apply_all_is_a_failure_not_a_fixed_point(tmp_path, monkeypatc
     assert res["refused"] == [0]
     assert res["fixed_point"] is False
     assert any("refused" in line for line in loop.failures([res]))
+
+
+def test_admission_counts_the_capped_window_the_replay_uses(tmp_path, monkeypatch):
+    """A device whose capped window (CYCLE_CAPS) holds too few replayable cycles is
+    not admitted: it would be driven with no work (an endless serial loop, an empty
+    rounds list with workers)."""
+    (tmp_path / "synth").mkdir()
+    (tmp_path / "synth" / "export.json").write_text(json.dumps(_export()))
+    assert loop.device_paths(tmp_path)                       # 8 replayable cycles
+    monkeypatch.setitem(loop.CYCLE_CAPS, "synth", loop.MIN_REPLAYABLE - 1)
+    assert loop.device_paths(tmp_path) == []
+
+
+def test_a_kept_cycle_still_starts_the_pump_out_window():
+    """A stored cycle the loop keeps as is (not replayed) still ended: a replayed
+    dishwasher pump-out 43 s after it is discarded, as live discards it. The loop
+    used to carry no end across a kept cycle, so it stored the pump-out."""
+    from datetime import datetime, timedelta, timezone
+    from types import SimpleNamespace
+
+    end = datetime(2026, 10, 1, 10, 0, tzinfo=timezone.utc)
+    kept = {"id": "main", "start_time": (end - timedelta(hours=3)).isoformat(),
+            "end_time": end.isoformat(), "duration": 10800.0, "status": "completed"}
+    start = end + timedelta(seconds=43)
+    pump = {"start_time": start.isoformat(), "duration": 120.0, "status": "completed",
+            "power_data": [[0.0, 20.0], [60.0, 20.0], [120.0, 0.0]]}   # 0.33 Wh
+    rep = {"captured": [pump], "ends": [120.0], "base": start, "committed": [],
+           "work_end": None}
+    store = SimpleNamespace(_add_cycle_data=lambda cd, target, id_pool: target.append(cd))
+    cfg = SimpleNamespace(stop_threshold_w=2.0)
+    out, _iv, m = loop.assemble(
+        [kept, {"id": "p", "power_data": pump["power_data"]}], {1: rep}, store, cfg,
+        {}, "dishwasher", (),
+    )
+    assert m["ghosts"] == 1
+    assert [c.get("id") for c in out] == ["main"]
+
+
+def test_a_kept_cycle_with_naive_times_still_starts_the_pump_out_window():
+    """Older stores carry naive timestamps: read as UTC (the Playground's rule), not
+    a TypeError when the pump-out gap subtracts one from an aware start."""
+    from datetime import datetime, timedelta, timezone
+    from types import SimpleNamespace
+
+    end = datetime(2026, 10, 1, 10, 0)                       # naive
+    kept = {"id": "main", "start_time": (end - timedelta(hours=3)).isoformat(),
+            "end_time": end.isoformat(), "duration": 10800.0, "status": "completed"}
+    start = end.replace(tzinfo=timezone.utc) + timedelta(seconds=43)
+    pump = {"start_time": start.isoformat(), "duration": 120.0, "status": "completed",
+            "power_data": [[0.0, 20.0], [60.0, 20.0], [120.0, 0.0]]}
+    rep = {"captured": [pump], "ends": [120.0], "base": start, "committed": [],
+           "work_end": None}
+    store = SimpleNamespace(_add_cycle_data=lambda cd, target, id_pool: target.append(cd))
+    out, _iv, m = loop.assemble(
+        [kept, {"id": "p", "power_data": pump["power_data"]}], {1: rep}, store,
+        SimpleNamespace(stop_threshold_w=2.0), {}, "dishwasher", (),
+    )
+    assert m["ghosts"] == 1 and [c.get("id") for c in out] == ["main"]
+
+
+def test_a_corrupt_stored_time_reads_as_none_not_an_abort():
+    """``parse_datetime`` raises on a well-formed impossible value; one corrupt kept
+    cycle must not end the run for every device."""
+    assert loop._parse_utc("2026-13-01T00:00:00") is None
+    assert loop._parse_utc("2026-01-01T00:00:00+99:00") is None
+    assert loop._stored_end({"end_time": "2026-13-01T00:00:00",
+                             "start_time": "2026-10-01T07:00:00+00:00",
+                             "duration": 3600.0}).hour == 8
+
+
+def test_a_length_timedelta_cannot_hold_is_an_unknown_end() -> None:
+    start = "2026-10-01T07:00:00+00:00"
+    for bad in (1e300, float("inf"), float("nan"), 10**400):
+        assert loop._stored_end({"start_time": start, "duration": bad}) is None
+

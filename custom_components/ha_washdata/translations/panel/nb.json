@@ -266,7 +266,11 @@
     "bp_details": "Detaljer",
     "bp_copy_yaml": "Kopier YAML",
     "bp_hide_yaml": "Skjul YAML",
-    "bp_show_yaml": "Vis YAML"
+    "bp_show_yaml": "Vis YAML",
+    "review_something_else": "Noe annet…",
+    "review_not_sure": "Ikke sikker",
+    "review_prev": "Forrige syklus",
+    "review_next": "Neste syklus"
   },
   "note": {
     "off_delay": {
@@ -583,6 +587,7 @@
     "pg_alert_overrun": "For lang",
     "pg_alert_underrun": "For kort",
     "pg_alert_did_not_finish": "Ble ikke fullført",
+    "pg_alert_discarded": "Forkastet som spøkelsessyklus eller tømming",
     "pg_alert_false_end": "Delt i flere sykluser",
     "pg_alert_unmatched": "Uten treff",
     "pg_alert_ambiguous": "Tvetydig treff",
@@ -714,7 +719,10 @@
     "bp_needs": "Krever",
     "bp_needs_version": "WashData {version} eller nyere",
     "bp_author": "Forfatter",
-    "bp_required": "påkrevd"
+    "bp_required": "påkrevd",
+    "pg_runs_as": "brukes som {value}",
+    "review_this_cycle": "Denne syklusen",
+    "review_usual": "Vanlig for {name}"
   },
   "log": {
     "all_levels": "Alle nivåer",
@@ -1061,7 +1069,7 @@
     "hist_scan_failed": "Søket mislyktes.",
     "hist_scan_expired": "Det søket er ikke lenger tilgjengelig. Søk på nytt.",
     "hist_import_failed": "Importen mislyktes.",
-    "imported_history_readonly": "Funnet i importert effekthistorikk. Den hjelper matchingen, men telles ikke med i statistikken din og kan ikke beskjæres eller deles opp. Merk den for å navngi programmet.",
+    "imported_history_note": "Funnet i importert effekthistorikk. Den hjelper matchingen, men telles ikke med i statistikken din og kan ikke deles opp. Merk den for å navngi programmet.",
     "odometer_intro": "Denne totalen går bare opp. Å slette en syklus senker den ikke, så servicepåminnelser forblir riktige.",
     "odometer_correct_hint": "Angi dette hvis WashData telte en kjøring som aldri fant sted, eller apparatet kjørte sykluser før WashData ble installert.",
     "no_reminders_set": "Ingen servicepåminnelser er satt opp ennå.",
@@ -1111,10 +1119,18 @@
     "bp_none_yet": "Ingen maler for denne apparattypen ennå. Del den første.",
     "bp_unreachable": "Det lastes ned fra GitHub. Sjekk at Home Assistant når internett, og prøv igjen.",
     "bp_library_intro": "Ferdige automasjoner delt av WashData-brukere på GitHub og gjennomgått før de blir oppført. Bare tilgjengelig med nettfunksjoner slått på.",
-    "bp_needs_version": "Krever WashData {version} eller nyere."
+    "bp_needs_version": "Krever WashData {version} eller nyere.",
+    "bp_review_check": "Sjekk dette før du lagrer: Home Assistant kjører det nøyaktig slik det er skrevet.",
+    "review_q_title": "Hvilket program var dette?",
+    "review_q_intro": "WashData er usikker på disse syklusene. Svaret ditt hjelper den å lære.",
+    "review_q_started": "Startet {when}",
+    "review_q_more": "{count} til å vurdere",
+    "review_q_more_one": "{count} til å vurdere",
+    "review_q_more_other": "{count} til å vurdere",
+    "review_which_program": "Hvilket program var det?"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Oppvaskmaskin: stille sekunder etter forventet varighet før ventingen på tømming ved slutten av syklusen frigjøres",
+    "dishwasher_end_spike_quiet_release": "Oppvaskmaskin: sekunder under Stoppterskel siden siste aktivitet som trengs for å avslutte ventingen på siste tømming etter forventet varighet",
     "smart_termination_duration_ratio": "Andel av programmets gjennomsnittlige varighet som en syklus må nå før smart avslutning kan avslutte den tidlig; senk den hvis kjøretidene varierer",
     "completion_min_seconds": "Korteste kjøring som teller som en ekte syklus",
     "interrupted_min_seconds": "Korte sykluser merkes som avbrutt",
@@ -1223,7 +1239,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Frigjøring etter stille tørkefase",
-      "doc": "Etter forventet varighet: hvor lenge oppvaskmaskinen må holde seg under Stoppterskel før WashData slutter å vente på siste tømming. Hev den hvis en sen tømming etter lang tørking blir oversett. Ventetiden er aldri over 30 minutter."
+      "doc": "Etter forventet varighet slutter WashData å vente på siste tømming når oppvaskmaskinen har holdt seg under Stoppterskel så lenge siden siste aktivitet, høyst 30 minutter (og, når programmet har 3 registrerte sykluser, minst dets lengste registrerte tørkepause). Hev den hvis en sen tømming etter lang tørking blir oversett."
     },
     "anti_crease_finalize_ratio": {
       "label": "Forhold for anti-rynke-avslutning",
@@ -1370,7 +1386,7 @@
       "label": "Varselikon"
     },
     "notify_live_chronometer": {
-      "doc": "Android: legger til en nedtelling til forventet slutt ved siden av varselteksten. Bruk {finish_time} i Nesten ferdig-melding for å vise sluttiden i stedet for en andre nedtelling.",
+      "doc": "Android: legger til en nedtelling til forventet slutt ved siden av varselteksten. Bruk {finish_time} i Melding for direkteoppdateringer for å vise sluttiden i stedet for en andre nedtelling.",
       "label": "Bruk direktekronometer"
     },
     "notify_live_interval_seconds": {
@@ -1395,11 +1411,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Tekst i hver live fremdriftsoppdatering. Malvariabler: {device}, {program}, {minutes} (minutter igjen), {finish_time} (beregnet sluttid, f.eks. 14:30). Med andre variabler brukes standardteksten.",
-      "label": "Nesten ferdig-melding"
+      "label": "Melding for direkteoppdateringer"
     },
     "notify_reminder_message": {
       "doc": "Tekst i Forhåndsvarsling, som sendes én gang. Malvariabler: {device}, {program}, {minutes} (innstillingen Forhåndsvarsling). Med andre variabler brukes standardteksten.",
-      "label": "Påminnelsesmelding"
+      "label": "Melding for forhåndsvarsling"
     },
     "notify_start_message": {
       "doc": "Tekst som sendes når en syklus starter. Malvariabler: {device}, {program}. Med andre variabler brukes standardteksten.",
@@ -1690,6 +1706,8 @@
     "preparing": "Forbereder…",
     "unlabelling": "Fjerner merking…",
     "working": "Arbeider…",
+    "torn_pick": "{a} eller {b}?",
+    "torn_tip": "WashData klarer ennå ikke å skille disse to fra hverandre, så velg programmet som kjører for å merke denne syklusen med det (Automatisk gjenkjenning angrer valget).",
     "match_uncertain": "Usikker: {top} eller {runner}",
     "match_uncertain_single": "Usikker: kanskje {top}",
     "match_sure": "~{pct}% sikker",
@@ -1974,7 +1992,8 @@
     "bp_automation_created": "Automasjon opprettet med standardinnstillinger; åpner den",
     "copied": "Kopiert",
     "copy_failed": "Kopiering mislyktes. Velg teksten og kopier manuelt.",
-    "automation_label_failed": "Automatisering opprettet, men WashData-etiketten eller kategorien kunne ikke legges til."
+    "automation_label_failed": "Automatisering opprettet, men WashData-etiketten eller kategorien kunne ikke legges til.",
+    "review_answered": "Lagret: {program}"
   },
   "trend": {
     "down": "Trender nedover",
@@ -2241,7 +2260,7 @@
       "name": "Tømt"
     },
     "state_changed": {
-      "name": "Tilstand endret"
+      "name": "Apparatets tilstand endret"
     },
     "maintenance_due": {
       "name": "Vedlikehold forfaller"

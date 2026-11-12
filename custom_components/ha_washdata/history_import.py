@@ -91,8 +91,7 @@ from .const import (
 from .cycle_detector import CycleDetector, CycleDetectorConfig
 from .options_utils import option_float
 from .signal_processing import (
-    energy_gap_threshold_s,
-    integrate_wh,
+    integrate_cycle_wh,
     terminal_event_end,
     terminal_quiet_seen,
 )
@@ -966,7 +965,7 @@ def summarize_segment(
     status = str(cycle_data.get("status") or "")
     energy_wh = 0.0
     if len(offsets) >= 2:
-        energy_wh = integrate_wh(offsets, powers, max_gap_s=energy_gap_threshold_s(offsets))
+        energy_wh = integrate_cycle_wh(offsets, powers)
 
     if status == "completed":
         accept, reason = True, None
@@ -1450,6 +1449,9 @@ async def async_import_tail_cuts(
             )
             if cut is not None:
                 cycle["tail_cut_s"] = round(cut, 1)
+                # The level it was judged at, kept with the removed readings so a
+                # pass at another stop threshold can redo it (register item 618).
+                cycle["tail_cut_stop_w"] = stop
                 stamped += 1
                 # The preview row shows what will be stored, and the overlap check
                 # (`mark_already_recorded`) reads the same span.
@@ -1486,7 +1488,9 @@ def import_tail_cut_s(
     (the same shared ``terminal_quiet_seen`` / ``terminal_event_end`` judgement, the
     same ``TERMINAL_QUIET_CAP_S``, ``TRUSTED_LENGTH_FLOOR_FRAC`` and
     ``BANKED_TAIL_REPAIR_MIN_S``), fed the statistics of the programme
-    :func:`async_import_tail_cuts` matched: its measured drying span ``quiet_s``,
+    :func:`async_import_tail_cuts` matched, or the one a stored import was later
+    labelled with (``ProfileStore._cut_backfill_tails_nosave``, #518): its
+    measured drying span ``quiet_s``,
     its trusted length, and - where no span was measured - its expected duration,
     the live cap's fallback. (The live cap's end-spike shortcut needs detector state
     the replay does not keep; the trace test covers the same pump-out.) Every other

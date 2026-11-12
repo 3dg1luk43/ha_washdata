@@ -86,3 +86,23 @@ test('a reload or close with an unsaved edit asks the browser to confirm', async
   await editMinPower(page);
   expect(await prevented()).toBe(true);
 });
+
+// A value being typed lives only in the field until the form is snapshotted, so a
+// re-render (a toast for an answer sent from another view, a finished background
+// task) put the rendered value back under the cursor.
+test('a toast does not undo a Settings value being typed', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, {});
+  await clickTab(page, 'settings');
+  const inp = page.locator('input[data-opt="min_power"]').first();
+  await expect(inp).toBeVisible({ timeout: 8_000 });
+  await inp.fill('3.5');   // focused, typed, not committed
+  await page.evaluate(() => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    el._showToast('Correction submitted');
+  });
+  await expect(page.locator('.wd-toast')).toBeVisible();
+  const after = page.locator('input[data-opt="min_power"]').first();
+  await expect(after).toHaveValue('3.5');
+  await expect(after).toBeFocused();
+});

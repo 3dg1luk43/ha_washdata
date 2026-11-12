@@ -32,29 +32,36 @@ import statistics
 import threading
 import time
 import uuid
+from array import array
 from collections.abc import Callable, Mapping
 from datetime import datetime, timedelta
+from types import SimpleNamespace
 from typing import Any, TypeAlias, cast
 
 import numpy as np
 
-from homeassistant.core import CoreState, HomeAssistant
+from homeassistant.core import CoreState, HomeAssistant, callback
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .const import (
+    END_GATE_HAZARD_MIN_CYCLES,
     PRICE_TIMELINE_MAX_POINTS,
     PRICE_TIMELINE_PRICE_DECIMALS,
     CLUSTER_RESAMPLE_N,
     CLUSTER_SHAPE_SIMILARITY_THRESHOLD,
     GROUP_MIN_COHESION,
+    TERMINAL_DROP_MIN_PEAK_RATIO,
     TERMINAL_EVENT_MAX_PEAK_FRAC,
     TERMINAL_EVENT_PEAK_FRAC,
     TERMINAL_QUIET_MIN_S,
     TERMINAL_SIGNATURE_MIN_CYCLES,
     SELF_UNMATCHABLE_MIN_CYCLES,
     DEVICE_TYPE_DISHWASHER,
+    BACKFILL_TAIL_CUT_KEY,
+    BACKFILL_TAIL_TRACE_KEY,
     BANKED_TAIL_REPAIR_KEY,
+    CYCLE_ENERGY_REBUILD_KEY,
     BANKED_TAIL_REPAIR_MIN_S,
     TERMINAL_QUIET_CAP_S,
     TERMINAL_QUIET_MIN_CONSISTENCY,
@@ -68,6 +75,14 @@ from .const import (
     MAINTENANCE_INTERVAL_DAYS_MAX,
     MAINTENANCE_RECENT_SUPPRESS_DAYS,
     MATCH_AMBIGUITY_MARGIN,
+    MATCH_MEMBER_DEVICE_TYPES,
+    MATCH_MEMBER_GATE_CONFIRM,
+    MATCH_MEMBER_GATE_RHYTHM_DELTA,
+    MATCH_MEMBER_GATE_SINGLE_DELTA,
+    MATCH_MEMBER_MAX,
+    MATCH_MEMBER_MIN_CYCLES,
+    MATCH_MEMBER_TEMPLATES,
+    MATCH_SPIN_DISPLAY_DEVICE_TYPES,
     MATCH_MIN_RESAMPLED_POINTS,
     PLAYGROUND_PRESET_MAX,
     PLAYGROUND_PRESET_NAME_MAX,
@@ -106,19 +121,32 @@ from .signal_processing import (
     resample_adaptive,
     Segment,
     integrate_wh,
+    integrate_cycle_wh,
     energy_gap_threshold_s,
-    has_resumed_pause as _has_resumed_pause,
     resumed_pauses as _resumed_pauses,
     terminal_event_end as _terminal_event_end,
+    terminal_event_measure as _terminal_event_walk,
     terminal_quiet_seen as _terminal_quiet_seen,
 )
-from . import analysis
+from . import analysis, spin_rhythm
 from .time_utils import (
+    SYNTHETIC_OFFSETS_KEY,
     migrate_power_data_to_offsets,
+    normalize_synthetic_offsets,
+    offset_key,
     power_data_to_offsets,
+    remap_synthetic_offsets,
+    set_synthetic_offsets,
+    synthetic_offset_keys,
     utc_now,
 )
+from .trace_codec import (
+    count_compact_fields,
+    decode_store_payload,
+    encode_store_payload,
+)
 from .maintenance import clean_task_name, coerce_interval, is_due
+from .notification_rules import cycle_end_is_finish
 from .options_utils import canonical_device_type
 from .phase_catalog import (
     DEFAULT_PHASES_BY_DEVICE,
@@ -151,6 +179,11 @@ _TRIM_SNAP_TOLERANCE_S = 1.0
 # the delay: the cycle itself is flushed at once.
 _BURST_SAVE_WINDOW_S = 120.0
 _BURST_SAVE_DELAY_S = 10.0
+
+# The Clean overlay's record in the active-cycle file (#500): cycle finished, load
+# still inside. Additive key with no default, so no storage version.
+CLEAN_STATE_KEY = "clean_state"
+_MISSING: Any = object()
 
 # Floor of the resampled sample-segment cache (audit ML-12, ~20-45 KB an entry);
 # see ProfileStore._sample_segment_cache_cap.
@@ -547,6 +580,30 @@ class MatchResult:
     # The elapsed duration this match scored (the query's), so a candidate's
     # duration ratio can be stated against the cycle (audit MATCH-DECIDE-13).
     query_duration_s: float = 0.0
+    # Issue #486: with live member templates, what the end gates read: the
+    # single-template ranking's own winner, its confidence, expected duration,
+    # ambiguity and #288 prefix-landscape verdict (``_single_template_gate``).
+    # None everywhere else, where they read the result's own fields. The member
+    # ranking (best_profile, confidence, is_ambiguous) is what is displayed and
+    # what the switching rules read.
+    gate_profile: str | None = None
+    gate_confidence: float | None = None
+    gate_expected_duration: float | None = None
+    gate_ambiguous: bool | None = None
+    gate_prefix_full_shape: bool | None = None
+    # The programmes an ambiguous match is torn between, as ``(name, expected
+    # duration s)``: every candidate within MATCH_AMBIGUITY_MARGIN of the top
+    # (a Stage-5 family expanded to its members), winner first, for the hazard end
+    # gate (`hazard_pause_catalogue`). None when the ambiguity does not come from
+    # the margin (a Stage-5 safeguard), so no set of candidates explains it.
+    # ``gate_contenders`` is the same for the ranking the end gates read (#486).
+    ambiguity_contenders: tuple[tuple[str, float], ...] | None = None
+    gate_contenders: tuple[tuple[str, float], ...] | None = None
+    # Per-run expected duration (2026-11-03 audit, item 2): the gate profile's
+    # members nearest this run in energy over the elapsed stretch
+    # (``analysis.nearest_member_duration``), for the end gates; None unless they
+    # agree, and on every path without the live gate view.
+    gate_run_expected: float | None = None
 
     @property
     def label_confidence(self) -> float:
@@ -802,14 +859,28 @@ def earliest_sustained_quiet_offset(
     stop_threshold_w: float,
     min_quiet_span_s: float,
     min_clean_cycles: int,
+    min_peak_ratio: float = TERMINAL_DROP_MIN_PEAK_RATIO,
 ) -> float | None:
-    """Smallest elapsed offset (s) at which any *completed* cycle first shows a
-    sustained (>= ``min_quiet_span_s``) near-zero (< ``stop_threshold_w``) span.
+    """Smallest elapsed offset (s) at which any *completed* cycle legitimately went
+    quiet: its first sustained (>= ``min_quiet_span_s``) near-zero
+    (< ``stop_threshold_w``) span, or its own end.
 
     This is the device's learned "we have never legitimately been quiet before
     this many seconds into a cycle" baseline, used by the opt-in terminal-drop
     detector: a hard cliff-to-~0 that begins *earlier* than this is anomalous and
     almost certainly a real stop rather than a soak pause.
+
+    **A completed cycle's end is a legitimate quiet onset too (#516).** Only a
+    dishwasher stores the quiet after its last activity (``keep_tail``); every
+    other type's trace is cut there, so on a washer without sub-threshold pauses
+    only an odd late quiet (the standby tail of an over-long run read at a raised
+    Stop Threshold) seeded the baseline, later than every normal end, and each
+    normal end fired as a terminal drop. The end counted is where the trailing
+    quiet begins (the last active reading when the trace is cut there), and only
+    of a cycle that was clearly on (peak >= ``min_peak_ratio`` x the stop
+    threshold, ``is_terminal_drop``'s own bar): a stored few-watt blip must not
+    stand for a programme that ended. The end only CAPS a baseline the quiet
+    spans set; it never creates one, so the change can only remove fires.
 
     Only ``completed`` cycles seed the baseline - interrupted / force-stopped /
     terminal-drop cycles are exactly the anomalies we are trying to catch, so
@@ -824,6 +895,8 @@ def earliest_sustained_quiet_offset(
     if not cycles:
         return None
     earliest: float | None = None
+    earliest_end: float | None = None
+    min_peak = min_peak_ratio * max(stop_threshold_w, 1.0)
     clean = 0
     for cycle in cycles:
         if cycle.get("status") != "completed":
@@ -833,18 +906,35 @@ def earliest_sustained_quiet_offset(
             continue
         clean += 1
         span_start: float | None = None
+        first_quiet: float | None = None
+        last_active: float | None = None
+        peak = 0.0
         for offset, power in points:
             if power < stop_threshold_w:
                 if span_start is None:
                     span_start = offset
-                elif (offset - span_start) >= min_quiet_span_s:
-                    if earliest is None or span_start < earliest:
-                        earliest = span_start
-                    break
+                elif first_quiet is None and (offset - span_start) >= min_quiet_span_s:
+                    first_quiet = span_start
             else:
                 span_start = None
+                last_active = offset
+                peak = max(peak, power)
+        if first_quiet is not None and (earliest is None or first_quiet < earliest):
+            earliest = first_quiet
+        # The end as the live check reads a drop: where the trailing quiet run
+        # begins, or the last active reading of a trace cut there.
+        end = span_start if span_start is not None else last_active
+        if (
+            end is not None
+            and last_active is not None
+            and peak >= min_peak
+            and (earliest_end is None or end < earliest_end)
+        ):
+            earliest_end = end
     if clean < min_clean_cycles:
         return None
+    if earliest is not None and earliest_end is not None:
+        return min(earliest, earliest_end)
     return earliest
 
 
@@ -879,6 +969,7 @@ def terminal_drop_baseline(
     stop_threshold_w: float,
     min_quiet_span_s: float,
     min_clean_cycles: int,
+    min_peak_ratio: float = TERMINAL_DROP_MIN_PEAK_RATIO,
 ) -> tuple[float | None, tuple[float, float] | None]:
     """Combined ``(earliest_quiet_offset, peak_range)`` baseline.
 
@@ -886,7 +977,7 @@ def terminal_drop_baseline(
     the manager can offload the whole per-cycle scan to an executor thread in one
     hop instead of decompressing every trace on the event loop (issue #311)."""
     earliest = earliest_sustained_quiet_offset(
-        cycles, stop_threshold_w, min_quiet_span_s, min_clean_cycles
+        cycles, stop_threshold_w, min_quiet_span_s, min_clean_cycles, min_peak_ratio
     )
     peak_range = device_active_peak_range(cycles, min_clean_cycles)
     return earliest, peak_range
@@ -1012,7 +1103,38 @@ def compress_power_data(cycle: CycleDict) -> list[Any] | None:
 
 
 class WashDataStore(Store[JSONDict]):
-    """Store implementation with migration support."""
+    """Store implementation with migration support.
+
+    Since v19 the file holds each cycle's ``power_data`` / ``debug_data`` and each
+    envelope as compact JSON text (``trace_codec``): every write goes through an
+    encoded shallow copy of the payload and every load is decoded, so memory never
+    holds the text.
+    """
+
+    async def async_load(self) -> JSONDict | None:
+        """Load (and migrate) the store, with every compact field decoded."""
+        data = await super().async_load()
+        if isinstance(data, dict):
+            # Off the loop: one parse per trace and envelope (~0.1 s on tron4r's
+            # 17 MB store). Nothing else holds `data` yet.
+            await self.hass.async_add_executor_job(decode_store_payload, data)
+        return data
+
+    async def async_save(self, data: JSONDict) -> None:
+        """Write ``data`` with its traces and envelopes compact; ``data`` is not changed."""
+        if self.hass.state is CoreState.stopping:
+            # HA defers this one to its final write, which serialised `data` as it
+            # is THEN: encode then too (the override below wraps the function).
+            self.async_delay_save(lambda: data)
+            return
+        await super().async_save(encode_store_payload(data))
+
+    @callback
+    def async_delay_save(
+        self, data_func: Callable[[], JSONDict], delay: float = 0
+    ) -> None:
+        """Debounced write; encodes the store as it is when the write fires."""
+        super().async_delay_save(lambda: encode_store_payload(data_func()), delay)
 
     async def _async_migrate_func(
         self,
@@ -1021,6 +1143,13 @@ class WashDataStore(Store[JSONDict]):
         old_data: JSONDict,
     ) -> JSONDict:
         """Migrate data to the new version."""
+        # Whatever version the file claims, every step below reads decoded traces
+        # and envelopes.
+        # Only a round trip through an older build leaves compact text in an older
+        # file (it loads a v19 file without decoding it and writes it back as its
+        # own version); a store written by any older build has none.
+        decode_store_payload(old_data)
+
         if old_major_version < 2:
             _LOGGER.info("Migrating storage from v%s to v2", old_major_version)
             # Logic moved from ProfileStore._migrate_v1_to_v2
@@ -1310,6 +1439,35 @@ class WashDataStore(Store[JSONDict]):
                 summary["model_records"] or "none",
             )
 
+        if old_major_version < 18:
+            # #498: stored energy dropped every interval over 10x the MEDIAN report
+            # gap, so a change-only plug's silent heater stretches counted as 0 W.
+            # Re-integrate from the stored trace (pure data, idempotent) and arm the
+            # envelope rebuild that refreshes avg_energy (#495) after setup.
+            summary = _recompute_cycle_energy(old_data)
+            old_data[CYCLE_ENERGY_REBUILD_KEY] = True
+            _LOGGER.info(
+                "Migrating storage from v%s to v18 (cycle energy re-integrated: "
+                "%d of %d cycles changed, %+.0f Wh in total; %d kept, their energy "
+                "did not come from their trace)",
+                old_major_version, summary["changed"], summary["examined"],
+                summary["delta_wh"], summary["kept"],
+            )
+
+        if old_major_version < 19:
+            # Compact traces and envelopes on disk (`trace_codec`). Memory keeps the
+            # decoded values (the decode at the top made sure of it); the file
+            # changes: the write that follows every migration (Store.async_load saves
+            # what this returns, the restore of a restore point saves too) stores each
+            # cycle's power_data / debug_data and each envelope as compact JSON text,
+            # every value bit-identical. Nothing is dropped or rewritten. Idempotent.
+            fields, envelopes = count_compact_fields(old_data)
+            _LOGGER.info(
+                "Migrating storage from v%s to v19 (%d cycle traces and %d envelopes "
+                "written compact)",
+                old_major_version, fields, envelopes,
+            )
+
         return old_data
 
 #: Trained-model capabilities no longer trained on-device since 0.5.8: the early
@@ -1319,6 +1477,83 @@ class WashDataStore(Store[JSONDict]):
 #: the shipped quality / end baselines still score the panel's per-cycle health.
 #: Only ``total_energy`` is trained (and kept).
 _REMOVED_ML_CAPABILITIES = ("live_match", "quality", "end", "remaining_time")
+
+
+def _export_predates_energy_recompute(meta: dict[str, Any]) -> bool:
+    """Does this import payload predate the v18 energy re-integration (#498)?
+
+    The import paths never run `_async_migrate_func`, so an older export brings its
+    cycles' old energy with it. An unreadable version counts as old: the recompute
+    is idempotent.
+    """
+    try:
+        return int(meta.get("version") or 1) < 18
+    except (TypeError, ValueError, OverflowError):
+        return True
+
+
+def _recompute_cycle_energy(data: JSONDict) -> dict[str, Any]:
+    """Re-integrate ``energy_wh`` of every past and backfill cycle (#498).
+
+    Uses ``integrate_cycle_wh``, the integrator every stored-energy writer uses
+    since #498. Only a figure the old rule (``integrate_wh`` +
+    ``energy_gap_threshold_s``) produced from this very trace is replaced: one that
+    came from anywhere else (an import of rescaled or hand-edited data, an older
+    integrator) is kept, as is a cycle without a usable trace. Where the cycle's
+    reported energy is the integrated one (no meter reading), its cost moves with
+    it. ``reference_cycles`` are left alone: a community download's trace is
+    downsampled, and its energy is the uploader's. The lifetime odometer is not
+    touched. Idempotent (a replaced figure no longer matches the old rule); never
+    raises.
+    """
+    summary: dict[str, Any] = {"examined": 0, "changed": 0, "kept": 0, "delta_wh": 0.0}
+    for key in ("past_cycles", "backfill_cycles"):
+        cycles = data.get(key)
+        if not isinstance(cycles, list):
+            continue
+        for cycle in cycles:
+            if not isinstance(cycle, dict):
+                continue
+            try:
+                xy = decompress_power_data(cycle)
+                if len(xy) < 2:
+                    continue
+                summary["examined"] += 1
+                ts = np.asarray([t for t, _ in xy], dtype=float)
+                pw = np.asarray([p for _, p in xy], dtype=float)
+                order = np.argsort(ts, kind="stable")
+                ts, pw = ts[order], pw[order]
+                new = round(integrate_cycle_wh(ts, pw), 3)
+                if not math.isfinite(new):
+                    continue
+                raw_old = cycle.get("energy_wh")
+                old = float(raw_old) if isinstance(raw_old, (int, float)) else None
+                if old is not None and math.isfinite(old):
+                    if abs(new - old) < 0.001:
+                        continue
+                    old_rule = integrate_wh(ts, pw, max_gap_s=energy_gap_threshold_s(ts))
+                    if abs(old - old_rule) > max(0.5, 0.02 * abs(old_rule)):
+                        summary["kept"] += 1
+                        continue
+                cycle["energy_wh"] = new
+                summary["changed"] += 1
+                summary["delta_wh"] += new - (old if old is not None and math.isfinite(old) else 0.0)
+                if cycle.get("energy_meter_wh") is None and cycle.get("cost") is not None:
+                    _rescale_cycle_cost(cycle, old, new)
+            except Exception:  # noqa: BLE001 - one bad row must not stop the rest
+                _LOGGER.debug("Energy recompute skipped a cycle", exc_info=True)
+    return summary
+
+
+def _rescale_cycle_cost(cycle: CycleDict, old_wh: float | None, new_wh: float) -> None:
+    """Move a cycle's cost with its re-integrated energy. A time-weighted cost is
+    scaled (its prices are frozen with it); a fixed one is energy x price."""
+    cost = float(cycle["cost"])
+    price = cycle.get("energy_price")
+    if cycle.get("energy_price_mode") != "dynamic" and isinstance(price, (int, float)):
+        cycle["cost"] = round(new_wh / 1000.0 * float(price), 4)
+    elif old_wh is not None and math.isfinite(old_wh) and old_wh > 0:
+        cycle["cost"] = round(cost * new_wh / old_wh, 4)
 
 
 def _drop_removed_ml_state(data: JSONDict) -> dict[str, Any]:
@@ -1545,9 +1780,43 @@ class _EnvelopeBuild(tuple):  # type: ignore[type-arg]
     ``energy_ref``. Still unpacks as the 2-tuple every caller reads."""
 
     energy_ref: dict[str, Any] | None = None
+    spin_ref: dict[str, Any] | None = None
+    tail_ref: dict[str, Any] | None = None
+    prog_ends: dict[str, float] | None = None
+
+
+def _member_programme_ends(
+    decoded: list[tuple[CycleDict, list[tuple[float, float]]]],
+) -> dict[str, float] | None:
+    """``{cycle id: programme end s}`` for the members whose trace ends in a quiet
+    tail (``spin_rhythm.active_end_s``); a member without one ends at its stored
+    duration and is left out. Executor-side, with the envelope build (audit item
+    2). Never raises."""
+    try:
+        out: dict[str, float] = {}
+        for cycle, pairs in decoded:
+            cid = cycle.get("id")
+            if not cid or len(pairs) < 3:
+                continue
+            end = spin_rhythm.active_end_s([p[0] for p in pairs], [p[1] for p in pairs])
+            if end is not None and math.isfinite(end) and end > 0:
+                out[str(cid)] = round(float(end), 1)
+        return out or None
+    except Exception:  # noqa: BLE001 - a statistic must never break the build
+        return None
 
 
 def collapse_group_candidates(
+    candidates: list[dict], group_members: dict[str, list[str]]
+) -> list[dict]:
+    """Collapse each cohesive group to one candidate: see
+    :func:`_collapse_group_candidates`. The public name runs once per match (on
+    the ranking the result is built from; devtools/eval.py records it); the #486
+    single-template view calls the implementation directly."""
+    return _collapse_group_candidates(candidates, group_members)
+
+
+def _collapse_group_candidates(
     candidates: list[dict], group_members: dict[str, list[str]]
 ) -> list[dict]:
     """Replace each cohesive group's scored members with ONE candidate carrying
@@ -1603,7 +1872,162 @@ def _ambiguity_from_candidates(candidates: list[dict]) -> tuple[float, bool]:
     return margin, margin < MATCH_AMBIGUITY_MARGIN
 
 
+def _ambiguity_contenders(
+    ranking: list[dict],
+    group_members: dict[str, list[str]],
+    durations: dict[str, Any],
+    top_name: str | None,
+    top_expected: Any,
+    stage5_doubt: bool,
+) -> tuple[tuple[str, float], ...] | None:
+    """``(name, expected s)`` of every programme an ambiguous match is torn between.
+
+    The winner (as resolved, first), then every candidate of the collapsed,
+    score-sorted ``ranking`` within MATCH_AMBIGUITY_MARGIN of its top, a Stage-5
+    family expanded to its members (``durations``: each member's own expected
+    duration, from its pre-collapse record; a member Stage 1 rejected has none
+    and is not a contender). None when the ranking's own margin is clear, or a
+    Stage-5 safeguard (``stage5_doubt``) also doubts the pick: then no candidate
+    set explains the ambiguity and the hazard end gate keeps its old refusal.
+    Pure, never raises.
+    """
+    try:
+        if stage5_doubt or not ranking or not top_name:
+            return None
+        if not _ambiguity_from_candidates(ranking)[1]:
+            return None
+        floor = float(ranking[0]["score"]) - MATCH_AMBIGUITY_MARGIN
+        out: dict[str, float] = {}
+
+        def _add(name: Any, dur: Any) -> None:
+            try:
+                value = float(dur or 0.0)
+            except (TypeError, ValueError, OverflowError):
+                return
+            if name and math.isfinite(value) and value > 0:
+                out.setdefault(str(name), value)
+
+        _add(top_name, top_expected)
+        for cand in ranking:
+            if float(cand.get("score") or 0.0) < floor:
+                break
+            name = str(cand.get("name"))
+            if name in group_members:
+                for member in group_members[name]:
+                    _add(member, durations.get(member))
+            else:
+                _add(name, cand.get("profile_duration"))
+        return tuple(out.items()) or None
+    except Exception:  # noqa: BLE001 - a statistic must never break matching
+        return None
+
+
+def _pause_frontier(
+    pauses: Any,
+) -> tuple[tuple[float, float], ...]:
+    """The pauses no later-or-equal, longer-or-equal pause dominates, ascending.
+
+    Exact for every question the detector asks of a catalogue - the longest pause
+    starting at or after a position, and so the longest at all - so a catalogue
+    pooled over many cycles stays a handful of pairs. The frontier of pooled
+    frontiers is the frontier of the pool. Pairs must be finite (a non-finite one
+    would stand in for the pairs it dominates and then be dropped). Pure.
+    """
+    out: list[tuple[float, float]] = []
+    best = -1.0
+    for f, d in sorted(((float(f), float(d)) for f, d in pauses), reverse=True):
+        if d > best:
+            out.append((f, d))
+            best = d
+    return tuple(reversed(out))
+
+
+def _single_template_view(
+    candidates: list[dict], group_members: dict[str, list[str]]
+) -> list[dict] | None:
+    """The single-template ranking a live member match carries (#486).
+
+    Live member templates (``analysis._collapse_member_templates``) rank a
+    profile by its nearest member cycles, and a profile with many cycles wins a
+    prefix far more easily than one with a single template (it gets many draws),
+    so its score and margin are not the numbers the end gates were calibrated
+    on. ``compute_matches_worker`` therefore also scores the query on the
+    single-template path (what runs with members off) and carries each
+    profile's result as ``single_score`` / ``single_shape``. This rebuilds that
+    ranking, best first and collapsed into the same Stage-5 families, for
+    :meth:`ProfileStore._single_template_gate`. None when no candidate carries
+    it: members off, or a completed-cycle match.
+    """
+    if not any(isinstance(c, dict) and "single_score" in c for c in candidates):
+        return None
+    single: list[dict] = []
+    for cand in candidates:
+        try:
+            score = float(cand.get("single_score"))
+        except (TypeError, ValueError, OverflowError):
+            continue
+        if not math.isfinite(score):
+            continue
+        try:
+            shape = float(cand.get("single_shape"))
+        except (TypeError, ValueError, OverflowError):
+            shape = score
+        single.append({
+            "name": cand.get("name"),
+            "score": score,
+            "shape_score": shape if math.isfinite(shape) else score,
+            "profile_duration": cand.get("profile_duration"),
+        })
+    single.sort(key=lambda c: c["score"], reverse=True)
+    return _collapse_group_candidates(single, group_members)
+
+
+def _member_gate_confirmed(
+    best: dict, single_view: list[dict] | None, member_ambiguous: bool, ranked: list[dict]
+) -> bool:
+    """May the end gates follow the member winner on this live tick? (#486)
+
+    Only where the single-template ranking names a different programme and every
+    check confirms the member winner: it is clear by its own margin (and Stage 5's
+    safeguards), the single-template path scores it within
+    ``MATCH_MEMBER_GATE_SINGLE_DELTA`` of that ranking's own winner (not one lucky
+    member cycle), and the run's spin/heat rhythm so far agrees with its members
+    at least as well, within ``MATCH_MEMBER_GATE_RHYTHM_DELTA``, as with the single
+    winner's (``rhythm_live``, washers only). ``ranked`` is the member ranking the
+    rhythm tags are read from. When the two rankings agree the single ranking's
+    own confidence and margin stand. Pure, never raises.
+    """
+    try:
+        if not MATCH_MEMBER_GATE_CONFIRM or not single_view or member_ambiguous:
+            return False
+        top = single_view[0]
+        if top.get("name") == best.get("name"):
+            return False
+        own = best.get("single_score")
+        if own is None or float(own) < float(top["score"]) - MATCH_MEMBER_GATE_SINGLE_DELTA:
+            return False
+        rows = {str(c.get("name")): c for c in ranked}
+        rival = rows.get(str(top.get("group_best_member") or top.get("name"))) or {}
+        ours, theirs = best.get("rhythm_live"), rival.get("rhythm_live")
+        if ours is None or theirs is None:
+            return False
+        return float(ours) >= float(theirs) - MATCH_MEMBER_GATE_RHYTHM_DELTA
+    except (TypeError, ValueError, KeyError, OverflowError):
+        return False
+
+
 def _match_prefix_ambiguity(
+    candidates: list[dict],
+    best_duration: float,
+    pauses_below: Callable[[str], bool | None] | None = None,
+) -> bool:
+    """:func:`_prefix_landscape_ambiguity` on the ranking the result is built from,
+    once per match (devtools/prefix_guard_eval.py records this call); the #486
+    single-template view's verdict calls the implementation directly."""
+    return _prefix_landscape_ambiguity(candidates, best_duration, pauses_below)
+
+
+def _prefix_landscape_ambiguity(
     candidates: list[dict],
     best_duration: float,
     pauses_below: Callable[[str], bool | None] | None = None,
@@ -1897,6 +2321,18 @@ def unwrap_import_payload(payload: Any) -> tuple[dict[str, Any], dict[str, Any]]
         raise ValueError("Invalid export payload (not a JSON object)")
 
     version = payload.get("version", 1)
+    # A newer build's store may mean something this one cannot read, and no
+    # migration runs backwards; the undo path refuses the same (#511). An
+    # unreadable version passes, as the other version checks treat it as old.
+    try:
+        newer = int(version) > STORAGE_VERSION
+    except (TypeError, ValueError, OverflowError):
+        newer = False
+    if newer:
+        raise ValueError(
+            f"This export was made by a newer version of WashData (storage v{version}, "
+            f"this one reads up to v{STORAGE_VERSION}); update WashData to import it"
+        )
     if version == 1 or "data" not in payload:
         data_dict: dict[str, Any] = {
             "profiles": payload.get("profiles", {}),
@@ -1912,6 +2348,10 @@ def unwrap_import_payload(payload: Any) -> tuple[dict[str, Any], dict[str, Any]]
         data_dict = dict(data)  # shallow copy: caller may assign/mutate freely
         present = set(data_dict)
         fmt = "v2"
+    # Exports are written decoded, but a store file or restore point handed in as an
+    # import carries compact traces and envelopes (v19); copy-on-decode, the payload
+    # is not touched.
+    decode_store_payload(data_dict)
 
     # What the payload really carried, read before the repair below fills the core
     # keys in: a null, or a core key of the wrong type, carried nothing. The
@@ -2106,6 +2546,21 @@ def _effective_golden_flags(cycles: list[Any]) -> list[bool]:
     return [False] * len(cycles)
 
 
+def _pins_golden_template(cycles: list[Any]) -> bool:
+    """Whether a profile's matching template is a pinned golden cycle, not its envelope.
+
+    Register item 570: by the envelope's own rule (`_effective_golden_flags`), and only
+    for a cycle flagged golden itself. The snapshot builder read the raw flag, so a
+    store import older versions forced golden replaced the envelope template of a
+    profile with 20 of the user's own cycles. A store-only profile keeps what it had
+    (its forced-golden import pinned, an unflagged one on the envelope).
+    """
+    return any(
+        eff and isinstance(c.get("ml_review"), dict) and bool(c["ml_review"].get("golden"))
+        for c, eff in zip(cycles, _effective_golden_flags(cycles))
+    )
+
+
 def _merge_list_dedup(base: list[Any], incoming: list[Any]) -> None:
     """Append items from ``incoming`` to ``base`` in place, skipping duplicates.
 
@@ -2222,6 +2677,234 @@ def _last_high_block(
     return (min(max(start_frac, 0.0), 1.0), seconds, start_offset)
 
 
+# --- Trace summaries --------------------------------------------------------------
+# The per-profile statistics the detector is fed (pause catalogues, terminal quiet,
+# member terminal spins, the prefix term's "ever paused below") each decompressed
+# every evidence cycle of the profile, on the event loop, on the first match tick
+# after the profile's evidence changed (0.8 s at 300 cycles, ~3 s at 1000). What
+# they read from one trace is a pure function of that trace, so it is computed once
+# per trace, off the loop (`ProfileStore.async_warm_trace_summaries`), and the
+# statistics aggregate the summaries. The signature and pause parts are those
+# statistics' own per-cycle bodies, moved; the spin part answers `_last_high_block`
+# at any level (tests/test_issue_510_statistics_off_loop.py checks it against that
+# function). The aggregates are bit-identical to the inline computation.
+
+
+class _PartFailed(Exception):
+    """A summary part whose computation raised. Reading it raises, so the statistic
+    fails the way it did when it computed the part inline (and is not cached)."""
+
+
+_PART_FAILED = object()
+
+
+def _terminal_event_measure(points: list[tuple[float, float]]) -> tuple[float, ...] | None:
+    """One cycle's input to :meth:`ProfileStore.compute_profile_terminal_signature`.
+
+    :func:`signal_processing.terminal_event_measure` at the signature's own
+    thresholds; the live standby-band finalise (#518) asks the same walk.
+    """
+    return _terminal_event_walk(
+        points, TERMINAL_EVENT_PEAK_FRAC, TERMINAL_QUIET_MIN_S, TERMINAL_EVENT_MAX_PEAK_FRAC
+    )
+
+
+class _SpinTail:
+    """What :func:`_last_high_block` can return a TERMINAL block from, at any level.
+
+    ``_member_terminal_spins`` keeps a member's last block above the level only when
+    it starts at ``ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC`` or later, and the standby
+    finalise asks at a level that follows the live cycle's peak, so the answer
+    cannot be cached per level ahead of time. A block that starts before index ``B``
+    (the first sample at or past that fraction of the trimmed span) is never kept,
+    so only the samples from ``B - 1`` on are held: about a tenth of the trace. The
+    trim, span and median step are the trace's own, computed as ``_last_high_block``
+    computes them. A trace whose times are not sorted keeps all of it.
+    """
+
+    __slots__ = ("t", "p", "t0", "span", "step", "s")
+
+    def __init__(self, points: list[tuple[float, float]]) -> None:
+        times = [float(pt[0]) for pt in points]
+        powers = [float(pt[1]) for pt in points]
+        # The trim and span of _last_high_block, level-independent.
+        peak = max(powers) if powers else 0.0
+        quiet_floor = max(1.0, peak * 0.02)
+        end = len(powers) - 1
+        while end > 0 and powers[end] <= quiet_floor:
+            end -= 1
+        self.t: array[float] = array("d")
+        self.p: array[float] = array("d")
+        self.t0 = 0.0
+        self.span = 0.0
+        self.step = 0.0
+        self.s = 0
+        if end < 1:
+            return
+        times = times[: end + 1]
+        powers = powers[: end + 1]
+        span = float(times[-1]) - float(times[0])
+        if span <= 0:
+            return
+        t0 = float(times[0])
+        diffs = [
+            float(times[i + 1]) - float(times[i])
+            for i in range(len(times) - 1)
+            if float(times[i + 1]) - float(times[i]) > 0
+        ]
+        self.step = statistics.median(diffs) if diffs else 0.0
+        self.t0 = t0
+        self.span = span
+        if all(times[i] <= times[i + 1] for i in range(len(times) - 1)):
+            b = len(times) - 1
+            while b > 0 and (float(times[b - 1]) - t0) / span >= (
+                ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC
+            ):
+                b -= 1
+            self.s = max(b - 1, 0)
+        self.t = array("d", times[self.s :])
+        self.p = array("d", powers[self.s :])
+
+    def terminal_block(self, level: float) -> tuple[float, float] | None:
+        """``(start_offset_s, seconds)`` of ``_last_high_block(trace, level)`` when
+        that block starts at ``ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC`` or later, else
+        None. The same walk on the held samples."""
+        t, p = self.t, self.p
+        if self.span <= 0 or not p:
+            return None
+        last = None
+        for i in range(len(p) - 1, -1, -1):
+            if p[i] > level:
+                last = i
+                break
+        if last is None:
+            return None  # nothing above the level from B - 1 on: not terminal
+        first = last
+        while first > 0 and p[first - 1] > level:
+            first -= 1
+        if first == 0 and self.s > 0:
+            return None  # the run starts at B - 1 or earlier: not terminal
+        start_offset = float(t[first]) - self.t0
+        start_frac = start_offset / self.span
+        if last + 1 < len(t):
+            end_t = float(t[last + 1])
+        elif self.s + last > 0:
+            end_t = float(t[last]) + self.step
+        else:
+            end_t = float(t[last])
+        seconds = end_t - float(t[first])
+        if seconds <= 0:
+            return None
+        if min(max(start_frac, 0.0), 1.0) < ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC:
+            return None
+        return (start_offset, seconds)
+
+
+class _TraceSummary:
+    """Everything the profile statistics read from one stored trace.
+
+    Valid while the cycle holds the same ``power_data`` object (every edit assigns
+    a new one) with the same length and ``start_time``: the inputs of
+    ``decompress_power_data``. ``pauses`` maps a stop level to the
+    :func:`_pause_frontier` of ``signal_processing.resumed_pauses`` at that level,
+    flattened into doubles (``(f0, d0, f1, d1, ...)``); :meth:`pause_pairs` gives
+    the tuples back. Every question asked of a trace's pauses (the longest from a
+    position on, the longest at all) has the same answer on its frontier, which is
+    a handful of a washer trace's ~120 pauses (register item 601).
+    """
+
+    __slots__ = ("raw", "n_raw", "start", "n", "sig", "spin", "pauses")
+
+    def __init__(self, raw: Any, start: Any) -> None:
+        self.raw = raw
+        self.n_raw = _raw_len(raw)
+        self.start = start
+        self.n = 0
+        self.sig: Any = None
+        self.spin: Any = None
+        self.pauses: dict[float, array[float]] = {}
+
+    def pause_pairs(self, level: float) -> list[tuple[float, float]]:
+        flat = self.pauses[level]
+        return list(zip(flat[0::2], flat[1::2]))
+
+    def longest_pause(self, level: float) -> float:
+        return max(self.pauses[level][1::2], default=0.0)
+
+    def valid_for(self, raw: Any, start: Any) -> bool:
+        return self.raw is raw and self.n_raw == _raw_len(raw) and self.start == start
+
+    def signature(self) -> tuple[float, ...] | None:
+        if self.sig is _PART_FAILED:
+            raise _PartFailed
+        return cast("tuple[float, ...] | None", self.sig)
+
+    def spin_block(self, level: float) -> tuple[float, float] | None:
+        if self.spin is _PART_FAILED:
+            raise _PartFailed
+        return self.spin.terminal_block(level) if self.spin is not None else None
+
+
+def _raw_len(raw: Any) -> int:
+    return len(raw) if isinstance(raw, list) else -1
+
+
+def _trace_points(raw: Any, start: Any) -> list[tuple[float, float]]:
+    """``decompress_power_data`` of a cycle holding ``raw`` and ``start``."""
+    return decompress_power_data(cast(Any, {"power_data": raw, "start_time": start}))
+
+
+def _resumed_pauses_at(points: list[tuple[float, float]], level: float) -> array[float]:
+    """The :func:`_pause_frontier` of the trace's resumed pauses at ``level``,
+    flattened (register item 601). A non-finite pair is dropped first, as the
+    detector drops it on intake, so the frontier never keeps one in place of a
+    pair it dominates."""
+    flat: array[float] = array("d")
+    if len(points) >= 2:
+        pauses = [
+            (f, d) for f, d in _resumed_pauses(points, level)
+            if math.isfinite(f) and math.isfinite(d)
+        ]
+        for f, d in _pause_frontier(pauses):
+            flat.append(f)
+            flat.append(d)
+    return flat
+
+
+def _summarise_trace(raw: Any, start: Any, levels: Any) -> _TraceSummary:
+    """One trace's summary. Raises only if decompression does (pure otherwise)."""
+    points = _trace_points(raw, start)
+    summary = _TraceSummary(raw, start)
+    summary.n = len(points)
+    try:
+        summary.sig = _terminal_event_measure(points)
+    except Exception:  # noqa: BLE001 - the statistic reading it fails instead
+        summary.sig = _PART_FAILED
+    if summary.n >= 10:
+        try:
+            summary.spin = _SpinTail(points)
+        except Exception:  # noqa: BLE001
+            summary.spin = _PART_FAILED
+    for level in levels:
+        summary.pauses[float(level)] = _resumed_pauses_at(points, float(level))
+    return summary
+
+
+def _summarise_traces(
+    todo: list[tuple[Any, Any]], levels: tuple[float, ...]
+) -> list[_TraceSummary]:
+    """Executor job: the summaries of ``todo`` (``(raw, start)`` pairs). Never
+    raises; a trace that cannot be decompressed is left to the statistic, which
+    fails on it as before."""
+    out: list[_TraceSummary] = []
+    for raw, start in todo:
+        try:
+            out.append(_summarise_trace(raw, start, levels))
+        except Exception:  # noqa: BLE001
+            continue
+    return out
+
+
 class ProfileStore:
     """Manages storage of washer profiles and past cycles."""
 
@@ -2245,11 +2928,24 @@ class ProfileStore:
         # from the device type via analysis.stage4_energy_mode. Default "mean"
         # keeps behaviour byte-identical until wired.
         self.energy_mode: str = "mean"
+        # The device type, pushed in by the manager like energy_mode. Scopes the
+        # nearest-member templates (MATCH_MEMBER_DEVICE_TYPES, #486); None = off.
+        self.device_type: str | None = None
+        # The detector's stop threshold, pushed in by the manager like device_type.
+        # Where an imported dishwasher cycle's last activity sits is judged at it
+        # (`_cut_backfill_tails_nosave`, #518); None = the store cannot judge, so
+        # nothing is cut.
+        self.stop_threshold_w: float | None = None
         # Which cycle categories may shape a profile (see CONF_PROFILE_EVIDENCE_SOURCES).
         # Pushed in by the manager from entry options, the way energy_mode is; the store
         # has no access to them itself. Defaults to all three, i.e. pre-setting behaviour.
         self._evidence_sources: tuple[str, ...] = tuple(PROFILE_EVIDENCE_SOURCES)
         self._save_debug_traces = save_debug_traces
+        # One summary per stored trace (keyed by its power_data object) and the stop
+        # levels each carries its pauses at, pinned by the manager: what the profile
+        # statistics read, computed off the loop (async_warm_trace_summaries).
+        self._trace_summaries: dict[int, _TraceSummary] = {}
+        self._trace_summary_levels: tuple[float, ...] = ()
 
         # Cache for resampled sample segments: key=(cycle_id, dt), least recently
         # used first, bounded by _sample_segment_cache_cap (audit ML-12). Written
@@ -2267,6 +2963,9 @@ class ProfileStore:
         self._cohesion_cache: dict[tuple[str, ...], float] = {}
         self._cohesion_cache_generation: int = 0
         self._cohesion_cache_generation_checked: int = -1
+        # Bumped whenever an import or an undo replaces the stored data: a build
+        # that started before reads the old cycles and must not write into the new.
+        self._data_generation: int = 0
         # group_cohesion runs in executor threads (live matching + Playground can
         # touch the same store concurrently); serialize the read-clear-compute-store
         # sequence so a concurrent call can't clear a half-populated cache or
@@ -2286,6 +2985,11 @@ class ProfileStore:
             hass, 1, f"{STORAGE_KEY}.{entry_id}.active"
         )
         self._active_data: JSONDict = {}
+        # The Clean overlay's record (#500) as last written to the active file;
+        # _MISSING until the file is read. Lets the manager's unload/stop write
+        # land even when the write-through task that would have carried it was
+        # cancelled by the unload.
+        self._clean_state_on_disk: Any = _MISSING
         # The last snapshot that failed to restore (register item 266 follow-up):
         # written only on a failure, read only by the diagnostics download.
         self._failed_restore_store: Store[JSONDict] = Store(
@@ -2720,6 +3424,37 @@ class ProfileStore:
             return cast(list[CycleDict], raw)
         return []
 
+    def last_finished_cycle(self) -> CycleDict | None:
+        """The most recent observed run, or None (#501's last-cycle sensors).
+
+        ``past_cycles`` only (a download or a replayed history is not a run of this
+        appliance), newest first whatever the list order (``_newest_cycle``), and
+        only a cycle the cycle_finished trigger would announce
+        (``cycle_end_is_finish``): an interrupted false start must not replace the
+        wash it followed.
+
+        Called on every entity refresh, so the scan is cached while the list, its
+        length and its last element are unchanged and the cached cycle still sits
+        at its index; a delete, merge, split, import or wipe changes one of those.
+        The returned dict is the stored one, so an in-place trim or relabel shows.
+        """
+        cycles = self.get_past_cycles()
+        key = (id(cycles), len(cycles), id(cycles[-1]) if cycles else None)
+        cached = getattr(self, "_last_finished_cache", None)
+        if cached is not None and cached[0] == key:
+            idx, cycle = cached[1], cached[2]
+            if cycle is None or (0 <= idx < len(cycles) and cycles[idx] is cycle):
+                return cycle
+        best = _newest_cycle([
+            c for c in cycles
+            if isinstance(c, dict) and cycle_end_is_finish(c.get("status"))
+        ])
+        best_idx = next(
+            (i for i in range(len(cycles) - 1, -1, -1) if cycles[i] is best), -1
+        )
+        self._last_finished_cache = (key, best_idx, best)
+        return cast("CycleDict | None", best)
+
     # ── Legacy per-device community-store account ─────────────────────────────
     def get_store_account(self) -> dict[str, Any]:
         """The pre-global per-device store account incl. the refresh token.
@@ -2836,7 +3571,8 @@ class ProfileStore:
         """Locate a cycle by id, returning it with the name of the list holding it.
 
         The origin is what decides capability: ``past`` cycles are fully editable,
-        ``reference`` and ``backfill`` cycles can be labelled but not trimmed or split.
+        ``backfill`` cycles can be labelled and trimmed (#518) but not split, and
+        ``reference`` cycles can only be labelled.
         """
         for origin, cycles in (
             ("past", self.get_past_cycles()),
@@ -3201,6 +3937,72 @@ class ProfileStore:
             for m in present:
                 member_snaps[m] = by_name[m]
         return snapshots, group_members, member_snaps
+
+    def _single_template_gate(
+        self,
+        single_view: list[dict],
+        current_power: list[float],
+        current_duration: float,
+        group_members: dict[str, list[str]],
+        member_snaps: dict[str, dict[str, Any]],
+        pauses_fn: Callable[[str], bool | None] | None,
+        durations: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """What the end gates read on a live member match (#486) unless the member
+        winner is confirmed (:func:`_member_gate_confirmed`): the single-template
+        ranking as a match of its own, i.e. exactly what they read with member
+        templates off.
+
+        Its winner (a Stage-5 family resolved to a member the way the result's own
+        winner is, with the same two safeguards), that winner's score as the
+        confidence and its expected duration, the ranking's own margin as the
+        ambiguity and its #288 prefix-landscape verdict. Every end gate - Smart
+        Termination, the anti-crease finalise, the late shortening, the deferral,
+        the per-profile tail, terminal-spin and pause statistics the detector looks
+        up by name - was calibrated on this ranking, and the member ranking moved
+        them both ways: unguarded it split three washer cycles and ended two dryers
+        early (register item 555), and reading only its confidence and duration
+        from here while calling every disagreement ambiguous (the first guard)
+        ended 32 cycles more than a minute later and 4 earlier (end_gate_eval
+        --loo --all-formats: the forced ambiguity blocked the anti-crease finalise
+        and Smart Termination, the member ranking's own prefix verdict blocked the
+        finalise where both agreed, and a family's member came from the member
+        ranking). An empty ranking reads as ambiguous at no confidence.
+        ``contenders`` is :func:`_ambiguity_contenders` on this ranking. Never
+        raises.
+        """
+        try:
+            if not single_view:
+                return {"profile": None, "confidence": 0.0, "expected": None,
+                        "ambiguous": True, "prefix": False, "contenders": None}
+            top = single_view[0]
+            name = str(top.get("name"))
+            score = float(top.get("score") or 0.0)
+            expected = float(top.get("profile_duration") or 0.0)
+            ambiguous = _ambiguity_from_candidates(single_view)[1]
+            doubt = False
+            if name in group_members:
+                chosen, fit, member_dur = self._stage5_pick_member(
+                    current_power, current_duration, group_members[name], member_snaps,
+                    in_progress=True, preferred=top.get("group_best_member"),
+                )
+                name = chosen
+                if member_dur:
+                    expected = float(member_dur)
+                if fit is not None and score > 0 and fit < 0.55 * score:
+                    ambiguous = doubt = True
+                if expected and current_duration > expected * 1.05:
+                    ambiguous = doubt = True
+            prefix = _prefix_landscape_ambiguity(single_view, expected, pauses_fn)
+            return {"profile": name or None, "confidence": score,
+                    "expected": expected or None, "ambiguous": bool(ambiguous),
+                    "prefix": bool(prefix),
+                    "contenders": _ambiguity_contenders(
+                        single_view, group_members, durations or {}, name, expected, doubt
+                    )}
+        except Exception:  # noqa: BLE001 - never fail a match over its gate view
+            return {"profile": None, "confidence": 0.0, "expected": None,
+                    "ambiguous": True, "prefix": False, "contenders": None}
 
     def _stage5_pick_member(
         self, current_power: list[float], current_duration: float,
@@ -5618,7 +6420,12 @@ class ProfileStore:
             try:
                 await self.async_rebuild_envelope(profile_name)
             except Exception:  # pylint: disable=broad-exception-caught
-                pass
+                # The repair stands; the envelope stays as it was until the next
+                # rebuild, which is worth knowing when matching looks off (#511).
+                self._logger.warning(
+                    "Envelope rebuild after repairing profile '%s' failed",
+                    profile_name, exc_info=True,
+                )
 
         return stats
 
@@ -5672,24 +6479,59 @@ class ProfileStore:
             self._logger.warning("Could not read the active-cycle snapshot: %s", err)
             active = None
         self._active_data = dict(active) if isinstance(active, dict) else {}
+        self._clean_state_on_disk = self._active_data.get(CLEAN_STATE_KEY)
         legacy = self._data.pop("active_cycle", None)
         legacy_saved = self._data.pop("last_active_save", None)
         if not self._active_data.get("active_cycle") and isinstance(legacy, dict):
-            self._active_data = {"active_cycle": legacy, "last_active_save": legacy_saved}
+            self._active_data.update(
+                {"active_cycle": legacy, "last_active_save": legacy_saved}
+            )
             await self._async_write_active()
 
     async def _async_write_active(self) -> None:
+        data = dict(self._active_data)
         try:
-            await self._active_store.async_save(self._active_data)
+            await self._active_store.async_save(data)
         except Exception as err:  # noqa: BLE001 - never break the cycle for a snapshot
             self._logger.warning("Could not write the active-cycle snapshot: %s", err)
+            return
+        self._clean_state_on_disk = data.get(CLEAN_STATE_KEY)
 
     async def async_save_active_cycle(self, detector_snapshot: JSONDict) -> None:
         """Save the active cycle state to its own file (throttled by Manager)."""
         self._active_data = {
+            **self._clean_state_entry(),
             "active_cycle": detector_snapshot,
             "last_active_save": dt_util.now().isoformat(),
         }
+        await self._async_write_active()
+
+    def _clean_state_entry(self) -> JSONDict:
+        """The Clean record as an ``_active_data`` fragment, so a snapshot write or
+        clear keeps it (#500)."""
+        record = self._active_data.get(CLEAN_STATE_KEY)
+        return {CLEAN_STATE_KEY: record} if isinstance(record, dict) else {}
+
+    def get_clean_state(self) -> JSONDict | None:
+        """The persisted Clean overlay (#500): finished, load still inside."""
+        raw = self._active_data.get(CLEAN_STATE_KEY)
+        return cast(JSONDict, raw) if isinstance(raw, dict) else None
+
+    async def async_save_clean_state(self, record: JSONDict | None) -> None:
+        """Persist (or with None, drop) the Clean overlay (#500).
+
+        Lives in the small active-cycle file, not the main store: it changes at
+        every cycle end and reminder, and the main store is megabytes. Writes only
+        when the file holds something else, so the manager can call it on every
+        change and at unload/stop. Never raises.
+        """
+        if isinstance(record, dict):
+            self._active_data[CLEAN_STATE_KEY] = record
+        else:
+            record = None
+            self._active_data.pop(CLEAN_STATE_KEY, None)
+        if self._clean_state_on_disk is not _MISSING and self._clean_state_on_disk == record:
+            return
         await self._async_write_active()
 
     def get_active_cycle(self) -> JSONDict | None:
@@ -5730,9 +6572,9 @@ class ProfileStore:
         return cast(JSONDict, raw) if isinstance(raw, dict) else None
 
     async def async_clear_active_cycle(self) -> None:
-        """Clear the active cycle snapshot from storage."""
-        if self._active_data:
-            self._active_data = {}
+        """Clear the active cycle snapshot from storage (the Clean record stays)."""
+        if any(k != CLEAN_STATE_KEY for k in self._active_data):
+            self._active_data = self._clean_state_entry()
             await self._async_write_active()
 
     async def async_add_cycle(self, cycle_data: CycleDict) -> set[str]:
@@ -5827,7 +6669,13 @@ class ProfileStore:
             pairs = power_data_to_offsets(
                 cast(list[list[Any] | tuple[Any, ...]], raw_data), start_time_iso
             )
-            stored: list[list[float]] = [[round(p[0], 1), round(p[1], 1)] for p in pairs]
+            # A non-finite reading (an import, a hand-edited file) is dropped: kept,
+            # it made the cycle's energy NaN, which no later recompute replaced.
+            stored: list[list[float]] = [
+                [round(p[0], 1), round(p[1], 1)]
+                for p in pairs
+                if math.isfinite(p[0]) and math.isfinite(p[1])
+            ]
             offsets: list[float] = [p[0] for p in stored]
 
             # Calculate average sampling interval (in seconds)
@@ -5853,6 +6701,14 @@ class ProfileStore:
                 stored = trim_zero_power_data(stored, threshold=1.0)
 
             cycle_data["power_data"] = stored
+            # The keepalive / invented rows (item 568), normalised like the trace
+            # and kept only where a stored row still is.
+            set_synthetic_offsets(
+                cycle_data,
+                normalize_synthetic_offsets(
+                    cycle_data.get(SYNTHETIC_OFFSETS_KEY), raw_data, start_time_iso
+                ),
+            )
             cycle_data["sampling_interval"] = round(sampling_interval, 1)
 
             # Helper to get arrays for signature (use stored data for consistency)
@@ -5865,14 +6721,14 @@ class ProfileStore:
                 cycle_data["signature"] = dataclasses.asdict(sig)
 
             # Compute and store energy (Wh) if not already set (e.g. by manager).
-            # Shared trapezoidal integrator + data-driven outage gap (single source
-            # with manager._on_cycle_end).
+            # Shared stored-cycle integrator (#498; single source with
+            # manager._on_cycle_end).
             if "energy_wh" not in cycle_data and len(ts_arr) > 1:
                 sort_idx = np.argsort(ts_arr)
                 ts_s = ts_arr[sort_idx]
                 p_s = p_arr[sort_idx]
                 cycle_data["energy_wh"] = round(
-                    integrate_wh(ts_s, p_s, max_gap_s=energy_gap_threshold_s(ts_s)), 3
+                    integrate_cycle_wh(ts_s, p_s), 3
                 )
 
             self._logger.debug(
@@ -6184,12 +7040,17 @@ class ProfileStore:
                                     # row is [offset, power]
                                     shifted_data.append([round(row[0] - first_offset, 1), row[1]])
                                 cycle["power_data"] = shifted_data
+                                remap_synthetic_offsets(
+                                    cycle,
+                                    lambda o, shift=first_offset: round(o - shift, 1),
+                                )
                                 processed_count += 1
                             except (ValueError, TypeError, OverflowError) as e:
                                 self._logger.warning("Failed to shift start_time for trimmed cycle: %s", e)
                         else:
                             # Only trailing trimmed or no shift needed
                             cycle["power_data"] = trimmed
+                            remap_synthetic_offsets(cycle, lambda o: o)
                             processed_count += 1
 
                         # Update duration to match new data length
@@ -6434,9 +7295,17 @@ class ProfileStore:
             return None
 
         built = _EnvelopeBuild((result, durations))
+        # Audit item 2: each member's programme end (spin_rhythm.active_end_s, the
+        # #486 definition) by cycle id, for the per-run end expectation.
+        if self.device_type in MATCH_MEMBER_DEVICE_TYPES:
+            built.prog_ends = _member_programme_ends(decoded)
         # Stage 4's expected energy, from the same members (w7g): the warped
         # average inherits the reference cycle's heating length.
         built.energy_ref = analysis.member_energy_reference(raw_cycles_data)
+        if self.energy_mode == "integrated":
+            built.spin_ref = spin_rhythm.member_rhythm_reference(raw_cycles_data)
+            # The quiet anti-crease tail after the programme end, for the ETA (#486).
+            built.tail_ref = spin_rhythm.member_tail_reference(raw_cycles_data)
         return built
 
     def _cycle_peak(self, cycle: CycleDict) -> float:
@@ -6608,6 +7477,9 @@ class ProfileStore:
             if not repaired_rows:
                 continue  # all rows malformed - leave original trace untouched
             cycle["power_data"] = repaired_rows
+            remap_synthetic_offsets(
+                cycle, lambda o, shift=start_ts: round(o + shift, 1)
+            )
             repaired += 1
             repaired_data = cycle["power_data"]
             if len(repaired_data) > 1:
@@ -6676,6 +7548,7 @@ class ProfileStore:
                     repr(pd[-1]) if has_pts else None,
                     c.get("id"), c.get("status"), c.get("duration"),
                     c.get("manual_duration"), c.get("energy_wh"), c.get("start_time"),
+                    c.get("energy_meter_wh"),
                     repr(rev.get("golden")) if isinstance(rev, dict) else None,
                     repr(meta.get("source")) if isinstance(meta, dict) else None,
                 ))
@@ -6703,7 +7576,19 @@ class ProfileStore:
         reproduce the same envelope and stats. A cycle end used to rebuild the
         labelled profile twice (the manager, then the learning pass confirming the
         same label) and every other profile once more (register item 456).
+
+        First the profile's trace summaries: every edit of its cycles reaches this
+        method, so what the next match tick's statistics read is ready off the loop.
+
+        Then the end wait of its history-imported dishwasher cycles is cut
+        (:meth:`_cut_backfill_tails_nosave`, #518): every path that gives such a
+        cycle a programme (a label, the bulk auto-label, a new profile from it, an
+        import) rebuilds that programme here, so the build never learns the wait.
         """
+        await self.async_warm_trace_summaries((profile_name,))
+        if self._cut_backfill_tails_nosave(profile_name)[0]:
+            # The cut traces are new lists: summarise them off the loop too.
+            await self.async_warm_trace_summaries((profile_name,))
         before = self._envelope_inputs(profile_name)
         memo: dict[str, tuple[tuple[Any, ...], tuple[Any, ...], list[Any]]] = (
             self.__dict__.setdefault("_envelope_built_from", {})
@@ -6723,6 +7608,7 @@ class ProfileStore:
         )
         generation = generations.get(profile_name, 0) + 1
         generations[profile_name] = generation
+        data_generation = getattr(self, "_data_generation", 0)
         existed = profile_name in (self._data.get("profiles") or {})
         # A rebuild changes this profile's curve, which feeds group cohesion, so
         # invalidate the cohesion cache (not only on group mutations) to avoid stale
@@ -6771,8 +7657,10 @@ class ProfileStore:
             shape_cycles
         )
 
-        if generations.get(profile_name) != generation or (
-            existed and profile_name not in (self._data.get("profiles") or {})
+        if (
+            generations.get(profile_name) != generation
+            or getattr(self, "_data_generation", 0) != data_generation
+            or (existed and profile_name not in (self._data.get("profiles") or {}))
         ):
             self._logger.debug(
                 "Discarding a superseded envelope build for %s", profile_name
@@ -6800,6 +7688,9 @@ class ProfileStore:
 
         result, durations = result_pkg
         energy_ref = getattr(result_pkg, "energy_ref", None)
+        spin_ref = getattr(result_pkg, "spin_ref", None)
+        tail_ref = getattr(result_pkg, "tail_ref", None)
+        prog_ends = getattr(result_pkg, "prog_ends", None)
 
         # Update profile stats in storage (Fast metadata update)
         if durations and profile_name in self._data.get("profiles", {}):
@@ -6843,21 +7734,24 @@ class ProfileStore:
 
         # Usage stats (avg_energy, cycle_count) come from REAL cycles only, so imported
         # reference cycles can shape the curve without ever inflating energy/count.
-        # When there are no reference cycles this is byte-identical to the prior behaviour
-        # (avg_energy from the avg curve, cycle_count = len(durations)).
-        if ref_cycles:
-            real_energies = [
-                float(c["energy_wh"])
-                for c in real_cycles
-                if isinstance(c.get("energy_wh"), (int, float))
+        # avg_energy is the mean of what each cycle reports (meter first), the figure
+        # the cycle list shows (#495). The averaged curve is a mean of DTW-warped
+        # members, which keeps the values but not the area: a dishwasher at 0.30 kWh
+        # a run showed 0.73 kWh. Reference/backfill energies stand in only for a
+        # profile with no real cycle, and the curve only when no cycle has an energy.
+        def _mean_report_kwh(cycles: list[CycleDict]) -> float | None:
+            values = [
+                wh for wh in (cycle_report_energy_wh(c) for c in cycles) if wh > 0
             ]
-            avg_energy = (sum(real_energies) / len(real_energies) / 1000.0) if real_energies else 0.0
-            cycle_count = len(real_cycles)
-        else:
-            # Average-curve energy (kWh) via the shared trapezoidal integrator.
+            return sum(values) / len(values) / 1000.0 if values else None
+
+        avg_energy = _mean_report_kwh(real_cycles)
+        if avg_energy is None:
+            avg_energy = _mean_report_kwh(ref_cycles)
+        if avg_energy is None:
             # avg_curve is in Watts, time_grid in seconds; integrate_wh returns Wh.
             avg_energy = integrate_wh(time_grid, avg_curve) / 1000.0
-            cycle_count = len(durations)
+        cycle_count = len(real_cycles) if ref_cycles else len(durations)
 
         envelope_data: dict[str, Any] = {
             "time_grid": time_grid,  # Time grid used by manager for phase estimation
@@ -6878,6 +7772,14 @@ class ProfileStore:
             # Stage 4's expected energy from the members' own traces
             # (analysis.member_energy_reference); absent on envelopes built before.
             envelope_data["energy_ref"] = energy_ref
+        if spin_ref:
+            envelope_data["spin_ref"] = spin_ref
+        if tail_ref:
+            envelope_data["tail_ref"] = tail_ref
+        if prog_ends:
+            # Audit item 2: the members' programme ends, for the per-run end
+            # expectation (_member_templates); absent on envelopes built before.
+            envelope_data["member_prog_s"] = prog_ends
 
         if "envelopes" not in self._data:
             self._data["envelopes"] = {}
@@ -7056,6 +7958,85 @@ class ProfileStore:
         """Whether the one-time banked-tail repair still has to run."""
         return bool(self._data.get(BANKED_TAIL_REPAIR_KEY))
 
+    def cycle_energy_rebuild_pending(self) -> bool:
+        """Whether the envelope rebuild armed by the v18 energy fix still has to run."""
+        return bool(self._data.get(CYCLE_ENERGY_REBUILD_KEY))
+
+    def backfill_tail_cut_pending(self) -> bool:
+        """Whether the one-time import tail cut (#518) still has to run. Absent
+        counts as pending, so a store from before it runs it once."""
+        return self._data.get(BACKFILL_TAIL_CUT_KEY, True) is not False
+
+    def arm_backfill_tail_cut(self) -> None:
+        """Ask for the import tail cut again (the stop threshold changed)."""
+        self._data[BACKFILL_TAIL_CUT_KEY] = True
+
+    async def async_cut_backfill_tails(self) -> dict[str, Any]:
+        """Cut the end wait off every labelled imported dishwasher cycle, once (#518).
+
+        For installs that labelled history-imported cycles before the cut existed:
+        new labels are cut by the envelope rebuild they trigger. Rebuilds only the
+        profiles it changed and saves only then; the marker is cleared either way
+        (a cycle the rule declined is retried by its profile's next rebuild). Needs
+        the stop threshold the manager pushes in. Never raises.
+
+        Re-armed by a stop threshold change: a cut judged at another level is first
+        undone from its kept tail (:meth:`_restore_backfill_tails_nosave`, register
+        item 618), so the cut below redoes it from the full trace, at another point
+        or not at all (``restored`` counts them).
+        """
+        summary: dict[str, Any] = {
+            "cut": 0, "reclaimed_s": 0.0, "profiles": 0, "restored": 0,
+        }
+        try:
+            if self.stop_threshold_w is None:
+                return summary
+            names = sorted({
+                str(c.get("profile_name"))
+                for c in self.get_backfill_cycles()
+                if isinstance(c, dict) and c.get("profile_name")
+            } & set(self._data.get("profiles") or {}))
+            touched: list[str] = []
+            for name in names:
+                restored = self._restore_backfill_tails_nosave(name)
+                cut, reclaimed = self._cut_backfill_tails_nosave(name)
+                if cut or restored:
+                    touched.append(name)
+                    summary["cut"] += cut
+                    summary["reclaimed_s"] += reclaimed
+                    summary["restored"] += restored
+            self._data[BACKFILL_TAIL_CUT_KEY] = False
+            summary["profiles"] = len(touched)
+            if touched:
+                for name in touched:
+                    with contextlib.suppress(Exception):
+                        await self.async_rebuild_envelope(name)
+                await self.async_save()
+        except Exception as exc:  # noqa: BLE001 - never cost the user their history
+            self._logger.warning("Import tail cut aborted: %s", exc)
+        return summary
+
+    async def async_rebuild_envelopes_after_energy_fix(self) -> int:
+        """Rebuild every envelope once after the cycle energies were re-integrated
+        (#498), so each profile's avg_energy is the mean of its cycles (#495).
+
+        The marker is cleared only after the rebuild, so an interrupted run is
+        repeated at the next start. Returns the number of envelopes rebuilt.
+        """
+        # An import or undo while it runs replaces the profiles it walks, and its
+        # in-flight build is discarded: go again on the data now stored, so the
+        # marker is never cleared for profiles that were not rebuilt.
+        for _attempt in range(3):
+            data_generation = getattr(self, "_data_generation", 0)
+            count = await self.async_rebuild_all_envelopes()
+            if getattr(self, "_data_generation", 0) == data_generation:
+                break
+        else:
+            return count
+        self._data.pop(CYCLE_ENERGY_REBUILD_KEY, None)
+        await self.async_save()
+        return count
+
     async def async_repair_banked_tails(
         self, stop_threshold_w: float, device_type: str
     ) -> dict[str, Any]:
@@ -7078,8 +8059,12 @@ class ProfileStore:
         cycles recorded as ``TerminationReason.SMART`` are touched - plus, on a
         dishwasher, ``TerminationReason.TIMEOUT``, whose finish keeps its tail
         through the same cap (#424).
-        ``backfill_cycles`` were replayed from raw history and never went through
-        Smart Termination at all, so they cannot carry a banked tail; a
+        ``backfill_cycles`` are not scanned here, but they DO carry a banked tail:
+        the history replay runs unmatched, so a dishwasher's timeout finish keeps
+        its whole ``min_off_gap`` wait (audit PLAYGROUND-07, #518). They are cut by
+        the same dishwasher rule with their programme's statistics, at import
+        (``history_import.async_import_tail_cuts``) and once labelled
+        (:meth:`_cut_backfill_tails_nosave`, run by every envelope rebuild). A
         user-stopped, unattributed, or hand-corrected cycle is left alone for the
         reasons given at the filter.
 
@@ -7312,6 +8297,7 @@ class ProfileStore:
             # Never leave a cycle without a curve: a trace that cannot be trimmed
             # sensibly keeps its samples and only the duration is corrected.
             if len(kept) >= 2:
+                invented: list[float] = []
                 # A dishwasher's allowance extends `new_duration` past the last
                 # ACTIVE sample, and a change-only plug reports nothing during
                 # passive drying - so without a terminal point the trace ends
@@ -7352,7 +8338,10 @@ class ProfileStore:
                             terminal_p = quiet_p
                         break
                     kept.append([round(float(new_duration), 1), terminal_p])
+                    invented.append(round(float(new_duration), 1))
                 cycle["power_data"] = kept
+                # Same offsets (no re-base); the terminal point is not a report.
+                remap_synthetic_offsets(cycle, lambda o: o, invented)
                 # The signature is derived from the trace, so it has to be rebuilt
                 # from the kept samples - exactly as the sibling trim and the merge
                 # path already do. Left stale it would describe a duration and a
@@ -7375,6 +8364,355 @@ class ProfileStore:
         # Last, so a row that fails above keeps its old duration with its old trace
         # rather than a cut duration over an uncut one (register item 384).
         cycle["duration"] = round(float(new_duration), 3)
+
+    def _apply_backfill_tail_cut(
+        self, cycle: CycleDict, new_duration: float, *, stop_w: Any = None
+    ) -> None:
+        """Cut a history-imported cycle's end wait at ``new_duration`` seconds (#518).
+
+        :meth:`_apply_repaired_duration` does the trim; this re-integrates
+        ``energy_wh`` from the kept trace (a backfill cycle has no meter figure, and
+        its stored energy was integrated over the wait) and stamps
+        ``meta["tail_cut_s"]``, the seconds removed, so the cut never runs twice on
+        one cycle. Shared by the import (``ws_api``) and the label-time cut.
+
+        The readings it removes are kept (register item 618), with the length and
+        end the cycle had and the stop threshold the cut was judged at (``stop_w``,
+        else the store's): a pass at another stop threshold puts them back
+        (:meth:`_restore_backfill_tail`) and cuts again from the full trace. A cut
+        that could not be undone exactly keeps nothing and is final, as before.
+        """
+        old_duration = float(cycle.get("duration") or 0.0)
+        old_end = cycle.get("end_time")
+        before = cycle.get("power_data")
+        self._apply_repaired_duration(cycle, new_duration)
+        points = decompress_power_data(cycle)
+        if len(points) > 1:
+            ts = np.asarray([t for t, _ in points], dtype=float)
+            power = np.asarray([p for _, p in points], dtype=float)
+            cycle["energy_wh"] = round(integrate_cycle_wh(ts, power), 3)
+        meta = cycle.get("meta")
+        if not isinstance(meta, dict):
+            meta = cycle["meta"] = {}
+        meta["tail_cut_s"] = round(max(0.0, old_duration - float(new_duration)), 1)
+        kept = self._backfill_kept_tail(
+            cycle, before, old_duration, old_end,
+            self.stop_threshold_w if stop_w is None else stop_w,
+        )
+        if kept is None:
+            cycle.pop(BACKFILL_TAIL_TRACE_KEY, None)
+        else:
+            cycle[BACKFILL_TAIL_TRACE_KEY] = kept
+
+    @staticmethod
+    def _backfill_kept_tail(
+        cycle: CycleDict, before: Any, old_duration: float, old_end: Any, stop_w: Any
+    ) -> dict[str, Any] | None:
+        """What a tail cut removed from ``cycle``, as :meth:`_restore_backfill_tail`
+        reads it, or None when the cut cannot be undone exactly.
+
+        ``points``: the removed rows as stored (every one past the new end);
+        ``end_row``: the cut appended a terminal row at the new end
+        (:meth:`_apply_repaired_duration`); ``duration`` / ``end_time``: the cycle's
+        before the cut; ``cut_s``: its length after; ``stop_w``: the level the cut
+        was judged at. None when the trace was not trimmed, a removed row is not a
+        clean ``[offset, watts]`` past the cut, or the level is unknown: a restore
+        rebuilds the trace exactly or not at all. Never raises.
+        """
+        try:
+            stop = _safe_offset(stop_w)
+            after = cycle.get("power_data")
+            if (
+                stop is None
+                or not isinstance(before, list)
+                or not isinstance(after, list)
+                or after is before
+                or not after
+            ):
+                return None
+            cut_s = float(cycle.get("duration") or 0.0)
+            before_ids = {id(pt) for pt in before}
+            after_ids = {id(pt) for pt in after}
+            tail: list[list[Any]] = []
+            for pt in before:
+                if id(pt) in after_ids:
+                    continue
+                if not (isinstance(pt, (list, tuple)) and len(pt) >= 2):
+                    return None
+                off = _safe_offset(pt[0])
+                if off is None or _safe_offset(pt[1]) is None or off <= cut_s + 1e-6:
+                    return None
+                tail.append([pt[0], pt[1]])
+            return {
+                "points": tail,
+                "end_row": id(after[-1]) not in before_ids,
+                "duration": old_duration,
+                "end_time": old_end if isinstance(old_end, str) else None,
+                "cut_s": cut_s,
+                "stop_w": stop,
+            }
+        except Exception:  # noqa: BLE001 - keeping it is optional, the cut is not
+            return None
+
+    def _restore_backfill_tail(self, cycle: CycleDict) -> bool:
+        """Undo :meth:`_apply_backfill_tail_cut` on ``cycle`` from its kept tail.
+
+        The kept readings go back after the trace (minus the terminal row the cut
+        appended), the length and end become what they were before the cut,
+        ``energy_wh`` is re-integrated (``integrate_cycle_wh``) and the signature
+        recomputed from the full trace, and the cut stamp and the kept tail are
+        cleared, so the cut rule judges the cycle as freshly imported. Only while
+        the cycle is exactly what the cut left (its length, its last row): any other
+        change means the tail no longer belongs to it, and it is left alone. All or
+        nothing; True when restored. Never raises.
+        """
+        record = cycle.get(BACKFILL_TAIL_TRACE_KEY)
+        if not isinstance(record, dict):
+            return False
+        try:
+            points = record.get("points")
+            duration = _safe_offset(record.get("duration"))
+            cut_s = _safe_offset(record.get("cut_s"))
+            current = cycle.get("power_data")
+            if (
+                not isinstance(points, list)
+                or duration is None
+                or cut_s is None
+                or duration <= cut_s
+                or not isinstance(current, list)
+                or abs(float(cycle.get("duration") or 0.0) - cut_s) > 1e-6
+            ):
+                return False
+            trace = list(current)
+            if record.get("end_row") is True and trace:
+                trace.pop()
+            if len(trace) < 2 or not all(
+                isinstance(pt, (list, tuple)) and len(pt) >= 2 for pt in trace
+            ):
+                return False
+            last = _safe_offset(trace[-1][0])
+            if last is None or last > cut_s + 1e-6:
+                return False
+            tail: list[list[Any]] = []
+            for pt in points:
+                if not (isinstance(pt, (list, tuple)) and len(pt) >= 2):
+                    return False
+                off = _safe_offset(pt[0])
+                if off is None or _safe_offset(pt[1]) is None or off <= last:
+                    return False
+                tail.append([pt[0], pt[1]])
+            restored = [*trace, *tail]
+            ts = np.asarray([float(pt[0]) for pt in restored], dtype=float)
+            power = np.asarray([float(pt[1]) for pt in restored], dtype=float)
+            signature = dataclasses.asdict(compute_signature(ts, power))
+            energy = round(integrate_cycle_wh(ts, power), 3)
+        except Exception:  # noqa: BLE001 - a failed restore leaves the cut as it was
+            self._logger.debug(
+                "Import tail restore: skipped cycle %s", cycle.get("id"), exc_info=True
+            )
+            return False
+        cycle_id = str(cycle.get("id") or "")
+        if cycle_id:
+            self._drop_cached_sample_segments(cycle_id)
+        cycle["power_data"] = restored
+        cycle["signature"] = signature
+        cycle["energy_wh"] = energy
+        cycle["duration"] = duration
+        end_time = record.get("end_time")
+        if isinstance(end_time, str) and end_time:
+            cycle["end_time"] = end_time
+        else:
+            cycle.pop("end_time", None)
+        meta = cycle.get("meta")
+        if isinstance(meta, dict):
+            meta.pop("tail_cut_s", None)
+        cycle.pop(BACKFILL_TAIL_TRACE_KEY, None)
+        return True
+
+    def _restore_backfill_tails_nosave(self, profile_name: str) -> int:
+        """Put back the end wait of ``profile_name``'s imports cut at another stop
+        threshold (register item 618), so the cut that follows judges each one at
+        the current level from its full trace.
+
+        A higher stop threshold can read a standby as the end of activity and cut
+        it away, and the cut stamp kept that cut when the threshold was lowered
+        again: only Undo import brought the readings back. Only cycles that carry a
+        kept tail judged at a level other than the current one, and that the user
+        has not trimmed (``meta.edited`` / ``meta.trim``) or given a corrected
+        length (``manual_duration``) since: those are the user's statement of where
+        the cycle ended. Returns how many were restored; the caller cuts, rebuilds
+        and saves. Never raises.
+        """
+        if self.device_type != DEVICE_TYPE_DISHWASHER or not profile_name:
+            return 0
+        stop = _safe_offset(self.stop_threshold_w)
+        if stop is None:
+            return 0
+        restored = 0
+        for cycle in self.get_backfill_cycles():
+            try:
+                if not isinstance(cycle, dict) or cycle.get("profile_name") != profile_name:
+                    continue
+                record = cycle.get(BACKFILL_TAIL_TRACE_KEY)
+                if not isinstance(record, dict):
+                    continue
+                if (
+                    cycle.get("termination_reason") != TerminationReason.TIMEOUT
+                    or cycle.get("manual_duration")
+                ):
+                    continue
+                meta = cycle.get("meta")
+                if (
+                    not isinstance(meta, dict)
+                    or meta.get("tail_cut_s") is None
+                    or meta.get("edited")
+                    or meta.get("trim")
+                ):
+                    continue
+                judged = _safe_offset(record.get("stop_w"))
+                if judged is None or math.isclose(judged, stop, rel_tol=1e-9, abs_tol=1e-9):
+                    continue
+                if self._restore_backfill_tail(cycle):
+                    restored += 1
+            except Exception:  # noqa: BLE001 - one bad row must not stop the rest
+                self._logger.debug("Import tail restore: skipped a cycle", exc_info=True)
+        if restored:
+            self._logger.info(
+                "Put back the end wait of %d imported cycle(s) of '%s' to cut them "
+                "again at the new stop threshold (%.2f W)",
+                restored, profile_name, stop,
+            )
+        return restored
+
+    def _backfill_tail_candidates(self, profile_name: str) -> list[CycleDict]:
+        """``profile_name``'s imported cycles that may still hold their end wait.
+
+        A dishwasher's timeout finish keeps its tail (``keep_tail``), and the
+        unmatched history replay has no expected duration to cap it with, so an
+        imported one stores the whole ``min_off_gap`` wait (audit PLAYGROUND-07). Not
+        a cycle already cut (``meta.tail_cut_s``), trimmed by the user (``meta.edited``
+        / ``meta.trim``) or given a corrected length (``manual_duration``): those are
+        the user's statement of where it ended. Metadata only, no trace decoding.
+        """
+        if self.device_type != DEVICE_TYPE_DISHWASHER or not profile_name:
+            return []
+        out: list[CycleDict] = []
+        for cycle in self.get_backfill_cycles():
+            if not isinstance(cycle, dict) or cycle.get("profile_name") != profile_name:
+                continue
+            if cycle.get("termination_reason") != TerminationReason.TIMEOUT:
+                continue
+            if cycle.get("manual_duration"):
+                continue
+            meta = cycle.get("meta")
+            if isinstance(meta, dict) and (
+                meta.get("tail_cut_s") is not None or meta.get("edited") or meta.get("trim")
+            ):
+                continue
+            out.append(cycle)
+        return out
+
+    def _backfill_tail_expected_s(
+        self, profile_name: str, candidates: list[CycleDict]
+    ) -> float | None:
+        """The programme length the cut falls back to when no drying span is measured.
+
+        The median length of the profile's evidence cycles that cannot hold an
+        uncut import wait - live cycles, references, imports already cut or ended
+        another way - and never ``avg_duration``: that mean includes the very waits
+        being cut (#518: 8,461 -> 10,193 s), so anchoring on it would keep most of
+        each one. None when the profile has no such cycle; the candidates then wait
+        for evidence (each rebuild of the profile asks again).
+        """
+        skip = {id(c) for c in candidates}
+        lengths: list[float] = []
+        for cycle in self.iter_evidence_cycles():
+            if (
+                not isinstance(cycle, dict)
+                or id(cycle) in skip
+                or cycle.get("profile_name") != profile_name
+                or cycle.get("status") not in ("completed", "force_stopped")
+            ):
+                continue
+            try:
+                length = float(cycle.get("manual_duration") or cycle.get("duration") or 0.0)
+            except (TypeError, ValueError, OverflowError):
+                continue
+            if math.isfinite(length) and length > 60:
+                lengths.append(length)
+        return float(statistics.median(lengths)) if lengths else None
+
+    def _cut_backfill_tails_nosave(self, profile_name: str) -> tuple[int, float]:
+        """Cut the end wait off ``profile_name``'s imported dishwasher cycles (#518).
+
+        The import cuts a candidate only when it confidently matches an existing
+        programme (``history_import.async_import_tail_cuts``), so on a first import,
+        with no programme yet, nothing was cut, and once labelled each cycle carried
+        its whole ``min_off_gap`` wait into the profile. Here the programme is known
+        (the label), so the SAME rule, :func:`history_import.import_tail_cut_s`, is
+        applied with its statistics: the measured drying span before the terminal
+        pump-out (from the traces, so the waits after it cannot inflate it), the
+        user-vouched length floor, and only without a span the length of its other
+        cycles (:meth:`_backfill_tail_expected_s`). Shorten-only, at least
+        ``BANKED_TAIL_REPAIR_MIN_S``; statistics are read once, before any cut.
+
+        A cycle the rule declines is not stamped, so a later rebuild (more evidence,
+        a new stop threshold) can still cut it; a cut one never runs again unless a
+        new stop threshold first restores it (:meth:`_restore_backfill_tails_nosave`).
+        Returns ``(cycles cut, seconds removed)``; the caller rebuilds and saves.
+        Never raises.
+        """
+        try:
+            stop = self.stop_threshold_w
+            if stop is None or not math.isfinite(float(stop)):
+                return 0, 0.0
+            candidates = self._backfill_tail_candidates(profile_name)
+            if not candidates:
+                return 0, 0.0
+            from . import history_import  # pylint: disable=import-outside-toplevel
+
+            config = SimpleNamespace(
+                device_type=DEVICE_TYPE_DISHWASHER, stop_threshold_w=float(stop)
+            )
+            quiet = self.profile_terminal_quiet_seconds(profile_name)
+            trusted = self.profile_trusted_min_duration(profile_name)
+            expected = (
+                self._backfill_tail_expected_s(profile_name, candidates)
+                if quiet is None
+                else None
+            )
+            cut = 0
+            reclaimed = 0.0
+            for cycle in candidates:
+                try:
+                    view = {
+                        "power_data": decompress_power_data(cycle),
+                        "duration": cycle.get("duration"),
+                        "termination_reason": cycle.get("termination_reason"),
+                    }
+                    new_duration = history_import.import_tail_cut_s(
+                        view, config, quiet, trusted, expected
+                    )
+                    if new_duration is None:
+                        continue
+                    old_duration = float(cycle.get("duration") or 0.0)
+                    self._apply_backfill_tail_cut(cycle, new_duration)
+                except Exception:  # noqa: BLE001 - one bad row must not stop the rest
+                    self._logger.debug(
+                        "Import tail cut: skipped cycle %s", cycle.get("id"), exc_info=True
+                    )
+                    continue
+                cut += 1
+                reclaimed += old_duration - float(new_duration)
+            if cut:
+                self._logger.info(
+                    "Cut the end wait off %d imported cycle(s) of '%s' (%.0f min)",
+                    cut, profile_name, reclaimed / 60.0,
+                )
+            return cut, reclaimed
+        except Exception:  # noqa: BLE001 - a cut must never break the rebuild
+            self._logger.debug("Import tail cut failed for '%s'", profile_name, exc_info=True)
+            return 0, 0.0
 
     def profile_trusted_min_duration(self, profile_name: str) -> float | None:
         """Shortest user-vouched length of this profile, or None (item 384).
@@ -7519,11 +8857,12 @@ class ProfileStore:
             for cycle in self.iter_evidence_cycles():
                 if cycle.get("profile_name") != profile_name or not cycle.get("power_data"):
                     continue
-                points = decompress_power_data(cast(Any, cycle))
-                if len(points) < 2:
+                summary = self._trace_summary(cycle, stop)
+                if summary.n < 2:
                     continue
                 traced += 1
-                if _has_resumed_pause(points, stop, SMART_TERM_PREFIX_MIN_PAUSE_S):
+                # `has_resumed_pause` on the trace: its longest resumed pause.
+                if summary.longest_pause(stop) >= SMART_TERM_PREFIX_MIN_PAUSE_S:
                     seen = True
                     break
             value: bool | None = seen if traced else None
@@ -7537,11 +8876,17 @@ class ProfileStore:
     ) -> tuple[int, tuple[tuple[float, float], ...]] | None:
         """``(traced cycles, pauses)`` for the hazard end gate (audit DETECT-16).
 
-        Every below-``stop_threshold_w`` pause that power later resumed from, as
-        ``(start_fraction, seconds)``, across the profile's traced evidence cycles.
-        The detector asks "has this programme ever paused this long from this far
-        in?" and waits only that long. None without traced evidence. Cached on the
-        evidence fingerprint and the threshold; never raises.
+        The below-``stop_threshold_w`` pauses that power later resumed from, as
+        ``(start_fraction, seconds)``, across the profile's traced evidence cycles,
+        reduced to their :func:`_pause_frontier`. The detector asks "has this
+        programme ever paused this long from this far in?" and waits only that
+        long; it also reads the longest pause at all (the dishwasher release floor,
+        an orphaned pause's wait) and the near-stop ceiling's catalogue for the
+        stall display, and the frontier answers each of these exactly as the full
+        list did. Register item 601: the full list held every pause (122k pairs at
+        1000 washer cycles), which the detector scanned on every ENDING reading and
+        wrote into the active snapshot every 60 s. None without traced evidence.
+        Cached on the evidence fingerprint and the threshold; never raises.
         """
         try:
             stop = float(stop_threshold_w)
@@ -7560,16 +8905,272 @@ class ProfileStore:
             for cycle in self.iter_evidence_cycles():
                 if cycle.get("profile_name") != profile_name or not cycle.get("power_data"):
                     continue
-                points = decompress_power_data(cast(Any, cycle))
-                if len(points) < 10:
+                summary = self._trace_summary(cycle, stop)
+                if summary.n < 10:
                     continue
                 traced += 1
-                pauses.extend(_resumed_pauses(points, stop))
-            value = (traced, tuple(pauses)) if traced else None
+                pauses.extend(summary.pause_pairs(stop))  # each trace's frontier
+            value = (traced, _pause_frontier(pauses)) if traced else None
             cache[key] = (fingerprint, value)
             return value
         except Exception:  # noqa: BLE001 - a statistic must never break matching
             return None
+
+    def device_pause_catalogue(
+        self, stop_threshold_w: float
+    ) -> tuple[int, tuple[tuple[float, float], ...]] | None:
+        """:meth:`profile_pause_catalogue` pooled over every labelled traced evidence
+        cycle of this device, reduced to its :func:`_pause_frontier`.
+
+        The hazard end gate's evidence for a programme with too few traced runs of
+        its own: "has this machine ever paused this long from this far into a
+        programme?". Cached on the device's evidence fingerprint and the
+        threshold; never raises.
+        """
+        try:
+            stop = float(stop_threshold_w)
+            if not math.isfinite(stop) or stop <= 0:
+                return None
+            cache = getattr(self, "_device_pause_cache", None)
+            if cache is None:
+                cache = self._device_pause_cache = {}
+            key = round(stop, 4)
+            labelled = [
+                c for c in self.iter_evidence_cycles()
+                if isinstance(c, dict) and c.get("profile_name")
+            ]
+            total = 0.0
+            for cycle in labelled:
+                try:
+                    total += float(cycle.get("duration") or 0.0)
+                except (TypeError, ValueError, OverflowError):
+                    continue
+            fingerprint = (
+                len(labelled), str(labelled[-1].get("id") or "") if labelled else "",
+                int(total),
+            )
+            hit = cache.get(key)
+            if hit is not None and hit[0] == fingerprint:
+                return hit[1]
+            # Per cycle too, so a new cycle costs one trace summary, not the store's
+            # (this runs on the event loop, in ENDING).
+            per_cycle = getattr(self, "_cycle_pause_cache", {}).get(key, {})
+            kept: dict[tuple[str, int, str], Any] = {}
+            traced = 0
+            pauses: list[tuple[float, float]] = []
+            for cycle in labelled:
+                raw = cycle.get("power_data")
+                if not raw:
+                    continue
+                ckey = (str(cycle.get("id") or ""),
+                        len(raw) if hasattr(raw, "__len__") else 0,
+                        str(cycle.get("duration") or ""))
+                got = per_cycle.get(ckey)
+                if got is None:
+                    # Each cycle's own frontier: a pause another pause of its cycle
+                    # dominates is dominated in the pool too, so the pooled frontier
+                    # is the same, sorted over a handful per cycle instead of every
+                    # pause of the device (44k at 375 washer cycles: 150 ms here).
+                    summary = self._trace_summary(cycle, stop)
+                    got = (summary.n >= 10,
+                           _pause_frontier(summary.pause_pairs(stop)) if summary.n >= 10 else ())
+                if ckey[0]:
+                    kept[ckey] = got
+                if got[0]:
+                    traced += 1
+                    pauses.extend(got[1])
+            if not hasattr(self, "_cycle_pause_cache"):
+                self._cycle_pause_cache = {}
+            self._cycle_pause_cache[key] = kept
+            value = (traced, _pause_frontier(pauses)) if traced else None
+            cache[key] = (fingerprint, value)
+            return value
+        except Exception:  # noqa: BLE001 - a statistic must never break matching
+            return None
+
+    def hazard_pause_catalogue(
+        self,
+        profile_name: str | None,
+        expected_duration: Any,
+        ambiguous: bool,
+        contenders: Any,
+        stop_threshold_w: float,
+    ) -> tuple[int, tuple[tuple[float, float], ...]] | None:
+        """Match element 16: the hazard end gate's evidence where the matched
+        profile's own catalogue (element 14) cannot serve, else None.
+
+        Element 14 serves an unambiguous match with END_GATE_HAZARD_MIN_CYCLES
+        traced cycles. For the rest:
+
+        * an ambiguous match: the catalogues of every contender (``contenders``,
+          :func:`_ambiguity_contenders`, plus the matched profile itself), each
+          rescaled onto ``expected_duration`` (the detector places the quiet as a
+          fraction of it), so a pause qualifies wherever ANY of the programmes the
+          match is torn between could still be soaking. Counted as the fewest
+          traced cycles among them; None when the ambiguity has no contender set.
+        * a programme (or contender) with fewer traced cycles: the device's pooled
+          catalogue (:meth:`device_pause_catalogue`) instead of its own.
+
+        None as soon as any programme in the set has no usable evidence: the gate
+        then waits as it always did. Never raises.
+        """
+        try:
+            if not profile_name:
+                return None
+            ref = float(expected_duration or 0.0)
+            stop = float(stop_threshold_w)
+            if not (math.isfinite(ref) and ref > 0 and math.isfinite(stop) and stop > 0):
+                return None
+            if ambiguous:
+                if not contenders:
+                    return None
+                members = {str(n): float(d) for n, d in contenders}
+                members[str(profile_name)] = ref
+            else:
+                own = self.profile_pause_catalogue(profile_name, stop)
+                if own is not None and own[0] >= END_GATE_HAZARD_MIN_CYCLES:
+                    return None
+                members = {str(profile_name): ref}
+            traced: int | None = None
+            pauses: list[tuple[float, float]] = []
+            for name, expected in members.items():
+                if not (math.isfinite(expected) and expected > 0):
+                    return None
+                cat = self.profile_pause_catalogue(name, stop)
+                if cat is None or cat[0] < END_GATE_HAZARD_MIN_CYCLES:
+                    cat = self.device_pause_catalogue(stop)
+                if cat is None or cat[0] < END_GATE_HAZARD_MIN_CYCLES:
+                    return None
+                traced = cat[0] if traced is None else min(traced, cat[0])
+                scale = expected / ref
+                pauses.extend((f * scale, d) for f, d in cat[1])
+            if traced is None:
+                return None
+            return (traced, _pause_frontier(pauses))
+        except Exception:  # noqa: BLE001 - a statistic must never break matching
+            return None
+
+    def set_trace_summary_levels(self, levels: Any) -> bool:
+        """The stop levels every trace summary carries its pauses at (the manager's
+        stop threshold and near-stop ceiling); True when they changed.
+
+        A statistic asked at another level (a Playground what-if) still gets it, by
+        decompressing that trace once for the level, wherever it runs.
+        """
+        new = tuple(sorted({float(v) for v in levels if math.isfinite(float(v))}))
+        old = self.__dict__.get("_trace_summary_levels", ())
+        self._trace_summary_levels = new
+        return new != old
+
+    def _trace_summary(self, cycle: CycleDict, level: float | None = None) -> _TraceSummary:
+        """The summary of ``cycle``'s trace, with its pauses at ``level`` if given.
+
+        Read from the cache when :meth:`async_warm_trace_summaries` (or an earlier
+        read) computed it for this very ``power_data`` object; computed here
+        otherwise, which is the decompression every statistic used to do inline.
+        Callable from an executor (the Playground, the panel's statistics): cache
+        writes are single dict assignments. Raises what decompression raises.
+        """
+        cache: dict[int, _TraceSummary] = self.__dict__.setdefault("_trace_summaries", {})
+        raw = cycle.get("power_data")
+        start = cycle.get("start_time")
+        hit = cache.get(id(raw))
+        if hit is not None and hit.valid_for(raw, start):
+            if level is not None and level not in hit.pauses:
+                hit.pauses[level] = _resumed_pauses_at(_trace_points(raw, start), level)
+            return hit
+        levels = set(self.__dict__.get("_trace_summary_levels", ()))
+        if level is not None:
+            levels.add(level)
+        summary = _summarise_trace(raw, start, levels)
+        cache[id(raw)] = summary
+        return summary
+
+    def _missing_trace_summaries(self, profiles: Any = None) -> list[tuple[Any, Any]]:
+        """``(raw, start)`` of every labelled evidence trace (of ``profiles``, if
+        given) without a current summary at every pinned level. O(cycles), no
+        decompression."""
+        # Runs on every match tick, so the validity test is inlined (valid_for).
+        cache: dict[int, _TraceSummary] = self.__dict__.setdefault("_trace_summaries", {})
+        levels = self.__dict__.get("_trace_summary_levels", ())
+        names = None if profiles is None else {p for p in profiles if p}
+        out: list[tuple[Any, Any]] = []
+        queued: set[int] = set()
+        for cycle in self.iter_evidence_cycles():
+            if not isinstance(cycle, dict):
+                continue
+            name = cycle.get("profile_name")
+            if not name or (names is not None and name not in names):
+                continue
+            raw = cycle.get("power_data")
+            if not raw:
+                continue
+            key = id(raw)
+            hit = cache.get(key)
+            start = cycle.get("start_time")
+            if (
+                hit is not None
+                and hit.raw is raw
+                and hit.n_raw == (len(raw) if isinstance(raw, list) else -1)
+                and hit.start == start
+            ):
+                pauses = hit.pauses
+                for level in levels:
+                    if level not in pauses:
+                        break
+                else:
+                    continue
+            if key in queued:
+                continue
+            queued.add(key)
+            out.append((raw, start))
+        return out
+
+    async def async_warm_trace_summaries(self, profiles: Any = None) -> int:
+        """Compute the missing trace summaries in the executor; how many.
+
+        Run where a profile's traces change (every envelope rebuild: cycle end,
+        label, delete, trim, merge, split, import, migrations), at setup and on a
+        stop-threshold change, and by the live match tick before it reads the
+        statistics, so the first tick after a new cycle aggregates summaries instead
+        of decompressing every cycle of the profile on the event loop. A no-op that
+        never yields when nothing is missing. Never raises.
+        """
+        try:
+            todo = self._missing_trace_summaries(profiles)
+            if not todo:
+                return 0
+            levels = tuple(self.__dict__.get("_trace_summary_levels", ()))
+            built = await self.hass.async_add_executor_job(_summarise_traces, todo, levels)
+            if not isinstance(built, list):
+                return 0
+            cache: dict[int, _TraceSummary] = self.__dict__.setdefault(
+                "_trace_summaries", {}
+            )
+            count = 0
+            for summary in built:
+                if isinstance(summary, _TraceSummary):
+                    cache[id(summary.raw)] = summary
+                    count += 1
+            self._prune_trace_summaries()
+            return count
+        except Exception:  # noqa: BLE001 - a cache fill must never break its caller
+            self._logger.debug("Trace summary warm-up failed", exc_info=True)
+            return 0
+
+    def _prune_trace_summaries(self) -> None:
+        """Drop summaries of traces no stored cycle holds any more (each pins its
+        trace's memory). Rebuilt and swapped, never mutated mid-iteration."""
+        cache: dict[int, _TraceSummary] = self.__dict__.get("_trace_summaries") or {}
+        live = [c.get("power_data") for c in self.iter_stored_cycles() if isinstance(c, dict)]
+        if len(cache) <= len(live) + 64:
+            return
+        kept: dict[int, _TraceSummary] = {}
+        for raw in live:
+            hit = cache.get(id(raw))
+            if hit is not None and hit.raw is raw:
+                kept[id(raw)] = hit
+        self._trace_summaries = kept
 
     def _terminal_quiet_fingerprint(self, profile_name: str) -> tuple[int, str, int]:
         """Cheap stand-in for "has this profile's evidence changed?".
@@ -7735,15 +9336,14 @@ class ProfileStore:
                 or not cycle.get("power_data")
             ):
                 continue
-            points = decompress_power_data(cycle)
-            if len(points) < 10:
+            summary = self._trace_summary(cycle)
+            if summary.n < 10:
                 continue
             members += 1
-            block = _last_high_block(
-                [float(pt[0]) for pt in points], [float(pt[1]) for pt in points], level
-            )
-            if block is not None and block[0] >= ANTI_CREASE_TERMINAL_HIGH_MIN_FRAC:
-                starts.append(block[2])
+            # `_last_high_block` on the member's trace, kept when terminal.
+            block = summary.spin_block(level)
+            if block is not None:
+                starts.append(block[0])
                 lengths.append(block[1])
         value = (
             (tuple(sorted(starts)), tuple(sorted(lengths)), members) if members else None
@@ -8068,15 +9668,10 @@ class ProfileStore:
             measured = 0
 
             for cycle in cycles:
-                points = decompress_power_data(cast(Any, cycle))
-                if len(points) < 5:
-                    continue
-                peak = max(p for _t, p in points)
-                if peak <= 0:
-                    continue
-                threshold = peak * TERMINAL_EVENT_PEAK_FRAC
-                span = points[-1][0] - points[0][0]
-                if span <= 0:
+                # The per-cycle walk is `_terminal_event_measure`, read from the
+                # trace's summary (decompressed once, off the loop).
+                measure = self._trace_summary(cycle).signature()
+                if measure is None:
                     continue
                 # Counted only once the trace is measurable AT ALL. An all-zero
                 # cycle (a stored cycle that is nothing but 0.0 W keepalives,
@@ -8087,45 +9682,19 @@ class ProfileStore:
                 # how long it stayed quiet without one, which decides after the
                 # loop whether it is an absence or censored (item 469).
                 measured += 1
-
-                # Walk back to the last run above the threshold, then to the start
-                # of that run, then to the end of the quiet stretch before it.
-                end_i = None
-                for i in range(len(points) - 1, -1, -1):
-                    if points[i][1] > threshold:
-                        end_i = i
-                        break
-                if end_i is None:
+                if not measure:
                     continue
-                start_i = end_i
-                while start_i > 0 and points[start_i - 1][1] > threshold:
-                    start_i -= 1
-                # The quiet PHASE, not the sample interval: walk back to the
-                # previous activity. Measuring the gap to the preceding sample
-                # would just report the plug's reporting rate, since a plug that
-                # keeps sampling through the drying phase has no large interval.
-                prev_i = None
-                for i in range(start_i - 1, -1, -1):
-                    if points[i][1] > threshold:
-                        prev_i = i
-                        break
-                event_peak = max(p for _t, p in points[start_i : end_i + 1])
-                if (
-                    prev_i is None  # the run reaches the start, or nothing precedes it
-                    or points[start_i][0] - points[prev_i][0] < TERMINAL_QUIET_MIN_S
-                    or event_peak > peak * TERMINAL_EVENT_MAX_PEAK_FRAC
-                ):
+                if len(measure) == 1:
                     # The last run is the main activity (item 469): no event seen,
                     # only how long the trace stayed quiet after it.
-                    no_event_tails.append(points[-1][0] - points[end_i][0])
+                    no_event_tails.append(measure[0])
                     continue
-                gap = points[start_i][0] - points[prev_i][0]
-
+                gap, event_s, event_peak, event_frac, position = measure
                 quiet.append(gap)
-                seconds.append(points[end_i][0] - points[start_i][0])
+                seconds.append(event_s)
                 watts.append(event_peak)
-                watt_fracs.append(event_peak / peak)
-                positions.append((points[start_i][0] - points[0][0]) / span)
+                watt_fracs.append(event_frac)
+                positions.append(position)
 
             if not measured:
                 return None
@@ -8329,13 +9898,10 @@ class ProfileStore:
         rejects. Returns 0.0 when nothing usable exists, which the caller skips.
         """
         try:
-            has_golden = any(
-                isinstance(c.get("ml_review"), dict)
-                and c["ml_review"].get("golden")
-                and c.get("power_data")
-                and c.get("profile_name") == name
-                for c in self.iter_evidence_cycles()
-            )
+            has_golden = _pins_golden_template([
+                c for c in self.iter_evidence_cycles()
+                if c.get("power_data") and c.get("profile_name") == name
+            ])
             envelope = (self._data.get("envelopes") or {}).get(name)
             if not has_golden and envelope and envelope_shape_count(envelope) >= 2:
                 env_avg = envelope.get("avg")
@@ -8620,13 +10186,14 @@ class ProfileStore:
         MR-01, MATCH-EVAL-02). Cached per envelope revision and grid step.
         """
         avg = envelope.get("avg") or []
-        key = (name, id(envelope), envelope.get("updated"), float(round(used_dt, 2)))
+        revision = envelope.get("updated")
+        key = (name, float(round(used_dt, 2)))
         cache = getattr(self, "_envelope_template_cache", None)
         if cache is None:
             cache = self._envelope_template_cache = {}
         hit = cache.get(key)
-        if hit is not None and hit[0] is envelope:
-            return hit[1]
+        if hit is not None and hit[0] is envelope and hit[1] == revision:
+            return hit[2]
         values = [float(p[1]) for p in avg]
         try:
             ts = np.asarray([float(p[0]) for p in avg], dtype=float)
@@ -8641,10 +10208,22 @@ class ProfileStore:
                         values = [float(v) for v in seg.power]
         except Exception:  # noqa: BLE001 - fall back to the raw curve, never fail a match
             pass
-        if len(cache) > 512:
+        # Only the current revision of each profile, on at most two grid steps
+        # (live and a Playground replay can alternate): keyed by the envelope's id
+        # and step, every rebuild and every jittered step of a change-only plug
+        # kept a template and its whole old envelope alive until 512 piled up
+        # (#521). Snapshots and pop(), so a concurrent matcher thread is harmless.
+        mine = [k for k in list(cache) if k[0] == name and k != key]
+        for k in mine:
+            old_entry = cache.get(k)
+            if old_entry is None or old_entry[0] is not envelope:
+                cache.pop(k, None)
+        mine = [k for k in list(cache) if k[0] == name and k != key]
+        for k in mine[:-1]:
+            cache.pop(k, None)
+        if len(cache) > 512:  # profiles deleted or renamed since
             cache.clear()
-        # The envelope itself is held, so its id cannot be recycled while cached.
-        cache[key] = (envelope, values)
+        cache[key] = (envelope, revision, values)
         return values
 
     def build_match_snapshots(self, used_dt: float) -> list[dict[str, Any]]:
@@ -8673,10 +10252,16 @@ class ProfileStore:
         # auto-label (many matches x many cycles) - issue #311. Selections are
         # byte-identical: cycles_by_id keeps the FIRST occurrence (== next()),
         # labeled_by_profile keeps the first eligible cycle in all_cycles order,
-        # and golden_profiles mirrors the any(...) golden test.
+        # and golden_profiles is `_pins_golden_template` over each profile's traced
+        # cycles (register item 570).
         cycles_by_id: dict[str, CycleDict] = {}
         labeled_by_profile: dict[str, CycleDict] = {}
-        golden_profiles: set[str] = set()
+        traced_by_profile: dict[str, list[CycleDict]] = {}
+        # Issue #486: each profile's member cycles, for nearest-member templates.
+        members_on = bool(MATCH_MEMBER_TEMPLATES) and (
+            self.device_type in MATCH_MEMBER_DEVICE_TYPES
+        )
+        members_by_profile: dict[str, list[CycleDict]] = {}
         for c in all_cycles:
             cid = c.get("id")
             if cid is not None and cid not in cycles_by_id:
@@ -8684,14 +10269,23 @@ class ProfileStore:
             pname = c.get("profile_name")
             if not pname or not c.get("power_data"):
                 continue
+            traced_by_profile.setdefault(pname, []).append(c)
             if (
                 pname not in labeled_by_profile
                 and c.get("status") in ("completed", "force_stopped")
             ):
                 labeled_by_profile[pname] = c
-            rev = c.get("ml_review")
-            if isinstance(rev, dict) and rev.get("golden"):
-                golden_profiles.add(pname)
+            if members_on and c.get("status") in ("completed", "force_stopped"):
+                try:
+                    long_enough = float(c.get("duration") or 0.0) > 60
+                except (TypeError, ValueError, OverflowError):
+                    long_enough = False
+                if long_enough:
+                    members_by_profile.setdefault(pname, []).append(c)
+        golden_profiles = {
+            pname for pname, traced in traced_by_profile.items()
+            if _pins_golden_template(traced)
+        }
 
         snapshots: list[dict[str, Any]] = []
         skipped_profiles: list[str] = []
@@ -8752,7 +10346,15 @@ class ProfileStore:
                     # elapsed duration for prefix scoring.
                     "sample_span_s": float(_env_ts_duration or avg_duration),
                     "energy_ref": envelope.get("energy_ref"),
+                    "spin_ref": envelope.get("spin_ref"),
                 })
+                if members_on and envelope_shape_count(envelope) >= MATCH_MEMBER_MIN_CYCLES:
+                    mems = self._member_templates(
+                        members_by_profile.get(name) or [], used_dt,
+                        envelope.get("member_prog_s"),
+                    )
+                    if mems:
+                        snapshots[-1]["members"] = mems
                 continue
 
             if not sample_cycle:
@@ -8803,7 +10405,25 @@ class ProfileStore:
                 # Stage 4 still takes the expected energy from the profile's own
                 # cycles when it has them (a golden template, or one cycle).
                 "energy_ref": envelope.get("energy_ref") if isinstance(envelope, dict) else None,
+                "spin_ref": envelope.get("spin_ref") if isinstance(envelope, dict) else None,
             })
+            # Issue #486: a golden-pinned profile keeps its golden trace as its own
+            # template and gains its other members, like an envelope profile.
+            # Without them one pinned cycle stood for the whole programme: on the
+            # #486 Miele, a 142-min run for a 23-cycle Easy Care 40.
+            if (
+                members_on
+                and has_golden
+                and envelope_shape_count(envelope) >= MATCH_MEMBER_MIN_CYCLES
+            ):
+                mems = self._member_templates(
+                    [c for c in members_by_profile.get(name) or []
+                     if c.get("id") != sample_cycle.get("id")],
+                    used_dt,
+                    envelope.get("member_prog_s") if isinstance(envelope, dict) else None,
+                )
+                if mems:
+                    snapshots[-1]["members"] = mems
 
         if skipped_profiles:
             self._logger.debug(
@@ -8813,6 +10433,59 @@ class ProfileStore:
             )
 
         return snapshots
+
+    def _member_templates(
+        self, cycles: list[CycleDict], used_dt: float,
+        prog_ends: dict[str, Any] | None = None,
+    ) -> list[dict[str, Any]]:
+        """A profile's member cycles as matching templates on the query grid (#486).
+
+        The ``MATCH_MEMBER_MAX`` most recent, so the cost per match stays bounded
+        however long the history grows and a programme that drifts with the season
+        (inlet water temperature) is represented by how it runs now. Degenerate
+        members (peak under the envelope build's floor) are skipped, as the
+        envelope skips them. Re-gridded through the sample-segment cache, so a
+        live tick re-grids only when the query's step changes. Never raises.
+        """
+        try:
+            if not cycles:
+                return []
+            peaks = [self._cycle_peak(c) for c in cycles]
+            med = sorted(peaks)[len(peaks) // 2]
+            floor = max(_DEGENERATE_POWER_FLOOR, 0.10 * med)
+            pool = [c for c, pk in zip(cycles, peaks) if pk >= floor] or list(cycles)
+            cap = int(MATCH_MEMBER_MAX or 0)
+            if cap > 0 and len(pool) > cap:
+
+                def _started(c: CycleDict) -> float:
+                    parsed = _parse_start_dt(c.get("start_time"))
+                    return parsed.timestamp() if parsed is not None else float("-inf")
+
+                pool = sorted(pool, key=_started, reverse=True)[:cap]
+            out: list[dict[str, Any]] = []
+            for c in pool:
+                seg = self._get_cached_sample_segment(c, used_dt)
+                if not seg or len(seg.power) < 2:
+                    continue
+                span = float(seg.timestamps[-1]) - float(seg.timestamps[0])
+                dur = float(c.get("duration") or 0.0) or span
+                out.append({
+                    "id": c.get("id"),
+                    "sample_power": seg.power.tolist(),
+                    "sample_span_s": span or dur,
+                    "duration": dur,
+                })
+                # Audit item 2: its programme end, from the envelope build
+                # (`member_prog_s`); without one, the stored duration.
+                prog = (prog_ends or {}).get(str(c.get("id")))
+                out[-1]["prog_s"] = (
+                    float(prog)
+                    if isinstance(prog, (int, float)) and 0 < float(prog) < dur
+                    else dur
+                )
+            return out
+        except Exception:  # noqa: BLE001 - members are optional, never fail a match
+            return []
 
     def _get_cached_sample_segment(
         self, sample_cycle: dict[str, Any], dt: float
@@ -8891,6 +10564,10 @@ class ProfileStore:
         """
         profiles = self._data.get("profiles") if isinstance(self._data, dict) else None
         count = len(profiles) if isinstance(profiles, dict) else 0
+        if MATCH_MEMBER_TEMPLATES and self.device_type in MATCH_MEMBER_DEVICE_TYPES:
+            # Member templates (#486) cache up to MATCH_MEMBER_MAX members' segments
+            # per profile as well.
+            count += count * max(0, int(MATCH_MEMBER_MAX or 0))
         return max(SAMPLE_SEGMENT_CACHE_MIN, 2 * count)
 
     def _drop_cached_sample_segments(self, cycle_id: str) -> None:
@@ -8978,6 +10655,18 @@ class ProfileStore:
                 "dtw_bandwidth": self.dtw_bandwidth,
                 "energy_mode": self.energy_mode,
                 "in_progress": bool(in_progress),
+                # Issue #486: the RAW trace for the washer rhythm term (the
+                # resampled grid smears seconds-long spin spikes). Extracted in the
+                # executor, not here on the loop.
+                "spin_trace": (
+                    (ts_arr, p_arr) if self.energy_mode == "integrated" else None
+                ),
+                # The live display-only rhythm term (#486 follow-up) is washing
+                # machines only (MATCH_SPIN_DISPLAY_DEVICE_TYPES).
+                **(
+                    {} if self.device_type in MATCH_SPIN_DISPLAY_DEVICE_TYPES
+                    else {"spin_weight_in_progress_display": 0.0}
+                ),
                 # Empty live; the Playground's replay config (see _matching_overrides).
                 **self._matching_overrides(),
             }
@@ -9025,6 +10714,7 @@ class ProfileStore:
         # the selected member's own blended score still exists (see
         # MatchResult.label_confidence).
         scored_by_name = {str(c.get("name")): c for c in candidates}
+        durations = {k: c.get("profile_duration") for k, c in scored_by_name.items()}
         # Element 12's population, captured here for a related reason. The
         # collapse keeps only the best sibling of each cohesive family, so a
         # LONGER sibling's duration leaves the list entirely - and element 12 is
@@ -9037,6 +10727,9 @@ class ProfileStore:
         # RAISE the bar, so this defers ends, never hastens them.
         pre_collapse_candidates = list(candidates)
         candidates = collapse_group_candidates(candidates, group_members)
+        # The collapsed ranking before Stage 5 relabels its winner: a family keeps
+        # its group name here, which the hazard contenders expand to its members.
+        ranked_collapsed = candidates
 
         best = candidates[0]
 
@@ -9044,10 +10737,19 @@ class ProfileStore:
         # group-vs-runner-up call is flagged so it goes to the uncertain/feedback
         # path, not a confident commit.
         margin, is_ambiguous = _ambiguity_from_candidates(candidates)
+        # Issue #486, live member templates: the members choose the winner (and
+        # its own margin is the ambiguity the switching rules read); the end gates
+        # read the single-template ranking (_single_template_view,
+        # _single_template_gate). Off (None) on every other path.
+        single_view = (
+            _single_template_view(pre_collapse_candidates, group_members)
+            if in_progress else None
+        )
 
         best_name = best["name"]
         best_duration = best["profile_duration"]
         member_confidence: float | None = None
+        stage5_doubt = False
         # Stage 5: if a group won, pick the best-fitting member.
         if best_name in group_members:
             chosen, member_fit, member_dur = self._stage5_pick_member(
@@ -9091,11 +10793,13 @@ class ProfileStore:
             # like-for-like blended scores.
             if member_fit is not None and best["score"] > 0 and member_fit < 0.55 * best["score"]:
                 is_ambiguous = True
+                stage5_doubt = True
             # Overrun guard: if the cycle has already outlasted the chosen member's
             # expected duration we may be running the longer group member — downgrade
             # to ambiguous so Smart Termination falls back to the power timeout.
             if best_duration and current_duration > best_duration * 1.05:
                 is_ambiguous = True
+                stage5_doubt = True
             # Relabel the winning candidate for the ranking / diagnostics, and carry
             # the Stage-5 provenance with it. `score` deliberately stays the group's
             # (i.e. the best-scoring sibling's) blended score: that is the number the
@@ -9143,10 +10847,34 @@ class ProfileStore:
         full_shape_hit = _match_prefix_ambiguity(
             candidates, best_duration or 0.0, pauses_fn
         )
+        # Issue #486: the end gates read the single-template ranking, whole, unless
+        # the member winner is confirmed (_member_gate_confirmed).
+        gate: dict[str, Any] | None = None
+        if single_view is not None:
+            if _member_gate_confirmed(
+                best, single_view, bool(is_ambiguous), pre_collapse_candidates
+            ):
+                gate = {"profile": best_name, "confidence": float(best["score"]),
+                        "expected": float(best_duration or 0.0) or None,
+                        "ambiguous": False, "prefix": bool(full_shape_hit),
+                        "contenders": None}
+            else:
+                gate = self._single_template_gate(
+                    single_view, current_power_list, float(current_duration or 0.0),
+                    group_members, member_snaps, pauses_fn, durations,
+                )
         # From the pre-collapse population, not just before the [:5] truncation
         # below: see `pre_collapse_candidates` above for why the collapse is the
         # more dangerous of the two filters here.
         longest_candidate_s = longest_candidate_duration(pre_collapse_candidates)
+        # Audit item 2: this run's own expected duration from the gate profile's
+        # nearest members, live member path only (the end gates' view).
+        gate_run_expected: float | None = None
+        if single_view is not None and gate:
+            gate_run_expected = self._run_expected_for(
+                gate.get("profile"), {str(s.get("name")): s for s in snapshots},
+                current_power_list, float(current_duration or 0.0),
+            )
 
         return MatchResult(
             best_name,
@@ -9161,7 +10889,38 @@ class ProfileStore:
             member_confidence=member_confidence,
             longest_candidate_duration_s=longest_candidate_s,
             query_duration_s=float(current_duration or 0.0),
+            gate_profile=gate["profile"] if gate else None,
+            gate_confidence=gate["confidence"] if gate else None,
+            gate_expected_duration=gate["expected"] if gate else None,
+            gate_ambiguous=gate["ambiguous"] if gate else None,
+            gate_prefix_full_shape=gate["prefix"] if gate else None,
+            ambiguity_contenders=_ambiguity_contenders(
+                ranked_collapsed, group_members, durations, best_name, best_duration,
+                stage5_doubt,
+            ),
+            gate_contenders=gate.get("contenders") if gate else None,
+            gate_run_expected=gate_run_expected,
         )
+
+    @staticmethod
+    def _run_expected_for(
+        name: str | None,
+        snap_by_name: dict[str, dict[str, Any]],
+        current_power: list[float],
+        current_duration: float,
+    ) -> float | None:
+        """``analysis.nearest_member_duration`` for profile ``name``'s member
+        templates (audit item 2); None without members. Never raises."""
+        try:
+            snap = snap_by_name.get(str(name)) if name else None
+            members = snap.get("members") if isinstance(snap, dict) else None
+            if not members:
+                return None
+            return analysis.nearest_member_duration(
+                current_power, current_duration, members, duration_key="prog_s",
+            )
+        except Exception:  # noqa: BLE001 - a statistic must never break matching
+            return None
 
     async def async_verify_alignment(
         self,
@@ -9650,6 +11409,15 @@ class ProfileStore:
             for req in pending.values():
                 if req.get("detected_profile") == old_name:
                     req["detected_profile"] = new_name
+                # The ranking names the one-tap review answers
+                # (learning.review_choices: the panel's buttons and the
+                # notification's actions), a group entry by its best member.
+                for cand in req.get("ranking") or []:
+                    if not isinstance(cand, dict):
+                        continue
+                    for key in ("name", "group_best_member"):
+                        if cand.get(key) == old_name:
+                            cand[key] = new_name
 
             # 3. Update feedback history
             history = self.get_feedback_history()
@@ -9963,6 +11731,18 @@ class ProfileStore:
             # Try to match
             result = await self.async_match_profile(power_data, cycle["duration"])
 
+            # The match awaited the executor. A cycle deleted, merged or split
+            # away meanwhile (the delete action and the panel's per-cycle edits
+            # take no write lock) is not labelled, so no profile is rebuilt for a
+            # cycle the store no longer holds.
+            pool = (
+                self.get_backfill_cycles() if is_backfill
+                else self._data.get("past_cycles", [])
+            )
+            if not any(c is cycle for c in pool):
+                stats["skipped"] += 1
+                continue
+
             # The same verdict the cycle-end labeller applies (item 387c).
             if label_verdict(result, confidence_threshold)[0]:
                 current_label = cycle.get("profile_name")
@@ -10134,6 +11914,8 @@ class ProfileStore:
                 compressed = compress_power_data(cycle)
                 if compressed:
                     cycle["power_data"] = compressed
+                    # Compression drops readings: keep the rows that are left.
+                    remap_synthetic_offsets(cycle, lambda o: o)
                     migrated += 1
             except Exception as e:  # pylint: disable=broad-exception-caught
                 self._logger.warning("Failed to migrate cycle %s: %s", cycle.get("id"), e)
@@ -10343,9 +12125,11 @@ class ProfileStore:
             "store_version": STORAGE_VERSION,
             "counts": self._pre_import_counts(self._data),
             "entry_options": dict(entry_options) if isinstance(entry_options, dict) else None,
-            # Aliases the live store: Store.async_save serialises before it returns
-            # and the caller mutates nothing until then (it holds the write lock).
-            "data": self._data,
+            # A whole store, so its traces and envelopes go compact like the main
+            # file's (v19).
+            # Otherwise aliases the live store: Store.async_save serialises before it
+            # returns and the caller mutates nothing until then (it holds the write lock).
+            "data": encode_store_payload(self._data),
         }
         try:
             await self._pre_import_store.async_save(record)
@@ -10423,6 +12207,9 @@ class ProfileStore:
         if version > STORAGE_VERSION:
             raise ValueError("The restore point was saved by a newer version of WashData")
         data: JSONDict = dict(raw["data"])
+        # Written compact since v19 (older restore points are not): decoded before
+        # a migration step or the restored store reads a trace or an envelope.
+        await self.hass.async_add_executor_job(decode_store_payload, data)
         if version < STORAGE_VERSION:
             # Taken before an upgrade: same forward migration the main store runs on
             # load, which an import path never does by itself.
@@ -10435,6 +12222,7 @@ class ProfileStore:
         data.pop("active_cycle", None)
         data.pop("last_active_save", None)
         self._data = data
+        self._data_generation = getattr(self, "_data_generation", 0) + 1
         self._cached_sample_segments = {}
         self._cohesion_cache_generation += 1
         await self.async_save()
@@ -10498,6 +12286,7 @@ class ProfileStore:
                 "Import payload lacks %s; keeping this device's", ", ".join(sorted(kept))
             )
         self._data = {**data_dict, **kept}
+        self._data_generation = getattr(self, "_data_generation", 0) + 1
         # The payload's envelopes were built without any cycle list kept above, so
         # rebuild the profiles those lists label. A list kept from the target also
         # means a profile kept from it can lack a payload envelope.
@@ -10518,6 +12307,11 @@ class ProfileStore:
         # re-armed here for a payload old enough to carry banked tails.
         if _export_predates_banked_tail_repair(meta):
             self._data[BANKED_TAIL_REPAIR_KEY] = True
+        # ...and the v18 energy re-integration (#498), with the envelope rebuild
+        # it arms (the payload's avg_energy came from the old curve rule, #495).
+        if _export_predates_energy_recompute(meta):
+            _recompute_cycle_energy(self._data)
+            self._data[CYCLE_ENERGY_REBUILD_KEY] = True
         self._cached_sample_segments = {}
         # profile_groups may have been replaced under the same member names.
         self._cohesion_cache_generation += 1
@@ -11040,6 +12834,13 @@ class ProfileStore:
                 elif cur is None:
                     self._data[key] = src_val  # scalar: fill only when absent locally
 
+        # An older export's cycles carry the pre-#498 energy; re-integrate them before
+        # the rebuild below, and arm the full one for the carried envelopes (#495).
+        # Idempotent, so this device's own cycles come out as they were.
+        if _export_predates_energy_recompute(meta):
+            _recompute_cycle_energy(self._data)
+            self._data[CYCLE_ENERGY_REBUILD_KEY] = True
+
         # ── Step 5: envelopes -- carry for definition-only profiles, rebuild the rest ─
         src_envs = data_dict.get("envelopes") if isinstance(data_dict.get("envelopes"), dict) else {}
         local_envs = self._data.setdefault("envelopes", {})
@@ -11076,6 +12877,11 @@ class ProfileStore:
         # the next restart could report a lifetime count below its own retained
         # history. Only ever increases, and idempotent.
         self._heal_lifetime_cycle_count()
+        # A real-history replace can take cycles whose review requests stay
+        # queued: drop them, as a split, merge or load does (#362), so they neither
+        # show nor spend their programme's review budget.
+        self.prune_orphaned_feedback()
+        self._data_generation = getattr(self, "_data_generation", 0) + 1
         await self.async_save()
 
         settings_out: dict[str, Any] = {}
@@ -11192,10 +12998,14 @@ class ProfileStore:
 
         Returns True if successful, False if the cycle was not found or the
         resulting data is empty.
+
+        Real and history-imported (``backfill``) cycles: an import can hold an end
+        wait or a merged neighbour the user wants gone, and deleting it was the
+        only way out (#518). A community-store ``reference`` cycle stays as
+        downloaded.
         """
-        cycles = cast(list[CycleDict], self._data.get("past_cycles", []))
-        cycle = next((c for c in cycles if c.get("id") == cycle_id), None)
-        if cycle is None:
+        cycle, origin = self.find_stored_cycle(cycle_id)
+        if cycle is None or origin not in ("past", "backfill"):
             return False
 
         p_data = decompress_power_data(cycle)
@@ -11287,6 +13097,10 @@ class ProfileStore:
 
         new_duration = round(renorm[-1][0], 1) if renorm else 0.0
         cycle["power_data"] = renorm
+        remap_synthetic_offsets(
+            cycle,
+            lambda o: round(o - base, 2) if new_start_s <= o <= new_end_s else None,
+        )
         cycle["sampling_interval"] = round(sampling_interval, 1)
         cycle["duration"] = new_duration
 
@@ -11296,7 +13110,7 @@ class ProfileStore:
         p_s = np.array([r[1] for r in renorm], dtype=float)
         if len(ts_s) > 1:
             cycle["energy_wh"] = round(
-                integrate_wh(ts_s, p_s, max_gap_s=energy_gap_threshold_s(ts_s)), 3
+                integrate_cycle_wh(ts_s, p_s), 3
             )
             cycle["max_power"] = round(float(np.max(p_s)), 1)
         elif len(ts_s) == 1:
@@ -11499,6 +13313,8 @@ class ProfileStore:
         points: list[tuple[float, float]] = []
         for offset_seconds, val in p_data_tuples:
             points.append((float(offset_seconds), float(val)))
+        # The parent's keepalive / invented rows (item 568); None when it does not say.
+        parent_synthetic = synthetic_offset_keys(cycle)
 
         # Create new cycles
         for seg_start, seg_end, seg_profile in materialized_segs:
@@ -11513,18 +13329,31 @@ class ProfileStore:
             # Or just take points strictly inside?
             # Generally better to capture the state at start 0.
             state_val = 0.0
+            state_t: float | None = None
             for t, p in points:
                 if t <= seg_start:
                     state_val = p
+                    state_t = t
                 else:
                     break
 
             # Start point (t=0 relative to new cycle)
             p_data_abs.append([round(new_cycle_start_ts, 1), state_val])
+            # In the trace's format, for async_add_cycle to normalise with it. The
+            # start point is a report only when a report sits exactly there.
+            piece_synthetic: list[float] = []
+            if parent_synthetic is not None and (
+                state_t is None
+                or offset_key(state_t) != offset_key(seg_start)
+                or offset_key(state_t) in parent_synthetic
+            ):
+                piece_synthetic.append(round(new_cycle_start_ts, 1))
 
             for t, p in points:
                 if seg_start < t <= seg_end:
                     p_data_abs.append([round(start_ts + t, 1), p])
+                    if parent_synthetic is not None and offset_key(t) in parent_synthetic:
+                        piece_synthetic.append(round(start_ts + t, 1))
 
             # Create Cycle Record
             new_cycle: dict[str, Any] = {
@@ -11535,6 +13364,8 @@ class ProfileStore:
                 "power_data": p_data_abs,
                 "profile_name": seg_profile
             }
+            if parent_synthetic is not None:
+                new_cycle[SYNTHETIC_OFFSETS_KEY] = piece_synthetic
             await self.async_add_cycle(new_cycle)
             new_ids.append(new_cycle["id"])
             piece_bounds.append((new_cycle, seg_start, seg_end))
@@ -11703,11 +13534,23 @@ class ProfileStore:
 
         # Start with C1 points
         merged_points_abs: list[list[float]] = [] # [timestamp, power]
+        # The parts' keepalive / invented rows (item 568) and the gap fill, at
+        # their absolute times; None once a consumed part does not say.
+        merged_synthetic: list[float] | None = []
+
+        def note_synthetic(cy: CycleDict, pts: list[tuple[float, float, float]]) -> None:
+            nonlocal merged_synthetic
+            keys = synthetic_offset_keys(cy)
+            if keys is None or merged_synthetic is None:
+                merged_synthetic = None
+                return
+            merged_synthetic.extend(t for t, off, _p in pts if offset_key(off) in keys)
 
         # Add C1 points
         c1_pts = get_points(c1)
         for t_abs, _, p in c1_pts:
             merged_points_abs.append([t_abs, p])
+        note_synthetic(c1, c1_pts)
 
         # Use the maximum t_abs seen so far (guards against out-of-order or corrupted points)
         last_t_abs = max((pt[0] for pt in c1_pts), default=c1_start_dt.timestamp())
@@ -11732,12 +13575,15 @@ class ProfileStore:
             if gap > 1.0:
                 merged_points_abs.append([last_t_abs + 0.1, 0.0])
                 merged_points_abs.append([current_start_ts - 0.1, 0.0])
+                if merged_synthetic is not None:
+                    merged_synthetic.extend((last_t_abs + 0.1, current_start_ts - 0.1))
 
             # Append points; track the running maximum to guard against reversed/corrupt data
             for t_abs, _, p in c_pts:
                 merged_points_abs.append([t_abs, p])
                 if t_abs > last_t_abs:
                     last_t_abs = t_abs
+            note_synthetic(next_c, c_pts)
 
             max_power = max(max_power, next_c.get("max_power", 0))
             ids_to_remove.append(next_c["id"])
@@ -11775,6 +13621,12 @@ class ProfileStore:
             new_power_data.append([offset, float(p)])
 
         c1["power_data"] = new_power_data
+        set_synthetic_offsets(
+            c1,
+            None
+            if merged_synthetic is None
+            else [round(t_abs - c1_start_ts, 1) for t_abs in merged_synthetic],
+        )
 
         # Recompute energy from the merged trace (merge keeps only c1's original
         # energy_wh which under-represents the combined cycle).
@@ -11783,7 +13635,7 @@ class ProfileStore:
             p_s = np.array([pt[1] for pt in new_power_data], dtype=float)
             if len(ts_s) > 1:
                 c1["energy_wh"] = round(
-                    integrate_wh(ts_s, p_s, max_gap_s=energy_gap_threshold_s(ts_s)), 3
+                    integrate_cycle_wh(ts_s, p_s), 3
                 )
         except Exception:  # pylint: disable=broad-exception-caught
             self._logger.warning("Energy recompute failed after cycle merge", exc_info=True)

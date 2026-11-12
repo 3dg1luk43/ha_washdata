@@ -56,6 +56,7 @@
       "timer_pause_action_title": "サイクルを再開する",
       "timer_pause_body_suffix": "サイクルが一時停止中です。再開するには WashData パネルを開いてください。",
       "unload_dismiss_action_title": "リマインダーを停止",
+      "review_action_title": "{program} でした",
       "notify_live_waiting_message": "{device}: まだ一致するプロファイルがありません。",
       "vs_typical_longer": "通常より {pct}% 長い",
       "vs_typical_shorter": "通常より {pct}% 短い",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "メンテナンス完了としてマーク",
+      "description": "パネルの「完了」ボタンと同じように、メンテナンスタスクを今完了したものとして記録します。",
+      "fields": {
+        "device_id": {
+          "name": "デバイス",
+          "description": "タスクが属する WashData デバイス。"
+        },
+        "task_id": {
+          "name": "タスク ID",
+          "description": "メンテナンス時期センサーの due_task_ids 属性に表示されるタスクの ID（descale、filter_clean、drum_clean、bearing_service、salt、rinse_aid、lint_filter、condenser_clean、other、またはカスタムタスクの custom_ ID）。"
+        },
+        "notes": {
+          "name": "メモ",
+          "description": "記録と一緒に保存する任意のメモ。"
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "サイクルを削除",
+      "description": "保存済みのサイクルを 1 件削除します。そのプログラムはこのサイクルを除いて再構築されます。インポートしたサイクルがそのプログラムの最後の 1 件だった場合は、プログラム自体が削除されます。元に戻せません。",
+      "fields": {
+        "device_id": {
+          "name": "デバイス",
+          "description": "WashData デバイス。"
+        },
+        "cycle_id": {
+          "name": "サイクル ID",
+          "description": "削除するサイクルの ID。例: 「サイクル終了」トリガーの cycle_id 変数（その実行でサイクルが保存されなかった場合は空になるため、先に確認してください）。"
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "ML トレーニングを開始",
       "description": "このデバイス自身のラベル付きサイクルからオンデバイス ML モデルを手動で再トレーニングします（実験的機能）。",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "総電力量"
+      },
+      "last_cycle_duration": {
+        "name": "前回サイクルの所要時間"
+      },
+      "last_cycle_energy": {
+        "name": "前回サイクルの電力量"
+      },
+      "last_cycle_cost": {
+        "name": "前回サイクルの電気料金"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "プロファイルを割り当てできませんでした：{error}"
+    },
+    "cycle_not_found": {
+      "message": "サイクルが見つかりません。"
+    },
+    "maintenance_task_not_found": {
+      "message": "このデバイスに ID {task_id} のメンテナンスタスクはありません。"
+    },
+    "task_id_required": {
+      "message": "有効な task_id が必要です。"
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "サイクルが再開された",
       "still_tumbling": "サイクル後もまだ回転中",
       "unloaded": "取り出し済み",
-      "state_changed": "状態が変わった",
+      "state_changed": "家電の状態が変わった",
       "maintenance_due": "メンテナンスが必要",
       "milestone_reached": "サイクルのマイルストーンに達した",
       "pump_stuck": "ポンプが詰まっている"
@@ -665,7 +716,7 @@
       "description": "サイクル後に洗濯物が取り出されたときにトリガーします: ドアが開いたか、取り出しが確認されました。"
     },
     "state_changed": {
-      "name": "状態が変わった",
+      "name": "家電の状態が変わった",
       "description": "WashData の状態が変わったときにトリガーします。",
       "fields": {
         "from": {

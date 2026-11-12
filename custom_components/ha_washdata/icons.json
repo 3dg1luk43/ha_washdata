@@ -43,7 +43,7 @@
       "trigger": "mdi:basket-check-outline"
     },
     "state_changed": {
-      "trigger": "mdi:state-machine"
+      "trigger": "mdi:washing-machine"
     },
     "maintenance_due": {
       "trigger": "mdi:wrench-clock"

@@ -274,7 +274,11 @@
     "bp_details": "Szczegóły",
     "bp_copy_yaml": "Kopiuj YAML",
     "bp_hide_yaml": "Ukryj YAML",
-    "bp_show_yaml": "Pokaż YAML"
+    "bp_show_yaml": "Pokaż YAML",
+    "review_something_else": "Coś innego…",
+    "review_not_sure": "Nie mam pewności",
+    "review_prev": "Poprzedni cykl",
+    "review_next": "Następny cykl"
   },
   "note": {
     "off_delay": {
@@ -589,6 +593,7 @@
     "pg_alert_overrun": "Wydłużenie",
     "pg_alert_underrun": "Skrócenie",
     "pg_alert_did_not_finish": "Nie zakończono",
+    "pg_alert_discarded": "Odrzucono jako fałszywy cykl lub odpompowanie",
     "pg_alert_false_end": "Podzielono na wiele cykli",
     "pg_alert_unmatched": "Bez dopasowania",
     "pg_alert_ambiguous": "Niejednoznaczne dopasowanie",
@@ -728,7 +733,10 @@
     "bp_needs": "Wymagania",
     "bp_needs_version": "WashData {version} lub nowszy",
     "bp_author": "Autor",
-    "bp_required": "wymagane"
+    "bp_required": "wymagane",
+    "pg_runs_as": "symulacja używa {value}",
+    "review_this_cycle": "Ten cykl",
+    "review_usual": "Zwykle dla {name}"
   },
   "log": {
     "all_levels": "Wszystkie poziomy",
@@ -1087,7 +1095,7 @@
     "hist_scan_failed": "Skanowanie nie powiodło się.",
     "hist_scan_expired": "To skanowanie nie jest już dostępne. Zeskanuj ponownie.",
     "hist_import_failed": "Import nie powiódł się.",
-    "imported_history_readonly": "Wykryty w zaimportowanej historii mocy. Pomaga w dopasowaniu, ale nie liczy się do statystyk i nie można go przyciąć ani podzielić. Oznacz go, aby nadać nazwę programu.",
+    "imported_history_note": "Wykryty w zaimportowanej historii mocy. Pomaga w dopasowaniu, ale nie liczy się do statystyk i nie można go podzielić. Oznacz go, aby nadać nazwę programu.",
     "odometer_intro": "Ta suma tylko rośnie. Usunięcie cyklu jej nie zmniejsza, więc przypomnienia serwisowe pozostają prawidłowe.",
     "odometer_correct_hint": "Ustaw to, jeśli WashData policzył cykl, który się nie odbył, albo urządzenie wykonało cykle przed instalacją WashData.",
     "no_reminders_set": "Nie ustawiono jeszcze żadnych przypomnień serwisowych.",
@@ -1145,7 +1153,17 @@
     "bp_none_yet": "Nie ma jeszcze szablonów dla tego typu urządzenia. Udostępnij pierwszy.",
     "bp_unreachable": "Jest pobierana z GitHuba. Sprawdź, czy Home Assistant ma dostęp do internetu, i spróbuj ponownie.",
     "bp_library_intro": "Gotowe automatyzacje udostępniane przez użytkowników WashData na GitHubie, sprawdzane przed dodaniem do listy. Dostępne tylko przy włączonych funkcjach online.",
-    "bp_needs_version": "Wymaga WashData {version} lub nowszego."
+    "bp_needs_version": "Wymaga WashData {version} lub nowszego.",
+    "bp_review_check": "Sprawdź to przed zapisaniem: Home Assistant wykona to dokładnie tak, jak jest napisane.",
+    "review_q_title": "Jaki to był program?",
+    "review_q_intro": "WashData nie jest pewien tych cykli. Twoja odpowiedź go uczy.",
+    "review_q_started": "Rozpoczęto {when}",
+    "review_q_more": "Jeszcze {count} cykli do sprawdzenia",
+    "review_q_more_one": "Jeszcze {count} cykl do sprawdzenia",
+    "review_q_more_few": "Jeszcze {count} cykle do sprawdzenia",
+    "review_q_more_many": "Jeszcze {count} cykli do sprawdzenia",
+    "review_q_more_other": "Jeszcze {count} cyklu do sprawdzenia",
+    "review_which_program": "Który program to był?"
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
@@ -1238,7 +1256,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Zwolnienie po cichej fazie suszenia",
-      "doc": "Po upływie oczekiwanego czasu trwania: jak długo zmywarka musi pozostać poniżej Progu Zatrzymania, zanim WashData przestanie czekać na końcowe odpompowanie. Zwiększ, jeśli późne odpompowanie po długim suszeniu jest pomijane. Oczekiwanie nigdy nie przekracza 30 minut."
+      "doc": "Po osiągnięciu oczekiwanego czasu trwania WashData przestaje czekać na końcowe odpompowanie, gdy zmywarka pozostaje poniżej Progu Zatrzymania tak długo od swojej ostatniej aktywności, nie dłużej jednak niż 30 minut (a gdy program ma już 3 zapisane cykle, co najmniej tak długo, jak jego najdłuższa zapisana przerwa na suszenie). Zwiększ, jeśli późne odpompowanie po długim suszeniu jest pomijane."
     },
     "anti_crease_finalize_ratio": {
       "doc": "Ułamek średniego czasu trwania programu, który cykl musi osiągnąć, zanim obracanie bębna o niskiej mocy zostanie uznane za ogon antygniotowy. Obniż (np. 0,75) w suszarkach, które dostosowują czas do wsadu. W pralkach zostaw wartość domyślną (0,98), inaczej pranie może się skończyć w połowie.",
@@ -1381,7 +1399,7 @@
       "label": "Ikona Powiadomienia"
     },
     "notify_live_chronometer": {
-      "doc": "Android: dodaje odliczanie do szacowanego zakończenia obok tekstu powiadomienia. Użyj {finish_time} w Wiadomości Przed Zakończeniem, aby wyświetlić godzinę zakończenia zamiast drugiego odliczania.",
+      "doc": "Android: dodaje odliczanie do szacowanego zakończenia obok tekstu powiadomienia. Użyj {finish_time} w Wiadomości Aktualizacji na Żywo, aby wyświetlić godzinę zakończenia zamiast drugiego odliczania.",
       "label": "Używaj Chronometru na Żywo"
     },
     "notify_live_interval_seconds": {
@@ -1406,11 +1424,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Treść każdej aktualizacji postępu na żywo. Zmienne szablonu: {device}, {program}, {minutes} (pozostałe minuty), {finish_time} (szacowana godzina zakończenia, np. 14:30). Przy każdej innej zmiennej używany jest tekst domyślny.",
-      "label": "Wiadomość Przed Zakończeniem"
+      "label": "Wiadomość Aktualizacji na Żywo"
     },
     "notify_reminder_message": {
       "doc": "Treść jednorazowego Alertu Przed Zakończeniem. Zmienne szablonu: {device}, {program}, {minutes} (ustawienie Alert Przed Zakończeniem). Przy każdej innej zmiennej używany jest tekst domyślny.",
-      "label": "Wiadomość Przypomnienia"
+      "label": "Wiadomość Alertu Przed Zakończeniem"
     },
     "notify_start_message": {
       "doc": "Treść wysyłana po rozpoczęciu cyklu. Zmienne szablonu: {device}, {program}. Przy każdej innej zmiennej używany jest tekst domyślny.",
@@ -1708,7 +1726,9 @@
     "match_uncertain": "Niepewne: {top} lub {runner}",
     "match_uncertain_single": "Niepewne: może {top}",
     "match_sure": "~{pct}% pewności",
-    "match_uncertain_tip": "WashData nie wybrał jeszcze programu. Liczba pokazuje, jak często wiodący kandydat, {top}, okazywał się trafny w poprzednich cyklach przy takiej przewadze. Tylko informacyjnie."
+    "match_uncertain_tip": "WashData nie wybrał jeszcze programu. Liczba pokazuje, jak często wiodący kandydat, {top}, okazywał się trafny w poprzednich cyklach przy takiej przewadze. Tylko informacyjnie.",
+    "torn_pick": "{a} czy {b}?",
+    "torn_tip": "WashData nie potrafi jeszcze rozróżnić tych dwóch programów, więc wybierz ten, który właśnie działa, aby oznaczyć nim ten cykl (Automatyczne wykrywanie cofa wybór)."
   },
   "suggestion": {
     "observed_label": "Zmierzono",
@@ -1993,7 +2013,8 @@
     "bp_automation_created": "Automatyzacja utworzona z ustawieniami domyślnymi; otwieram",
     "copied": "Skopiowano",
     "copy_failed": "Kopiowanie nie powiodło się. Zaznacz tekst i skopiuj go ręcznie.",
-    "automation_label_failed": "Automatyzacja utworzona, ale etykiety ani kategorii WashData nie można było dodać."
+    "automation_label_failed": "Automatyzacja utworzona, ale etykiety ani kategorii WashData nie można było dodać.",
+    "review_answered": "Zapisano: {program}"
   },
   "trend": {
     "down": "Trend w dół",
@@ -2011,7 +2032,7 @@
     "other": "Inne"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Zmywarka: sekundy ciszy po oczekiwanym czasie trwania, zanim zwolnione zostanie oczekiwanie na końcowe odpompowanie wody",
+    "dishwasher_end_spike_quiet_release": "Zmywarka: sekundy poniżej Progu Zatrzymania od ostatniej aktywności potrzebne do zakończenia oczekiwania na końcowe odpompowanie po upływie oczekiwanego czasu trwania",
     "smart_termination_duration_ratio": "Ułamek średniego czasu trwania programu, który cykl musi osiągnąć, zanim Inteligentne zakończenie może go zakończyć wcześniej; obniż, jeśli czasy pracy się wahają",
     "anti_crease_finalize_ratio": "Ułamek średniego czasu trwania programu, który cykl musi osiągnąć, zanim ogon antygniotowy może go zakończyć; obniż w suszarkach, w pralkach zostaw wartość domyślną",
     "anti_wrinkle_enabled": "Pochłaniaj impulsy bębna po głównej fazie, zamiast odczytywać je jako nowe cykle",
@@ -2279,7 +2300,7 @@
       "name": "Wyładowany"
     },
     "state_changed": {
-      "name": "Stan zmieniony"
+      "name": "Stan urządzenia zmieniony"
     },
     "maintenance_due": {
       "name": "Wymagana konserwacja"

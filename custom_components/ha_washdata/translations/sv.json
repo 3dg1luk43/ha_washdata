@@ -56,6 +56,7 @@
       "timer_pause_action_title": "Återuppta cykeln",
       "timer_pause_body_suffix": "Cykeln är pausad. Öppna WashData-panelen för att fortsätta.",
       "unload_dismiss_action_title": "Sluta påminna",
+      "review_action_title": "Det var {program}",
       "notify_live_waiting_message": "{device}: Ingen profil matchad ännu.",
       "vs_typical_longer": "{pct}% längre än vanligt",
       "vs_typical_shorter": "{pct}% kortare än vanligt",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Markera underhåll som klart",
+      "description": "Logga en underhållsuppgift som klar nu, precis som panelens knapp Klar gör.",
+      "fields": {
+        "device_id": {
+          "name": "Enhet",
+          "description": "WashData-enheten som uppgiften hör till."
+        },
+        "task_id": {
+          "name": "Uppgifts-ID",
+          "description": "Uppgiftens ID, så som det anges i attributet due_task_ids på sensorn Dags för underhåll (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other, eller en egen uppgifts custom_-ID)."
+        },
+        "notes": {
+          "name": "Anteckningar",
+          "description": "Valfri anteckning som sparas med loggposten."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Ta bort cykel",
+      "description": "Ta bort en sparad cykel. Dess program byggs om utan den, eller tas bort om en importerad cykel var dess sista. Kan inte ångras.",
+      "fields": {
+        "device_id": {
+          "name": "Enhet",
+          "description": "WashData-enheten."
+        },
+        "cycle_id": {
+          "name": "Cykel-ID",
+          "description": "ID för cykeln som ska tas bort, t.ex. variabeln cycle_id från utlösaren Cykel avslutad (tom när den körningen inte sparade någon cykel, så kontrollera den först)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Starta ML-träning",
       "description": "Träna om ML-modellerna på enheten manuellt från enhetens egna märkta cykler (experimentell).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "Total energi"
+      },
+      "last_cycle_duration": {
+        "name": "Varaktighet för senaste cykeln"
+      },
+      "last_cycle_energy": {
+        "name": "Energi för senaste cykeln"
+      },
+      "last_cycle_cost": {
+        "name": "Kostnad för senaste cykeln"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "Det gick inte att tilldela profilen: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Cykeln hittades inte."
+    },
+    "maintenance_task_not_found": {
+      "message": "Ingen underhållsuppgift med ID {task_id} på den här enheten."
+    },
+    "task_id_required": {
+      "message": "Ett giltigt task_id krävs."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "Cykel återupptagen",
       "still_tumbling": "Torktumlaren tumlar fortfarande efter cykeln",
       "unloaded": "Tömd",
-      "state_changed": "Tillstånd ändrat",
+      "state_changed": "Apparatens tillstånd ändrat",
       "maintenance_due": "Dags för underhåll",
       "milestone_reached": "Cykelmilstolpe uppnådd",
       "pump_stuck": "Pumpen fastnad"
@@ -665,7 +716,7 @@
       "description": "Utlöses när tvätten tas ut efter en cykel: dörren öppnades eller lossningen bekräftades."
     },
     "state_changed": {
-      "name": "Tillstånd ändrat",
+      "name": "Apparatens tillstånd ändrat",
       "description": "Utlöses när WashData-tillståndet ändras.",
       "fields": {
         "from": {

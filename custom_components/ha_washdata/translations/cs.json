@@ -56,6 +56,7 @@
       "timer_pause_action_title": "Obnovit cyklus",
       "timer_pause_body_suffix": "Cyklus je pozastaven. Pro pokračování otevřete panel WashData.",
       "unload_dismiss_action_title": "Přestat připomínat",
+      "review_action_title": "Byl to {program}",
       "notify_live_waiting_message": "{device}: Zatím nebyl rozpoznán žádný profil.",
       "vs_typical_longer": "o {pct}% déle než obvykle",
       "vs_typical_shorter": "o {pct}% kratší než obvykle",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Označit údržbu jako hotovou",
+      "description": "Zapíše úkol údržby jako hotový nyní, stejně jako tlačítko Hotovo v panelu.",
+      "fields": {
+        "device_id": {
+          "name": "Zařízení",
+          "description": "Zařízení WashData, ke kterému úkol patří."
+        },
+        "task_id": {
+          "name": "ID úkolu",
+          "description": "ID úkolu uvedené v atributu due_task_ids senzoru Údržba na řadě (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other nebo custom_ ID vlastního úkolu)."
+        },
+        "notes": {
+          "name": "Poznámky",
+          "description": "Volitelná poznámka uložená se záznamem v protokolu."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Smazat cyklus",
+      "description": "Smaže jeden uložený cyklus. Jeho program se bez něj znovu sestaví, nebo se odstraní, pokud šlo o jeho poslední cyklus a ten byl importovaný. Nelze vrátit zpět.",
+      "fields": {
+        "device_id": {
+          "name": "Zařízení",
+          "description": "Zařízení WashData."
+        },
+        "cycle_id": {
+          "name": "ID cyklu",
+          "description": "ID cyklu ke smazání, např. proměnná cycle_id spouštěče „Cyklus ukončen“ (je prázdná, když daný běh neuložil žádný cyklus, proto ji nejprve zkontrolujte)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Spustit ML trénink",
       "description": "Ručně přetrénujte ML modely v zařízení z vlastních označených cyklů tohoto zařízení (experimentální).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "Celková energie"
+      },
+      "last_cycle_duration": {
+        "name": "Délka posledního cyklu"
+      },
+      "last_cycle_energy": {
+        "name": "Energie posledního cyklu"
+      },
+      "last_cycle_cost": {
+        "name": "Náklady posledního cyklu"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "Profil se nepodařilo přiřadit: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Cyklus nenalezen."
+    },
+    "maintenance_task_not_found": {
+      "message": "Na tomto zařízení není žádný úkol údržby s ID {task_id}."
+    },
+    "task_id_required": {
+      "message": "Je vyžadován platný task_id."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "Cyklus obnoven",
       "still_tumbling": "Stále otáčí bubnem po skončení",
       "unloaded": "Vyloženo",
-      "state_changed": "Stav změněn",
+      "state_changed": "Stav spotřebiče změněn",
       "maintenance_due": "Servis potřebný",
       "milestone_reached": "Dosažen milník cyklu",
       "pump_stuck": "Čerpadlo zaseknuté"
@@ -665,7 +716,7 @@
       "description": "Spustí se, když je náplň po cyklu vytažena: dveře se otevřely nebo bylo vyložení potvrzeno."
     },
     "state_changed": {
-      "name": "Stav změněn",
+      "name": "Stav spotřebiče změněn",
       "description": "Spustí se při změně stavu WashData.",
       "fields": {
         "from": {

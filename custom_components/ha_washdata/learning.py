@@ -38,6 +38,7 @@ from .const import (
     DEFAULT_LEARNING_CONFIDENCE,
     MIN_SUGGESTION_COOLDOWN_CYCLES,
     MIN_SUGGESTION_REL_DELTA,
+    REVIEW_BUDGET_PER_PROFILE,
     TerminationReason,
 )
 from .suggestion_engine import SuggestionEngine
@@ -77,6 +78,112 @@ def _ended_on_its_own(cycle: dict[str, Any]) -> bool:
         cycle.get("status") == "completed"
         and cycle.get("termination_reason") != TerminationReason.USER
     )
+
+
+def review_choices(pending: Any, profiles: Any) -> list[str]:
+    """The two programmes a review request offers as one-tap answers. Never raises.
+
+    The detected programme first, then the stored ranking's next distinct one (a
+    profile group named by its best member). Only names of existing profiles, at
+    most two, in that order. The panel's answer buttons, its chart overlay and the
+    finish notification's actions all read this, so they always name the same two;
+    answer one with :meth:`LearningManager.async_answer_review`.
+    """
+    out: list[str] = []
+    try:
+        if not isinstance(pending, dict):
+            return out
+        names = profiles if profiles is not None else {}
+
+        def _add(name: Any) -> None:
+            if (
+                isinstance(name, str) and name and name not in out
+                and name in names and len(out) < 2
+            ):
+                out.append(name)
+
+        _add(pending.get("detected_profile"))
+        ranking = pending.get("ranking")
+        for cand in ranking if isinstance(ranking, list) else []:
+            if len(out) >= 2:
+                break
+            if not isinstance(cand, dict):
+                continue
+            name = cand.get("name")
+            if isinstance(name, str) and name.startswith("__group__"):
+                name = cand.get("group_best_member")
+            _add(name)
+    except Exception:  # noqa: BLE001 - a display helper must never raise
+        return out
+    return out
+
+
+#: Answer key that confirms a review request's own programme.
+REVIEW_ANSWER_CONFIRM = "C"
+#: Prefix of the answer key ``R<j>``: the request's stored ranking entry ``j``.
+REVIEW_ANSWER_RANKED = "R"
+
+
+def _ranked_name(cand: Any) -> Any:
+    """The programme a stored ranking entry names (a group by its best member)."""
+    if not isinstance(cand, dict):
+        return None
+    name = cand.get("name")
+    if isinstance(name, str) and name.startswith("__group__"):
+        return cand.get("group_best_member")
+    return name
+
+
+def review_answer_choices(request: Any, profile_names: Any) -> list[tuple[str, str]]:
+    """The finish notification's one-tap answers: ``[(key, programme)]``.
+
+    The same two programmes as the panel's buttons (:func:`review_choices`), keyed
+    so the phone carries a position, not a name: ``REVIEW_ANSWER_CONFIRM`` for the
+    request's own programme, ``R<j>`` for the other, ``j`` being its entry in the
+    request's stored ranking. That list is never reordered (a rename rewrites it in
+    place), so the key keeps naming the programme the phone shows: deleting it
+    makes the tap stale (:func:`resolve_review_answer` returns None) instead of
+    moving the key onto the next programme. Pure, never raises.
+    """
+    try:
+        detected = request.get("detected_profile") if isinstance(request, dict) else None
+        ranking = request.get("ranking") if isinstance(request, dict) else None
+        ranked = [_ranked_name(c) for c in ranking] if isinstance(ranking, list) else []
+        out: list[tuple[str, str]] = []
+        for name in review_choices(request, profile_names):
+            if name == detected:
+                out.append((REVIEW_ANSWER_CONFIRM, name))
+            elif name in ranked:
+                out.append((f"{REVIEW_ANSWER_RANKED}{ranked.index(name)}", name))
+        return out
+    except Exception:  # noqa: BLE001 - a notification extra must never raise
+        return []
+
+
+def resolve_review_answer(request: Any, key: Any, profile_names: Any) -> str | None:
+    """The programme an answer key names on this request, or None when it no
+    longer exists or the key is malformed. Never raises."""
+    try:
+        if not isinstance(request, dict) or not isinstance(key, str):
+            return None
+        names = profile_names if profile_names is not None else {}
+        detected = request.get("detected_profile")
+        if key == REVIEW_ANSWER_CONFIRM:
+            name = detected
+        else:
+            idx = key[len(REVIEW_ANSWER_RANKED):]
+            if not key.startswith(REVIEW_ANSWER_RANKED) or not (idx.isascii() and idx.isdigit()):
+                return None
+            ranking = request.get("ranking")
+            j = int(idx)
+            if not isinstance(ranking, list) or j >= len(ranking):
+                return None
+            name = _ranked_name(ranking[j])
+            if name == detected:
+                return None
+        return name if isinstance(name, str) and name and name in names else None
+    except Exception:  # noqa: BLE001 - an answer that cannot be read answers nothing
+        return None
 
 
 class StatisticalModel:
@@ -163,7 +270,9 @@ class LearningManager:
         # no-update timeouts would be re-suggested from it every five minutes.
         # Bounded like the model itself: only its last 200 survive a commit anyway.
         self._pending_intervals: deque[tuple[float, datetime]] = deque(maxlen=200)
-        self._last_suggestion_update: datetime | None = None
+        # Set by a cadence commit, consumed by run_due_operational_pass once the
+        # cycle is stored, so the pass's pause scan sees the cycle that just ended.
+        self._operational_pass_due: bool = False
         self._last_batch_simulation_count: int = 0  # track when to re-run batch
         self._last_suggestions_labeled_count: int = 0  # gate model/detection passes
 
@@ -226,17 +335,23 @@ class LearningManager:
                         abs_delta = abs(sv - cv)
 
                         # Gate 1: exact equality → stale, delete so it doesn't linger.
+                        # Gates 1 and 2 save only when a stored key was removed
+                        # (#510): the 5-minute pass re-derives the same applied
+                        # values every tick of a running cycle, and "deleting" a key
+                        # that was never stored rewrote the whole store each time.
                         if abs_delta < 1e-9:
-                            self.profile_store.delete_suggestion(key)
-                            any_deleted = True
+                            if key in existing_suggestions:
+                                self.profile_store.delete_suggestion(key)
+                                any_deleted = True
                             continue
 
                         # Gate 2: change too small to be meaningful → delete (noise).
                         rel_delta = abs_delta / max(abs(cv), 1e-3)
                         if (rel_delta < MIN_SUGGESTION_REL_DELTA
                                 and abs_delta < _suggestion_min_abs_delta(key)):
-                            self.profile_store.delete_suggestion(key)
-                            any_deleted = True
+                            if key in existing_suggestions:
+                                self.profile_store.delete_suggestion(key)
+                                any_deleted = True
                             continue
 
                         # Gate 3: cooldown active → skip update without deleting.
@@ -255,25 +370,28 @@ class LearningManager:
                 self._spawn(self.profile_store.async_save())
             return
 
-        self.suggestion_engine.apply_suggestions(filtered_suggestions)
+        # A deletion above is unsaved until a write: apply_suggestions saves only
+        # when it changes something itself (#510), so tell it.
+        self.suggestion_engine.apply_suggestions(filtered_suggestions, changed=any_deleted)
 
     def process_power_reading(
         self, _power: float, now: datetime, last_reading_time: datetime | None
     ) -> None:
-        """Ingest power reading metadata for statistical analysis."""
+        """Hold this reading's update interval for the cycle-end cadence commit.
+
+        No suggestion pass runs here. It used to, every 5 minutes of a running
+        cycle, but everything it reads moves only at a cycle end (the cadence
+        model is committed by ``close_cycle_cadence``, the traces it scans are
+        stored then), so each one re-derived what the last cycle-end pass had,
+        a ~100-trace executor scan for nothing (#510 follow-up). The pass runs
+        once per cycle end, in ``run_due_operational_pass``.
+        """
         if last_reading_time:
             delta = (now - last_reading_time).total_seconds()
             # Ignore ultra-small jitter (<0.1s) and massive gaps (>1800s - likely downtime)
             if 0.1 < delta < 1800:
                 # Held until the cycle's outcome is known (#458): see close_cycle_cadence.
                 self._pending_intervals.append((delta, now))
-
-        # Periodically update suggestions based on operational stats
-        if (
-            self._last_suggestion_update is None
-            or (now - self._last_suggestion_update).total_seconds() > 300  # Check every 5 mins
-        ):
-            self._update_operational_suggestions(now)
 
     def discard_cycle_cadence(self) -> None:
         """Drop held intervals without committing them (a new start from idle)."""
@@ -303,10 +421,24 @@ class LearningManager:
             return False
         for delta, ts in pending:
             self._sample_interval_model.add_sample(delta, ts)
-        # The periodic refresh only runs while a cycle is active, so surface what
-        # this cycle taught now rather than at the start of the next one.
-        self._update_operational_suggestions(pending[-1][1])
+        # The operational pass's one run per cycle: its cadence input changes only
+        # here (process_power_reading runs none during the cycle). Not run here:
+        # this commit comes before the cycle is stored, and the pass's pause scan
+        # reads the stored cycles, so it would miss this one until the next end.
+        self._operational_pass_due = True
         return True
+
+    def run_due_operational_pass(self) -> None:
+        """Run the operational pass a cadence commit left due, once.
+
+        Called once the ended cycle is stored (``process_cycle_end``) and, for an
+        end that stores nothing (ghost, pump-out, failed write), by the manager
+        directly: the stored cycles did not change there, so nothing is missed.
+        """
+        if not self._operational_pass_due:
+            return
+        self._operational_pass_due = False
+        self._update_operational_suggestions()
 
     def process_cycle_end(
         self,
@@ -334,6 +466,10 @@ class LearningManager:
         # (No per-cycle stop/start simulation: re-deriving both from the last cycle
         # alone made them a random walk - audit SUGGEST-06. The batch pass below
         # derives them across cycles.)
+
+        # 1. Operational (off delay, watchdog, timeouts): the cycle is stored now,
+        # so the off-delay pause scan includes it.
+        self.run_due_operational_pass()
 
         # 1b. Standby above the stop threshold (#458). Every cycle end, whatever its
         # status: a force-stopped cycle is the evidence this pass exists for.
@@ -412,7 +548,7 @@ class LearningManager:
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.error("Batch simulation failed: %s", e)
 
-    def _update_operational_suggestions(self, now: datetime) -> None:
+    def _update_operational_suggestions(self) -> None:
         """Generate suggestions for operational parameters (intervals, timeouts).
 
         The cadence stats (p95/median) are read on the event loop and captured as
@@ -429,9 +565,6 @@ class LearningManager:
         if p95 is None or median is None:
             return
 
-        # Throttle before dispatching so repeated readings within the window do
-        # not schedule overlapping passes.
-        self._last_suggestion_update = now
         # Bind the config snapshot here, on the loop, not inside the executor job.
         engine = self.suggestion_engine.for_job()
         self._dispatch_scan_and_apply(
@@ -723,6 +856,19 @@ class LearningManager:
             )
             return
 
+        # A refused gate asks only while this programme's review budget lasts
+        # (REVIEW_BUDGET_PER_PROFILE): the answers that move accuracy are a
+        # programme's first ones and every correction, not the tenth confirmation.
+        if not warmup_request:
+            spent = self._review_budget_spent(detected_profile)
+            if spent >= REVIEW_BUDGET_PER_PROFILE:
+                self._logger.debug(
+                    "Not asking about cycle %s: '%s' already has %d waiting or "
+                    "confirmed review requests",
+                    cycle_id, detected_profile, spent,
+                )
+                return
+
         actual_duration = cycle_data.get("duration", 0)
 
         # Request feedback via learning manager for moderate confidence
@@ -739,6 +885,35 @@ class LearningManager:
         # The pending review is surfaced in the panel's Cycles review queue;
         # WashData intentionally does not raise a persistent notification here.
         self._spawn(self.profile_store.async_save())
+
+    def _review_budget_spent(self, profile_name: str) -> int:
+        """Review requests about ``profile_name`` that spend its budget. Never raises.
+
+        Waiting requests, plus answers that did not correct it: a confirmation, a
+        dismissal, or a relabel to that same programme. A correction to another
+        programme does not count (see ``REVIEW_BUDGET_PER_PROFILE``). Counted from
+        the stored queue and answer history, so it survives a restart and follows
+        a profile rename, which rewrites both.
+        """
+        spent = 0
+        try:
+            # A request whose cycle is gone (not pruned yet) asks nothing.
+            stored = {c.get("id") for c in self.profile_store.get_past_cycles()}
+            for cid, rec in (self.profile_store.get_pending_feedback() or {}).items():
+                if (
+                    isinstance(rec, dict) and rec.get("detected_profile") == profile_name
+                    and cid in stored
+                ):
+                    spent += 1
+            for rec in (self.profile_store.get_feedback_history() or {}).values():
+                if not isinstance(rec, dict) or rec.get("original_detected_profile") != profile_name:
+                    continue
+                corrected = rec.get("corrected_profile")
+                if rec.get("user_confirmed") or not corrected or corrected == profile_name:
+                    spent += 1
+        except Exception:  # noqa: BLE001 - a count must never block a cycle end
+            self._logger.debug("Review budget count failed", exc_info=True)
+        return spent
 
     def request_cycle_verification(
         self,
@@ -759,12 +934,17 @@ class LearningManager:
         if match_result and hasattr(match_result, "ranking") and match_result.ranking:
             for cand in match_result.ranking[:5]:  # Store top 5
                 try:
-                    ranking_summary.append({
+                    entry: dict[str, Any] = {
                         "name": cand.get("name", "Unknown"),
                         "score": float(cand.get("score", 0.0)),
                         "metrics": cand.get("metrics", {}),
                         "profile_duration": float(cand.get("profile_duration", 0.0)),
-                    })
+                    }
+                    # A profile group ranks under its `__group__` key; the member
+                    # that scored is what a review answer can name (review_choices).
+                    if str(entry["name"]).startswith("__group__") and cand.get("group_best_member"):
+                        entry["group_best_member"] = str(cand["group_best_member"])
+                    ranking_summary.append(entry)
                 except (TypeError, ValueError, KeyError, AttributeError, OverflowError):
                     continue
 
@@ -826,10 +1006,30 @@ class LearningManager:
         notes: str = "",
         dismiss: bool = False,
     ) -> bool:
-        """Submit user feedback for a cycle."""
+        """Submit user feedback for a cycle.
+
+        False, with nothing written, when no review is pending for the cycle or
+        the answer names a programme that no longer exists (deleting a programme
+        keeps the requests that detected it, so confirming one labelled the cycle
+        with the deleted name).
+        """
         pending = self.profile_store.get_pending_feedback().get(cycle_id)
         if not pending:
             return False
+        if not dismiss:
+            target = pending.get("detected_profile") if user_confirmed else corrected_profile
+            if (
+                isinstance(target, str)
+                and target
+                and target not in self.profile_store.get_profiles()
+            ):
+                self._logger.info(
+                    "Review answer for cycle %s names programme %r, which no longer "
+                    "exists; nothing recorded",
+                    cycle_id,
+                    target,
+                )
+                return False
 
         # Parse corrected_duration before writing to history so a bad value
         # never leaves a partially-applied state.
@@ -930,6 +1130,34 @@ class LearningManager:
         async_dispatcher_send(self.hass, f"ha_washdata_update_{self.entry_id}")
 
         return True
+
+    async def async_answer_review(self, cycle_id: str, profile_name: str) -> bool:
+        """Answer a review request with the programme the user picked.
+
+        The one-tap answer: the detected programme is a confirmation, any other
+        existing programme a correction to it. The panel's answer buttons send the
+        same two ``resolve_feedback`` actions by the same rule, so a button and a
+        notification action resolve a request identically. False when nothing is
+        waiting for ``cycle_id`` or ``profile_name`` is not a profile.
+        """
+        pending = self.profile_store.get_pending_feedback().get(cycle_id)
+        if not pending or not isinstance(profile_name, str) or not profile_name:
+            return False
+        if profile_name not in self.profile_store.get_profiles():
+            return False
+        if not any(c.get("id") == cycle_id for c in self.profile_store.get_past_cycles()):
+            # The cycle went (a replace import, say) and left its request behind: a
+            # tap on its old notification must not record an answer that labels
+            # nothing and still spends the programme's review budget.
+            self.profile_store.get_pending_feedback().pop(cycle_id, None)
+            await self.profile_store.async_save()
+            async_dispatcher_send(self.hass, f"ha_washdata_update_{self.entry_id}")
+            return False
+        if profile_name == pending.get("detected_profile"):
+            return await self.async_submit_cycle_feedback(cycle_id, user_confirmed=True)
+        return await self.async_submit_cycle_feedback(
+            cycle_id, user_confirmed=False, corrected_profile=profile_name
+        )
 
     def _build_feedback_record(
         self,

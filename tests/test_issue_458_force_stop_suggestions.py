@@ -212,10 +212,42 @@ def test_a_cycle_that_did_not_end_on_its_own_teaches_no_cadence(cycle) -> None:
 def test_a_clean_cycle_commits_its_cadence() -> None:
     lm = _learning()
     _feed(lm, 5.0, 40)
-    lm._update_operational_suggestions.reset_mock()  # the periodic mid-cycle refresh
+    # No pass while the cycle runs (#510 follow-up); one at its end, once stored.
+    lm._update_operational_suggestions.assert_not_called()
     assert lm.close_cycle_cadence({"status": "completed", "termination_reason": "smart"})
     assert lm._sample_interval_model.count == 40
+    lm._update_operational_suggestions.assert_not_called()
+    lm.run_due_operational_pass()
+    lm.run_due_operational_pass()
     lm._update_operational_suggestions.assert_called_once()
+
+
+def test_the_operational_pass_scans_the_cycle_that_just_ended() -> None:
+    """The cadence commit runs before the cycle is stored; the off-delay pause
+    scan reads the stored cycles, so run there it missed the cycle that ended."""
+    stored: list[dict[str, Any]] = []
+    store = MagicMock()
+    store.get_past_cycles.side_effect = lambda: list(stored)
+    store.get_suggestions.return_value = {}
+    lm = LearningManager(MagicMock(), "entry1", store, device_type="washing_machine")
+    seen: list[list[str]] = []
+    job = MagicMock()
+    for name in ("generate_standby_floor_suggestions", "generate_model_suggestions",
+                 "generate_detection_suggestions", "run_batch_simulation"):
+        getattr(job, name).return_value = {}
+    job.generate_operational_suggestions.side_effect = lambda *_a: (
+        seen.append([c["id"] for c in store.get_past_cycles()]) or {}
+    )
+    lm.suggestion_engine.for_job = MagicMock(return_value=job)
+    _feed(lm, 5.0, 40)
+    cycle = {"id": "new", "status": "completed", "termination_reason": "smart",
+             "duration": 3600.0, "power_data": []}
+
+    assert lm.close_cycle_cadence(cycle)
+    stored.append(cycle)                     # the manager's async_add_cycle
+    lm.process_cycle_end(cycle)
+
+    assert seen == [["new"]]
 
 
 def test_dropped_intervals_never_reach_the_next_cycle() -> None:

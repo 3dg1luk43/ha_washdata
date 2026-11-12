@@ -648,3 +648,22 @@ async def test_real_to_reference_keeps_a_manual_duration(store, source_type, kep
     ref = store.get_reference_cycles()[0]
     assert ref.get("manual_duration") == (14040.0 if kept else None)
     assert store.profile_trusted_min_duration("ECO") == (14040.0 if kept else ref["duration"])
+
+
+@pytest.mark.asyncio
+async def test_a_replace_drops_the_review_requests_of_the_cycles_it_took(store):
+    # A real-history replace takes the local cycles; their pending review requests
+    # must go with them (as a split, merge or load prunes them), or they keep showing
+    # and keep spending their programme's review budget.
+    store._data["past_cycles"] = [_cyc("local1", None, 800), _cyc("local2", None, 900)]
+    store._data["pending_feedback"] = {
+        "local1": {"cycle_id": "local1", "detected_profile": "Cotton"},
+        "local2": {"cycle_id": "local2", "detected_profile": "Cotton"},
+    }
+    payload = _payload(past=[{**_cyc("p1", "Cotton", 1000), "start_time": "2023-02-01T10:00:00+00:00"}])
+    await store.async_import_data_selective(
+        payload, selection={"categories": ["real_cycles"]}, mode="replace",
+        cycle_destination="real_history", local_device_type="washing_machine",
+    )
+    assert [c["meta"]["imported_from"] for c in store.get_past_cycles()] == ["p1"]
+    assert store.get_pending_feedback() == {}

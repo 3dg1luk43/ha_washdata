@@ -56,6 +56,7 @@
       "timer_pause_action_title": "Відновити цикл",
       "timer_pause_body_suffix": "Цикл призупинено. Відкрийте панель WashData для відновлення.",
       "unload_dismiss_action_title": "Не нагадувати",
+      "review_action_title": "Це {program}",
       "notify_live_waiting_message": "{device}: Профіль ще не розпізнано.",
       "vs_typical_longer": "на {pct}% довше, ніж зазвичай",
       "vs_typical_shorter": "на {pct}% коротше, ніж зазвичай",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Позначити обслуговування виконаним",
+      "description": "Записує завдання обслуговування як виконане зараз, як кнопка Готово на панелі.",
+      "fields": {
+        "device_id": {
+          "name": "Пристрій",
+          "description": "Пристрій WashData, до якого належить завдання."
+        },
+        "task_id": {
+          "name": "Ідентифікатор завдання",
+          "description": "Ідентифікатор завдання з атрибута due_task_ids датчика «Потрібне обслуговування» (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other або custom_ ID власного завдання)."
+        },
+        "notes": {
+          "name": "Нотатки",
+          "description": "Необов'язкова нотатка, що зберігається разом із записом у журналі."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Видалити цикл",
+      "description": "Видаляє один збережений цикл. Його програма перебудовується без нього або видаляється, якщо це був її останній цикл і його було імпортовано. Скасувати неможливо.",
+      "fields": {
+        "device_id": {
+          "name": "Пристрій",
+          "description": "Пристрій WashData."
+        },
+        "cycle_id": {
+          "name": "Ідентифікатор циклу",
+          "description": "Ідентифікатор циклу для видалення, напр. змінна cycle_id тригера «Цикл завершено» (вона порожня, якщо цей запуск не зберіг циклу, тож спершу перевірте її)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Запустити навчання ML",
       "description": "Вручну перенавчіть моделі ML на пристрої з власних позначених циклів цього пристрою (експериментальний).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "Загальна енергія"
+      },
+      "last_cycle_duration": {
+        "name": "Тривалість останнього циклу"
+      },
+      "last_cycle_energy": {
+        "name": "Енергія останнього циклу"
+      },
+      "last_cycle_cost": {
+        "name": "Вартість останнього циклу"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "Не вдалося призначити профіль: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Цикл не знайдено."
+    },
+    "maintenance_task_not_found": {
+      "message": "На цьому пристрої немає завдання обслуговування з ідентифікатором {task_id}."
+    },
+    "task_id_required": {
+      "message": "Потрібен дійсний task_id."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "Цикл відновлено",
       "still_tumbling": "Барабан ще обертається після циклу",
       "unloaded": "Вивантажено",
-      "state_changed": "Стан змінився",
+      "state_changed": "Стан приладу змінився",
       "maintenance_due": "Потрібне обслуговування",
       "milestone_reached": "Досягнуто віху циклів",
       "pump_stuck": "Насос застряг"
@@ -665,7 +716,7 @@
       "description": "Спрацьовує, коли завантаження виймають після циклу: двері відчинились або вивантаження підтверджено."
     },
     "state_changed": {
-      "name": "Стан змінився",
+      "name": "Стан приладу змінився",
       "description": "Спрацьовує, коли стан WashData змінюється.",
       "fields": {
         "from": {

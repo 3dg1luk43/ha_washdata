@@ -335,3 +335,42 @@ def test_manifest_glob_must_match_one_file(tmp_path):
         sge._resolve("x-*.json", tmp_path)
     assert sge._resolve("x-1*.json", tmp_path) == str(tmp_path / "x-1.json")
     assert sge._resolve("sqlite:db/home.db", tmp_path) == "sqlite:" + str(tmp_path / "db/home.db")
+
+
+def test_a_flat_power_stop_due_before_an_outage_is_made():
+    """Live runs the watchdog's flat-power tick on its own timer, so a stop due
+    before the sensor goes unavailable happens; the replay used to handle the
+    unavailable reading first, which clears the flat run, and never made it."""
+    doc = {"data": {"past_cycles": []}, "entry_data": {}, "entry_options": dict(OPTIONS)}
+    config, manager = sge.detector_setup(sge.load_device(doc, None), {})
+    rows: list[tuple[float, float | None]] = []
+    t = 0.0
+    for watts in (200.0, 2000.0, 400.0, 2000.0, 400.0):   # a real start
+        rows.append((t, watts))
+        t += 30.0
+    rows.append((t, 300.0))           # then stuck at one level; change-only: silent
+    outage = t + 5 * 3600.0           # past the 4 h flat-power window
+    rows += [(outage, None), (outage + 600.0, 0.0)]
+    result = sge.replay([(_at(s), p) for s, p in rows], config, manager)
+    assert result.runs and result.runs[0].end is not None
+    assert result.runs[0].end < _at(outage), result.runs[0]
+
+
+def test_keepalives_due_before_an_outage_end_the_cycle_before_it():
+    """A change-only plug drops to 0 W and goes silent; live, the watchdog's
+    keepalives run on their timer and end the cycle long before the sensor goes
+    unavailable. The replay fed them only at the next real reading, after the
+    outage flag was set, so the detector skipped them and the end moved past it."""
+    doc = {"data": {"past_cycles": []}, "entry_data": {}, "entry_options": dict(OPTIONS)}
+    config, manager = sge.detector_setup(sge.load_device(doc, None), {})
+    rows: list[tuple[float, float | None]] = []
+    t = 0.0
+    for watts in (200.0, 2000.0, 400.0, 2000.0, 400.0) * 4:   # a real wash
+        rows.append((t, watts))
+        t += 30.0
+    rows.append((t, 0.0))             # it ends; the plug reports once, then nothing
+    outage = t + 3 * 3600.0
+    rows += [(outage, None), (outage + 600.0, 0.0)]
+    result = sge.replay([(_at(s), p) for s, p in rows], config, manager)
+    assert result.runs and result.runs[0].end is not None
+    assert result.runs[0].end < _at(outage), result.runs[0]

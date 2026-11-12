@@ -221,7 +221,11 @@
     "bp_details": "Detalles",
     "bp_copy_yaml": "Copiar YAML",
     "bp_hide_yaml": "Ocultar el YAML",
-    "bp_show_yaml": "Mostrar el YAML"
+    "bp_show_yaml": "Mostrar el YAML",
+    "review_something_else": "Otra cosa…",
+    "review_not_sure": "No lo sé",
+    "review_prev": "Ciclo anterior",
+    "review_next": "Ciclo siguiente"
   },
   "conflict": {
     "anti_wrinkle_max": {
@@ -535,6 +539,7 @@
     "pg_alert_overrun": "Demasiado largo",
     "pg_alert_underrun": "Demasiado corto",
     "pg_alert_did_not_finish": "No terminó",
+    "pg_alert_discarded": "Descartado como fantasma o vaciado",
     "pg_alert_false_end": "Dividido en varios ciclos",
     "pg_alert_unmatched": "Sin coincidencia",
     "pg_alert_ambiguous": "Coincidencia ambigua",
@@ -667,7 +672,10 @@
     "bp_needs": "Requiere",
     "bp_needs_version": "WashData {version} o posterior",
     "bp_author": "Autor",
-    "bp_required": "obligatorio"
+    "bp_required": "obligatorio",
+    "pg_runs_as": "se simula con {value}",
+    "review_this_cycle": "Este ciclo",
+    "review_usual": "Habitual para {name}"
   },
   "log": {
     "all_levels": "Todos los niveles",
@@ -1019,7 +1027,7 @@
     "hist_scan_failed": "El análisis falló.",
     "hist_scan_expired": "Ese análisis ya no está disponible. Vuelva a analizar.",
     "hist_import_failed": "La importación falló.",
-    "imported_history_readonly": "Encontrado en un historial de potencia importado. Ayuda a la coincidencia, pero no cuenta en sus estadísticas y no se puede recortar ni dividir. Etiquételo para poner nombre al programa.",
+    "imported_history_note": "Encontrado en un historial de potencia importado. Ayuda a la coincidencia, pero no cuenta en sus estadísticas y no se puede dividir. Etiquételo para poner nombre al programa.",
     "odometer_intro": "Este total solo sube. Eliminar un ciclo no lo reduce, así que los recordatorios de servicio siguen siendo correctos.",
     "odometer_correct_hint": "Ajuste este valor si WashData contó un ciclo que nunca ocurrió, o si el electrodoméstico ya hizo ciclos antes de instalar WashData.",
     "no_reminders_set": "Aún no hay recordatorios de servicio configurados.",
@@ -1074,10 +1082,19 @@
     "bp_none_yet": "Aún no hay plantillas para este tipo de electrodoméstico. Comparta la primera.",
     "bp_unreachable": "Se descarga de GitHub. Compruebe que Home Assistant tiene acceso a internet y vuelva a intentarlo.",
     "bp_library_intro": "Automatizaciones listas para usar compartidas por usuarios de WashData en GitHub, revisadas antes de publicarse. Disponible solo con las funciones en línea activadas.",
-    "bp_needs_version": "Requiere WashData {version} o posterior."
+    "bp_needs_version": "Requiere WashData {version} o posterior.",
+    "bp_review_check": "Revise esto antes de guardar: Home Assistant lo ejecutará exactamente como está escrito.",
+    "review_q_title": "¿Qué programa era?",
+    "review_q_intro": "WashData no está seguro de estos ciclos. Su respuesta le ayuda a aprender.",
+    "review_q_started": "Iniciado el {when}",
+    "review_q_more": "{count} más por revisar",
+    "review_q_more_one": "{count} más por revisar",
+    "review_q_more_many": "{count} más por revisar",
+    "review_q_more_other": "{count} más por revisar",
+    "review_which_program": "¿Qué programa fue?"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Lavavajillas: segundos de silencio tras la duración esperada antes de liberar la espera del vaciado de fin de ciclo",
+    "dishwasher_end_spike_quiet_release": "Lavavajillas: segundos por debajo del Umbral de parada desde la última actividad necesarios para terminar la espera del vaciado final tras la duración esperada",
     "smart_termination_duration_ratio": "Fracción de la duración media del programa que un ciclo debe alcanzar antes de que la Terminación inteligente pueda finalizarlo antes de tiempo; redúzcala si la duración varía",
     "anti_crease_finalize_ratio": "Fracción de la duración media del programa que un ciclo debe alcanzar antes de que la cola antiarrugas pueda terminarlo; redúzcala en secadoras, deje las lavadoras en el valor predeterminado",
     "anti_wrinkle_enabled": "Absorber los pulsos de giro tras la fase principal en lugar de leerlos como nuevos ciclos",
@@ -1186,7 +1203,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Liberación en silencio del secado pasivo",
-      "doc": "Tras la duración esperada: cuánto tiempo debe quedarse el lavavajillas por debajo del Umbral de parada antes de que WashData deje de esperar el vaciado final. Súbalo si se pierde un vaciado tardío después de un secado largo. La espera nunca supera los 30 minutos."
+      "doc": "Tras la duración esperada, WashData deja de esperar el vaciado final cuando el lavavajillas lleva este tiempo por debajo del Umbral de parada desde su última actividad, como máximo 30 minutos (y, una vez que el programa tenga 3 ciclos registrados, como mínimo su pausa de secado más larga registrada). Súbalo si se pierde un vaciado tardío después de un secado largo."
     },
     "anti_crease_finalize_ratio": {
       "label": "Proporción de finalización antiarrugas",
@@ -1333,7 +1350,7 @@
       "label": "Icono de notificación"
     },
     "notify_live_chronometer": {
-      "doc": "Android: agrega una cuenta atrás hasta el fin estimado junto al texto de notificación. Use {finish_time} en Mensaje de pre-finalización para mostrar la hora de fin en lugar de una segunda cuenta atrás.",
+      "doc": "Android: agrega una cuenta atrás hasta el fin estimado junto al texto de notificación. Use {finish_time} en Mensaje de actualización en vivo para mostrar la hora de fin en lugar de una segunda cuenta atrás.",
       "label": "Usar cronómetro en vivo"
     },
     "notify_live_interval_seconds": {
@@ -1358,11 +1375,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Texto de cada actualización de progreso en vivo. Variables de plantilla: {device}, {program}, {minutes} (minutos restantes), {finish_time} (hora de finalización estimada, ej. 14:30). Cualquier otra variable hace que se use el texto predeterminado.",
-      "label": "Mensaje de pre-finalización"
+      "label": "Mensaje de actualización en vivo"
     },
     "notify_reminder_message": {
       "doc": "Texto de la Alerta previa al fin, que se envía una sola vez. Variables de plantilla: {device}, {program}, {minutes} (el ajuste Alerta previa al fin). Cualquier otra variable hace que se use el texto predeterminado.",
-      "label": "Mensaje de recordatorio"
+      "label": "Mensaje de la alerta previa al fin"
     },
     "notify_start_message": {
       "doc": "Cuerpo enviado cuando comienza un ciclo. Variables de plantilla: {device}, {program}. Cualquier otra variable hace que se use el texto predeterminado.",
@@ -1653,6 +1670,8 @@
     "preparing": "Preparando…",
     "unlabelling": "Quitando etiqueta…",
     "working": "Procesando…",
+    "torn_pick": "¿{a} o {b}?",
+    "torn_tip": "WashData todavía no distingue estos dos programas, así que elija el que está en marcha para etiquetar este ciclo con él (la opción Detección automática deshace la elección).",
     "match_uncertain": "Incierto: {top} o {runner}",
     "match_uncertain_single": "Incierto: quizá {top}",
     "match_sure": "~{pct} % de certeza",
@@ -1851,7 +1870,8 @@
     "bp_automation_created": "Automatización creada con la configuración predeterminada; abriéndola",
     "copied": "Copiado",
     "copy_failed": "Error al copiar. Seleccione el texto y cópielo manualmente.",
-    "automation_label_failed": "Automatización creada, pero no se pudo añadir la etiqueta o categoría WashData."
+    "automation_label_failed": "Automatización creada, pero no se pudo añadir la etiqueta o categoría WashData.",
+    "review_answered": "Guardado: {program}"
   },
   "suggestion": {
     "observed_label": "Observado",
@@ -2260,7 +2280,7 @@
       "name": "Descargado"
     },
     "state_changed": {
-      "name": "Estado cambiado"
+      "name": "Estado del electrodoméstico cambiado"
     },
     "maintenance_due": {
       "name": "Mantenimiento pendiente"

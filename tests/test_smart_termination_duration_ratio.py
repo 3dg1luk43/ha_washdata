@@ -128,6 +128,21 @@ def test_out_of_range_configured_ratio_is_clamped():
     assert CycleDetector._resolve_smart_ratio("dishwasher", 0.0, True, 950.0, 1000.0) == 0.5
 
 
+def test_unusable_configured_ratio_falls_back_to_the_default():
+    # An import can carry any JSON value. 10**400 stays an unbounded int and makes
+    # float() raise OverflowError; 1e400 parses to inf and must not clamp to 1.0;
+    # NaN must not clamp to the loosest 0.50.
+    from custom_components.ha_washdata.cycle_detector import (
+        effective_smart_termination_ratio,
+    )
+    for bad in (10**400, float("inf"), float("nan"), "abc", None):
+        assert effective_smart_termination_ratio(bad) == DEFAULT_SMART_TERMINATION_DURATION_RATIO
+        assert (
+            CycleDetector._resolve_smart_ratio("washing_machine", bad, False, 0.0, 1000.0)
+            == DEFAULT_SMART_TERMINATION_DURATION_RATIO
+        )
+
+
 # ---------------------------------------------------------------------------
 # The gate mirror: a lower ratio unblocks the fast path at a duration the
 # default blocks. _smart_term_block_reason mirrors the gate's conditions in

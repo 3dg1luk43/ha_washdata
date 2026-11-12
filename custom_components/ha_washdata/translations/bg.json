@@ -56,6 +56,7 @@
       "timer_pause_action_title": "Възобновяване на цикъла",
       "timer_pause_body_suffix": "Цикълът е на пауза. Отворете панела на WashData, за да го възобновите.",
       "unload_dismiss_action_title": "Спри напомнянията",
+      "review_action_title": "Беше {program}",
       "notify_live_waiting_message": "{device}: Все още няма съвпадащ профил.",
       "vs_typical_longer": "{pct}% по-дълго от обичайното",
       "vs_typical_shorter": "{pct}% по-кратко от обичайното",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Маркирай поддръжката като извършена",
+      "description": "Записва задача за поддръжка като извършена сега, както бутонът Готово в панела.",
+      "fields": {
+        "device_id": {
+          "name": "Устройство",
+          "description": "Устройството WashData, към което принадлежи задачата."
+        },
+        "task_id": {
+          "name": "ИД на задача",
+          "description": "ID на задачата, както е посочено в атрибута due_task_ids на сензора Предстои поддръжка (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other или custom_ ID на собствена задача)."
+        },
+        "notes": {
+          "name": "Бележки",
+          "description": "Незадължителна бележка към записа в дневника."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Изтриване на цикъл",
+      "description": "Изтрива един запазен цикъл. Програмата му се изгражда наново без него или се премахва, ако това е бил последният ѝ цикъл и той е бил импортиран. Не може да бъде отменено.",
+      "fields": {
+        "device_id": {
+          "name": "Устройство",
+          "description": "Устройството WashData."
+        },
+        "cycle_id": {
+          "name": "ИД на цикъл",
+          "description": "ID на цикъла за изтриване, напр. променливата cycle_id на тригера \"Цикълът приключи\" (тя е празна, когато това изпълнение не е запазило цикъл, затова първо я проверете)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Стартиране на ML обучение",
       "description": "Ръчно преквалификация на моделите ML на устройство от собствените етикети на това устройство (експериментални).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "Обща енергия"
+      },
+      "last_cycle_duration": {
+        "name": "Продължителност на последния цикъл"
+      },
+      "last_cycle_energy": {
+        "name": "Енергия на последния цикъл"
+      },
+      "last_cycle_cost": {
+        "name": "Цена на последния цикъл"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "Неуспешно присвояване на профил: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Цикълът не е намерен."
+    },
+    "maintenance_task_not_found": {
+      "message": "На това устройство няма задача за поддръжка с ID {task_id}."
+    },
+    "task_id_required": {
+      "message": "Изисква се валиден task_id."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "Цикълът е възобновен",
       "still_tumbling": "Барабанът все още се върти след цикъла",
       "unloaded": "Разтоварено",
-      "state_changed": "Състоянието се промени",
+      "state_changed": "Състоянието на уреда се промени",
       "maintenance_due": "Необходима поддръжка",
       "milestone_reached": "Достигнат етап на цикъла",
       "pump_stuck": "Помпата е заседнала"
@@ -665,7 +716,7 @@
       "description": "Задейства се, когато прането е извадено след цикъл: вратата е отворена или разтоварването е потвърдено."
     },
     "state_changed": {
-      "name": "Състоянието се промени",
+      "name": "Състоянието на уреда се промени",
       "description": "Задейства се, когато състоянието на WashData се промени.",
       "fields": {
         "from": {

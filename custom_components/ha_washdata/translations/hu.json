@@ -56,6 +56,7 @@
       "timer_pause_action_title": "Ciklus folytatása",
       "timer_pause_body_suffix": "A ciklus szünetel. A folytatáshoz nyissa meg a WashData-panelt.",
       "unload_dismiss_action_title": "Emlékeztetés leállítása",
+      "review_action_title": "{program} volt",
       "notify_live_waiting_message": "{device}: Még nincs illeszkedő profil.",
       "vs_typical_longer": "{pct}%-kal hosszabb a szokásosnál",
       "vs_typical_shorter": "{pct}%-kal rövidebb a szokásosnál",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Karbantartás megjelölése elvégzettként",
+      "description": "Elvégzettként naplóz egy karbantartási feladatot most, ahogy a panel Kész gombja is.",
+      "fields": {
+        "device_id": {
+          "name": "Eszköz",
+          "description": "A WashData eszköz, amelyhez a feladat tartozik."
+        },
+        "task_id": {
+          "name": "Feladatazonosító",
+          "description": "A feladat azonosítója, ahogy az Esedékes karbantartás érzékelő due_task_ids attribútumában szerepel (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other, vagy egy egyéni feladat custom_ azonosítója)."
+        },
+        "notes": {
+          "name": "Megjegyzések",
+          "description": "Választható megjegyzés, amely a naplóbejegyzéssel együtt tárolódik."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Ciklus törlése",
+      "description": "Töröljön egy tárolt ciklust. A programja nélküle épül újra, vagy maga a program törlődik, ha egy importált ciklus volt az utolsó ciklusa. Ez nem vonható vissza.",
+      "fields": {
+        "device_id": {
+          "name": "Eszköz",
+          "description": "A WashData eszköz."
+        },
+        "cycle_id": {
+          "name": "Ciklusazonosító",
+          "description": "A törlendő ciklus azonosítója, pl. a Ciklus véget ért eseményindító cycle_id változója (üres, ha az adott futás nem tárolt ciklust, ezért előbb ellenőrizze)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "ML-tanítás indítása",
       "description": "Tanítsa újra kézzel az eszközön futó ML-modelleket az eszköz saját címkézett ciklusaiból (kísérleti).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "Összes energia"
+      },
+      "last_cycle_duration": {
+        "name": "Utolsó ciklus időtartama"
+      },
+      "last_cycle_energy": {
+        "name": "Utolsó ciklus energiája"
+      },
+      "last_cycle_cost": {
+        "name": "Utolsó ciklus költsége"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "A profil hozzárendelése nem sikerült: {error}"
+    },
+    "cycle_not_found": {
+      "message": "A ciklus nem található."
+    },
+    "maintenance_task_not_found": {
+      "message": "Ezen az eszközön nincs {task_id} azonosítójú karbantartási feladat."
+    },
+    "task_id_required": {
+      "message": "Érvényes task_id megadása kötelező."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "Ciklus folytatódott",
       "still_tumbling": "A ciklus után még forog a dob",
       "unloaded": "Kirakva",
-      "state_changed": "Állapot megváltozott",
+      "state_changed": "Készülék állapota megváltozott",
       "maintenance_due": "Karbantartás esedékes",
       "milestone_reached": "Ciklus mérföldkő elérve",
       "pump_stuck": "Szivattyú elakadt"
@@ -665,7 +716,7 @@
       "description": "Aktiválódik, amikor a töltetet kiveszi egy ciklus után: az ajtó kinyílt vagy a kirakást megerősítették."
     },
     "state_changed": {
-      "name": "Állapot megváltozott",
+      "name": "Készülék állapota megváltozott",
       "description": "Aktiválódik, amikor a WashData állapota megváltozik.",
       "fields": {
         "from": {

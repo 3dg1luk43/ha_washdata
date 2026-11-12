@@ -221,7 +221,11 @@
     "bp_details": "Detalii",
     "bp_copy_yaml": "Copiați YAML-ul",
     "bp_hide_yaml": "Ascundeți YAML-ul",
-    "bp_show_yaml": "Afișați YAML-ul"
+    "bp_show_yaml": "Afișați YAML-ul",
+    "review_something_else": "Altceva…",
+    "review_not_sure": "Nu știu",
+    "review_prev": "Ciclul anterior",
+    "review_next": "Ciclul următor"
   },
   "conflict": {
     "anti_wrinkle_max": {
@@ -535,6 +539,7 @@
     "pg_alert_overrun": "Prea lung",
     "pg_alert_underrun": "Prea scurt",
     "pg_alert_did_not_finish": "Nu s-a terminat",
+    "pg_alert_discarded": "Eliminat ca fantomă sau evacuare",
     "pg_alert_false_end": "Împărțit în mai multe cicluri",
     "pg_alert_unmatched": "Fără potrivire",
     "pg_alert_ambiguous": "Potrivire ambiguă",
@@ -667,7 +672,10 @@
     "bp_needs": "Necesită",
     "bp_needs_version": "WashData {version} sau mai nou",
     "bp_author": "Autor",
-    "bp_required": "obligatoriu"
+    "bp_required": "obligatoriu",
+    "pg_runs_as": "simulat cu {value}",
+    "review_this_cycle": "Acest ciclu",
+    "review_usual": "Obișnuit pentru {name}"
   },
   "log": {
     "all_levels": "Toate nivelurile",
@@ -1019,7 +1027,7 @@
     "hist_scan_failed": "Analiza a eșuat.",
     "hist_scan_expired": "Acea analiză nu mai este disponibilă. Reluați analiza.",
     "hist_import_failed": "Importul a eșuat.",
-    "imported_history_readonly": "Găsit într-un istoric de putere importat. Ajută potrivirea, dar nu contează în statisticile dvs. și nu poate fi tăiat sau împărțit. Etichetați-l pentru a denumi programul.",
+    "imported_history_note": "Găsit într-un istoric de putere importat. Ajută potrivirea, dar nu contează în statisticile dvs. și nu poate fi împărțit. Etichetați-l pentru a denumi programul.",
     "odometer_intro": "Acest total doar crește. Ștergerea unui ciclu nu îl scade, ca mementourile de service să rămână corecte.",
     "odometer_correct_hint": "Setați această valoare dacă WashData a numărat un ciclu care nu a avut loc sau dacă aparatul a rulat cicluri înainte de instalarea WashData.",
     "no_reminders_set": "Încă nu este setat niciun memento de service.",
@@ -1074,7 +1082,16 @@
     "bp_none_yet": "Încă nu există șabloane pentru acest tip de aparat. Partajați-l pe primul.",
     "bp_unreachable": "Se descarcă de pe GitHub. Verificați dacă Home Assistant are acces la internet, apoi încercați din nou.",
     "bp_library_intro": "Automatizări gata făcute, partajate de utilizatorii WashData pe GitHub și verificate înainte de a fi listate. Disponibilă doar cu funcțiile online activate.",
-    "bp_needs_version": "Necesită WashData {version} sau mai nou."
+    "bp_needs_version": "Necesită WashData {version} sau mai nou.",
+    "bp_review_check": "Verificați acest lucru înainte de a salva: Home Assistant îl va rula exact așa cum este scris.",
+    "review_q_title": "Ce program a fost acesta?",
+    "review_q_intro": "WashData nu este sigur de aceste cicluri. Răspunsul dvs. îl ajută să învețe.",
+    "review_q_started": "Pornit la {when}",
+    "review_q_more": "Încă {count} de revizuit",
+    "review_q_more_one": "Încă {count} de revizuit",
+    "review_q_more_few": "Încă {count} de revizuit",
+    "review_q_more_other": "Încă {count} de revizuit",
+    "review_which_program": "Ce program a fost?"
   },
   "phase_desc": {
     "anti_crease": "Rotiri scurte ocazionale ale tamburului după finalizare pentru a reduce șifonarea.",
@@ -1167,7 +1184,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Eliberare la liniște în uscarea pasivă",
-      "doc": "După durata așteptată: cât timp trebuie să rămână mașina de spălat vase sub Pragul de Oprire înainte ca WashData să nu mai aștepte evacuarea finală. Creșteți-l dacă o evacuare târzie după o uscare lungă este ratată. Așteptarea nu depășește niciodată 30 de minute."
+      "doc": "După durata așteptată, WashData nu mai așteaptă evacuarea finală odată ce mașina de spălat vase a rămas sub Pragul de Oprire această durată de la ultima sa activitate, cel mult 30 de minute (și, după ce programul are 3 cicluri înregistrate, cel puțin cea mai lungă pauză de uscare înregistrată a acestuia). Creșteți-l dacă o evacuare târzie după o uscare lungă este ratată."
     },
     "anti_crease_finalize_ratio": {
       "label": "Raport de finalizare anti-șifonare",
@@ -1314,7 +1331,7 @@
       "label": "Pictogramă Notificare"
     },
     "notify_live_chronometer": {
-      "doc": "Android: adaugă o numărătoare inversă până la finalizarea estimată lângă textul notificării. Folosiți {finish_time} în Mesaj Pre-Finalizare pentru a afișa ora de finalizare în loc de o a doua numărătoare.",
+      "doc": "Android: adaugă o numărătoare inversă până la finalizarea estimată lângă textul notificării. Folosiți {finish_time} în Mesaj Actualizare în Timp Real pentru a afișa ora de finalizare în loc de o a doua numărătoare.",
       "label": "Utilizați Cronometru în Timp Real"
     },
     "notify_live_interval_seconds": {
@@ -1339,11 +1356,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Textul fiecărei actualizări de progres în timp real. Variabile de șablon: {device}, {program}, {minutes} (minute rămase), {finish_time} (ora estimată de finalizare, ex. 14:30). Cu orice altă variabilă se folosește textul implicit.",
-      "label": "Mesaj Pre-Finalizare"
+      "label": "Mesaj Actualizare în Timp Real"
     },
     "notify_reminder_message": {
       "doc": "Textul Alertei Înainte de Sfârșit, trimisă o singură dată. Variabile de șablon: {device}, {program}, {minutes} (setarea Alertă Înainte de Sfârșit). Cu orice altă variabilă se folosește textul implicit.",
-      "label": "Mesaj Reamintire"
+      "label": "Mesaj Alertă Înainte de Sfârșit"
     },
     "notify_start_message": {
       "doc": "Corpul trimis când pornește un ciclu. Variabile de șablon: {device}, {program}. Cu orice altă variabilă se folosește textul implicit.",
@@ -1634,6 +1651,8 @@
     "preparing": "Se pregătește…",
     "unlabelling": "Se elimină eticheta…",
     "working": "Se procesează…",
+    "torn_pick": "{a} sau {b}?",
+    "torn_tip": "WashData nu poate încă deosebi aceste două programe, așa că alegeți programul care rulează pentru a eticheta acest ciclu cu el (opțiunea Detectare automată anulează alegerea).",
     "match_uncertain": "Incert: {top} sau {runner}",
     "match_uncertain_single": "Incert: poate {top}",
     "match_sure": "~{pct}% certitudine",
@@ -1832,7 +1851,8 @@
     "bp_automation_created": "Automatizare creată cu setările implicite; deschidere în curs",
     "copied": "Copiat",
     "copy_failed": "Copiere eșuată. Selectați textul și copiați-l manual.",
-    "automation_label_failed": "Automatizare creată, dar eticheta sau categoria WashData nu a putut fi adăugată."
+    "automation_label_failed": "Automatizare creată, dar eticheta sau categoria WashData nu a putut fi adăugată.",
+    "review_answered": "Salvat: {program}"
   },
   "suggestion": {
     "observed_label": "Observat",
@@ -1938,7 +1958,7 @@
     "other": "Altele"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Mașină de spălat vase: secunde de liniște după durata așteptată înainte de a elibera așteptarea evacuării de la sfârșitul ciclului",
+    "dishwasher_end_spike_quiet_release": "Mașină de spălat vase: secunde sub Pragul de Oprire de la ultima activitate necesare pentru a încheia așteptarea evacuării finale după durata așteptată",
     "smart_termination_duration_ratio": "Fracțiunea din durata medie a programului pe care un ciclu trebuie să o atingă înainte ca Terminarea inteligentă să îl poată încheia mai devreme; reduceți-o dacă duratele variază",
     "anti_crease_finalize_ratio": "Fracțiunea din durata medie a programului pe care un ciclu trebuie să o atingă înainte ca finalul anti-șifonare să îl poată încheia; reduceți-o la uscătoare, lăsați mașinile de spălat la implicit",
     "anti_wrinkle_enabled": "Absoarbe impulsurile de rotire de după faza principală în loc să le trateze drept cicluri noi",
@@ -2260,7 +2280,7 @@
       "name": "Descărcat"
     },
     "state_changed": {
-      "name": "Stare schimbată"
+      "name": "Starea aparatului schimbată"
     },
     "maintenance_due": {
       "name": "Mentenanță necesară"

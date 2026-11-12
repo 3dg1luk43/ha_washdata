@@ -274,7 +274,11 @@
     "bp_details": "Podrobnosti",
     "bp_copy_yaml": "Kopírovať YAML",
     "bp_hide_yaml": "Skryť YAML",
-    "bp_show_yaml": "Zobraziť YAML"
+    "bp_show_yaml": "Zobraziť YAML",
+    "review_something_else": "Niečo iné…",
+    "review_not_sure": "Neviem s istotou",
+    "review_prev": "Predchádzajúci cyklus",
+    "review_next": "Ďalší cyklus"
   },
   "note": {
     "off_delay": {
@@ -589,6 +593,7 @@
     "pg_alert_overrun": "Prebeh",
     "pg_alert_underrun": "Podbeh",
     "pg_alert_did_not_finish": "Nedokončené",
+    "pg_alert_discarded": "Zahodené ako falošný cyklus alebo odčerpanie",
     "pg_alert_false_end": "Rozdelené na viac cyklov",
     "pg_alert_unmatched": "Bez zhody",
     "pg_alert_ambiguous": "Nejednoznačná zhoda",
@@ -728,7 +733,10 @@
     "bp_needs": "Požiadavky",
     "bp_needs_version": "WashData {version} alebo novší",
     "bp_author": "Autor",
-    "bp_required": "povinné"
+    "bp_required": "povinné",
+    "pg_runs_as": "simulácia použije {value}",
+    "review_this_cycle": "Tento cyklus",
+    "review_usual": "Zvyčajne pre {name}"
   },
   "log": {
     "all_levels": "Všetky úrovne",
@@ -1087,7 +1095,7 @@
     "hist_scan_failed": "Vyhľadávanie sa nepodarilo.",
     "hist_scan_expired": "Toto skenovanie už nie je dostupné. Skenujte znova.",
     "hist_import_failed": "Import sa nepodaril.",
-    "imported_history_readonly": "Nájdené v importovanej histórii výkonu. Pomáha párovaniu, ale nezapočítava sa do štatistík a nedá sa orezať ani rozdeliť. Označením pomenujte program.",
+    "imported_history_note": "Nájdené v importovanej histórii výkonu. Pomáha párovaniu, ale nezapočítava sa do štatistík a nedá sa rozdeliť. Označením pomenujte program.",
     "odometer_intro": "Tento súčet len rastie. Odstránenie cyklu ho nezníži, takže pripomienky servisu zostávajú správne.",
     "odometer_correct_hint": "Nastavte, ak WashData započítalo cyklus, ktorý neprebehol, alebo spotrebič absolvoval cykly pred inštaláciou WashData.",
     "no_reminders_set": "Zatiaľ nie sú nastavené žiadne pripomienky servisu.",
@@ -1145,7 +1153,17 @@
     "bp_none_yet": "Pre tento typ spotrebiča zatiaľ nie sú žiadne šablóny. Zdieľajte prvú.",
     "bp_unreachable": "Sťahuje sa z GitHubu. Skontrolujte, či má Home Assistant prístup na internet, a skúste to znova.",
     "bp_library_intro": "Hotové automatizácie, ktoré zdieľajú používatelia WashData na GitHube a ktoré sa pred zaradením do zoznamu kontrolujú. Dostupné len so zapnutými online funkciami.",
-    "bp_needs_version": "Vyžaduje WashData {version} alebo novší."
+    "bp_needs_version": "Vyžaduje WashData {version} alebo novší.",
+    "bp_review_check": "Pred uložením si to skontrolujte: Home Assistant to spustí presne tak, ako je napísané.",
+    "review_q_title": "Aký to bol program?",
+    "review_q_intro": "WashData si pri týchto cykloch nie je istý. Z vašej odpovede sa učí.",
+    "review_q_started": "Spustený {when}",
+    "review_q_more": "Ešte {count} cyklov na kontrolu",
+    "review_q_more_one": "Ešte {count} cyklus na kontrolu",
+    "review_q_more_few": "Ešte {count} cykly na kontrolu",
+    "review_q_more_many": "Ešte {count} cyklu na kontrolu",
+    "review_q_more_other": "Ešte {count} cyklov na kontrolu",
+    "review_which_program": "Ktorý program to bol?"
   },
   "phase_desc": {
     "anti_crease": "Príležitostné krátke otáčanie bubna po dokončení na predchádzanie krčeniu oblečenia.",
@@ -1238,7 +1256,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Uvoľnenie po tichej fáze sušenia",
-      "doc": "Po očakávanej dobe trvania: ako dlho musí umývačka zostať pod Prahom zastavenia, než WashData prestane čakať na záverečné odčerpanie. Zvýšte, ak sa neskoré odčerpanie po dlhom sušení nezachytí. Čakanie nikdy nepresiahne 30 minút."
+      "doc": "Po dosiahnutí očakávaného trvania prestane WashData čakať na záverečné odčerpanie, keď umývačka zostane pod Prahom zastavenia takto dlho od svojej poslednej aktivity, najviac však 30 minút (a len čo má program 3 zaznamenané cykly, najmenej tak dlho ako jeho najdlhšia zaznamenaná pauza na sušenie). Zvýšte, ak sa neskoré odčerpanie po dlhom sušení nezachytí."
     },
     "anti_crease_finalize_ratio": {
       "doc": "Zlomok priemernej doby trvania programu, ktorý musí cyklus dosiahnuť, než sa otáčanie bubna s nízkym výkonom počíta ako chvost ochrany pred krčením. Pri sušičkách riadených náplňou ho znížte (napr. 0,75). Pri práčkach ponechajte predvolenú hodnotu (0,98), inak môže pranie skončiť v polovici.",
@@ -1381,7 +1399,7 @@
       "label": "Ikona upozornenia"
     },
     "notify_live_chronometer": {
-      "doc": "Android: pridá odpočítavanie do odhadovaného konca vedľa textu upozornenia. Použite {finish_time} v Správe pred dokončením, aby sa miesto druhého odpočítavania zobrazil čas konca.",
+      "doc": "Android: pridá odpočítavanie do odhadovaného konca vedľa textu upozornenia. Použite {finish_time} v Správe živej aktualizácie, aby sa namiesto druhého odpočítavania zobrazil čas konca.",
       "label": "Použiť živý chronometer"
     },
     "notify_live_interval_seconds": {
@@ -1406,11 +1424,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Text každej živej aktualizácie priebehu. Premenné šablóny: {device}, {program}, {minutes} (zostávajúce minúty), {finish_time} (odhadovaný koniec, napr. 14:30). Pri akejkoľvek inej premennej sa použije predvolený text.",
-      "label": "Správa pred dokončením"
+      "label": "Správa živej aktualizácie"
     },
     "notify_reminder_message": {
       "doc": "Text jednorazového Upozornenia pred koncom. Premenné šablóny: {device}, {program}, {minutes} (nastavenie Upozornenie pred koncom). Pri akejkoľvek inej premennej sa použije predvolený text.",
-      "label": "Správa pripomienky"
+      "label": "Správa upozornenia pred koncom"
     },
     "notify_start_message": {
       "doc": "Text odoslaný pri spustení cyklu. Premenné šablóny: {device}, {program}. Pri akejkoľvek inej premennej sa použije predvolený text.",
@@ -1708,7 +1726,9 @@
     "match_uncertain": "Neisté: {top} alebo {runner}",
     "match_uncertain_single": "Neisté: možno {top}",
     "match_sure": "istota ~{pct} %",
-    "match_uncertain_tip": "WashData sa zatiaľ nerozhodol pre program. Číslo udáva, ako často mal vedúci odhad, {top}, v minulých cykloch pravdu pri takom náskoku. Len na informáciu."
+    "match_uncertain_tip": "WashData sa zatiaľ nerozhodol pre program. Číslo udáva, ako často mal vedúci odhad, {top}, v minulých cykloch pravdu pri takom náskoku. Len na informáciu.",
+    "torn_pick": "{a} alebo {b}?",
+    "torn_tip": "WashData zatiaľ tieto dva programy nedokáže rozlíšiť, preto vyberte ten, ktorý práve beží, aby ste ním označili tento cyklus (Automatické zisťovanie výber vráti späť)."
   },
   "suggestion": {
     "observed_label": "Namerané",
@@ -1993,7 +2013,8 @@
     "bp_automation_created": "Automatizácia vytvorená s predvolenými nastaveniami; otváram",
     "copied": "Skopírované",
     "copy_failed": "Kopírovanie zlyhalo. Vyberte text a skopírujte ho ručne.",
-    "automation_label_failed": "Automatizácia vytvorená, ale štítok alebo kategória WashData nemohli byť pridané."
+    "automation_label_failed": "Automatizácia vytvorená, ale štítok alebo kategória WashData nemohli byť pridané.",
+    "review_answered": "Uložené: {program}"
   },
   "trend": {
     "down": "Klesajúci trend",
@@ -2011,7 +2032,7 @@
     "other": "Iné"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Umývačka: tiché sekundy po očakávanom trvaní, než sa uvoľní čakanie na záverečné odčerpanie vody",
+    "dishwasher_end_spike_quiet_release": "Umývačka: sekundy pod Prahom zastavenia od poslednej aktivity potrebné na ukončenie čakania na záverečné odčerpanie po uplynutí očakávaného trvania",
     "smart_termination_duration_ratio": "Zlomok priemernej doby trvania programu, ktorý musí cyklus dosiahnuť, než ho Inteligentné ukončenie smie ukončiť skôr; znížte, ak doby behu kolíšu",
     "anti_crease_finalize_ratio": "Zlomok priemernej doby trvania programu, ktorý musí cyklus dosiahnuť, než ho chvost ochrany pred krčením smie dokončiť; pri sušičkách znížte, pri práčkach ponechajte predvolené",
     "anti_wrinkle_enabled": "Pohltiť pulzy bubna po hlavnej fáze namiesto ich čítania ako nové cykly",
@@ -2279,7 +2300,7 @@
       "name": "Vyložené"
     },
     "state_changed": {
-      "name": "Stav zmenený"
+      "name": "Stav spotrebiča zmenený"
     },
     "maintenance_due": {
       "name": "Servis potrebný"

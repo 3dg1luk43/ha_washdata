@@ -98,20 +98,31 @@ def _dt(offset_seconds: float) -> datetime:
     )
 
 
+def _crease_guard(t: int) -> float:
+    """The #429 reporter's crease guard: one 155-275 W tumble of about 20 s every
+    3-4 min (here every 210 s) on a 5 W base, above the 4 W stop threshold so the
+    off-delay path never closes it (the #296 shape the finalise exists for)."""
+    return 200.0 if (t - 7000) % 210 < 30 else 5.0
+
+
+def _cool_down(_t: int) -> float:
+    """A drum that turns without a pause at 200 W after the heating (#514)."""
+    return 200.0
+
+
 def _run_dryer_with_tumble_tail(
     ratio: float,
     tail_end: int = 8000,
     anti_wrinkle_max_duration: float = 60.0,
+    tail=_crease_guard,
 ):
     """A confidently-matched dryer that stops heating at 70% of its expected
-    duration and then sits in a 200 W crease-guard tumble tail.
+    duration and then sits in its crease-guard tumble tail (``tail``).
 
-    200 W is below ``anti_wrinkle_max_power`` (400 W, so it reads as tail, not
-    work) but above ``stop_threshold_w`` (so the cycle stays in RUNNING and the
-    off-delay path never closes it - the #296 shape the finalise exists for).
-    The run is fed to ``tail_end``; 8000 is 80% of expected, i.e. past a 0.75
-    ratio but nowhere near 0.98. Returns the detector and the ``on_cycle_end``
-    mock.
+    Every reading is below ``anti_wrinkle_max_power`` (400 W, so it reads as
+    tail, not work) and above ``stop_threshold_w``. The run is fed to
+    ``tail_end``; 8000 is 80% of expected, i.e. past a 0.75 ratio but nowhere
+    near 0.98. Returns the detector and the ``on_cycle_end`` mock.
     """
     expected = 10000.0
     matcher = Mock(
@@ -145,9 +156,8 @@ def _run_dryer_with_tumble_tail(
     # Heat phase to 70% of expected.
     for t in range(90, 7000, 30):
         det.process_reading(1000.0, _dt(t))
-    # Crease-guard tumble tail.
     for t in range(7000, tail_end, 30):
-        det.process_reading(200.0, _dt(t))
+        det.process_reading(tail(t), _dt(t))
     return det, on_end
 
 
@@ -168,39 +178,44 @@ def test_tuned_ratio_recognises_the_tail_the_default_sits_through() -> None:
 
 
 # ---------------------------------------------------------------------------
-# The coupling the reporter measured: an earlier finalise EXPOSES an unrelated
-# default. Not caused by the ratio, but the two have to be tuned together, and
-# the setting doc says so.
+# The coupling the reporter measured: an earlier finalise EXPOSES what follows the
+# heating. A lowered ratio opens the gate while a dryer may still be in its
+# cool-down, the drum turning without a pause for minutes under
+# anti_wrinkle_max_power (#514).
 # ---------------------------------------------------------------------------
 
 
-def test_a_continuous_tumble_stays_absorbed_after_an_early_finalize() -> None:
-    """A continuous tumble longer than ``anti_wrinkle_max_duration`` no longer
-    reopens a cycle once the #296 finalise recognised it (register item 393a).
+def test_a_continuous_tumble_is_not_finalised_into_anti_wrinkle() -> None:
+    """Register item 393a met this as a fragment: the finalise fired inside a
+    continuous drum stretch and the rest of it opened a second cycle (the #429
+    reporter saw it twice, 32 Wh and 13 Wh); the tail floor then absorbed it.
+    Since #514 a dryer's finalise waits for the first rest, so the stretch stays
+    in the cycle and nothing is left to absorb."""
+    def cool_then_guard(t: int) -> float:
+        return _cool_down(t) if t < 8000 else _crease_guard(t)
 
-    With the ratio at its default the finalise never fires, so the 60 s default
-    is never reached during a tail and nobody notices. Lowering the ratio makes
-    the tail arrive while the machine is still tumbling, and a dryer that tumbles
-    for minutes in one stretch tripped the pulse-length limit and opened a
-    fragment - the reporter saw exactly this twice (32 Wh and 13 Wh). The tail's
-    own level is now its baseline, so the same tumble stays attached at the
-    shipped 60 s limit.
-    """
-    det, on_end = _run_dryer_with_tumble_tail(
-        0.75, tail_end=8000, anti_wrinkle_max_duration=60.0
-    )
-    assert on_end.call_count == 1, "the finalise itself still fired"
-    assert det.state == STATE_ANTI_WRINKLE, (
-        "a 600 s continuous tumble at the tail's own level stays in anti-wrinkle"
-    )
+    det, on_end = _run_dryer_with_tumble_tail(0.75, tail_end=8000, tail=cool_then_guard)
+    assert not on_end.called, "past 0.75 x expected, but still in the cool-down"
+    assert det.state != STATE_ANTI_WRINKLE
+
+    det, on_end = _run_dryer_with_tumble_tail(0.75, tail_end=8900, tail=cool_then_guard)
+    assert on_end.call_count == 1, "finalised once, after the cool-down"
+    assert on_end.call_args[0][0]["duration"] >= 7950, "the cool-down is in the cycle"
+    assert det.state == STATE_ANTI_WRINKLE
 
 
 def test_raising_max_duration_keeps_the_tail_absorbed() -> None:
-    """The reporter's own fix: raise the pulse limit past the tumble length."""
+    """The reporter's own fix: raise the pulse limit past the tumble length. A
+    600 s tumble after the finalise stays attached with a 900 s limit."""
+    def guard_then_long_tumble(t: int) -> float:
+        return 200.0 if 7800 <= t < 8400 else _crease_guard(t)
+
     det, on_end = _run_dryer_with_tumble_tail(
-        0.75, tail_end=8000, anti_wrinkle_max_duration=900.0
+        0.75, tail_end=8600, anti_wrinkle_max_duration=900.0,
+        tail=guard_then_long_tumble,
     )
     assert on_end.call_count == 1
+    assert on_end.call_args[0][0]["duration"] < 7800, "finalised in the crease guard"
     assert det.state == STATE_ANTI_WRINKLE, "the whole tail stays attached"
 
 

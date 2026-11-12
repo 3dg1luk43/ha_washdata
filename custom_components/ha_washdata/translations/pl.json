@@ -56,6 +56,7 @@
       "timer_pause_action_title": "Wznów cykl",
       "timer_pause_body_suffix": "Cykl jest wstrzymany. Otwórz panel WashData, aby wznowić.",
       "unload_dismiss_action_title": "Przestań przypominać",
+      "review_action_title": "To był {program}",
       "notify_live_waiting_message": "{device}: Nie rozpoznano jeszcze żadnego profilu.",
       "vs_typical_longer": "o {pct}% dłużej niż zwykle",
       "vs_typical_shorter": "o {pct}% krócej niż zwykle",
@@ -295,6 +296,38 @@
         }
       }
     },
+    "mark_maintenance_done": {
+      "name": "Oznacz konserwację jako wykonaną",
+      "description": "Zapisz zadanie konserwacyjne jako wykonane teraz, tak jak przycisk Zrobione w panelu.",
+      "fields": {
+        "device_id": {
+          "name": "Urządzenie",
+          "description": "Urządzenie WashData, do którego należy zadanie."
+        },
+        "task_id": {
+          "name": "Identyfikator zadania",
+          "description": "Identyfikator zadania z atrybutu due_task_ids czujnika wymaganej konserwacji (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other albo identyfikator custom_ zadania własnego)."
+        },
+        "notes": {
+          "name": "Notatki",
+          "description": "Opcjonalna notatka zapisywana razem z wpisem w dzienniku."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "Usuń cykl",
+      "description": "Usuń jeden zapisany cykl. Jego program zostanie przebudowany bez niego albo usunięty, jeśli był to jego ostatni cykl i pochodził z importu. Tej operacji nie można cofnąć.",
+      "fields": {
+        "device_id": {
+          "name": "Urządzenie",
+          "description": "Urządzenie WashData."
+        },
+        "cycle_id": {
+          "name": "Identyfikator cyklu",
+          "description": "Identyfikator cyklu do usunięcia, np. zmienna cycle_id wyzwalacza „Cykl zakończony” (jest pusta, gdy dane uruchomienie nie zapisało cyklu, więc najpierw ją sprawdź)."
+        }
+      }
+    },
     "trigger_ml_training": {
       "name": "Wyzwól trenowanie ML",
       "description": "Ręcznie przetrenuj modele ML na urządzeniu z własnych oznaczonych cykli (eksperymentalne).",
@@ -431,6 +464,15 @@
       },
       "energy_total": {
         "name": "Całkowita energia"
+      },
+      "last_cycle_duration": {
+        "name": "Czas trwania ostatniego cyklu"
+      },
+      "last_cycle_energy": {
+        "name": "Energia ostatniego cyklu"
+      },
+      "last_cycle_cost": {
+        "name": "Koszt ostatniego cyklu"
       }
     },
     "select": {
@@ -507,6 +549,15 @@
     },
     "assign_profile_failed": {
       "message": "Nie można przypisać profilu: {error}"
+    },
+    "cycle_not_found": {
+      "message": "Nie znaleziono cyklu."
+    },
+    "maintenance_task_not_found": {
+      "message": "Na tym urządzeniu nie ma zadania konserwacyjnego o identyfikatorze {task_id}."
+    },
+    "task_id_required": {
+      "message": "Wymagany jest prawidłowy identyfikator zadania (task_id)."
     }
   },
   "device_automation": {
@@ -525,7 +576,7 @@
       "cycle_resumed": "Cykl wznowiony",
       "still_tumbling": "Nadal obraca bębnem po zakończeniu",
       "unloaded": "Wyładowany",
-      "state_changed": "Stan zmieniony",
+      "state_changed": "Stan urządzenia zmieniony",
       "maintenance_due": "Wymagana konserwacja",
       "milestone_reached": "Osiągnięto kamień milowy cyklu",
       "pump_stuck": "Pompa zablokowana"
@@ -665,7 +716,7 @@
       "description": "Wyzwala, gdy bielizna zostaje wyjęta po cyklu: otwarto drzwi lub potwierdzono wyładunek."
     },
     "state_changed": {
-      "name": "Stan zmieniony",
+      "name": "Stan urządzenia zmieniony",
       "description": "Wyzwala, gdy zmienia się stan WashData.",
       "fields": {
         "from": {

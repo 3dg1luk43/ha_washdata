@@ -274,7 +274,11 @@
     "bp_details": "Podrobnosti",
     "bp_copy_yaml": "Kopiraj YAML",
     "bp_hide_yaml": "Skrij YAML",
-    "bp_show_yaml": "Prikaži YAML"
+    "bp_show_yaml": "Prikaži YAML",
+    "review_something_else": "Nekaj drugega…",
+    "review_not_sure": "Ne vem",
+    "review_prev": "Prejšnji cikel",
+    "review_next": "Naslednji cikel"
   },
   "note": {
     "off_delay": {
@@ -589,6 +593,7 @@
     "pg_alert_overrun": "Podaljšanje",
     "pg_alert_underrun": "Skrajšanje",
     "pg_alert_did_not_finish": "Ni končano",
+    "pg_alert_discarded": "Zavrženo kot lažni cikel ali izčrpavanje",
     "pg_alert_false_end": "Razdeljeno na več ciklov",
     "pg_alert_unmatched": "Brez ujemanja",
     "pg_alert_ambiguous": "Dvoumno ujemanje",
@@ -728,7 +733,10 @@
     "bp_needs": "Zahteve",
     "bp_needs_version": "WashData {version} ali novejši",
     "bp_author": "Avtor",
-    "bp_required": "obvezno"
+    "bp_required": "obvezno",
+    "pg_runs_as": "simulacija uporabi {value}",
+    "review_this_cycle": "Ta cikel",
+    "review_usual": "Običajno za {name}"
   },
   "log": {
     "all_levels": "Vse ravni",
@@ -1087,7 +1095,7 @@
     "hist_scan_failed": "Pregledovanje ni uspelo.",
     "hist_scan_expired": "Ta pregled ni več na voljo. Pregled zaženite znova.",
     "hist_import_failed": "Uvoz ni uspel.",
-    "imported_history_readonly": "Najdeno v uvoženi zgodovini moči. Pomaga pri ujemanju, a se ne šteje v statistiko in ga ni mogoče obrezati ali razdeliti. Označite ga, da poimenujete program.",
+    "imported_history_note": "Najdeno v uvoženi zgodovini moči. Pomaga pri ujemanju, a se ne šteje v statistiko in ga ni mogoče razdeliti. Označite ga, da poimenujete program.",
     "odometer_intro": "Ta vsota samo narašča. Brisanje cikla je ne zmanjša, zato opomniki za servis ostanejo pravilni.",
     "odometer_correct_hint": "Nastavite to, če je WashData štel cikel, ki se ni zgodil, ali je naprava opravila cikle pred namestitvijo WashData.",
     "no_reminders_set": "Opomniki za servis še niso nastavljeni.",
@@ -1145,7 +1153,17 @@
     "bp_none_yet": "Za ta tip naprave še ni predlog. Delite prvo.",
     "bp_unreachable": "Prenese se z GitHuba. Preverite, ali ima Home Assistant dostop do interneta, nato poskusite znova.",
     "bp_library_intro": "Pripravljene avtomatizacije, ki jih uporabniki WashData delijo na GitHubu in so pred objavo pregledane. Na voljo samo z vklopljenimi spletnimi funkcijami.",
-    "bp_needs_version": "Zahteva WashData {version} ali novejši."
+    "bp_needs_version": "Zahteva WashData {version} ali novejši.",
+    "bp_review_check": "Pred shranjevanjem to preverite: Home Assistant bo to izvedel natanko tako, kot je zapisano.",
+    "review_q_title": "Kateri program je bil to?",
+    "review_q_intro": "WashData glede teh ciklov ni prepričan. Vaš odgovor ga uči.",
+    "review_q_started": "Začeto {when}",
+    "review_q_more": "Še {count} ciklov za pregled",
+    "review_q_more_one": "Še {count} cikel za pregled",
+    "review_q_more_two": "Še {count} cikla za pregled",
+    "review_q_more_few": "Še {count} cikli za pregled",
+    "review_q_more_other": "Še {count} ciklov za pregled",
+    "review_which_program": "Kateri program je bil?"
   },
   "phase_desc": {
     "anti_crease": "Občasno kratko vrtenje bobna po zaključku za preprečevanje gub na oblačilih.",
@@ -1238,7 +1256,7 @@
   "setting": {
     "dishwasher_end_spike_quiet_release": {
       "label": "Sprostitev po tihi fazi sušenja",
-      "doc": "Po pričakovanem trajanju: kako dolgo mora pomivalni stroj ostati pod Pragom zaustavitve, preden WashData neha čakati na končno izčrpavanje. Zvišajte, če se pozno izčrpavanje po dolgem sušenju zgreši. Čakanje nikoli ne preseže 30 minut."
+      "doc": "Ko je pričakovano trajanje doseženo, WashData neha čakati na končno izčrpavanje, ko pomivalni stroj od svoje zadnje aktivnosti toliko časa ostane pod Pragom zaustavitve, vendar ne več kot 30 minut (in ko ima program 3 zabeležene cikle, ne manj kot njegov najdaljši zabeleženi premor za sušenje). Zvišajte, če se pozno izčrpavanje po dolgem sušenju zgreši."
     },
     "anti_crease_finalize_ratio": {
       "doc": "Delež povprečnega trajanja programa, ki ga mora cikel doseči, preden se vrtenje bobna pri nizki moči šteje za rep zaščite pred gubami. Znižajte ga (npr. 0,75) pri sušilnih strojih, ki čas prilagajajo količini perila. Pri pralnih strojih pustite privzeto (0,98), sicer se pranje lahko konča na polovici.",
@@ -1385,7 +1403,7 @@
       "label": "Ikona obvestila"
     },
     "notify_live_chronometer": {
-      "doc": "Android: doda odštevanje do ocenjenega konca ob besedilu obvestila. Uporabite {finish_time} v Sporočilu pred dokončanjem, da prikažete čas konca namesto drugega odštevanja.",
+      "doc": "Android: doda odštevanje do ocenjenega konca ob besedilu obvestila. Uporabite {finish_time} v Sporočilu sprotne posodobitve, da prikažete čas konca namesto drugega odštevanja.",
       "label": "Uporabi sprotni kronometer"
     },
     "notify_live_interval_seconds": {
@@ -1410,11 +1428,11 @@
     },
     "notify_pre_complete_message": {
       "doc": "Besedilo vsake sprotne posodobitve napredka. Spremenljivke predloge: {device}, {program}, {minutes} (preostale minute), {finish_time} (ocenjeni konec, npr. 14:30). Pri vsaki drugi spremenljivki se uporabi privzeto besedilo.",
-      "label": "Sporočilo pred dokončanjem"
+      "label": "Sporočilo sprotne posodobitve"
     },
     "notify_reminder_message": {
       "doc": "Besedilo enkratnega Opozorila pred koncem. Spremenljivke predloge: {device}, {program}, {minutes} (nastavitev Opozorilo pred koncem). Pri vsaki drugi spremenljivki se uporabi privzeto besedilo.",
-      "label": "Sporočilo opomnika"
+      "label": "Sporočilo opozorila pred koncem"
     },
     "notify_start_message": {
       "doc": "Besedilo ob začetku cikla. Spremenljivke predloge: {device}, {program}. Pri vsaki drugi spremenljivki se uporabi privzeto besedilo.",
@@ -1708,7 +1726,9 @@
     "match_uncertain": "Negotovo: {top} ali {runner}",
     "match_uncertain_single": "Negotovo: morda {top}",
     "match_sure": "~{pct} % gotovosti",
-    "match_uncertain_tip": "WashData se še ni odločil za program. Številka pove, kako pogosto je imelo vodilno ugibanje, {top}, prav v preteklih ciklih pri takšni prednosti. Samo informativno."
+    "match_uncertain_tip": "WashData se še ni odločil za program. Številka pove, kako pogosto je imelo vodilno ugibanje, {top}, prav v preteklih ciklih pri takšni prednosti. Samo informativno.",
+    "torn_pick": "{a} ali {b}?",
+    "torn_tip": "WashData teh dveh programov še ne zna ločiti, zato izberite tistega, ki teče, da z njim označite ta cikel (možnost Samodejno zaznaj razveljavi izbiro)."
   },
   "suggestion": {
     "observed_label": "Izmerjeno",
@@ -1993,7 +2013,8 @@
     "bp_automation_created": "Avtomatizacija ustvarjena s privzetimi nastavitvami; odpiranje",
     "copied": "Kopirano",
     "copy_failed": "Kopiranje ni uspelo. Izberite besedilo in ga ročno kopirajte.",
-    "automation_label_failed": "Avtomatizacija ustvarjena, toda oznake ali kategorije WashData ni bilo mogoče dodati."
+    "automation_label_failed": "Avtomatizacija ustvarjena, toda oznake ali kategorije WashData ni bilo mogoče dodati.",
+    "review_answered": "Shranjeno: {program}"
   },
   "trend": {
     "down": "Padajoči trend",
@@ -2011,7 +2032,7 @@
     "other": "Drugo"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Pomivalni stroj: sekunde tišine po pričakovanem trajanju, preden se sprosti čakanje na končno izčrpavanje vode",
+    "dishwasher_end_spike_quiet_release": "Pomivalni stroj: sekunde pod Pragom zaustavitve od zadnje aktivnosti, potrebne, da se čakanje na končno izčrpavanje konča po izteku pričakovanega trajanja",
     "smart_termination_duration_ratio": "Delež povprečnega trajanja programa, ki ga mora cikel doseči, preden ga Pametni zaključek sme predčasno končati; znižajte, če se časi delovanja razlikujejo",
     "anti_crease_finalize_ratio": "Delež povprečnega trajanja programa, ki ga mora cikel doseči, preden ga rep zaščite pred gubami sme zaključiti; znižajte pri sušilnih strojih, pri pralnih pustite privzeto",
     "anti_wrinkle_enabled": "Vsrkaj pulze vrtenja po glavni fazi, namesto da jih obravnavaš kot nove cikle",
@@ -2279,7 +2300,7 @@
       "name": "Razloženo"
     },
     "state_changed": {
-      "name": "Stanje se je spremenilo"
+      "name": "Stanje naprave se je spremenilo"
     },
     "maintenance_due": {
       "name": "Vzdrževanje potrebno"
