@@ -84,7 +84,11 @@ def detect_power_data_format(
     if isinstance(ts, (int, float)):
         # Values > 1e8 (≈ 3+ years of seconds) are absolute Unix epoch timestamps,
         # not relative offsets. Treat them differently so we can subtract start_time.
-        if float(ts) > 1e8:
+        try:
+            value = float(ts)
+        except OverflowError:   # an int beyond float range (an imported file)
+            return "unknown"
+        if value > 1e8:
             return "unix_timestamp"
         return "offset"
     return "unknown"

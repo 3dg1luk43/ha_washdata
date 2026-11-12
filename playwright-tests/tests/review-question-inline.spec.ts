@@ -665,3 +665,38 @@ test('a one-tap answer keeps the unsaved Review notes', async ({ page }) => {
   await expect(page.locator('.wd-toast')).toBeVisible();
   await expect(page.locator('#wd-cyc-rev-notes')).toHaveValue('drum squeaked');
 });
+
+// A request from an older backend has no `choices`; its ranking can carry a
+// Stage-5 group key, which names no programme.
+test('the legacy answer fallback names a group by its scoring member', async ({ page }) => {
+  await bootWithQuestion(page);
+  const names = await page.evaluate(() => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    return [
+      el._reviewChoiceNames({ detected_profile: 'Eco 60°C', ranking: [
+        { name: 'Eco 60°C' }, { name: '__group__Cottons', group_best_member: 'Cotton 40°C' }] }),
+      el._reviewChoiceNames({ detected_profile: 'Eco 60°C', ranking: [
+        { name: '__group__Cottons' }, { name: 'Quick 30°C' }] }),
+    ];
+  });
+  expect(names).toEqual([['Eco 60°C', 'Cotton 40°C'], ['Eco 60°C', 'Quick 30°C']]);
+});
+
+// The Previous and Next steps share data-action: a background re-render put focus
+// back on the first of them, not the one the keyboard was on.
+test('a re-render keeps focus on the same review step', async ({ page }) => {
+  await bootWithQuestion(page, [REQUEST, { ...REQUEST, cycle_id: 'cyc-002' }]);
+  await openQuestion(page);
+  const steps = page.locator('button[data-action="review-q-step"]');
+  await expect(steps).toHaveCount(2, { timeout: 5_000 });
+  const second = steps.nth(1);
+  const dir = await second.getAttribute('data-dir');
+  await second.focus();
+  await page.evaluate(() => (document.querySelector('ha-washdata-panel') as any)._render());
+  const focused = await page.evaluate(() => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    const a = el.shadowRoot.activeElement;
+    return a ? a.getAttribute('data-dir') : null;
+  });
+  expect(focused).toBe(dir);
+});

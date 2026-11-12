@@ -569,3 +569,13 @@ def test_an_unusable_start_time_also_takes_the_traces_anchor() -> None:
     trace = [[1700000000.0, 500.0], [1700000060.0, 2.0]]
     assert normalize_synthetic_offsets([1700000060.0], trace, "not a time") == [60.0]
     assert normalize_synthetic_offsets([1700000060.0], trace, None) == [60.0]
+
+
+def test_an_oversized_integer_timestamp_is_an_unknown_format() -> None:
+    from custom_components.ha_washdata.time_utils import (
+        detect_power_data_format,
+        normalize_synthetic_offsets,
+    )
+
+    assert detect_power_data_format([[10**400, 5.0]]) == "unknown"
+    assert normalize_synthetic_offsets([10**400], [[0.0, 5.0], [60.0, 5.0]], None) is None

@@ -76,3 +76,16 @@ def test_a_completed_match_is_unchanged() -> None:
     assert done == _rank(_snaps(), q, spin_trace=q, member_templates_in_progress=True,
                          spin_weight_in_progress_display=0.9)
     assert analysis.MATCH_SPIN_WEIGHT_IN_PROGRESS == 0.0
+
+
+def test_a_spin_only_weighting_still_scores_the_rhythm() -> None:
+    """With the duration and energy weights at 0 and the spin weight at 1, the
+    stage-4 loop (where the rhythm term is blended) was skipped, so the ranking
+    ignored the rhythm the weighting asked for."""
+    q = _prefix(_trace("cotton", 80), 1.0)
+    weights = dict(duration_weight=0.0, energy_weight=0.0, spin_weight=1.0)
+    spin_only = _scores(_rank(_snaps(), q, spin_trace=q, member_templates_in_progress=True,
+                              **weights))
+    plain = _scores(_rank(_snaps(), q, spin_trace=None, member_templates_in_progress=True,
+                          **weights))
+    assert spin_only != plain

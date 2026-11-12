@@ -1145,7 +1145,9 @@ def _compute_matches(
                 spin_ag = {}
     if spin_ag:
         shape_w, dur_w, en_w = shape_w * (1 - sp_w), dur_w * (1 - sp_w), en_w * (1 - sp_w)
-    if (dur_w > 0 or en_w > 0) and candidates and current_duration > 0:
+    # The rhythm term is blended in this loop too: run it for a spin-only weighting
+    # (duration and energy weights both 0) as well, or the term was dropped.
+    if (dur_w > 0 or en_w > 0 or spin_ag) and candidates and current_duration > 0:
         # energy_mode: "mean" (default) compares whole-cycle mean power (W);
         # "integrated" compares true integrated energy (mean x duration). Opt-in so
         # the historical default is byte-for-byte preserved. See register item 99.

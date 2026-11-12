@@ -1920,8 +1920,11 @@ function _num(v, def) { const n = parseFloat(v); return isNaN(n) ? def : n; }
 // Visible, keyboard-focusable descendants of `root` (for modal focus trapping).
 // A selector that finds "the same control" after a full re-render: its id, else the
 // data-* attributes the panel uses to identify buttons, rows and inputs.
+// data-prof / data-dir tell apart controls that share an action: the review
+// answers of one cycle (a button per programme) and the Previous / Next steps.
 const _FOCUS_ATTRS = ['data-action', 'data-cid', 'data-idx', 'data-tab', 'data-sec', 'data-gtab',
-  'data-ptab', 'data-hsub', 'data-proftab', 'data-opt', 'data-pgkey', 'data-gname', 'data-sugkey'];
+  'data-ptab', 'data-hsub', 'data-proftab', 'data-opt', 'data-pgkey', 'data-gname', 'data-sugkey',
+  'data-prof', 'data-dir'];
 function _focusKey(el) {
   if (!el || !el.getAttribute || el.tagName === 'BODY') return null;
   const esc = (v) => (window.CSS && CSS.escape) ? CSS.escape(v) : String(v).replace(/["\\]/g, '\\$&');
@@ -5196,7 +5199,13 @@ class HaWashdataPanel extends HTMLElement {
     const out = [];
     const add = n => { if (typeof n === 'string' && n && !out.includes(n) && out.length < 2) out.push(n); };
     add(fb.detected_profile);
-    (Array.isArray(fb.ranking) ? fb.ranking : []).forEach(c => add(c && c.name));
+    // A Stage-5 group key names no programme: its scoring member does, else skip it
+    // (the backend's review_choices applies the same rule).
+    (Array.isArray(fb.ranking) ? fb.ranking : []).forEach(c => {
+      if (!c || typeof c.name !== 'string') return;
+      if (c.name.startsWith('__group__')) add(c.group_best_member);
+      else add(c.name);
+    });
     return out;
   }
 
