@@ -370,11 +370,17 @@ def normalize_synthetic_offsets(
     rows: PowerData = [[value, 0.0] for value in raw]
     if detect_power_data_format(rows) != detect_power_data_format(power_data):
         return None
-    if start_time_iso or not power_data:
+    usable = False
+    if start_time_iso:
+        try:
+            usable = dt_util.parse_datetime(start_time_iso) is not None
+        except (ValueError, OverflowError, TypeError):
+            usable = False
+    if usable or not power_data:
         return [off for off, _p in power_data_to_offsets(rows, start_time_iso)]
-    # No start time: the converter anchors each list on its own first row, which
-    # would put the first synthetic row at 0 s. Converted behind the trace's first
-    # row, they share its anchor, as the trace's own rows do.
+    # No usable start time: the converter anchors each list on its own first row,
+    # which would put the first synthetic row at 0 s. Converted behind the trace's
+    # first row, they share its anchor, as the trace's own rows do.
     converted = power_data_to_offsets([power_data[0], *rows], None)
     if len(converted) != len(rows) + 1:
         return None   # the anchor row did not convert: which row is which is unknown

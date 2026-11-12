@@ -1495,11 +1495,16 @@ def _compare(before_path: str, after_path: str) -> None:
             continue
         name = scope or "ALL"
         print(f"=== {name} (n={as_['n']})")
+        # The programme-truth figures too: they are the ones --check gates on.
         for key, unit in (
             ("median_lag_min", " min"), ("mean_lag_min", " min"), ("p90_lag_min", " min"),
             ("early_1min_pct", "%"), ("early_5min_pct", "%"), ("split_pct", "%"),
+            ("prog_median_lag_min", " min"), ("prog_mean_lag_min", " min"),
+            ("prog_p90_lag_min", " min"), ("prog_early_1min_n", ""),
+            ("prog_early_5min_n", ""), ("prog_split_n", ""),
         ):
-            print(f"    {key:<18} {bs[key]:>8}{unit} -> {as_[key]:>8}{unit}")
+            if key in bs and key in as_:
+                print(f"    {key:<20} {bs[key]:>8}{unit} -> {as_[key]:>8}{unit}")
         print()
 
     ac_scopes = [None, *sorted({

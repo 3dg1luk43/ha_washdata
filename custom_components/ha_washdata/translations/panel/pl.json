@@ -1156,7 +1156,7 @@
     "bp_needs_version": "Wymaga WashData {version} lub nowszego.",
     "bp_review_check": "Sprawdź to przed zapisaniem: Home Assistant wykona to dokładnie tak, jak jest napisane.",
     "review_q_title": "Jaki to był program?",
-    "review_q_intro": "WashData nie potrafił ich rozróżnić. Twoja odpowiedź go tego uczy.",
+    "review_q_intro": "WashData nie jest pewien tych cykli. Twoja odpowiedź go uczy.",
     "review_q_started": "Rozpoczęto {when}",
     "review_q_more": "Jeszcze {count} cykli do sprawdzenia",
     "review_q_more_one": "Jeszcze {count} cykl do sprawdzenia",
@@ -1728,7 +1728,7 @@
     "match_sure": "~{pct}% pewności",
     "match_uncertain_tip": "WashData nie wybrał jeszcze programu. Liczba pokazuje, jak często wiodący kandydat, {top}, okazywał się trafny w poprzednich cyklach przy takiej przewadze. Tylko informacyjnie.",
     "torn_pick": "{a} czy {b}?",
-    "torn_tip": "WashData nie potrafi jeszcze rozróżnić tych dwóch programów, więc po tym cyklu pojawiłoby się pytanie do przeglądu. Wybierz ten, który właśnie działa, a cykl zostanie nim oznaczony. Automatyczne wykrywanie to cofa."
+    "torn_tip": "WashData nie potrafi jeszcze rozróżnić tych dwóch programów, więc wybierz ten, który właśnie działa, aby oznaczyć nim ten cykl (Automatyczne wykrywanie cofa wybór)."
   },
   "suggestion": {
     "observed_label": "Zmierzono",

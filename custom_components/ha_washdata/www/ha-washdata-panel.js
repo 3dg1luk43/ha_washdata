@@ -3155,9 +3155,11 @@ class HaWashdataPanel extends HTMLElement {
       this._showToast(this._tText('msg.toast_error', {error: t.error || ''}, 'Error: ' + (t.error || '')), 'error');
     } else if (result) {
       if (isHistory) this._pgHistory = result;
-      // A sweep of a setting no longer selected is not shown under the new one
-      // (it stays in the recent runs).
-      else if (result.param && result.param !== this._pgSweepParam) this._pgSweepNew = null;
+      // A sweep of a setting or an objective no longer selected is not shown under
+      // the new one: its best value answers another question (it stays in the
+      // recent runs).
+      else if ((result.param && result.param !== this._pgSweepParam)
+        || (result.objective && result.objective !== (this._pgSweepObjective || 'match_accuracy'))) this._pgSweepNew = null;
       else this._pgSweepNew = (result && !result.error) ? result : null;
     }
     if (isHistory) { this._busy.delete('pg-history'); this._pgHistoryTaskId = null; }
@@ -5146,7 +5148,7 @@ class HaWashdataPanel extends HTMLElement {
     if (!isRunning || manual || !Array.isArray(c) || c.length < 2 || !c[0] || !c[1]) return '';
     const chip = n => _html(`<button type="button" class="wd-chip wd-torn-chip" data-action="torn-pick" data-prog="${_esc(n)}">${_esc(n)}</button>`);
     const tip = _tip(this._tText('status.torn_tip', {},
-      'WashData cannot tell these two apart yet, so this cycle would end with a review question. Pick the one that is running and the cycle is labelled with it. Auto-detect undoes it.'));
+      'WashData cannot tell these two apart yet, so pick the one that is running to label this cycle with it (Auto-detect undoes the choice).'));
     return `<span class="wd-torn">${this._t('status.torn_pick', {a: chip(c[0]), b: chip(c[1])}, '{a} or {b}?')}</span>${tip}`;
   }
 
@@ -5348,7 +5350,7 @@ class HaWashdataPanel extends HTMLElement {
     return `<div class="wd-card wd-review-q open">
       ${head}
       <div id="wd-review-q-body">
-        <div class="wd-info" style="margin:4px 0 0">${this._t('msg.review_q_intro', {}, 'WashData could not tell these apart. Your answer teaches it.')} ${queueLink}</div>
+        <div class="wd-info" style="margin:4px 0 0">${this._t('msg.review_q_intro', {}, 'WashData is not sure about these cycles. Your answer teaches it.')} ${queueLink}</div>
         <div class="wd-review-tiles${multi ? ' multi' : ''}">${tiles.map((fb, i) => this._htmlReviewTile(fb, i)).join('')}</div>
       </div>
     </div>`;
@@ -14378,6 +14380,9 @@ class HaWashdataPanel extends HTMLElement {
         const req = a === 'fb-pick'
           ? { type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: fbCid, action: 'correct', corrected_profile: label }
           : { type: `${_DOMAIN}/resolve_feedback`, entry_id: eid, cycle_id: fbCid, action: a === 'fb-ignore' ? 'ignore' : 'confirm' };
+        // The answer's toast re-renders the cycle dialog: keep unsaved Review-form
+        // edits (quality, tags, notes) for Save Review, whatever the answer does.
+        this._snapshotCycleReviewForm(this.shadowRoot);
         this._ws(req).then(() => {
           this._showToast(a === 'fb-ignore'
             ? this._t('toast.feedback_dismissed', {}, 'Feedback dismissed')
@@ -15366,8 +15371,9 @@ class HaWashdataPanel extends HTMLElement {
         if (t.kind === 'pg_history') { this._pgHistory = result; this._pgAnalysisTab = 'history'; }
         else {
           this._pgSweepNew = (!result.error) ? result : null; this._pgAnalysisTab = 'sweep';
-          // A loaded run shows under the setting it swept.
+          // A loaded run shows under the setting and objective it was swept for.
           if (this._pgSweepNew && this._pgSweepNew.param) this._pgSweepParam = this._pgSweepNew.param;
+          if (this._pgSweepNew && this._pgSweepNew.objective) this._pgSweepObjective = this._pgSweepNew.objective;
         }
         this._render();
       }).catch(() => this._showToast(this._t('toast.pg_run_gone', {}, 'That run is no longer available.'), 'info'));

@@ -1156,7 +1156,7 @@
     "bp_needs_version": "Zahteva WashData {version} ali novejši.",
     "bp_review_check": "Pred shranjevanjem to preverite: Home Assistant bo to izvedel natanko tako, kot je zapisano.",
     "review_q_title": "Kateri program je bil to?",
-    "review_q_intro": "WashData jih ni znal ločiti. Vaš odgovor ga to nauči.",
+    "review_q_intro": "WashData glede teh ciklov ni prepričan. Vaš odgovor ga uči.",
     "review_q_started": "Začeto {when}",
     "review_q_more": "Še {count} ciklov za pregled",
     "review_q_more_one": "Še {count} cikel za pregled",
@@ -1728,7 +1728,7 @@
     "match_sure": "~{pct} % gotovosti",
     "match_uncertain_tip": "WashData se še ni odločil za program. Številka pove, kako pogosto je imelo vodilno ugibanje, {top}, prav v preteklih ciklih pri takšni prednosti. Samo informativno.",
     "torn_pick": "{a} ali {b}?",
-    "torn_tip": "WashData teh dveh programov še ne zna ločiti, zato bi se ta cikel končal z vprašanjem za pregled. Izberite tistega, ki teče, in cikel bo označen z njim. Izbira Samodejno zaznaj to razveljavi."
+    "torn_tip": "WashData teh dveh programov še ne zna ločiti, zato izberite tistega, ki teče, da z njim označite ta cikel (možnost Samodejno zaznaj razveljavi izbiro)."
   },
   "suggestion": {
     "observed_label": "Izmerjeno",

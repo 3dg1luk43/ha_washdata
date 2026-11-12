@@ -1122,7 +1122,7 @@
     "bp_needs_version": "Vaatii WashData {version} tai uudemman.",
     "bp_review_check": "Tarkista tämä ennen tallentamista: Home Assistant suorittaa sen täsmälleen niin kuin se on kirjoitettu.",
     "review_q_title": "Mikä ohjelma tämä oli?",
-    "review_q_intro": "WashData ei osannut erottaa näitä toisistaan. Vastauksesi opettaa sitä.",
+    "review_q_intro": "WashData ei ole varma näistä sykleistä. Vastauksesi opettaa sitä.",
     "review_q_started": "Alkoi {when}",
     "review_q_more": "Vielä {count} tarkistettavana",
     "review_q_more_one": "Vielä {count} tarkistettavana",
@@ -1711,7 +1711,7 @@
     "match_sure": "~{pct} % varma",
     "match_uncertain_tip": "WashData ei ole vielä päättänyt ohjelmaa. Luku kertoo, kuinka usein johtava arvaus, {top}, osui oikeaan aiemmissa sykleissä, kun se johti näin paljon. Vain tiedoksi.",
     "torn_pick": "{a} vai {b}?",
-    "torn_tip": "WashData ei vielä osaa erottaa näitä kahta toisistaan, joten tämä sykli päättyisi tarkistuskysymykseen. Valitse käynnissä oleva ohjelma, niin sykli merkitään sillä. Automaattinen tunnistus kumoaa valinnan."
+    "torn_tip": "WashData ei vielä osaa erottaa näitä kahta toisistaan, joten valitse käynnissä oleva ohjelma, niin tämä sykli merkitään sillä (Automaattinen tunnistus kumoaa valinnan)."
   },
   "suggestion": {
     "observed_label": "Havaittu",

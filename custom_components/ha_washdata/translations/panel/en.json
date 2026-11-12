@@ -1133,7 +1133,7 @@
     "bp_needs_version": "Needs WashData {version} or newer.",
     "bp_review_check": "Check this before saving: Home Assistant will run it exactly as written.",
     "review_q_title": "Which program was this?",
-    "review_q_intro": "WashData could not tell these apart. Your answer teaches it.",
+    "review_q_intro": "WashData is not sure about these cycles. Your answer teaches it.",
     "review_q_started": "Started {when}",
     "review_q_more": "{count} more to review",
     "review_q_more_one": "{count} more to review",
@@ -1722,7 +1722,7 @@
     "unlabelling": "Unlabelling…",
     "working": "Working…",
     "torn_pick": "{a} or {b}?",
-    "torn_tip": "WashData cannot tell these two apart yet, so this cycle would end with a review question. Pick the one that is running and the cycle is labelled with it. Auto-detect undoes it."
+    "torn_tip": "WashData cannot tell these two apart yet, so pick the one that is running to label this cycle with it (Auto-detect undoes the choice)."
   },
   "suggestion": {
     "observed_label": "Observed",

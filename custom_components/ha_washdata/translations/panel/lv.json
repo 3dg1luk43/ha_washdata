@@ -1139,7 +1139,7 @@
     "bp_needs_version": "Nepieciešams WashData {version} vai jaunāks.",
     "bp_review_check": "Pārbaudiet to pirms saglabāšanas: Home Assistant to izpildīs tieši tā, kā tas ir uzrakstīts.",
     "review_q_title": "Kāda programma tā bija?",
-    "review_q_intro": "WashData nespēja tās atšķirt. Jūsu atbilde to apmāca.",
+    "review_q_intro": "WashData nav pārliecināts par šiem cikliem. Jūsu atbilde to apmāca.",
     "review_q_started": "Sākts {when}",
     "review_q_more": "Vēl {count} cikli pārskatīšanai",
     "review_q_more_zero": "Vēl {count} cikli pārskatīšanai",
@@ -1710,7 +1710,7 @@
     "match_sure": "~{pct}% pārliecība",
     "match_uncertain_tip": "WashData vēl nav izlēmis par programmu. Skaitlis rāda, cik bieži vadošais minējums, {top}, iepriekšējos ciklos bija pareizs, kad tas vadīja ar tik lielu pārsvaru. Tikai informācijai.",
     "torn_pick": "{a} vai {b}?",
-    "torn_tip": "WashData vēl nespēj atšķirt šīs divas programmas, tāpēc šis cikls beigtos ar pārskatīšanas jautājumu. Izvēlieties to, kas pašlaik darbojas, un cikls tiks ar to iezīmēts. Automātiska noteikšana to atceļ."
+    "torn_tip": "WashData vēl nespēj atšķirt šīs divas programmas, tāpēc izvēlieties to, kas pašlaik darbojas, lai ar to iezīmētu šo ciklu (Automātiska noteikšana izvēli atceļ)."
   },
   "tab": {
     "advanced": "Papildu",

@@ -179,6 +179,8 @@ def longest_flat(
     nxt = np.minimum(j + 1, n - 1)
     dur = np.where(j + 1 < n, t[nxt] - t[starts], t[j] - t[starts])
     best = int(np.argmax(dur))
+    if not dur[best] > 0:
+        return None   # no stretch holds any time: nothing to report (or divide by)
     i0, j0 = int(starts[best]), int(j[best])
     seg = p[i0:j0 + 1]
     return {
@@ -394,9 +396,11 @@ def measure_histories(root: Path, grid: list[tuple[float, float]]) -> list[dict[
         inside = np.zeros(len(t_all), dtype=bool)
         for s0, s1, ident in spans:
             sel = (t_all >= s0) & (t_all <= s1)
+            # Inside a stored cycle however few readings it has: a one-reading
+            # cycle is not idle standby, and must not join the idle groups.
+            inside |= sel
             if sel.sum() < MIN_READINGS:
                 continue
-            inside |= sel
             m = measure_trace(t_all[sel], p_all[sel], start_w, stop_w, grid)
             rows.append({
                 "source": "history", "file": src.label, "fmt": "raw", "list": "history",
@@ -491,11 +495,12 @@ def print_tables(summ: dict[str, Any], grid: list[tuple[float, float]]) -> None:
               "(max / p99 / p95 over cycles)")
         for fname in FLOORS:
             print(f"  floor = {fname} threshold")
-            header = "    A \\ R  " + "".join(f"{f'{rel:.0%}':>24}" for rel in REL_GRID)
+            rels = sorted({r for _a, r in grid})   # the grid measured, e.g. --rel 7
+            header = "    A \\ R  " + "".join(f"{f'{rel:.0%}':>24}" for rel in rels)
             print(header)
             for abs_w in sorted({a for a, _ in grid}):
                 cells = []
-                for rel in REL_GRID:
+                for rel in rels:
                     v = per.get(f"{fname}|{abs_w:g}|{rel:g}")
                     cells.append(
                         f"{_fmt_min(v['max_s']) if v else '-':>8}/"

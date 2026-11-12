@@ -561,3 +561,11 @@ def test_without_a_start_time_synthetic_rows_share_the_traces_anchor() -> None:
     assert normalize_synthetic_offsets(["2026-10-01T00:01:00+00:00"], trace, None) == [60.0]
     assert normalize_synthetic_offsets(
         ["2026-10-01T00:01:00+00:00"], trace, "2026-10-01T00:00:00+00:00") == [60.0]
+
+
+def test_an_unusable_start_time_also_takes_the_traces_anchor() -> None:
+    from custom_components.ha_washdata.time_utils import normalize_synthetic_offsets
+
+    trace = [[1700000000.0, 500.0], [1700000060.0, 2.0]]
+    assert normalize_synthetic_offsets([1700000060.0], trace, "not a time") == [60.0]
+    assert normalize_synthetic_offsets([1700000060.0], trace, None) == [60.0]

@@ -1122,7 +1122,7 @@
     "bp_needs_version": "Vajab WashData {version} või uuemat.",
     "bp_review_check": "Kontrolli seda enne salvestamist: Home Assistant käivitab selle täpselt nii, nagu see on kirjutatud.",
     "review_q_title": "Mis programm see oli?",
-    "review_q_intro": "WashData ei suutnud neid eristada. Teie vastus aitab tal õppida.",
+    "review_q_intro": "WashData pole nendes tsüklites kindel. Teie vastus aitab tal õppida.",
     "review_q_started": "Algas {when}",
     "review_q_more": "Veel {count} ootab ülevaatamist",
     "review_q_more_one": "Veel {count} ootab ülevaatamist",
@@ -1711,7 +1711,7 @@
     "match_sure": "~{pct}% kindel",
     "match_uncertain_tip": "WashData pole veel programmi valinud. Protsent näitab, kui sageli juhtiv oletus, {top}, oli varasemates tsüklites õige, kui see oli nii palju ees. Ainult teadmiseks.",
     "torn_pick": "{a} või {b}?",
-    "torn_tip": "WashData ei suuda neid kahte veel eristada, seega lõpeks see tsükkel ülevaatusküsimusega. Valige programm, mis praegu töötab, ja tsükkel sildistatakse sellega. Valik Automaatne tuvastamine tühistab selle."
+    "torn_tip": "WashData ei suuda neid kahte veel eristada, seega valige praegu töötav programm, millega see tsükkel sildistatakse (Automaatne tuvastamine tühistab valiku)."
   },
   "tab": {
     "advanced": "Täpsemalt",

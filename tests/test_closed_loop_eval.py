@@ -288,3 +288,10 @@ async def test_an_auto_label_rebuild_runs_before_the_next_match() -> None:
     await cl._run_pending_rebuilds(lm)
     rebuilt.assert_awaited_once_with("Eco")
     assert closed == []
+
+
+def test_a_trace_too_short_for_a_final_match_has_no_winner() -> None:
+    """The manager runs no complete-cycle match under 10 readings; the harness
+    matched it anyway. Its stand-in result names no programme."""
+    res = cl._no_match()
+    assert res.best_profile is None and res.ambiguity_margin == 0.0

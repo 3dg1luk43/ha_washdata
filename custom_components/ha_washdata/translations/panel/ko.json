@@ -1105,7 +1105,7 @@
         "bp_needs_version": "WashData {version} 이상이 필요합니다.",
         "bp_review_check": "저장하기 전에 내용을 확인하세요. Home Assistant는 작성된 그대로 실행합니다.",
         "review_q_title": "어떤 프로그램이었나요?",
-        "review_q_intro": "WashData가 이 프로그램들을 구분하지 못했습니다. 답변은 학습에 사용됩니다.",
+        "review_q_intro": "WashData가 이 사이클들에 대해 확신하지 못합니다. 답변은 학습에 사용됩니다.",
         "review_q_started": "시작: {when}",
         "review_q_more": "{count}개 더 검토 대기 중",
         "review_q_more_other": "{count}개 더 검토 대기 중",
@@ -1693,7 +1693,7 @@
         "match_sure": "약 {pct}% 확신",
         "match_uncertain_tip": "WashData가 아직 프로그램을 확정하지 않았습니다. 이 수치는 과거 사이클에서 선두 후보인 {top}이(가) 이만큼 앞섰을 때 맞았던 비율입니다. 참고용입니다.",
         "torn_pick": "{a} 또는 {b}?",
-        "torn_tip": "WashData가 아직 이 둘을 구분하지 못하므로 이 사이클은 검토 질문으로 끝나게 됩니다. 실행 중인 프로그램을 선택하면 사이클에 그 라벨이 지정됩니다. '자동 감지'를 선택하면 취소됩니다."
+        "torn_tip": "WashData가 아직 이 둘을 구분하지 못하므로, 실행 중인 프로그램을 선택해 이 사이클에 그 라벨을 지정하세요('자동 감지'를 선택하면 되돌릴 수 있습니다)."
     },
     "tab": {
         "advanced": "고급",

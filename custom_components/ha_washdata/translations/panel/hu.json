@@ -1122,7 +1122,7 @@
         "bp_needs_version": "WashData {version} vagy újabb szükséges.",
         "bp_review_check": "Mentés előtt ellenőrizze ezt: a Home Assistant pontosan úgy futtatja, ahogy le van írva.",
         "review_q_title": "Melyik program volt ez?",
-        "review_q_intro": "A WashData nem tudta megkülönböztetni őket. Az Ön válaszából tanul.",
+        "review_q_intro": "A WashData nem biztos ezekben a ciklusokban. Az Ön válaszából tanul.",
         "review_q_started": "Indult: {when}",
         "review_q_more": "Még {count} vár felülvizsgálatra",
         "review_q_more_one": "Még {count} vár felülvizsgálatra",
@@ -1692,7 +1692,7 @@
         "match_sure": "~{pct}% biztos",
         "match_uncertain_tip": "A WashData még nem döntött a programról. A szám azt mutatja, a korábbi ciklusokban milyen gyakran volt helyes a vezető tipp, {top}, amikor ennyivel vezetett. Csak tájékoztató.",
         "torn_pick": "{a} vagy {b}?",
-        "torn_tip": "A WashData még nem tudja megkülönböztetni ezt a kettőt, ezért ez a ciklus felülvizsgálati kérdéssel zárulna. Válassza ki a futó programot, és a ciklus azt a címkét kapja. Az Automatikus felismerés visszavonja ezt."
+        "torn_tip": "A WashData még nem tudja megkülönböztetni ezt a kettőt, ezért válassza ki a futó programot, hogy a ciklus azt a címkét kapja (az Automatikus felismerés visszavonja a választást)."
     },
     "tab": {
         "advanced": "Fejlett",

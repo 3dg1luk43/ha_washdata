@@ -372,6 +372,14 @@ async def _shipped_step(lm: Any, st: Any, data: dict, c2: dict, idx: int, res: A
     return c2.get("profile_name"), raised, answered
 
 
+def _no_match() -> Any:
+    from custom_components.ha_washdata.profile_store import MatchResult  # noqa: PLC0415
+
+    return MatchResult(best_profile=None, confidence=0.0, expected_duration=0.0,
+                       matched_phase=None, candidates=[], is_ambiguous=False,
+                       ambiguity_margin=0.0)
+
+
 async def run_arm(dev: E.Device, arm: str, seq: list[dict], seeds: list[dict],
                   override: dict, answer_seed: int = 0) -> tuple[str, list[dict]]:
     from custom_components.ha_washdata import match_rules  # noqa: PLC0415
@@ -392,7 +400,16 @@ async def run_arm(dev: E.Device, arm: str, seq: list[dict], seeds: list[dict],
     for idx, c in enumerate(seq):
         pts = E.query_points(c)
         dur = E.cycle_duration(c, pts)
-        res = await st.async_match_profile([list(p) for p in pts], dur, in_progress=False)
+        # The manager's complete-cycle match input (finished stalls and user pauses
+        # cut out, fewer than 10 readings: no final match at all, so no winner).
+        final = match_rules.final_match_input(
+            {"power_data": [list(p) for p in pts], "duration": dur,
+             "halt_spans": c.get("halt_spans")}
+        )
+        if final is None:
+            res = _no_match()
+        else:
+            res = await st.async_match_profile(final[0], final[1], in_progress=False)
         half = [p for p in pts if p[0] <= pts[0][0] + HALF * dur]
         res50 = (await st.async_match_profile([list(p) for p in half], half[-1][0] - half[0][0],
                                               in_progress=True)

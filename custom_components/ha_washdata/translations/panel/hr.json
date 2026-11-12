@@ -1139,7 +1139,7 @@
     "bp_needs_version": "Zahtijeva WashData {version} ili noviji.",
     "bp_review_check": "Provjerite ovo prije spremanja: Home Assistant će to izvršiti točno onako kako je napisano.",
     "review_q_title": "Koji je ovo bio program?",
-    "review_q_intro": "WashData ih nije mogao razlikovati. Vaš odgovor ga tome uči.",
+    "review_q_intro": "WashData nije siguran u ove cikluse. Vaš odgovor ga uči.",
     "review_q_started": "Pokrenuto {when}",
     "review_q_more": "Još {count} ciklusa za pregled",
     "review_q_more_one": "Još {count} ciklus za pregled",
@@ -1710,7 +1710,7 @@
     "match_sure": "~{pct}% sigurnosti",
     "match_uncertain_tip": "WashData se još nije odlučio za program. Broj pokazuje koliko je često vodeća pretpostavka, {top}, bila točna u prošlim ciklusima uz ovakvu prednost. Samo informativno.",
     "torn_pick": "{a} ili {b}?",
-    "torn_tip": "WashData još ne može razlikovati ova dva programa, pa bi ovaj ciklus završio pitanjem za pregled. Odaberite onaj koji radi i ciklus će biti označen njime. Automatsko otkrivanje to poništava."
+    "torn_tip": "WashData još ne može razlikovati ova dva programa, pa odaberite onaj koji radi kako biste njime označili ovaj ciklus (Automatsko otkrivanje poništava odabir)."
   },
   "suggestion": {
     "observed_label": "Izmjereno",

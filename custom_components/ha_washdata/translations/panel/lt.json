@@ -1156,7 +1156,7 @@
     "bp_needs_version": "Reikalinga WashData {version} arba naujesnė versija.",
     "bp_review_check": "Patikrinkite tai prieš išsaugodami: Home Assistant tai vykdys tiksliai taip, kaip parašyta.",
     "review_q_title": "Kokia tai buvo programa?",
-    "review_q_intro": "WashData negalėjo jų atskirti. Jūsų atsakymas jį moko.",
+    "review_q_intro": "WashData nėra tikras dėl šių ciklų. Jūsų atsakymas jį moko.",
     "review_q_started": "Pradėtas {when}",
     "review_q_more": "Dar {count} ciklų peržiūrai",
     "review_q_more_one": "Dar {count} ciklas peržiūrai",
@@ -1728,7 +1728,7 @@
     "match_sure": "~{pct} % tikrumas",
     "match_uncertain_tip": "WashData dar nenusprendė, kuri tai programa. Skaičius rodo, kaip dažnai pirmaujantis spėjimas, {top}, ankstesniuose cikluose pasitvirtindavo, kai pirmavo tiek pat. Tik informacija.",
     "torn_pick": "{a} ar {b}?",
-    "torn_tip": "WashData dar negali atskirti šių dviejų programų, todėl šis ciklas baigtųsi peržiūros klausimu. Pasirinkite tą, kuri dabar veikia, ir ciklas bus ja pažymėtas. Automatinis aptikimas tai atšaukia."
+    "torn_tip": "WashData dar negali atskirti šių dviejų programų, todėl pasirinkite tą, kuri dabar veikia, kad ja pažymėtumėte šį ciklą (Automatinis aptikimas pasirinkimą atšaukia)."
   },
   "tab": {
     "advanced": "Išplėstinė",

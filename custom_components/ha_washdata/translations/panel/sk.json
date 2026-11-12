@@ -1156,7 +1156,7 @@
     "bp_needs_version": "Vyžaduje WashData {version} alebo novší.",
     "bp_review_check": "Pred uložením si to skontrolujte: Home Assistant to spustí presne tak, ako je napísané.",
     "review_q_title": "Aký to bol program?",
-    "review_q_intro": "WashData ich nedokázal rozlíšiť. Vaša odpoveď ho to naučí.",
+    "review_q_intro": "WashData si pri týchto cykloch nie je istý. Z vašej odpovede sa učí.",
     "review_q_started": "Spustený {when}",
     "review_q_more": "Ešte {count} cyklov na kontrolu",
     "review_q_more_one": "Ešte {count} cyklus na kontrolu",
@@ -1728,7 +1728,7 @@
     "match_sure": "istota ~{pct} %",
     "match_uncertain_tip": "WashData sa zatiaľ nerozhodol pre program. Číslo udáva, ako často mal vedúci odhad, {top}, v minulých cykloch pravdu pri takom náskoku. Len na informáciu.",
     "torn_pick": "{a} alebo {b}?",
-    "torn_tip": "WashData zatiaľ tieto dva programy nedokáže rozlíšiť, takže by tento cyklus skončil otázkou na kontrolu. Vyberte ten, ktorý práve beží, a cyklus sa ním označí. Automatické zisťovanie to vráti späť."
+    "torn_tip": "WashData zatiaľ tieto dva programy nedokáže rozlíšiť, preto vyberte ten, ktorý práve beží, aby ste ním označili tento cyklus (Automatické zisťovanie výber vráti späť)."
   },
   "suggestion": {
     "observed_label": "Namerané",

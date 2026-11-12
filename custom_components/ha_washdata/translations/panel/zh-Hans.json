@@ -1105,7 +1105,7 @@
         "bp_needs_version": "需要 WashData {version} 或更高版本。",
         "bp_review_check": "保存前请检查：Home Assistant 会完全按照所写内容执行。",
         "review_q_title": "这是哪个程序？",
-        "review_q_intro": "WashData 无法区分这些程序。您的回答将帮助它学习。",
+        "review_q_intro": "WashData 对这些周期还不确定。您的回答将帮助它学习。",
         "review_q_started": "开始于 {when}",
         "review_q_more": "还有 {count} 个待审查",
         "review_q_more_other": "还有 {count} 个待审查",
@@ -1693,7 +1693,7 @@
         "match_sure": "约 {pct}% 把握",
         "match_uncertain_tip": "WashData 尚未确定程序。该数值表示在过去的周期中，领先猜测 {top} 领先这么多时猜对的频率。仅供参考。",
         "torn_pick": "{a} 还是 {b}？",
-        "torn_tip": "WashData 暂时还无法区分这两个程序，因此此周期结束时会提出审查问题。选择正在运行的程序，此周期就会标记为该程序。选择“自动检测”可撤销。"
+        "torn_tip": "WashData 暂时还无法区分这两个程序，因此请选择正在运行的程序，将此周期标记为该程序（选择“自动检测”可撤销此选择）。"
     },
     "tab": {
         "advanced": "高级",

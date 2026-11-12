@@ -1105,7 +1105,7 @@
         "bp_needs_version": "WashData {version} 以降が必要です。",
         "bp_review_check": "保存する前に内容を確認してください。Home Assistant は書かれているとおりに実行します。",
         "review_q_title": "これはどのプログラムでしたか？",
-        "review_q_intro": "WashData はこれらを区別できませんでした。回答は学習に使われます。",
+        "review_q_intro": "WashData はこれらのサイクルについて確信が持てません。回答は学習に使われます。",
         "review_q_started": "開始: {when}",
         "review_q_more": "ほか {count} 件がレビュー待ち",
         "review_q_more_other": "ほか {count} 件がレビュー待ち",
@@ -1693,7 +1693,7 @@
         "match_sure": "確度 約{pct}%",
         "match_uncertain_tip": "WashData はまだプログラムを確定していません。この数値は、過去のサイクルで最有力候補の {top} がこれだけリードしていたときに正しかった割合です。参考情報です。",
         "torn_pick": "{a} または {b}？",
-        "torn_tip": "WashData はまだこの 2 つを区別できないため、このサイクルは終了時にレビューの質問になります。実行中のプログラムを選ぶと、サイクルにそのラベルが付きます。「自動検出」を選ぶと元に戻ります。"
+        "torn_tip": "WashData はまだこの 2 つを区別できないため、実行中のプログラムを選んでこのサイクルにそのラベルを付けてください（「自動検出」を選ぶと選択が元に戻ります）。"
     },
     "tab": {
         "advanced": "高度な",

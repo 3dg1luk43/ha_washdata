@@ -649,3 +649,19 @@ test('a review count that moved elsewhere drops the cached candidate curves', as
   });
   expect(replaced).toBe(true);
 });
+
+// A one-tap answer in the cycle dialog re-rendered it through its toast before
+// the Review form was snapshotted, so unsaved notes were gone for Save Review.
+test('a one-tap answer keeps the unsaved Review notes', async ({ page }) => {
+  await bootWithQuestion(page);
+  await clickTab(page, 'history');
+  await page.locator('tr[data-cid="cyc-003"]').click();
+  await expect(page.locator('#wd-cyc-canvas')).toBeVisible({ timeout: 5_000 });
+  await page.locator('button[data-maction="cyc-review"]').click();
+  await page.locator('#wd-cyc-rev-notes').fill('drum squeaked');
+  const pick = page.locator('.wd-modal button[data-action="fb-pick"]').first();
+  await expect(pick).toBeVisible({ timeout: 5_000 });
+  await pick.click();
+  await expect(page.locator('.wd-toast')).toBeVisible();
+  await expect(page.locator('#wd-cyc-rev-notes')).toHaveValue('drum squeaked');
+});
