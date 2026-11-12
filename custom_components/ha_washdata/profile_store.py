@@ -6662,7 +6662,13 @@ class ProfileStore:
             pairs = power_data_to_offsets(
                 cast(list[list[Any] | tuple[Any, ...]], raw_data), start_time_iso
             )
-            stored: list[list[float]] = [[round(p[0], 1), round(p[1], 1)] for p in pairs]
+            # A non-finite reading (an import, a hand-edited file) is dropped: kept,
+            # it made the cycle's energy NaN, which no later recompute replaced.
+            stored: list[list[float]] = [
+                [round(p[0], 1), round(p[1], 1)]
+                for p in pairs
+                if math.isfinite(p[0]) and math.isfinite(p[1])
+            ]
             offsets: list[float] = [p[0] for p in stored]
 
             # Calculate average sampling interval (in seconds)

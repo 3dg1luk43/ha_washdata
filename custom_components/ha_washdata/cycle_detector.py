@@ -5385,7 +5385,13 @@ class CycleDetector:
             return False
         readings = self._power_readings
         ceiling = float(self._config.anti_wrinkle_max_power)
-        if len(readings) < 8 or float(readings[-1][1]) > ceiling:
+        if readings and float(readings[-1][1]) > ceiling:
+            # Activity again: a held positive verdict ends here, or the next low
+            # reading inside its re-read interval returned it and held the gate
+            # open (and match updates frozen) through a resumed wash.
+            self._programme_end_memo = None
+            return False
+        if len(readings) < 8:
             return False
         start = self._current_cycle_start
         memo = self._programme_end_memo

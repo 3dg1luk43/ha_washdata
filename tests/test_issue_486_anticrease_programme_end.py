@@ -361,3 +361,29 @@ def test_element_17_survives_a_snapshot() -> None:
     other = CycleDetector(_config(), lambda _o, _n: None, lambda _d: None)
     other.restore_state_snapshot(snap)
     assert other._matched_programme_tail_s == TAIL_S  # noqa: SLF001
+
+
+def test_a_reading_above_the_ceiling_ends_a_held_verdict() -> None:
+    """The verdict of a trace read holds to the next read but never past a reading
+    above anti_wrinkle_max_power: the memo outlived one, so a low reading inside
+    the re-read interval returned the old verdict during resumed activity."""
+    det = CycleDetector(config=_config(), on_state_change=lambda *_: None,
+                        on_cycle_end=lambda _d: None)
+    t = 0.0
+    held = None
+    while t <= SPIN_END - 300:
+        det.process_reading(_miele(t), BASE + timedelta(seconds=t))
+        if det.state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
+            det.update_match(MatchContext(
+                profile_name="Pflegeleicht 40", confidence=0.7, expected_duration=EXPECTED,
+                programme_tail_s=TAIL_S,
+            ))
+            det._anticrease_programme_ended(  # noqa: SLF001 - what the gate asks
+                BASE + timedelta(seconds=t), t
+            )
+            held = det._programme_end_memo or held  # noqa: SLF001
+        t += STEP
+    assert held is not None and det._programme_end_memo is not None  # noqa: SLF001
+    det.process_reading(700.0, BASE + timedelta(seconds=t))
+    assert det._anticrease_programme_ended(BASE + timedelta(seconds=t), t) is False  # noqa: SLF001
+    assert det._programme_end_memo is None  # noqa: SLF001

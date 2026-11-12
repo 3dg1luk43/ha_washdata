@@ -144,6 +144,19 @@ async def test_trimming_a_dead_tail_keeps_the_energy(store: ProfileStore) -> Non
     assert after == pytest.approx(before, abs=0.01)
 
 
+async def test_a_non_finite_reading_is_not_stored(store: ProfileStore) -> None:
+    """The offset normaliser keeps NaN and inf; stored, they made the cycle's
+    energy NaN, which reads back as 0 and no recompute replaced."""
+    import math
+
+    pts = [[0.0, 500.0], [60.0, float("nan")], [120.0, float("inf")], [180.0, 500.0],
+           [240.0, 0.0]]
+    await store.async_add_cycle(_cycle(pts))
+    cycle = store.get_past_cycles()[-1]
+    assert all(math.isfinite(t) and math.isfinite(w) for t, w in cycle["power_data"])
+    assert math.isfinite(cycle["energy_wh"]) and cycle["energy_wh"] > 0
+
+
 async def test_avg_energy_is_the_mean_of_the_cycles(store: ProfileStore) -> None:
     """#495: the mean of what each cycle reports, the meter's figure first."""
     pts_a = [[float(t), 2000.0 if (t // 300) % 2 == 0 else 5.0] for t in range(0, 3600, 30)]

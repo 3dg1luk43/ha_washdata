@@ -289,8 +289,8 @@ def detector_gate_inputs(
     """``(confidence, expected_duration)`` the detector's end gates read (#486).
 
     With live member templates the result carries the single-template ranking's
-    confidence (``gate_confidence``) and, while that ranking picks a different
-    programme, the longer of the two durations (``gate_expected_duration``); the
+    own confidence and expected duration (``gate_confidence``,
+    ``gate_expected_duration``: that ranking's match, register items 555/567); the
     end gates read those instead of the member scores. Every other result leaves
     both as given. Shared by the manager and the Playground sim.
     """
