@@ -309,6 +309,21 @@ STALL_CURRENT_EXCLUDED_FROM_PROGRESS = True
 # 6 / 5 / 18 -> 5 / 7 / 8 (each new one the unpaused cycle's own end, or a former
 # split); paused on the display level, 9 -> 6 and 14 -> 9 (50% / 90%).
 USER_PAUSE_EXCLUDED_FROM_GATES = True
+# Register item 620: the duration cap (#502) reads programme time too
+# (`_cap_elapsed_s`): the wall clock less every finished user pause, and it does
+# not fire while one lasts (the watchdog's zombie and unmatched guards and the
+# flat-power stop already wait a user pause out). On the wall clock a wash paused
+# for hours was force-stopped at the cap, in the pause or after the resume.
+# Measured (`end_gate_eval --loo --all-formats --halt-at 0.5 --halt-min 300
+# --halt-level 5 --user-pause`, 635 rows): cap stops 66 -> 0 (58 of them
+# dishwashers), programme splits 21 -> 8 and early ends > 5 min 16 -> 8, as on the
+# unpaused corpus (9 and 8), whose 635 rows are unchanged. A finished stall still
+# counts: left out as well, an unmatched washer on a 4-5 W standby with a 2 min
+# burst every 40-90 min was never capped (30 h on; 8 h on the wall clock), each
+# burst banking the run before it, and that zombie is the cap's case. It would
+# have kept 1 of 635 rows whole on the same run as a halt (no --user-pause),
+# where the flat-power stop ends 426. The A/B switch for the revert checks.
+USER_PAUSE_EXCLUDED_FROM_CAP = True
 # Register item 514: a halt is abrupt. A programme winds down to its end (the last
 # spin's ramp, then quiet), so the reading before a display left on is low; a halt
 # stops the machine where it is. A flat run whose previous reading was at least
@@ -6918,7 +6933,7 @@ class CycleDetector:
         return self._time_below_threshold < wait + max(0.0, float(grace_s))
 
     def _duration_cap_s(self, timestamp: datetime) -> float:
-        """This run's hard cap on wall-clock length (#502).
+        """This run's hard cap on its length (#502), in programme time (item 620).
 
         :func:`match_rules.cycle_duration_cap_s` on the device's longest learned
         programme. Not on the match's expected duration: that is the profile's
@@ -6952,18 +6967,34 @@ class CycleDetector:
         """
         if not self._current_cycle_start:
             return False
-        elapsed = (timestamp - self._current_cycle_start).total_seconds()
+        if USER_PAUSE_EXCLUDED_FROM_CAP and self._user_paused:
+            return False  # item 620: a user pause holds the cycle open while it lasts
+        elapsed = self._cap_elapsed_s(timestamp)
         if elapsed <= match_rules.cycle_duration_cap_base_s(self._config.device_type):
             return False
         cap = self._duration_cap_s(timestamp)
         if elapsed <= cap:
             return False
         self._logger.warning(
-            "Cycle ran %.1f h, past its %.1f h duration cap; force-stopping",
+            "Cycle ran %.1f h (%.1f h wall clock), past its %.1f h duration cap; "
+            "force-stopping",
             elapsed / 3600.0,
+            (timestamp - self._current_cycle_start).total_seconds() / 3600.0,
             cap / 3600.0,
         )
         return True
+
+    def _cap_elapsed_s(self, timestamp: datetime) -> float:
+        """The clock the duration cap reads (item 620): the cycle's wall clock less
+        every finished user pause. Finished stalls count (see
+        USER_PAUSE_EXCLUDED_FROM_CAP). 0.0 with no cycle open."""
+        start = self._current_cycle_start
+        if start is None:
+            return 0.0
+        elapsed = (timestamp - start).total_seconds()
+        if USER_PAUSE_EXCLUDED_FROM_CAP and self._user_pause_spans:
+            elapsed = max(0.0, elapsed - sum(n for _at, n in self._user_pause_spans))
+        return elapsed
 
     # --- Flat-power stop (FLAT_POWER_STOP_*) -----------------------------------
 

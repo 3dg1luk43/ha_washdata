@@ -29,6 +29,9 @@ Midea LSD12X1 on a ~1 s publish-on-change Zigbee plug, programmes of 7.9-8.5 h.
 3. The detector dropped every expected duration over 6 h as corrupt, so a match
    to one of these programmes (6.8-8 h) left it unmatched while the manager
    showed the program. It now accepts up to 16 h.
+4. Register item 620: the cap read the wall clock, so a wash paused by the user
+   for hours was force-stopped at the cap, in the pause or after the resume. It
+   now reads programme time: finished user pauses left out, never during one.
 """
 from __future__ import annotations
 
@@ -38,6 +41,7 @@ from typing import Any
 
 import pytest
 
+from custom_components.ha_washdata import cycle_detector as cd_mod
 from custom_components.ha_washdata import match_rules
 from custom_components.ha_washdata.const import (
     CYCLE_DURATION_CAP_BASE_S,
@@ -317,6 +321,105 @@ def test_a_zombie_still_stops_at_the_scaled_cap() -> None:
     assert cycles[0]["duration"] == pytest.approx(43200.0, abs=31.0)
 
 
+# --- item 620: the cap reads programme time ----------------------------------
+
+
+def _paused_zombie(
+    det: CycleDetector, cycles: list, pause_s: float, level_w: float, after_s: float
+) -> None:
+    """30 min of :func:`_zombie`, a user pause of ``pause_s`` on ``level_w`` (what
+    ``async_pause_cycle`` / ``async_resume_cycle`` tell the detector), then up to
+    ``after_s`` of :func:`_zombie`, stopping at the first stored cycle."""
+    t = 0.0
+
+    def feed(watts, secs: float) -> None:
+        nonlocal t
+        end = t + secs
+        while t < end and not cycles:
+            det.process_reading(watts(t) if callable(watts) else watts, T0 + timedelta(seconds=t))
+            t += 30.0
+
+    feed(_zombie, 1800)
+    det.set_user_paused(True, T0 + timedelta(seconds=t))
+    det.set_verified_pause(True)
+    feed(level_w, pause_s)
+    det.set_user_paused(False, T0 + timedelta(seconds=t))
+    det.set_verified_pause(False)
+    feed(_zombie, after_s)
+
+
+@pytest.mark.parametrize("level_w", [5.0, 0.0])  # on the display level / power cut
+def test_a_long_user_pause_does_not_cap_the_resumed_wash(level_w: float) -> None:
+    """Item 620: 30 min washing, 6 h paused, 2 h washing: 8.5 h on the wall
+    clock, 2.5 h of programme. The cap read the wall clock and force-stopped
+    the resumed wash at 8 h."""
+    cycles: list[dict[str, Any]] = []
+    det = _detector(cycles, device_type="washing_machine")
+    _paused_zombie(det, cycles, 6 * 3600, level_w, 2 * 3600)
+    assert cycles == []
+    assert det.state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
+
+
+@pytest.mark.parametrize("level_w", [5.0, 0.0])
+def test_the_cap_does_not_fire_while_a_user_pause_lasts(level_w: float) -> None:
+    """Paused for 9 h: the cap force-stopped the paused cycle at 8 h."""
+    cycles: list[dict[str, Any]] = []
+    det = _detector(cycles, device_type="washing_machine")
+    _paused_zombie(det, cycles, 9 * 3600, level_w, 0)
+    assert cycles == []
+    assert det.state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING)
+
+
+def test_after_a_user_pause_the_cap_fires_on_programme_time() -> None:
+    """Zombie protection stays: 8 h of programme after a 2 h pause. The stored
+    cycle keeps the wall clock, pause included, as any other stop."""
+    cycles: list[dict[str, Any]] = []
+    det = _detector(cycles, device_type="washing_machine")
+    _paused_zombie(det, cycles, 2 * 3600, 5.0, 9 * 3600)
+    assert cycles and cycles[0]["status"] == "force_stopped"
+    assert cycles[0]["duration_capped"] is True
+    assert cycles[0]["duration"] == pytest.approx(10 * 3600.0, abs=31.0)
+
+
+def test_the_cap_reads_the_wall_clock_with_the_switch_off(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Revert check: with USER_PAUSE_EXCLUDED_FROM_CAP off, the paused wash is
+    cut at 8 h on the wall clock again."""
+    monkeypatch.setattr(cd_mod, "USER_PAUSE_EXCLUDED_FROM_CAP", False)
+    cycles: list[dict[str, Any]] = []
+    det = _detector(cycles, device_type="washing_machine")
+    _paused_zombie(det, cycles, 6 * 3600, 5.0, 2 * 3600)
+    assert cycles and cycles[0]["duration_capped"] is True
+    assert cycles[0]["duration"] == pytest.approx(CYCLE_DURATION_CAP_BASE_S, abs=31.0)
+
+
+def test_a_finished_stall_still_counts_toward_the_cap() -> None:
+    """Item 620 keeps stalls on the wall clock: an unmatched washer on a 4-5 W
+    standby (above its 3.75 W stop) with a 2 min burst every 40 min shows each
+    standby run as a stall, and each burst banks one. Left out of the cap clock,
+    this zombie was never capped (30 h on)."""
+    cycles: list[dict[str, Any]] = []
+    det = _detector(cycles, device_type="washing_machine")
+
+    def power(t: float) -> float:
+        if t < 1800:
+            return _zombie(t)
+        if (t - 1800) % (42 * 60) >= 40 * 60:
+            return 200.0
+        return 4.1 if int(t // 30) % 2 else 4.9
+
+    t, banked = 0.0, 0
+    while t < 9 * 3600 and not cycles:
+        det.process_reading(power(t), T0 + timedelta(seconds=t))
+        banked = max(banked, len(det._stall_spans))  # noqa: SLF001
+        t += 30.0
+    assert banked >= 5  # the standby runs were stalls
+    assert cycles and cycles[0]["status"] == "force_stopped"
+    assert cycles[0]["duration_capped"] is True
+    assert cycles[0]["duration"] == pytest.approx(CYCLE_DURATION_CAP_BASE_S, abs=31.0)
+
+
 # --- the side question: a long match the detector dropped --------------------
 
 
@@ -450,4 +553,25 @@ async def test_a_cap_stop_is_stored_with_its_mark(hass, freezer) -> None:
     assert stored[0]["duration_capped"] is True
     stored[0]["profile_name"] = "Cotton + Dry"
     assert mgr._longest_programme_s() == 0.0  # noqa: SLF001
+    await mgr.async_shutdown()
+
+
+async def test_a_user_paused_wash_is_not_capped_after_the_resume(hass, freezer) -> None:
+    """Item 620 through the manager's own pause and resume: 30 min, 6 h paused
+    on the display level, 2 h more. The cap cut it at 8 h on the wall clock."""
+    from .real_manager import boot, feed, make_entry, record_notify
+
+    record_notify(hass)
+    entry = make_entry(
+        hass, {**OPTIONS, "device_type": "washing_machine", "min_off_gap": 600}
+    )
+    mgr = await boot(hass, entry)
+    await _feed_programme(hass, freezer, 1800)
+    assert await mgr.async_pause_cycle() is True
+    await feed(hass, freezer, 5, 6 * 3600, step=120)
+    assert await mgr.async_resume_cycle() is True
+    await _feed_programme(hass, freezer, 2 * 3600)
+
+    assert mgr.profile_store.get_past_cycles() == []
+    assert mgr.detector.state == STATE_RUNNING
     await mgr.async_shutdown()
