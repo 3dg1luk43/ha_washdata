@@ -1330,6 +1330,13 @@ CYCLE_ENERGY_REBUILD_KEY = "_cycle_energy_rebuild_pending"
 # the manager sets it False when the pass is done. New labels are cut by the
 # envelope rebuild (`ProfileStore._cut_backfill_tails_nosave`), not by this pass.
 BACKFILL_TAIL_CUT_KEY = "_backfill_tail_cut_pending"
+# Per-cycle field on a cut history-imported cycle (#518, register item 618): the
+# readings the cut removed, the length and end it had, and the stop threshold it
+# was judged at, so a later pass at another stop threshold can put them back and
+# cut again from the full trace. Optional and additive (no storage version): a
+# cycle without it is never restored. Written compact (trace_codec), never sent
+# to the panel, never shared.
+BACKFILL_TAIL_TRACE_KEY = "tail_cut_trace"
 # Don't churn a cycle for a few seconds of tail: only rewrite one whose banked
 # span is worth correcting. Measured median banking was 12.6 min, so this only
 # skips noise.

@@ -40,6 +40,7 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .const import (
+    BACKFILL_TAIL_TRACE_KEY,
     coerce_numeric_option,
     drop_invalid_numeric_options,
     numeric_option_keys,
@@ -204,8 +205,11 @@ def _send_result(
     connection.send_result(msg_id, data)
 
 
-# Fields too large or not serialisable to send over WebSocket.
-_CYCLE_STRIP_KEYS = frozenset({"power_data", "power_trace", "debug_data", "samples"})
+# Fields too large or not serialisable to send over WebSocket. The kept tail of a
+# cut import (register item 618) is store-internal: only a later cut reads it.
+_CYCLE_STRIP_KEYS = frozenset(
+    {"power_data", "power_trace", "debug_data", "samples", BACKFILL_TAIL_TRACE_KEY}
+)
 
 # Settings keys that can be staged from suggestions. Mirrors the OptionsFlow's
 # _suggestion_keys_to_apply so the panel and the flow agree on what is tunable.
@@ -8057,8 +8061,11 @@ async def _history_import_apply_task(
                 )
                 if raw.get("tail_cut_s"):
                     # The banked-tail repair's own trim (PLAYGROUND-07), stamped so the
-                    # cut at labelling (#518) does not run on it again.
-                    store._apply_backfill_tail_cut(stored, float(raw["tail_cut_s"]))  # noqa: SLF001
+                    # cut at labelling (#518) does not run on it again; the readings it
+                    # removes are kept with the level it was judged at (item 618).
+                    store._apply_backfill_tail_cut(  # noqa: SLF001
+                        stored, float(raw["tail_cut_s"]), stop_w=raw.get("tail_cut_stop_w")
+                    )
                 if key is not None:
                     existing.add(key)
                 interval = history_import.stored_intervals([{**raw, "duration": duration}])

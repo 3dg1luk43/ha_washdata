@@ -1449,6 +1449,9 @@ async def async_import_tail_cuts(
             )
             if cut is not None:
                 cycle["tail_cut_s"] = round(cut, 1)
+                # The level it was judged at, kept with the removed readings so a
+                # pass at another stop threshold can redo it (register item 618).
+                cycle["tail_cut_stop_w"] = stop
                 stamped += 1
                 # The preview row shows what will be stored, and the overlap check
                 # (`mark_already_recorded`) reads the same span.

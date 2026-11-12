@@ -59,6 +59,7 @@ from .const import (
     SELF_UNMATCHABLE_MIN_CYCLES,
     DEVICE_TYPE_DISHWASHER,
     BACKFILL_TAIL_CUT_KEY,
+    BACKFILL_TAIL_TRACE_KEY,
     BANKED_TAIL_REPAIR_KEY,
     CYCLE_ENERGY_REBUILD_KEY,
     BANKED_TAIL_REPAIR_MIN_S,
@@ -7956,8 +7957,15 @@ class ProfileStore:
         profiles it changed and saves only then; the marker is cleared either way
         (a cycle the rule declined is retried by its profile's next rebuild). Needs
         the stop threshold the manager pushes in. Never raises.
+
+        Re-armed by a stop threshold change: a cut judged at another level is first
+        undone from its kept tail (:meth:`_restore_backfill_tails_nosave`, register
+        item 618), so the cut below redoes it from the full trace, at another point
+        or not at all (``restored`` counts them).
         """
-        summary: dict[str, Any] = {"cut": 0, "reclaimed_s": 0.0, "profiles": 0}
+        summary: dict[str, Any] = {
+            "cut": 0, "reclaimed_s": 0.0, "profiles": 0, "restored": 0,
+        }
         try:
             if self.stop_threshold_w is None:
                 return summary
@@ -7968,11 +7976,13 @@ class ProfileStore:
             } & set(self._data.get("profiles") or {}))
             touched: list[str] = []
             for name in names:
+                restored = self._restore_backfill_tails_nosave(name)
                 cut, reclaimed = self._cut_backfill_tails_nosave(name)
-                if cut:
+                if cut or restored:
                     touched.append(name)
                     summary["cut"] += cut
                     summary["reclaimed_s"] += reclaimed
+                    summary["restored"] += restored
             self._data[BACKFILL_TAIL_CUT_KEY] = False
             summary["profiles"] = len(touched)
             if touched:
@@ -8329,7 +8339,9 @@ class ProfileStore:
         # rather than a cut duration over an uncut one (register item 384).
         cycle["duration"] = round(float(new_duration), 3)
 
-    def _apply_backfill_tail_cut(self, cycle: CycleDict, new_duration: float) -> None:
+    def _apply_backfill_tail_cut(
+        self, cycle: CycleDict, new_duration: float, *, stop_w: Any = None
+    ) -> None:
         """Cut a history-imported cycle's end wait at ``new_duration`` seconds (#518).
 
         :meth:`_apply_repaired_duration` does the trim; this re-integrates
@@ -8337,8 +8349,16 @@ class ProfileStore:
         its stored energy was integrated over the wait) and stamps
         ``meta["tail_cut_s"]``, the seconds removed, so the cut never runs twice on
         one cycle. Shared by the import (``ws_api``) and the label-time cut.
+
+        The readings it removes are kept (register item 618), with the length and
+        end the cycle had and the stop threshold the cut was judged at (``stop_w``,
+        else the store's): a pass at another stop threshold puts them back
+        (:meth:`_restore_backfill_tail`) and cuts again from the full trace. A cut
+        that could not be undone exactly keeps nothing and is final, as before.
         """
         old_duration = float(cycle.get("duration") or 0.0)
+        old_end = cycle.get("end_time")
+        before = cycle.get("power_data")
         self._apply_repaired_duration(cycle, new_duration)
         points = decompress_power_data(cycle)
         if len(points) > 1:
@@ -8349,6 +8369,194 @@ class ProfileStore:
         if not isinstance(meta, dict):
             meta = cycle["meta"] = {}
         meta["tail_cut_s"] = round(max(0.0, old_duration - float(new_duration)), 1)
+        kept = self._backfill_kept_tail(
+            cycle, before, old_duration, old_end,
+            self.stop_threshold_w if stop_w is None else stop_w,
+        )
+        if kept is None:
+            cycle.pop(BACKFILL_TAIL_TRACE_KEY, None)
+        else:
+            cycle[BACKFILL_TAIL_TRACE_KEY] = kept
+
+    @staticmethod
+    def _backfill_kept_tail(
+        cycle: CycleDict, before: Any, old_duration: float, old_end: Any, stop_w: Any
+    ) -> dict[str, Any] | None:
+        """What a tail cut removed from ``cycle``, as :meth:`_restore_backfill_tail`
+        reads it, or None when the cut cannot be undone exactly.
+
+        ``points``: the removed rows as stored (every one past the new end);
+        ``end_row``: the cut appended a terminal row at the new end
+        (:meth:`_apply_repaired_duration`); ``duration`` / ``end_time``: the cycle's
+        before the cut; ``cut_s``: its length after; ``stop_w``: the level the cut
+        was judged at. None when the trace was not trimmed, a removed row is not a
+        clean ``[offset, watts]`` past the cut, or the level is unknown: a restore
+        rebuilds the trace exactly or not at all. Never raises.
+        """
+        try:
+            stop = _safe_offset(stop_w)
+            after = cycle.get("power_data")
+            if (
+                stop is None
+                or not isinstance(before, list)
+                or not isinstance(after, list)
+                or after is before
+                or not after
+            ):
+                return None
+            cut_s = float(cycle.get("duration") or 0.0)
+            before_ids = {id(pt) for pt in before}
+            after_ids = {id(pt) for pt in after}
+            tail: list[list[Any]] = []
+            for pt in before:
+                if id(pt) in after_ids:
+                    continue
+                if not (isinstance(pt, (list, tuple)) and len(pt) >= 2):
+                    return None
+                off = _safe_offset(pt[0])
+                if off is None or _safe_offset(pt[1]) is None or off <= cut_s + 1e-6:
+                    return None
+                tail.append([pt[0], pt[1]])
+            return {
+                "points": tail,
+                "end_row": id(after[-1]) not in before_ids,
+                "duration": old_duration,
+                "end_time": old_end if isinstance(old_end, str) else None,
+                "cut_s": cut_s,
+                "stop_w": stop,
+            }
+        except Exception:  # noqa: BLE001 - keeping it is optional, the cut is not
+            return None
+
+    def _restore_backfill_tail(self, cycle: CycleDict) -> bool:
+        """Undo :meth:`_apply_backfill_tail_cut` on ``cycle`` from its kept tail.
+
+        The kept readings go back after the trace (minus the terminal row the cut
+        appended), the length and end become what they were before the cut,
+        ``energy_wh`` is re-integrated (``integrate_cycle_wh``) and the signature
+        recomputed from the full trace, and the cut stamp and the kept tail are
+        cleared, so the cut rule judges the cycle as freshly imported. Only while
+        the cycle is exactly what the cut left (its length, its last row): any other
+        change means the tail no longer belongs to it, and it is left alone. All or
+        nothing; True when restored. Never raises.
+        """
+        record = cycle.get(BACKFILL_TAIL_TRACE_KEY)
+        if not isinstance(record, dict):
+            return False
+        try:
+            points = record.get("points")
+            duration = _safe_offset(record.get("duration"))
+            cut_s = _safe_offset(record.get("cut_s"))
+            current = cycle.get("power_data")
+            if (
+                not isinstance(points, list)
+                or duration is None
+                or cut_s is None
+                or duration <= cut_s
+                or not isinstance(current, list)
+                or abs(float(cycle.get("duration") or 0.0) - cut_s) > 1e-6
+            ):
+                return False
+            trace = list(current)
+            if record.get("end_row") is True and trace:
+                trace.pop()
+            if len(trace) < 2 or not all(
+                isinstance(pt, (list, tuple)) and len(pt) >= 2 for pt in trace
+            ):
+                return False
+            last = _safe_offset(trace[-1][0])
+            if last is None or last > cut_s + 1e-6:
+                return False
+            tail: list[list[Any]] = []
+            for pt in points:
+                if not (isinstance(pt, (list, tuple)) and len(pt) >= 2):
+                    return False
+                off = _safe_offset(pt[0])
+                if off is None or _safe_offset(pt[1]) is None or off <= last:
+                    return False
+                tail.append([pt[0], pt[1]])
+            restored = [*trace, *tail]
+            ts = np.asarray([float(pt[0]) for pt in restored], dtype=float)
+            power = np.asarray([float(pt[1]) for pt in restored], dtype=float)
+            signature = dataclasses.asdict(compute_signature(ts, power))
+            energy = round(integrate_cycle_wh(ts, power), 3)
+        except Exception:  # noqa: BLE001 - a failed restore leaves the cut as it was
+            self._logger.debug(
+                "Import tail restore: skipped cycle %s", cycle.get("id"), exc_info=True
+            )
+            return False
+        cycle_id = str(cycle.get("id") or "")
+        if cycle_id:
+            self._drop_cached_sample_segments(cycle_id)
+        cycle["power_data"] = restored
+        cycle["signature"] = signature
+        cycle["energy_wh"] = energy
+        cycle["duration"] = duration
+        end_time = record.get("end_time")
+        if isinstance(end_time, str) and end_time:
+            cycle["end_time"] = end_time
+        else:
+            cycle.pop("end_time", None)
+        meta = cycle.get("meta")
+        if isinstance(meta, dict):
+            meta.pop("tail_cut_s", None)
+        cycle.pop(BACKFILL_TAIL_TRACE_KEY, None)
+        return True
+
+    def _restore_backfill_tails_nosave(self, profile_name: str) -> int:
+        """Put back the end wait of ``profile_name``'s imports cut at another stop
+        threshold (register item 618), so the cut that follows judges each one at
+        the current level from its full trace.
+
+        A higher stop threshold can read a standby as the end of activity and cut
+        it away, and the cut stamp kept that cut when the threshold was lowered
+        again: only Undo import brought the readings back. Only cycles that carry a
+        kept tail judged at a level other than the current one, and that the user
+        has not trimmed (``meta.edited`` / ``meta.trim``) or given a corrected
+        length (``manual_duration``) since: those are the user's statement of where
+        the cycle ended. Returns how many were restored; the caller cuts, rebuilds
+        and saves. Never raises.
+        """
+        if self.device_type != DEVICE_TYPE_DISHWASHER or not profile_name:
+            return 0
+        stop = _safe_offset(self.stop_threshold_w)
+        if stop is None:
+            return 0
+        restored = 0
+        for cycle in self.get_backfill_cycles():
+            try:
+                if not isinstance(cycle, dict) or cycle.get("profile_name") != profile_name:
+                    continue
+                record = cycle.get(BACKFILL_TAIL_TRACE_KEY)
+                if not isinstance(record, dict):
+                    continue
+                if (
+                    cycle.get("termination_reason") != TerminationReason.TIMEOUT
+                    or cycle.get("manual_duration")
+                ):
+                    continue
+                meta = cycle.get("meta")
+                if (
+                    not isinstance(meta, dict)
+                    or meta.get("tail_cut_s") is None
+                    or meta.get("edited")
+                    or meta.get("trim")
+                ):
+                    continue
+                judged = _safe_offset(record.get("stop_w"))
+                if judged is None or math.isclose(judged, stop, rel_tol=1e-9, abs_tol=1e-9):
+                    continue
+                if self._restore_backfill_tail(cycle):
+                    restored += 1
+            except Exception:  # noqa: BLE001 - one bad row must not stop the rest
+                self._logger.debug("Import tail restore: skipped a cycle", exc_info=True)
+        if restored:
+            self._logger.info(
+                "Put back the end wait of %d imported cycle(s) of '%s' to cut them "
+                "again at the new stop threshold (%.2f W)",
+                restored, profile_name, stop,
+            )
+        return restored
 
     def _backfill_tail_candidates(self, profile_name: str) -> list[CycleDict]:
         """``profile_name``'s imported cycles that may still hold their end wait.
@@ -8423,8 +8631,10 @@ class ProfileStore:
         ``BANKED_TAIL_REPAIR_MIN_S``; statistics are read once, before any cut.
 
         A cycle the rule declines is not stamped, so a later rebuild (more evidence,
-        a new stop threshold) can still cut it; a cut one never runs again. Returns
-        ``(cycles cut, seconds removed)``; the caller rebuilds and saves. Never raises.
+        a new stop threshold) can still cut it; a cut one never runs again unless a
+        new stop threshold first restores it (:meth:`_restore_backfill_tails_nosave`).
+        Returns ``(cycles cut, seconds removed)``; the caller rebuilds and saves.
+        Never raises.
         """
         try:
             stop = self.stop_threshold_w

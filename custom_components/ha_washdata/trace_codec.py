@@ -7,8 +7,10 @@ Home Assistant writes a ``Store`` file as JSON with a 2-space indent, so one
 ``[offset, watts]`` sample of ``power_data`` costs ~62 B on disk against ~14 B as
 compact JSON (tron4r's Miele store: 7.8 MB of traces, 1.8 MB compact), and the
 profiles' envelopes (per-point avg/min/max/std curves) pay the same indent. From
-v19 the ``power_data`` and ``debug_data`` of every cycle in the three cycle lists,
-and every envelope in ``envelopes``, are written as ONE JSON string each holding
+v19 the ``power_data`` and ``debug_data`` of every cycle in the three cycle lists
+(and the kept tail of a cut import, ``tail_cut_trace``, which needs no version: a
+build without it keeps the text as it is), and every envelope in ``envelopes``,
+are written as ONE JSON string each holding
 the same value as compact JSON text, and read back with one parse.
 
 Why text and not a binary fixed-point form: a fixed-point int32 + zlib + base64
@@ -38,6 +40,8 @@ import json
 from collections.abc import Callable, Mapping
 from typing import Any
 
+from .const import BACKFILL_TAIL_TRACE_KEY
+
 _ENCODE: Callable[[Any], bytes] | None
 try:  # the Store writer's own serialiser, minus the indent
     from homeassistant.helpers.json import json_bytes as _ENCODE
@@ -53,9 +57,13 @@ except ImportError:  # pragma: no cover - stdlib parses the same text exactly
 STORED_CYCLE_LISTS: tuple[str, ...] = ("past_cycles", "reference_cycles", "backfill_cycles")
 
 #: Per-cycle fields written compact, with the type their value has in memory.
+#: The third is the end wait a history-import tail cut removed (register item 618):
+#: a 1 h wait densified at 30 s is ~120 rows, 1.8 KB a cut cycle on disk against
+#: 8.6 KB as indented JSON (KoLSMS Beko export re-imported, 15 cuts).
 COMPACT_CYCLE_FIELDS: tuple[tuple[str, type], ...] = (
     ("power_data", list),
     ("debug_data", dict),
+    (BACKFILL_TAIL_TRACE_KEY, dict),
 )
 
 #: The per-profile envelope map; each envelope (a dict) is written compact as a whole.

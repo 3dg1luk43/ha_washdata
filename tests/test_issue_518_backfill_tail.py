@@ -8,19 +8,34 @@ stored, last activity ~8,470 s) took its ``avg_duration`` from 8,461 to 10,193 s
 Now the envelope rebuild a label triggers cuts them with the same rule and the
 programme's statistics, a one-time pass reaches installs that already hold them,
 and a backfill cycle can be trimmed by hand (it could only be deleted).
+
+Register item 618: the cut dropped what it removed, so one made at a higher stop
+threshold stayed when the threshold was lowered (only Undo import restored it).
+It now keeps those readings, and a stop threshold change puts them back and cuts
+again from the full trace.
 """
 from __future__ import annotations
 
+import asyncio
+import copy
+import json
 from typing import Any
+from unittest.mock import AsyncMock, MagicMock, patch
 
+import numpy as np
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.json import json_dumps
 
+from custom_components.ha_washdata import store_account, trace_codec, ws_api
 from custom_components.ha_washdata.const import (
     BACKFILL_TAIL_CUT_KEY,
+    BACKFILL_TAIL_TRACE_KEY,
     STORAGE_KEY,
     STORAGE_VERSION,
 )
 from custom_components.ha_washdata.profile_store import ProfileStore
+from custom_components.ha_washdata.signal_processing import integrate_cycle_wh
+from custom_components.ha_washdata.store import StoreBridge
 
 STOP = 1.2
 # The programme: 20 min heating, wash to 5400 s, 3000 s of silent drying, then the
@@ -56,8 +71,9 @@ def _imported(i: int, profile: str | None = None, **extra: Any) -> dict[str, Any
 async def _store(
     hass: HomeAssistant, *, device_type: str = "dishwasher", live: int = 3,
     imported: list[dict[str, Any]] | None = None, stop: float | None = STOP,
+    key: str = "test_518",
 ) -> ProfileStore:
-    store = ProfileStore(hass, "test_518")
+    store = ProfileStore(hass, key)
     await store.async_load()
     store.device_type = device_type
     store.stop_threshold_w = stop
@@ -250,6 +266,210 @@ async def test_a_community_reference_cycle_stays_as_downloaded(hass: HomeAssista
     assert ref["duration"] == LIVE_S
 
 
+# ─── Register item 618: a cut made at another stop threshold is redone ───────
+
+HIGH_STOP = 2.5
+
+
+def _integrated(cycle: dict[str, Any]) -> dict[str, Any]:
+    """The energy a real import stores: integrated over its own trace."""
+    ts = np.asarray([p[0] for p in cycle["power_data"]], dtype=float)
+    pw = np.asarray([p[1] for p in cycle["power_data"]], dtype=float)
+    cycle["energy_wh"] = round(integrate_cycle_wh(ts, pw), 3)
+    return cycle
+
+
+def _standby(i: int, profile: str | None = "Eco") -> dict[str, Any]:
+    """The reporter's plug: after the pump-out it idles at 1.7 W for the whole wait,
+    quiet at a 2.5 W stop and activity at 1.2 W."""
+    cycle = _imported(i, profile)
+    cycle["power_data"] = [[t, 1.7 if t > LIVE_S else p] for t, p in cycle["power_data"]]
+    return _integrated(cycle)
+
+
+async def _recut_at(store: ProfileStore, stop: float) -> dict[str, Any]:
+    """What a Stop Threshold change does: the manager pins the level and re-arms."""
+    store.stop_threshold_w = stop
+    store.arm_backfill_tail_cut()
+    return await store.async_cut_backfill_tails()
+
+
+async def test_a_cut_at_a_higher_stop_is_undone_when_the_stop_is_lowered(
+    hass: HomeAssistant,
+) -> None:
+    """At 2.5 W the standby reads as quiet and the wait is cut at the pump-out; at
+    1.2 W it is activity to the very end, so the rule declines: the cycle is again
+    exactly what the import stored, not stuck with the 2.5 W cut."""
+    standby = _standby(2)
+    uncut = copy.deepcopy(standby)
+    store = await _store(hass, imported=[standby], stop=HIGH_STOP)
+    assert (await store.async_cut_backfill_tails())["cut"] == 1
+    assert standby["duration"] == PUMP_END_S
+    kept = standby[BACKFILL_TAIL_TRACE_KEY]
+    assert kept["points"] == [p for p in uncut["power_data"] if p[0] > PUMP_END_S]
+    assert kept["stop_w"] == HIGH_STOP and kept["duration"] == IMPORT_S
+    assert kept["end_row"] is False   # the cut ends on the pump-out's own sample
+
+    result = await _recut_at(store, STOP)
+    assert result["restored"] == 1 and result["cut"] == 0 and result["profiles"] == 1
+    for field in ("duration", "power_data", "energy_wh", "meta"):
+        assert standby[field] == uncut[field], field
+    assert "end_time" not in standby and BACKFILL_TAIL_TRACE_KEY not in standby
+    # Declined, so unstamped: the next rebuild may judge it again, and finds nothing.
+    await store.async_rebuild_envelope("Eco")
+    assert standby["duration"] == IMPORT_S
+    # Same level again: nothing to redo.
+    assert (await _recut_at(store, STOP))["restored"] == 0
+
+
+async def test_a_lowered_stop_redoes_the_cut_where_a_fresh_cut_would_end(
+    hass: HomeAssistant,
+) -> None:
+    """No drying span to measure, so the cut falls back to the programme length,
+    never before the last activity. At 2.5 W the 1.7 W standby after the run is
+    quiet (cut at 5430 s, a terminal row appended); at 1.2 W it is activity up to
+    6600 s. The redo must land exactly where a never-cut import cut at 1.2 W does."""
+    flat = [[float(t), 1900.0 if t < 1200 else 60.0] for t in range(0, 5401, 30)]
+
+    def _import() -> dict[str, Any]:
+        trace = (
+            [list(p) for p in flat]
+            + [[float(t), 1.7] for t in range(5460, 6601, 60)]
+            + [[float(t), 0.4] for t in range(6660, 9031, 60)]
+        )
+        return _integrated({**_imported(0, "Eco"), "power_data": trace, "duration": 9030.0})
+
+    def _short_live(store: ProfileStore) -> None:
+        store._data["past_cycles"].extend(
+            {**_live(i), "duration": 5430.0,
+             "power_data": [list(p) for p in flat] + [[5430.0, 0.4]]}
+            for i in range(2)
+        )
+
+    redo = _import()
+    store = await _store(hass, live=0, imported=[redo], stop=HIGH_STOP)
+    _short_live(store)
+    fresh = _import()
+    reference = await _store(hass, live=0, imported=[fresh], stop=STOP, key="test_618_fresh")
+    _short_live(reference)
+
+    assert (await store.async_cut_backfill_tails())["cut"] == 1
+    assert redo["duration"] == 5430.0 and redo["power_data"][-1] == [5430.0, 1.7]
+    assert redo[BACKFILL_TAIL_TRACE_KEY]["end_row"] is True
+
+    result = await _recut_at(store, STOP)
+    assert result["restored"] == 1 and result["cut"] == 1
+    assert (await reference.async_cut_backfill_tails())["cut"] == 1
+    assert fresh["duration"] == 6600.0   # the fresh cut, at the new level
+    for field in (
+        "duration", "power_data", "energy_wh", "signature", "end_time", "meta",
+        BACKFILL_TAIL_TRACE_KEY,
+    ):
+        assert redo[field] == fresh[field], field
+    assert redo[BACKFILL_TAIL_TRACE_KEY]["stop_w"] == STOP
+    assert store._data["profiles"]["Eco"]["avg_duration"] == (
+        reference._data["profiles"]["Eco"]["avg_duration"]
+    )
+
+
+async def test_a_cycle_the_user_changed_after_the_cut_keeps_their_change(
+    hass: HomeAssistant,
+) -> None:
+    corrected, trimmed, untouched = _standby(0), _standby(1), _standby(2)
+    store = await _store(hass, imported=[corrected, trimmed, untouched], stop=HIGH_STOP)
+    assert (await store.async_cut_backfill_tails())["cut"] == 3
+    assert all(BACKFILL_TAIL_TRACE_KEY in c for c in (corrected, trimmed, untouched))
+    corrected["manual_duration"] = 9000.0
+    assert await store.trim_cycle_power_data("bf1", 0.0, 8400.0) is True
+
+    result = await _recut_at(store, STOP)
+    assert result["restored"] == 1
+    assert untouched["duration"] == IMPORT_S
+    assert corrected["duration"] == PUMP_END_S and corrected["meta"]["tail_cut_s"]
+    assert trimmed["duration"] == 8400.0 and trimmed["meta"]["edited"] is True
+    assert max(p[0] for p in trimmed["power_data"]) == 8400.0
+
+
+async def test_the_kept_tail_is_exported_written_compact_and_kept_from_the_panel(
+    hass: HomeAssistant,
+) -> None:
+    standby = _standby(2)
+    src = await _store(hass, imported=[standby], stop=HIGH_STOP)
+    await src.async_cut_backfill_tails()
+    kept = copy.deepcopy(standby[BACKFILL_TAIL_TRACE_KEY])
+
+    # On disk it is compact text, like the trace beside it, and reads back exactly.
+    disk = trace_codec.encode_store_payload(src._data)
+    assert isinstance(disk["backfill_cycles"][0][BACKFILL_TAIL_TRACE_KEY], str)
+    assert trace_codec.decode_store_payload(json.loads(json_dumps(disk))) >= 2
+    # The panel's cycle list never carries it.
+    assert BACKFILL_TAIL_TRACE_KEY not in ws_api._strip_cycle(standby)
+
+    # Both exports carry it, and the selective import keeps it on the copy.
+    assert src.export_data()["data"]["backfill_cycles"][0][BACKFILL_TAIL_TRACE_KEY] == kept
+    dw = {"device_type": "dishwasher"}
+    cats = {"categories": ["profiles", "backfill_cycles"]}
+    payload = json.loads(json_dumps(
+        src.export_data(entry_data=dw, entry_options=dw, selection=cats)
+    ))
+    dst = await _store(hass, imported=[], stop=STOP, key="test_618_dst")
+    summary = await dst.async_import_data_selective(
+        payload, selection=cats, local_device_type="dishwasher",
+    )
+    assert summary["backfill_cycles_imported"] == 1
+    [copied] = dst.get_backfill_cycles()
+    assert copied[BACKFILL_TAIL_TRACE_KEY] == kept and copied["duration"] == PUMP_END_S
+    # ...so the target, at its lower stop, can still undo the cut.
+    assert (await dst.async_cut_backfill_tails())["restored"] == 1
+    assert copied["duration"] == IMPORT_S
+
+
+class _UploadRecorder:
+    """Stands in for the community-store client: records what would be sent."""
+
+    def __init__(self) -> None:
+        self.write_lock = asyncio.Lock()
+        self.sent: list[Any] = []
+
+    async def upload_reference_cycle(self, *args: Any) -> str:
+        self.sent.append(args)
+        return "store-cycle"
+
+    async def upload_device_bundle(self, *args: Any) -> dict[str, Any]:
+        self.sent.append(args)
+        return {"ok": True, "cycle_ids": ["store-cycle"]}
+
+    def last_error(self) -> None:
+        return None
+
+
+async def test_a_shared_cycle_never_carries_the_kept_tail(hass: HomeAssistant) -> None:
+    """The uploads are built from the cut trace and whitelisted stats only."""
+    standby = _standby(2)
+    store = await _store(hass, imported=[standby], stop=HIGH_STOP)
+    await store.async_cut_backfill_tails()
+    assert standby[BACKFILL_TAIL_TRACE_KEY]["points"]
+
+    hass.data[store_account._DATA_KEY] = {
+        "store": MagicMock(async_save=AsyncMock()),
+        "data": {"online_enabled": True, "account": {"refresh_token": "rt", "uid": "u1"}},
+    }
+    client = _UploadRecorder()
+    with patch("custom_components.ha_washdata.store.get_client", return_value=client):
+        bridge = StoreBridge(hass, store)
+    assert (await bridge.share_cycle("bf2", "Eco", "Beko", "X", "dishwasher")) == {
+        "store_cycle_id": "store-cycle"
+    }
+    await bridge.share_device("Beko", "X", "dishwasher", [
+        {"local_cycle_id": "bf2", "program": "Eco"},
+    ])
+    assert len(client.sent) == 2
+    sent = json.dumps(client.sent, default=str)
+    assert BACKFILL_TAIL_TRACE_KEY not in sent and "end_row" not in sent
+    points = client.sent[0][4]
+    assert max(p[0] for p in points) <= PUMP_END_S
+
+
 # ─── Wiring: the manager pushes the level and runs the pass once ─────────────
 
 
@@ -306,4 +526,15 @@ async def test_a_real_boot_cuts_what_an_older_install_labelled(
     assert store.backfill_tail_cut_pending() is False
     assert [c["duration"] for c in store.get_backfill_cycles()] == [PUMP_END_S] * 3
     assert abs(float(store._data["profiles"]["Eco"]["avg_duration"]) - LIVE_S) < 30
+
+    # Lowered again (register item 618): the standby is activity at 1.2 W, so the
+    # cut made at 2.5 W is undone from its kept readings and the rule declines it.
+    hass.config_entries.async_update_entry(
+        entry, options={**entry.options, "stop_threshold_w": STOP}
+    )
+    await hass.async_block_till_done()
+    assert store.stop_threshold_w == STOP
+    durations = {c["id"]: c["duration"] for c in store.get_backfill_cycles()}
+    assert durations == {"bf0": PUMP_END_S, "bf1": PUMP_END_S, "bf2": IMPORT_S}
+    assert "tail_cut_s" not in _bf(store, "bf2")["meta"]
     assert await hass.config_entries.async_unload(entry.entry_id)

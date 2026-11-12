@@ -2292,11 +2292,13 @@ class WashDataManager:
         raises."""
         try:
             result = await self.profile_store.async_cut_backfill_tails()
-            if result.get("cut"):
+            if result.get("cut") or result.get("restored"):
                 self._logger.info(
-                    "Cut the end wait off %d imported cycles (%.0f min); %d profile "
+                    "Cut the end wait off %d imported cycles (%.0f min) after "
+                    "restoring %d cut at another stop threshold; %d profile "
                     "envelopes rebuilt.",
-                    result["cut"], result["reclaimed_s"] / 60.0, result["profiles"],
+                    result["cut"], result["reclaimed_s"] / 60.0,
+                    result.get("restored", 0), result["profiles"],
                 )
         except Exception as exc:  # pylint: disable=broad-exception-caught
             self._logger.warning("Import tail cut could not run: %s", exc)
