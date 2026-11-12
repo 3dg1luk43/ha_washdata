@@ -291,7 +291,8 @@ def offset_key(offset: Any) -> int | None:
         value = float(offset)
     except (TypeError, ValueError, OverflowError):
         return None
-    return int(round(value * 10.0)) if math.isfinite(value) else None
+    scaled = value * 10.0   # finite before scaling is not enough: 1e308 x 10 is inf
+    return round(scaled) if math.isfinite(scaled) else None
 
 
 def synthetic_offset_keys(cycle: Mapping[str, Any]) -> set[int] | None:
@@ -369,4 +370,12 @@ def normalize_synthetic_offsets(
     rows: PowerData = [[value, 0.0] for value in raw]
     if detect_power_data_format(rows) != detect_power_data_format(power_data):
         return None
-    return [off for off, _p in power_data_to_offsets(rows, start_time_iso)]
+    if start_time_iso or not power_data:
+        return [off for off, _p in power_data_to_offsets(rows, start_time_iso)]
+    # No start time: the converter anchors each list on its own first row, which
+    # would put the first synthetic row at 0 s. Converted behind the trace's first
+    # row, they share its anchor, as the trace's own rows do.
+    converted = power_data_to_offsets([power_data[0], *rows], None)
+    if len(converted) != len(rows) + 1:
+        return None   # the anchor row did not convert: which row is which is unknown
+    return [off for off, _p in converted[1:]]

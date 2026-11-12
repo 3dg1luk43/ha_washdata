@@ -587,6 +587,7 @@
     "pg_alert_overrun": "Zu lang",
     "pg_alert_underrun": "Zu kurz",
     "pg_alert_did_not_finish": "Nicht abgeschlossen",
+    "pg_alert_discarded": "Als Geisterzyklus oder Abpumpen verworfen",
     "pg_alert_false_end": "In mehrere Zyklen geteilt",
     "pg_alert_unmatched": "Nicht zugeordnet",
     "pg_alert_ambiguous": "Mehrdeutige Übereinstimmung",
@@ -1129,7 +1130,7 @@
     "review_which_program": "Welches Programm war es?"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Geschirrspüler: Sekunden unter dem Stoppschwellenwert seit der letzten Aktivität, nach denen das Warten auf das letzte Abpumpen endet, sobald die erwartete Dauer erreicht ist",
+    "dishwasher_end_spike_quiet_release": "Geschirrspüler: Sekunden unter dem Stoppschwellenwert seit der letzten Aktivität, die nötig sind, um nach der erwarteten Dauer das Warten auf das letzte Abpumpen zu beenden",
     "smart_termination_duration_ratio": "Anteil der durchschnittlichen Programmdauer, den ein Zyklus erreichen muss, bevor die intelligente Beendigung ihn vorzeitig beenden darf; senken, wenn die Laufzeiten schwanken",
     "completion_min_seconds": "Kürzester Lauf, der als echter Zyklus zählt",
     "interrupted_min_seconds": "Kurze Zyklen werden als unterbrochen markiert",

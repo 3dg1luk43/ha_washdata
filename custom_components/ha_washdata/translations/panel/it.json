@@ -539,6 +539,7 @@
     "pg_alert_overrun": "Troppo lungo",
     "pg_alert_underrun": "Troppo corto",
     "pg_alert_did_not_finish": "Non terminato",
+    "pg_alert_discarded": "Scartato come fantasma o scarico",
     "pg_alert_false_end": "Diviso in più cicli",
     "pg_alert_unmatched": "Senza abbinamento",
     "pg_alert_ambiguous": "Abbinamento ambiguo",
@@ -1093,7 +1094,7 @@
     "review_which_program": "Di quale programma si trattava?"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Lavastoviglie: secondi sotto la Soglia di arresto dall'ultima attività che chiudono l'attesa dello scarico finale, una volta raggiunta la durata prevista",
+    "dishwasher_end_spike_quiet_release": "Lavastoviglie: secondi sotto la Soglia di arresto dall'ultima attività necessari per chiudere l'attesa dello scarico finale dopo la durata prevista",
     "smart_termination_duration_ratio": "Frazione della durata media del programma che un ciclo deve raggiungere prima che la Terminazione intelligente possa chiuderlo in anticipo; abbassala se le durate variano",
     "anti_crease_finalize_ratio": "Frazione della durata media del programma che un ciclo deve raggiungere prima che la coda antirughe possa concluderlo; abbassala sulle asciugatrici, lascia le lavatrici al valore predefinito",
     "anti_wrinkle_enabled": "Assorbire gli impulsi di rotazione dopo la fase principale invece di leggerli come nuovi cicli",

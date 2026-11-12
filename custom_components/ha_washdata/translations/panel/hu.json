@@ -582,6 +582,7 @@
         "pg_alert_overrun": "Túlfutás",
         "pg_alert_underrun": "Alulfutás",
         "pg_alert_did_not_finish": "Nem fejeződött be",
+        "pg_alert_discarded": "Fantomciklusként vagy leeresztésként elvetve",
         "pg_alert_false_end": "Több ciklusra bomlott",
         "pg_alert_unmatched": "Nincs egyezés",
         "pg_alert_ambiguous": "Bizonytalan egyezés",
@@ -1991,7 +1992,7 @@
         "other": "Egyéb"
     },
     "pg_desc": {
-        "dishwasher_end_spike_quiet_release": "Mosogatógép: a Leállítási küszöb alatt töltött másodpercek az utolsó aktivitás óta, amelyek után véget ér a végső leeresztésre való várakozás, ha a várható időtartam már letelt",
+        "dishwasher_end_spike_quiet_release": "Mosogatógép: a Leállítási küszöb alatt töltött másodpercek az utolsó aktivitás óta, amelyek a várható időtartam után szükségesek a végső leeresztésre való várakozás befejezéséhez",
         "smart_termination_duration_ratio": "A program átlagos időtartamának hányada, amelyet a ciklusnak el kell érnie, mielőtt az intelligens leállítás korán befejezheti; csökkentse, ha a futásidők ingadoznak",
         "anti_wrinkle_enabled": "Nyelje el a fő fázis utáni dobpulzusokat, ahelyett hogy új ciklusként olvasná őket",
         "anti_wrinkle_idle_timeout": "Két dobpulzus között engedélyezett csendes idő, mielőtt a ránctalanítás véget ér",

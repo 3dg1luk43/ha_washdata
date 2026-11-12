@@ -577,6 +577,7 @@
         "pg_alert_overrun": "运行过长",
         "pg_alert_underrun": "运行过短",
         "pg_alert_did_not_finish": "未完成",
+        "pg_alert_discarded": "判为误检周期或排水并丢弃",
         "pg_alert_false_end": "拆分为多个周期",
         "pg_alert_unmatched": "未匹配",
         "pg_alert_ambiguous": "匹配不明确",
@@ -1124,7 +1125,7 @@
         "anti_wrinkle_max_power": "高于此值的脉冲将结束防皱并开启新周期",
         "profile_match_min_duration_ratio": "最短周期时长占配置文件时长的比例；默认 0.1 (10%)",
         "profile_match_max_duration_ratio": "最长周期时长占配置文件时长的比例；默认 1.8 (180%)",
-        "dishwasher_end_spike_quiet_release": "洗碗机：达到预期时长后，自上次活动以来低于停止阈值、可结束最终排水等待的秒数",
+        "dishwasher_end_spike_quiet_release": "洗碗机：达到预期时长后，结束最终排水等待所需的、自上次活动以来低于停止阈值的秒数",
         "smart_termination_duration_ratio": "智能终止可以提前结束周期之前，周期必须达到的程序平均时长比例；运行时间波动大时请调低",
         "anti_crease_finalize_ratio": "防皱尾段可以结束周期之前，周期必须达到的程序平均时长比例；烘干机请调低，洗衣机保持默认值",
         "curve_preroll_seconds": "并入周期曲线开头的中止启动尝试读数秒数；0 = 关闭"

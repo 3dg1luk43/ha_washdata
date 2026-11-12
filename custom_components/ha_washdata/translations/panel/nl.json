@@ -587,6 +587,7 @@
     "pg_alert_overrun": "Te lang",
     "pg_alert_underrun": "Te kort",
     "pg_alert_did_not_finish": "Niet voltooid",
+    "pg_alert_discarded": "Verworpen als spookcyclus of wegpompen",
     "pg_alert_false_end": "Opgesplitst in meerdere cycli",
     "pg_alert_unmatched": "Geen match",
     "pg_alert_ambiguous": "Dubbelzinnige match",
@@ -1129,7 +1130,7 @@
     "review_which_program": "Welk programma was het?"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Vaatwasser: seconden onder de Stopdrempel sinds de laatste activiteit waarna het wachten op het laatste wegpompen stopt, zodra de verwachte duur is bereikt",
+    "dishwasher_end_spike_quiet_release": "Vaatwasser: seconden onder de Stopdrempel sinds de laatste activiteit die nodig zijn om na de verwachte duur het wachten op het laatste wegpompen te beëindigen",
     "smart_termination_duration_ratio": "Deel van de gemiddelde programmaduur dat een cyclus moet halen voordat de slimme beëindiging hem vroeg mag afsluiten; verlaag als de looptijden variëren",
     "completion_min_seconds": "Kortste run die als een echte cyclus telt",
     "interrupted_min_seconds": "Korte cycli gemarkeerd als onderbroken",

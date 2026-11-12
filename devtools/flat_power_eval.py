@@ -246,7 +246,9 @@ def _trace_key(cycle: dict[str, Any], start_w: float, stop_w: float) -> str | No
     )
 
     try:
-        pts = [[round(float(o), 0), round(float(w), 0)] for o, w in _cycle_readings(cycle)]
+        # Power at the precision the stretch is measured at (a 5 W band on two
+        # traces a few tenths apart is two answers); time on the clone grid.
+        pts = [[round(float(o), 0), round(float(w), 1)] for o, w in _cycle_readings(cycle)]
     except (TypeError, ValueError, OverflowError):
         return None
     if not pts:

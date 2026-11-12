@@ -587,6 +587,7 @@
     "pg_alert_overrun": "För lång",
     "pg_alert_underrun": "För kort",
     "pg_alert_did_not_finish": "Slutfördes inte",
+    "pg_alert_discarded": "Kasserad som spökcykel eller tömning",
     "pg_alert_false_end": "Uppdelad i flera cykler",
     "pg_alert_unmatched": "Ingen matchning",
     "pg_alert_ambiguous": "Tvetydig matchning",
@@ -1129,7 +1130,7 @@
     "review_which_program": "Vilket program var det?"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Diskmaskin: sekunder under Stopptröskel sedan senaste aktiviteten som avslutar väntan på den sista tömningen, när den förväntade längden har nåtts",
+    "dishwasher_end_spike_quiet_release": "Diskmaskin: sekunder under Stopptröskel sedan senaste aktiviteten som krävs för att avsluta väntan på den sista tömningen efter den förväntade längden",
     "smart_termination_duration_ratio": "Andel av programmets genomsnittliga längd som en cykel måste nå innan smart avslutning får avsluta den i förtid; sänk den om körtiderna varierar",
     "completion_min_seconds": "Kortaste körning som räknas som en riktig cykel",
     "interrupted_min_seconds": "Korta cykler markeras som avbrutna",

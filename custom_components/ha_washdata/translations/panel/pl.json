@@ -593,6 +593,7 @@
     "pg_alert_overrun": "Wydłużenie",
     "pg_alert_underrun": "Skrócenie",
     "pg_alert_did_not_finish": "Nie zakończono",
+    "pg_alert_discarded": "Odrzucono jako fałszywy cykl lub odpompowanie",
     "pg_alert_false_end": "Podzielono na wiele cykli",
     "pg_alert_unmatched": "Bez dopasowania",
     "pg_alert_ambiguous": "Niejednoznaczne dopasowanie",
@@ -2031,7 +2032,7 @@
     "other": "Inne"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Zmywarka: sekundy poniżej Progu Zatrzymania od ostatniej aktywności, po których kończy się oczekiwanie na końcowe odpompowanie, gdy minie oczekiwany czas trwania",
+    "dishwasher_end_spike_quiet_release": "Zmywarka: sekundy poniżej Progu Zatrzymania od ostatniej aktywności potrzebne do zakończenia oczekiwania na końcowe odpompowanie po upływie oczekiwanego czasu trwania",
     "smart_termination_duration_ratio": "Ułamek średniego czasu trwania programu, który cykl musi osiągnąć, zanim Inteligentne zakończenie może go zakończyć wcześniej; obniż, jeśli czasy pracy się wahają",
     "anti_crease_finalize_ratio": "Ułamek średniego czasu trwania programu, który cykl musi osiągnąć, zanim ogon antygniotowy może go zakończyć; obniż w suszarkach, w pralkach zostaw wartość domyślną",
     "anti_wrinkle_enabled": "Pochłaniaj impulsy bębna po głównej fazie, zamiast odczytywać je jako nowe cykle",

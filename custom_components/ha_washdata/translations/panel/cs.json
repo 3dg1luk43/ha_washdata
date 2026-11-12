@@ -593,6 +593,7 @@
     "pg_alert_overrun": "Přeběh",
     "pg_alert_underrun": "Podběh",
     "pg_alert_did_not_finish": "Nedokončeno",
+    "pg_alert_discarded": "Zahozeno jako falešný cyklus nebo odčerpání",
     "pg_alert_false_end": "Rozděleno na více cyklů",
     "pg_alert_unmatched": "Bez shody",
     "pg_alert_ambiguous": "Nejednoznačná shoda",
@@ -2031,7 +2032,7 @@
     "other": "Jiné"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Myčka: sekundy pod Prahem zastavení od poslední aktivity, po kterých skončí čekání na závěrečné odčerpání, jakmile uplyne očekávaná doba trvání",
+    "dishwasher_end_spike_quiet_release": "Myčka: sekundy pod Prahem zastavení od poslední aktivity potřebné k ukončení čekání na závěrečné odčerpání po uplynutí očekávané doby trvání",
     "smart_termination_duration_ratio": "Zlomek průměrné doby trvání programu, kterého musí cyklus dosáhnout, než jej Chytré ukončení smí ukončit dříve; snižte, pokud doby běhu kolísají",
     "anti_crease_finalize_ratio": "Zlomek průměrné doby trvání programu, kterého musí cyklus dosáhnout, než jej ocas ochrany před zmačkáním smí dokončit; u sušiček snižte, u praček ponechte výchozí",
     "anti_wrinkle_enabled": "Pohltit pulzy bubnu po hlavní fázi místo čtení jako nové cykly",

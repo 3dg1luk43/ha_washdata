@@ -539,6 +539,7 @@
     "pg_alert_overrun": "Longo demais",
     "pg_alert_underrun": "Curto demais",
     "pg_alert_did_not_finish": "Não terminou",
+    "pg_alert_discarded": "Descartado como fantasma ou escoamento",
     "pg_alert_false_end": "Dividido em vários ciclos",
     "pg_alert_unmatched": "Sem correspondência",
     "pg_alert_ambiguous": "Correspondência ambígua",
@@ -1957,7 +1958,7 @@
     "other": "Outro"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Lava-louças: segundos abaixo do Limite de Parada desde a última atividade que encerram a espera pelo escoamento final, quando a duração esperada é atingida",
+    "dishwasher_end_spike_quiet_release": "Lava-louças: segundos abaixo do Limite de Parada desde a última atividade necessários para encerrar a espera pelo escoamento final após a duração esperada",
     "smart_termination_duration_ratio": "Fração da duração média do programa que um ciclo deve atingir antes de o Encerramento inteligente poder finalizá-lo mais cedo; reduza se os tempos de execução variarem",
     "anti_crease_finalize_ratio": "Fração da duração média do programa que um ciclo deve atingir antes de a cauda antiamasso poder finalizá-lo; reduza em secadoras, deixe as lavadoras no padrão",
     "anti_wrinkle_enabled": "Absorver os pulsos de giro após a fase principal em vez de lê-los como novos ciclos",

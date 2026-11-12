@@ -593,6 +593,7 @@
     "pg_alert_overrun": "Podaljšanje",
     "pg_alert_underrun": "Skrajšanje",
     "pg_alert_did_not_finish": "Ni končano",
+    "pg_alert_discarded": "Zavrženo kot lažni cikel ali izčrpavanje",
     "pg_alert_false_end": "Razdeljeno na več ciklov",
     "pg_alert_unmatched": "Brez ujemanja",
     "pg_alert_ambiguous": "Dvoumno ujemanje",
@@ -2031,7 +2032,7 @@
     "other": "Drugo"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Pomivalni stroj: sekunde pod Pragom zaustavitve od zadnje aktivnosti, po katerih se čakanje na končno izčrpavanje konča, ko je pričakovano trajanje doseženo",
+    "dishwasher_end_spike_quiet_release": "Pomivalni stroj: sekunde pod Pragom zaustavitve od zadnje aktivnosti, potrebne, da se čakanje na končno izčrpavanje konča po izteku pričakovanega trajanja",
     "smart_termination_duration_ratio": "Delež povprečnega trajanja programa, ki ga mora cikel doseči, preden ga Pametni zaključek sme predčasno končati; znižajte, če se časi delovanja razlikujejo",
     "anti_crease_finalize_ratio": "Delež povprečnega trajanja programa, ki ga mora cikel doseči, preden ga rep zaščite pred gubami sme zaključiti; znižajte pri sušilnih strojih, pri pralnih pustite privzeto",
     "anti_wrinkle_enabled": "Vsrkaj pulze vrtenja po glavni fazi, namesto da jih obravnavaš kot nove cikle",

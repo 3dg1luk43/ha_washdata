@@ -539,6 +539,7 @@
     "pg_alert_overrun": "Demasiado largo",
     "pg_alert_underrun": "Demasiado corto",
     "pg_alert_did_not_finish": "No terminó",
+    "pg_alert_discarded": "Descartado como fantasma o vaciado",
     "pg_alert_false_end": "Dividido en varios ciclos",
     "pg_alert_unmatched": "Sin coincidencia",
     "pg_alert_ambiguous": "Coincidencia ambigua",
@@ -1093,7 +1094,7 @@
     "review_which_program": "¿Qué programa fue?"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Lavavajillas: segundos por debajo del Umbral de parada desde la última actividad que terminan la espera del vaciado final, una vez alcanzada la duración esperada",
+    "dishwasher_end_spike_quiet_release": "Lavavajillas: segundos por debajo del Umbral de parada desde la última actividad necesarios para terminar la espera del vaciado final tras la duración esperada",
     "smart_termination_duration_ratio": "Fracción de la duración media del programa que un ciclo debe alcanzar antes de que la Terminación inteligente pueda finalizarlo antes de tiempo; redúzcala si la duración varía",
     "anti_crease_finalize_ratio": "Fracción de la duración media del programa que un ciclo debe alcanzar antes de que la cola antiarrugas pueda terminarlo; redúzcala en secadoras, deje las lavadoras en el valor predeterminado",
     "anti_wrinkle_enabled": "Absorber los pulsos de giro tras la fase principal en lugar de leerlos como nuevos ciclos",

@@ -5567,6 +5567,14 @@ class WashDataManager:
         self.diag_buffer.record_state(
             old_state, new_state, self._current_program, utc_now()
         )
+        # Anti-wrinkle left on idle inside a programme-end tail hold: the cycle end
+        # cleared the snapshot minutes ago, and the periodic saves run only in the
+        # active states, so a crash in the hold lost it and the tail's next pulse
+        # opened a cycle. Saved now, as a stop or an unload would.
+        if new_state == STATE_OFF and not self._is_shutdown and getattr(
+            self.detector, "anticrease_hold_pending", False
+        ) is True:
+            self._spawn_tracked(self._async_save_tail_hold())
         # A start from idle owns no update intervals yet: drop anything a false
         # start (STARTING -> OFF, which ends no cycle) left pending, so it is not
         # committed with this cycle (#458). DELAY_WAIT is idle too, and since item
@@ -6421,6 +6429,15 @@ class WashDataManager:
             self.detector.state == STATE_ANTI_WRINKLE
             and getattr(self.detector, "in_anticrease_tail", False) is True
         )
+
+    async def _async_save_tail_hold(self) -> None:
+        """Write the detector's snapshot while it holds a programme-end tail in OFF."""
+        try:
+            if self._in_anticrease_tail():
+                snapshot = self._augment_active_snapshot(self.detector.get_state_snapshot())
+                await self.profile_store.async_save_active_cycle(snapshot)
+        except Exception:  # noqa: BLE001 - a tail snapshot must never break detection
+            self._logger.debug("Could not save the anti-crease tail hold", exc_info=True)
 
     def _augment_active_snapshot(self, snapshot: dict[str, Any]) -> dict[str, Any]:
         """Add manager-owned fields to a detector snapshot before persisting.
@@ -8839,6 +8856,17 @@ class WashDataManager:
         )
         remaining_seconds = int(max(0, round(float(self._time_remaining or 0.0))))
         elapsed_seconds = max(0, total_seconds - remaining_seconds)
+        # The bar shows the progress sensor's value (progress.py, the one source):
+        # on a profile with an anti-crease tail the countdown stops at the
+        # programme end, so total minus remaining ran the bar ahead of the sensor
+        # (67% shown for 50% at half of a 120 min wash with a 30 min tail).
+        shown = float(self._cycle_progress or 0.0)
+        if 0.0 < shown <= 100.0:
+            progress_pct = shown
+            bar_seconds = int(round(total_seconds * shown / 100.0))
+        else:
+            progress_pct = 100.0 * elapsed_seconds / total_seconds if total_seconds > 0 else 0.0
+            bar_seconds = elapsed_seconds
 
         # When a chronometer notification is on the phone but the estimate has
         # expired, bypass the cap once to replace the frozen "0:00" countdown
@@ -8873,7 +8901,7 @@ class WashDataManager:
 
         extra_vars: dict[str, Any] = {
             "tag": self._live_notification_tag,
-            "progress": elapsed_seconds,
+            "progress": bar_seconds,
             "progress_max": total_seconds,
             "live_update": True,
             "alert_once": True,
@@ -8892,9 +8920,6 @@ class WashDataManager:
         # flat progress/when keys above. Forwarded to mobile_app_* targets only (see
         # _send_notification_service); non-mobile live targets are already skipped.
         eta_timestamp = int(now.timestamp()) + remaining_seconds
-        progress_pct = (
-            100.0 * elapsed_seconds / total_seconds if total_seconds > 0 else 0.0
-        )
         activity_marker = None if self._live_activity_started else "start"
         extra_vars.update(
             self._build_ios_live_activity_extras(

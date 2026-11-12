@@ -587,6 +587,7 @@
     "pg_alert_overrun": "For lang",
     "pg_alert_underrun": "For kort",
     "pg_alert_did_not_finish": "Ble ikke fullført",
+    "pg_alert_discarded": "Forkastet som spøkelsessyklus eller tømming",
     "pg_alert_false_end": "Delt i flere sykluser",
     "pg_alert_unmatched": "Uten treff",
     "pg_alert_ambiguous": "Tvetydig treff",
@@ -1129,7 +1130,7 @@
     "review_which_program": "Hvilket program var det?"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Oppvaskmaskin: sekunder under Stoppterskel siden siste aktivitet som avslutter ventingen på siste tømming, når forventet varighet er nådd",
+    "dishwasher_end_spike_quiet_release": "Oppvaskmaskin: sekunder under Stoppterskel siden siste aktivitet som trengs for å avslutte ventingen på siste tømming etter forventet varighet",
     "smart_termination_duration_ratio": "Andel av programmets gjennomsnittlige varighet som en syklus må nå før smart avslutning kan avslutte den tidlig; senk den hvis kjøretidene varierer",
     "completion_min_seconds": "Korteste kjøring som teller som en ekte syklus",
     "interrupted_min_seconds": "Korte sykluser merkes som avbrutt",

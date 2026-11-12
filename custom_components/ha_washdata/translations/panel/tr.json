@@ -582,6 +582,7 @@
         "pg_alert_overrun": "Uzun sürdü",
         "pg_alert_underrun": "Kısa sürdü",
         "pg_alert_did_not_finish": "Bitmedi",
+        "pg_alert_discarded": "Sahte döngü veya tahliye olarak atıldı",
         "pg_alert_false_end": "Birden fazla döngüye bölündü",
         "pg_alert_unmatched": "Eşleşmedi",
         "pg_alert_ambiguous": "Belirsiz eşleşme",
@@ -1142,7 +1143,7 @@
         "anti_wrinkle_max_power": "Bunun üzerindeki bir darbe kırışıklık önlemeyi bitirir ve yeni bir döngü açar",
         "profile_match_min_duration_ratio": "Profil süresinin kesri olarak en kısa döngü uzunluğu; varsayılan 0.1 (%10)",
         "profile_match_max_duration_ratio": "Profil süresinin kesri olarak en uzun döngü uzunluğu; varsayılan 1.8 (%180)",
-        "dishwasher_end_spike_quiet_release": "Bulaşık makinesi: beklenen süreye ulaşıldıktan sonra, son etkinlikten beri Durdurma Eşiği'nin altında geçen ve son tahliye beklemesini bitiren saniyeler",
+        "dishwasher_end_spike_quiet_release": "Bulaşık makinesi: beklenen süreden sonra son tahliye beklemesini bitirmek için gereken, son etkinlikten beri Durdurma Eşiği'nin altında geçen saniyeler",
         "smart_termination_duration_ratio": "Akıllı Sonlandırma'nın döngüyü erken bitirebilmesi için döngünün ulaşması gereken, programın ortalama süresine oranı; çalışma süreleri değişkense düşürün",
         "anti_crease_finalize_ratio": "Kırışıklık önleme kuyruğunun döngüyü bitirebilmesi için döngünün ulaşması gereken, programın ortalama süresine oranı; kurutucularda düşürün, çamaşır makinelerini varsayılanda bırakın",
         "curve_preroll_seconds": "İptal edilen başlatma denemelerinden bir döngünün eğrisinin başına taşınan okuma saniyesi; 0 = kapalı"

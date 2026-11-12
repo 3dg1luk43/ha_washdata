@@ -178,3 +178,21 @@ def test_a_discarded_end_does_not_stand_in_for_the_tail_flush() -> None:
     sim.detector.force_end = lambda ts: flushed.append(ts)
     sim.run_tail()
     assert len(flushed) == 1
+
+
+def test_a_replay_whose_every_end_was_discarded_says_so() -> None:
+    """A replayed ghost or pump-out did end; the manager just would not store it.
+    It used to be reported as a replay that never reached a terminal state."""
+    cfg = build_detector_config(OPTIONS_487, {}, DEVICE_TYPE_DISHWASHER)
+    sim = playground._DetailSim(  # noqa: SLF001
+        {"id": "c568c", "start_time": T0.isoformat(),
+         "power_data": [[0.0, 0.5], [30.0, 0.5]]},
+        cfg, None, None, OPTIONS_487, None,
+    )
+    sim.captured.append({"duration": 30.0, "status": "completed"})
+    sim.discarded.append(ghost_rules.DISCARD_PUMP_OUT)
+    out = sim.finalize()
+    codes = {a["code"] for a in out["alerts"]}
+    assert out["outcome"]["detected"] is False
+    assert "discarded" in codes and "did_not_finish" not in codes
+    assert any("pump_out" in a["detail"] for a in out["alerts"] if a["code"] == "discarded")

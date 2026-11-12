@@ -42,7 +42,7 @@ def test_a_second_batch_run_on_a_busy_device_is_refused(first, second):
     hass, conn = _hass(), _conn()
     handlers = {
         "history": (ws_api.ws_start_playground_history, {"cycle_ids": [], "settings_override": {}}),
-        "sweep": (ws_api.ws_start_playground_sweep, {"param": "off_delay", "values": [60.0], "objective": "end_lag"}),
+        "sweep": (ws_api.ws_start_playground_sweep, {"param": "off_delay", "values": [60.0, 120.0], "objective": "end_lag"}),
     }
     a, b, c = _ctx(hass)
     with a, b, c:
@@ -123,3 +123,19 @@ def test_the_commands_take_a_count_up_to_the_batch_cap(command):
     assert schema({**base, "count": 50})["count"] == 50
     with pytest.raises(vol.Invalid):
         schema({**base, "count": 51})
+
+
+def test_a_sweep_that_collapses_to_one_value_is_refused():
+    """off_delay is an integer setting: 0.1-0.9 in five steps ran five replays of
+    0 s. The values are coerced as the replay runs them and deduplicated first."""
+    from custom_components.ha_washdata import playground
+
+    assert playground.effective_sweep_values("off_delay", [0.1, 0.3, 0.5, 0.7, 0.9]) == [0]
+    assert playground.effective_sweep_values("off_delay", [60.5, 60.9, 120.0]) == [60, 120]
+    hass, conn = _hass(), _conn()
+    a, b, c = _ctx(hass)
+    with a, b, c:
+        _start(ws_api.ws_start_playground_sweep, hass, conn, 1,
+               param="off_delay", values=[0.1, 0.3, 0.5, 0.7, 0.9], objective="end_lag")
+    assert conn.send_error.call_args.args[:2] == (1, "invalid_format")
+    assert not task_registry.get_registry(hass).snapshot("e")

@@ -582,6 +582,7 @@
     "pg_alert_overrun": "Ylitys",
     "pg_alert_underrun": "Alitus",
     "pg_alert_did_not_finish": "Ei valmistunut",
+    "pg_alert_discarded": "Hylätty haamujaksona tai vedenpoistona",
     "pg_alert_false_end": "Jakautui useaan sykliin",
     "pg_alert_unmatched": "Ei osumaa",
     "pg_alert_ambiguous": "Epäselvä osuma",
@@ -1129,7 +1130,7 @@
     "review_which_program": "Mikä ohjelma se oli?"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Astianpesukone: sekunnit Pysäytyskynnyksen alapuolella viimeisestä toiminnasta, joiden jälkeen lopullisen vedenpoiston odotus päättyy, kun odotettu kesto on kulunut",
+    "dishwasher_end_spike_quiet_release": "Astianpesukone: sekunnit Pysäytyskynnyksen alapuolella viimeisestä toiminnasta, joita tarvitaan lopullisen vedenpoiston odotuksen päättämiseen odotetun keston jälkeen",
     "smart_termination_duration_ratio": "Osuus ohjelman keskimääräisestä kestosta, joka syklin on saavutettava ennen kuin älykäs lopetus voi päättää sen aikaisin; laske sitä, jos ajoajat vaihtelevat",
     "anti_wrinkle_enabled": "Sulauta päävaiheen jälkeiset rumpupulssit sen sijaan, että lukisit ne uusina sykleinä",
     "anti_wrinkle_idle_timeout": "Kahden rumpupulssin välillä sallittu hiljainen aika ennen kuin ryppyjenesto päättyy",

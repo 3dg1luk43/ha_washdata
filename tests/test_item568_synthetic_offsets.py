@@ -542,3 +542,22 @@ def test_the_list_is_stored_compact_and_reloads_identical() -> None:
     assert disk["past_cycles"][1][SYNTHETIC_OFFSETS_KEY] == []  # known, and empty
     trace_codec.decode_store_payload(disk)
     assert disk == data
+
+
+def test_an_oversized_offset_is_skipped_not_raised() -> None:
+    from custom_components.ha_washdata.time_utils import offset_key
+
+    assert offset_key(1e308) is None
+    assert offset_key(12.34) == 123
+
+
+def test_without_a_start_time_synthetic_rows_share_the_traces_anchor() -> None:
+    """An ISO trace starting at 00:00 with its first keepalive at 00:01: converted on
+    its own, that keepalive came out at 0 s and named the trace's first row."""
+    from custom_components.ha_washdata.time_utils import normalize_synthetic_offsets
+
+    trace = [["2026-10-01T00:00:00+00:00", 500.0], ["2026-10-01T00:01:00+00:00", 2.0],
+             ["2026-10-01T00:02:00+00:00", 2.0]]
+    assert normalize_synthetic_offsets(["2026-10-01T00:01:00+00:00"], trace, None) == [60.0]
+    assert normalize_synthetic_offsets(
+        ["2026-10-01T00:01:00+00:00"], trace, "2026-10-01T00:00:00+00:00") == [60.0]

@@ -577,6 +577,7 @@
         "pg_alert_overrun": "長すぎ",
         "pg_alert_underrun": "短すぎ",
         "pg_alert_did_not_finish": "未完了",
+        "pg_alert_discarded": "誤検出サイクルまたは排水として破棄",
         "pg_alert_false_end": "複数サイクルに分割",
         "pg_alert_unmatched": "マッチなし",
         "pg_alert_ambiguous": "あいまいなマッチ",
@@ -1124,7 +1125,7 @@
         "anti_wrinkle_max_power": "これを超えるパルスはしわ防止を終了し、新しいサイクルを開始する",
         "profile_match_min_duration_ratio": "プロファイルの所要時間に対するサイクルの最短比率; デフォルト 0.1 (10%)",
         "profile_match_max_duration_ratio": "プロファイルの所要時間に対するサイクルの最長比率; デフォルト 1.8 (180%)",
-        "dishwasher_end_spike_quiet_release": "食器洗い機: 予想所要時間に達した後、最後の動作から停止しきい値を下回った状態が続き、最終排水の待機を終了するまでの秒数",
+        "dishwasher_end_spike_quiet_release": "食器洗い機: 予想所要時間の経過後、最終排水の待機を終了するのに必要な、最後の動作から停止しきい値を下回っている秒数",
         "smart_termination_duration_ratio": "スマート終了がサイクルを早期に終了できるようになるまでに、プログラムの平均所要時間に対して到達すべき割合。運転時間がばらつく場合は下げる",
         "anti_crease_finalize_ratio": "しわ防止の末尾でサイクルを終了できるようになるまでに、プログラムの平均所要時間に対して到達すべき割合。乾燥機では下げ、洗濯機はデフォルトのままにする",
         "curve_preroll_seconds": "中断された開始試行の測定値をサイクルの曲線の先頭に取り込む秒数。0 = 無効"

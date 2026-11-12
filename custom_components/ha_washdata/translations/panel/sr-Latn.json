@@ -588,6 +588,7 @@
     "pg_alert_overrun": "Duže od uobičajenog",
     "pg_alert_underrun": "Kraće od uobičajenog",
     "pg_alert_did_not_finish": "Nije završeno",
+    "pg_alert_discarded": "Odbačeno kao lažni ciklus ili ispumpavanje",
     "pg_alert_false_end": "Podeljeno na više ciklusa",
     "pg_alert_unmatched": "Bez poklapanja",
     "pg_alert_ambiguous": "Dvosmisleno poklapanje",
@@ -2011,7 +2012,7 @@
     "other": "Ostalo"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Mašina za pranje sudova: sekunde ispod Praga zaustavljanja od poslednje aktivnosti posle kojih se završava čekanje na završno ispumpavanje, kada se dostigne očekivano trajanje",
+    "dishwasher_end_spike_quiet_release": "Mašina za pranje sudova: sekunde ispod Praga zaustavljanja od poslednje aktivnosti potrebne da se okonča čekanje na završno ispumpavanje posle isteka očekivanog trajanja",
     "smart_termination_duration_ratio": "Deo prosečnog trajanja programa koji ciklus mora da dostigne pre nego što Pametno završavanje sme da ga okonča ranije; smanjite ako vremena rada variraju",
     "anti_crease_finalize_ratio": "Deo prosečnog trajanja programa koji ciklus mora da dostigne pre nego što rep zaštite od gužvanja sme da ga završi; smanjite kod mašina za sušenje, kod mašina za veš ostavite podrazumevano",
     "completion_min_seconds": "Najkraće pokretanje koje se računa kao pravi ciklus",

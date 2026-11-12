@@ -577,6 +577,7 @@
         "pg_alert_overrun": "Zgjati më gjatë",
         "pg_alert_underrun": "Zgjati më shkurt",
         "pg_alert_did_not_finish": "Nuk përfundoi",
+        "pg_alert_discarded": "U hodh poshtë si fantazmë ose zbrazje",
         "pg_alert_false_end": "U nda në disa cikle",
         "pg_alert_unmatched": "Pa përputhje",
         "pg_alert_ambiguous": "Përputhje e paqartë",
@@ -1999,7 +2000,7 @@
         "anti_wrinkle_max_power": "Një puls mbi këtë e mbaron modalitetin kundër rrudhave dhe hap një cikël të ri",
         "profile_match_min_duration_ratio": "Gjatësia minimale e ciklit si pjesë e kohëzgjatjes së profilit; parazgjedhja 0.1 (10%)",
         "profile_match_max_duration_ratio": "Gjatësia maksimale e ciklit si pjesë e kohëzgjatjes së profilit; parazgjedhja 1.8 (180%)",
-        "dishwasher_end_spike_quiet_release": "Pjatalarëse: sekonda nën Pragun e ndalimit që nga aktiviteti i fundit, që i japin fund pritjes për zbrazjen përfundimtare, pasi arrihet kohëzgjatja e pritshme",
+        "dishwasher_end_spike_quiet_release": "Pjatalarëse: sekonda nën Pragun e ndalimit që nga aktiviteti i fundit, të nevojshme për t'i dhënë fund pritjes për zbrazjen përfundimtare pas kohëzgjatjes së pritshme",
         "smart_termination_duration_ratio": "Pjesa e kohëzgjatjes mesatare të programit që një cikël duhet të arrijë përpara se Përfundimi i Zgjuar ta mbyllë herët; uleni nëse kohëzgjatjet ndryshojnë",
         "anti_crease_finalize_ratio": "Pjesa e kohëzgjatjes mesatare të programit që një cikël duhet të arrijë përpara se bishti kundër rrudhave ta përfundojë; uleni te tharëset, makinat larëse lërini në vlerën e parazgjedhur",
         "curve_preroll_seconds": "Sekonda leximesh nga përpjekjet e ndërprera për nisje të bartura në fillim të kurbës së një cikli; 0 = joaktiv"

@@ -414,3 +414,29 @@ async def test_a_force_stopped_clean_state_with_power_off_survives_a_restart(
     await _feed(hass, freezer, 0.2, 240)            # the power drops: Off
     assert manager.check_state() == STATE_OFF
     assert manager.is_clean_state is False
+
+
+async def test_entering_the_off_tail_hold_saves_it_for_a_crash(
+    hass: HomeAssistant, setup_washdata_entry, freezer, hass_storage
+) -> None:
+    """The stop and unload save the hold, but a crash does neither: the snapshot
+    is written when the detector enters the hold, so a crash restart keeps it."""
+    from custom_components.ha_washdata.const import STATE_ANTI_WRINKLE, STATE_OFF, STATE_STARTING
+
+    options = {**FAST, "anti_wrinkle_enabled": True, "anti_wrinkle_max_power": 400.0}
+    entry = await setup_washdata_entry(power_sensor=POWER, options=options)
+    manager = _manager(hass, entry)
+    await _feed(hass, freezer, 0.0, 60)
+    assert manager.detector.state == STATE_OFF
+    manager.detector._anticrease_tail_hold_until = (  # noqa: SLF001 - as the finalise leaves it
+        dt_util.utcnow() + timedelta(minutes=30)
+    )
+    manager._on_state_change(STATE_ANTI_WRINKLE, STATE_OFF)  # noqa: SLF001
+    await hass.async_block_till_done()
+    assert manager.profile_store.get_active_cycle() is not None
+    manager = await _restart(hass, entry, freezer, hass_storage, 60)   # a crash: no stop event
+    seen = []
+    for _ in range(10):
+        await _feed(hass, freezer, 40.0, 30)
+        seen.append(manager.detector.state)
+    assert not {STATE_STARTING, STATE_RUNNING} & set(seen), seen

@@ -592,6 +592,7 @@
     "pg_alert_overrun": "Per ilgai",
     "pg_alert_underrun": "Per trumpai",
     "pg_alert_did_not_finish": "Nebaigta",
+    "pg_alert_discarded": "Atmesta kaip netikras ciklas arba vandens išleidimas",
     "pg_alert_false_end": "Suskilo į kelis ciklus",
     "pg_alert_unmatched": "Be atitikties",
     "pg_alert_ambiguous": "Neaiški atitiktis",
@@ -2031,7 +2032,7 @@
     "other": "Kita"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Indaplovė: sekundės žemiau Sustabdymo slenksčio nuo paskutinės veiklos, po kurių baigiamas galutinio vandens išleidimo laukimas, kai pasiekta numatoma trukmė",
+    "dishwasher_end_spike_quiet_release": "Indaplovė: sekundės žemiau Sustabdymo slenksčio nuo paskutinės veiklos, reikalingos galutinio vandens išleidimo laukimui užbaigti, praėjus numatomai trukmei",
     "smart_termination_duration_ratio": "Programos vidutinės trukmės dalis, kurią ciklas turi pasiekti, kad išmanusis užbaigimas galėtų jį užbaigti anksčiau; sumažinkite, jei veikimo trukmė svyruoja",
     "anti_crease_finalize_ratio": "Programos vidutinės trukmės dalis, kurią ciklas turi pasiekti, kad apsaugos nuo raukšlių uodega galėtų jį užbaigti; džiovyklėms sumažinkite, skalbyklėms palikite numatytąją",
     "anti_wrinkle_enabled": "Sugerkite būgno impulsus po pagrindinės fazės, o ne skaitykite juos kaip naujus ciklus",

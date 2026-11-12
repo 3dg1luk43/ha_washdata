@@ -539,6 +539,7 @@
     "pg_alert_overrun": "Prea lung",
     "pg_alert_underrun": "Prea scurt",
     "pg_alert_did_not_finish": "Nu s-a terminat",
+    "pg_alert_discarded": "Eliminat ca fantomă sau evacuare",
     "pg_alert_false_end": "Împărțit în mai multe cicluri",
     "pg_alert_unmatched": "Fără potrivire",
     "pg_alert_ambiguous": "Potrivire ambiguă",
@@ -1957,7 +1958,7 @@
     "other": "Altele"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Mașină de spălat vase: secunde sub Pragul de Oprire de la ultima activitate care încheie așteptarea evacuării finale, după atingerea duratei așteptate",
+    "dishwasher_end_spike_quiet_release": "Mașină de spălat vase: secunde sub Pragul de Oprire de la ultima activitate necesare pentru a încheia așteptarea evacuării finale după durata așteptată",
     "smart_termination_duration_ratio": "Fracțiunea din durata medie a programului pe care un ciclu trebuie să o atingă înainte ca Terminarea inteligentă să îl poată încheia mai devreme; reduceți-o dacă duratele variază",
     "anti_crease_finalize_ratio": "Fracțiunea din durata medie a programului pe care un ciclu trebuie să o atingă înainte ca finalul anti-șifonare să îl poată încheia; reduceți-o la uscătoare, lăsați mașinile de spălat la implicit",
     "anti_wrinkle_enabled": "Absoarbe impulsurile de rotire de după faza principală în loc să le trateze drept cicluri noi",

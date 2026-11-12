@@ -1787,7 +1787,14 @@ class _DetailSim:
         alerts: list[dict[str, Any]] = []
         expected_dur = float(last_match["expected"] or 0.0)
         final_dur = outcome["final_duration_s"] or 0.0
-        if not outcome["detected"]:
+        dropped = [why for why in self.discarded if why is not None]
+        if not outcome["detected"] and dropped:
+            # It did end, as a run the manager discards (a ghost or a dishwasher
+            # pump-out, item 568): not a replay that never reached an end.
+            alerts.append({"code": "discarded", "severity": "warn",
+                           "detail": "Every end in the replay was discarded: "
+                                     + ", ".join(sorted(set(dropped))) + "."})
+        elif not outcome["detected"]:
             alerts.append({"code": "did_not_finish", "severity": "error",
                            "detail": "Cycle never reached a terminal state in the replay."})
         if outcome["detected"] and (outcome["detected_count"] or 0) > 1:
@@ -2322,6 +2329,24 @@ def _coerce_param(base_config: CycleDetectorConfig, param: str, value: float) ->
         return coerce(value)
     except (TypeError, ValueError, OverflowError):
         return value
+
+
+def effective_sweep_values(param: str, values: list[Any]) -> list[Any]:
+    """``values`` as the replay will run them (the override map's coercion: an
+    integer setting truncates), distinct, in order. A 0.1-0.9 Off Delay sweep was
+    five runs of the same 0 s. Never raises; a value that cannot be read is dropped."""
+    out: list[Any] = []
+    for value in values:
+        try:
+            number = float(value)
+        except (TypeError, ValueError, OverflowError):
+            continue
+        if not math.isfinite(number):
+            continue
+        coerced = _coerce_param(None, param, number)  # type: ignore[arg-type]
+        if coerced not in out:
+            out.append(coerced)
+    return out
 
 
 def run_playground_sweep(

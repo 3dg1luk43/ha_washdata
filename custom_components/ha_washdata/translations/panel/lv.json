@@ -587,6 +587,7 @@
     "pg_alert_overrun": "Par ilgu",
     "pg_alert_underrun": "Par īsu",
     "pg_alert_did_not_finish": "Nepabeidzās",
+    "pg_alert_discarded": "Atmests kā viltus cikls vai ūdens izvadīšana",
     "pg_alert_false_end": "Sadalījās vairākos ciklos",
     "pg_alert_unmatched": "Bez atbilstības",
     "pg_alert_ambiguous": "Neskaidra atbilstība",
@@ -2011,7 +2012,7 @@
     "other": "Cits"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Trauku mazgājamā mašīna: sekundes zem Apstāšanās sliekšņa kopš pēdējās darbības, pēc kurām beidzas beigu ūdens izvadīšanas gaidīšana, kad sasniegts paredzētais ilgums",
+    "dishwasher_end_spike_quiet_release": "Trauku mazgājamā mašīna: sekundes zem Apstāšanās sliekšņa kopš pēdējās darbības, kas vajadzīgas, lai pārtrauktu beigu ūdens izvadīšanas gaidīšanu pēc paredzētā ilguma sasniegšanas",
     "smart_termination_duration_ratio": "Programmas vidējā ilguma daļa, kas ciklam jāsasniedz, pirms Viedā pabeigšana drīkst to beigt agrāk; samaziniet, ja darbības laiks mainās",
     "anti_crease_finalize_ratio": "Programmas vidējā ilguma daļa, kas ciklam jāsasniedz, pirms pretgrumbu aste drīkst to pabeigt; žāvētājiem samaziniet, veļas mašīnām atstājiet noklusējumu",
     "anti_wrinkle_enabled": "Absorbējiet griešanās impulsus pēc galvenās fāzes, nevis nolasiet tos kā jaunus ciklus",

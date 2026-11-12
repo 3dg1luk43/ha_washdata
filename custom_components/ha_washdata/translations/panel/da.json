@@ -587,6 +587,7 @@
     "pg_alert_overrun": "For lang",
     "pg_alert_underrun": "For kort",
     "pg_alert_did_not_finish": "Blev ikke fuldført",
+    "pg_alert_discarded": "Kasseret som spøgelsescyklus eller udpumpning",
     "pg_alert_false_end": "Opdelt i flere cyklusser",
     "pg_alert_unmatched": "Uden match",
     "pg_alert_ambiguous": "Tvetydig match",
@@ -1129,7 +1130,7 @@
     "review_which_program": "Hvilket program var det?"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Opvaskemaskine: sekunder under Stoptærskel siden seneste aktivitet, der afslutter ventetiden på den sidste udpumpning, når den forventede varighed er nået",
+    "dishwasher_end_spike_quiet_release": "Opvaskemaskine: sekunder under Stoptærskel siden seneste aktivitet, der skal til for at afslutte ventetiden på den sidste udpumpning efter den forventede varighed",
     "smart_termination_duration_ratio": "Andel af programmets gennemsnitlige varighed, som en cyklus skal nå, før smart afslutning må afslutte den tidligt; sænk den, hvis køretiderne varierer",
     "completion_min_seconds": "Korteste kørsel, der tæller som en rigtig cyklus",
     "interrupted_min_seconds": "Korte cyklusser markeres som afbrudt",

@@ -214,6 +214,9 @@ def test_the_harness_dedupe_keeps_thresholds_and_legacy_traces_apart() -> None:
         ["2026-10-01T08:00:00+00:00", 5.0], ["2026-10-01T08:10:00+00:00", 5.0],
         ["2026-10-01T08:20:00+00:00", 0.0]]}
     assert mod._trace_key(legacy, 1.0, 0.5) is not None  # noqa: SLF001
+    # Power a few tenths apart is another trace: whole-watt rounding merged them.
+    near = {**cyc, "power_data": [[0.0, 5.3], [600.0, 5.3], [1200.0, 0.0]]}
+    assert mod._trace_key(near, 1.0, 0.5) != mod._trace_key(cyc, 1.0, 0.5)  # noqa: SLF001
 
 
 # --- the stop --------------------------------------------------------------------

@@ -582,6 +582,7 @@
     "pg_alert_overrun": "Kestis kauem",
     "pg_alert_underrun": "Kestis lühemalt",
     "pg_alert_did_not_finish": "Ei lõpetanud",
+    "pg_alert_discarded": "Hüljatud kui kummitustsükkel või väljapumpamine",
     "pg_alert_false_end": "Jagunes mitmeks tsükliks",
     "pg_alert_unmatched": "Vasteta",
     "pg_alert_ambiguous": "Ebaselge vaste",
@@ -1129,7 +1130,7 @@
     "review_which_program": "Milline programm see oli?"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Nõudepesumasin: sekundid allpool Peatumise Läve alates viimasest tegevusest, mille järel lõpliku tühjenduse ootamine lõpeb, kui eeldatav kestus on täis",
+    "dishwasher_end_spike_quiet_release": "Nõudepesumasin: sekundid allpool Peatumise Läve alates viimasest tegevusest, mida on vaja lõpliku tühjenduse ootamise lõpetamiseks pärast eeldatavat kestust",
     "smart_termination_duration_ratio": "Osa programmi keskmisest kestusest, milleni tsükkel peab jõudma, enne kui nutikas lõpetamine tohib selle varem lõpetada; vähendage, kui tööajad kõiguvad",
     "anti_wrinkle_enabled": "Neelab pärast põhifaasi trummelimpulsid, selle asemel et lugeda neid uute tsüklitena",
     "anti_wrinkle_idle_timeout": "Kahe trummelimpulsi vahel lubatud vaikuseaeg enne kortsudevastase režiimi lõppu",

@@ -7415,13 +7415,22 @@ def ws_start_playground_sweep(
         return
     if _pg_refuse_busy(hass, connection, msg["id"], entry_id):
         return
+    # The values the replay will actually run: an integer setting truncates, so a
+    # narrow range collapsed to one value scored the same configuration N times.
+    values = playground.effective_sweep_values(msg["param"], list(msg.get("values") or []))
+    if len(values) < 2:
+        connection.send_error(
+            msg["id"], "invalid_format",
+            "The range holds fewer than two distinct values for this setting",
+        )
+        return
     reg = task_registry.get_registry(hass)
     task = reg.create(
         entry_id, "pg_sweep", f"Optimize: {msg['param']}",
         label_key="task.pg_sweep.optimize", label_params={"param": msg["param"]},
     )
     _raw = hass.async_create_task(_pg_sweep_task(
-        hass, task, entry_id, msg["param"], list(msg.get("values") or []),
+        hass, task, entry_id, msg["param"], values,
         msg["objective"], list(msg.get("cycle_ids") or []), msg.get("count"),
     ))
     if _raw is not None:

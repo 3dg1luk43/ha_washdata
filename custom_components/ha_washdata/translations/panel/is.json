@@ -587,6 +587,7 @@
     "pg_alert_overrun": "Of lengi",
     "pg_alert_underrun": "Of stutt",
     "pg_alert_did_not_finish": "Lauk ekki",
+    "pg_alert_discarded": "Fleygt sem draugalotu eða útdælingu",
     "pg_alert_false_end": "Skipt í margar lotur",
     "pg_alert_unmatched": "Engin samsvörun",
     "pg_alert_ambiguous": "Óljós samsvörun",
@@ -1129,7 +1130,7 @@
     "review_which_program": "Hvaða kerfi var það?"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Uppþvottavél: sekúndur undir Stöðvunarþröskuldi frá síðustu virkni sem ljúka biðinni eftir lokaútdælingu, þegar væntanlegri lengd er náð",
+    "dishwasher_end_spike_quiet_release": "Uppþvottavél: sekúndur undir Stöðvunarþröskuldi frá síðustu virkni sem þarf til að ljúka biðinni eftir lokaútdælingu að lokinni væntanlegri lengd",
     "smart_termination_duration_ratio": "Hlutfall af meðallengd kerfisins sem lota þarf að ná áður en snjöll lokun má ljúka henni snemma; lækkaðu það ef keyrslutímar eru breytilegir",
     "completion_min_seconds": "Stysta keyrsla sem telst raunveruleg lota",
     "interrupted_min_seconds": "Stuttar lotur merktar sem truflaðar",

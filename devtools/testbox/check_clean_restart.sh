@@ -73,6 +73,11 @@ NAG0=0
 nag_sent() { echo $(( $(nag_count) - NAG0 )); }
 
 FAIL=0
+# Home Assistant rolls its log over at every start, so the errors of a boot are
+# read before the next restart and kept here for the final check.
+ERRLOG=$(mktemp)
+trap 'rm -f "$ERRLOG"' EXIT
+scan_errors() { $HACTL errors >> "$ERRLOG" 2>/dev/null || true; }
 check() {  # check <label> <got> <expected>
   if [ "$2" = "$3" ]; then
     echo "  PASS  $1 ($2)"
@@ -95,6 +100,7 @@ common_options "$ENTRY_B"
 $HACTL set-options "$ENTRY_B" \
   door_sensor_entity="$DOOR" \
   notify_unload_delay_minutes=0 > /dev/null
+scan_errors
 $HACTL restart > /dev/null
 # A state pushed through the REST API is not restored across a restart, so the
 # door is seeded after it (closed: only a closed door enters Clean).
@@ -131,6 +137,7 @@ check "written while HA runs (no unload on a restart)" \
 
 echo
 echo "== graceful restart (SIGTERM, the stop path)"
+scan_errors
 $HACTL restart > /dev/null
 sleep 5
 check "no door sensor: still Clean" "$(state_of sensor.clean_restart_state)" clean
@@ -143,6 +150,7 @@ check "original Clean start kept" "$(clean_record "$ENTRY_A" start)" "$START_A"
 
 echo
 echo "== crash (SIGKILL, nothing written at stop)"
+scan_errors
 docker compose kill -s SIGKILL ha > /dev/null
 docker compose start ha > /dev/null
 $HACTL wait > /dev/null
@@ -167,6 +175,7 @@ check "record dropped" "$(clean_record "$ENTRY_A" start)" none
 
 echo
 echo "== a restart after the unload stays unloaded"
+scan_errors
 $HACTL restart > /dev/null
 sleep 5
 GOT=$(state_of sensor.clean_restart_state)
@@ -175,7 +184,8 @@ GOT=$(state_of sensor.clean_restart_state)
 
 echo
 echo "== nothing rejected or raised"
-if $HACTL errors | grep -iE "clean_state|Clean state|MultipleInvalid" ; then
+scan_errors
+if grep -iE "clean_state|Clean state|MultipleInvalid" "$ERRLOG" ; then
   echo "  FAIL  an error mentions the Clean state"
   FAIL=1
 else

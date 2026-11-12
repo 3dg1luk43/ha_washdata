@@ -539,6 +539,7 @@
     "pg_alert_overrun": "Trop long",
     "pg_alert_underrun": "Trop court",
     "pg_alert_did_not_finish": "N'a pas terminé",
+    "pg_alert_discarded": "Écarté comme fantôme ou vidange",
     "pg_alert_false_end": "Divisé en plusieurs cycles",
     "pg_alert_unmatched": "Sans correspondance",
     "pg_alert_ambiguous": "Correspondance ambiguë",
@@ -1093,7 +1094,7 @@
     "review_which_program": "De quel programme s'agissait-il ?"
   },
   "pg_desc": {
-    "dishwasher_end_spike_quiet_release": "Lave-vaisselle : secondes sous le Seuil d'arrêt depuis la dernière activité qui mettent fin à l'attente de la vidange finale, une fois la durée attendue atteinte",
+    "dishwasher_end_spike_quiet_release": "Lave-vaisselle : secondes sous le Seuil d'arrêt depuis la dernière activité nécessaires pour mettre fin à l'attente de la vidange finale après la durée attendue",
     "smart_termination_duration_ratio": "Fraction de la durée moyenne du programme qu'un cycle doit atteindre avant que la Terminaison intelligente puisse l'arrêter plus tôt ; baissez-la si les durées varient",
     "anti_crease_finalize_ratio": "Fraction de la durée moyenne du programme qu'un cycle doit atteindre avant que la traîne anti-froissement puisse le terminer ; baissez-la sur les sèche-linge, gardez la valeur par défaut sur les lave-linge",
     "anti_wrinkle_enabled": "Absorber les impulsions de rotation après la phase principale au lieu de les lire comme de nouveaux cycles",
