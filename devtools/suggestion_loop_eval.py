@@ -128,6 +128,7 @@ import hashlib  # noqa: E402
 import importlib.util  # noqa: E402
 import json  # noqa: E402
 import logging  # noqa: E402
+import math  # noqa: E402
 import sys  # noqa: E402
 import time  # noqa: E402
 import warnings  # noqa: E402
@@ -646,9 +647,11 @@ def _stored_end(cycle: dict) -> datetime | None:
     start = _parse_utc(cycle.get("start_time"))
     try:
         duration = float(cycle.get("duration") or 0.0)
+        if start is None or not math.isfinite(duration) or duration <= 0:
+            return None
+        return start + timedelta(seconds=duration)
     except (TypeError, ValueError, OverflowError):
-        return None
-    return start + timedelta(seconds=duration) if start is not None and duration > 0 else None
+        return None  # a corrupt length: the end is unknown, the cycle is kept
 
 
 def assemble(

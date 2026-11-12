@@ -3694,9 +3694,12 @@ class WashDataManager:
             return False
         now = utc_now()
         # The terminal state it was shown over. A restored anti-crease tail or
-        # probe keeps its own state, and so does an OFF it was shown over.
+        # probe keeps its own state, and so does an OFF it was shown over. A
+        # force-stopped end enters Clean too (`cycle_end_is_finish`), and live
+        # power-based Off keeps it until the power drops, so it is restored as is.
+        terminal = record.get("detector_state")
         finished = (
-            record.get("detector_state") == STATE_FINISHED
+            terminal in (STATE_FINISHED, STATE_FORCE_STOPPED)
             and self.detector.state == STATE_OFF
         )
         self._is_clean_state = True
@@ -3732,7 +3735,7 @@ class WashDataManager:
             self._reset_unload_nag_tracking()
             return False
         if finished:
-            self.detector.restore_terminal_state(STATE_FINISHED, completed)
+            self.detector.restore_terminal_state(terminal, completed)
         self._cycle_progress = (
             100.0 if since_complete <= self._progress_reset_delay else 0.0
         )
@@ -6400,7 +6403,12 @@ class WashDataManager:
         OFF reads the tail's next drum bursts as a new cycle (one ~20 min cycle on
         the item-393 shape). The cycle end has already cleared the active slot, and
         the restore consumes it again, so a stale tail cannot come back later.
+        Also OFF inside a programme-end finalise's tail hold: the detector restores
+        that hold, but nothing was saved, so after a restart the tail's next pulse
+        opened a cycle.
         """
+        if getattr(self.detector, "anticrease_hold_pending", False) is True:
+            return True
         return (
             self.detector.state == STATE_ANTI_WRINKLE
             and getattr(self.detector, "in_anticrease_tail", False) is True

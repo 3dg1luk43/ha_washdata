@@ -110,8 +110,13 @@ def encode_store_payload(data: Any) -> Any:
         for cycle in cycles:
             if isinstance(cycle, dict):
                 copied: dict[str, Any] | None = None
-                for field, _kind in COMPACT_CYCLE_FIELDS:
-                    text = encode_value(cycle.get(field))
+                for field, kind in COMPACT_CYCLE_FIELDS:
+                    value = cycle.get(field)
+                    # Only the declared kind: decoding accepts nothing else, so a
+                    # list-valued debug_data (an import) stayed JSON text on load.
+                    if not isinstance(value, kind):
+                        continue
+                    text = encode_value(value)
                     if text is not None:
                         if copied is None:
                             copied = dict(cycle)

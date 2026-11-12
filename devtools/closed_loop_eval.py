@@ -90,6 +90,7 @@ import random  # noqa: E402
 import sys  # noqa: E402
 from collections import defaultdict  # noqa: E402
 from concurrent.futures import ProcessPoolExecutor  # noqa: E402
+from datetime import timezone  # noqa: E402
 from pathlib import Path  # noqa: E402
 from typing import Any, Callable, Iterable  # noqa: E402
 
@@ -145,7 +146,11 @@ def start_ts(c: dict) -> float:
     """Start time (epoch s) for ordering; 0 when unparseable."""
     from custom_components.ha_washdata.profile_store import _parse_start_dt  # noqa: PLC0415
     p = _parse_start_dt(c.get("start_time"))
-    return p.timestamp() if p else 0.0
+    if p is None:
+        return 0.0
+    # A naive stamp (older stores) is UTC, as the Playground reads it; .timestamp()
+    # would take it as the machine's local time and reorder it against aware ones.
+    return (p if p.tzinfo else p.replace(tzinfo=timezone.utc)).timestamp()
 
 
 def split_seeds(cycles: list[dict], key: Callable[[dict], float] = start_ts,

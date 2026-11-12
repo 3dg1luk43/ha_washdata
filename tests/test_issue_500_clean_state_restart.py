@@ -352,3 +352,65 @@ async def test_a_restored_running_cycle_supersedes_it(
     assert manager.check_state() == STATE_RUNNING
     assert manager.is_clean_state is False
     assert _record_on_disk(hass_storage, entry) is None
+
+
+async def test_a_stop_inside_the_off_tail_hold_keeps_the_hold(
+    hass: HomeAssistant, setup_washdata_entry, freezer, hass_storage
+) -> None:
+    """Anti-wrinkle left on idle inside a programme-end finalise's tail hold puts
+    the detector in OFF with the hold set. Nothing was saved at a stop, so after
+    the restart the tail's next pulse (40 W, held by a send-on-change plug) opened
+    a phantom cycle."""
+    from custom_components.ha_washdata.const import STATE_OFF, STATE_STARTING
+
+    options = {**FAST, "anti_wrinkle_enabled": True, "anti_wrinkle_max_power": 400.0}
+    entry = await setup_washdata_entry(power_sensor=POWER, options=options)
+    manager = _manager(hass, entry)
+    await _feed(hass, freezer, 0.0, 60)
+    assert manager.detector.state == STATE_OFF
+    manager.detector._anticrease_tail_hold_until = (  # noqa: SLF001 - as the finalise leaves it
+        dt_util.utcnow() + timedelta(minutes=30)
+    )
+    await manager._async_on_ha_stop(None)  # noqa: SLF001 - HA's stop event
+    manager = await _restart(hass, entry, freezer, hass_storage, 60)
+    seen = []
+    for _ in range(10):
+        await _feed(hass, freezer, 40.0, 30)
+        seen.append(manager.detector.state)
+    assert not {STATE_STARTING, STATE_RUNNING} & set(seen), seen
+
+
+async def test_a_force_stopped_clean_state_with_power_off_survives_a_restart(
+    hass: HomeAssistant, setup_washdata_entry, freezer, hass_storage
+) -> None:
+    """A force-stopped end enters Clean, and live power-based Off keeps it past the
+    reset delay until the power drops. The restore took only a FINISHED record as
+    terminal, so after a restart the reset delay expired it."""
+    from custom_components.ha_washdata.const import (
+        CONF_POWER_OFF_DELAY,
+        CONF_POWER_OFF_THRESHOLD_W,
+        CONF_STOP_THRESHOLD_W,
+        STATE_FORCE_STOPPED,
+        STATE_OFF,
+    )
+
+    options = {
+        **NO_DOOR, CONF_PROGRESS_RESET_DELAY: 600, CONF_STOP_THRESHOLD_W: 2.0,
+        CONF_POWER_OFF_THRESHOLD_W: 1.0, CONF_POWER_OFF_DELAY: 120,
+    }
+    entry = await setup_washdata_entry(power_sensor=POWER, options=options)
+    await _feed(hass, freezer, 500, 900)
+    manager = _manager(hass, entry)
+    manager.detector.force_end(dt_util.utcnow())   # the watchdog's force-end
+    await hass.async_block_till_done()
+    await _feed(hass, freezer, 1.5, 300)
+    assert manager.detector.state == STATE_FORCE_STOPPED and manager.is_clean_state
+
+    manager = await _restart(hass, entry, freezer, hass_storage, 1800)
+    assert manager.is_clean_state is True
+    assert manager.detector.state == STATE_FORCE_STOPPED
+    await _feed(hass, freezer, 1.5, 300)
+    assert manager.is_clean_state is True
+    await _feed(hass, freezer, 0.2, 240)            # the power drops: Off
+    assert manager.check_state() == STATE_OFF
+    assert manager.is_clean_state is False

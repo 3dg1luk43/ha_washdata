@@ -6773,6 +6773,12 @@ class CycleDetector:
             and self._anticrease_tail_floor_w is not None
         )
 
+    @property
+    def anticrease_hold_pending(self) -> bool:
+        """OFF inside a programme-end finalise's tail hold (audit 2026-11-03 item 9):
+        anti-wrinkle left on idle, and the tail's next pulses must not start a cycle."""
+        return self._state == STATE_OFF and self._anticrease_tail_hold_until is not None
+
     def get_elapsed_seconds(self) -> float:
         """Return seconds elapsed in current cycle."""
         if self._current_cycle_start:
@@ -6942,7 +6948,19 @@ class CycleDetector:
         since = self._flat_power_since()
         if since is None:
             return None
-        return since + timedelta(seconds=FLAT_POWER_STOP_WINDOW_S)
+        due = since + timedelta(seconds=FLAT_POWER_STOP_WINDOW_S)
+        # A finished user pause is not flat time: held 4 h on the display level,
+        # it force-stopped the cycle on the first tick after the resume and the
+        # resumed wash became a second cycle (end_gate_eval --loo --all-formats
+        # --halt-at 0.5 --halt-min 300 --halt-level 5 --user-pause, 635 rows:
+        # flat stops 38 -> 2, splits 9.23% -> 3.62%, early ends unchanged). The
+        # window restarts at the resume; where the stored cycle ends does not move.
+        if self._user_pause_spans and self._current_cycle_start is not None:
+            resumed = self._current_cycle_start + timedelta(
+                seconds=max(at + n for at, n in self._user_pause_spans)
+            )
+            due = max(due, resumed + timedelta(seconds=FLAT_POWER_STOP_WINDOW_S))
+        return due
 
     def _flat_power_due(self, timestamp: datetime) -> bool:
         due = self.flat_power_due_at()

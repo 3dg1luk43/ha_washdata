@@ -157,6 +157,7 @@ reviews:
         - Every auto-label goes through profile_store.label_verdict(). Labelling or persisting uses MatchResult.label_confidence, not confidence (they differ on a Stage-5 group win).
         - New gates should use the top1-top2 margin, not the absolute confidence. MATCH_AMBIGUITY_MARGIN stays 0.05 because it also gates Smart Termination.
         - Cycle lookups go through iter_stored_cycles()/find_stored_cycle(); only the profile-shaping readers use iter_evidence_cycles(). Profile GC or a lookup gated on the evidence view deletes import-only profiles.
+        - Review requests exist only for observed cycles: whether a request is live (prune_orphaned_feedback, the review budget, an answer's guard) is read on past_cycles, because an answer can only label a past cycle. Do not widen those checks to iter_stored_cycles().
         - Rejected designs, do not re-add: the Stage-5 aggregate group snapshot, the additive _stage5_rerank tie-break, the #364 prefix-fit guard, a global phase_match fill role.
         - prefix_shape_arrays caps the grid at the candidate's k on purpose (a candidate-independent grid measured worse on the split guard).
         - Detector config is clamped where it is read, not in a constructor: an options reload assigns detector.config fields directly.

@@ -245,3 +245,20 @@ async def test_shipped_step_gate_label_is_stored_and_unasked_cycles_are_not_answ
     assert kw["label_allowed"] is True and kw["predicted_duration"] == 5400.0
     assert st.rebuilt == ["A"] and (lab, raised, answered) == ("A", False, False)
     assert lm.answers == []
+
+
+def test_start_ts_reads_a_naive_stamp_as_utc(monkeypatch) -> None:
+    """Older stores carry naive stamps; .timestamp() read them as the machine's
+    local time, so they sorted hours off against aware ones."""
+    import time
+
+    monkeypatch.setenv("TZ", "America/New_York")
+    time.tzset()
+    try:
+        naive = cl.start_ts({"start_time": "2026-09-03T08:00:00"})
+        aware = cl.start_ts({"start_time": "2026-09-03T08:00:00+00:00"})
+    finally:
+        monkeypatch.undo()
+        time.tzset()
+    assert naive == aware
+

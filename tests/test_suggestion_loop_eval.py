@@ -274,3 +274,10 @@ def test_a_corrupt_stored_time_reads_as_none_not_an_abort():
     assert loop._stored_end({"end_time": "2026-13-01T00:00:00",
                              "start_time": "2026-10-01T07:00:00+00:00",
                              "duration": 3600.0}).hour == 8
+
+
+def test_a_length_timedelta_cannot_hold_is_an_unknown_end() -> None:
+    start = "2026-10-01T07:00:00+00:00"
+    for bad in (1e300, float("inf"), float("nan"), 10**400):
+        assert loop._stored_end({"start_time": start, "duration": bad}) is None
+

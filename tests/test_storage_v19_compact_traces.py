@@ -412,3 +412,16 @@ def test_harness_loader_reads_a_raw_v19_store_file() -> None:
     from_export, from_file = ev._unwrap(export), ev._unwrap(store_file)  # noqa: SLF001
     assert from_export[3] == from_file[3] == "export"
     assert _bits(_cycles(from_file[0])) == _bits(_cycles(from_export[0]))
+
+
+def test_a_field_of_the_wrong_kind_is_written_as_it_is() -> None:
+    """``debug_data`` is a dict; a list there (an import) was encoded, and decoding,
+    which accepts only a dict, left it as JSON text after the next load."""
+    data = {"past_cycles": [{"id": "a", "debug_data": [1, 2], "power_data": [[0.0, 5.0]]}]}
+    disk = trace_codec.encode_store_payload(data)
+    assert disk["past_cycles"][0]["debug_data"] == [1, 2]
+    assert isinstance(disk["past_cycles"][0]["power_data"], str)
+    loaded = json_loads(json.dumps(disk))
+    trace_codec.decode_store_payload(loaded)
+    assert loaded["past_cycles"][0]["debug_data"] == [1, 2]
+    assert loaded["past_cycles"][0]["power_data"] == [[0.0, 5.0]]

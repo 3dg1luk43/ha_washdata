@@ -632,3 +632,20 @@ test('a review list that arrives for another device is dropped', async ({ page }
   expect(out).toEqual({ ok: false, same: true, eid: 'test-entry-001' });
 });
 
+
+// Answered from the notification, a request leaves the count lower without this
+// panel answering: that answer rebuilt its programme's envelope, which the
+// remaining tile may draw, so the cached candidate curves are dropped.
+test('a review count that moved elsewhere drops the cached candidate curves', async ({ page }) => {
+  await bootWithQuestion(page);
+  const replaced = await page.evaluate(async () => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    const dev = el._devices[el._selIdx];
+    const stale = { stale: true };
+    el._reviewQ = { eid: dev.entry_id, curves: {}, envs: { 'Eco 60°C': stale } };
+    el._feedbacksSeenCount = (dev.feedback_count || 0) + 1;   // another answer moved it
+    await el._ensureReviewQuestion(dev);
+    return el._reviewQ.envs['Eco 60°C'] !== stale;
+  });
+  expect(replaced).toBe(true);
+});

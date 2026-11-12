@@ -512,3 +512,44 @@ async def test_manager_silent_plug_stops_on_the_watchdog_tick(hass, freezer, cap
     assert mgr.profile_store.get_past_cycles() == []
     assert not any("Washer: " in str(c.get("message")) for c in calls), calls
     await mgr.async_shutdown()
+
+
+# --- a user pause is not flat time -----------------------------------------------
+
+
+def _paused_washer(pause_s: float, level_w: float = 5.0) -> tuple[CycleDetector, Any]:
+    det = CycleDetector(build_detector_config({}, {}, "washing_machine"),
+                        lambda _o, _n: None, lambda _c: None, device_name="t")
+    t = 0.0
+
+    def feed(p: float, secs: float) -> None:
+        nonlocal t
+        end = t + secs
+        while t < end:
+            det.process_reading(p, T0 + timedelta(seconds=t))
+            t += 30.0
+
+    feed(500.0, 1800)
+    det.set_user_paused(True, T0 + timedelta(seconds=t))   # async_pause_cycle
+    det.set_verified_pause(True)
+    feed(level_w, pause_s)                                  # paused on the display level
+    resume = T0 + timedelta(seconds=t)
+    det.set_user_paused(False, resume)                      # async_resume_cycle
+    det.set_verified_pause(False)
+    return det, resume
+
+
+def test_the_first_tick_after_a_long_user_pause_does_not_force_stop() -> None:
+    """Held on one level for 4 h+ while paused, the window was already full at
+    the resume: the first watchdog tick force-stopped the cycle."""
+    det, resume = _paused_washer(FLAT_POWER_STOP_WINDOW_S + 3600)
+    assert det.check_flat_power(resume + timedelta(seconds=30)) is False
+    assert det.state == STATE_RUNNING
+
+
+def test_a_level_still_stuck_after_the_resume_stops_a_window_later() -> None:
+    det, resume = _paused_washer(FLAT_POWER_STOP_WINDOW_S + 3600)
+    due = det.flat_power_due_at()
+    assert due == resume + timedelta(seconds=FLAT_POWER_STOP_WINDOW_S)
+    assert det.check_flat_power(due) is True
+    assert det.state == STATE_FORCE_STOPPED

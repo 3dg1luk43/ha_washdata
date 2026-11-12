@@ -5222,7 +5222,13 @@ class HaWashdataPanel extends HTMLElement {
       // Recorded only once the list is in: a failed fetch is retried next poll
       // instead of leaving the old requests matched to the new count.
       const count = dev.feedback_count;
-      if (await this._fetchFeedbacks(eid)) this._feedbacksSeenCount = count;
+      if (await this._fetchFeedbacks(eid)) {
+        this._feedbacksSeenCount = count;
+        // The count moved without this panel answering (a notification tap):
+        // that answer rebuilt its programme's envelope, which another tile may
+        // draw. A new map, so responses already in flight are dropped (envs0).
+        if (this._reviewQ && this._reviewQ.eid === eid) this._reviewQ.envs = {};
+      }
       changed = true;
     }
     if (!this._reviewQ || this._reviewQ.eid !== eid) this._reviewQ = { eid, curves: {}, envs: {} };
