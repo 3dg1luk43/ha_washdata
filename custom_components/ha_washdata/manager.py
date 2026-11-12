@@ -5344,11 +5344,13 @@ class WashDataManager:
         # Gate on the active detector state, not _current_program: the latter is only set
         # to "detecting..." on the RUNNING transition, so a cycle stuck in STARTING keeps
         # a stale program and would never hit this guard.
+        # Net of finished user pauses, as the guards above and the detector's cap
+        # (item 620): a long pause otherwise force-ended the resumed cycle.
         elif (
             expected == 0
             and not self._is_user_paused
             and not _verified_pause_zombie
-            and elapsed > self._unmatched_watchdog_ceiling
+            and elapsed - self._total_user_paused_seconds > self._unmatched_watchdog_ceiling
             and self._current_power < self.detector.config.start_threshold_w
             and not self._external_end_trigger_available()
             and self.detector.state in (
@@ -5359,10 +5361,10 @@ class WashDataManager:
             )
         ):
             self._logger.warning(
-                "Watchdog: Unmatched idle cycle exceeded %.0fs (elapsed %.0fs, "
-                "power %.1fW). Force-ending.",
+                "Watchdog: Unmatched idle cycle exceeded %.0fs (elapsed %.0fs net of "
+                "pauses, power %.1fW). Force-ending.",
                 self._unmatched_watchdog_ceiling,
-                elapsed,
+                elapsed - self._total_user_paused_seconds,
                 self._current_power,
             )
             self.detector.force_end(now)
