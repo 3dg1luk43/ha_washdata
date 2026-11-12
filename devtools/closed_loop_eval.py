@@ -307,12 +307,36 @@ def _fmt_delta(d: dict[str, int]) -> str:
 def _learning_pass(mgr: Any) -> Any:
     """The manager's own LearningManager, made runnable without a running HA: the
     entry it reads options from is the eval entry, its background jobs (store
-    saves, suggestion scans) are dropped, and its dispatcher signal goes nowhere."""
+    saves, suggestion scans) are dropped, and its dispatcher signal goes nowhere.
+
+    Except the envelope rebuild an auto-label schedules: the next match reads that
+    envelope, so it is kept (without its store write) and ``_shipped_step`` awaits
+    it before the next cycle, as the manager's loop would have run it by then."""
     lm = mgr.learning_manager
     lm.hass.config_entries.async_get_entry.return_value = mgr.config_entry
     lm.hass.data = {}
-    lm._spawn_fn = lambda coro: coro.close()  # noqa: SLF001
+    pending: list[Any] = []
+
+    async def _rebuild_only(profile_name: str) -> None:
+        await lm._async_rebuild_profile_envelope(profile_name)  # noqa: SLF001
+
+    def _spawn(coro: Any) -> None:
+        if getattr(coro, "cr_code", None) is _rebuild_only.__code__:
+            pending.append(coro)
+        else:
+            coro.close()
+
+    lm._async_rebuild_and_save_profile = _rebuild_only  # noqa: SLF001
+    lm._spawn_fn = _spawn  # noqa: SLF001
+    lm._eval_pending_rebuilds = pending  # noqa: SLF001
     return lm
+
+
+async def _run_pending_rebuilds(lm: Any) -> None:
+    """The envelope rebuilds the cycle-end pass scheduled, in order."""
+    pending = getattr(lm, "_eval_pending_rebuilds", None) or []
+    while pending:
+        await pending.pop(0)
 
 
 async def _shipped_step(lm: Any, st: Any, data: dict, c2: dict, idx: int, res: Any,
@@ -339,6 +363,7 @@ async def _shipped_step(lm: Any, st: Any, data: dict, c2: dict, idx: int, res: A
     lm.process_cycle_end(c2, detected_profile=detected, confidence=conf,
                          predicted_duration=expected or dur, match_result=res,
                          label_allowed=bool(verdict))
+    await _run_pending_rebuilds(lm)
     raised = c2["id"] in st.get_pending_feedback()
     answered = raised and user_answers(arm, rng)
     if answered:

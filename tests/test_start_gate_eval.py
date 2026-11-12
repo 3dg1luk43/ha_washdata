@@ -354,3 +354,23 @@ def test_a_flat_power_stop_due_before_an_outage_is_made():
     result = sge.replay([(_at(s), p) for s, p in rows], config, manager)
     assert result.runs and result.runs[0].end is not None
     assert result.runs[0].end < _at(outage), result.runs[0]
+
+
+def test_keepalives_due_before_an_outage_end_the_cycle_before_it():
+    """A change-only plug drops to 0 W and goes silent; live, the watchdog's
+    keepalives run on their timer and end the cycle long before the sensor goes
+    unavailable. The replay fed them only at the next real reading, after the
+    outage flag was set, so the detector skipped them and the end moved past it."""
+    doc = {"data": {"past_cycles": []}, "entry_data": {}, "entry_options": dict(OPTIONS)}
+    config, manager = sge.detector_setup(sge.load_device(doc, None), {})
+    rows: list[tuple[float, float | None]] = []
+    t = 0.0
+    for watts in (200.0, 2000.0, 400.0, 2000.0, 400.0) * 4:   # a real wash
+        rows.append((t, watts))
+        t += 30.0
+    rows.append((t, 0.0))             # it ends; the plug reports once, then nothing
+    outage = t + 3 * 3600.0
+    rows += [(outage, None), (outage + 600.0, 0.0)]
+    result = sge.replay([(_at(s), p) for s, p in rows], config, manager)
+    assert result.runs and result.runs[0].end is not None
+    assert result.runs[0].end < _at(outage), result.runs[0]

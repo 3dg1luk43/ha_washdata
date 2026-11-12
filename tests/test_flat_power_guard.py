@@ -190,6 +190,18 @@ def test_the_harness_ends_a_flat_stretch_at_an_outage() -> None:
     assert measured is not None and measured["dur_s"] == pytest.approx(1200.0)
 
 
+def test_the_harness_measures_a_trace_of_three_readings() -> None:
+    """600 W at 0 s and 120 s, then 0 W at 5 h: a 5 h flat stretch in three readings,
+    which the harness skipped (it wanted four) although the detector would stop it."""
+    mod = _harness()
+    cyc = {"start_time": "2026-10-01T08:00:00+00:00", "duration": 18000.0,
+           "power_data": [[0.0, 600.0], [120.0, 600.0], [18000.0, 0.0]]}
+    t, p = mod._offsets(cyc)  # noqa: SLF001
+    measured = mod.longest_flat(t, p, 1.0, FLAT_POWER_STOP_TOLERANCE_W,
+                                FLAT_POWER_STOP_TOLERANCE_FRACTION)
+    assert measured is not None and measured["dur_s"] == pytest.approx(18000.0)
+
+
 # --- the stop --------------------------------------------------------------------
 
 

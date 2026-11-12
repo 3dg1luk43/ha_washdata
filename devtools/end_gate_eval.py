@@ -2053,6 +2053,10 @@ def main(argv: list[str] | None = None) -> int:
         ap.error("--check replays the baseline's corpus unmodified: drop --standby-tail")
     if standby is not None and halt is not None:
         ap.error("--standby-tail and --halt-at both replace the trace's tail: pick one")
+    # A baseline records the flags --check restores, and --check replays the corpus
+    # unmodified: one written from a modified replay could never be reproduced.
+    if args.write_baseline and (standby is not None or halt is not None):
+        ap.error("--write-baseline measures the corpus unmodified: drop --standby-tail / --halt-at")
     rows: list[dict[str, Any]] = []
     corpus = REPO / "cycle_data"
     if args.all_formats:

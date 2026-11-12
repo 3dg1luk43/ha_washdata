@@ -262,3 +262,29 @@ def test_start_ts_reads_a_naive_stamp_as_utc(monkeypatch) -> None:
         time.tzset()
     assert naive == aware
 
+
+
+async def test_an_auto_label_rebuild_runs_before_the_next_match() -> None:
+    """The learning pass schedules the envelope rebuild of a cycle it auto-labels;
+    the harness closed every scheduled task, so the next match read the old
+    envelope. The rebuild runs (without its store write); other tasks still drop."""
+    from types import SimpleNamespace
+    from unittest.mock import AsyncMock, MagicMock
+
+    rebuilt = AsyncMock()
+    lm = SimpleNamespace(
+        hass=SimpleNamespace(config_entries=MagicMock(), data=None),
+        _async_rebuild_profile_envelope=rebuilt, _spawn_fn=None,
+    )
+    mgr = SimpleNamespace(learning_manager=lm, config_entry=object())
+    cl._learning_pass(mgr)
+    closed: list[bool] = []
+
+    async def _save() -> None:  # a store save: never run here
+        closed.append(False)
+
+    lm._spawn_fn(lm._async_rebuild_and_save_profile("Eco"))
+    lm._spawn_fn(_save())
+    await cl._run_pending_rebuilds(lm)
+    rebuilt.assert_awaited_once_with("Eco")
+    assert closed == []

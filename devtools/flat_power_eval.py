@@ -243,7 +243,9 @@ def _offsets(cycle: dict[str, Any]) -> tuple[np.ndarray, np.ndarray] | None:
 
     pts = _cycle_readings(cycle)
     pts = [(o, w) for o, w in pts if math.isfinite(o) and math.isfinite(w)]
-    if len(pts) < 4:
+    # Two readings already hold a stretch (a sparse plug's three readings can span
+    # the whole window), and longest_flat measures from two.
+    if len(pts) < MIN_READINGS:
         return None
     pts.sort(key=lambda r: r[0])
     return np.array([o for o, _ in pts]), np.array([w for _, w in pts])
@@ -316,6 +318,9 @@ def measure_corpus(root: Path, grid: list[tuple[float, float]]) -> list[dict[str
     return rows
 
 
+#: Readings a trace needs to be measured: a flat stretch spans two.
+MIN_READINGS = 2
+
 #: An unavailable reading's stand-in: below every floor, so it ends a flat stretch
 #: (the shipped detector restarts its window on an outage) and a silence.
 OUTAGE_W = -1.0
@@ -341,7 +346,7 @@ def measure_histories(root: Path, grid: list[tuple[float, float]]) -> list[dict[
             dump = dump or doc
         readings = sg.clip(sg.merge(histories), sg._utc(src.since) if src.since else None,  # noqa: SLF001
                            sg._utc(src.until) if src.until else None)  # noqa: SLF001
-        if sum(1 for _ts, w in readings if w is not None) < 4:
+        if sum(1 for _ts, w in readings if w is not None) < MIN_READINGS:
             continue
         readings = with_outages(readings)
         docs = [sg.load_config(Path(sg._resolve(c, root))) for c in src.config] or [dump]  # noqa: SLF001
@@ -368,7 +373,7 @@ def measure_histories(root: Path, grid: list[tuple[float, float]]) -> list[dict[
         inside = np.zeros(len(t_all), dtype=bool)
         for s0, s1, ident in spans:
             sel = (t_all >= s0) & (t_all <= s1)
-            if sel.sum() < 4:
+            if sel.sum() < MIN_READINGS:
                 continue
             inside |= sel
             m = measure_trace(t_all[sel], p_all[sel], start_w, stop_w, grid)
@@ -383,12 +388,12 @@ def measure_histories(root: Path, grid: list[tuple[float, float]]) -> list[dict[
             })
         # Idle: each run of readings outside every cycle, measured on its own.
         out_idx = np.nonzero(~inside)[0]
-        if len(out_idx) >= 4:
+        if len(out_idx) >= MIN_READINGS:
             breaks = np.nonzero(np.diff(out_idx) > 1)[0]
             groups = np.split(out_idx, breaks + 1)
             best: dict[str, Any] | None = None
             for g in groups:
-                if len(g) < 4:
+                if len(g) < MIN_READINGS:
                     continue
                 for abs_w, rel in ((5.0, 0.05),):
                     r = longest_flat(t_all[g], p_all[g], start_w, abs_w, rel)
@@ -584,8 +589,8 @@ def main(argv: list[str] | None = None) -> int:
             if vals:
                 print(f"  {dtype:16} worst {max(vals) / 60:6.1f} min -> margin "
                       f"{w / max(vals):.2f}x ({len(vals)} cycles)")
-        hits = [r for r in rows if r.get("source") in ("stored", "history")
-                and r["device_type"] in types and r["flat"].get(key)
+        # The programmes the margins measure: a corrupt record is listed on its own.
+        hits = [r for r in _cycles(rows, types) if r["flat"].get(key)
                 and r["flat"][key]["dur_s"] >= w]
         print(f"\n== cycles the rule {key} would stop at a {args.window_h:g} h window: {len(hits)}")
         for r in hits:

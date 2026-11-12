@@ -614,6 +614,9 @@ def replay(readings: list[Reading], config: CycleDetectorConfig, manager: dict[s
     current_power = 0.0  # the manager's _current_power: last PROCESSED value
     prev_raw: float | None = None  # the previous raw row (a change event's old_state)
     last_real: tuple[datetime, float] | None = None
+    # The keepalives fed up to an outage (live, the watchdog ran them before it):
+    # the next real reading starts after it rather than feeding them again.
+    keepalives_until: datetime | None = None
     processed = 0
 
     def _feed(ts: datetime, power: float, *, synthetic: bool = False) -> None:
@@ -636,17 +639,20 @@ def replay(readings: list[Reading], config: CycleDetectorConfig, manager: dict[s
             det.reset(STATE_OFF, now["t"])
             completed_at["t"] = None
         # Watchdog keepalives inside a silent low-power stretch (item 390), placed
-        # half an interval into each period like the Playground's emulation.
-        # Not before an unavailable reading: the next real one injects them, from
-        # the same last real reading, and would inject them twice.
-        if power is not None and last_real is not None and watchdog > 0:
+        # half an interval into each period like the Playground's emulation. Also
+        # before an unavailable reading, as live runs them on its own timer: fed
+        # after it, the outage flag made the detector skip them and an end due
+        # before the outage was missed. Never twice (``keepalives_until``).
+        if last_real is not None and watchdog > 0:
             prev_ts, prev_w = last_real
             k = 1
             while k <= MAX_KEEPALIVES_PER_GAP:
                 tick = prev_ts + timedelta(seconds=watchdog * (k + 0.5))
                 if tick >= ts or not det.is_waiting_low_power():
                     break
-                _feed(tick, prev_w, synthetic=True)
+                in_outage = getattr(det, "_sensor_outage_since", None) is not None
+                if not in_outage and (keepalives_until is None or tick > keepalives_until):
+                    _feed(tick, prev_w, synthetic=True)
                 k += 1
         # The watchdog's flat-power tick (manager._watchdog_check_stuck_cycle asks
         # the detector on every tick): in a report-free stretch at one level nothing
@@ -667,6 +673,7 @@ def replay(readings: list[Reading], config: CycleDetectorConfig, manager: dict[s
             now["t"] = ts
             det.mark_sensor_unavailable(ts)
             prev_raw = None
+            keepalives_until = ts
             continue
         # manager._async_power_changed's throttle. A re-report (same value) carries
         # no old_state there, so it falls back to the last processed power.
@@ -686,6 +693,7 @@ def replay(readings: list[Reading], config: CycleDetectorConfig, manager: dict[s
         processed += 1
         _feed(ts, power)
         last_real = (ts, power)
+        keepalives_until = None
     return Replay(runs, probes, len(readings), processed, flickers, wait_drops, idle_flips,
                   terminal_probes, terminal_lost)
 

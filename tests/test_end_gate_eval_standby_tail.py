@@ -63,3 +63,16 @@ def test_programme_lag_is_measured_on_the_trace_clock() -> None:
 def test_the_dishwasher_band_arm_is_a_baseline_flag() -> None:
     assert "no_dishwasher_band" in end_gate_eval.BASELINE_FLAGS
 
+
+
+def test_a_baseline_is_never_written_from_a_modified_replay(tmp_path, capsys) -> None:
+    """--check restores the baseline's flags and replays the corpus unmodified, so a
+    baseline written with a held tail or a halt could not reproduce its own figures."""
+    import pytest
+
+    for extra in (["--standby-tail", "2x"], ["--halt-at", "0.5"]):
+        with pytest.raises(SystemExit) as exc:
+            end_gate_eval.main(["--write-baseline", str(tmp_path / "b.json"), *extra])
+        assert exc.value.code == 2
+        assert "--write-baseline" in capsys.readouterr().err
+    assert not (tmp_path / "b.json").exists()
