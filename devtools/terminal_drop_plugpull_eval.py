@@ -148,6 +148,7 @@ def cut_cycle(
     tail = [(last_t + TAIL_STEP_S * (i + 1), 0.0) for i in range(TAIL_SAMPLES)]
     out = copy.deepcopy(cycle)
     out["power_data"] = [[round(t - t0, 1), p] for t, p in pre + tail]
+    out.pop("synthetic_offsets", None)  # re-based and a tail added: provenance unknown
     out["duration"] = last_t - t0
     return out, last_t - t0
 

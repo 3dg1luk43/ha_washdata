@@ -495,6 +495,7 @@ def _with_halt(
         k += 1
     out = dict(cycle)
     out["power_data"] = head + plateau + tail
+    out.pop("synthetic_offsets", None)  # rows moved and added: provenance unknown
     return out, t0, t0 + length_s, yard
 
 
@@ -524,6 +525,7 @@ def _with_tumble_tail(
         t += 37.0
     tailed = dict(cycle)
     tailed["power_data"] = out
+    tailed.pop("synthetic_offsets", None)  # rows added: provenance unknown
     return tailed
 
 
@@ -610,6 +612,7 @@ def _with_standby_tail(
     tail = [[round(t, 1), level] for t in times]
     out = dict(cycle)
     out["power_data"] = head + tail + [[t1, 0.0], [t1 + 600.0, 0.0]]
+    out.pop("synthetic_offsets", None)  # rows added: provenance unknown
     return out, t0, t1
 
 

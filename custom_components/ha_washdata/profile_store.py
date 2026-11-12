@@ -130,8 +130,14 @@ from .signal_processing import (
 )
 from . import analysis, spin_rhythm
 from .time_utils import (
+    SYNTHETIC_OFFSETS_KEY,
     migrate_power_data_to_offsets,
+    normalize_synthetic_offsets,
+    offset_key,
     power_data_to_offsets,
+    remap_synthetic_offsets,
+    set_synthetic_offsets,
+    synthetic_offset_keys,
     utc_now,
 )
 from .trace_codec import (
@@ -6695,6 +6701,14 @@ class ProfileStore:
                 stored = trim_zero_power_data(stored, threshold=1.0)
 
             cycle_data["power_data"] = stored
+            # The keepalive / invented rows (item 568), normalised like the trace
+            # and kept only where a stored row still is.
+            set_synthetic_offsets(
+                cycle_data,
+                normalize_synthetic_offsets(
+                    cycle_data.get(SYNTHETIC_OFFSETS_KEY), raw_data, start_time_iso
+                ),
+            )
             cycle_data["sampling_interval"] = round(sampling_interval, 1)
 
             # Helper to get arrays for signature (use stored data for consistency)
@@ -7026,12 +7040,17 @@ class ProfileStore:
                                     # row is [offset, power]
                                     shifted_data.append([round(row[0] - first_offset, 1), row[1]])
                                 cycle["power_data"] = shifted_data
+                                remap_synthetic_offsets(
+                                    cycle,
+                                    lambda o, shift=first_offset: round(o - shift, 1),
+                                )
                                 processed_count += 1
                             except (ValueError, TypeError, OverflowError) as e:
                                 self._logger.warning("Failed to shift start_time for trimmed cycle: %s", e)
                         else:
                             # Only trailing trimmed or no shift needed
                             cycle["power_data"] = trimmed
+                            remap_synthetic_offsets(cycle, lambda o: o)
                             processed_count += 1
 
                         # Update duration to match new data length
@@ -7458,6 +7477,9 @@ class ProfileStore:
             if not repaired_rows:
                 continue  # all rows malformed - leave original trace untouched
             cycle["power_data"] = repaired_rows
+            remap_synthetic_offsets(
+                cycle, lambda o, shift=start_ts: round(o + shift, 1)
+            )
             repaired += 1
             repaired_data = cycle["power_data"]
             if len(repaired_data) > 1:
@@ -8275,6 +8297,7 @@ class ProfileStore:
             # Never leave a cycle without a curve: a trace that cannot be trimmed
             # sensibly keeps its samples and only the duration is corrected.
             if len(kept) >= 2:
+                invented: list[float] = []
                 # A dishwasher's allowance extends `new_duration` past the last
                 # ACTIVE sample, and a change-only plug reports nothing during
                 # passive drying - so without a terminal point the trace ends
@@ -8315,7 +8338,10 @@ class ProfileStore:
                             terminal_p = quiet_p
                         break
                     kept.append([round(float(new_duration), 1), terminal_p])
+                    invented.append(round(float(new_duration), 1))
                 cycle["power_data"] = kept
+                # Same offsets (no re-base); the terminal point is not a report.
+                remap_synthetic_offsets(cycle, lambda o: o, invented)
                 # The signature is derived from the trace, so it has to be rebuilt
                 # from the kept samples - exactly as the sibling trim and the merge
                 # path already do. Left stale it would describe a duration and a
@@ -11888,6 +11914,8 @@ class ProfileStore:
                 compressed = compress_power_data(cycle)
                 if compressed:
                     cycle["power_data"] = compressed
+                    # Compression drops readings: keep the rows that are left.
+                    remap_synthetic_offsets(cycle, lambda o: o)
                     migrated += 1
             except Exception as e:  # pylint: disable=broad-exception-caught
                 self._logger.warning("Failed to migrate cycle %s: %s", cycle.get("id"), e)
@@ -13069,6 +13097,10 @@ class ProfileStore:
 
         new_duration = round(renorm[-1][0], 1) if renorm else 0.0
         cycle["power_data"] = renorm
+        remap_synthetic_offsets(
+            cycle,
+            lambda o: round(o - base, 2) if new_start_s <= o <= new_end_s else None,
+        )
         cycle["sampling_interval"] = round(sampling_interval, 1)
         cycle["duration"] = new_duration
 
@@ -13281,6 +13313,8 @@ class ProfileStore:
         points: list[tuple[float, float]] = []
         for offset_seconds, val in p_data_tuples:
             points.append((float(offset_seconds), float(val)))
+        # The parent's keepalive / invented rows (item 568); None when it does not say.
+        parent_synthetic = synthetic_offset_keys(cycle)
 
         # Create new cycles
         for seg_start, seg_end, seg_profile in materialized_segs:
@@ -13295,18 +13329,31 @@ class ProfileStore:
             # Or just take points strictly inside?
             # Generally better to capture the state at start 0.
             state_val = 0.0
+            state_t: float | None = None
             for t, p in points:
                 if t <= seg_start:
                     state_val = p
+                    state_t = t
                 else:
                     break
 
             # Start point (t=0 relative to new cycle)
             p_data_abs.append([round(new_cycle_start_ts, 1), state_val])
+            # In the trace's format, for async_add_cycle to normalise with it. The
+            # start point is a report only when a report sits exactly there.
+            piece_synthetic: list[float] = []
+            if parent_synthetic is not None and (
+                state_t is None
+                or offset_key(state_t) != offset_key(seg_start)
+                or offset_key(state_t) in parent_synthetic
+            ):
+                piece_synthetic.append(round(new_cycle_start_ts, 1))
 
             for t, p in points:
                 if seg_start < t <= seg_end:
                     p_data_abs.append([round(start_ts + t, 1), p])
+                    if parent_synthetic is not None and offset_key(t) in parent_synthetic:
+                        piece_synthetic.append(round(start_ts + t, 1))
 
             # Create Cycle Record
             new_cycle: dict[str, Any] = {
@@ -13317,6 +13364,8 @@ class ProfileStore:
                 "power_data": p_data_abs,
                 "profile_name": seg_profile
             }
+            if parent_synthetic is not None:
+                new_cycle[SYNTHETIC_OFFSETS_KEY] = piece_synthetic
             await self.async_add_cycle(new_cycle)
             new_ids.append(new_cycle["id"])
             piece_bounds.append((new_cycle, seg_start, seg_end))
@@ -13485,11 +13534,23 @@ class ProfileStore:
 
         # Start with C1 points
         merged_points_abs: list[list[float]] = [] # [timestamp, power]
+        # The parts' keepalive / invented rows (item 568) and the gap fill, at
+        # their absolute times; None once a consumed part does not say.
+        merged_synthetic: list[float] | None = []
+
+        def note_synthetic(cy: CycleDict, pts: list[tuple[float, float, float]]) -> None:
+            nonlocal merged_synthetic
+            keys = synthetic_offset_keys(cy)
+            if keys is None or merged_synthetic is None:
+                merged_synthetic = None
+                return
+            merged_synthetic.extend(t for t, off, _p in pts if offset_key(off) in keys)
 
         # Add C1 points
         c1_pts = get_points(c1)
         for t_abs, _, p in c1_pts:
             merged_points_abs.append([t_abs, p])
+        note_synthetic(c1, c1_pts)
 
         # Use the maximum t_abs seen so far (guards against out-of-order or corrupted points)
         last_t_abs = max((pt[0] for pt in c1_pts), default=c1_start_dt.timestamp())
@@ -13514,12 +13575,15 @@ class ProfileStore:
             if gap > 1.0:
                 merged_points_abs.append([last_t_abs + 0.1, 0.0])
                 merged_points_abs.append([current_start_ts - 0.1, 0.0])
+                if merged_synthetic is not None:
+                    merged_synthetic.extend((last_t_abs + 0.1, current_start_ts - 0.1))
 
             # Append points; track the running maximum to guard against reversed/corrupt data
             for t_abs, _, p in c_pts:
                 merged_points_abs.append([t_abs, p])
                 if t_abs > last_t_abs:
                     last_t_abs = t_abs
+            note_synthetic(next_c, c_pts)
 
             max_power = max(max_power, next_c.get("max_power", 0))
             ids_to_remove.append(next_c["id"])
@@ -13557,6 +13621,12 @@ class ProfileStore:
             new_power_data.append([offset, float(p)])
 
         c1["power_data"] = new_power_data
+        set_synthetic_offsets(
+            c1,
+            None
+            if merged_synthetic is None
+            else [round(t_abs - c1_start_ts, 1) for t_abs in merged_synthetic],
+        )
 
         # Recompute energy from the merged trace (merge keeps only c1's original
         # energy_wh which under-represents the combined cycle).

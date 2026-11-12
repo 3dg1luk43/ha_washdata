@@ -206,9 +206,11 @@ def _send_result(
 
 
 # Fields too large or not serialisable to send over WebSocket. The kept tail of a
-# cut import (register item 618) is store-internal: only a later cut reads it.
+# cut import (register item 618) is store-internal: only a later cut reads it. The
+# keepalive offsets (item 568) are trace data the panel never reads.
 _CYCLE_STRIP_KEYS = frozenset(
-    {"power_data", "power_trace", "debug_data", "samples", BACKFILL_TAIL_TRACE_KEY}
+    {"power_data", "power_trace", "debug_data", "samples", BACKFILL_TAIL_TRACE_KEY,
+     "synthetic_offsets"}
 )
 
 # Settings keys that can be staged from suggestions. Mirrors the OptionsFlow's

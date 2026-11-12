@@ -31,6 +31,8 @@ Formats recognised:
 from __future__ import annotations
 
 import logging
+import math
+from collections.abc import Callable, Iterable, Mapping
 from datetime import datetime
 from typing import Any, Literal, cast
 
@@ -271,3 +273,100 @@ def migrate_power_data_to_offsets(cycle: dict[str, Any]) -> bool:
 
     cycle["power_data"] = converted
     return True
+
+
+#: Per-cycle field (register item 568): the offsets of the ``power_data`` rows that
+#: are not a sensor report - the live watchdog's keepalives, which repeat the
+#: sensor's last value, and the points a trace builder adds (the terminal point of
+#: a capped or repaired end, a split piece's opening point, a merge's 0 W gap
+#: fill). Present, every other row is a report; absent (anything recorded before
+#: it, a history import, a store download), nobody knows, and the Playground keeps
+#: reading a repeated value as silence. Offsets are on the trace's own 0.1 s grid.
+SYNTHETIC_OFFSETS_KEY = "synthetic_offsets"
+
+
+def offset_key(offset: Any) -> int | None:
+    """``offset`` on the stored trace's 0.1 s grid, as an int to look rows up by."""
+    try:
+        value = float(offset)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    return int(round(value * 10.0)) if math.isfinite(value) else None
+
+
+def synthetic_offset_keys(cycle: Mapping[str, Any]) -> set[int] | None:
+    """The :func:`offset_key` of every synthetic row, or None when ``cycle`` does not say."""
+    raw = cycle.get(SYNTHETIC_OFFSETS_KEY)
+    if not isinstance(raw, list):
+        return None
+    return {key for key in (offset_key(o) for o in raw) if key is not None}
+
+
+def set_synthetic_offsets(cycle: dict[str, Any], offsets: Iterable[Any] | None) -> None:
+    """Store ``offsets`` (new-trace offsets) as ``cycle``'s synthetic rows.
+
+    Only an offset that names a row of ``cycle``'s current ``power_data`` is kept,
+    as that row's own offset, so the field never names a reading the trace does not
+    hold (a trim or compression that dropped it). None removes the field.
+    """
+    if offsets is None:
+        cycle.pop(SYNTHETIC_OFFSETS_KEY, None)
+        return
+    raw = cycle.get("power_data")
+    rows: dict[int, float] = {}
+    if isinstance(raw, list) and raw:
+        start = cycle.get("start_time")
+        for off, _p in power_data_to_offsets(
+            cast(PowerData, raw), start if isinstance(start, str) else None
+        ):
+            key = offset_key(off)
+            if key is not None:
+                rows.setdefault(key, float(off))
+    wanted = {key for key in (offset_key(o) for o in offsets) if key is not None}
+    cycle[SYNTHETIC_OFFSETS_KEY] = sorted(rows[key] for key in wanted if key in rows)
+
+
+def remap_synthetic_offsets(
+    cycle: dict[str, Any],
+    mapper: Callable[[float], float | None],
+    added: Iterable[Any] = (),
+) -> None:
+    """Carry ``cycle``'s synthetic rows through an in-place rewrite of its trace.
+
+    Call it once ``power_data`` (and ``start_time``) are rewritten: ``mapper`` takes
+    an old offset to the same row's new one (None for a dropped row), with the
+    rewrite's own arithmetic, and ``added`` are the points the rewrite invented.
+    A cycle without the field is left without it (unknown stays unknown).
+    """
+    old = cycle.get(SYNTHETIC_OFFSETS_KEY)
+    if not isinstance(old, list):
+        return
+    moved: list[float] = []
+    for raw in old:
+        try:
+            value = float(raw)
+        except (TypeError, ValueError, OverflowError):
+            continue
+        new = mapper(value) if math.isfinite(value) else None
+        if new is not None:
+            moved.append(new)
+    set_synthetic_offsets(cycle, [*moved, *added])
+
+
+def normalize_synthetic_offsets(
+    raw: Any, power_data: PowerData, start_time_iso: str | None
+) -> list[float] | None:
+    """``raw`` (a cycle's synthetic rows, in its ``power_data``'s format) as offsets.
+
+    Converted by :func:`power_data_to_offsets` on the same anchor as the trace, so
+    each comes out exactly as its row does. None when the cycle does not say, or
+    the two lists are not in one format (then nobody knows which row is which).
+    """
+    if not isinstance(raw, list):
+        return None
+    if not raw:
+        return []
+    rows: PowerData = [[value, 0.0] for value in raw]
+    if detect_power_data_format(rows) != detect_power_data_format(power_data):
+        return None
+    return [off for off, _p in power_data_to_offsets(rows, start_time_iso)]

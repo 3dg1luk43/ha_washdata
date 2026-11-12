@@ -125,7 +125,7 @@ from .detector_config import (
     terminal_drop_fires,
     terminal_drop_may_fire,
 )
-from .time_utils import power_data_to_offsets
+from .time_utils import offset_key, power_data_to_offsets, synthetic_offset_keys
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -381,12 +381,15 @@ _PLAYGROUND_START_DT = 5.0
 # threshold, and its ENDING fallback ends that wait long before this.
 _MAX_KEEPALIVES_PER_GAP = 960
 
-# The watchdog ghost suppressor's silence clock in a replay (register item 568): a
-# reading that repeats the previous value is not a sensor report. Since 0.5.7 the
-# live watchdog's keepalives are recorded in the trace at the sensor's last value,
-# and the synthetic tail repeats 0 W, so both read as the silence live saw. A
-# periodic plug that re-reports an unchanged value (live counts those) reads as
-# silent too, so its ghosts close earlier than live. False: every reading reports.
+# The watchdog ghost suppressor's silence clock in a replay (register item 568).
+# A cycle the manager recorded lists the rows it injected (`synthetic_offsets`):
+# those keepalives are silence and every other row is a report, a repeated value
+# included, as live counts it. A cycle without the list (recorded before it, a
+# history import, a store download) cannot tell a keepalive, which since 0.5.7 is
+# recorded at the sensor's last value, from a plug re-reporting that value, so
+# there a reading that repeats the previous value is not a report: a periodic
+# plug's ghosts close earlier than live. The synthetic tail repeats 0 W, read as
+# that silence either way. False: every unlisted reading reports.
 REPLAY_REPEATS_ARE_SILENCE = True
 
 
@@ -791,6 +794,14 @@ class _DetailSim:
         self.device_type = _device_type_of(self.config)
         self.label = _cycle_label(cycle)
         self.readings, _points, self.base = _readings_from_cycle(cycle)
+        # Per reading: True for a row the manager injected, False for a report,
+        # None for every row of a cycle that does not say (item 568).
+        _synthetic = synthetic_offset_keys(cycle)
+        self.reading_synthetic: list[bool | None] = (
+            [None] * len(_points)
+            if _synthetic is None
+            else [offset_key(o) in _synthetic for o, _p in _points]
+        )
         self.stored_duration = _safe_float(cycle.get("duration"))
         # When the appliance actually ran, for the Optimize end-timing objectives
         # (audit PLAYGROUND-08): first/last reading above the LIVE stop threshold,
@@ -1469,14 +1480,16 @@ class _DetailSim:
         if self._aborted or not self.ready:
             return
         try:
-            for ts, power in self.readings[i0:i1]:
+            flags = self.reading_synthetic
+            for index, (ts, power) in enumerate(self.readings[i0:i1], start=i0):
+                synthetic = flags[index] if 0 <= index < len(flags) else None
                 self._watchdog_keepalives(ts)
                 self._watchdog_flat_tick(ts)
                 self.cursor["t"] = (ts - self.base).total_seconds()
                 self.detector.process_reading(power, ts)
                 self._note_stall()
                 self._last_real = (ts, power)
-                self._note_report(ts, power)
+                self._note_report(ts, power, synthetic)
                 self._sample(ts)
         except Exception as exc:  # pylint: disable=broad-exception-caught
             self._aborted = True
@@ -1484,10 +1497,24 @@ class _DetailSim:
                 "Playground detail replay failed for %s: %s", self.cycle.get("id"), exc
             )
 
-    def _note_report(self, ts: datetime, power: float) -> None:
-        """Advance the sensor's report clock (``REPLAY_REPEATS_ARE_SILENCE``)."""
+    def _note_report(
+        self, ts: datetime, power: float, synthetic: bool | None = None
+    ) -> None:
+        """Advance the sensor's report clock on a report (``REPLAY_REPEATS_ARE_SILENCE``).
+
+        ``synthetic`` is what the cycle says of this row: a keepalive (True) never
+        advances it, a report (False) always does; unknown (None) falls back to
+        reading a repeated value as silence.
+        """
+        if synthetic is True:
+            return
         last = self._report
-        if last is None or not REPLAY_REPEATS_ARE_SILENCE or power != last[1]:
+        if (
+            synthetic is False
+            or last is None
+            or not REPLAY_REPEATS_ARE_SILENCE
+            or power != last[1]
+        ):
             self._report = (ts, power)
 
     def _watchdog_ghost_ticks(self, until: datetime) -> bool:

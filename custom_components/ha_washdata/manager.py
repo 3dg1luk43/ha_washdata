@@ -280,7 +280,7 @@ from .log_utils import DeviceLoggerAdapter
 # HA restart, and never carries over between different configured entities.
 _UNLOAD_CONFIRM_ANCHOR_KEY = f"{DOMAIN}_unload_confirm_anchors"
 from .options_utils import option_float, option_int
-from .time_utils import power_data_to_offsets, utc_now
+from .time_utils import SYNTHETIC_OFFSETS_KEY, power_data_to_offsets, utc_now
 from . import analysis
 from . import progress as progress_mod
 from . import notification_rules as notif_rules
@@ -384,9 +384,10 @@ _UNSET: Any = object()
 
 # Kept out of the ha_washdata_cycle_ended event: HA's 32 KB event limit. A chatty
 # dynamic tariff can add hundreds of price entries (#426); the cost and effective
-# price it produced ride along instead.
+# price it produced ride along instead. A long silent dry adds hundreds of
+# keepalive offsets (item 568), trace data like power_data.
 _EVENT_EXCLUDED_FIELDS = frozenset(
-    {"power_data", "debug_data", "power_trace", "price_timeline"}
+    {"power_data", "debug_data", "power_trace", "price_timeline", SYNTHETIC_OFFSETS_KEY}
 )
 
 
@@ -1154,6 +1155,9 @@ class WashDataManager:
             end_confidence_provider=self._ml_end_confidence,
             terminal_drop_provider=self._terminal_drop_provider,
             longest_programme_provider=self._longest_programme_s,
+            # Item 568: the stored cycle lists its keepalive rows, so a Playground
+            # replay can tell a plug re-reporting a value from a silent one.
+            record_synthetic_offsets=True,
         )
         # The stop levels the detector's statistics ask at, so the trace summaries
         # computed off the loop carry them (see _pin_trace_summary_levels).

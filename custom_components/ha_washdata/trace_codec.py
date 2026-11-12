@@ -60,10 +60,13 @@ STORED_CYCLE_LISTS: tuple[str, ...] = ("past_cycles", "reference_cycles", "backf
 #: The third is the end wait a history-import tail cut removed (register item 618):
 #: a 1 h wait densified at 30 s is ~120 rows, 1.8 KB a cut cycle on disk against
 #: 8.6 KB as indented JSON (KoLSMS Beko export re-imported, 15 cuts).
+#: ``synthetic_offsets`` is ``time_utils.SYNTHETIC_OFFSETS_KEY`` (item 568): one
+#: offset per keepalive of the trace, hundreds on a long silent dry.
 COMPACT_CYCLE_FIELDS: tuple[tuple[str, type], ...] = (
     ("power_data", list),
     ("debug_data", dict),
     (BACKFILL_TAIL_TRACE_KEY, dict),
+    ("synthetic_offsets", list),
 )
 
 #: The per-profile envelope map; each envelope (a dict) is written compact as a whole.

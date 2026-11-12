@@ -32,7 +32,7 @@ from homeassistant.util import dt as dt_util
 
 from . import match_rules
 from .log_utils import DeviceLoggerAdapter
-from .time_utils import utc_now
+from .time_utils import SYNTHETIC_OFFSETS_KEY, utc_now
 from .const import (
     DEFAULT_ANTI_WRINKLE_EXIT_POWER,
     TERMINAL_EVENT_PEAK_FRAC,
@@ -864,8 +864,16 @@ class CycleDetector:
             Callable[[list[tuple[float, float]], float], bool | None] | None
         ) = None,
         longest_programme_provider: Callable[[], float] | None = None,
+        record_synthetic_offsets: bool = False,
     ) -> None:
-        """Initialize the cycle detector."""
+        """Initialize the cycle detector.
+
+        ``record_synthetic_offsets``: the finished cycle lists which of its
+        ``power_data`` rows are not a sensor report (``SYNTHETIC_OFFSETS_KEY``,
+        register item 568). Only the manager sets it: there every other row is a
+        report the sensor sent. A replay or a history import feeds rows of unknown
+        provenance, so its cycles say nothing.
+        """
         self._logger = DeviceLoggerAdapter(_LOGGER, device_name)
         self._config = config
         self._on_state_change = on_state_change
@@ -908,6 +916,14 @@ class CycleDetector:
 
         # Data
         self._power_readings: list[tuple[datetime, float]] = []  # (time, raw_power)
+        # The timestamps of the synthetic readings processed (the manager's
+        # keepalives), for the finished cycle's SYNTHETIC_OFFSETS_KEY (item 568).
+        # Pruned to the readings still held at every reset. `_synthetic_known` is
+        # False while the trace holds readings restored from a snapshot that did
+        # not record them: that cycle then says nothing.
+        self._record_synthetic = bool(record_synthetic_offsets)
+        self._synthetic_ts: set[datetime] = set()
+        self._synthetic_known = True
         # Rolling pre-cycle readings, so a start that took several probes to
         # commit can recover the readings the aborted probes took with them
         # (#430). Only appended to while no cycle is open, trimmed to
@@ -1713,6 +1729,7 @@ class CycleDetector:
             self._time_in_state = max(0.0, (timestamp - entered).total_seconds())
         self._sub_state = sub_state
         self._power_readings = []
+        self._prune_synthetic()
         self._current_cycle_start = None
         self._last_active_time = None
         self._cycle_max_power = 0.0
@@ -2784,6 +2801,17 @@ class CycleDetector:
         if carried is not None:
             self._standby_reprobe, self._preroll_buffer = carried
         self._flat_lockout = flat_lockout
+        self._prune_synthetic()
+
+    def _prune_synthetic(self) -> None:
+        """Forget synthetic timestamps no held reading carries (item 568); a fresh
+        trace is recorded from the start, so its rows are known again."""
+        if not self._power_readings:
+            self._synthetic_known = True
+        if self._synthetic_ts:
+            held = {ts for ts, _p in self._power_readings}
+            held.update(ts for ts, _p in self._preroll_buffer)
+            self._synthetic_ts &= held
 
     @property
     def state(self) -> str:
@@ -3032,6 +3060,8 @@ class CycleDetector:
         # transitions, and mixed-zone comparisons elsewhere stay correct.
         timestamp = dt_util.as_utc(timestamp)
         outage_since = self._sensor_outage_since
+        if synthetic and self._record_synthetic:
+            self._synthetic_ts.add(timestamp)
         if not synthetic:
             self._last_real_reading_time = timestamp
             if outage_since is not None:
@@ -6557,6 +6587,7 @@ class CycleDetector:
         # Ensure power_data covers the full duration until end_time
         # (especially important for manual recordings or drying phases with no sensor updates)
         final_readings = list(trimmed_readings)
+        invented_end: datetime | None = None
         if final_readings:
             last_t, last_p = final_readings[-1]
             if last_t < end_time:
@@ -6574,6 +6605,7 @@ class CycleDetector:
                     if later is not None and later < self._config.stop_threshold_w:
                         last_p = later
                 final_readings.append((end_time, last_p))
+                invented_end = end_time
 
         start_ts = self._current_cycle_start.timestamp()
         # Store timestamps in canonical UTC (#369). Reading timestamps arrive from
@@ -6589,6 +6621,16 @@ class CycleDetector:
             "termination_reason": termination_reason,
             "power_data": [[round(t.timestamp() - start_ts, 1), p] for t, p in final_readings],
         }
+        if self._record_synthetic and self._synthetic_known:
+            # Item 568: the rows the sensor did not send (the keepalives, the end
+            # point added above), so a replay can tell a plug re-reporting an
+            # unchanged value from a silent one. Same offsets as `power_data`.
+            synthetic = self._synthetic_ts
+            cycle_data[SYNTHETIC_OFFSETS_KEY] = [
+                round(t.timestamp() - start_ts, 1)
+                for t, _p in final_readings
+                if t in synthetic or t == invented_end
+            ]
         spans = [
             [round(at, 1), round(n, 1)]
             for at, n in _merge_spans([*self._stall_spans, *self._user_pause_spans])
@@ -6686,6 +6728,25 @@ class CycleDetector:
         """Return the current power trace."""
         return list(self._power_readings)
 
+    def _restore_synthetic(self, raw: Any) -> None:
+        """The restored trace's synthetic timestamps (item 568). A snapshot that
+        holds readings but no list (written before it) leaves them unknown."""
+        self._synthetic_ts = set()
+        if not isinstance(raw, list):
+            self._synthetic_known = not self._power_readings
+            return
+        for item in raw:
+            try:
+                parsed = dt_util.parse_datetime(item) if isinstance(item, str) else None
+            except (TypeError, ValueError, OverflowError):
+                parsed = None
+            if parsed is None:
+                continue
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=dt_util.now().tzinfo)
+            self._synthetic_ts.add(dt_util.as_utc(parsed))
+        self._synthetic_known = True
+
     def get_state_snapshot(self) -> dict[str, Any]:
         """Get a snapshot of the current state for persistence."""
         return {
@@ -6697,6 +6758,13 @@ class CycleDetector:
                 else None
             ),
             "power_readings": [(t.isoformat(), p) for t, p in self._power_readings],
+            # Item 568: which of them the manager injected (None: unknown), so a
+            # cycle restored across a restart still says which rows are reports.
+            "synthetic_readings": (
+                [t.isoformat() for t, _p in self._power_readings if t in self._synthetic_ts]
+                if self._record_synthetic and self._synthetic_known
+                else None
+            ),
             "accumulated_energy_wh": self._energy_since_idle_wh,
             "time_above": self._time_above_threshold,
             "time_below": self._time_below_threshold,
@@ -7247,6 +7315,7 @@ class CycleDetector:
                     "Restored %d power readings with Naive timestamps (fixed to local)",
                     len(self._power_readings),
                 )
+            self._restore_synthetic(snapshot.get("synthetic_readings"))
 
             # Restore last active
             last_active = snapshot.get("last_active_time")
