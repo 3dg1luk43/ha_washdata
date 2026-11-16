@@ -110,7 +110,9 @@ def _paused_door_moments(
         resumed = next((t for t, p in pts if t > at and p >= stop), None)
         if resumed is None:
             continue  # the final quiet: the end, not a mid-cycle pause
-        latest = min(resumed - dwell, (left if left is not None else resumed) - 1e-3)
+        # Strictly before both boundaries: a dwell expiring at the resumption
+        # meets a reading at the threshold and re-arms instead of ending.
+        latest = min(resumed - dwell, left if left is not None else resumed) - 1e-3
         if latest >= at:
             out.append(latest)
     return out
