@@ -48,7 +48,15 @@ from .const import (
     REVIEW_BUDGET_PER_PROFILE,
     TerminationReason,
 )
-from .suggestion_engine import SuggestionEngine
+from .suggestion_engine import (
+    OWNER_BATCH,
+    OWNER_DETECTION,
+    OWNER_MODEL,
+    OWNER_OPERATIONAL,
+    OWNER_STANDBY_FLOOR,
+    OWNER_START_THRESHOLD,
+    SuggestionEngine,
+)
 from .log_utils import DeviceLoggerAdapter
 from .profile_store import _AUTO_LABEL_SOURCES
 from .detector_config import effective_option_values
@@ -58,16 +66,6 @@ if TYPE_CHECKING:
 
 
 _LOGGER = logging.getLogger(__name__)
-
-
-# The suggestion passes, as stored with each entry they produce ("owner"): a pass
-# withdraws what it owns and no longer proposes (audit 2026-11-16).
-OWNER_OPERATIONAL = "operational"
-OWNER_STANDBY_FLOOR = "standby_floor"
-OWNER_START_THRESHOLD = "start_threshold"
-OWNER_MODEL = "model"
-OWNER_DETECTION = "detection"
-OWNER_BATCH = "batch"
 
 
 def _suggestion_min_abs_delta(key: str) -> float:

@@ -175,6 +175,12 @@ from custom_components.ha_washdata.const import (  # noqa: E402
     resolve_sampling_interval_default,
 )
 from custom_components.ha_washdata.suggestion_engine import (  # noqa: E402
+    OWNER_BATCH,
+    OWNER_DETECTION,
+    OWNER_MODEL,
+    OWNER_OPERATIONAL,
+    OWNER_STANDBY_FLOOR,
+    OWNER_START_THRESHOLD,
     SuggestionEngine,
     _cycle_readings,
     select_clean_cycles,
@@ -810,17 +816,17 @@ def run_passes(mgr: Any, cad: tuple[float, float] | None) -> dict[str, Any]:
     try:
         gate = lm._apply_suggestions_and_notify  # noqa: SLF001
         if cad is not None:
-            gate(eng.for_job().generate_operational_suggestions(*cad))
-        gate(eng.for_job().generate_standby_floor_suggestions())
-        gate(eng.for_job().generate_start_threshold_suggestions())  # #527
-        gate(eng.for_job().generate_model_suggestions())
-        gate(eng.for_job().generate_detection_suggestions())
+            gate(eng.for_job().generate_operational_suggestions(*cad), owner=OWNER_OPERATIONAL)
+        gate(eng.for_job().generate_standby_floor_suggestions(), owner=OWNER_STANDBY_FLOOR)
+        gate(eng.for_job().generate_start_threshold_suggestions(), owner=OWNER_START_THRESHOLD)
+        gate(eng.for_job().generate_model_suggestions(), owner=OWNER_MODEL)
+        gate(eng.for_job().generate_detection_suggestions(), owner=OWNER_DETECTION)
         labeled = [
             c for c in mgr.profile_store.get_past_cycles()
             if isinstance(c, dict) and c.get("profile_name") and c.get("profile_name") != "noise"
             and c.get("power_data") and c.get("status") in ("completed", "force_stopped")
         ]
-        gate(eng.for_job().run_batch_simulation(labeled))
+        gate(eng.for_job().run_batch_simulation(labeled), owner=OWNER_BATCH)
     finally:
         eng.apply_suggestions = orig_apply
     return passed

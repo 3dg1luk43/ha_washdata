@@ -1459,6 +1459,16 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 
+# The suggestion passes, as stored with each entry they produce ("owner"): a pass
+# withdraws what it owns and no longer proposes (audit 2026-11-16), and the end-gate
+# guard tells its own pending entries from another pass's.
+OWNER_OPERATIONAL = "operational"
+OWNER_STANDBY_FLOOR = "standby_floor"
+OWNER_START_THRESHOLD = "start_threshold"
+OWNER_MODEL = "model"
+OWNER_DETECTION = "detection"
+OWNER_BATCH = "batch"
+
 
 def _parse_ts(v: Any) -> float | None:
     """Parse a value into a unix timestamp float, supporting ISO strings."""
@@ -1619,7 +1629,7 @@ class SuggestionEngine:
 
         if CONF_OFF_DELAY in suggestions:
             suggestions = self._guard_end_gate(
-                suggestions, _op_opts, drop_order=(CONF_OFF_DELAY,)
+                suggestions, _op_opts, drop_order=(CONF_OFF_DELAY,), owner=OWNER_OPERATIONAL
             )
 
         # 4. Profile Match Interval
@@ -1836,7 +1846,8 @@ class SuggestionEngine:
         if min_off_gap is not None:
             suggestions[CONF_MIN_OFF_GAP] = min_off_gap
             suggestions = self._guard_end_gate(
-                suggestions, self._entry_options(), drop_order=(CONF_MIN_OFF_GAP,)
+                suggestions, self._entry_options(), drop_order=(CONF_MIN_OFF_GAP,),
+                owner=OWNER_MODEL,
             )
 
         return suggestions
@@ -1935,6 +1946,7 @@ class SuggestionEngine:
         options: dict[str, Any],
         *,
         drop_order: tuple[str, ...],
+        owner: str,
     ) -> dict[str, Any]:
         """Drop end-gate suggestions that would split this device's own cycles.
 
@@ -1945,6 +1957,13 @@ class SuggestionEngine:
         ``drop_order``. Audit 2026-11-16: each pass judged its own key against
         the others' current values, and Apply all wrote them together. Mutates
         and returns ``suggestions``.
+
+        ``owner`` is this pass. Its own pending entries are left out (it replaces
+        them, or withdraws them when it no longer proposes them); another pass's
+        stay in even for a key this pass proposes, because when this pass drops
+        that key the other's value is what Apply all writes (PR #529: the batch
+        dropped its min_off_gap to keep a stop, and the model pass's identical
+        pending min_off_gap was applied with that stop).
         """
         proposed = [k for k in drop_order if isinstance(suggestions.get(k), dict)]
         if not proposed:
@@ -1957,7 +1976,11 @@ class SuggestionEngine:
             pending = self.profile_store.get_suggestions() or {}
             for key in self._END_GATE_KEYS:
                 entry = pending.get(key)
-                if key not in suggestions and isinstance(entry, dict) and entry.get("value") is not None:
+                if (
+                    isinstance(entry, dict)
+                    and entry.get("value") is not None
+                    and entry.get("owner") != owner
+                ):
                     base[key] = entry["value"]
             allowed = self._end_gate_splits(evidence, base)
 
@@ -2755,6 +2778,7 @@ class SuggestionEngine:
             suggestions,
             _batch_opts,
             drop_order=(CONF_END_ENERGY_THRESHOLD, CONF_MIN_OFF_GAP, CONF_STOP_THRESHOLD_W),
+            owner=OWNER_BATCH,
         )
 
     def apply_suggestions(

@@ -46,6 +46,7 @@ from custom_components.ha_washdata.learning import (
     LearningManager,
 )
 from custom_components.ha_washdata.suggestion_engine import (
+    OWNER_MODEL,
     SuggestionEngine,
     end_gate_would_split,
     reconcile_suggestions,
@@ -219,16 +220,62 @@ def test_the_guard_withholds_end_gate_values_that_split_own_cycles() -> None:
     engine._entry_options = lambda: dict(options)
     drop = (CONF_END_ENERGY_THRESHOLD, CONF_MIN_OFF_GAP)
     out = engine._guard_end_gate(
-        {CONF_END_ENERGY_THRESHOLD: _sug(0.75), CONF_MIN_OFF_GAP: _sug(210)}, options, drop_order=drop
+        {CONF_END_ENERGY_THRESHOLD: _sug(0.75), CONF_MIN_OFF_GAP: _sug(210)}, options,
+        drop_order=drop, owner=OWNER_BATCH,
     )
     assert set(out) == {CONF_MIN_OFF_GAP}  # the end_energy raise was the split
     # A pending 180 s off_delay from another pass (harmless alone: 0.06 Wh over
     # its window) is applied with them, and still only end_energy goes.
     store.suggestions[CONF_OFF_DELAY] = _sug(180)
     out = engine._guard_end_gate(
-        {CONF_END_ENERGY_THRESHOLD: _sug(0.75), CONF_MIN_OFF_GAP: _sug(210)}, options, drop_order=drop
+        {CONF_END_ENERGY_THRESHOLD: _sug(0.75), CONF_MIN_OFF_GAP: _sug(210)}, options,
+        drop_order=drop, owner=OWNER_BATCH,
     )
     assert set(out) == {CONF_MIN_OFF_GAP}
+
+
+def _paused_cycle(i: int) -> dict[str, Any]:
+    """800 W for an hour with one 1000 s pause at 1.5 W."""
+    pts = [[float(t), 1.5 if 1200 <= t < 2200 else 800.0] for t in range(0, 3600, 10)]
+    pts.append([3600.0, 0.0])
+    return {
+        "id": f"p{i}", "profile_name": "Cotton", "status": "completed",
+        "termination_reason": "timeout", "duration": 3600.0,
+        "start_time": "2026-10-01T10:00:00+00:00", "power_data": pts,
+    }
+
+
+def test_a_dropped_key_is_judged_with_another_pass_s_pending_value() -> None:
+    """PR #529: a 2 W stop makes the 1.5 W pause quiet, which a 1200 s gap bridges
+    and a 900 s one does not. The batch proposed the stop and 900 s; dropping its
+    own min_off_gap kept the stop, and the model pass's pending 900 s was applied
+    with it."""
+    pts = [(float(t), float(p)) for t, p in _paused_cycle(0)["power_data"]]
+    assert not end_gate_would_split(pts, 1.0, 180, 900, 0.1)  # the gap alone
+    assert not end_gate_would_split(pts, 2.0, 180, 1200, 0.1)  # the stop alone
+    assert end_gate_would_split(pts, 2.0, 180, 900, 0.1)  # both
+    store = _Store([_paused_cycle(i) for i in range(6)])
+    engine = SuggestionEngine(MagicMock(), "e", store, device_type="washing_machine")
+    options = {
+        CONF_STOP_THRESHOLD_W: 1.0, CONF_START_THRESHOLD_W: 5.0, CONF_OFF_DELAY: 180,
+        CONF_MIN_OFF_GAP: 1200, CONF_END_ENERGY_THRESHOLD: 0.1,
+    }
+    engine._entry_options = lambda: dict(options)
+    drop = (CONF_END_ENERGY_THRESHOLD, CONF_MIN_OFF_GAP, CONF_STOP_THRESHOLD_W)
+
+    def batch() -> dict[str, Any]:
+        return {
+            CONF_STOP_THRESHOLD_W: _sug(2.0), CONF_START_THRESHOLD_W: _sug(2.6),
+            CONF_MIN_OFF_GAP: _sug(900),
+        }
+
+    store.suggestions[CONF_MIN_OFF_GAP] = _sug(900, owner=OWNER_MODEL)
+    out = engine._guard_end_gate(batch(), options, drop_order=drop, owner=OWNER_BATCH)
+    assert out == {}  # the stop goes too: the 900 s gap is written either way
+    # The pass's own pending entry is withdrawn with the key, so it does not count.
+    store.suggestions[CONF_MIN_OFF_GAP] = _sug(900, owner=OWNER_BATCH)
+    out = engine._guard_end_gate(batch(), options, drop_order=drop, owner=OWNER_BATCH)
+    assert set(out) == {CONF_STOP_THRESHOLD_W, CONF_START_THRESHOLD_W}
 
 
 def test_the_bridge_is_measured_at_the_stop_threshold() -> None:
