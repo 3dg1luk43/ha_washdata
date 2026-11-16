@@ -1277,12 +1277,28 @@ def _unmatched_split(ended: list[dict], points: list[tuple[float, float]], stop:
     return span > 0 and float(ended[0].get("duration") or 0.0) < 0.9 * span
 
 
+class _NoProfiles:
+    """The device's store with nothing to match (``has_real_profiles`` False, the
+    gate the replay's matcher checks first). Everything else is the store's own:
+    the terminal-drop baseline, the duration cap's longest programme."""
+
+    has_real_profiles = False
+
+    def __init__(self, store: Any) -> None:
+        self._store = store
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._store, name)
+
+
 def _unmatched_task(job: tuple[str, str, dict, int]) -> tuple[str, str, int, dict | None]:
     """Worker: one stored cycle replayed with nothing to match, under ``options``.
 
-    No profile and no matcher: what a new programme, a first run or an ambiguous
-    match gets (no Smart Termination, no matched deferral), the case the matched
-    in-sample rounds above cannot show (audit 2026-11-16, register item 638).
+    No matcher: what a new programme, a first run or an ambiguous match gets (no
+    Smart Termination, no matched deferral), the case the matched in-sample rounds
+    above cannot show (audit 2026-11-16, register item 638). The device's history
+    stays (`_NoProfiles`): with ML models on, an unmatched run can still end on the
+    learned terminal drop (PR #529 review).
     """
     path, arm, options, idx = job
     dev = _DEVICES[path]
@@ -1301,8 +1317,10 @@ def _unmatched_task(job: tuple[str, str, dict, int]) -> tuple[str, str, int, dic
         thinned = _throttle(_cycle_readings(src), s_now, float(cfg.min_power))
         if len(thinned) < len(_cycle_readings(src)):
             cyc = dict(src, power_data=[[round(t, 1), p] for t, p in thinned])
+    match_mgr, _prebuilt = dev.match_side(options)
     sim = playground._DetailSim(  # noqa: SLF001
-        cyc, cfg, None, None, {**dev.entry_data, **options}, None, compute_series=False,
+        cyc, cfg, None, _NoProfiles(match_mgr.profile_store), {**dev.entry_data, **options},
+        None, compute_series=False,
     )
     ends: list[float] = []
     ended: list[dict] = []

@@ -339,6 +339,25 @@ class LearningManager:
         # that started before it applies nothing, since its options snapshot
         # (``for_job``) is no longer the one in force.
         self._config_generation: int = 0
+        # One suggestion pass at a time, from its scan to its store (PR #529
+        # review): a cycle end spawns several, and each end-gate guard checks its
+        # values against what the others have pending. Run side by side, two
+        # passes read the same old pending set, and an Off Delay and an End
+        # Energy each safe alone were stored together and split a pause.
+        self._pass_lock = asyncio.Lock()
+
+    async def _run_pass(
+        self,
+        generate: Callable[..., dict[str, Any]],
+        owner: str | None,
+        generation: int,
+        *args: Any,
+    ) -> dict[str, Any]:
+        """Scan in the executor and apply on the loop, holding ``_pass_lock``."""
+        async with self._pass_lock:
+            found = await self.hass.async_add_executor_job(generate, *args)
+            self._apply_if_current(generation, found or {}, owner)
+            return found or {}
 
     def _spawn(self, coro: Coroutine[Any, Any, Any]) -> Any:
         """Start a background task through the manager's tracked spawner."""
@@ -676,10 +695,9 @@ class LearningManager:
         gen = self._config_generation if generation is None else generation
         try:
             engine = self.suggestion_engine.for_job()
-            new_suggestions = await self.hass.async_add_executor_job(
-                engine.run_batch_simulation, cycles
+            new_suggestions = await self._run_pass(
+                engine.run_batch_simulation, OWNER_BATCH, gen, cycles
             )
-            self._apply_if_current(gen, new_suggestions or {}, OWNER_BATCH)
             if new_suggestions:
                 self._logger.debug(
                     "Batch simulation (%d cycles) produced suggestions: %s",
@@ -759,8 +777,7 @@ class LearningManager:
         """Offload ``generate`` to an executor thread, then apply on the loop."""
         gen = self._config_generation if generation is None else generation
         try:
-            suggestions = await self.hass.async_add_executor_job(generate)
-            self._apply_if_current(gen, suggestions or {}, owner)
+            await self._run_pass(generate, owner, gen)
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.error("%s suggestion pass failed: %s", label, e)
 
@@ -777,10 +794,9 @@ class LearningManager:
         gen = self._config_generation if generation is None else generation
         try:
             engine = self.suggestion_engine.for_job()
-            new_suggestions = await self.hass.async_add_executor_job(
-                engine.generate_detection_suggestions
+            new_suggestions = await self._run_pass(
+                engine.generate_detection_suggestions, OWNER_DETECTION, gen
             )
-            self._apply_if_current(gen, new_suggestions or {}, OWNER_DETECTION)
             if new_suggestions:
                 self._logger.debug(
                     "Detection suggestions produced: %s", list(new_suggestions.keys())
@@ -853,24 +869,21 @@ class LearningManager:
             cad = self.cadence()
             if cad is not None:
                 p95, median = cad
-                op = await self.hass.async_add_executor_job(
+                await self._run_pass(
                     self.suggestion_engine.for_job().generate_operational_suggestions,
-                    p95, median
+                    OWNER_OPERATIONAL, gen, p95, median,
                 )
-                self._apply_if_current(gen, op or {}, OWNER_OPERATIONAL)
             for owner, generate in (
                 (OWNER_STANDBY_FLOOR, self.suggestion_engine.for_job().generate_standby_floor_suggestions),
                 (OWNER_START_THRESHOLD, self.suggestion_engine.for_job().generate_start_threshold_suggestions),
                 (OWNER_MODEL, self.suggestion_engine.for_job().generate_model_suggestions),
             ):
-                found = await self.hass.async_add_executor_job(generate)
-                self._apply_if_current(gen, found or {}, owner)
+                await self._run_pass(generate, owner, gen)
             await self._async_run_detection_suggestions(gen)
-            cycles = self._batch_cycles()
-            batch = await self.hass.async_add_executor_job(
-                self.suggestion_engine.for_job().run_batch_simulation, cycles
+            await self._run_pass(
+                self.suggestion_engine.for_job().run_batch_simulation,
+                OWNER_BATCH, gen, self._batch_cycles(),
             )
-            self._apply_if_current(gen, batch or {}, OWNER_BATCH)
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.error("Suggestion analysis failed: %s", e)
 

@@ -207,12 +207,14 @@ DEFAULT_DOOR_END_DWELL_SECONDS = 60  # door must stay open this long to finalize
 # its matched programme's expected duration; earlier (or unmatched) it is a pause,
 # as before 0.6.1 (#524). PAUSED is where a mid-programme quiet sits, so this is
 # what keeps a door opened there to add an item from ending the cycle.
-# `devtools/door_end_eval.py` (completed cycles vs the leave-one-out mean of their
-# programme; quiet spells of 60 s+ under the Stop Threshold with activity after):
-# dishwashers at 0.9 keep 98.2% of 165 ends and 2.6% of 192 mid-cycle spells
-# (0.8: 99.4% / 45.3%). A washer's door is locked while it runs, so its quiet
-# spells cannot be opened into and its bar sits lower: 0.75 keeps 93.2% of 206
-# ends (0.9: 74.3%).
+# `devtools/door_end_eval.py` drives `CycleDetector.door_end_due` (expected = the
+# leave-one-out mean of the programme; a door opened in the PAUSED part of a
+# mid-cycle quiet spell and held 60 s inside it). Dishwashers at 0.9: 98.2% of
+# 165 ends caught, 12.4% of 137 such spells exposed (9.7% of cycles; 0.8:
+# 59.9% / 38.8%; 0.95: 0.7% exposed but 88.5% of ends). A washer's door is locked
+# while it runs, so its bar sits lower: 0.75 catches 93.2% of 206 ends (0.9:
+# 74.3%), 7 of 12 such spells (2.4% of cycles). Past PAUSED a spell is in ENDING,
+# where a held door ended the cycle before 0.6.1 too.
 DOOR_END_PAUSED_MIN_RATIO = 0.9
 DOOR_END_PAUSED_MIN_RATIO_BY_TYPE: dict[str, float] = {
     "washing_machine": 0.75,

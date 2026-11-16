@@ -179,7 +179,7 @@ def _real_gaps(cycles: list[dict]) -> list[float]:
     ]
 
 
-def _shipped_suggestion(device_type, clean, raw, stop) -> int | None:
+def _shipped_suggestion(device_type, clean, raw, stop, options) -> int | None:
     """Whatever `SuggestionEngine._suggest_min_off_gap` proposes for this export."""
     from unittest.mock import MagicMock  # noqa: PLC0415
 
@@ -193,7 +193,9 @@ def _shipped_suggestion(device_type, clean, raw, stop) -> int | None:
     store.get_past_cycles.return_value = raw
     store.get_profiles.return_value = {}
     store.get_suggestions.return_value = {}
-    eng = SuggestionEngine(hass, "eval", store, device_type=device_type)
+    # The export's own options (PR #529 review): `_measured_bridge_requirement`
+    # reads Off Delay, End Energy and the Stop Threshold from them.
+    eng = SuggestionEngine(hass, "eval", store, device_type=device_type).for_job(options=options)
     out = eng._suggest_min_off_gap(  # pylint: disable=protected-access
         clean, stop_threshold_w=stop, gap_cycles=raw
     )
@@ -251,7 +253,7 @@ def _scan(job: tuple[str, bool]) -> tuple[list[str], dict[str, dict[str, int]]] 
 
     # The value the shipped heuristic actually proposes, evaluated alongside
     # the raw candidates so the regression is validated, not just the choice.
-    shipped = _shipped_suggestion(device_type, clean, cycles, stop)
+    shipped = _shipped_suggestion(device_type, clean, cycles, stop, replay_opts)
     candidates = dict(CANDIDATES)
     if shipped is not None:
         candidates["SHIPPED"] = lambda _s, _g, v=shipped: float(v) - BUFFER_S

@@ -297,3 +297,36 @@ async def test_a_pass_from_replaced_options_applies_nothing(mock_hass: Any) -> N
     assert store.suggestions == {}
     lm._apply_if_current(lm._config_generation, {CONF_START_THRESHOLD_W: _sug(454.4)}, OWNER_BATCH)  # noqa: SLF001
     assert CONF_START_THRESHOLD_W in store.suggestions
+
+
+async def test_passes_run_one_at_a_time(mock_hass: Any) -> None:
+    """PR #529 review: a cycle end spawns several passes, and each end-gate guard
+    checks against what the others have pending. Run side by side, the second
+    read the pending set from before the first stored, so values each safe alone
+    were stored together. Now the second scans after the first has stored."""
+    import asyncio  # noqa: PLC0415
+
+    async def _executor(fn, *args):
+        await asyncio.sleep(0)  # the scan is off the loop: others run meanwhile
+        out = fn(*args)
+        await asyncio.sleep(0)
+        return out
+
+    mock_hass.async_add_executor_job = _executor
+    store = _Store()
+    lm = _learning(mock_hass, store, {CONF_START_THRESHOLD_W: 81.0, CONF_STOP_THRESHOLD_W: 54.0})
+    seen: list[set[str]] = []
+
+    def first() -> dict[str, Any]:
+        return {CONF_START_THRESHOLD_W: _sug(454.4)}
+
+    def second() -> dict[str, Any]:
+        seen.append(set(store.get_suggestions()))
+        return {}
+
+    gen = lm._config_generation  # noqa: SLF001
+    await asyncio.gather(
+        lm._async_scan_and_apply(first, "first", OWNER_BATCH, gen),  # noqa: SLF001
+        lm._async_scan_and_apply(second, "second", OWNER_STANDBY_FLOOR, gen),  # noqa: SLF001
+    )
+    assert seen == [{CONF_START_THRESHOLD_W}]

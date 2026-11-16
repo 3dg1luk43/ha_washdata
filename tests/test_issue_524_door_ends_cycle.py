@@ -160,7 +160,7 @@ async def test_an_unmatched_pause_still_pauses(
 
 def test_the_paused_bar_is_per_device_type() -> None:
     """0.9 of the expected duration, 0.75 on a washer (its door is locked while it
-    runs); never unmatched or user-paused."""
+    runs); never unmatched, user-paused or ambiguous."""
     from datetime import datetime, timezone  # noqa: PLC0415
 
     t0 = datetime(2026, 11, 16, 12, tzinfo=timezone.utc)
@@ -184,6 +184,9 @@ def test_the_paused_bar_is_per_device_type() -> None:
     assert _due("washing_machine", 0.75)
     assert not _due("dishwasher", 1.2, _matched_profile=None)
     assert not _due("dishwasher", 1.2, _user_paused=True)
+    # PR #529 review: an ambiguous match's expected duration may be a shorter
+    # look-alike's.
+    assert not _due("dishwasher", 1.2, _match_ambiguous=True)
 
 
 async def test_brief_open_while_paused_does_not_end_it(

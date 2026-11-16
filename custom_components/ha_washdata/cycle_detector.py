@@ -6770,11 +6770,18 @@ class CycleDetector:
 
         Only once programme time has reached ``DOOR_END_PAUSED_MIN_RATIO`` (per
         device type) of the matched programme's expected duration, and never
-        while user-paused. Unmatched, or earlier, the door is a pause, as before
-        0.6.1: PAUSED is also where a mid-programme quiet sits.
+        while user-paused or while the match is ambiguous (its expected duration
+        may be a shorter look-alike's, the reason Smart Termination waits too).
+        Unmatched, or earlier, the door is a pause, as before 0.6.1: PAUSED is
+        also where a mid-programme quiet sits.
         """
         expected = float(self._expected_duration or 0.0)
-        if not self._matched_profile or expected <= 0 or self._user_paused:
+        if (
+            not self._matched_profile
+            or expected <= 0
+            or self._user_paused
+            or self._match_ambiguous
+        ):
             return False
         ratio = DOOR_END_PAUSED_MIN_RATIO_BY_TYPE.get(
             self._config.device_type, DOOR_END_PAUSED_MIN_RATIO

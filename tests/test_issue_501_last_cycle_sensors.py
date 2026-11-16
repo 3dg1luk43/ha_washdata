@@ -262,3 +262,10 @@ async def test_last_cycle_start_is_a_timestamp_of_the_last_run(
     manager.notify_update()
     await hass.async_block_till_done()
     assert dt_util.parse_datetime(hass.states.get(entity_id).state) == start
+
+    # PR #529 review: a legacy cycle loaded with unix seconds (adding or editing
+    # a cycle rewrites them, loading does not).
+    manager.profile_store.get_past_cycles()[-1]["start_time"] = start.timestamp()
+    manager.notify_update()
+    await hass.async_block_till_done()
+    assert dt_util.parse_datetime(hass.states.get(entity_id).state) == start

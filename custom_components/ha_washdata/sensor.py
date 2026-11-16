@@ -1284,6 +1284,15 @@ class WasherLastCycleStartSensor(WasherLastCycleSensor):
 
     def _figure(self, cycle: dict[str, Any]) -> Any:
         raw = cycle.get("start_time")
+        if isinstance(raw, (int, float)) and not isinstance(raw, bool):
+            # A legacy cycle can keep unix seconds; `last_finished_cycle` orders
+            # by them too (PR #529 review).
+            if not math.isfinite(raw) or raw <= 0:
+                return None
+            try:
+                return dt_util.utc_from_timestamp(float(raw))
+            except (OverflowError, OSError, ValueError):
+                return None
         parsed = dt_util.parse_datetime(raw) if isinstance(raw, str) else None
         if parsed is None or parsed.tzinfo is None:
             return None
