@@ -27,6 +27,7 @@
 """
 from __future__ import annotations
 
+import asyncio
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -416,6 +417,64 @@ async def test_apply_all_during_a_pass_s_joint_check_writes_no_unsafe_set(
     assert res["success"] and res["result"]["applied"] == []
     assert entry.options[CONF_END_ENERGY_THRESHOLD] == 0.05
     assert CONF_END_ENERGY_THRESHOLD not in store.get_suggestions()
+
+
+async def test_apply_judges_a_selected_cascade_as_written(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """PR #529: the cascade flag left a selected 1800 s Min Off Gap out of the
+    apply-time check, so a raise it makes safe was withdrawn."""
+    pts = [(float(t), float(p)) for t, p in _paused_cycle(0, pause_w=1.0)["power_data"]]
+    assert not end_gate_would_split(pts, 3.0, 60, 60, 0.01)  # in force
+    assert end_gate_would_split(pts, 3.0, 60, 60, 1.0)  # the raise alone
+    assert not end_gate_would_split(pts, 3.0, 60, 1800, 1.0)  # with the gap
+    entry = await setup_washdata_entry(options={
+        CONF_STOP_THRESHOLD_W: 3.0, CONF_START_THRESHOLD_W: 5.0, CONF_OFF_DELAY: 60,
+        CONF_MIN_OFF_GAP: 60, CONF_END_ENERGY_THRESHOLD: 0.01,
+    })
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    store._data["past_cycles"] = [_paused_cycle(i, pause_w=1.0) for i in range(6)]  # noqa: SLF001
+    store.set_suggestion(CONF_MIN_OFF_GAP, 1800, reason="r", flags={"cascade": True})
+    store.set_suggestion(CONF_END_ENERGY_THRESHOLD, 1.0, reason="r", flags={"owner": OWNER_BATCH})
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({
+        "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry.entry_id,
+        "keys": [CONF_MIN_OFF_GAP, CONF_END_ENERGY_THRESHOLD],
+    })
+    res = await client.receive_json()
+    assert sorted(res["result"]["applied"]) == [CONF_END_ENERGY_THRESHOLD, CONF_MIN_OFF_GAP]
+    await hass.async_block_till_done()
+
+
+async def test_apply_rechecks_the_pair_against_a_save_it_waited_for(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """PR #529: the pair was checked on options read before the lock, so a save of
+    start 6 W landing while Apply waited let it write stop 8 W above it."""
+    from custom_components.ha_washdata import ws_api  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(options={
+        CONF_START_THRESHOLD_W: 10.0, CONF_STOP_THRESHOLD_W: 5.0,
+    })
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    store.set_suggestion(CONF_STOP_THRESHOLD_W, 8.0, reason="r", flags={"owner": OWNER_BATCH})
+    client = await hass_ws_client(hass)
+    lock = ws_api._entry_options_lock(hass, entry.entry_id)  # noqa: SLF001
+    await lock.acquire()
+    await client.send_json_auto_id({
+        "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry.entry_id,
+        "keys": [CONF_STOP_THRESHOLD_W],
+    })
+    for _ in range(20):  # let the handler read its options and reach the lock
+        await asyncio.sleep(0)
+    hass.config_entries.async_update_entry(
+        entry, options={**entry.options, CONF_START_THRESHOLD_W: 6.0}
+    )
+    lock.release()
+    res = await client.receive_json()
+    assert not res["success"] and res["error"]["code"] == "invalid_threshold_pair"
+    assert entry.options[CONF_STOP_THRESHOLD_W] == 5.0
+    await hass.async_block_till_done()
 
 
 def test_the_bridge_is_measured_at_the_stop_threshold() -> None:

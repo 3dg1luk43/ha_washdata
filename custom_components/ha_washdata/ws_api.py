@@ -336,7 +336,12 @@ async def _drop_unsafe_end_gate_updates(
         return
     try:
         engine = manager.learning_manager.suggestion_engine.for_job()
-        judged = {key: {**visible[key], "value": val} for key, val in updates.items()}
+        # As written: a cascade the selection carries is a value like any other
+        # here, not one derived from an off delay that may not be applied with it.
+        judged = {
+            key: {**visible[key], "value": val, "cascade": False}
+            for key, val in updates.items()
+        }
         drops = await hass.async_add_executor_job(engine.joint_end_gate_drops, judged)
     except Exception:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Joint end-gate check on apply failed", exc_info=True)
@@ -5058,41 +5063,48 @@ async def ws_apply_suggestions(
             updates[key] = (
                 int(float(val)) if key in _SUGGESTION_INT_KEYS else float(val)
             )
-        await _drop_unsafe_end_gate_updates(hass, manager, visible, updates)
-
-        # Item 515: the reconciler keeps a stored start/stop pair ordered, but
-        # applying one of the two alone (a subset, a muted cascade, or a pair
-        # reconciled against options that changed since) could still invert it.
-        _inverted = inverted_threshold_pair(
-            merged,
-            {**merged, **updates},
-            getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
-        )
-        if _inverted is not None:
-            connection.send_error(
-                msg["id"], "invalid_threshold_pair", _threshold_pair_message(*_inverted)
-            )
-            return
-
         if updates:
-            # Clear before updating the entry: async_update_entry schedules a
-            # reload that rebuilds the store, so persist the cleared state first.
-            # The odometer, like the cooldown check (audit SUGGEST-05): at the
-            # retention cap len(past_cycles) never grows past the stamp again.
-            cycle_count = manager.profile_store.get_lifetime_cycle_count()
-            manager.profile_store.set_suggestion_apply_cycle_count(cycle_count)
             # Same critical section as ws_set_options (#442 follow-up): the
             # changelog snapshot and the options write must be atomic per entry.
             async with _entry_options_lock(hass, entry_id):
-                # Record BEFORE clear_suggestions/async_update_entry: both persist,
-                # and the reload the latter schedules rebuilds the store (#442).
-                await _record_option_changes(hass, entry, updates, "apply_suggestions")
-                await manager.profile_store.clear_suggestions()
-                # Suggested values are all tunables -> layer them onto the existing
-                # options; never spread entry.data into options.
-                new_options = {**entry.options, **updates}
-                hass.config_entries.async_update_entry(entry, options=new_options)
-            manager.notify_update()
+                # Both checks read the options as they are now, inside the lock: a
+                # settings save can land while it is awaited or during the
+                # end-gate scan (PR #529).
+                fresh = {**entry.data, **entry.options}
+                await _drop_unsafe_end_gate_updates(hass, manager, visible, updates)
+                # Item 515: the reconciler keeps a stored start/stop pair ordered,
+                # but applying one of the two alone (a subset, a muted cascade, or
+                # a pair reconciled against options that changed since) could
+                # still invert it.
+                _inverted = inverted_threshold_pair(
+                    fresh,
+                    {**fresh, **updates},
+                    getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
+                )
+                if _inverted is not None:
+                    connection.send_error(
+                        msg["id"], "invalid_threshold_pair", _threshold_pair_message(*_inverted)
+                    )
+                    return
+                if updates:
+                    # Clear before updating the entry: async_update_entry schedules
+                    # a reload that rebuilds the store, so persist the cleared state
+                    # first. The odometer, like the cooldown check (audit
+                    # SUGGEST-05): at the retention cap len(past_cycles) never grows
+                    # past the stamp again.
+                    cycle_count = manager.profile_store.get_lifetime_cycle_count()
+                    manager.profile_store.set_suggestion_apply_cycle_count(cycle_count)
+                    # Record BEFORE clear_suggestions/async_update_entry: both
+                    # persist, and the reload the latter schedules rebuilds the
+                    # store (#442).
+                    await _record_option_changes(hass, entry, updates, "apply_suggestions")
+                    await manager.profile_store.clear_suggestions()
+                    # Suggested values are all tunables -> layer them onto the
+                    # existing options; never spread entry.data into options.
+                    new_options = {**entry.options, **updates}
+                    hass.config_entries.async_update_entry(entry, options=new_options)
+            if updates:
+                manager.notify_update()
 
         _send_result(connection, msg["id"], "apply_suggestions", {"success": True, "applied": list(updates.keys())}
         )
