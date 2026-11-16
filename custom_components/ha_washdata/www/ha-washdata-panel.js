@@ -531,6 +531,27 @@ function _nonPriceReason(id, vals, ctx) {
 const _ENERGY_DEVICE_CLASSES = new Set(['energy', 'energy_storage']);
 const _ENERGY_UNITS = new Set(['mwh', 'wh', 'kwh', 'gwh', 'twh', 'j', 'kj', 'mj', 'gj', 'cal', 'kcal', 'mcal', 'gcal']);
 
+// Whether a Min Power under 1 W would switch this Power Sensor to raw readings:
+// const.power_unit_scale reads a kW (or larger) sensor raw below 1 (#481), so no
+// cycle would start (PR #529). A sensor not in the states yet counts as one that
+// could be kW, as SuggestionEngine._min_power_floor does.
+function _minPowerMustStayAtOne(id, ctx) {
+  const st = (id && ctx && ctx.stateOf) ? ctx.stateOf(id) : null;
+  if (!st) return true;
+  const attrs = st.attributes || {};
+  const unit = String(attrs.unit_of_measurement == null ? '' : attrs.unit_of_measurement).trim();
+  const own = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key) ? obj[key] : null;
+  let scale = own({ mW: 0.001, W: 1, kW: 1000, MW: 1e6, GW: 1e9 }, unit);
+  if (scale == null) scale = unit.toLowerCase() === 'kw' ? 1000 : 1;
+  const slash = unit.indexOf('/');
+  if (slash >= 0) {
+    const energy = own({ Wh: 1, kWh: 1000, MWh: 1e6 }, unit.slice(0, slash).trim());
+    const per = own({ s: 1 / 3600, min: 1 / 60, h: 1, d: 24 }, unit.slice(slash + 1).trim());
+    if (energy != null && per != null) scale = energy / per;
+  }
+  return scale > 1;
+}
+
 // Why the chosen Power Sensor cannot be one: it counts energy (#481), or null. Only
 // positive evidence, as the backend refuses it.
 function _energyCounterReason(id, ctx) {
@@ -574,9 +595,14 @@ const _SETTING_CONFLICTS = [
     }),
   },
   {
-    // min_power <= stop_threshold_w (noise gate must sit below the stop floor)
+    // min_power <= stop_threshold_w (noise gate must sit below the stop floor). Not
+    // where Min Power cannot follow the stop under 1 W without switching a kW sensor
+    // to raw readings (PR #529; reconcile holds it at 1 the same way). Over the stop
+    // it is soft: no detection threshold reads it once start and stop are set.
     keys: ['min_power', 'stop_threshold_w'],
-    check: v => v.min_power != null && v.stop_threshold_w != null && v.min_power > v.stop_threshold_w,
+    check: (v, ctx) => v.min_power != null && v.stop_threshold_w != null && v.min_power > v.stop_threshold_w
+      && !(v.min_power >= 1 && +(v.stop_threshold_w * 0.8).toFixed(1) < 1
+        && _minPowerMustStayAtOne(v.power_sensor, ctx)),
     fieldErrors: v => ({
       min_power:        { msgKey: 'conflict.min_power.min_power', msgVars: {stop: v.stop_threshold_w}, msgFb: `Must be at or below Stop Threshold (${v.stop_threshold_w} W)`, fixVal: +(v.stop_threshold_w * 0.8).toFixed(1) },
       stop_threshold_w: { msgKey: 'conflict.min_power.stop',      msgVars: {min: v.min_power},  msgFb: `Must be at or above Min Power (${v.min_power} W)`, fixVal: +(v.min_power * 1.25).toFixed(1) },

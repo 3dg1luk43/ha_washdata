@@ -38,6 +38,7 @@ from custom_components.ha_washdata.const import (
     CONF_OFF_DELAY,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
+    CONF_MIN_POWER,
     DOMAIN,
 )
 from custom_components.ha_washdata.learning import (
@@ -185,6 +186,30 @@ def test_the_corrective_mark_is_stored(mock_hass: Any) -> None:
         {CONF_STOP_THRESHOLD_W: _sug(4.25, corrective=True)}, owner=OWNER_STANDBY_FLOOR
     )
     assert store.suggestions[CONF_STOP_THRESHOLD_W]["corrective"] is True
+
+
+def test_reconcile_never_moves_min_power_under_its_floor() -> None:
+    """PR #529: a 0.8 W stop cascaded Min Power 1 -> 0.6, and under 1 a kW sensor's
+    readings are read raw (``power_unit_scale``), so no cycle would start."""
+    current = {CONF_MIN_POWER: 1.0, CONF_START_THRESHOLD_W: 5.0, CONF_STOP_THRESHOLD_W: 2.0}
+    out, _ = reconcile_suggestions({CONF_STOP_THRESHOLD_W: _sug(0.8)}, current)
+    assert out[CONF_MIN_POWER]["value"] == 0.6  # a W sensor: unchanged
+    out, _ = reconcile_suggestions(
+        {CONF_STOP_THRESHOLD_W: _sug(0.8)}, current, min_power_floor=1.0
+    )
+    assert CONF_MIN_POWER not in out
+    assert out[CONF_STOP_THRESHOLD_W]["value"] == 0.8
+
+
+async def test_the_floor_follows_the_sensor_s_unit(hass: Any) -> None:
+    engine = SuggestionEngine(hass, "e", _Store())
+    hass.states.async_set("sensor.kw", "0.002", {"unit_of_measurement": "kW"})
+    hass.states.async_set("sensor.w", "2", {"unit_of_measurement": "W"})
+    floor = engine._min_power_floor  # noqa: SLF001
+    assert floor({CONF_MIN_POWER: 1.0, "power_sensor": "sensor.kw"}) == 1.0
+    assert floor({CONF_MIN_POWER: 1.0, "power_sensor": "sensor.w"}) == 0.0
+    assert floor({CONF_MIN_POWER: 0.005, "power_sensor": "sensor.kw"}) == 0.0  # already raw
+    assert floor({CONF_MIN_POWER: 1.0, "power_sensor": "sensor.missing"}) == 1.0
 
 
 # --------------------------------------------------------------------- the end gate

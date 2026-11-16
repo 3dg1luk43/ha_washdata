@@ -30,6 +30,7 @@ import numpy as np
 from homeassistant.core import HomeAssistant, callback
 
 from .const import (
+    power_unit_scale,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
@@ -50,6 +51,7 @@ from .const import (
     CONF_END_ENERGY_THRESHOLD,
     CONF_MIN_OFF_GAP,
     CONF_MIN_POWER,
+    CONF_POWER_SENSOR,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_ANTI_WRINKLE_ENABLED,
@@ -1252,6 +1254,8 @@ def _drop_inverted_threshold_pair(
 def reconcile_suggestions(
     suggestions: dict[str, Any],
     current: dict[str, Any],
+    *,
+    min_power_floor: float = 0.0,
 ) -> tuple[dict[str, Any], set[str]]:
     """Enforce cross-parameter invariants over a suggestion map.
 
@@ -1271,6 +1275,10 @@ def reconcile_suggestions(
 
     A cascade-created entry is NOT written if neither key in the constraint is
     in ``out`` (live-vs-live conflicts are the frontend's responsibility).
+
+    ``min_power_floor``: Min Power is never moved below it (1.0 on a kW sensor
+    whose Min Power is 1 or more: under 1 its readings are read raw,
+    ``power_unit_scale``; see ``SuggestionEngine._min_power_floor``).
     """
     out: dict[str, Any] = {k: dict(v) if isinstance(v, dict) else v for k, v in suggestions.items()}
     # Track which keys the engine originally proposed - used for direction logic.
@@ -1370,8 +1378,15 @@ def reconcile_suggestions(
 
         # ── Rule 1b: min_power <= stop_threshold_w ────────────────────────────
         # min_power is a display floor; always yields to the stop threshold.
+        # Not below min_power_floor (PR #529): there a kW sensor's readings would
+        # be read raw and no cycle would start. Min Power over the stop is soft:
+        # no detection threshold reads it once start and stop are set.
         mp = eff(CONF_MIN_POWER)
-        if stop is not None and mp is not None and mp > stop and in_out(CONF_STOP_THRESHOLD_W, CONF_MIN_POWER):
+        if (
+            stop is not None and mp is not None and mp > stop
+            and in_out(CONF_STOP_THRESHOLD_W, CONF_MIN_POWER)
+            and round(stop * 0.8, 1) >= min_power_floor
+        ):
             adjust(CONF_MIN_POWER, round(stop * 0.8, 1), "the stop threshold")
 
         # ── Rule 2: min_off_gap >= off_delay ──────────────────────────────────
@@ -2893,6 +2908,26 @@ class SuggestionEngine:
             flags={f: entry.get(f) for f in ("corrective", "cascade", "owner")},
         )
 
+    def _min_power_floor(self, options: dict[str, Any]) -> float:
+        """1.0 where a Min Power under 1 W would switch the sensor's readings to raw.
+
+        ``power_unit_scale`` reads a kW (or larger) sensor raw once Min Power is
+        under 1, so a reconcile cascade there would stop every cycle from starting
+        (PR #529). A sensor not loaded yet counts as one that could be kW.
+        Loop-only (reads ``hass.states``). Never raises.
+        """
+        try:
+            mp = _num(options.get(CONF_MIN_POWER))
+            if mp is None or mp < 1.0:
+                return 0.0
+            state = self.hass.states.get(str(options.get(CONF_POWER_SENSOR) or ""))
+            if state is None:
+                return 1.0
+            unit = state.attributes.get("unit_of_measurement")
+            return 1.0 if power_unit_scale(unit, mp) > 1.0 else 0.0
+        except Exception:  # pylint: disable=broad-exception-caught
+            return 1.0
+
     def _reconcile_stored_suggestions(self) -> bool:
         """Reconcile the accumulated stored suggestions against current options.
 
@@ -2921,7 +2956,9 @@ class SuggestionEngine:
             k: v for k, v in stored.items()
             if isinstance(v, dict) and not v.get("cascade") and k not in locked
         }
-        adjusted, _changed = reconcile_suggestions(base, current)
+        adjusted, _changed = reconcile_suggestions(
+            base, current, min_power_floor=self._min_power_floor(current)
+        )
         for key in locked:
             adjusted.pop(key, None)
         adjusted = _drop_inverted_threshold_pair(adjusted, current)
