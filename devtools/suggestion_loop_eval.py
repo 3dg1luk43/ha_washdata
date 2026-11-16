@@ -30,8 +30,8 @@ This harness closes that loop on the real corpus.
    ``ProfileStore._add_cycle_data`` (the production normaliser: trim, sampling interval,
    signature, energy) and replaces the stored cycle.
 3. The update-cadence model behind the operational pass is rebuilt from the
-   re-detected cycles that ended on their own (last 200 in-cycle intervals, >= 20 to
-   run, as ``LearningManager.close_cycle_cadence`` commits them).
+   re-detected cycles that ended on their own: one summary per cycle, the median
+   over the last ``CADENCE_RECENT_CYCLES`` (``LearningManager.cadence``).
 4. Every suggestion pass runs in cycle-end order (operational, standby floor, start
    threshold, model, detection, batch) through ``LearningManager._apply_suggestions_and_notify`` - the
    noise gates, the post-apply cooldown, locks, ``reconcile_suggestions``.
@@ -41,6 +41,14 @@ This harness closes that loop on the real corpus.
    (the one filter behind the Settings list, muted and unchanged keys dropped), int
    coercion, cooldown stamped on the lifetime odometer, suggestions cleared, values
    layered onto the options.
+
+**Unmatched arm** (register item 638; ``--no-unmatched`` skips it): once the loop has
+stopped, every replayable cycle is replayed again with nothing to match (no profile,
+no matcher: a new programme, a first run, an ambiguous match), under the export's
+options and under the last round's, and the run fails when the latter splits or
+stores as interrupted a cycle the former did not. The rounds above match in-sample,
+so they could not see that Apply all split dishwasher drying (audit 2026-11-16: 1 ->
+6 of 27 cycles on one device, 0 splits reported).
 
 Repeat until Apply all changes nothing (a fixed point) or ``--rounds`` applies. Round 0
 starts from the export's own options with no pending suggestions, no cooldown and no
@@ -170,6 +178,10 @@ from custom_components.ha_washdata.suggestion_engine import (  # noqa: E402
     SuggestionEngine,
     _cycle_readings,
     select_clean_cycles,
+)
+from custom_components.ha_washdata.time_utils import (  # noqa: E402
+    offset_key,
+    synthetic_offset_keys,
 )
 
 _EVAL_PATH = REPO / "devtools" / "eval.py"
@@ -660,7 +672,7 @@ def assemble(
 ) -> tuple[list[dict], list[float], dict[str, Any]]:
     """Store what the replays emitted, in history order, as the manager would.
 
-    Returns the new ``past_cycles``, the committed cadence intervals in cycle order,
+    Returns the new ``past_cycles``, the committed cadence intervals per replayed cycle, in order,
     and counts. ``replays`` maps a source index to :func:`replay_one`'s result; a
     source without one is kept as stored.
     """
@@ -692,7 +704,7 @@ def assemble(
             continue
         m["replayed"] += 1
         m["idle_above_stop"] += bool(rep.get("idle_above_stop"))
-        intervals.extend(rep["committed"])
+        intervals.append(list(rep["committed"]))
         kept: list[dict] = []
         end_at: dict[int, float] = {}
         for i, cd in enumerate(rep["captured"]):
@@ -753,15 +765,23 @@ def assemble(
     return out, intervals, m
 
 
-def cadence(intervals: list[float]) -> tuple[float, float] | None:
-    """(p95, median) of the cadence model, or None while it holds fewer than 20.
+def cadence(per_cycle: list[list[float]]) -> tuple[float, float] | None:
+    """(p95, median) the operational pass sizes from, as ``LearningManager.cadence``.
 
-    ``StatisticalModel(max_samples=200)``: the newest 200 committed intervals.
+    One ``learning.cycle_cadence`` summary per cycle that committed its intervals,
+    the median over the last ``CADENCE_RECENT_CYCLES`` (item 637); before any cycle
+    has 20 intervals, the newest 200 committed ones (``StatisticalModel``).
     """
-    ivs = intervals[-200:]
-    if len(ivs) < 20:
+    from custom_components.ha_washdata.learning import cycle_cadence, recent_cadence  # noqa: PLC0415
+
+    summaries = [s for s in (cycle_cadence(ivs) for ivs in per_cycle) if s is not None]
+    found = recent_cadence(summaries)
+    if found is not None:
+        return found
+    flat = [v for ivs in per_cycle for v in ivs][-200:]
+    if len(flat) < 20:
         return None
-    arr = np.array(ivs)
+    arr = np.array(flat)
     return float(np.percentile(arr, 95)), float(np.median(arr))
 
 
@@ -962,6 +982,8 @@ class DeviceLoop:
         self.base = ev.base_data(dev)
         self.past = list(self.base.get("past_cycles") or [])[-_cycle_cap(path):]
         self.entry_data, self.options = ev.entry_dicts(dev, {})
+        self.options0 = dict(self.options)  # the export's, for the unmatched arm
+        self.unmatched: dict[str, Any] | None = None
         # Every envelope rebuilt once with the current code (exports carry the ones the
         # exporting version built): the fixed match evidence for every round.
         mgr0 = _manager(self.entry_data, self.options, self.title, self.base)
@@ -1154,6 +1176,7 @@ class DeviceLoop:
             ],
             "cooldown_leaks": self.leaks, "lock_probe": self.lock_result,
             "legacy": list(self.legacy), "cpu_s": round(self.cpu, 1),
+            "unmatched": self.unmatched,
         }
 
 
@@ -1242,9 +1265,118 @@ def _drive(loops: list[DeviceLoop], jobs: int) -> None:
                             pending[pool.submit(_replay_task, *job)] = loop.path
 
 
+def _unmatched_split(ended: list[dict], points: list[tuple[float, float]], stop: float) -> bool:
+    """Not ONE stored cycle covering ~all of the trace's active span.
+
+    As ``min_off_gap_eval._is_split``: a fragment shorter than the completion
+    minimum is dropped silently, so a count of records alone misses a truncation.
+    """
+    if len(ended) != 1:
+        return True
+    span = _active_span(points, stop)
+    return span > 0 and float(ended[0].get("duration") or 0.0) < 0.9 * span
+
+
+def _unmatched_task(job: tuple[str, str, dict, int]) -> tuple[str, str, int, dict | None]:
+    """Worker: one stored cycle replayed with nothing to match, under ``options``.
+
+    No profile and no matcher: what a new programme, a first run or an ambiguous
+    match gets (no Smart Termination, no matched deferral), the case the matched
+    in-sample rounds above cannot show (audit 2026-11-16, register item 638).
+    """
+    path, arm, options, idx = job
+    dev = _DEVICES[path]
+    src = dev.past[idx]
+    synthetic = synthetic_offset_keys(src) or set()
+    pts = [(t, p) for t, p in _cycle_readings(src) if offset_key(t) not in synthetic]
+    if len(pts) < 10:
+        return path, arm, idx, None
+    t0 = pts[0][0]
+    pts = [(t - t0, p) for t, p in pts]
+    cycle = {"id": src.get("id") or f"u{idx}", "start_time": src.get("start_time"),
+             "power_data": [[t, p] for t, p in pts]}
+    sim = playground._DetailSim(  # noqa: SLF001
+        cycle, dev.detector_config(options), None, None, dict(options), None,
+        compute_series=False,
+    )
+    ends: list[float] = []
+    ended: list[dict] = []
+    if sim.ready:
+        det = sim.detector
+        original = det._on_cycle_end  # noqa: SLF001
+
+        def _end(data: dict, _original: Any = original) -> None:
+            ends.append(float(sim.cursor["t"]))
+            _original(data)
+
+        det._on_cycle_end = _end  # noqa: SLF001
+        sim.step(0, sim.n_readings)
+        sim.run_tail()
+        ended = list(sim.kept)
+    stop = dev.recorded_stop
+    work = [t for t, p in pts if p >= stop]
+    return path, arm, idx, {
+        "split": _unmatched_split(ended, pts, stop),
+        "interrupted": any(e.get("status") == "interrupted" for e in ended),
+        "lag": (ends[-1] - work[-1]) if ends and work else None,
+    }
+
+
+def _unmatched_summary(rows: dict[int, dict]) -> dict[str, Any]:
+    lags = [r["lag"] for r in rows.values() if r["lag"] is not None]
+    return {
+        "cycles": len(rows),
+        "splits": sorted(i for i, r in rows.items() if r["split"]),
+        "interrupted": sorted(i for i, r in rows.items() if r["interrupted"]),
+        "lag_med": round(float(np.median(lags))) if lags else None,
+    }
+
+
+def _unmatched_arm(loops: list["DeviceLoop"], jobs: int) -> None:
+    """Every replayable cycle, unmatched, under the export's options and the loop's
+    last ones; fills ``loop.unmatched``. Same options -> replayed once."""
+    jobs_list: list[tuple[str, str, dict, int]] = []
+    for loop in loops:
+        same = _opts_key(loop.options0) == _opts_key(loop.options)
+        for idx, cycle in enumerate(loop.past):
+            if not _replayable(cycle):
+                continue
+            jobs_list.append((loop.path, "initial", loop.options0, idx))
+            if not same:
+                jobs_list.append((loop.path, "final", loop.options, idx))
+    found: dict[tuple[str, str], dict[int, dict]] = {}
+    if jobs <= 1:
+        outs = [_unmatched_task(j) for j in jobs_list]
+    else:
+        import multiprocessing  # noqa: PLC0415
+
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore", message=r".*use of fork\(\) may lead to deadlocks.*",
+                category=DeprecationWarning,
+            )
+            with ProcessPoolExecutor(
+                max_workers=jobs, mp_context=multiprocessing.get_context("fork"), initializer=_quiet,
+            ) as pool:
+                outs = list(pool.map(_unmatched_task, jobs_list, chunksize=4))
+    for path, arm, idx, row in outs:
+        if row is not None:
+            found.setdefault((path, arm), {})[idx] = row
+    for loop in loops:
+        initial = found.get((loop.path, "initial"), {})
+        final = found.get((loop.path, "final"), initial)
+        a, b = _unmatched_summary(initial), _unmatched_summary(final)
+        ids = {i: loop.past[i].get("id") for i in range(len(loop.past))}
+        loop.unmatched = {
+            "initial": a, "final": b,
+            "splits_added": [ids[i] for i in b["splits"] if i not in a["splits"]],
+            "interrupted_added": [ids[i] for i in b["interrupted"] if i not in a["interrupted"]],
+        }
+
+
 def run(corpus: Path, rounds: int = DEFAULT_ROUNDS, jobs: int = 1, only: list[str] | None = None,
         legacy: tuple[str, ...] = (), keep_locks: bool = False, lock_probe: bool = True,
-        idle_hold: bool = False) -> list[dict]:
+        idle_hold: bool = False, unmatched: bool = True) -> list[dict]:
     """Run the loop on every selected device; one result per device."""
     paths = device_paths(corpus, only)
     # Biggest first: their round-0 replays start before anything else is queued.
@@ -1256,6 +1388,8 @@ def run(corpus: Path, rounds: int = DEFAULT_ROUNDS, jobs: int = 1, only: list[st
         _DEVICES.update({loop.path: loop for loop in loops})
         try:
             _drive(loops, jobs)
+            if unmatched:
+                _unmatched_arm(loops, jobs)
         finally:
             _DEVICES.clear()
             _MATCH_SIDES.clear()
@@ -1292,6 +1426,17 @@ def failures(results: list[dict]) -> list[str]:
                 f"{r['device']}: the loop split {len(r['fragmented'])} labelled cycle(s) "
                 f"{[(d['label'], d['after']) for d in r['fragmented']]}"
             )
+        um = r.get("unmatched") or {}
+        if um.get("splits_added"):
+            out.append(
+                f"{r['device']}: the fixed point splits {len(um['splits_added'])} cycle(s) "
+                f"replayed unmatched {um['splits_added']}"
+            )
+        if um.get("interrupted_added"):
+            out.append(
+                f"{r['device']}: the fixed point stores {len(um['interrupted_added'])} cycle(s) "
+                f"replayed unmatched as interrupted {um['interrupted_added']}"
+            )
         idle = [row["replay"]["idle_above_stop"] for row in r["rounds"]]
         if idle and idle[-1] > idle[0]:
             out.append(
@@ -1326,6 +1471,12 @@ def print_report(results: list[dict], rounds: int) -> None:
         print(f"\n{r['device']} [{r['device_type']}] cycles={r['cycles']} replayable={r['replayable']}"
               f" applies={len(r['rounds']) - 1} fixed_point={r['fixed_point']} cpu={r['cpu_s']}s"
               f"\n    replay first->last round: {moved}{lag_s}")
+        um = r.get("unmatched")
+        if um:
+            a, b = um["initial"], um["final"]
+            print(f"    unmatched export->fixed point: splits={len(a['splits'])}->{len(b['splits'])}"
+                  f" interrupted={len(a['interrupted'])}->{len(b['interrupted'])}"
+                  f" lag_med={_fmt_s(a['lag_med'])}->{_fmt_s(b['lag_med'])}")
         for key, k in r["keys"].items():
             seq = " -> ".join(_fmt(v) for v in k["values"])
             print(f"    {key:34s} {k['verdict']:10s} applies={k['applies']}  {seq}")
@@ -1363,6 +1514,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--no-lock-probe", action="store_true")
     ap.add_argument("--idle-hold", action="store_true",
                     help="a kept tail at/above the new stop threshold is standby: force-end, no 0 W tail")
+    ap.add_argument("--no-unmatched", action="store_true",
+                    help="skip the unmatched replay of the export's vs the fixed point's options")
     ap.add_argument("--corpus", default=str(REPO / "cycle_data"))
     ap.add_argument("--json", help="write the per-device results here")
     a = ap.parse_args(argv)
@@ -1372,7 +1525,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     t0 = time.time()
     results = run(corpus, a.rounds, a.jobs, a.device, tuple(a.legacy), a.keep_locks,
-                  not a.no_lock_probe, a.idle_hold)
+                  not a.no_lock_probe, a.idle_hold, unmatched=not a.no_unmatched)
     if not results:
         print("no device with enough re-detectable history")
         return 2

@@ -140,13 +140,17 @@ def test_the_raised_pair_survives_reconciliation() -> None:
 
 def test_the_batch_anchor_no_longer_lands_under_standby() -> None:
     clean = [_clean(f"c{i}") for i in range(6)]
+    # The report's 1.76 W (0.8 x the 2.2 W pre-roll reading) is already in the hold
+    # band under the lowest running reading, so the batch leaves it (item 637)...
     plain = _engine(clean).run_batch_simulation(clean)
-    # The fixture reproduces the report: 0.8 x 2.2 W.
-    assert plain[CONF_STOP_THRESHOLD_W]["value"] == pytest.approx(1.76)
-
-    floored = _engine(_history(clean)).run_batch_simulation(_history(clean))
-    assert floored[CONF_STOP_THRESHOLD_W]["value"] >= 2.75
-    assert floored[CONF_START_THRESHOLD_W]["value"] >= 3.44
+    assert CONF_STOP_THRESHOLD_W not in plain
+    # ...and with the standby evidence, neither pass proposes anything under it.
+    hist = _history(clean)
+    floored = _engine(hist).run_batch_simulation(hist)
+    assert (floored.get(CONF_STOP_THRESHOLD_W) or {}).get("value", 99.0) >= 2.75
+    raised = _engine(hist).generate_standby_floor_suggestions()
+    assert raised[CONF_STOP_THRESHOLD_W]["value"] >= 2.75
+    assert raised[CONF_START_THRESHOLD_W]["value"] >= 3.44
 
 
 def test_a_wash_that_pauses_at_standby_level_is_left_to_the_advisory() -> None:

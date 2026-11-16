@@ -134,7 +134,9 @@ def test_issue_455_the_anchor_still_moves_the_thresholds_above_the_rest(
     rest_w: float, low_run_w: float, stop: float, start: float
 ) -> None:
     cycles = [_washer(f"w{i}", rest_w, low_run_w=low_run_w) for i in range(6)]
-    out = _batch(cycles, WASHER_OPTS, "washing_machine")
+    # A stop at or over the lowest running phase, outside the hold band (item 637).
+    opts = {**WASHER_OPTS, CONF_STOP_THRESHOLD_W: 7.0, CONF_START_THRESHOLD_W: 9.0}
+    out = _batch(cycles, opts, "washing_machine")
     assert out[CONF_STOP_THRESHOLD_W]["value"] == pytest.approx(stop)
     assert out[CONF_START_THRESHOLD_W]["value"] == pytest.approx(start)
     assert out[CONF_STOP_THRESHOLD_W]["reason_key"] == "suggestion.reason.thr_batch"
@@ -142,11 +144,23 @@ def test_issue_455_the_anchor_still_moves_the_thresholds_above_the_rest(
 
 def test_issue_455_the_resting_level_needs_five_cycles() -> None:
     """Below five measured cycles the statistic is silent and the anchor proposes."""
-    cycles = [_washer(f"w{i}", 3.3) for i in range(4)]
+    cycles = [_washer(f"w{i}", 3.3) for i in range(2)]
     cycles += [_washer(f"z{i}", 0.0, low_run_w=3.3) for i in range(2)]
-    out = _batch(cycles, {**WASHER_OPTS, CONF_STOP_THRESHOLD_W: 3.0}, "washing_machine")
-    # Only the two 0 W-resting cycles have anything below 3.0 W.
+    cycles += [_washer("n0", 60.0)]  # never below the stop: not measured
+    # Stop 3.5 W, over the 3.3 W lowest running reading: a correction is due.
+    out = _batch(cycles, {**WASHER_OPTS, CONF_STOP_THRESHOLD_W: 3.5}, "washing_machine")
+    # Only four cycles have anything below 3.5 W.
     assert out[CONF_STOP_THRESHOLD_W]["value"] == pytest.approx(2.64)
+
+
+def test_a_stop_in_the_hold_band_is_left_alone() -> None:
+    """Item 637: a stop between half the anchor and the lowest running power stays.
+    Re-deriving a pair that already sits in the gap walked it with every batch
+    (one dishwasher 6 applies, no detection effect)."""
+    cycles = [_washer(f"w{i}", 0.0, low_run_w=6.0) for i in range(6)]
+    out = _batch(cycles, WASHER_OPTS, "washing_machine")  # stop 5.0 under 6.0
+    assert CONF_STOP_THRESHOLD_W not in out
+    assert CONF_START_THRESHOLD_W not in out
 
 
 # --------------------------------------------------------------------- the statistic

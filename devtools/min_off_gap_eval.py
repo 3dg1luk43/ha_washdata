@@ -132,11 +132,20 @@ def _is_split(ended: list[dict], points, stop: float) -> bool:
     return float(ended[0].get("duration") or 0.0) < 0.9 * span
 
 
-def _bridged_spans(clean: list[dict], stop: float) -> tuple[list[float], int]:
+def _bridged_spans(
+    clean: list[dict], stop: float, off_delay: float, end_energy: float
+) -> tuple[list[float], int]:
+    """The pauses the end gate needs bridged, as the engine measures them.
+
+    ``suggestion_engine.end_gate_pause_needs`` (register item 633): runs below the
+    stop threshold resumed by any reading at or above it, each needing bridging up
+    to the last moment the off_delay-window energy is at most end_energy; 0 (left
+    out) when the energy gate holds it. Until 0.6.1 this measured at max(stop, 2%
+    of the peak), where a dishwasher's terminal pump-out never ended its drying run.
+    """
     from custom_components.ha_washdata.suggestion_engine import (  # noqa: PLC0415
-        _CLEAN_ACTIVE_FLOOR_RATIO,
         _cycle_readings,
-        _resumed_low_runs,
+        end_gate_pause_needs,
     )
 
     spans: list[float] = []
@@ -145,15 +154,10 @@ def _bridged_spans(clean: list[dict], stop: float) -> tuple[list[float], int]:
         pts = _cycle_readings(c)
         if len(pts) < 10:
             continue
-        peak = max((p for _, p in pts), default=0.0)
-        if peak <= 0:
+        if max((p for _, p in pts), default=0.0) <= 0:
             continue
         traced += 1
-        thr = max(stop, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
-        for low_start, resume_idx in _resumed_low_runs(
-            pts, thr, 3600.0, min_resume_active_s=0.0
-        ):
-            spans.append(pts[resume_idx][0] - low_start)
+        spans.extend(n for n in end_gate_pause_needs(pts, stop, off_delay, end_energy) if n > 0)
     return spans, traced
 
 
@@ -222,10 +226,13 @@ def _scan(job: tuple[str, bool]) -> tuple[list[str], dict[str, dict[str, int]]] 
     options = {k: v for k, v in (doc.get("entry_options") or {}).items() if v is not None}
     options.setdefault("device_type", device_type)
     replay_opts = {**entry_data, **options}
-    stop = float(_cfg(entry_data, options, device_type, None).stop_threshold_w)
+    cfg0 = _cfg(entry_data, options, device_type, None)
+    stop = float(cfg0.stop_threshold_w)
     clean, _ = select_clean_cycles(cycles, stop_threshold_w=stop)
     traces = [c for c in clean if len(_cycle_readings(c)) >= 10]
-    spans, traced = _bridged_spans(clean, stop)
+    spans, traced = _bridged_spans(
+        clean, stop, float(cfg0.off_delay), float(cfg0.end_energy_threshold)
+    )
     if traced < 5 or len(spans) < 3 or not traces:
         return None
     significant = [s for s in spans if s > SIGNIFICANT_S]

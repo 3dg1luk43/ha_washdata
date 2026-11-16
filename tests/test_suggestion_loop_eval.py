@@ -85,6 +85,27 @@ def test_failures_flag_a_split_and_a_stranded_tail():
     assert len(stranded) == 1 and "0 -> 10" in stranded[0]
 
 
+def test_failures_flag_an_unmatched_split_and_interrupted_cycle():
+    """Item 638: Apply all split dishwasher drying only on an unmatched run, which
+    the matched in-sample rounds never showed."""
+    clean = _result([0, 0])
+    clean["unmatched"] = {"initial": {}, "final": {}, "splits_added": [], "interrupted_added": []}
+    assert loop.failures([clean]) == []
+    bad = _result([0, 0])
+    bad["unmatched"] = {"initial": {}, "final": {}, "splits_added": ["a", "b"],
+                        "interrupted_added": ["c"]}
+    lines = loop.failures([bad])
+    assert any("splits 2 cycle(s) replayed unmatched" in x for x in lines)
+    assert any("1 cycle(s) replayed unmatched as interrupted" in x for x in lines)
+
+
+def test_an_unmatched_split_needs_one_record_covering_the_active_span():
+    pts = [(float(t), 500.0) for t in range(0, 3600, 30)]
+    assert not loop._unmatched_split([{"duration": 3600.0}], pts, 2.0)  # noqa: SLF001
+    assert loop._unmatched_split([{"duration": 3600.0}, {"duration": 60.0}], pts, 2.0)  # noqa: SLF001
+    assert loop._unmatched_split([{"duration": 1200.0}], pts, 2.0)  # truncated  # noqa: SLF001
+
+
 def test_legacy_patch_restores_the_shipped_engine():
     gen, keys = SuggestionEngine.generate_detection_suggestions, ws_api._SUGGESTION_KEYS  # noqa: SLF001
     with loop.legacy_patch(("sampling_interval", "confidence")):
@@ -160,6 +181,10 @@ def test_loop_runs_end_to_end_on_a_synthetic_device(synth_results):
     assert len(first["replay"]["lag"]) == 8
     assert all(180 <= v < 1800 for v in first["replay"]["lag"].values()), first["replay"]["lag"]
     assert res["lag_median_s"][0] is not None
+    # The unmatched arm replayed every replayable cycle under both option sets.
+    um = res["unmatched"]
+    assert um["initial"]["cycles"] == um["final"]["cycles"] == 8
+    assert um["splits_added"] == [] and um["interrupted_added"] == []
 
 
 def test_a_muted_key_is_never_applied(synth_results):

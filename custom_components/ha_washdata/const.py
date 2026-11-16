@@ -2459,6 +2459,18 @@ MIN_SUGGESTION_REL_DELTA = 0.08  # 8% minimum relative change
 # completed cycles. Prevents the engine from immediately re-suggesting
 # slightly-different values based on a single new cycle.
 MIN_SUGGESTION_COOLDOWN_CYCLES = 3
+# The plug cadence the operational suggestions (watchdog, no-update timeout, match
+# interval) are sized from: one (p95, median) summary per cycle that ended on its
+# own, over all of its update intervals, and the median over the last this many
+# (register item 637). The newest 200 intervals of the newest cycle (its quiet
+# tail, mostly) moved them at every cycle end: 107 watchdog, 123 no-update and 68
+# match-interval applies over ~720 replayed cycle ends.
+CADENCE_RECENT_CYCLES = 10
+CADENCE_MIN_INTERVALS = 20
+# ...and a suggestion for one of those keys within this share of the value in force
+# is not surfaced: a plug reporting every 20 s gives a p95 of 40, 60 or 80 s, and the
+# median over 10 cycles flipped between them (live washer watchdog 43/63/83 s).
+CADENCE_HOLD_REL = 0.25
 
 # ─── Appliance health & predictive maintenance (Group E) ───────────────────────
 # Per-device maintenance-reminder thresholds: a dict {event_type: cycle_threshold}

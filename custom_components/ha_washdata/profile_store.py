@@ -45,6 +45,7 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .const import (
+    CADENCE_RECENT_CYCLES,
     END_GATE_HAZARD_MIN_CYCLES,
     PRICE_TIMELINE_MAX_POINTS,
     PRICE_TIMELINE_PRICE_DECIMALS,
@@ -3103,6 +3104,17 @@ class ProfileStore:
         """Clear all pending suggestions and persist."""
         self._data["suggestions"] = {}
         await self.async_save()
+
+    def get_cadence_summaries(self) -> list[list[float]]:
+        """Per-cycle ``[p95, median]`` update intervals, newest last (item 637)."""
+        raw = self._data.get("cadence_summaries")
+        return [list(r) for r in raw if isinstance(r, (list, tuple))] if isinstance(raw, list) else []
+
+    def add_cadence_summary(self, p95: float, median: float) -> None:
+        """Keep one cycle's cadence; saved with the cycle-end write."""
+        rows = self.get_cadence_summaries()
+        rows.append([round(float(p95), 2), round(float(median), 2)])
+        self._data["cadence_summaries"] = rows[-CADENCE_RECENT_CYCLES:]
 
     def get_suggestion_apply_cycle_count(self) -> int:
         """Return the total cycle count recorded at the last user suggestion apply."""
@@ -11524,6 +11536,7 @@ class ProfileStore:
         # correctable by hand - the panel's Maintenance tab edits the cycle count.
         self._data["settings_changelog"] = []
         self._data["suggestion_apply_cycle_count"] = 0
+        self._data["cadence_summaries"] = []
         self._cached_sample_segments = {}
         self._cohesion_cache = {}
         self._cohesion_cache_generation += 1

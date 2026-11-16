@@ -1007,6 +1007,9 @@ def resting_level_w(
 # every device that gets a threshold proposal, and at 70-85% on the #527 dryer, so
 # anything between is a clean cut.
 STEADY_LOAD_ANCHOR_RATIO = 0.25
+#: The batch stop hold band: a stop in [this x the anchor's stop, lowest running
+#: power) is left as it is (register item 637).
+STOP_HOLD_BAND = 0.5
 # Correcting a start threshold at or above a steady load's running level: start at
 # this fraction of the lowest level it runs at (a run half as strong still starts,
 # and the appliance's standby is far below), stop at STANDBY-style 0.8 x start.
@@ -2629,7 +2632,20 @@ class SuggestionEngine:
                 else None
             )
             working_w = float(np.median(working)) if working else 0.0
-            if is_steady_load(p05_min, working_w):
+            if STOP_HOLD_BAND * suggested_stop <= eff_stop < p05_min:
+                # Hold band (item 637): a stop between half the anchor's value and
+                # the lowest power the appliance runs at already keeps every running
+                # phase running, and re-deriving it walked it with each batch (p05 of
+                # 1/2/3 W integer minima: one dishwasher's stop 1.88 -> 2.96 -> 3.52
+                # -> 2.32 -> 1.6 -> 1.76 -> 1.96 W, no effect on detection). A stop
+                # at or over the lowest running power, or far under the anchor, is
+                # still proposed.
+                _LOGGER.debug(
+                    "Stop/start suggestion withheld: stop %.2fW already sits between "
+                    "%.2fW and the lowest running power (p05 %.2fW)",
+                    eff_stop, STOP_HOLD_BAND * suggested_stop, p05_min,
+                )
+            elif is_steady_load(p05_min, working_w):
                 # #527: no quiet phase inside the cycles, so the anchor is the
                 # running level and 0.8x / 1.05x of it sit on the running power.
                 # The thresholds in force end and start these cycles; a start

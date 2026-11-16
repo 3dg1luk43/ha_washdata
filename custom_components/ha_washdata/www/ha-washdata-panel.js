@@ -678,24 +678,10 @@ const _SETTING_CONFLICTS = [
       profile_match_max_duration_ratio: { msgKey: 'conflict.duration_ratio.max', msgVars: {min: v.profile_match_min_duration_ratio}, msgFb: `Must be greater than Min Duration Ratio (${v.profile_match_min_duration_ratio})`, fixVal: +(v.profile_match_min_duration_ratio * 2.0).toFixed(2) },
     }),
   },
-  {
-    // end_energy_threshold >= stop_threshold_w * off_delay / 3600  (#376)
-    // The energy gate is evaluated over an off_delay-long window, so it implies a
-    // wattage. Below this it forbids what stop_threshold_w (the power gate) allows,
-    // and the cycle can only close through a fallback path (smart termination,
-    // watchdog force-end) — surfacing only as an unexplained late completion.
-    keys: ['end_energy_threshold', 'stop_threshold_w', 'off_delay'],
-    check: v => v.end_energy_threshold != null && v.stop_threshold_w != null && v.off_delay != null
-      && v.off_delay > 0 && v.end_energy_threshold < v.stop_threshold_w * v.off_delay / 3600,
-    fieldErrors: v => ({
-      end_energy_threshold: { msgKey: 'conflict.end_energy.energy', msgVars: {w: v.stop_threshold_w, d: v.off_delay},
-        msgFb: `Too strict for Stop Threshold (${v.stop_threshold_w} W) over Off Delay (${v.off_delay} s); the cycle can only end through a fallback path`,
-        fixVal: Math.ceil(v.stop_threshold_w * v.off_delay / 3600 * 1000) / 1000 },
-      stop_threshold_w: { msgKey: 'conflict.end_energy.stop', msgVars: {e: v.end_energy_threshold, d: v.off_delay, p: +(v.end_energy_threshold * 3600 / v.off_delay).toFixed(2)},
-        msgFb: `End Energy Threshold (${v.end_energy_threshold} Wh over ${v.off_delay} s) only permits ${+(v.end_energy_threshold * 3600 / v.off_delay).toFixed(2)} W`,
-        fixVal: Math.floor(v.end_energy_threshold * 3600 / v.off_delay * 10) / 10 },
-    }),
-  },
+  // (The #376 rule end_energy_threshold >= stop_threshold_w * off_delay / 3600 is
+  // gone: under that floor is what holds a dishwasher's sub-stop drying together
+  // on an unmatched run, and its one-tap raise split 3 of 7 cycles in a replay. It
+  // also fired on stock dishwasher defaults. Register items 633, 636.)
 ];
 
 // ─── Styles ──────────────────────────────────────────────────────────────────

@@ -69,16 +69,20 @@ sys.path.insert(0, str(_REPO_ROOT / "devtools"))
 
 #: Reading intervals the cadence model accepts (``LearningManager.process_power_reading``).
 _MIN_INTERVAL_S, _MAX_INTERVAL_S = 0.1, 1800.0
-_MAX_PER_CYCLE = 200
+_MAX_PER_CYCLE = 20000  # a whole cycle, as learning._CYCLE_MAX_INTERVALS (item 637)
 
 
-def _cadence_intervals(cycles: list[dict[str, Any]]) -> list[float]:
-    """Reading intervals of the cycles that ended on their own, oldest first."""
+def _cadence_intervals(cycles: list[dict[str, Any]]) -> list[list[float]]:
+    """Reading intervals of each cycle that ended on their own, oldest first.
+
+    One list per cycle, as ``suggestion_loop_eval.cadence`` (and the live
+    ``LearningManager.cadence``) summarises them per cycle (item 637).
+    """
     from custom_components.ha_washdata.suggestion_engine import (  # noqa: PLC0415
         _cycle_readings,
     )
 
-    out: list[float] = []
+    out: list[list[float]] = []
     for c in cycles:
         if not isinstance(c, dict) or c.get("status") != "completed":
             continue
@@ -89,7 +93,7 @@ def _cadence_intervals(cycles: list[dict[str, Any]]) -> list[float]:
             b[0] - a[0] for a, b in zip(pts, pts[1:])
             if _MIN_INTERVAL_S < b[0] - a[0] < _MAX_INTERVAL_S
         ]
-        out.extend(deltas[-_MAX_PER_CYCLE:])
+        out.append(deltas[-_MAX_PER_CYCLE:])
     return out
 
 

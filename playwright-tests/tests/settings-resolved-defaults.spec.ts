@@ -88,7 +88,7 @@ test('saving an untouched section does not persist fields still equal to their r
   await page.locator('button[data-sec="detection"]').first().click();
   const endEnergy = page.locator('input[data-opt="end_energy_threshold"]').first();
   await expect(endEnergy).toBeVisible({ timeout: 8_000 });
-  await endEnergy.fill('0.15');  // above the 0.1 Wh 3 W x 120 s implies (conflict rule)
+  await endEnergy.fill('0.15');
 
   await page.locator('#wd-settings-save').first().click();
   const calls = await assertWsCalled(page, 'ha_washdata/set_options');

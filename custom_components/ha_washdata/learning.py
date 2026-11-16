@@ -19,6 +19,7 @@
 from __future__ import annotations
 
 import asyncio
+import math
 import logging
 from collections import deque
 from datetime import datetime
@@ -37,6 +38,12 @@ from .const import (
     DEFAULT_AUTO_LABEL_CONFIDENCE,
     DEFAULT_LEARNING_CONFIDENCE,
     MIN_SUGGESTION_COOLDOWN_CYCLES,
+    CADENCE_HOLD_REL,
+    CADENCE_MIN_INTERVALS,
+    CADENCE_RECENT_CYCLES,
+    CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+    CONF_PROFILE_MATCH_INTERVAL,
+    CONF_WATCHDOG_INTERVAL,
     MIN_SUGGESTION_REL_DELTA,
     REVIEW_BUDGET_PER_PROFILE,
     TerminationReason,
@@ -80,6 +87,45 @@ def _suggestion_min_abs_delta(key: str) -> float:
     if key.endswith(("_count", "_window", "_repeat")):
         return 1.0      # Integer count: less than 1 is a no-op
     return 0.05
+
+
+#: Keys the operational pass sizes from the plug cadence: the hold band applies.
+CADENCE_KEYS = (CONF_WATCHDOG_INTERVAL, CONF_NO_UPDATE_ACTIVE_TIMEOUT, CONF_PROFILE_MATCH_INTERVAL)
+#: Update intervals one cycle can hold (a 24 h cycle at 5 s); bounded, not 200.
+_CYCLE_MAX_INTERVALS = 20000
+#: Keys the noise gate requires the relative bar for (item 637): on seconds the 5 s
+#: absolute bar alone let 2692 -> 2698 s and 480 -> 470 s through. A sub-second
+#: change is noise too; the 5 s bar would block 7 -> 9 s on a short key.
+_SECONDS_SUFFIXES = ("_interval", "_timeout", "_delay", "_gap", "_duration", "_seconds")
+_SECONDS_MIN_ABS = 1.0
+
+
+def cycle_cadence(intervals: Any) -> tuple[float, float] | None:
+    """``(p95, median)`` of one cycle's update intervals, or None below 20 of them."""
+    try:
+        values = [float(v) for v in intervals]
+    except (TypeError, ValueError):
+        return None
+    values = [v for v in values if math.isfinite(v) and v > 0]
+    if len(values) < CADENCE_MIN_INTERVALS:
+        return None
+    arr = np.asarray(values)
+    return float(np.percentile(arr, 95)), float(np.median(arr))
+
+
+def recent_cadence(summaries: Any) -> tuple[float, float] | None:
+    """The median p95 and median over the last ``CADENCE_RECENT_CYCLES`` summaries."""
+    rows: list[tuple[float, float]] = []
+    for row in list(summaries or [])[-CADENCE_RECENT_CYCLES:]:
+        try:
+            p95, median = float(row[0]), float(row[1])
+        except (TypeError, ValueError, IndexError):
+            continue
+        if math.isfinite(p95) and math.isfinite(median) and p95 > 0 and median > 0:
+            rows.append((p95, median))
+    if not rows:
+        return None
+    return float(np.median([r[0] for r in rows])), float(np.median([r[1] for r in rows]))
 
 
 def _ended_on_its_own(cycle: dict[str, Any]) -> bool:
@@ -279,7 +325,7 @@ class LearningManager:
         # whole 200-sample window with that idle cadence, and the watchdog and
         # no-update timeouts would be re-suggested from it every five minutes.
         # Bounded like the model itself: only its last 200 survive a commit anyway.
-        self._pending_intervals: deque[tuple[float, datetime]] = deque(maxlen=200)
+        self._pending_intervals: deque[tuple[float, datetime]] = deque(maxlen=_CYCLE_MAX_INTERVALS)
         # Set by a cadence commit, consumed by run_due_operational_pass once the
         # cycle is stored, so the pass's pause scan sees the cycle that just ended.
         self._operational_pass_due: bool = False
@@ -367,9 +413,19 @@ class LearningManager:
                             continue
 
                         # Gate 2: change too small to be meaningful → delete (noise).
+                        # A seconds key needs the relative bar (item 637); others either.
                         rel_delta = abs_delta / max(abs(cv), 1e-3)
-                        if (rel_delta < MIN_SUGGESTION_REL_DELTA
-                                and abs_delta < _suggestion_min_abs_delta(key)):
+                        rel_bar = (
+                            CADENCE_HOLD_REL
+                            if key in CADENCE_KEYS and not data.get("corrective")
+                            else MIN_SUGGESTION_REL_DELTA
+                        )
+                        small_rel = rel_delta < rel_bar
+                        if key.endswith(_SECONDS_SUFFIXES):
+                            noise = small_rel or abs_delta < _SECONDS_MIN_ABS
+                        else:
+                            noise = small_rel and abs_delta < _suggestion_min_abs_delta(key)
+                        if noise:
                             if key in existing_suggestions:
                                 self.profile_store.delete_suggestion(key)
                                 any_deleted = True
@@ -452,12 +508,35 @@ class LearningManager:
             return False
         for delta, ts in pending:
             self._sample_interval_model.add_sample(delta, ts)
+        summary = cycle_cadence(delta for delta, _ts in pending)
+        if summary is not None:
+            try:
+                self.profile_store.add_cadence_summary(*summary)
+            except Exception:  # pylint: disable=broad-exception-caught
+                self._logger.debug("Could not store the cycle cadence", exc_info=True)
         # The operational pass's one run per cycle: its cadence input changes only
         # here (process_power_reading runs none during the cycle). Not run here:
         # this commit comes before the cycle is stored, and the pass's pause scan
         # reads the stored cycles, so it would miss this one until the next end.
         self._operational_pass_due = True
         return True
+
+    def cadence(self) -> tuple[float, float] | None:
+        """``(p95, median)`` update interval the operational pass sizes from (item 637).
+
+        The median over the stored per-cycle summaries (``recent_cadence``), which
+        survive a restart; before any is stored, the newest committed intervals.
+        """
+        try:
+            stored = recent_cadence(self.profile_store.get_cadence_summaries())
+        except Exception:  # pylint: disable=broad-exception-caught
+            stored = None
+        if stored is not None:
+            return stored
+        model = self._sample_interval_model
+        if model.count < CADENCE_MIN_INTERVALS or model.p95 is None or model.median is None:
+            return None
+        return model.p95, model.median
 
     def run_due_operational_pass(self) -> None:
         """Run the operational pass a cadence commit left due, once.
@@ -597,14 +676,10 @@ class LearningManager:
         ``generate_operational_suggestions`` is offloaded to an executor thread by
         ``_dispatch_scan_and_apply`` so it never runs on the loop.
         """
-        if self._sample_interval_model.count < 20:
+        cad = self.cadence()
+        if cad is None:
             return
-
-        p95 = self._sample_interval_model.p95
-        median = self._sample_interval_model.median
-
-        if p95 is None or median is None:
-            return
+        p95, median = cad
 
         # Bind the config snapshot here, on the loop, not inside the executor job.
         engine = self.suggestion_engine.for_job()
@@ -743,9 +818,9 @@ class LearningManager:
     async def _async_run_all_passes(self) -> None:
         """Every suggestion pass, in cycle-end order, each with its owner."""
         try:
-            model = self._sample_interval_model
-            if model.count >= 20 and model.p95 is not None and model.median is not None:
-                p95, median = model.p95, model.median
+            cad = self.cadence()
+            if cad is not None:
+                p95, median = cad
                 op = await self.hass.async_add_executor_job(
                     self.suggestion_engine.for_job().generate_operational_suggestions,
                     p95, median
