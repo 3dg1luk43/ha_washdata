@@ -1583,7 +1583,7 @@
     },
     "door_opens_at_end": {
       "label": "Otevření dveří ukončí cyklus",
-      "doc": "Pro spotřebiče, jejichž dveře zůstávají během chodu zamčené (většina praček s předním plněním), nebo které je na konci samy otevřou (myčky s AirDry). Dveře otevřené po dobu níže cyklus ukončí místo pozastavení; krátké otevření se ignoruje. Vyžaduje Entitu senzoru dveří."
+      "doc": "Pro spotřebiče, jejichž dveře zůstávají během chodu zamčené (většina praček s předním plněním), nebo které je na konci samy otevřou (myčky s AirDry). Dveře otevřené po dobu níže cyklus ukončí místo pozastavení; krátké otevření se ignoruje. Když je cyklus pozastavený, dveře jej ukončí až ve chvíli, kdy je rozpoznaný program téměř u konce, takže otevření dveří uprostřed programu cyklus dál jen pozastaví. Vyžaduje Entitu senzoru dveří."
     },
     "door_end_dwell_seconds": {
       "label": "Čekání na otevření dveří pro ukončení",

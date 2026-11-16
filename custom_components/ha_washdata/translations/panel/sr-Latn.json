@@ -1569,7 +1569,7 @@
     },
     "door_opens_at_end": {
       "label": "Otvaranje vrata završava ciklus",
-      "doc": "Za mašine čija vrata ostaju zaključana tokom rada (većina mašina za pranje veša sa prednjim punjenjem) ili koje ih same otvaraju na kraju (mašine za pranje sudova sa AirDry). Vrata otvorena tokom vremena zadržavanja ispod završavaju ciklus umesto da ga pauziraju; kratko otvaranje se zanemaruje. Zahteva Entitet senzora vrata."
+      "doc": "Za mašine čija vrata ostaju zaključana tokom rada (većina mašina za pranje veša sa prednjim punjenjem) ili koje ih same otvaraju na kraju (mašine za pranje sudova sa AirDry). Vrata otvorena tokom vremena zadržavanja ispod završavaju ciklus umesto da ga pauziraju; kratko otvaranje se zanemaruje. Dok je ciklus pauziran, vrata ga završavaju tek kada je prepoznati program pri kraju, pa ga otvaranje vrata usred programa i dalje pauzira. Zahteva Entitet senzora vrata."
     },
     "door_end_dwell_seconds": {
       "label": "Zadržavanje pri otvorenim vratima",

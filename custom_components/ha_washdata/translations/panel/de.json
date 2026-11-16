@@ -1570,7 +1570,7 @@
     },
     "door_opens_at_end": {
       "label": "Türöffnung beendet den Zyklus",
-      "doc": "Für Geräte, deren Tür während des Betriebs verriegelt bleibt (die meisten Frontlader-Waschmaschinen) oder die sie am Ende selbst öffnen (Geschirrspüler mit AirDry). Bleibt die Tür für die unten eingestellte Verweildauer offen, endet der Zyklus, statt zu pausieren; ein kurzes Öffnen wird ignoriert. Erfordert eine Türsensor-Entität."
+      "doc": "Für Geräte, deren Tür während des Betriebs verriegelt bleibt (die meisten Frontlader-Waschmaschinen) oder die sie am Ende selbst öffnen (Geschirrspüler mit AirDry). Bleibt die Tür für die unten eingestellte Verweildauer offen, endet der Zyklus, statt zu pausieren; ein kurzes Öffnen wird ignoriert. Ist der Zyklus pausiert, endet er erst, wenn das erkannte Programm fast fertig ist, sodass ein Öffnen der Tür mitten im Programm ihn weiterhin pausiert. Erfordert eine Türsensor-Entität."
     },
     "door_end_dwell_seconds": {
       "label": "Türöffnungs-Endverweildauer",

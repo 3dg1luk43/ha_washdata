@@ -1558,7 +1558,7 @@
         },
         "door_opens_at_end": {
             "label": "Kapının Açılması Döngüyü Bitirir",
-            "doc": "Çalışırken kapısı kilitli kalan (çoğu önden yüklemeli çamaşır makinesi) veya sonda kapıyı kendisi açan (AirDry özellikli bulaşık makineleri) cihazlar için. Aşağıdaki bekleme süresi kadar açık kalan kapı döngüyü duraklatmak yerine bitirir; kısa bir açılma yok sayılır. Kapı Sensörü Varlığı gerektirir."
+            "doc": "Çalışırken kapısı kilitli kalan (çoğu önden yüklemeli çamaşır makinesi) veya sonda kapıyı kendisi açan (AirDry özellikli bulaşık makineleri) cihazlar için. Aşağıdaki bekleme süresi kadar açık kalan kapı döngüyü duraklatmak yerine bitirir; kısa bir açılma yok sayılır. Döngü duraklatılmışken kapı onu yalnızca tanınan program bitmek üzereyken bitirir, bu nedenle programın ortasında kapıyı açmak döngüyü yine duraklatır. Kapı Sensörü Varlığı gerektirir."
         },
         "door_end_dwell_seconds": {
             "label": "Kapı Açık Bekleme Süresi",

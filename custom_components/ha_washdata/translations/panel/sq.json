@@ -1542,7 +1542,7 @@
         },
         "door_opens_at_end": {
             "label": "Hapja e derës e përfundon ciklin",
-            "doc": "Për pajisjet që e mbajnë derën të kyçur gjatë punës (shumica e lavatriçeve me ngarkim përpara) ose që e hapin vetë në fund (pjatalarëset me AirDry). Një derë e lënë hapur për kohën e pritjes më poshtë e përfundon ciklin në vend që ta vërë në pauzë; një hapje e shkurtër injorohet. Kërkon cilësimin Entiteta e sensorit të derës."
+            "doc": "Për pajisjet që e mbajnë derën të kyçur gjatë punës (shumica e lavatriçeve me ngarkim përpara) ose që e hapin vetë në fund (pjatalarëset me AirDry). Një derë e lënë hapur për kohën e pritjes më poshtë e përfundon ciklin në vend që ta vërë në pauzë; një hapje e shkurtër injorohet. Kur cikli është në pauzë, ai përfundon vetëm kur programi i njohur pothuajse ka mbaruar, prandaj hapja e derës në mes të programit thjesht e vë në pauzë. Kërkon cilësimin Entiteta e sensorit të derës."
         },
         "door_end_dwell_seconds": {
             "label": "Koha e pritjes me derë të hapur",

@@ -1587,7 +1587,7 @@
     },
     "door_opens_at_end": {
       "label": "Durų atidarymas užbaigia ciklą",
-      "doc": "Prietaisams, kurių durys veikimo metu lieka užrakintos (dauguma priekinio pakrovimo skalbimo mašinų) arba kurie pabaigoje patys jas atidaro (indaplovės su AirDry). Jei durys lieka atviros toliau nurodytą laukimo laiką, ciklas užbaigiamas, o ne pristabdomas; trumpas atidarymas ignoruojamas. Reikalingas Durų jutiklio objektas."
+      "doc": "Prietaisams, kurių durys veikimo metu lieka užrakintos (dauguma priekinio pakrovimo skalbimo mašinų) arba kurie pabaigoje patys jas atidaro (indaplovės su AirDry). Jei durys lieka atviros toliau nurodytą laukimo laiką, ciklas užbaigiamas, o ne pristabdomas; trumpas atidarymas ignoruojamas. Kai ciklas pristabdytas, durys jį užbaigia tik tada, kai atpažinta programa beveik baigta, todėl atidarius duris programos viduryje ciklas vis tiek pristabdomas. Reikalingas Durų jutiklio objektas."
     },
     "door_end_dwell_seconds": {
       "label": "Durų atidarymo pabaigos laukimas",

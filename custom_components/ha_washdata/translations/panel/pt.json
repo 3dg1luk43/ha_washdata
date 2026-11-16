@@ -1534,7 +1534,7 @@
     },
     "door_opens_at_end": {
       "label": "Abrir a Porta Termina o Ciclo",
-      "doc": "Para máquinas cuja porta fica trancada durante o funcionamento (a maioria das máquinas de lavar roupa de carga frontal) ou que a abrem sozinhas no fim (máquinas de lavar loiça com AirDry). Uma porta que fica aberta durante o tempo de espera abaixo termina o ciclo em vez de o pausar; uma abertura breve é ignorada. Requer uma Entidade do Sensor de Porta."
+      "doc": "Para máquinas cuja porta fica trancada durante o funcionamento (a maioria das máquinas de lavar roupa de carga frontal) ou que a abrem sozinhas no fim (máquinas de lavar loiça com AirDry). Uma porta que fica aberta durante o tempo de espera abaixo termina o ciclo em vez de o pausar; uma abertura breve é ignorada. Com o ciclo em pausa, só termina quando o programa reconhecido está quase concluído, por isso abrir a porta a meio do programa apenas o pausa. Requer uma Entidade do Sensor de Porta."
     },
     "door_end_dwell_seconds": {
       "label": "Tempo de Espera com Porta Aberta para Fim",

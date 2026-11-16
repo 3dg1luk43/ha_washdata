@@ -1534,7 +1534,7 @@
     },
     "door_opens_at_end": {
       "label": "L'apertura della porta termina il ciclo",
-      "doc": "Per macchine la cui porta resta bloccata durante il funzionamento (la maggior parte delle lavatrici a carica frontale) o che la aprono da sole alla fine (lavastoviglie con AirDry). Una porta che resta aperta per il tempo di permanenza qui sotto chiude il ciclo invece di metterlo in pausa; una breve apertura viene ignorata. Richiede un'Entità sensore porta."
+      "doc": "Per macchine la cui porta resta bloccata durante il funzionamento (la maggior parte delle lavatrici a carica frontale) o che la aprono da sole alla fine (lavastoviglie con AirDry). Una porta che resta aperta per il tempo di permanenza qui sotto chiude il ciclo invece di metterlo in pausa; una breve apertura viene ignorata. Se il ciclo è in pausa, termina solo quando il programma riconosciuto è quasi finito, quindi aprire la porta a metà programma lo mette comunque in pausa. Richiede un'Entità sensore porta."
     },
     "door_end_dwell_seconds": {
       "label": "Attesa apertura porta al termine",

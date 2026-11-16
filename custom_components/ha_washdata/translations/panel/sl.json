@@ -1587,7 +1587,7 @@
     },
     "door_opens_at_end": {
       "label": "Odprtje vrat konča cikel",
-      "doc": "Za stroje, katerih vrata med delovanjem ostanejo zaklenjena (večina pralnih strojev s sprednjim polnjenjem) ali jih ob koncu odprejo sami (pomivalni stroji z AirDry). Vrata, odprta za spodnji čas zadrževanja, cikel končajo, namesto da ga zaustavijo; kratko odprtje se prezre. Potrebuje Entiteto senzorja vrat."
+      "doc": "Za stroje, katerih vrata med delovanjem ostanejo zaklenjena (večina pralnih strojev s sprednjim polnjenjem) ali jih ob koncu odprejo sami (pomivalni stroji z AirDry). Vrata, odprta za spodnji čas zadrževanja, cikel končajo, namesto da ga zaustavijo; kratko odprtje se prezre. Ko je cikel zaustavljen, ga vrata končajo šele, ko je prepoznani program skoraj končan, zato ga odprtje vrat sredi programa še vedno zaustavi. Potrebuje Entiteto senzorja vrat."
     },
     "door_end_dwell_seconds": {
       "label": "Čas odprtosti vrat za zaključek",

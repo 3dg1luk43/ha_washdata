@@ -1534,7 +1534,7 @@
     },
     "door_opens_at_end": {
       "label": "L'ouverture de la porte termine le cycle",
-      "doc": "Pour les appareils dont la porte reste verrouillée pendant le fonctionnement (la plupart des lave-linge à hublot) ou qui l'ouvrent eux-mêmes en fin de cycle (lave-vaisselle avec AirDry). Une porte restée ouverte pendant le délai ci-dessous termine le cycle au lieu de le mettre en pause ; une brève ouverture est ignorée. Nécessite une Entité capteur de porte."
+      "doc": "Pour les appareils dont la porte reste verrouillée pendant le fonctionnement (la plupart des lave-linge à hublot) ou qui l'ouvrent eux-mêmes en fin de cycle (lave-vaisselle avec AirDry). Une porte restée ouverte pendant le délai ci-dessous termine le cycle au lieu de le mettre en pause ; une brève ouverture est ignorée. Si le cycle est en pause, il ne se termine que lorsque le programme reconnu est presque fini ; ouvrir la porte en milieu de programme ne fait donc que le mettre en pause. Nécessite une Entité capteur de porte."
     },
     "door_end_dwell_seconds": {
       "label": "Durée d'attente porte ouverte",

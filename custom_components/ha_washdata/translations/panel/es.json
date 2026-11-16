@@ -1534,7 +1534,7 @@
     },
     "door_opens_at_end": {
       "label": "Abrir la puerta finaliza el ciclo",
-      "doc": "Para máquinas cuya puerta queda bloqueada mientras funcionan (la mayoría de las lavadoras de carga frontal) o que la abren solas al final (lavavajillas con AirDry). Una puerta que queda abierta durante el tiempo de espera de abajo termina el ciclo en lugar de pausarlo; una apertura breve se ignora. Requiere una Entidad de sensor de puerta."
+      "doc": "Para máquinas cuya puerta queda bloqueada mientras funcionan (la mayoría de las lavadoras de carga frontal) o que la abren solas al final (lavavajillas con AirDry). Una puerta que queda abierta durante el tiempo de espera de abajo termina el ciclo en lugar de pausarlo; una apertura breve se ignora. Si el ciclo está en pausa, solo termina cuando el programa reconocido está a punto de acabar, así que abrir la puerta a mitad del programa solo lo pausa. Requiere una Entidad de sensor de puerta."
     },
     "door_end_dwell_seconds": {
       "label": "Tiempo mínimo de puerta abierta para finalizar",

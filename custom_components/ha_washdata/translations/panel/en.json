@@ -1310,7 +1310,7 @@
     },
     "door_opens_at_end": {
       "label": "Opening the Door Ends the Cycle",
-      "doc": "For machines whose door stays locked while they run (most front-loading washers) or that open it themselves at the end (dishwashers with AirDry). A door held open for the dwell time below ends the cycle instead of pausing it; a brief open is ignored. Needs a Door Sensor Entity."
+      "doc": "For machines whose door stays locked while they run (most front-loading washers) or that open it themselves at the end (dishwashers with AirDry). A door held open for the dwell time below ends the cycle instead of pausing it; a brief open is ignored. While the cycle is paused, it ends only once the recognised program is nearly done, so opening the door mid-program still pauses it. Needs a Door Sensor Entity."
     },
     "door_sensor_entity": {
       "doc": "Optional door sensor. Shows when the appliance was opened to unload after a cycle.",

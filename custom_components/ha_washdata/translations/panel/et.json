@@ -1570,7 +1570,7 @@
     },
     "door_opens_at_end": {
       "label": "Ukse avamine lõpetab tsükli",
-      "doc": "Masinatele, mille uks on töö ajal lukus (enamik eestlaetavaid pesumasinaid) või mis avavad selle lõpus ise (AirDry-funktsiooniga nõudepesumasinad). Kui uks jääb allpool määratud viibimisajaks avatuks, lõpetab see tsükli, mitte ei peata seda; lühikest avamist eiratakse. Vajab sätet Ukse Anduri Olem."
+      "doc": "Masinatele, mille uks on töö ajal lukus (enamik eestlaetavaid pesumasinaid) või mis avavad selle lõpus ise (AirDry-funktsiooniga nõudepesumasinad). Kui uks jääb allpool määratud viibimisajaks avatuks, lõpetab see tsükli, mitte ei peata seda; lühikest avamist eiratakse. Kui tsükkel on peatatud, lõpetab uks selle alles siis, kui tuvastatud programm on peaaegu lõpus, nii et ukse avamine programmi keskel peatab tsükli endiselt. Vajab sätet Ukse Anduri Olem."
     },
     "door_end_dwell_seconds": {
       "label": "Ukse avamise lõppviibimisaeg",

@@ -1570,7 +1570,7 @@
     },
     "door_opens_at_end": {
       "label": "Oven avaaminen päättää syklin",
-      "doc": "Koneille, joiden ovi pysyy lukittuna käytön aikana (useimmat edestä täytettävät pyykinpesukoneet) tai jotka avaavat sen itse lopussa (AirDry-toiminnolla varustetut astianpesukoneet). Jos ovi pysyy auki alla asetetun viiveen ajan, sykli päättyy tauon sijaan; lyhyt avaus ohitetaan. Vaatii asetuksen Ovianturin entiteetti."
+      "doc": "Koneille, joiden ovi pysyy lukittuna käytön aikana (useimmat edestä täytettävät pyykinpesukoneet) tai jotka avaavat sen itse lopussa (AirDry-toiminnolla varustetut astianpesukoneet). Jos ovi pysyy auki alla asetetun viiveen ajan, sykli päättyy tauon sijaan; lyhyt avaus ohitetaan. Kun sykli on tauolla, se päättyy vasta, kun tunnistettu ohjelma on lähes valmis, joten oven avaaminen kesken ohjelman asettaa syklin edelleen tauolle. Vaatii asetuksen Ovianturin entiteetti."
     },
     "door_end_dwell_seconds": {
       "label": "Oven avauksen loppuviive",

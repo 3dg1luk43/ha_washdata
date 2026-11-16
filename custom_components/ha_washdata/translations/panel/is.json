@@ -1570,7 +1570,7 @@
     },
     "door_opens_at_end": {
       "label": "Opnun hurðar lýkur lotunni",
-      "doc": "Fyrir vélar sem halda hurðinni læstri meðan þær ganga (flestar framhlaðnar þvottavélar) eða opna hana sjálfar í lokin (uppþvottavélar með AirDry). Hurð sem stendur opin í dvaltímann hér að neðan lýkur lotunni í stað þess að gera hlé á henni; stutt opnun er hunsuð. Krefst Dyraskynjareiningar."
+      "doc": "Fyrir vélar sem halda hurðinni læstri meðan þær ganga (flestar framhlaðnar þvottavélar) eða opna hana sjálfar í lokin (uppþvottavélar með AirDry). Hurð sem stendur opin í dvaltímann hér að neðan lýkur lotunni í stað þess að gera hlé á henni; stutt opnun er hunsuð. Á meðan hlé er á lotunni lýkur hurðin henni aðeins þegar þekkta kerfið er næstum búið, svo ef hurðin er opnuð í miðju kerfi er lotan áfram í hléi. Krefst Dyraskynjareiningar."
     },
     "door_end_dwell_seconds": {
       "label": "Dvaltími hurðar við lok",

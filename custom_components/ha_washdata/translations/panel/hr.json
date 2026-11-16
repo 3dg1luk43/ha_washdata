@@ -1569,7 +1569,7 @@
     },
     "door_opens_at_end": {
       "label": "Otvaranje vrata završava ciklus",
-      "doc": "Za uređaje čija vrata ostaju zaključana tijekom rada (većina perilica rublja s prednjim punjenjem) ili koji ih sami otvore na kraju (perilice posuđa s AirDry). Vrata otvorena tijekom vremena zadržavanja ispod završavaju ciklus umjesto da ga pauziraju; kratko otvaranje se zanemaruje. Zahtijeva Entitet senzora vrata."
+      "doc": "Za uređaje čija vrata ostaju zaključana tijekom rada (većina perilica rublja s prednjim punjenjem) ili koji ih sami otvore na kraju (perilice posuđa s AirDry). Vrata otvorena tijekom vremena zadržavanja ispod završavaju ciklus umjesto da ga pauziraju; kratko otvaranje se zanemaruje. Dok je ciklus pauziran, vrata ga završavaju tek kad je prepoznati program pri kraju, pa ga otvaranje vrata usred programa i dalje pauzira. Zahtijeva Entitet senzora vrata."
     },
     "door_end_dwell_seconds": {
       "label": "Zadržavanje otvorenih vrata za završetak",

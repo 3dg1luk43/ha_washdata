@@ -1515,7 +1515,7 @@
     },
     "door_opens_at_end": {
       "label": "Abrir a Porta Encerra o Ciclo",
-      "doc": "Para máquinas cuja porta fica travada durante o funcionamento (a maioria das lavadoras de abertura frontal) ou que a abrem sozinhas no final (lava-louças com AirDry). Uma porta que fica aberta pelo tempo de espera abaixo termina o ciclo em vez de pausá-lo; uma abertura breve é ignorada. Requer uma Entidade do Sensor de Porta."
+      "doc": "Para máquinas cuja porta fica travada durante o funcionamento (a maioria das lavadoras de abertura frontal) ou que a abrem sozinhas no final (lava-louças com AirDry). Uma porta que fica aberta pelo tempo de espera abaixo termina o ciclo em vez de pausá-lo; uma abertura breve é ignorada. Com o ciclo pausado, ele só termina quando o programa reconhecido está quase no fim, então abrir a porta no meio do programa apenas pausa o ciclo. Requer uma Entidade do Sensor de Porta."
     },
     "door_end_dwell_seconds": {
       "label": "Tempo de Espera da Porta Aberta",

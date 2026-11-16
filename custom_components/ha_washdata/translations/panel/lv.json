@@ -1569,7 +1569,7 @@
     },
     "door_opens_at_end": {
       "label": "Durvju atvēršana beidz ciklu",
-      "doc": "Iekārtām, kuru durvis darbības laikā paliek bloķētas (lielākā daļa veļas mazgājamo mašīnu ar priekšējo ielādi) vai kuras beigās tās atver pašas (trauku mazgājamās mašīnas ar AirDry). Ja durvis paliek atvērtas zemāk norādīto uzturēšanās laiku, cikls beidzas, nevis tiek pauzēts; īsa atvēršana tiek ignorēta. Nepieciešama Durvju sensora entītija."
+      "doc": "Iekārtām, kuru durvis darbības laikā paliek bloķētas (lielākā daļa veļas mazgājamo mašīnu ar priekšējo ielādi) vai kuras beigās tās atver pašas (trauku mazgājamās mašīnas ar AirDry). Ja durvis paliek atvērtas zemāk norādīto uzturēšanās laiku, cikls beidzas, nevis tiek pauzēts; īsa atvēršana tiek ignorēta. Kamēr cikls ir pauzēts, durvis to beidz tikai tad, kad atpazītā programma ir gandrīz pabeigta, tāpēc, atverot durvis programmas vidū, cikls joprojām tiek pauzēts. Nepieciešama Durvju sensora entītija."
     },
     "door_end_dwell_seconds": {
       "label": "Durvju atvēršanas beigu uzturēšanās laiks",

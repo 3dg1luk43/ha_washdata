@@ -1515,7 +1515,7 @@
     },
     "door_opens_at_end": {
       "label": "Deschiderea ușii încheie ciclul",
-      "doc": "Pentru aparatele a căror ușă rămâne blocată în timpul funcționării (majoritatea mașinilor de spălat rufe cu încărcare frontală) sau care o deschid singure la final (mașini de spălat vase cu AirDry). O ușă lăsată deschisă pe durata de mai jos încheie ciclul în loc să îl pună pe pauză; o deschidere scurtă este ignorată. Necesită o Entitate Senzor Ușă."
+      "doc": "Pentru aparatele a căror ușă rămâne blocată în timpul funcționării (majoritatea mașinilor de spălat rufe cu încărcare frontală) sau care o deschid singure la final (mașini de spălat vase cu AirDry). O ușă lăsată deschisă pe durata de mai jos încheie ciclul în loc să îl pună pe pauză; o deschidere scurtă este ignorată. Cât timp ciclul este pe pauză, se încheie doar când programul recunoscut este aproape gata, așa că deschiderea ușii la mijlocul programului doar îl pune pe pauză. Necesită o Entitate Senzor Ușă."
     },
     "door_end_dwell_seconds": {
       "label": "Durată de așteptare la deschiderea ușii",

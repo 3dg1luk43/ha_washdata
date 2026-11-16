@@ -1543,7 +1543,7 @@
         },
         "door_opens_at_end": {
             "label": "Az ajtó kinyitása befejezi a ciklust",
-            "doc": "Olyan gépekhez, amelyek ajtaja működés közben reteszelve marad (a legtöbb elöltöltős mosógép), vagy amelyek a végén maguk nyitják ki (AirDry funkciós mosogatógépek). Ha az ajtó az alábbi várakozási ideig nyitva marad, a ciklus befejeződik, nem szünetel; a rövid nyitást figyelmen kívül hagyja. Ajtóérzékelő entitás szükséges."
+            "doc": "Olyan gépekhez, amelyek ajtaja működés közben reteszelve marad (a legtöbb elöltöltős mosógép), vagy amelyek a végén maguk nyitják ki (AirDry funkciós mosogatógépek). Ha az ajtó az alábbi várakozási ideig nyitva marad, a ciklus befejeződik, nem szünetel; a rövid nyitást figyelmen kívül hagyja. Ha a ciklus szünetel, csak akkor fejeződik be, amikor a felismert program már majdnem kész, így a program közbeni ajtónyitás továbbra is csak szünetelteti a ciklust. Ajtóérzékelő entitás szükséges."
         },
         "door_end_dwell_seconds": {
             "label": "Ajtó-nyitásvégi várakozási idő",

@@ -1570,7 +1570,7 @@
     },
     "door_opens_at_end": {
       "label": "Deur openen beëindigt de cyclus",
-      "doc": "Voor machines waarvan de deur vergrendeld blijft zolang ze draaien (de meeste voorladers) of die hem aan het einde zelf openen (vaatwassers met AirDry). Blijft de deur open gedurende de verwijltijd hieronder, dan eindigt de cyclus in plaats van te pauzeren; kort openen wordt genegeerd. Vereist een Deursensorentiteit."
+      "doc": "Voor machines waarvan de deur vergrendeld blijft zolang ze draaien (de meeste voorladers) of die hem aan het einde zelf openen (vaatwassers met AirDry). Blijft de deur open gedurende de verwijltijd hieronder, dan eindigt de cyclus in plaats van te pauzeren; kort openen wordt genegeerd. Terwijl de cyclus gepauzeerd is, eindigt hij pas als het herkende programma bijna klaar is, zodat het openen van de deur halverwege het programma de cyclus nog steeds pauzeert. Vereist een Deursensorentiteit."
     },
     "door_end_dwell_seconds": {
       "label": "Deuropen-eindverwijltijd",

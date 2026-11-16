@@ -1570,7 +1570,7 @@
     },
     "door_opens_at_end": {
       "label": "Dörröppning avslutar cykeln",
-      "doc": "För maskiner vars dörr förblir låst medan de kör (de flesta frontmatade tvättmaskiner) eller som själva öppnar den i slutet (diskmaskiner med AirDry). En dörr som står öppen under uppehållstiden nedan avslutar cykeln i stället för att pausa den; en kort öppning ignoreras. Kräver en Dörrsensorentitet."
+      "doc": "För maskiner vars dörr förblir låst medan de kör (de flesta frontmatade tvättmaskiner) eller som själva öppnar den i slutet (diskmaskiner med AirDry). En dörr som står öppen under uppehållstiden nedan avslutar cykeln i stället för att pausa den; en kort öppning ignoreras. Medan cykeln är pausad avslutas den först när det identifierade programmet nästan är klart, så om dörren öppnas mitt i programmet pausas cykeln fortfarande. Kräver en Dörrsensorentitet."
     },
     "door_end_dwell_seconds": {
       "label": "Dörröppningens uppehållstid vid avslut",

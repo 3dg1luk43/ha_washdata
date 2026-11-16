@@ -1570,7 +1570,7 @@
     },
     "door_opens_at_end": {
       "label": "Åbning af døren afslutter cyklussen",
-      "doc": "Til maskiner, hvis dør forbliver låst, mens de kører (de fleste frontbetjente vaskemaskiner), eller som selv åbner den ved slutningen (opvaskemaskiner med AirDry). En dør, der står åben i ventetiden nedenfor, afslutter cyklussen i stedet for at sætte den på pause; en kort åbning ignoreres. Kræver en Dørsensorenhed."
+      "doc": "Til maskiner, hvis dør forbliver låst, mens de kører (de fleste frontbetjente vaskemaskiner), eller som selv åbner den ved slutningen (opvaskemaskiner med AirDry). En dør, der står åben i ventetiden nedenfor, afslutter cyklussen i stedet for at sætte den på pause; en kort åbning ignoreres. Mens cyklussen er sat på pause, afsluttes den først, når det genkendte program næsten er færdigt, så åbnes døren midt i programmet, sættes cyklussen stadig på pause. Kræver en Dørsensorenhed."
     },
     "door_end_dwell_seconds": {
       "label": "Dørens åbningstid ved afslutning",

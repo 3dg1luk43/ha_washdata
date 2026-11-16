@@ -1583,7 +1583,7 @@
     },
     "door_opens_at_end": {
       "label": "Otwarcie drzwi kończy cykl",
-      "doc": "Dla urządzeń, których drzwi pozostają zablokowane podczas pracy (większość pralek ładowanych od przodu) albo które same otwierają je na końcu (zmywarki z AirDry). Drzwi otwarte przez czas oczekiwania poniżej kończą cykl zamiast go wstrzymywać; krótkie otwarcie jest ignorowane. Wymaga Encji Czujnika Drzwi."
+      "doc": "Dla urządzeń, których drzwi pozostają zablokowane podczas pracy (większość pralek ładowanych od przodu) albo które same otwierają je na końcu (zmywarki z AirDry). Drzwi otwarte przez czas oczekiwania poniżej kończą cykl zamiast go wstrzymywać; krótkie otwarcie jest ignorowane. Gdy cykl jest wstrzymany, drzwi kończą go dopiero wtedy, gdy rozpoznany program jest bliski końca, więc otwarcie drzwi w trakcie programu nadal go tylko wstrzymuje. Wymaga Encji Czujnika Drzwi."
     },
     "door_end_dwell_seconds": {
       "label": "Czas otwarcia drzwi do zakończenia cyklu",
