@@ -47,6 +47,7 @@ from custom_components.ha_washdata.learning import (
 )
 from custom_components.ha_washdata.suggestion_engine import (
     OWNER_MODEL,
+    OWNER_OPERATIONAL,
     SuggestionEngine,
     end_gate_would_split,
     reconcile_suggestions,
@@ -234,9 +235,9 @@ def test_the_guard_withholds_end_gate_values_that_split_own_cycles() -> None:
     assert set(out) == {CONF_MIN_OFF_GAP}
 
 
-def _paused_cycle(i: int) -> dict[str, Any]:
-    """800 W for an hour with one 1000 s pause at 1.5 W."""
-    pts = [[float(t), 1.5 if 1200 <= t < 2200 else 800.0] for t in range(0, 3600, 10)]
+def _paused_cycle(i: int, pause_w: float = 1.5) -> dict[str, Any]:
+    """800 W for an hour with one 1000 s pause (1.5 W by default)."""
+    pts = [[float(t), pause_w if 1200 <= t < 2200 else 800.0] for t in range(0, 3600, 10)]
     pts.append([3600.0, 0.0])
     return {
         "id": f"p{i}", "profile_name": "Cotton", "status": "completed",
@@ -276,6 +277,77 @@ def test_a_dropped_key_is_judged_with_another_pass_s_pending_value() -> None:
     store.suggestions[CONF_MIN_OFF_GAP] = _sug(900, owner=OWNER_BATCH)
     out = engine._guard_end_gate(batch(), options, drop_order=drop, owner=OWNER_BATCH)
     assert set(out) == {CONF_STOP_THRESHOLD_W, CONF_START_THRESHOLD_W}
+
+
+_JOINT_OPTIONS = {
+    CONF_STOP_THRESHOLD_W: 3.0, CONF_START_THRESHOLD_W: 5.0, CONF_OFF_DELAY: 180,
+    CONF_MIN_OFF_GAP: 210, CONF_END_ENERGY_THRESHOLD: 0.05,
+}
+
+
+def _joint_setup(mock_hass: Any) -> tuple[_Store, LearningManager]:
+    """A 1000 s pause at 2 W under a 3 W stop: 0.1 Wh per 180 s window, so an
+    end-energy raise to 0.15 Wh is safe only while an 1800 s off delay waits it out."""
+    pts = [(float(t), float(p)) for t, p in _paused_cycle(0, pause_w=2.0)["power_data"]]
+    assert not end_gate_would_split(pts, 3.0, 180, 210, 0.05)  # in force
+    assert not end_gate_would_split(pts, 3.0, 1800, 1800, 0.15)  # the pending pair
+    assert end_gate_would_split(pts, 3.0, 180, 210, 0.15)  # the raise alone
+    store = _Store([_paused_cycle(i, pause_w=2.0) for i in range(6)])
+    lm = _learning(mock_hass, store, _JOINT_OPTIONS)
+
+    async def _executor(fn, *args):
+        return fn(*args)
+
+    lm.hass.async_add_executor_job = _executor
+    store.suggestions = {
+        CONF_OFF_DELAY: _sug(1800, owner=OWNER_OPERATIONAL),
+        CONF_MIN_OFF_GAP: _sug(1800, cascade=True),
+        CONF_END_ENERGY_THRESHOLD: _sug(0.15, owner=OWNER_BATCH),
+    }
+    return store, lm
+
+
+async def test_the_stored_set_is_judged_after_the_gates_and_reconcile(mock_hass: Any) -> None:
+    """PR #529: a pass proposing the 180 s in force passes its guard (the pending
+    cascade still waits 1800 s), the equality gate deletes the pending off delay,
+    reconcile drops its cascade, and the raise was left to be applied alone."""
+    store, lm = _joint_setup(mock_hass)
+    await lm._run_pass(  # noqa: SLF001
+        lambda: {CONF_OFF_DELAY: _sug(180)}, OWNER_OPERATIONAL, lm._config_generation  # noqa: SLF001
+    )
+    assert CONF_OFF_DELAY not in store.suggestions
+    assert CONF_END_ENERGY_THRESHOLD not in store.suggestions
+
+
+async def test_a_mute_rejudges_what_is_left(mock_hass: Any) -> None:
+    store, lm = _joint_setup(mock_hass)
+    await lm.async_check_joint_end_gate()
+    assert set(store.suggestions) == {CONF_OFF_DELAY, CONF_MIN_OFF_GAP, CONF_END_ENERGY_THRESHOLD}
+    store.locked.append(CONF_OFF_DELAY)
+    store.delete_suggestion(CONF_OFF_DELAY)  # what set_suggestion_locked does
+    await lm.async_check_joint_end_gate()
+    assert CONF_END_ENERGY_THRESHOLD not in store.suggestions
+
+
+async def test_a_mute_rejudges_the_rest_on_a_real_boot(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """The mute handler's check runs as a tracked task on a real manager."""
+    entry = await setup_washdata_entry(options=_JOINT_OPTIONS)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store = manager.profile_store
+    store._data["past_cycles"] = [_paused_cycle(i, pause_w=2.0) for i in range(6)]  # noqa: SLF001
+    store.set_suggestion(CONF_OFF_DELAY, 1800, reason="r", flags={"owner": OWNER_OPERATIONAL})
+    store.set_suggestion(CONF_END_ENERGY_THRESHOLD, 0.15, reason="r", flags={"owner": OWNER_BATCH})
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({
+        "type": f"{DOMAIN}/set_suggestion_lock", "entry_id": entry.entry_id,
+        "key": CONF_OFF_DELAY, "locked": True,
+    })
+    assert (await client.receive_json())["success"]
+    await hass.async_block_till_done()
+    assert CONF_OFF_DELAY not in store.get_suggestions()
+    assert CONF_END_ENERGY_THRESHOLD not in store.get_suggestions()
 
 
 def test_the_bridge_is_measured_at_the_stop_threshold() -> None:

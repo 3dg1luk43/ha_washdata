@@ -49,6 +49,7 @@ from .const import (
     TerminationReason,
 )
 from .suggestion_engine import (
+    END_GATE_KEYS,
     OWNER_BATCH,
     OWNER_DETECTION,
     OWNER_MODEL,
@@ -351,11 +352,65 @@ class LearningManager:
         generation: int,
         *args: Any,
     ) -> dict[str, Any]:
-        """Scan in the executor and apply on the loop, holding ``_pass_lock``."""
+        """Scan in the executor and apply on the loop, holding ``_pass_lock``.
+
+        Then judge the stored set as a whole (``_enforce_joint_end_gate``): the
+        gates and the reconcile after the pass's own guard can remove a pending
+        value another entry was judged with.
+        """
         async with self._pass_lock:
             found = await self.hass.async_add_executor_job(generate, *args)
             self._apply_if_current(generation, found or {}, owner)
+            if generation == self._config_generation:
+                await self._enforce_joint_end_gate()
             return found or {}
+
+    def schedule_joint_end_gate_check(self) -> None:
+        """Spawn ``async_check_joint_end_gate`` (tracked, so an unload cancels it)."""
+        self._spawn(self.async_check_joint_end_gate())
+
+    async def async_check_joint_end_gate(self) -> None:
+        """Re-judge the stored set after a change no pass made (a mute). Never raises."""
+        try:
+            async with self._pass_lock:
+                await self._enforce_joint_end_gate()
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Joint end-gate check failed: %s", e)
+
+    async def _enforce_joint_end_gate(self) -> None:
+        """Withdraw stored entries that, applied together, split own cycles.
+
+        The trace scan runs in the executor against a snapshot; an entry is only
+        withdrawn if it is still the one that was judged.
+        """
+        stored = {
+            k: dict(v) for k, v in (self.profile_store.get_suggestions() or {}).items()
+            if isinstance(v, dict)
+        }
+        if not any(k in END_GATE_KEYS for k in stored):
+            return
+        drops = await self.hass.async_add_executor_job(
+            self.suggestion_engine.for_job().joint_end_gate_drops, stored
+        )
+        self._withdraw_joint_drops(stored, drops or [])
+
+    def _withdraw_joint_drops(self, judged: dict[str, Any], drops: list[str]) -> None:
+        current = self.profile_store.get_suggestions() or {}
+        gone = [
+            key for key in drops
+            if isinstance(current.get(key), dict)
+            and current[key].get("value") == judged.get(key, {}).get("value")
+        ]
+        if not gone:
+            return
+        self._logger.info(
+            "Suggestion(s) withdrawn: applied together with the rest they would end "
+            "own cycles inside a pause the settings in force bridge: %s",
+            ", ".join(sorted(gone)),
+        )
+        for key in gone:
+            self.profile_store.delete_suggestion(key)
+        self.suggestion_engine.apply_suggestions({}, changed=True)
 
     def _spawn(self, coro: Coroutine[Any, Any, Any]) -> Any:
         """Start a background task through the manager's tracked spawner."""
@@ -762,6 +817,14 @@ class LearningManager:
                 self._logger.error("%s suggestion pass failed: %s", label, e)
                 return
             self._apply_suggestions_and_notify(suggestions or {}, owner=owner)
+            stored = {
+                k: dict(v) for k, v in (self.profile_store.get_suggestions() or {}).items()
+                if isinstance(v, dict)
+            }
+            if any(k in END_GATE_KEYS for k in stored):
+                self._withdraw_joint_drops(
+                    stored, self.suggestion_engine.for_job().joint_end_gate_drops(stored)
+                )
             return
         self._spawn(self._async_scan_and_apply(generate, label, owner, self._config_generation))
 

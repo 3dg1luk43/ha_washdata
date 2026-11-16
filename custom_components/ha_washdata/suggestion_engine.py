@@ -1469,6 +1469,12 @@ OWNER_MODEL = "model"
 OWNER_DETECTION = "detection"
 OWNER_BATCH = "batch"
 
+# The settings the fallback end gate reads; judged together (``_guard_end_gate``,
+# ``SuggestionEngine.joint_end_gate_drops``).
+END_GATE_KEYS = (
+    CONF_STOP_THRESHOLD_W, CONF_OFF_DELAY, CONF_MIN_OFF_GAP, CONF_END_ENERGY_THRESHOLD,
+)
+
 
 def _parse_ts(v: Any) -> float | None:
     """Parse a value into a unix timestamp float, supporting ISO strings."""
@@ -1898,9 +1904,7 @@ class SuggestionEngine:
         return effective_option_values(options, self.device_type or "")
 
     #: The settings the fallback end gate reads (`end_gate_would_split`).
-    _END_GATE_KEYS = (
-        CONF_STOP_THRESHOLD_W, CONF_OFF_DELAY, CONF_MIN_OFF_GAP, CONF_END_ENERGY_THRESHOLD,
-    )
+    _END_GATE_KEYS = END_GATE_KEYS
 
     def _end_gate_evidence(self) -> list[list[tuple[float, float]]]:
         """Traces of the cycles that ended on their own, any health, filler dropped.
@@ -2005,6 +2009,60 @@ class SuggestionEngine:
         except Exception:  # pylint: disable=broad-exception-caught
             _LOGGER.debug("End-gate guard failed", exc_info=True)
         return suggestions
+
+    def joint_end_gate_drops(self, stored: dict[str, Any]) -> list[str]:
+        """Stored keys to withdraw so Apply all splits no more own cycles than now.
+
+        ``_guard_end_gate`` judges a pass's values against what is pending when it
+        runs, but the gates and the reconcile after it can still remove a pending
+        value another entry was judged with, and a mute deletes one directly
+        (PR #529: a pending 1800 s off delay deleted as equal to the value in
+        force, its min_off_gap cascade re-derived away, left an end-energy raise
+        that only the 1800 s wait made safe). This judges the stored set as Apply
+        all writes it, against the settings in force, and withdraws one entry at a
+        time, the one whose removal leaves the fewest splits (non-corrective first),
+        until it splits no more. Cascades are derived, so never withdrawn here; a
+        min_off_gap cascade is left out of the count, since the off delay it
+        follows already sets the wait and it goes with that off delay. A withdrawn
+        stop takes its start. Executor-safe; never raises.
+        """
+        try:
+            values = {
+                k: e["value"] for k, e in stored.items()
+                if k in self._END_GATE_KEYS and isinstance(e, dict)
+                and _num(e.get("value")) is not None
+                and not (k == CONF_MIN_OFF_GAP and e.get("cascade"))
+            }
+            if not values:
+                return []
+            evidence = self._end_gate_evidence()
+            if not evidence:
+                return []
+            base = dict(self._effective_thresholds(self._entry_options()))
+            allowed = self._end_gate_splits(evidence, base)
+            drops: list[str] = []
+            while self._end_gate_splits(evidence, {**base, **values}) > allowed:
+                candidates = [k for k in values if not stored[k].get("cascade")]
+                if not candidates:
+                    break
+
+                def cost(key: str) -> tuple[int, bool, int]:
+                    rest = {k: v for k, v in values.items() if k != key}
+                    return (
+                        self._end_gate_splits(evidence, {**base, **rest}),
+                        bool(stored[key].get("corrective")),
+                        self._END_GATE_KEYS.index(key),
+                    )
+
+                key = min(candidates, key=cost)
+                values.pop(key)
+                drops.append(key)
+            if CONF_STOP_THRESHOLD_W in drops and isinstance(stored.get(CONF_START_THRESHOLD_W), dict):
+                drops.append(CONF_START_THRESHOLD_W)
+            return drops
+        except Exception:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("Joint end-gate check failed", exc_info=True)
+            return []
 
     def _standby_floor(self, options: dict[str, Any]) -> dict[str, Any] | None:
         """``standby_stop_floor`` over this device's recent history (#458)."""

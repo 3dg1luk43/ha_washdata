@@ -5127,6 +5127,10 @@ async def ws_set_suggestion_lock(
         return
     try:
         await manager.profile_store.set_suggestion_locked(key, bool(msg["locked"]))
+        learning = getattr(manager, "learning_manager", None)
+        if msg["locked"] and learning is not None:
+            # The muted entry may be what made another pending one safe (PR #529).
+            learning.schedule_joint_end_gate_check()
         manager.notify_update()
         _send_result(
             connection, msg["id"], "set_suggestion_lock",

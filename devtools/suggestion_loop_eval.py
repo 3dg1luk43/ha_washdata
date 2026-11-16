@@ -813,8 +813,15 @@ def run_passes(mgr: Any, cad: tuple[float, float] | None) -> dict[str, Any]:
         orig_apply(sug, **kwargs)
 
     eng.apply_suggestions = _capture
+
+    def gate(sug: dict[str, Any], owner: str) -> None:
+        # As LearningManager._run_pass: apply, then judge the stored set as a whole.
+        lm._apply_suggestions_and_notify(sug, owner=owner)  # noqa: SLF001
+        stored = {k: dict(v) for k, v in (mgr.profile_store.get_suggestions() or {}).items()
+                  if isinstance(v, dict)}
+        lm._withdraw_joint_drops(stored, eng.for_job().joint_end_gate_drops(stored))  # noqa: SLF001
+
     try:
-        gate = lm._apply_suggestions_and_notify  # noqa: SLF001
         if cad is not None:
             gate(eng.for_job().generate_operational_suggestions(*cad), owner=OWNER_OPERATIONAL)
         gate(eng.for_job().generate_standby_floor_suggestions(), owner=OWNER_STANDBY_FLOOR)
