@@ -737,11 +737,17 @@ def _idle_evidence_w(cycle: dict[str, Any], stop_threshold_w: float) -> float | 
     ``0.0`` for a cycle whose end saw the power below the threshold, the plateau
     level for a standby-band finalize, the settled kept tail for a cycle stopped
     by hand or force-stopped, None when the cycle says nothing (no trace, no tail,
-    or stopped by hand while still working).
+    stopped by hand while still working, or a loose-tier finalize on a plateau at
+    or above the threshold).
     """
     band = _num(cycle.get("standby_band_w"))
     if band is not None:
         return band
+    # The loose tier of that finalize: a stuck low phase, not a standby. At or
+    # above the threshold it did not see the power go below, so it says nothing.
+    loose = _num(cycle.get("loose_plateau_w"))
+    if loose is not None:
+        return 0.0 if loose < stop_threshold_w else None
     if cycle.get("termination_reason") in _BELOW_STOP_ENDS:
         return 0.0
     raw = cycle.get("power_data")

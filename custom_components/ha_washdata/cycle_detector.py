@@ -5138,9 +5138,11 @@ class CycleDetector:
         # the expected duration, as it did before 0.5.7. See the constants.
         stop = float(self._config.stop_threshold_w)
         near_stop_ceiling = standby_near_stop_ceiling(stop)
+        # The level the tiers test, kept for the stored cycle (PR #529 review).
+        self._standby_band_level = float(np.median(window))
         if (
             stop > 0
-            and float(np.median(window)) >= stop
+            and self._standby_band_level >= stop
             and hi <= near_stop_ceiling
             # #452: a halt says the programme is not done (it stopped on its
             # standby draw before its end), so the near-stop tier waits; the
@@ -5251,6 +5253,8 @@ class CycleDetector:
         plateau_hi = self._standby_band_plateau(timestamp)
         if plateau_hi is None:
             return False
+        near_stop = bool(getattr(self, "_standby_band_near_stop", False))
+        level = getattr(self, "_standby_band_level", None)
         start_time = self._current_cycle_start or timestamp
         current_duration = (timestamp - start_time).total_seconds()
         # The plateau sits ABOVE stop_threshold, so it keeps advancing
@@ -5291,7 +5295,7 @@ class CycleDetector:
             "draw above stop_threshold; finalizing (plateau trimmed, "
             "duration %.0fs).",
             self._state,
-            power,
+            power if level is None else level,
             self._cycle_max_power,
             self._expected_duration,
             current_duration,
@@ -5302,8 +5306,11 @@ class CycleDetector:
             termination_reason=TerminationReason.TIMEOUT,
             keep_tail=False,
             # Only the near-stop tier is a standby: the loose one also closes a
-            # 0 W soak or a 60 W rinse stuck past twice the expected duration.
-            standby_band_w=power if getattr(self, "_standby_band_near_stop", False) else None,
+            # 0 W soak or a 60 W rinse stuck past twice the expected duration, so
+            # its level is kept apart. Both are the plateau median the tiers
+            # tested, not the current sample.
+            standby_band_w=level if near_stop else None,
+            loose_plateau_w=None if near_stop else level,
         )
         return True
 
@@ -6552,6 +6559,7 @@ class CycleDetector:
         duration_capped: bool = False,
         flat_power_w: float | None = None,
         standby_band_w: float | None = None,
+        loose_plateau_w: float | None = None,
     ) -> None:
         """Finalize cycle.
 
@@ -6682,6 +6690,11 @@ class CycleDetector:
             # trace, so the level is kept here. It is the one TIMEOUT end that did
             # not see the power below stop (`detect_standby_above_stop`, #525).
             cycle_data["standby_band_w"] = round(float(standby_band_w), 2)
+        if loose_plateau_w is not None and math.isfinite(float(loose_plateau_w)):
+            # The same finalize on its loose tier (a flat plateau past twice the
+            # expected duration): not a standby, and only below the threshold
+            # does it show the power going there (`_idle_evidence_w`).
+            cycle_data["loose_plateau_w"] = round(float(loose_plateau_w), 2)
 
         self._logger.info("Cycle Finished: %s, %.1f min", status, duration / 60)
         self._on_cycle_end(cycle_data)

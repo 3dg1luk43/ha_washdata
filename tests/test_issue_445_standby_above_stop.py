@@ -40,6 +40,7 @@ from custom_components.ha_washdata.cycle_detector import (
     CycleDetector,
     CycleDetectorConfig,
 )
+from custom_components.ha_washdata.suggestion_engine import _idle_evidence_w
 
 T0 = datetime(2026, 9, 20, 10, 0, tzinfo=timezone.utc)
 EXPECTED = 5470.0  # the reporter's "Jeans 60" profile, ~91 min
@@ -134,6 +135,11 @@ def test_a_loose_tier_finish_carries_no_standby_level() -> None:
     _idle_s, data = _run(_cfg(), idle_w=15.0)
     assert data is not None and data["termination_reason"] == "timeout"
     assert "standby_band_w" not in data
+    # Its level is kept apart, and the standby evidence reads it as unknown, not
+    # as an end that saw the power below the threshold (PR #529 round 2).
+    assert data["loose_plateau_w"] == pytest.approx(15.0)
+    assert _idle_evidence_w(data, 2.56) is None
+    assert _idle_evidence_w({**data, "loose_plateau_w": 0.0}, 2.56) == 0.0
 
 
 def test_a_normal_timeout_carries_no_standby_level() -> None:
