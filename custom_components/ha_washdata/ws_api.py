@@ -318,6 +318,33 @@ def _visible_suggestions(
     return out
 
 
+async def _drop_unsafe_end_gate_updates(
+    hass: HomeAssistant, manager: Any, visible: dict[str, Any], updates: dict[str, Any]
+) -> None:
+    """Withdraw from ``updates`` what, written together, splits own cycles (PR #529).
+
+    A pass stores its values before its joint check
+    (``LearningManager._enforce_joint_end_gate``) can withdraw any, and Apply all
+    does not wait for it, so the stored set can briefly be one no pass would leave.
+    This judges exactly what is written. Never raises: on a failure the set is
+    written as stored (each pass's own checks still ran).
+    """
+    # Imported here to keep the ws_api import graph free of suggestion_engine.
+    from .suggestion_engine import END_GATE_KEYS  # pylint: disable=import-outside-toplevel
+
+    if not any(key in END_GATE_KEYS for key in updates):
+        return
+    try:
+        engine = manager.learning_manager.suggestion_engine.for_job()
+        judged = {key: {**visible[key], "value": val} for key, val in updates.items()}
+        drops = await hass.async_add_executor_job(engine.joint_end_gate_drops, judged)
+    except Exception:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Joint end-gate check on apply failed", exc_info=True)
+        return
+    for key in list(drops or ()):
+        updates.pop(key, None)
+
+
 def _threshold_pair_message(start: float, stop: float) -> str:
     """The error a write that would invert the threshold pair is refused with (item 515)."""
     return (
@@ -5031,6 +5058,7 @@ async def ws_apply_suggestions(
             updates[key] = (
                 int(float(val)) if key in _SUGGESTION_INT_KEYS else float(val)
             )
+        await _drop_unsafe_end_gate_updates(hass, manager, visible, updates)
 
         # Item 515: the reconciler keeps a stored start/stop pair ordered, but
         # applying one of the two alone (a subset, a muted cascade, or a pair

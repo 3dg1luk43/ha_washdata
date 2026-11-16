@@ -350,6 +350,49 @@ async def test_a_mute_rejudges_the_rest_on_a_real_boot(
     assert CONF_END_ENERGY_THRESHOLD not in store.get_suggestions()
 
 
+async def test_apply_all_during_a_pass_s_joint_check_writes_no_unsafe_set(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any, monkeypatch: Any
+) -> None:
+    """The pass has stored its values and its joint check is still running (held
+    here) when Apply all arrives: Apply judges what it writes itself."""
+    import threading  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(options=_JOINT_OPTIONS)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store, lm = manager.profile_store, manager.learning_manager
+    store._data["past_cycles"] = [_paused_cycle(i, pause_w=2.0) for i in range(6)]  # noqa: SLF001
+    store.set_suggestion(CONF_OFF_DELAY, 1800, reason="r", flags={"owner": OWNER_OPERATIONAL})
+    store.set_suggestion(CONF_MIN_OFF_GAP, 1800, reason="r", flags={"cascade": True})
+    store.set_suggestion(CONF_END_ENERGY_THRESHOLD, 0.15, reason="r", flags={"owner": OWNER_BATCH})
+    real = SuggestionEngine.joint_end_gate_drops
+    entered, release, calls = threading.Event(), threading.Event(), []
+
+    def held_first(self: Any, stored: dict[str, Any]) -> list[str]:
+        calls.append(sorted(stored))
+        if len(calls) == 1:  # the pass's check
+            entered.set()
+            release.wait(10)
+        return real(self, stored)
+
+    monkeypatch.setattr(SuggestionEngine, "joint_end_gate_drops", held_first)
+    task = hass.async_create_task(lm._run_pass(  # noqa: SLF001
+        lambda: {CONF_OFF_DELAY: _sug(180)}, OWNER_OPERATIONAL, lm._config_generation  # noqa: SLF001
+    ))
+    assert await hass.async_add_executor_job(entered.wait, 10)
+    assert set(store.get_suggestions()) == {CONF_END_ENERGY_THRESHOLD}  # the window
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({
+        "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry.entry_id,
+        "keys": [CONF_END_ENERGY_THRESHOLD],
+    })
+    res = await client.receive_json()
+    release.set()
+    await task
+    assert res["success"] and res["result"]["applied"] == []
+    assert entry.options[CONF_END_ENERGY_THRESHOLD] == 0.05
+    assert CONF_END_ENERGY_THRESHOLD not in store.get_suggestions()
+
+
 def test_the_bridge_is_measured_at_the_stop_threshold() -> None:
     """The 20 W pump-out resumes the drying run at a 1.5 W stop; at 2% of the
     2 kW peak (40 W) it never did, and the 90 min pause went unmeasured. With the
