@@ -344,10 +344,10 @@ const _SETTINGS_SECTIONS = [
     { sub: 'Door & Pause', fields: [
       { key: 'door_sensor_entity', label: 'Door Sensor Entity', basic: true, type: 'entity', domain: 'binary_sensor',
         doc: 'Optional door sensor. Shows when the appliance was opened to unload after a cycle.' },
-      { key: 'door_opens_at_end', label: 'Door Opens Automatically At End', type: 'checkbox',
-        doc: 'For dishwashers that open the door at the end to dry (e.g. AirDry). A door left open for the dwell time below ends the cycle instead of pausing it; a brief open is ignored. Needs a Door Sensor Entity.' },
+      { key: 'door_opens_at_end', label: 'Opening the Door Ends the Cycle', type: 'checkbox',
+        doc: 'For machines whose door stays locked while they run (most front-loading washers) or that open it themselves at the end (dishwashers with AirDry). A door held open for the dwell time below ends the cycle instead of pausing it; a brief open is ignored. Needs a Door Sensor Entity.' },
       { key: 'door_end_dwell_seconds', label: 'Door-Open End Dwell', unit: 's', type: 'number', min: 1, def: 60,
-        doc: 'With "Door Opens Automatically At End" on: how long the door must stay open before the cycle ends. Long enough to ignore adding a dish (default 60 s).' },
+        doc: 'With "Opening the Door Ends the Cycle" on: how long the door must stay open before the cycle ends. Long enough to ignore adding a dish (default 60 s).' },
       { key: 'pause_cuts_power', label: 'Pause Also Cuts Power (via switch)', type: 'checkbox',
         doc: 'When a cycle is paused, also switch off the Switch Entity below. Only for appliances that can safely lose power mid-cycle.' },
       { key: 'switch_entity', label: 'Switch Entity', type: 'entity', domain: 'switch',

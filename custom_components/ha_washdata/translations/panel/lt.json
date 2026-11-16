@@ -1586,12 +1586,12 @@
       "doc": "Kas atidaroma paspaudus šio prietaiso pranešimą. Tuščia: WashData skydelis su šiuo prietaisu. Įveskite prietaisų skydelio kelią (pvz., /lovelace/laundry) ar URL, arba „none“, kad paspaudimas nieko nedarytų."
     },
     "door_opens_at_end": {
-      "label": "Durys automatiškai atsidaromos pabaigoje",
-      "doc": "Indaplovėms, kurios pabaigoje atidaro duris džiovinimui (pvz., AirDry). Jei durys lieka atviros toliau nurodytą laiką, ciklas užbaigiamas, o ne pristabdomas; trumpas atidarymas ignoruojamas. Reikalingas Durų jutiklio objektas."
+      "label": "Durų atidarymas užbaigia ciklą",
+      "doc": "Prietaisams, kurių durys veikimo metu lieka užrakintos (dauguma priekinio pakrovimo skalbimo mašinų) arba kurie pabaigoje patys jas atidaro (indaplovės su AirDry). Jei durys lieka atviros toliau nurodytą laukimo laiką, ciklas užbaigiamas, o ne pristabdomas; trumpas atidarymas ignoruojamas. Reikalingas Durų jutiklio objektas."
     },
     "door_end_dwell_seconds": {
       "label": "Durų atidarymo pabaigos laukimas",
-      "doc": "Kai įjungta \"Durys automatiškai atsidaromos pabaigoje\": kiek laiko durys turi likti atviros, kad ciklas baigtųsi. Pakankamai ilgai, kad būtų ignoruojamas indo įdėjimas (numatytoji 60 s)."
+      "doc": "Kai įjungta \"Durų atidarymas užbaigia ciklą\": kiek laiko durys turi likti atviros, kad ciklas baigtųsi. Pakankamai ilgai, kad būtų ignoruojamas indo įdėjimas (numatytoji 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Ciklai, formuojantys programą",
@@ -1995,7 +1995,8 @@
       "watchdog": "Paliktas kuo mažesnis, kiek saugu (vos didesnis nei p95 atnaujinimo tarpas {p95}s ir bent 2x mėginių ėmimo intervalas {median}s, min. 30s), kad strigtys būtų aptiktos greitai be klaidingų sustabdymų.",
       "end_energy_floor": "Padidinta iki minimumo, kurį lemia sustabdymo slenkstis ({stop} W) per išjungimo delsimą ({off_delay} s); žemiau jo ciklas gali baigtis tik atsarginiu būdu.",
       "max_duration_ratio_default": "Grąžinta numatytoji reikšmė: žemesnė viršutinė riba atmeta teisingą programą kiekvieną kartą, kai ciklas trunka ilgiau nei įprastai.",
-      "min_duration_ratio_default": "Grąžinta numatytoji reikšmė: aukštesnė apatinė riba neleidžia atpažinti vykstančio ciklo, kol jis gerokai neįsibėgėja."
+      "min_duration_ratio_default": "Grąžinta numatytoji reikšmė: aukštesnė apatinė riba neleidžia atpažinti vykstančio ciklo, kol jis gerokai neįsibėgėja.",
+      "start_above_running": "Šis prietaisas nuo pradžios iki pabaigos veikia {low} W ar didesne galia, bet paleidimo slenkstis yra {start} W, todėl mažesne galia veikiantis ciklas niekada neprasideda. Paleidimo slenkstis nustatomas ties puse mažiausios veikimo galios, sustabdymo slenkstis žemiau jo."
     },
     "exclusions": {
       "summary": "Neįtraukta {total} klaidingai aptiktų ciklų: {parts}.",

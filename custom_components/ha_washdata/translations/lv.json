@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Pēdējā cikla izmaksas"
+      },
+      "last_cycle_start": {
+        "name": "Pēdējā cikla sākums"
       }
     },
     "select": {

@@ -1533,12 +1533,12 @@
       "doc": "O que um toque na notificação deste eletrodoméstico abre. Em branco: o painel WashData neste eletrodoméstico. Introduza um caminho de painel (p. ex. /lovelace/laundry) ou um URL, ou \"none\" para nenhuma ação ao tocar."
     },
     "door_opens_at_end": {
-      "label": "Porta Abre Automaticamente no Fim",
-      "doc": "Para máquinas de lavar loiça que abrem a porta no fim para secar (p. ex. AirDry). Uma porta que fica aberta durante o tempo de espera abaixo termina o ciclo em vez de o pausar; uma abertura breve é ignorada. Requer uma Entidade do Sensor de Porta."
+      "label": "Abrir a Porta Termina o Ciclo",
+      "doc": "Para máquinas cuja porta fica trancada durante o funcionamento (a maioria das máquinas de lavar roupa de carga frontal) ou que a abrem sozinhas no fim (máquinas de lavar loiça com AirDry). Uma porta que fica aberta durante o tempo de espera abaixo termina o ciclo em vez de o pausar; uma abertura breve é ignorada. Requer uma Entidade do Sensor de Porta."
     },
     "door_end_dwell_seconds": {
       "label": "Tempo de Espera com Porta Aberta para Fim",
-      "doc": "Com «Porta Abre Automaticamente no Fim» ligado: quanto tempo a porta tem de ficar aberta antes de o ciclo terminar. O suficiente para ignorar que se junta um prato (predefinição 60 s)."
+      "doc": "Com «Abrir a Porta Termina o Ciclo» ligado: quanto tempo a porta tem de ficar aberta antes de o ciclo terminar. O suficiente para ignorar que se junta um prato (predefinição 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Ciclos que moldam um programa",
@@ -1940,7 +1940,8 @@
       "watchdog": "Mantido o mais baixo que é seguro (ligeiramente acima do intervalo de atualização p95 de {p95}s e pelo menos 2x o intervalo de amostragem de {median}s, mín. 30s) para detetar rapidamente os bloqueios sem paragens falsas.",
       "end_energy_floor": "Elevado ao mínimo implicado pelo limiar de paragem ({stop} W) durante o atraso de desligamento ({off_delay} s); abaixo dele, o ciclo só pode terminar por um mecanismo de recurso.",
       "max_duration_ratio_default": "Reposto o valor predefinido: um limite superior mais baixo rejeita o programa certo sempre que um ciclo dura mais do que o habitual.",
-      "min_duration_ratio_default": "Reposto o valor predefinido: um limite inferior mais alto impede que um ciclo em curso seja reconhecido até estar bem adiantado."
+      "min_duration_ratio_default": "Reposto o valor predefinido: um limite inferior mais alto impede que um ciclo em curso seja reconhecido até estar bem adiantado.",
+      "start_above_running": "Este eletrodoméstico consome {low} W ou mais do início ao fim, mas o limiar de início é {start} W, pelo que um ciclo à sua potência mais baixa nunca arranca. Limiar de início definido para metade do seu nível de funcionamento mais baixo, limiar de paragem abaixo disso."
     },
     "exclusions": {
       "summary": "Excluído(s) {total} ciclo(s) mal detetado(s): {parts}.",

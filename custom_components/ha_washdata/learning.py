@@ -471,12 +471,10 @@ class LearningManager:
         # so the off-delay pause scan includes it.
         self.run_due_operational_pass()
 
-        # 1b. Standby above the stop threshold (#458). Every cycle end, whatever its
-        # status: a force-stopped cycle is the evidence this pass exists for.
-        self._dispatch_scan_and_apply(
-            self.suggestion_engine.for_job().generate_standby_floor_suggestions,
-            "Standby floor",
-        )
+        # 1b. Thresholds no cycle can end or start under (#458, #527). Every cycle
+        # end, whatever its status: a force-stopped cycle is the evidence these
+        # passes exist for.
+        self.run_threshold_correctives()
 
         # 2. Check if we should request feedback
         self._maybe_request_feedback(
@@ -504,6 +502,23 @@ class LearningManager:
 
         # 4. Run multi-cycle batch simulation when enough new labeled cycles have accumulated
         self._maybe_run_batch_simulation()
+
+    def run_threshold_correctives(self) -> None:
+        """The two passes that correct a threshold no cycle can end or start under.
+
+        The standby floor raises a stop threshold under the appliance's standby
+        (#458); the start pass lowers a start threshold on a steady load's running
+        level (#527). Called at every cycle end and once HA has started: the #527
+        fault stops cycles from starting at all, so it never produces a cycle end.
+        """
+        self._dispatch_scan_and_apply(
+            self.suggestion_engine.for_job().generate_standby_floor_suggestions,
+            "Standby floor",
+        )
+        self._dispatch_scan_and_apply(
+            self.suggestion_engine.for_job().generate_start_threshold_suggestions,
+            "Start threshold",
+        )
 
     def _maybe_run_batch_simulation(self) -> None:
         """Schedule a batch simulation when enough new labeled cycles have arrived."""
@@ -648,8 +663,9 @@ class LearningManager:
     async def async_run_full_analysis(self) -> dict[str, int]:
         """Run every suggestion pass now (manual trigger from the panel).
 
-        Runs the operational (cadence), model, detection and batch-simulation
-        passes over the accumulated cycle history and reconciles the result.
+        Runs the operational (cadence), threshold-corrective (standby floor, start
+        threshold), model, detection and batch-simulation passes over the
+        accumulated cycle history and reconciles the result.
         Returns ``{"count": <actionable suggestions>}``.
         """
         self._logger.info("Manual suggestion analysis requested")
@@ -663,6 +679,13 @@ class LearningManager:
                 )
                 if op:
                     self._apply_suggestions_and_notify(op)
+            for generate in (
+                self.suggestion_engine.for_job().generate_standby_floor_suggestions,
+                self.suggestion_engine.for_job().generate_start_threshold_suggestions,
+            ):
+                corrective = await self.hass.async_add_executor_job(generate)
+                if corrective:
+                    self._apply_suggestions_and_notify(corrective)
             model_sug = await self.hass.async_add_executor_job(
                 self.suggestion_engine.for_job().generate_model_suggestions
             )

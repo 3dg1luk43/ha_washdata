@@ -239,3 +239,26 @@ async def test_every_device_type_gets_them(
 ) -> None:
     entry = await setup_washdata_entry(device_type=device_type)
     assert _states(hass, entry) == dict.fromkeys(KEYS, "unknown")
+
+
+async def test_last_cycle_start_is_a_timestamp_of_the_last_run(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """#501 follow-up: "last washed" cards need the start time as an entity state."""
+    entry = await setup_washdata_entry()
+    manager = hass.data[DOMAIN][entry.entry_id]
+    entity_id = er.async_get(hass).async_get_entity_id(
+        "sensor", DOMAIN, f"{entry.entry_id}_last_cycle_start"
+    )
+    assert entity_id is not None
+    state = hass.states.get(entity_id)
+    assert state.state == "unknown"
+    assert state.attributes["device_class"] == SensorDeviceClass.TIMESTAMP
+    assert "state_class" not in state.attributes
+    assert er.async_get(hass).async_get(entity_id).entity_category is EntityCategory.DIAGNOSTIC
+
+    start = (dt_util.utcnow() - timedelta(hours=2)).replace(microsecond=0)
+    await manager.profile_store.async_add_cycle(_cycle(start, 60.0))
+    manager.notify_update()
+    await hass.async_block_till_done()
+    assert dt_util.parse_datetime(hass.states.get(entity_id).state) == start

@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Costul ultimului ciclu"
+      },
+      "last_cycle_start": {
+        "name": "Începutul ultimului ciclu"
       }
     },
     "select": {

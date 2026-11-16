@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Utolsó ciklus költsége"
+      },
+      "last_cycle_start": {
+        "name": "Utolsó ciklus kezdete"
       }
     },
     "select": {

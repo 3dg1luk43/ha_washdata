@@ -1569,12 +1569,12 @@
       "doc": "Hva et trykk på varselet fra dette apparatet åpner. Tom: WashData-panelet for dette apparatet. Angi en dashbord-sti (f.eks. /lovelace/laundry) eller URL, eller \"none\" for ingen trykkhandling."
     },
     "door_opens_at_end": {
-      "label": "Dør åpnes automatisk ved avslutning",
-      "doc": "For oppvaskmaskiner som åpner døren på slutten for å tørke (f.eks. AirDry). En dør som står åpen i ventetiden nedenfor, avslutter syklusen i stedet for å sette den på pause; en kort åpning ignoreres. Krever en Dørsensorenhet."
+      "label": "Åpning av døren avslutter syklusen",
+      "doc": "For maskiner der døren forblir låst mens de kjører (de fleste frontmatede vaskemaskiner), eller som selv åpner den på slutten (oppvaskmaskiner med AirDry). En dør som står åpen i ventetiden nedenfor, avslutter syklusen i stedet for å sette den på pause; en kort åpning ignoreres. Krever en Dørsensorenhet."
     },
     "door_end_dwell_seconds": {
       "label": "Dørens åpningstid ved avslutning",
-      "doc": "Med \"Dør åpnes automatisk ved avslutning\" på: hvor lenge døren må stå åpen før syklusen slutter. Lenge nok til å ignorere at en tallerken settes inn (standard 60 s)."
+      "doc": "Med \"Åpning av døren avslutter syklusen\" på: hvor lenge døren må stå åpen før syklusen slutter. Lenge nok til å ignorere at en tallerken settes inn (standard 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Sykluser som former et program",
@@ -1780,7 +1780,8 @@
       "watchdog": "Holdt så lavt som forsvarlig (like over p95-oppdateringsmellomrommet på {p95}s og minst 2x samplingsintervallet på {median}s, min. 30s) slik at stans fanges raskt uten falske stopp.",
       "end_energy_floor": "Hevet til den nedre grensen som stoppterskelen ({stop} W) i løpet av av-forsinkelsen ({off_delay} s) gir; under den kan syklusen bare avsluttes via en reservevei.",
       "max_duration_ratio_default": "Tilbake til standardverdien: et lavere tak avviser riktig program hver gang en kjøring varer lenger enn vanlig.",
-      "min_duration_ratio_default": "Tilbake til standardverdien: et høyere gulv hindrer at en pågående syklus gjenkjennes før den er godt i gang."
+      "min_duration_ratio_default": "Tilbake til standardverdien: et høyere gulv hindrer at en pågående syklus gjenkjennes før den er godt i gang.",
+      "start_above_running": "Dette apparatet går på {low} W eller mer fra start til slutt, men startterskelen er {start} W, så en kjøring med den lavere effekten registreres aldri. Start satt til halvparten av den laveste driftseffekten, stopp under det."
     },
     "exclusions": {
       "summary": "Ekskluderte {total} feildetekterte syklus(er): {parts}.",

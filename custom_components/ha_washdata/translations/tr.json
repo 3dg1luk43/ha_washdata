@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Son Döngü Maliyeti"
+      },
+      "last_cycle_start": {
+        "name": "Son Döngü Başlangıcı"
       }
     },
     "select": {

@@ -232,7 +232,8 @@ def test_the_operational_pass_scans_the_cycle_that_just_ended() -> None:
     lm = LearningManager(MagicMock(), "entry1", store, device_type="washing_machine")
     seen: list[list[str]] = []
     job = MagicMock()
-    for name in ("generate_standby_floor_suggestions", "generate_model_suggestions",
+    for name in ("generate_standby_floor_suggestions", "generate_start_threshold_suggestions",
+                 "generate_model_suggestions",
                  "generate_detection_suggestions", "run_batch_simulation"):
         getattr(job, name).return_value = {}
     job.generate_operational_suggestions.side_effect = lambda *_a: (

@@ -1569,12 +1569,12 @@
       "doc": "Wat een tik op de melding van dit apparaat opent. Leeg: het WashData-paneel bij dit apparaat. Voer een dashboardpad (bijv. /lovelace/laundry) of URL in, of \"none\" voor geen tikactie."
     },
     "door_opens_at_end": {
-      "label": "Deur opent automatisch aan het einde",
-      "doc": "Voor vaatwassers die aan het einde de deur openen om te drogen (bijv. AirDry). Een deur die de verblijftijd hieronder open blijft, beëindigt de cyclus in plaats van hem te pauzeren; kort openen wordt genegeerd. Vereist een Deursensorentiteit."
+      "label": "Deur openen beëindigt de cyclus",
+      "doc": "Voor machines waarvan de deur vergrendeld blijft zolang ze draaien (de meeste voorladers) of die hem aan het einde zelf openen (vaatwassers met AirDry). Blijft de deur open gedurende de verwijltijd hieronder, dan eindigt de cyclus in plaats van te pauzeren; kort openen wordt genegeerd. Vereist een Deursensorentiteit."
     },
     "door_end_dwell_seconds": {
       "label": "Deuropen-eindverwijltijd",
-      "doc": "Met \"Deur opent automatisch aan het einde\" aan: hoe lang de deur open moet blijven voordat de cyclus eindigt. Lang genoeg om het bijzetten van een bord te negeren (standaard 60 s)."
+      "doc": "Met \"Deur openen beëindigt de cyclus\" aan: hoe lang de deur open moet blijven voordat de cyclus eindigt. Lang genoeg om het bijzetten van een bord te negeren (standaard 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Cycli die een programma vormen",
@@ -1780,7 +1780,8 @@
       "watchdog": "Zo laag als veilig gehouden (net boven de p95-updatekloof van {p95}s en minstens 2x het meetinterval van {median}s, min. 30s) zodat vastlopers snel worden opgemerkt zonder valse stops.",
       "end_energy_floor": "Verhoogd tot de ondergrens die volgt uit de stopdrempel ({stop} W) gedurende de uitschakelvertraging ({off_delay} s); daaronder kan de cyclus alleen via een terugvalpad eindigen.",
       "max_duration_ratio_default": "Terug naar de standaardwaarde: een lager plafond wijst het juiste programma af zodra een cyclus langer duurt dan gebruikelijk.",
-      "min_duration_ratio_default": "Terug naar de standaardwaarde: een hogere ondergrens zorgt ervoor dat een lopende cyclus pas wordt herkend als hij al ver gevorderd is."
+      "min_duration_ratio_default": "Terug naar de standaardwaarde: een hogere ondergrens zorgt ervoor dat een lopende cyclus pas wordt herkend als hij al ver gevorderd is.",
+      "start_above_running": "Dit apparaat draait van start tot einde op {low} W of meer, maar de startdrempel is {start} W, dus een cyclus op het lagere vermogen wordt nooit opgemerkt. Start ingesteld op de helft van het laagste draaivermogen, stop daaronder."
     },
     "exclusions": {
       "summary": "{total} verkeerd gedetecteerde cyclus(sen) uitgesloten: {parts}.",

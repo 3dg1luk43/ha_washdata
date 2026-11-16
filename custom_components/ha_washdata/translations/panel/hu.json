@@ -1542,12 +1542,12 @@
             "doc": "Mit nyit meg egy koppintás a készülék értesítésén. Üres: a WashData panel ennél a készüléknél. Adjon meg egy irányítópult-útvonalat (pl. /lovelace/laundry) vagy URL-t, illetve a \"none\" értéket, ha ne legyen koppintási művelet."
         },
         "door_opens_at_end": {
-            "label": "Az ajtó automatikusan kinyílik a végén",
-            "doc": "Olyan mosogatógépekhez, amelyek a végén szárításhoz kinyitják az ajtót (pl. AirDry). Ha az ajtó az alábbi ideig nyitva marad, a ciklus befejeződik, nem szünetel; a rövid nyitást figyelmen kívül hagyja. Ajtóérzékelő entitás szükséges."
+            "label": "Az ajtó kinyitása befejezi a ciklust",
+            "doc": "Olyan gépekhez, amelyek ajtaja működés közben reteszelve marad (a legtöbb elöltöltős mosógép), vagy amelyek a végén maguk nyitják ki (AirDry funkciós mosogatógépek). Ha az ajtó az alábbi várakozási ideig nyitva marad, a ciklus befejeződik, nem szünetel; a rövid nyitást figyelmen kívül hagyja. Ajtóérzékelő entitás szükséges."
         },
         "door_end_dwell_seconds": {
             "label": "Ajtó-nyitásvégi várakozási idő",
-            "doc": "Bekapcsolt \"Az ajtó automatikusan kinyílik a végén\" beállításnál: mennyi ideig kell nyitva maradnia az ajtónak, mielőtt a ciklus véget ér. Elég hosszú legyen ahhoz, hogy egy edény betöltését figyelmen kívül hagyja (alapértelmezés: 60 mp)."
+            "doc": "Bekapcsolt \"Az ajtó kinyitása befejezi a ciklust\" beállításnál: mennyi ideig kell nyitva maradnia az ajtónak, mielőtt a ciklus véget ér. Elég hosszú legyen ahhoz, hogy egy edény betöltését figyelmen kívül hagyja (alapértelmezés: 60 mp)."
         },
         "profile_evidence_sources": {
             "label": "A programot alakító ciklusok",
@@ -1955,7 +1955,8 @@
             "match_interval_floored": "A legrövidebb program ({shortest} mp) {cap} mp-re korlátozná ezt, ami a(z) {minimum} mp-es minimum alatt van, ezért a minimum érvényes: {persistence} egymást követő egyezés {budget} mp, ami a program {pct}%-ánál több. Az egyeztetés csak leolvasás érkezésekor fut (medián={median} mp), így ez semmibe sem kerül.",
             "end_energy_floor": "Megemelve arra az alsó határra, amelyet a Leállítási küszöb ({stop} W) a Kikapcsolási késleltetés ({off_delay} s) alatt megkövetel; ez alatt a ciklus csak tartalék úton érhet véget.",
             "max_duration_ratio_default": "Vissza az alapértékre: egy alacsonyabb felső határ elveti a helyes programot, ha egy futás a szokásosnál tovább tart.",
-            "min_duration_ratio_default": "Vissza az alapértékre: egy magasabb alsó határ miatt a futó ciklus csak akkor ismerhető fel, amikor már jócskán előrehaladt."
+            "min_duration_ratio_default": "Vissza az alapértékre: egy magasabb alsó határ miatt a futó ciklus csak akkor ismerhető fel, amikor már jócskán előrehaladt.",
+            "start_above_running": "Ez a készülék az elejétől a végéig legalább {low} W-tal működik, de az indítási küszöb {start} W, így az alacsonyabb teljesítményű futás soha nem indul el. Az indítási küszöb a legalacsonyabb üzemi szint felére, a leállítási küszöb ez alá kerül."
         },
         "exclusions": {
             "summary": "{total} tévesen észlelt ciklus kizárva: {parts}.",

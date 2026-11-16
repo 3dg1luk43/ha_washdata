@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Kostnad for siste syklus"
+      },
+      "last_cycle_start": {
+        "name": "Start for siste syklus"
       }
     },
     "select": {

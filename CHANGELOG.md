@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
+## 0.6.1 - unreleased
+
+### TL;DR
+
+- A dryer or pump that stopped starting cycles after a suggested start threshold gets a correction.
+- No false "Still drawing X W" warning on appliances that do switch off.
+- The dashboard card shows the running state in your language.
+- Opening the door can end a front loader's cycle.
+- New: Last Cycle Start sensor.
+
+### Features
+
+- **Opening the door ends a front loader's cycle** ([#524](https://github.com/3dg1luk43/ha_washdata/issues/524)): "Door Opens Automatically At End" is now **Opening the Door Ends the Cycle** and covers washers whose door stays locked while they run. It used to end a cycle only while it was running or ending; once the power dropped at the end the cycle sat in Paused, where opening the door paused it instead and the cycle waited out the whole Off Delay. It now ends there too (dishwashers with AirDry included). Thanks to @Jimmyboy83.
+- **Last Cycle Start sensor** ([#501](https://github.com/3dg1luk43/ha_washdata/issues/501)): when the last finished cycle started, as a timestamp, for "last washed" dashboard cards. Thanks to @Di4bLo84.
+
+### Fixes
+
+- **A dryer stopped starting cycles after a suggestion raised its start threshold** ([#527](https://github.com/3dg1luk43/ha_washdata/issues/527)): suggested thresholds sit just below and above the lowest power inside the appliance's cycles. On a washer that is a near-standby moment; on an appliance that draws one level from start to end (a heat-pump dryer, a pump) it is the running level, so the reporter's dryer was set to start at 454 W while running at 380-480 W, and once it ran at 360-430 W no cycle started. Nothing could correct it: those cycles began at full power and were ignored as mis-detected, and with no cycle ending no suggestion ran. Such an appliance no longer gets thresholds from that rule, and a start threshold at or above its running level is now found at every cycle end and once Home Assistant has started, with a suggestion to start at half the lowest level it runs at (the reporter's: start 219 W, stop 175 W). Washers and dishwashers are unchanged: on every recorded appliance that gets a threshold suggestion, the lowest power inside its cycles is at most 3% of its working power. Thanks to @udpa123.
+- **"Still drawing X W when the cycle ended" on appliances that do switch off** ([#525](https://github.com/3dg1luk43/ha_washdata/issues/525)): the warning took each cycle's last stored reading as the level the appliance idled at, but a cycle that ends on its own is cut at its last reading above the Stop Threshold, so that reading is the last working one: an anti-crease drum pulse (39 W over a 3.2 W base), or the drain pump (18 W) on a washer whose Stop Threshold a suggestion had raised above its 1 W standby. Each cycle is now judged by how it ended: one that ended on its own got below the threshold, one stopped by hand or force-stopped shows the level it waited at, and one the standby finish closed (#445) records the level it held. A washer that really idles above its Stop Threshold still gets the warning, with the same level, and so do two recorded appliances stopped by hand at 2-3 W most of the time that it missed. Thanks to @TRON4R.
+- **The dashboard card showed "Running" in English** ([#526](https://github.com/3dg1luk43/ha_washdata/issues/526)): while running it showed the detector's sub-state, which is the English state name unless a phase is known. It now shows the state in your language unless the sub-state adds something. Thanks to @toot.
+
 ## 0.6.0 - 2026-11-12
 
 ### TL;DR

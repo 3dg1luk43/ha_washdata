@@ -1586,12 +1586,12 @@
       "doc": "Kaj odpre dotik obvestila te naprave. Prazno: plošča WashData te naprave. Vpišite pot nadzorne plošče (npr. /lovelace/laundry) ali URL ali »none«, da dotik ne odpre ničesar."
     },
     "door_opens_at_end": {
-      "label": "Vrata se ob koncu samodejno odprejo",
-      "doc": "Za pomivalne stroje, ki ob koncu odprejo vrata za sušenje (npr. AirDry). Vrata, odprta za spodnji čas zadrževanja, cikel končajo, namesto da ga zaustavijo; kratko odprtje se prezre. Potrebuje Entiteto senzorja vrat."
+      "label": "Odprtje vrat konča cikel",
+      "doc": "Za stroje, katerih vrata med delovanjem ostanejo zaklenjena (večina pralnih strojev s sprednjim polnjenjem) ali jih ob koncu odprejo sami (pomivalni stroji z AirDry). Vrata, odprta za spodnji čas zadrževanja, cikel končajo, namesto da ga zaustavijo; kratko odprtje se prezre. Potrebuje Entiteto senzorja vrat."
     },
     "door_end_dwell_seconds": {
       "label": "Čas odprtosti vrat za zaključek",
-      "doc": "Ko je vklopljeno »Vrata se ob koncu samodejno odprejo«: kako dolgo morajo vrata ostati odprta, preden se cikel konča. Dovolj dolgo, da se dodajanje posode prezre (privzeto 60 s)."
+      "doc": "Ko je vklopljeno »Odprtje vrat konča cikel«: kako dolgo morajo vrata ostati odprta, preden se cikel konča. Dovolj dolgo, da se dodajanje posode prezre (privzeto 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Cikli, ki oblikujejo program",
@@ -1797,7 +1797,8 @@
       "watchdog": "Ohranjeno tako nizko, kot je varno (tik nad vrzeljo posodobitve p95 {p95}s in vsaj 2× interval vzorčenja {median}s, najmanj 30s), da se zastoji hitro zaznajo brez lažnih ustavitev.",
       "end_energy_floor": "Zvišano na minimum, ki izhaja iz praga zaustavitve ({stop} W) v času zamude izklopa ({off_delay} s); pod njim se cikel lahko konča le po nadomestni poti.",
       "max_duration_ratio_default": "Vrnjeno na privzeto vrednost: nižja zgornja meja zavrne pravi program vsakič, ko cikel traja dlje kot običajno.",
-      "min_duration_ratio_default": "Vrnjeno na privzeto vrednost: višja spodnja meja prepreči prepoznavanje cikla, ki teče, dokler ne napreduje precej daleč."
+      "min_duration_ratio_default": "Vrnjeno na privzeto vrednost: višja spodnja meja prepreči prepoznavanje cikla, ki teče, dokler ne napreduje precej daleč.",
+      "start_above_running": "Ta naprava od začetka do konca porablja {low} W ali več, vendar je prag zagona {start} W, zato se cikel pri njeni nižji moči nikoli ne zažene. Prag zagona je nastavljen na polovico najnižje delovne ravni, prag zaustavitve pod njo."
     },
     "exclusions": {
       "summary": "Izključeno {total} napačno zaznanih ciklov: {parts}.",

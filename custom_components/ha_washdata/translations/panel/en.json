@@ -1306,11 +1306,11 @@
     },
     "door_end_dwell_seconds": {
       "label": "Door-Open End Dwell",
-      "doc": "With \"Door Opens Automatically At End\" on: how long the door must stay open before the cycle ends. Long enough to ignore adding a dish (default 60 s)."
+      "doc": "With \"Opening the Door Ends the Cycle\" on: how long the door must stay open before the cycle ends. Long enough to ignore adding a dish (default 60 s)."
     },
     "door_opens_at_end": {
-      "label": "Door Opens Automatically At End",
-      "doc": "For dishwashers that open the door at the end to dry (e.g. AirDry). A door left open for the dwell time below ends the cycle instead of pausing it; a brief open is ignored. Needs a Door Sensor Entity."
+      "label": "Opening the Door Ends the Cycle",
+      "doc": "For machines whose door stays locked while they run (most front-loading washers) or that open it themselves at the end (dishwashers with AirDry). A door held open for the dwell time below ends the cycle instead of pausing it; a brief open is ignored. Needs a Door Sensor Entity."
     },
     "door_sensor_entity": {
       "doc": "Optional door sensor. Shows when the appliance was opened to unload after a cycle.",
@@ -1788,6 +1788,7 @@
       "min_off_gap": "Based on {gaps} observed inter-cycle gaps (p05={p05}s). Device floor: {floor}s.",
       "min_off_gap_bridge": "Sized to bridge the longest quiet stretch inside a cycle: {span}s + 60s buffer, from {spans} bridged gaps across {cycles} clean cycles (stays under your {ceiling}s back-to-back headroom).",
       "standby_floor": "Every recent cycle was still drawing {idle}W when it ended, so a threshold below that can never see the appliance switch off. Kept above it; the {cycles} clean cycles on record never paused under it for more than {pause}s.",
+      "start_above_running": "This appliance runs at {low} W or more from start to end, but the start threshold is {start} W, so a run at its lower power never starts. Start set to half its lowest running level, stop below that.",
       "thr_batch": "Just above the lowest active power (p05) across {cycles} cycles ({p05}W), so starts are caught early and the stop threshold stays below the lowest running power.",
       "max_duration_ratio_default": "Back to the default: a lower ceiling rejects the right programme whenever a run is longer than usual.",
       "min_duration_ratio_default": "Back to the default: a higher floor stops a running cycle from being recognised until it is well under way.",

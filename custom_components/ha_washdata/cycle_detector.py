@@ -5299,6 +5299,7 @@ class CycleDetector:
             status="completed",
             termination_reason=TerminationReason.TIMEOUT,
             keep_tail=False,
+            standby_band_w=power,
         )
         return True
 
@@ -6546,6 +6547,7 @@ class CycleDetector:
         tail_cap: datetime | None = None,
         duration_capped: bool = False,
         flat_power_w: float | None = None,
+        standby_band_w: float | None = None,
     ) -> None:
         """Finalize cycle.
 
@@ -6670,6 +6672,12 @@ class CycleDetector:
             # kept for diagnostics (a standby above the start threshold shows here).
             cycle_data["flat_power_stop"] = True
             cycle_data["flat_power_w"] = round(float(flat_power_w), 2)
+        if standby_band_w is not None and math.isfinite(float(standby_band_w)):
+            # The standby-band finalize (#445): the appliance finished but held this
+            # draw above the stop threshold, and the plateau is trimmed off the
+            # trace, so the level is kept here. It is the one TIMEOUT end that did
+            # not see the power below stop (`detect_standby_above_stop`, #525).
+            cycle_data["standby_band_w"] = round(float(standby_band_w), 2)
 
         self._logger.info("Cycle Finished: %s, %.1f min", status, duration / 60)
         self._on_cycle_end(cycle_data)

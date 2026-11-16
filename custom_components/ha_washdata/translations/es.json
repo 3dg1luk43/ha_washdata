@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Costo del último ciclo"
+      },
+      "last_cycle_start": {
+        "name": "Inicio del último ciclo"
       }
     },
     "select": {

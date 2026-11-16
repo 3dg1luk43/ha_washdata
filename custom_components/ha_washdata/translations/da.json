@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Omkostning ved sidste cyklus"
+      },
+      "last_cycle_start": {
+        "name": "Start på sidste cyklus"
       }
     },
     "select": {

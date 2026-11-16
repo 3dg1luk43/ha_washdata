@@ -1557,12 +1557,12 @@
             "doc": "Bu cihazın bildirimine dokunulduğunda ne açılacağı. Boş: bu cihazda WashData paneli. Bir pano yolu (örn. /lovelace/laundry) veya URL girin; dokunma eylemi olmaması için \"none\" yazın."
         },
         "door_opens_at_end": {
-            "label": "Döngü Sonunda Kapı Otomatik Açılır",
-            "doc": "Kurutmak için sonda kapıyı açan bulaşık makineleri için (örn. AirDry). Aşağıdaki bekleme süresi kadar açık kalan kapı döngüyü duraklatmak yerine bitirir; kısa bir açılma yok sayılır. Kapı Sensörü Varlığı gerektirir."
+            "label": "Kapının Açılması Döngüyü Bitirir",
+            "doc": "Çalışırken kapısı kilitli kalan (çoğu önden yüklemeli çamaşır makinesi) veya sonda kapıyı kendisi açan (AirDry özellikli bulaşık makineleri) cihazlar için. Aşağıdaki bekleme süresi kadar açık kalan kapı döngüyü duraklatmak yerine bitirir; kısa bir açılma yok sayılır. Kapı Sensörü Varlığı gerektirir."
         },
         "door_end_dwell_seconds": {
             "label": "Kapı Açık Bekleme Süresi",
-            "doc": "\"Döngü Sonunda Kapı Otomatik Açılır\" açıkken: döngünün bitmesi için kapının ne kadar açık kalması gerektiği. Tabak eklemeyi yok sayacak kadar uzun olmalı (varsayılan 60 sn)."
+            "doc": "\"Kapının Açılması Döngüyü Bitirir\" açıkken: döngünün bitmesi için kapının ne kadar açık kalması gerektiği. Tabak eklemeyi yok sayacak kadar uzun olmalı (varsayılan 60 sn)."
         },
         "dishwasher_end_spike_quiet_release": {
             "label": "Pasif Kurutma Sessiz Serbest Bırakma",
@@ -1974,7 +1974,8 @@
             "match_interval_floored": "En kısa program ({shortest}s) bunu {cap}s ile sınırlardı; bu {minimum}s alt sınırının altında olduğundan alt sınır kullanılır: {persistence} ardışık eşleşme {budget}s sürer, bu da o programın %{pct} kadarından fazladır. Eşleştirme yalnızca bir okuma geldiğinde çalışır (medyan={median}s), bu yüzden bunun bir maliyeti yok.",
             "end_energy_floor": "Kapatma gecikmesi ({off_delay} s) boyunca durdurma eşiğinin ({stop} W) gerektirdiği alt sınıra yükseltildi; bunun altında döngü yalnızca bir yedek yoldan bitebilir.",
             "max_duration_ratio_default": "Varsayılana döndürüldü: daha düşük bir üst sınır, bir döngü her zamankinden uzun sürdüğünde doğru programı reddeder.",
-            "min_duration_ratio_default": "Varsayılana döndürüldü: daha yüksek bir alt sınır, çalışan bir döngünün iyice ilerleyene kadar tanınmasını engeller."
+            "min_duration_ratio_default": "Varsayılana döndürüldü: daha yüksek bir alt sınır, çalışan bir döngünün iyice ilerleyene kadar tanınmasını engeller.",
+            "start_above_running": "Bu cihaz baştan sona {low} W veya daha yüksek güçte çalışıyor, ancak başlangıç eşiği {start} W; bu yüzden daha düşük güçteki bir döngü hiç başlamaz. Başlangıç eşiği en düşük çalışma seviyesinin yarısına, durdurma eşiği bunun altına ayarlandı."
         },
         "exclusions": {
             "summary": "{total} yanlış algılanan döngü hariç tutuldu: {parts}.",

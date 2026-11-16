@@ -1582,12 +1582,12 @@
       "doc": "Co otwiera dotknięcie powiadomienia tego urządzenia. Puste: panel WashData tego urządzenia. Wpisz ścieżkę pulpitu (np. /lovelace/laundry) lub URL albo „none”, aby dotknięcie nic nie otwierało."
     },
     "door_opens_at_end": {
-      "label": "Drzwi otwierają się automatycznie na końcu",
-      "doc": "Dla zmywarek, które na końcu otwierają drzwi, aby suszyć (np. AirDry). Drzwi otwarte przez czas oczekiwania poniżej kończą cykl zamiast go wstrzymywać; krótkie otwarcie jest ignorowane. Wymaga Encji Czujnika Drzwi."
+      "label": "Otwarcie drzwi kończy cykl",
+      "doc": "Dla urządzeń, których drzwi pozostają zablokowane podczas pracy (większość pralek ładowanych od przodu) albo które same otwierają je na końcu (zmywarki z AirDry). Drzwi otwarte przez czas oczekiwania poniżej kończą cykl zamiast go wstrzymywać; krótkie otwarcie jest ignorowane. Wymaga Encji Czujnika Drzwi."
     },
     "door_end_dwell_seconds": {
       "label": "Czas otwarcia drzwi do zakończenia cyklu",
-      "doc": "Przy włączonym „Drzwi otwierają się automatycznie na końcu”: jak długo drzwi muszą pozostać otwarte, zanim cykl się zakończy. Na tyle długo, aby zignorować dołożenie naczynia (domyślnie 60 s)."
+      "doc": "Przy włączonym „Otwarcie drzwi kończy cykl”: jak długo drzwi muszą pozostać otwarte, zanim cykl się zakończy. Na tyle długo, aby zignorować dołożenie naczynia (domyślnie 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Cykle kształtujące program",
@@ -1797,7 +1797,8 @@
       "watchdog": "Utrzymane tak nisko, jak to bezpieczne (tuż powyżej przerwy aktualizacji p95 wynoszącej {p95}s i co najmniej 2x powyżej interwału próbkowania {median}s, min. 30s), aby zawieszenia były szybko wykrywane bez fałszywych zatrzymań.",
       "end_energy_floor": "Podniesiono do minimum wynikającego z progu zatrzymania ({stop} W) w czasie opóźnienia wyłączenia ({off_delay} s); poniżej niego cykl może się zakończyć tylko ścieżką awaryjną.",
       "max_duration_ratio_default": "Przywrócono wartość domyślną: niższy górny limit odrzuca właściwy program za każdym razem, gdy cykl trwa dłużej niż zwykle.",
-      "min_duration_ratio_default": "Przywrócono wartość domyślną: wyższy dolny limit uniemożliwia rozpoznanie trwającego cyklu, dopóki nie jest on mocno zaawansowany."
+      "min_duration_ratio_default": "Przywrócono wartość domyślną: wyższy dolny limit uniemożliwia rozpoznanie trwającego cyklu, dopóki nie jest on mocno zaawansowany.",
+      "start_above_running": "To urządzenie pobiera od startu do końca {low} W lub więcej, ale próg startu wynosi {start} W, więc cykl przy jego niższej mocy nigdy się nie rozpocznie. Próg startu ustawiony na połowę najniższego poziomu pracy, próg zatrzymania poniżej niego."
     },
     "exclusions": {
       "summary": "Wykluczono {total} błędnie wykrytych cykli: {parts}.",

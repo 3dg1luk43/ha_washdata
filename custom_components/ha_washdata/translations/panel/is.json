@@ -1569,12 +1569,12 @@
       "doc": "Hvað opnast þegar ýtt er á tilkynningu þessa tækis. Autt: WashData-spjaldið á þessu tæki. Sláðu inn slóð á mælaborð (t.d. /lovelace/laundry) eða URL, eða „none“ fyrir enga aðgerð."
     },
     "door_opens_at_end": {
-      "label": "Hurð opnast sjálfkrafa í lok",
-      "doc": "Fyrir uppþvottavélar sem opna hurðina í lokin til að þurrka (t.d. AirDry). Hurð sem stendur opin í biðtímann hér að neðan lýkur lotunni í stað þess að gera hlé á henni; stutt opnun er hunsuð. Krefst Dyraskynjareiningar."
+      "label": "Opnun hurðar lýkur lotunni",
+      "doc": "Fyrir vélar sem halda hurðinni læstri meðan þær ganga (flestar framhlaðnar þvottavélar) eða opna hana sjálfar í lokin (uppþvottavélar með AirDry). Hurð sem stendur opin í dvaltímann hér að neðan lýkur lotunni í stað þess að gera hlé á henni; stutt opnun er hunsuð. Krefst Dyraskynjareiningar."
     },
     "door_end_dwell_seconds": {
       "label": "Dvaltími hurðar við lok",
-      "doc": "Þegar „Hurð opnast sjálfkrafa í lok“ er virkt: hversu lengi hurðin þarf að vera opin áður en lotunni lýkur. Nógu lengi til að hunsa að diski sé bætt við (sjálfgefið 60 s)."
+      "doc": "Þegar „Opnun hurðar lýkur lotunni“ er virkt: hversu lengi hurðin þarf að vera opin áður en lotunni lýkur. Nógu lengi til að hunsa að diski sé bætt við (sjálfgefið 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Lotur sem móta kerfi",
@@ -1780,7 +1780,8 @@
       "watchdog": "Haldið eins lágu og óhætt er (rétt yfir p95-uppfærslubilinu {p95}s og að minnsta kosti 2x sýnatökubilinu {median}s, lágm. 30s) svo að stöðnun greinist fljótt án falskra stöðvana.",
       "end_energy_floor": "Hækkað upp í lágmarkið sem Stöðvunarþröskuldur ({stop} W) yfir Slökkvitöf ({off_delay} s) felur í sér; fyrir neðan það getur lotan aðeins endað eftir varaleið.",
       "max_duration_ratio_default": "Aftur í sjálfgefið gildi: lægra hámark hafnar réttu kerfi í hvert sinn sem keyrsla er lengri en venjulega.",
-      "min_duration_ratio_default": "Aftur í sjálfgefið gildi: hærra lágmark kemur í veg fyrir að lota í gangi þekkist fyrr en hún er vel á veg komin."
+      "min_duration_ratio_default": "Aftur í sjálfgefið gildi: hærra lágmark kemur í veg fyrir að lota í gangi þekkist fyrr en hún er vel á veg komin.",
+      "start_above_running": "Þetta tæki gengur á {low} W eða meira frá upphafi til enda, en ræsingarþröskuldurinn er {start} W, svo keyrsla á lægra aflinu greinist aldrei. Ræsing stillt á helming lægsta gangafls, stöðvun undir því."
     },
     "exclusions": {
       "summary": "Útilokaði {total} ranggreindar lotur: {parts}.",

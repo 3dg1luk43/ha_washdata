@@ -435,11 +435,14 @@ class WashDataCard extends HTMLElement {
       phase = progObj.attributes.active_phase;
     }
 
-    // Sub-state (e.g. "Running (Rinsing)" -> "Rinsing").
+    // Sub-state (e.g. "Running (Rinsing)" -> "Rinsing"), shown instead of the state
+    // only when it says more than the state: the detector's default sub_state is the
+    // state name in English ("Running"), which hid the localized state (#526).
     let subState = "";
     if (sk === "running" && attr.sub_state) {
       const m = String(attr.sub_state).match(/Running \((.*)\)/);
-      subState = m && m[1] ? m[1] : attr.sub_state;
+      const s = String(m && m[1] ? m[1] : attr.sub_state).trim();
+      if (s.toLowerCase() !== sk) subState = s;
     }
 
     // Progress percentage.
@@ -850,13 +853,7 @@ class WashDataCard extends HTMLElement {
 
     const flags = this._flags();
     const parts = [];
-    if (flags.showState) {
-      if (vm.isRunning) {
-        if (vm.subState) parts.push(vm.subState);
-      } else {
-        parts.push(vm.stateLabel);
-      }
-    }
+    if (flags.showState) parts.push(vm.isRunning && vm.subState ? vm.subState : vm.stateLabel);
     if (flags.showProgram && vm.program) parts.push(vm.program);
     if (!vm.isInactive && flags.showDetails) {
       if (flags.displayMode === "percentage" && vm.pct !== null) parts.push(vm.pct + "%");

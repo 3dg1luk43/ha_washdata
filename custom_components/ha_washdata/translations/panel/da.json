@@ -1569,12 +1569,12 @@
       "doc": "Hvad et tryk på dette apparats notifikation åbner. Tom: WashData-panelet for dette apparat. Angiv en dashboard-sti (f.eks. /lovelace/laundry) eller URL, eller \"none\" for ingen trykhandling."
     },
     "door_opens_at_end": {
-      "label": "Dør åbner automatisk ved afslutning",
-      "doc": "Til opvaskemaskiner, der åbner døren ved slutningen for at tørre (f.eks. AirDry). En dør, der står åben i ventetiden nedenfor, afslutter cyklussen i stedet for at sætte den på pause; en kort åbning ignoreres. Kræver en Dørsensorenhed."
+      "label": "Åbning af døren afslutter cyklussen",
+      "doc": "Til maskiner, hvis dør forbliver låst, mens de kører (de fleste frontbetjente vaskemaskiner), eller som selv åbner den ved slutningen (opvaskemaskiner med AirDry). En dør, der står åben i ventetiden nedenfor, afslutter cyklussen i stedet for at sætte den på pause; en kort åbning ignoreres. Kræver en Dørsensorenhed."
     },
     "door_end_dwell_seconds": {
       "label": "Dørens åbningstid ved afslutning",
-      "doc": "Med \"Dør åbner automatisk ved afslutning\" slået til: hvor længe døren skal stå åben, før cyklussen slutter. Længe nok til at ignorere, at en tallerken sættes ind (standard 60 s)."
+      "doc": "Med \"Åbning af døren afslutter cyklussen\" slået til: hvor længe døren skal stå åben, før cyklussen slutter. Længe nok til at ignorere, at en tallerken sættes ind (standard 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Cyklusser, der former et program",
@@ -1780,7 +1780,8 @@
       "watchdog": "Holdt så lavt som forsvarligt (lige over p95-opdateringsmellemrummet på {p95}s og mindst 2x samplingintervallet på {median}s, min. 30s), så stilstande fanges hurtigt uden falske stop.",
       "end_energy_floor": "Hævet til den nedre grænse, som stoptærsklen ({stop} W) i løbet af slukkeforsinkelsen ({off_delay} s) giver; under den kan cyklussen kun afsluttes via en reservevej.",
       "max_duration_ratio_default": "Tilbage til standardværdien: et lavere loft afviser det rigtige program, når en kørsel varer længere end normalt.",
-      "min_duration_ratio_default": "Tilbage til standardværdien: en højere bundgrænse forhindrer en igangværende cyklus i at blive genkendt, før den er godt i gang."
+      "min_duration_ratio_default": "Tilbage til standardværdien: en højere bundgrænse forhindrer en igangværende cyklus i at blive genkendt, før den er godt i gang.",
+      "start_above_running": "Dette apparat kører med {low} W eller mere fra start til slut, men starttærsklen er {start} W, så en kørsel ved den lavere effekt registreres aldrig. Start sat til halvdelen af den laveste køreeffekt, stop derunder."
     },
     "exclusions": {
       "summary": "{total} fejldetekterede cyklus(ser) udelukket: {parts}.",

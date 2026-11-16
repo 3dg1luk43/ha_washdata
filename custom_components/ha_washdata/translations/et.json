@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Viimase tsükli maksumus"
+      },
+      "last_cycle_start": {
+        "name": "Viimase tsükli algus"
       }
     },
     "select": {

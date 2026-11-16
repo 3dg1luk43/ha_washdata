@@ -1569,12 +1569,12 @@
       "doc": "Mitä tämän laitteen ilmoituksen napautus avaa. Tyhjä: tämän laitteen WashData-paneeli. Anna kojelaudan polku (esim. /lovelace/laundry) tai URL, tai \"none\", jos napautus ei tee mitään."
     },
     "door_opens_at_end": {
-      "label": "Ovi avautuu automaattisesti lopussa",
-      "doc": "Astianpesukoneille, jotka avaavat oven lopussa kuivausta varten (esim. AirDry). Jos ovi pysyy auki alla olevan odotusajan, sykli päättyy tauon sijaan; lyhyt avaus ohitetaan. Vaatii asetuksen Ovianturin entiteetti."
+      "label": "Oven avaaminen päättää syklin",
+      "doc": "Koneille, joiden ovi pysyy lukittuna käytön aikana (useimmat edestä täytettävät pyykinpesukoneet) tai jotka avaavat sen itse lopussa (AirDry-toiminnolla varustetut astianpesukoneet). Jos ovi pysyy auki alla asetetun viiveen ajan, sykli päättyy tauon sijaan; lyhyt avaus ohitetaan. Vaatii asetuksen Ovianturin entiteetti."
     },
     "door_end_dwell_seconds": {
       "label": "Oven avauksen loppuviive",
-      "doc": "Kun \"Ovi avautuu automaattisesti lopussa\" on käytössä: kuinka kauan oven on pysyttävä auki, ennen kuin sykli päättyy. Tarpeeksi pitkä, jotta lautasen lisäämistä ei huomioida (oletus 60 s)."
+      "doc": "Kun \"Oven avaaminen päättää syklin\" on käytössä: kuinka kauan oven on pysyttävä auki, ennen kuin sykli päättyy. Tarpeeksi pitkä, jotta lautasen lisäämistä ei huomioida (oletus 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Ohjelmaa muovaavat syklit",
@@ -1780,7 +1780,8 @@
       "watchdog": "Pidetään niin matalana kuin on turvallista (hieman yli p95-päivitysvälin {p95}s ja vähintään 2x näytteenottoväli {median}s, väh. 30s), jotta pysähdykset havaitaan nopeasti ilman vääriä pysäytyksiä.",
       "end_energy_floor": "Nostettu alarajaan, jonka pysäytyskynnys ({stop} W) sammutusviiveen ({off_delay} s) aikana edellyttää; sen alapuolella sykli voi päättyä vain varapolun kautta.",
       "max_duration_ratio_default": "Takaisin oletusarvoon: matalampi yläraja hylkää oikean ohjelman aina, kun ajo kestää tavallista pidempään.",
-      "min_duration_ratio_default": "Takaisin oletusarvoon: korkeampi alaraja estää käynnissä olevan syklin tunnistamisen, kunnes se on jo pitkällä."
+      "min_duration_ratio_default": "Takaisin oletusarvoon: korkeampi alaraja estää käynnissä olevan syklin tunnistamisen, kunnes se on jo pitkällä.",
+      "start_above_running": "Tämä laite käy alusta loppuun vähintään {low} W:n teholla, mutta käynnistyskynnys on {start} W, joten pienemmällä teholla käyvä sykli ei koskaan käynnisty. Käynnistyskynnys asetetaan puoleen pienimmästä käyntitehosta, pysäytyskynnys sen alle."
     },
     "exclusions": {
       "summary": "Suljettu pois {total} väärin tunnistettua sykliä: {parts}.",

@@ -1514,12 +1514,12 @@
       "doc": "Ce deschide o atingere pe notificarea acestui aparat. Gol: panoul WashData pe acest aparat. Introduceți o cale de dashboard (de ex. /lovelace/laundry) sau un URL, ori „none” pentru nicio acțiune la atingere."
     },
     "door_opens_at_end": {
-      "label": "Ușa se deschide automat la final",
-      "doc": "Pentru mașinile de spălat vase care deschid ușa la final pentru uscare (de ex. AirDry). O ușă lăsată deschisă pe durata de mai jos încheie ciclul în loc să îl pună pe pauză; o deschidere scurtă este ignorată. Necesită o Entitate Senzor Ușă."
+      "label": "Deschiderea ușii încheie ciclul",
+      "doc": "Pentru aparatele a căror ușă rămâne blocată în timpul funcționării (majoritatea mașinilor de spălat rufe cu încărcare frontală) sau care o deschid singure la final (mașini de spălat vase cu AirDry). O ușă lăsată deschisă pe durata de mai jos încheie ciclul în loc să îl pună pe pauză; o deschidere scurtă este ignorată. Necesită o Entitate Senzor Ușă."
     },
     "door_end_dwell_seconds": {
       "label": "Durată de așteptare la deschiderea ușii",
-      "doc": "Cu „Ușa se deschide automat la final” activat: cât timp trebuie să stea ușa deschisă înainte ca ciclul să se încheie. Suficient cât să ignore adăugarea unei farfurii (implicit 60 s)."
+      "doc": "Cu „Deschiderea ușii încheie ciclul” activat: cât timp trebuie să stea ușa deschisă înainte ca ciclul să se încheie. Suficient cât să ignore adăugarea unei farfurii (implicit 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Ciclurile care formează un program",
@@ -1921,7 +1921,8 @@
       "watchdog": "Păstrat cât mai mic în siguranță (puțin peste intervalul de actualizare p95 de {p95}s și cel puțin 2x intervalul de eșantionare de {median}s, min. 30s), astfel încât blocajele să fie surprinse rapid fără opriri false.",
       "end_energy_floor": "Ridicat la minimul implicat de pragul de oprire ({stop} W) pe durata întârzierii la oprire ({off_delay} s); sub acesta, ciclul se poate încheia doar printr-o cale de rezervă.",
       "max_duration_ratio_default": "Revenire la valoarea implicită: o limită superioară mai mică respinge programul corect ori de câte ori un ciclu durează mai mult decât de obicei.",
-      "min_duration_ratio_default": "Revenire la valoarea implicită: o limită inferioară mai mare împiedică recunoașterea unui ciclu în desfășurare până când acesta este bine avansat."
+      "min_duration_ratio_default": "Revenire la valoarea implicită: o limită inferioară mai mare împiedică recunoașterea unui ciclu în desfășurare până când acesta este bine avansat.",
+      "start_above_running": "Acest aparat consumă {low} W sau mai mult de la început până la final, dar pragul de pornire este {start} W, deci un ciclu la puterea lui cea mai mică nu pornește niciodată. Pragul de pornire setat la jumătate din cel mai mic nivel de funcționare, pragul de oprire sub acesta."
     },
     "exclusions": {
       "summary": "Excluse {total} cicluri detectate greșit: {parts}.",

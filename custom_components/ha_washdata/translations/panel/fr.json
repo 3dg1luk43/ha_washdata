@@ -1533,12 +1533,12 @@
       "doc": "Ce qu'ouvre un appui sur la notification de cet appareil. Vide : le panneau WashData sur cet appareil. Saisissez un chemin de tableau de bord (p. ex. /lovelace/laundry) ou une URL, ou « none » pour aucune action."
     },
     "door_opens_at_end": {
-      "label": "La porte s'ouvre automatiquement en fin de cycle",
-      "doc": "Pour les lave-vaisselle qui ouvrent la porte en fin de cycle pour sécher (p. ex. AirDry). Une porte restée ouverte pendant le délai ci-dessous termine le cycle au lieu de le mettre en pause ; une brève ouverture est ignorée. Nécessite une Entité capteur de porte."
+      "label": "L'ouverture de la porte termine le cycle",
+      "doc": "Pour les appareils dont la porte reste verrouillée pendant le fonctionnement (la plupart des lave-linge à hublot) ou qui l'ouvrent eux-mêmes en fin de cycle (lave-vaisselle avec AirDry). Une porte restée ouverte pendant le délai ci-dessous termine le cycle au lieu de le mettre en pause ; une brève ouverture est ignorée. Nécessite une Entité capteur de porte."
     },
     "door_end_dwell_seconds": {
       "label": "Durée d'attente porte ouverte",
-      "doc": "Avec « La porte s'ouvre automatiquement en fin de cycle » activé : durée pendant laquelle la porte doit rester ouverte avant la fin du cycle. Assez longue pour ignorer l'ajout d'une assiette (60 s par défaut)."
+      "doc": "Avec « L'ouverture de la porte termine le cycle » activé : durée pendant laquelle la porte doit rester ouverte avant la fin du cycle. Assez longue pour ignorer l'ajout d'une assiette (60 s par défaut)."
     },
     "profile_evidence_sources": {
       "label": "Cycles qui façonnent un programme",
@@ -1940,7 +1940,8 @@
       "watchdog": "Maintenu aussi bas que possible en toute sécurité (juste au-dessus de l'écart de mise à jour p95 de {p95}s et au moins 2x l'intervalle d'échantillonnage de {median}s, min 30s) pour détecter rapidement les blocages sans faux arrêts.",
       "end_energy_floor": "Relevé au plancher qu'impliquent le seuil d'arrêt ({stop} W) sur le délai d'arrêt ({off_delay} s) ; en dessous, le cycle ne peut se terminer que par une voie de secours.",
       "max_duration_ratio_default": "Retour à la valeur par défaut : un plafond plus bas rejette le bon programme chaque fois qu'un cycle dure plus longtemps que d'habitude.",
-      "min_duration_ratio_default": "Retour à la valeur par défaut : un plancher plus haut empêche de reconnaître un cycle en cours tant qu'il n'est pas bien avancé."
+      "min_duration_ratio_default": "Retour à la valeur par défaut : un plancher plus haut empêche de reconnaître un cycle en cours tant qu'il n'est pas bien avancé.",
+      "start_above_running": "Cet appareil consomme {low} W ou plus du début à la fin, mais le seuil de démarrage est de {start} W : un cycle à sa puissance la plus basse ne démarre donc jamais. Seuil de démarrage réglé à la moitié de son niveau de fonctionnement le plus bas, seuil d'arrêt en dessous."
     },
     "exclusions": {
       "summary": "{total} cycle(s) mal détecté(s) exclu(s) : {parts}.",

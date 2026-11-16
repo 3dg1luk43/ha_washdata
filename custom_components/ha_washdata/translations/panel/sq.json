@@ -1541,12 +1541,12 @@
             "doc": "Çfarë hap trokitja mbi njoftimin e kësaj pajisjeje. Bosh: panelin WashData te kjo pajisje. Shkruani shtegun e një paneli kontrolli (p.sh. /lovelace/laundry) ose një URL, ose \"none\" që trokitja të mos bëjë asgjë."
         },
         "door_opens_at_end": {
-            "label": "Dera hapet automatikisht në fund",
-            "doc": "Për pjatalarëset që hapin derën në fund për tharje (p.sh. AirDry). Një derë e lënë hapur për kohën e mëposhtme e përfundon ciklin në vend që ta vërë në pauzë; një hapje e shkurtër injorohet. Kërkon cilësimin Entiteta e sensorit të derës."
+            "label": "Hapja e derës e përfundon ciklin",
+            "doc": "Për pajisjet që e mbajnë derën të kyçur gjatë punës (shumica e lavatriçeve me ngarkim përpara) ose që e hapin vetë në fund (pjatalarëset me AirDry). Një derë e lënë hapur për kohën e pritjes më poshtë e përfundon ciklin në vend që ta vërë në pauzë; një hapje e shkurtër injorohet. Kërkon cilësimin Entiteta e sensorit të derës."
         },
         "door_end_dwell_seconds": {
             "label": "Koha e pritjes me derë të hapur",
-            "doc": "Kur \"Dera hapet automatikisht në fund\" është aktive: sa gjatë duhet të qëndrojë dera hapur përpara se cikli të përfundojë. Mjaft gjatë sa të injorohet shtimi i një pjate (parazgjedhja 60 s)."
+            "doc": "Kur \"Hapja e derës e përfundon ciklin\" është aktive: sa gjatë duhet të qëndrojë dera hapur përpara se cikli të përfundojë. Mjaft gjatë sa të injorohet shtimi i një pjate (parazgjedhja 60 s)."
         },
         "dishwasher_end_spike_quiet_release": {
             "label": "Lirim në qetësi gjatë tharjes pasive",
@@ -1950,7 +1950,8 @@
             "watchdog": "Mbahet sa më i ulët në mënyrë të sigurt (pak mbi boshllëkun e përditësimit p95 prej {p95}s dhe të paktën 2× intervalin e kampionimit prej {median}s, min. 30s) që bllokimet të kapen shpejt pa ndalime të rreme.",
             "end_energy_floor": "U ngrit në minimumin që nënkuptojnë pragu i ndalimit ({stop} W) gjatë vonesës së fikjes ({off_delay} s); nën të, cikli mund të përfundojë vetëm përmes një rruge rezervë.",
             "max_duration_ratio_default": "Kthim te vlera e parazgjedhur: një kufi i sipërm më i ulët refuzon programin e duhur sa herë që një cikël zgjat më shumë se zakonisht.",
-            "min_duration_ratio_default": "Kthim te vlera e parazgjedhur: një kufi i poshtëm më i lartë pengon njohjen e një cikli në zhvillim derisa të ketë përparuar mjaft."
+            "min_duration_ratio_default": "Kthim te vlera e parazgjedhur: një kufi i poshtëm më i lartë pengon njohjen e një cikli në zhvillim derisa të ketë përparuar mjaft.",
+            "start_above_running": "Kjo pajisje punon me {low} W ose më shumë nga fillimi në fund, por pragu i nisjes është {start} W, kështu që një cikël me fuqinë e saj më të ulët nuk niset kurrë. Pragu i nisjes vendoset në gjysmën e nivelit të saj më të ulët të punës, pragu i ndalimit nën të."
         },
         "exclusions": {
             "summary": "U përjashtuan {total} cikle të zbuluar gabimisht: {parts}.",

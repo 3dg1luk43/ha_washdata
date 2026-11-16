@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "前回サイクルの電気料金"
+      },
+      "last_cycle_start": {
+        "name": "前回サイクルの開始時刻"
       }
     },
     "select": {

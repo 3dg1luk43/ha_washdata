@@ -338,6 +338,11 @@ _SENSOR_SWAP_BLOCKED_STATES = frozenset(
     }
 )
 
+# "Opening the door ends the cycle" (#342 auto-open dishwashers, #524 door-locked
+# washers): the states in which a held door-open finalises. STARTING is left out
+# (nothing has run yet), so a door opened while loading is a pause as before.
+_DOOR_END_STATES = frozenset({STATE_RUNNING, STATE_PAUSED, STATE_ENDING})
+
 # #478: the live triggers whose announcement the snapshot keeps (trigger_marks).
 _MARKED_TRIGGERS = frozenset({
     TRIGGER_PROGRAM_RECOGNISED, TRIGGER_PHASE_STARTED,
@@ -703,6 +708,7 @@ class WashDataManager:
         self._remove_maintenance_timer: Callable[[], None] | None = None
         self._remove_notify_queue_restore: Callable[[], None] | None = None
         self._remove_trace_warm_at_started: Callable[[], None] | None = None
+        self._remove_threshold_check_at_started: Callable[[], None] | None = None
         self._remove_notify_people_listener = None
         self._live_notification_sent_count = 0
 
@@ -2598,6 +2604,12 @@ class WashDataManager:
         self._remove_trace_warm_at_started = async_at_started(
             self.hass, self._schedule_trace_summary_warm
         )
+        # A threshold no cycle can start or end under is corrected at a cycle end,
+        # but one no cycle can START under (#527) never produces a cycle end: check
+        # once HA has started, off the loop.
+        self._remove_threshold_check_at_started = async_at_started(
+            self.hass, self._schedule_threshold_check
+        )
 
         # Register schedulers (maintenance + ML training). These are also re-
         # registered on every config reload; calling them here ensures they
@@ -3091,6 +3103,7 @@ class WashDataManager:
         for _unsub_name in (
             "_remove_ha_stop_listener", "_remove_notify_queue_restore", "_remove_maintenance_timer",
             "_remove_clean_door_recheck", "_remove_trace_warm_at_started",
+            "_remove_threshold_check_at_started",
         ):
             _unsub = getattr(self, _unsub_name, None)
             if _unsub is not None:
@@ -3399,13 +3412,16 @@ class WashDataManager:
                 self.mark_unloaded("door opened", how="door")
             elif (
                 self._door_opens_at_end
-                and self.detector.state in (STATE_RUNNING, STATE_ENDING)
+                and self.detector.state in _DOOR_END_STATES
             ):
-                # Auto-open dishwasher (#342): the machine pops its door at the end.
-                # A sustained open means the cycle finished; a brief open (adding an
-                # item) does not. Arm a dwell timer instead of the sticky user-pause
-                # (which would strand the cycle in user_paused). If the door stays
-                # open past the dwell we finalize; if it closes first we cancel.
+                # Auto-open dishwasher (#342), or a washer whose door stays locked
+                # while it runs (#524): a sustained open means the cycle finished; a
+                # brief open (adding an item) does not. Arm a dwell timer instead of
+                # the sticky user-pause (which would strand the cycle in user_paused).
+                # If the door stays open past the dwell we finalize; if it closes
+                # first we cancel. PAUSED counts: once the power has dropped at the
+                # end the detector sits there for minutes before ENDING, and that is
+                # when the door is opened (#524).
                 self._logger.debug(
                     "Door opened on auto-open device: arming %ss end dwell",
                     self._door_end_dwell_seconds,
@@ -3788,7 +3804,7 @@ class WashDataManager:
             self.mark_unloaded("door open after restart", how="door")
 
     def _maybe_arm_door_end_dwell_if_open(self) -> None:
-        """Arm the end-dwell timer when in RUNNING or ENDING with the door already open.
+        """Arm the end-dwell timer in an active state with the door already open.
 
         Called from both ``_on_state_change`` (live transition) and the
         snapshot-restoration path (where ``_on_state_change`` is not invoked).
@@ -3796,7 +3812,7 @@ class WashDataManager:
         restoring a RUNNING snapshot with the door already open re-arms the dwell.
         """
         if not (
-            self.detector.state in (STATE_RUNNING, STATE_ENDING)
+            self.detector.state in _DOOR_END_STATES
             and self._door_opens_at_end
             and self._door_sensor_entity
             and self._remove_door_end_dwell is None
@@ -3805,7 +3821,7 @@ class WashDataManager:
         door_state = self.hass.states.get(self._door_sensor_entity)
         if door_state and door_state.state == "on":
             self._logger.debug(
-                "Door already open on ENDING: arming %ss end dwell",
+                "Door already open while active: arming %ss end dwell",
                 self._door_end_dwell_seconds,
             )
             self._arm_door_end_dwell()
@@ -3839,7 +3855,7 @@ class WashDataManager:
             else None
         )
         if (
-            self.detector.state in (STATE_RUNNING, STATE_ENDING)
+            self.detector.state in _DOOR_END_STATES
             and self._door_opens_at_end
             and not self._is_user_paused
             and door_state is not None
@@ -7539,6 +7555,13 @@ class WashDataManager:
         self._remove_trace_warm_at_started = None
         if not self._is_shutdown:
             self._spawn_tracked(self.profile_store.async_warm_trace_summaries())
+
+    @callback
+    def _schedule_threshold_check(self, _hass: HomeAssistant) -> None:
+        """Run the threshold-corrective suggestion passes once HA has started (#527)."""
+        self._remove_threshold_check_at_started = None
+        if not self._is_shutdown:
+            self.learning_manager.run_threshold_correctives()
 
     @callback
     def _schedule_notify_queue_restore(self, _hass: HomeAssistant) -> None:

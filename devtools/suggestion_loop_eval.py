@@ -32,8 +32,8 @@ This harness closes that loop on the real corpus.
 3. The update-cadence model behind the operational pass is rebuilt from the
    re-detected cycles that ended on their own (last 200 in-cycle intervals, >= 20 to
    run, as ``LearningManager.close_cycle_cadence`` commits them).
-4. Every suggestion pass runs in cycle-end order (operational, standby floor, model,
-   detection, batch) through ``LearningManager._apply_suggestions_and_notify`` - the
+4. Every suggestion pass runs in cycle-end order (operational, standby floor, start
+   threshold, model, detection, batch) through ``LearningManager._apply_suggestions_and_notify`` - the
    noise gates, the post-apply cooldown, locks, ``reconcile_suggestions``.
    First with the cooldown still active (anything non-corrective stored then is a
    cooldown leak), then once it has expired.
@@ -787,6 +787,7 @@ def run_passes(mgr: Any, cad: tuple[float, float] | None) -> dict[str, Any]:
         if cad is not None:
             gate(eng.for_job().generate_operational_suggestions(*cad))
         gate(eng.for_job().generate_standby_floor_suggestions())
+        gate(eng.for_job().generate_start_threshold_suggestions())  # #527
         gate(eng.for_job().generate_model_suggestions())
         gate(eng.for_job().generate_detection_suggestions())
         labeled = [

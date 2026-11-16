@@ -69,7 +69,7 @@ from .const import (
 )
 from .options_utils import option_int
 from .signal_processing import longest_resumed_pause_s
-from .time_utils import power_data_to_offsets
+from .time_utils import offset_key, power_data_to_offsets, synthetic_offset_keys
 
 # ─── Clean-cycle selection ────────────────────────────────────────────────────
 # Suggestions must learn only from cycles that were detected correctly. A cycle
@@ -506,6 +506,127 @@ _STANDBY_PEAK_FRACTION = 0.10
 _STANDBY_MAX_MAD = 0.25
 
 
+# End paths that saw the power BELOW the stop threshold: the off delay or the
+# quiet window ran below it (timeout, the duration-anchored finalize, Smart
+# Termination in ENDING) or it dropped to 0 (terminal drop). The standby-band
+# finalize also stores TIMEOUT but marks the cycle with ``standby_band_w``.
+_BELOW_STOP_ENDS = frozenset(
+    {TerminationReason.TIMEOUT, TerminationReason.SMART, TerminationReason.TERMINAL_DROP}
+)
+# The settled level of a kept tail: the level it held for at least this share of
+# its time, so a wind-down at the start of the tail (a Miele's 15 W drain before
+# its 3.4 W standby) and a lone 0 W glitch between standby readings both lose.
+_TAIL_SETTLED_FRACTION = 0.25
+
+
+def _tail_settled_w(cycle: dict[str, Any], raw: list[Any], peak: float) -> float | None:
+    """Where a kept tail settled after the cycle's last working reading (#525).
+
+    Working means at or above ``_STANDBY_PEAK_FRACTION`` of the cycle's peak. Each
+    reading is held until the next one (an outage-sized gap carries no weight), as
+    in :func:`resting_level_w`; the result is the level held for at least
+    ``_TAIL_SETTLED_FRACTION`` of the tail. Rows listed in ``synthetic_offsets``
+    are skipped: WashData wrote them, the plug did not. Scans back from the end
+    only as far as the working reading, so it costs the tail, not the trace (the
+    caller runs on the event loop). None when the tail has fewer than two timed
+    readings.
+    """
+    synthetic = synthetic_offset_keys(cycle) or set()
+    work_w = peak * _STANDBY_PEAK_FRACTION if peak > 0 else float("inf")
+    tail: list[tuple[float, float]] = []
+    for pt in reversed(raw):
+        if not isinstance(pt, (list, tuple)) or len(pt) < 2:
+            continue
+        try:
+            offset, watts = float(pt[0]), float(pt[1])
+        except (TypeError, ValueError, OverflowError):
+            return None  # an ISO-stamped legacy row: no clock to weight by
+        if watts >= work_w:
+            break
+        if offset_key(offset) not in synthetic:
+            tail.append((offset, watts))
+    tail.reverse()
+    max_gap_s = _MAX_PAUSE_GAP_H * 3600
+    vals: list[float] = []
+    weights: list[float] = []
+    for (t0, p0), (t1, _p1) in zip(tail, tail[1:]):
+        dt = t1 - t0
+        if 0 < dt <= max_gap_s:
+            vals.append(p0)
+            weights.append(dt)
+    if not weights:
+        return None
+    order = np.argsort(vals)
+    cum = np.cumsum(np.asarray(weights)[order])
+    idx = int(np.searchsorted(cum, cum[-1] * _TAIL_SETTLED_FRACTION))
+    return float(np.asarray(vals)[order][idx])
+
+
+def _cycle_peak_w(cycle: dict[str, Any], raw: list[Any]) -> float:
+    """The cycle's peak: the stored signature's when usable, else a scan.
+
+    The signature already carries it, and it is what the rest of the integration
+    means by one (Stage 1 rejection reads the same field). Scanning every sample
+    again is not free here: this runs on the event loop inside the synchronous
+    ``ws_get_devices`` callback, which the panel polls every 20 s per device
+    (1.73 ms a call over the worst real export's last 8 cycles).
+    """
+    sig = cycle.get("signature")
+    sig_peak = sig.get("max_power") if isinstance(sig, dict) else None
+    try:
+        sig_peak = float(sig_peak) if sig_peak is not None else None
+    except (TypeError, ValueError, OverflowError):
+        sig_peak = None
+    if sig_peak is not None and math.isfinite(sig_peak) and sig_peak >= 0:
+        return sig_peak
+    peak = 0.0
+    for pt in raw:
+        if isinstance(pt, (list, tuple)) and len(pt) >= 2:
+            try:
+                peak = max(peak, float(pt[1]))
+            except (TypeError, ValueError, OverflowError):
+                continue
+    return peak
+
+
+def _idle_evidence_w(cycle: dict[str, Any], stop_threshold_w: float) -> float | None:
+    """The level one stored cycle shows the appliance idling at, if it shows one.
+
+    ``0.0`` for a cycle whose end saw the power below the threshold, the plateau
+    level for a standby-band finalize, the settled kept tail for a cycle stopped
+    by hand or force-stopped, None when the cycle says nothing (no trace, no tail,
+    or stopped by hand while still working).
+    """
+    band = _num(cycle.get("standby_band_w"))
+    if band is not None:
+        return band
+    if cycle.get("termination_reason") in _BELOW_STOP_ENDS:
+        return 0.0
+    raw = cycle.get("power_data")
+    if not isinstance(raw, list) or not raw:
+        return None
+    last = raw[-1]
+    if not isinstance(last, (list, tuple)) or len(last) < 2:
+        return None
+    try:
+        final_w = float(last[1])
+    except (TypeError, ValueError, OverflowError):
+        return None
+    peak = _cycle_peak_w(cycle, raw)
+    # Stopped by hand mid-wash: it ends at working power and says nothing about
+    # the standby draw.
+    if peak > 0 and final_w > peak * _STANDBY_PEAK_FRACTION:
+        return None
+    # A hand or force stop keeps the trace up to the moment it was stopped, so its
+    # last sample is what the appliance drew while it waited, unless that moment
+    # was a drum pulse; the settled tail is what it drew most of the time, unless
+    # the stop came seconds into standby after a long drain. The lower of the two
+    # (#445: stopped 10 s after a 15 W drain reached 3.4 W; #525: a pulse over a
+    # 3.2 W base).
+    settled = _tail_settled_w(cycle, raw, peak)
+    return final_w if settled is None else min(final_w, settled)
+
+
 def detect_standby_above_stop(
     cycles: list[dict[str, Any]],
     stop_threshold_w: float,
@@ -516,128 +637,72 @@ def detect_standby_above_stop(
     """Does this appliance idle ABOVE its stop threshold? (#445 cause 1)
 
     ``CycleDetector`` only counts a cycle as ending once power stays BELOW
-    ``stop_threshold_w``. An appliance whose standby draw sits above it can
-    therefore never end a cycle on its own, however long the off delay: the #445
-    reporter's Miele idles at 3.2-3.5 W against a 2.56 W threshold, and they
-    force-stopped four cycles before reporting it.
+    ``stop_threshold_w``. An appliance whose standby draw sits above it cannot end
+    a cycle through the off delay: the #445 reporter's Miele idles at 3.2-3.5 W
+    against a 2.56 W threshold, and they force-stopped four cycles before
+    reporting it. Since then the standby-band finalize ends such a cycle once it
+    is past its expected length, later than the off delay would.
 
-    The evidence is in the stored cycles. A cycle that ended by timeout snaps back
-    to the last reading above the threshold, and one the user force-stopped keeps
-    its tail - so in both cases the LAST stored sample is the level the appliance
-    was actually sitting at when the cycle closed. If that is repeatedly above
-    ``stop_threshold_w``, the threshold is below the appliance's standby draw.
+    **The last stored sample is not evidence** (#525, and every washer whose
+    threshold sits above its standby). Every power end cuts the trace at the last
+    reading at or above the threshold, so its last sample is the last working
+    reading (a drain pump at 16-19 W, an anti-crease drum pulse at 27-97 W), never
+    the idle level, and regular enough to look like one. Read before #525 it told
+    a washer idling at 1.0 W under a 1.25 W threshold, and a Miele between drum
+    pulses at 3.2 W under 5 W, that they "still draw" 18 W and 39 W. So each
+    recent cycle is judged by how it ended (:func:`_idle_evidence_w`):
 
-    **Two requirements, and both are load-bearing** (PR #448 round 7). The first
-    draft asked only that ``min_hits`` of the recent cycles ended above the
-    threshold, and a peak-relative sanity check was added on top. Measured across
-    the whole corpus that still fired on **4 of 6 real devices** with plainly
-    wrong numbers - it told a dishwasher whose last stored samples are
-    ``[0, 0, 0, 0, 0, 0, 62, 23]`` that it "idles at 42.5 W". The reason is
-    structural: every non-dishwasher end path TRIMS the trailing sub-threshold
-    samples, so the last stored sample is by construction the last sample *above*
-    the threshold - the moment the appliance was last working, not the level it
-    settled at. On a machine that really reaches 0 W that number is meaningless.
+    * the end saw the power below the threshold (timeout, Smart Termination,
+      terminal drop): it gets there, so it does not idle above it;
+    * the standby-band finalize: idles above, at the plateau it recorded
+      (``standby_band_w``; cycles stored before that mark read as the timeout
+      they were stored as);
+    * stopped by hand or force-stopped: the lower of its last sample (what it
+      drew when stopped) and the level its kept tail settled at.
 
-    So:
-
-    1. **Every** recent cycle must end above the threshold, not merely
-       ``min_hits`` of them. One cycle that reached 0 W proves the appliance
-       *can* go below, which is the whole question being asked.
-    2. The level must be **consistent**, as median-absolute-deviation over the
-       median, within ``_STANDBY_MAX_MAD``. A real standby draw is a level;
-       "wherever the drum happened to be" ranges 6 W to 55 W across eight cycles,
-       which is what the corpus's washing machines actually look like.
-
-    **Validated against the reporters' own exports, not just the corpus.** Of
-    nine real devices only one passes both tests: #445's Miele, every cycle
-    ending 3.2-7.5 W against a 2.56 W threshold (MAD 0.059). The corpus washing
-    machine that also never reaches 0 W is rejected on consistency (MAD 0.548).
-
-    **#427's AEG and #424's Beko are deliberately NOT reported**, though an
-    earlier version of this docstring cited them as validation at 4/8 each. Their
-    stored cycles end ``[0.0, 1.9, 0.1, 0.9, 0.8, 0.0, 0.0, 0.7]`` and
-    ``[1.2, 1.3, 1.3, 0.0, 0.3, 0.4, 0.2, 1.3]`` - both reach 0 W regularly, so
-    neither idles above its threshold. Their late finishes had a different cause
-    (the keepalive cadence bug, fixed separately), and counting them here was
-    reading a coincidence as a diagnosis.
-
-    User-stopped cycles are still kept: on an appliance with this fault they are
-    often the ONLY way a cycle ever closes, and the #445 reporter force-stopped
-    four.
+    Reported when at least ``min_hits`` cycles idle above the threshold, they
+    outnumber the ones that went below, and their levels are **consistent**
+    (median absolute deviation over the median within ``_STANDBY_MAX_MAD``: a
+    real standby draw is a level). The #445 Miele's export: four cycles stopped by
+    hand or unmarked, settled at 3.4 W, against one that timed out after the
+    machine switched itself off. Two corpus devices the last-sample rule missed
+    because one stop landed on a 0 W reading now show: a washer stopped by hand
+    6 of 8 times at 2.2 W over an effective 1.2 W, a dishwasher stopped 6 of 8
+    times at 3 W over 1.5 W.
 
     Returns None when there is no such pattern, else a summary carrying the
     observed idle level so the UI can name a number rather than a symptom. Pure
     statistics, never raises: this is read on the device-list path.
     """
     try:
-        if stop_threshold_w <= 0:
+        stop = float(stop_threshold_w)
+        if not math.isfinite(stop) or stop <= 0:
             return None
-        finals: list[float] = []
+        above: list[float] = []
+        below = 0
         for cycle in list(cycles)[-recent:]:
             if not isinstance(cycle, dict):
                 continue
-            raw = cycle.get("power_data")
-            if not isinstance(raw, list) or not raw:
+            level = _idle_evidence_w(cycle, stop)
+            if level is None:
                 continue
-            last = raw[-1]
-            if not isinstance(last, (list, tuple)) or len(last) < 2:
-                continue
-            try:
-                final_w = float(last[1])
-            except (TypeError, ValueError, OverflowError):
-                continue
-            # The stored signature already carries this cycle's peak, and it is
-            # what the rest of the integration means by one (Stage 1 rejection
-            # reads the same field), so scanning every sample again is pure
-            # waste. It is not free waste: this runs on the event loop inside the
-            # synchronous `ws_get_devices` callback, which the panel polls every
-            # 20 s per device, and measured over the worst real export in
-            # `cycle_data/` (11454 samples across the last 8 cycles) the scan
-            # costs 1.73 ms a call. Not a hazard at that cadence, which is why
-            # there is no cache here: keying one on cycle count, last id and
-            # threshold buys a millisecond and adds an invalidation path that can
-            # serve a stale advisory. Falling back to the scan keeps a cycle
-            # whose signature is missing or unusable working exactly as before.
-            peak = 0.0
-            _sig = cycle.get("signature")
-            _sig_peak = _sig.get("max_power") if isinstance(_sig, dict) else None
-            try:
-                _sig_peak = float(_sig_peak) if _sig_peak is not None else None
-            except (TypeError, ValueError, OverflowError):
-                _sig_peak = None
-            if _sig_peak is not None and math.isfinite(_sig_peak) and _sig_peak >= 0:
-                peak = _sig_peak
+            if level > stop:
+                above.append(level)
             else:
-                for pt in raw:
-                    if isinstance(pt, (list, tuple)) and len(pt) >= 2:
-                        try:
-                            peak = max(peak, float(pt[1]))
-                        except (TypeError, ValueError, OverflowError):
-                            continue
-            # Idle-like or nothing: a cycle stopped by hand mid-wash ends at
-            # working power and says nothing about the standby draw.
-            if peak > 0 and final_w > peak * _STANDBY_PEAK_FRACTION:
-                continue
-            finals.append(final_w)
-        if len(finals) < min_hits:
-            return None
-        above = [f for f in finals if f > stop_threshold_w]
-        # Requirement 1: EVERY recent cycle ended above the threshold. One that
-        # reached it proves the appliance can, so it does not idle above it.
-        if len(above) != len(finals) or len(above) < min_hits:
+                below += 1
+        if len(above) < min_hits or len(above) <= below:
             return None
         median = float(np.median(above))
         if median <= 0:
             return None
-        # Requirement 2: the levels agree with each other. See _STANDBY_MAX_MAD.
         mad = float(np.median([abs(f - median) for f in above]))
         if mad / median > _STANDBY_MAX_MAD:
             return None
         return {
             "cycles_above": len(above),
-            "cycles_checked": len(finals),
+            "cycles_checked": len(above) + below,
             "idle_w": round(median, 2),
-            "stop_threshold_w": round(float(stop_threshold_w), 2),
+            "stop_threshold_w": round(stop, 2),
         }
     except Exception:  # noqa: BLE001 - a statistic must never break the device list
         return None
@@ -775,6 +840,126 @@ def resting_level_w(
         return float(np.median(levels))
     except Exception:  # noqa: BLE001 - a statistic must never break a suggestion pass
         return None
+
+
+# Steady-load appliances (#527): a heat-pump dryer or a pump runs at one level from
+# start to end, with no quiet phase inside the cycle. The batch thresholds anchor on
+# the lowest power seen inside the cycles (p05 of per-cycle minima), which on a
+# washer or dishwasher is a near-standby moment (drum stopped, pump idle) and so
+# marks where "running" begins. On a steady load that minimum IS the running level,
+# so 0.8x / 1.05x of it put both thresholds on top of the running power: the #527
+# dryer was set to start 454 W / stop 303 W while running at 380-480 W, and once it
+# ran at 360-430 W no cycle ever started again. Measured over the corpus, the anchor
+# sits at 0.0-3% of each device's working power (p90 of its active readings) on
+# every device that gets a threshold proposal, and at 70-85% on the #527 dryer, so
+# anything between is a clean cut.
+STEADY_LOAD_ANCHOR_RATIO = 0.25
+# Correcting a start threshold at or above a steady load's running level: start at
+# this fraction of the lowest level it runs at (a run half as strong still starts,
+# and the appliance's standby is far below), stop at STANDBY-style 0.8 x start.
+STEADY_LOAD_START_RATIO = 0.5
+STEADY_LOAD_STOP_RATIO = 0.8
+STEADY_LOAD_RECENT_CYCLES = 8
+STEADY_LOAD_MIN_CYCLES = 3
+# Per cycle: its running level is the p05 of the readings the detector counted as
+# running (at or above the stop threshold), its working power the p90 of them.
+_STEADY_LOAD_LOW_PCT = 5.0
+_STEADY_LOAD_WORK_PCT = 90.0
+
+
+def is_steady_load(low_w: float, work_w: float) -> bool:
+    """True when a cycle's lowest running power is its working level (#527)."""
+    return work_w > 0 and low_w >= STEADY_LOAD_ANCHOR_RATIO * work_w
+
+
+def start_above_running(
+    cycles: list[dict[str, Any]], start_threshold_w: float, stop_threshold_w: float
+) -> dict[str, Any] | None:
+    """Is the start threshold at or above the level a steady load runs at? (#527)
+
+    Reads the last ``STEADY_LOAD_RECENT_CYCLES`` stored cycles that ran (completed
+    or force-stopped), whatever their health: every cycle of an appliance in this
+    state starts at full power with no lead-in, which ``select_clean_cycles`` drops
+    as ``high_start``, so the clean history is exactly what this fault empties. Rows
+    WashData filled in itself (``synthetic_offsets``) are skipped.
+
+    None unless at least ``STEADY_LOAD_MIN_CYCLES`` cycles are steady loads
+    (:func:`is_steady_load`) and the start threshold is at or above their running
+    level (the p05 across the cycles of each one's own p05). Otherwise::
+
+        low_w     that running level
+        cycles    how many cycles were read
+        start_w   the start threshold
+        stop_w    the stop threshold
+
+    Pure statistics, executor-safe, never raises.
+    """
+    try:
+        start = float(start_threshold_w)
+        stop = float(stop_threshold_w)
+        if not (math.isfinite(start) and math.isfinite(stop)) or start <= 0:
+            return None
+        lows: list[float] = []
+        ran = [
+            c for c in list(cycles or [])
+            if isinstance(c, dict) and c.get("status") in ("completed", "force_stopped")
+        ][-STEADY_LOAD_RECENT_CYCLES:]
+        for cycle in ran:
+            synthetic = synthetic_offset_keys(cycle) or set()
+            running = [
+                p for o, p in _cycle_readings(cycle)
+                if p >= stop and p > 0 and offset_key(o) not in synthetic
+            ]
+            if len(running) < 5:
+                continue
+            low = float(np.percentile(running, _STEADY_LOAD_LOW_PCT))
+            if is_steady_load(low, float(np.percentile(running, _STEADY_LOAD_WORK_PCT))):
+                lows.append(low)
+        if len(lows) < STEADY_LOAD_MIN_CYCLES:
+            return None
+        low_w = float(np.percentile(lows, _STEADY_LOAD_LOW_PCT))
+        if start < low_w:
+            return None
+        return {
+            "low_w": round(low_w, 1),
+            "cycles": len(lows),
+            "start_w": round(start, 2),
+            "stop_w": round(stop, 2),
+        }
+    except Exception:  # noqa: BLE001 - a statistic must never break a suggestion pass
+        return None
+
+
+def steady_load_threshold_suggestions(adv: dict[str, Any] | None) -> dict[str, Any]:
+    """The corrective stop/start pair for :func:`start_above_running`'s finding.
+
+    Start goes to ``STEADY_LOAD_START_RATIO`` of the running level; stop only moves
+    when it would no longer sit below that start, to ``STEADY_LOAD_STOP_RATIO`` of it.
+    Corrective, so the post-apply cooldown does not hold it back: no cycle can start
+    under the current value.
+    """
+    if not adv:
+        return {}
+    low = float(adv["low_w"])
+    start = round(low * STEADY_LOAD_START_RATIO, 1)
+    params = {"low": f"{low:.0f}", "start": f"{float(adv['start_w']):g}"}
+    entry = {
+        "reason": (
+            f"This appliance runs at {low:.0f} W or more from start to end, but the "
+            f"start threshold is {float(adv['start_w']):g} W, so a run at its lower "
+            f"power never starts. Start set to half its lowest running level, stop "
+            f"below that."
+        ),
+        "reason_key": "suggestion.reason.start_above_running",
+        "reason_params": params,
+        "corrective": True,
+    }
+    out: dict[str, Any] = {CONF_START_THRESHOLD_W: {"value": start, **entry}}
+    if float(adv["stop_w"]) >= start:
+        out[CONF_STOP_THRESHOLD_W] = {
+            "value": round(start * STEADY_LOAD_STOP_RATIO, 1), **entry,
+        }
+    return out
 
 
 def _standby_floor_entry(value: float, floor: dict[str, Any]) -> dict[str, Any]:
@@ -1574,6 +1759,21 @@ class SuggestionEngine:
             out[CONF_START_THRESHOLD_W] = _standby_floor_entry(start_min, floor)
         return out
 
+    def generate_start_threshold_suggestions(self) -> dict[str, Any]:
+        """Lower a start threshold that sits on a steady load's running level (#527).
+
+        Runs after every cycle end and once HA has started: an appliance in this
+        state may never end a cycle again, so a cycle-end trigger alone would never
+        reach it. Executor-safe.
+        """
+        eff = self._effective_thresholds(self._entry_options())
+        adv = start_above_running(
+            list(self.profile_store.get_past_cycles()[-200:]),
+            float(eff[CONF_START_THRESHOLD_W]),
+            float(eff[CONF_STOP_THRESHOLD_W]),
+        )
+        return steady_load_threshold_suggestions(adv)
+
     def generate_detection_suggestions(self) -> dict[str, Any]:
         """Statistical suggestions for detection/model settings not covered by
         the operational or model passes.
@@ -2087,6 +2287,7 @@ class SuggestionEngine:
 
         # --- Power thresholds ---
         lowest_active: list[float] = []
+        working: list[float] = []             # per-cycle p90 active power (#527)
         main_cycles: list[list[tuple[float, float]]] = []
         cycle_energies: list[float] = []      # per-cycle total energy (Wh) for proportional floor
         false_end_energies: list[float] = []
@@ -2103,6 +2304,7 @@ class SuggestionEngine:
             active = powers[powers > 0.5]
             if active.size > 0:
                 lowest_active.append(float(np.min(active)))
+                working.append(float(np.percentile(active, _STEADY_LOAD_WORK_PCT)))
 
             # Per-cycle total energy (trapezoidal, gap-guarded) for the
             # proportional end-energy floor.
@@ -2173,7 +2375,18 @@ class SuggestionEngine:
                 if resting is not None and resting > 0
                 else None
             )
-            if resting_floor is not None and suggested_stop < resting_floor:
+            working_w = float(np.median(working)) if working else 0.0
+            if is_steady_load(p05_min, working_w):
+                # #527: no quiet phase inside the cycles, so the anchor is the
+                # running level and 0.8x / 1.05x of it sit on the running power.
+                # The thresholds in force end and start these cycles; a start
+                # threshold at the running level is start_above_running's to fix.
+                _LOGGER.debug(
+                    "Stop/start suggestion withheld: p05 lowest active %.2fW is the "
+                    "running level (p90 working power %.2fW), not a standby boundary",
+                    p05_min, working_w,
+                )
+            elif resting_floor is not None and suggested_stop < resting_floor:
                 _LOGGER.debug(
                     "Stop/start suggestion withheld: p05 lowest active %.2fW is the "
                     "resting level (%.2fW), stop %.2fW would sit under %.2fW",

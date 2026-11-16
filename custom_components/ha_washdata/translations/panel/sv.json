@@ -1569,12 +1569,12 @@
       "doc": "Vad ett tryck på den här apparatens avisering öppnar. Tomt: WashData-panelen för den här apparaten. Ange en sökväg till en instrumentpanel (t.ex. /lovelace/laundry) eller en URL, eller \"none\" för ingen tryckåtgärd."
     },
     "door_opens_at_end": {
-      "label": "Dörren öppnas automatiskt vid avslut",
-      "doc": "För diskmaskiner som öppnar dörren i slutet för att torka (t.ex. AirDry). En dörr som står öppen under väntetiden nedan avslutar cykeln i stället för att pausa den; en kort öppning ignoreras. Kräver en Dörrsensorentitet."
+      "label": "Dörröppning avslutar cykeln",
+      "doc": "För maskiner vars dörr förblir låst medan de kör (de flesta frontmatade tvättmaskiner) eller som själva öppnar den i slutet (diskmaskiner med AirDry). En dörr som står öppen under uppehållstiden nedan avslutar cykeln i stället för att pausa den; en kort öppning ignoreras. Kräver en Dörrsensorentitet."
     },
     "door_end_dwell_seconds": {
       "label": "Dörröppningens uppehållstid vid avslut",
-      "doc": "Med \"Dörren öppnas automatiskt vid avslut\" på: hur länge dörren måste vara öppen innan cykeln avslutas. Tillräckligt länge för att ignorera att man ställer in en tallrik (standard 60 s)."
+      "doc": "Med \"Dörröppning avslutar cykeln\" på: hur länge dörren måste vara öppen innan cykeln avslutas. Tillräckligt länge för att ignorera att man ställer in en tallrik (standard 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Cykler som formar ett program",
@@ -1780,7 +1780,8 @@
       "watchdog": "Hålls så lågt som är säkert (strax över p95-uppdateringsmellanrummet på {p95}s och minst 2x samplingsintervallet på {median}s, min. 30s) så att stillestånd upptäcks snabbt utan falska stopp.",
       "end_energy_floor": "Höjd till den nedre gräns som stopptröskeln ({stop} W) under avfördröjningen ({off_delay} s) ger; lägre än så kan cykeln bara avslutas via en reservväg.",
       "max_duration_ratio_default": "Tillbaka till standardvärdet: ett lägre tak avvisar rätt program så fort en körning tar längre tid än vanligt.",
-      "min_duration_ratio_default": "Tillbaka till standardvärdet: ett högre golv gör att en pågående cykel inte känns igen förrän den har kommit en bra bit."
+      "min_duration_ratio_default": "Tillbaka till standardvärdet: ett högre golv gör att en pågående cykel inte känns igen förrän den har kommit en bra bit.",
+      "start_above_running": "Den här apparaten går på {low} W eller mer från start till slut, men starttröskeln är {start} W, så en körning på den lägre effekten registreras aldrig. Start satt till hälften av den lägsta drifteffekten, stopp under det."
     },
     "exclusions": {
       "summary": "Uteslöt {total} feldetekterade cykler: {parts}.",

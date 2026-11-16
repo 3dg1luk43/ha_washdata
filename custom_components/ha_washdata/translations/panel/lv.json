@@ -1568,12 +1568,12 @@
       "doc": "Ko atver pieskāriens šīs ierīces paziņojumam. Tukšs: WashData panelis ar šo ierīci. Ievadiet informācijas paneļa ceļu (piem., /lovelace/laundry) vai URL, vai “none”, ja pieskārienam nav jādara nekas."
     },
     "door_opens_at_end": {
-      "label": "Durvis automātiski atveras beigās",
-      "doc": "Trauku mazgājamām mašīnām, kas beigās atver durvis žāvēšanai (piem., AirDry). Ja durvis paliek atvērtas zemāk norādīto laiku, cikls beidzas, nevis tiek pauzēts; īsa atvēršana tiek ignorēta. Nepieciešama Durvju sensora entītija."
+      "label": "Durvju atvēršana beidz ciklu",
+      "doc": "Iekārtām, kuru durvis darbības laikā paliek bloķētas (lielākā daļa veļas mazgājamo mašīnu ar priekšējo ielādi) vai kuras beigās tās atver pašas (trauku mazgājamās mašīnas ar AirDry). Ja durvis paliek atvērtas zemāk norādīto uzturēšanās laiku, cikls beidzas, nevis tiek pauzēts; īsa atvēršana tiek ignorēta. Nepieciešama Durvju sensora entītija."
     },
     "door_end_dwell_seconds": {
       "label": "Durvju atvēršanas beigu uzturēšanās laiks",
-      "doc": "Ja ieslēgts \"Durvis automātiski atveras beigās\": cik ilgi durvīm jāpaliek atvērtām, pirms cikls beidzas. Pietiekami ilgi, lai ignorētu trauka pievienošanu (noklusējums 60 s)."
+      "doc": "Ja ieslēgts \"Durvju atvēršana beidz ciklu\": cik ilgi durvīm jāpaliek atvērtām, pirms cikls beidzas. Pietiekami ilgi, lai ignorētu trauka pievienošanu (noklusējums 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Cikli, kas veido programmu",
@@ -1975,7 +1975,8 @@
       "watchdog": "Saglabāts pēc iespējas zemāks, cik droši (tikai nedaudz virs p95 atjaunināšanas intervāla {p95}s un vismaz 2x paraugu ņemšanas intervāls {median}s, min. 30s), lai apstāšanās tiktu atklāta ātri bez viltus apturēšanas.",
       "end_energy_floor": "Paaugstināts līdz minimumam, ko nosaka apstāšanās slieksnis ({stop} W) izslēgšanas aizkaves laikā ({off_delay} s); zem tā cikls var beigties tikai ar rezerves mehānismu.",
       "max_duration_ratio_default": "Atjaunota noklusējuma vērtība: zemāka augšējā robeža noraida pareizo programmu ikreiz, kad cikls ilgst ilgāk nekā parasti.",
-      "min_duration_ratio_default": "Atjaunota noklusējuma vērtība: augstāka apakšējā robeža neļauj atpazīt notiekošu ciklu, līdz tas ir krietni pavirzījies uz priekšu."
+      "min_duration_ratio_default": "Atjaunota noklusējuma vērtība: augstāka apakšējā robeža neļauj atpazīt notiekošu ciklu, līdz tas ir krietni pavirzījies uz priekšu.",
+      "start_above_running": "Šī iekārta no sākuma līdz beigām darbojas ar {low} W vai vairāk, bet starta slieksnis ir {start} W, tāpēc cikls ar zemāku jaudu nekad nesākas. Starta slieksnis iestatīts uz pusi no zemākā darbības līmeņa, apstāšanās slieksnis zem tā."
     },
     "exclusions": {
       "summary": "Izslēgti {total} kļūdaini atpazīti cikli: {parts}.",

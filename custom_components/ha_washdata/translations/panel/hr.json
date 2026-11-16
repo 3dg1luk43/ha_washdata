@@ -1568,12 +1568,12 @@
       "doc": "Što otvara dodir obavijesti ovog uređaja. Prazno: WashData panel ovog uređaja. Upišite putanju nadzorne ploče (npr. /lovelace/laundry) ili URL, ili \"none\" da dodir ništa ne otvara."
     },
     "door_opens_at_end": {
-      "label": "Vrata se automatski otvaraju na kraju",
-      "doc": "Za perilice posuđa koje na kraju otvaraju vrata radi sušenja (npr. AirDry). Vrata otvorena tijekom vremena zadržavanja ispod završavaju ciklus umjesto da ga pauziraju; kratko otvaranje se zanemaruje. Zahtijeva Entitet senzora vrata."
+      "label": "Otvaranje vrata završava ciklus",
+      "doc": "Za uređaje čija vrata ostaju zaključana tijekom rada (većina perilica rublja s prednjim punjenjem) ili koji ih sami otvore na kraju (perilice posuđa s AirDry). Vrata otvorena tijekom vremena zadržavanja ispod završavaju ciklus umjesto da ga pauziraju; kratko otvaranje se zanemaruje. Zahtijeva Entitet senzora vrata."
     },
     "door_end_dwell_seconds": {
       "label": "Zadržavanje otvorenih vrata za završetak",
-      "doc": "Uz uključeno \"Vrata se automatski otvaraju na kraju\": koliko dugo vrata moraju ostati otvorena prije nego što ciklus završi. Dovoljno dugo da se zanemari dodavanje posuđa (zadano 60 s)."
+      "doc": "Uz uključeno \"Otvaranje vrata završava ciklus\": koliko dugo vrata moraju ostati otvorena prije nego što ciklus završi. Dovoljno dugo da se zanemari dodavanje posuđa (zadano 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Ciklusi koji oblikuju program",
@@ -1779,7 +1779,8 @@
       "watchdog": "Zadržano što nižim uz sigurnost (tik iznad razmaka ažuriranja p95 od {p95}s i najmanje 2× intervala uzorkovanja od {median}s, najmanje 30s) kako bi se zastoji brzo uhvatili bez lažnih zaustavljanja.",
       "end_energy_floor": "Povećano na minimum koji proizlazi iz praga zaustavljanja ({stop} W) tijekom odgode isključivanja ({off_delay} s); ispod toga ciklus može završiti samo rezervnim putem.",
       "max_duration_ratio_default": "Vraćeno na zadanu vrijednost: niža gornja granica odbacuje ispravan program kad god ciklus traje dulje nego obično.",
-      "min_duration_ratio_default": "Vraćeno na zadanu vrijednost: viša donja granica sprječava prepoznavanje ciklusa u tijeku sve dok dobro ne odmakne."
+      "min_duration_ratio_default": "Vraćeno na zadanu vrijednost: viša donja granica sprječava prepoznavanje ciklusa u tijeku sve dok dobro ne odmakne.",
+      "start_above_running": "Ovaj uređaj troši {low} W ili više od početka do kraja, ali prag pokretanja je {start} W, pa se ciklus pri njegovoj nižoj snazi nikad ne pokrene. Prag pokretanja postavljen je na polovicu najniže radne razine, prag zaustavljanja ispod toga."
     },
     "exclusions": {
       "summary": "Isključeno {total} pogrešno otkrivenih ciklusa: {parts}.",

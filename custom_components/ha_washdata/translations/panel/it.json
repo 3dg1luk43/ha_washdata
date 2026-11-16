@@ -1533,12 +1533,12 @@
       "doc": "Cosa apre un tocco sulla notifica di questo elettrodomestico. Vuoto: il pannello WashData su questo elettrodomestico. Inserisci un percorso di dashboard (es. /lovelace/laundry) o un URL, oppure \"none\" per nessuna azione."
     },
     "door_opens_at_end": {
-      "label": "Porta si apre automaticamente al termine",
-      "doc": "Per lavastoviglie che aprono la porta alla fine per asciugare (es. AirDry). Una porta che resta aperta per il tempo di permanenza qui sotto chiude il ciclo invece di metterlo in pausa; una breve apertura viene ignorata. Richiede un'Entità sensore porta."
+      "label": "L'apertura della porta termina il ciclo",
+      "doc": "Per macchine la cui porta resta bloccata durante il funzionamento (la maggior parte delle lavatrici a carica frontale) o che la aprono da sole alla fine (lavastoviglie con AirDry). Una porta che resta aperta per il tempo di permanenza qui sotto chiude il ciclo invece di metterlo in pausa; una breve apertura viene ignorata. Richiede un'Entità sensore porta."
     },
     "door_end_dwell_seconds": {
       "label": "Attesa apertura porta al termine",
-      "doc": "Con \"Porta si apre automaticamente al termine\" attivo: quanto a lungo la porta deve restare aperta prima che il ciclo termini. Abbastanza da ignorare l'aggiunta di un piatto (predefinito 60 s)."
+      "doc": "Con \"L'apertura della porta termina il ciclo\" attivo: quanto a lungo la porta deve restare aperta prima che il ciclo termini. Abbastanza da ignorare l'aggiunta di un piatto (predefinito 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Cicli che formano un programma",
@@ -1940,7 +1940,8 @@
       "watchdog": "Mantenuto il più basso possibile in sicurezza (poco sopra l'intervallo di aggiornamento p95 di {p95}s e almeno 2x l'intervallo di campionamento di {median}s, min 30s) per rilevare rapidamente i blocchi senza arresti falsi.",
       "end_energy_floor": "Portato al minimo implicato dalla soglia di arresto ({stop} W) nell'arco del ritardo spegnimento ({off_delay} s); al di sotto, il ciclo può terminare solo tramite un percorso di riserva.",
       "max_duration_ratio_default": "Ripristinato il valore predefinito: un limite superiore più basso scarta il programma giusto ogni volta che un ciclo dura più del solito.",
-      "min_duration_ratio_default": "Ripristinato il valore predefinito: un limite inferiore più alto impedisce di riconoscere un ciclo in corso finché non è ben avviato."
+      "min_duration_ratio_default": "Ripristinato il valore predefinito: un limite inferiore più alto impedisce di riconoscere un ciclo in corso finché non è ben avviato.",
+      "start_above_running": "Questo elettrodomestico assorbe {low} W o più dall'inizio alla fine, ma la soglia di avvio è {start} W, quindi un ciclo alla sua potenza più bassa non si avvia mai. Soglia di avvio impostata alla metà del suo livello di funzionamento più basso, soglia di arresto al di sotto."
     },
     "exclusions": {
       "summary": "Esclusi {total} cicli rilevati male: {parts}.",

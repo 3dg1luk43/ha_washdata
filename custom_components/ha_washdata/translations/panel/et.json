@@ -1569,12 +1569,12 @@
       "doc": "Mis avaneb selle seadme teavituse puudutamisel. Tühi: selle seadme WashData paneel. Sisestage töölaua tee (nt /lovelace/laundry) või URL, või \"none\", kui puudutus ei tohi midagi teha."
     },
     "door_opens_at_end": {
-      "label": "Uks avaneb automaatselt lõpus",
-      "doc": "Nõudepesumasinatele, mis avavad lõpus kuivatamiseks ukse (nt AirDry). Kui uks jääb allpool määratud viibimisajaks avatuks, lõpetab see tsükli, mitte ei peata seda; lühikest avamist eiratakse. Vajab sätet Ukse Anduri Olem."
+      "label": "Ukse avamine lõpetab tsükli",
+      "doc": "Masinatele, mille uks on töö ajal lukus (enamik eestlaetavaid pesumasinaid) või mis avavad selle lõpus ise (AirDry-funktsiooniga nõudepesumasinad). Kui uks jääb allpool määratud viibimisajaks avatuks, lõpetab see tsükli, mitte ei peata seda; lühikest avamist eiratakse. Vajab sätet Ukse Anduri Olem."
     },
     "door_end_dwell_seconds": {
       "label": "Ukse avamise lõppviibimisaeg",
-      "doc": "Kui \"Uks avaneb automaatselt lõpus\" on sees: kui kaua peab uks avatuks jääma, enne kui tsükkel lõpeb. Piisavalt kaua, et nõude lisamist eirata (vaikimisi 60 s)."
+      "doc": "Kui \"Ukse avamine lõpetab tsükli\" on sees: kui kaua peab uks avatuks jääma, enne kui tsükkel lõpeb. Piisavalt kaua, et nõude lisamist eirata (vaikimisi 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Programmi kujundavad tsüklid",
@@ -1974,7 +1974,8 @@
       "watchdog": "Hoitakse nii madal kui ohutu (veidi üle p95 uuendusintervalli {p95}s ja vähemalt 2x proovivõtu intervall {median}s, min 30s), et seiskumised tuvastataks kiiresti ilma valeseisakuteta.",
       "end_energy_floor": "Tõstetud miinimumini, mis tuleneb peatumise lävest ({stop} W) väljalülitumise viivituse ({off_delay} s) jooksul; sellest madalamal saab tsükkel lõppeda ainult varumehhanismi kaudu.",
       "max_duration_ratio_default": "Taastatud vaikeväärtus: madalam ülempiir lükkab õige programmi tagasi alati, kui tsükkel kestab tavalisest kauem.",
-      "min_duration_ratio_default": "Taastatud vaikeväärtus: kõrgem alampiir takistab käimasoleva tsükli tuvastamist, kuni see on juba hästi käima läinud."
+      "min_duration_ratio_default": "Taastatud vaikeväärtus: kõrgem alampiir takistab käimasoleva tsükli tuvastamist, kuni see on juba hästi käima läinud.",
+      "start_above_running": "See seade töötab algusest lõpuni vähemalt {low} W võimsusega, kuid käivitumise lävi on {start} W, seega madalamal võimsusel töötav tsükkel ei käivitu kunagi. Käivitumise lävi seatakse poolele madalaimast töötasemest, peatumise lävi sellest allapoole."
     },
     "exclusions": {
       "summary": "Välja jäetud {total} valesti tuvastatud tsüklit: {parts}.",

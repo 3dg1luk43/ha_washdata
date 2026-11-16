@@ -1533,12 +1533,12 @@
       "doc": "Qué abre un toque en la notificación de este electrodoméstico. En blanco: el panel de WashData en este electrodoméstico. Introduzca una ruta de panel (p. ej. /lovelace/laundry) o una URL, o \"none\" para no hacer nada al tocar."
     },
     "door_opens_at_end": {
-      "label": "La puerta se abre automáticamente al final",
-      "doc": "Para lavavajillas que abren la puerta al final para secar (p. ej. AirDry). Una puerta que queda abierta durante el tiempo de espera de abajo termina el ciclo en lugar de pausarlo; una apertura breve se ignora. Requiere una Entidad de sensor de puerta."
+      "label": "Abrir la puerta finaliza el ciclo",
+      "doc": "Para máquinas cuya puerta queda bloqueada mientras funcionan (la mayoría de las lavadoras de carga frontal) o que la abren solas al final (lavavajillas con AirDry). Una puerta que queda abierta durante el tiempo de espera de abajo termina el ciclo en lugar de pausarlo; una apertura breve se ignora. Requiere una Entidad de sensor de puerta."
     },
     "door_end_dwell_seconds": {
       "label": "Tiempo mínimo de puerta abierta para finalizar",
-      "doc": "Con «La puerta se abre automáticamente al final» activado: cuánto tiempo debe quedar abierta la puerta antes de que termine el ciclo. Lo bastante para ignorar que se añade un plato (predeterminado 60 s)."
+      "doc": "Con «Abrir la puerta finaliza el ciclo» activado: cuánto tiempo debe quedar abierta la puerta antes de que termine el ciclo. Lo bastante para ignorar que se añade un plato (predeterminado 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Ciclos que forman un programa",
@@ -1940,7 +1940,8 @@
       "watchdog": "Se mantiene lo más bajo que resulta seguro (justo por encima del intervalo de actualización p95 de {p95}s y al menos 2x el intervalo de muestreo de {median}s, mín. 30s) para detectar rápido los bloqueos sin paradas falsas.",
       "end_energy_floor": "Elevado al mínimo que implican el umbral de parada ({stop} W) durante el retardo de apagado ({off_delay} s); por debajo, el ciclo solo puede terminar mediante una vía de respaldo.",
       "max_duration_ratio_default": "Vuelta al valor predeterminado: un techo más bajo rechaza el programa correcto siempre que un ciclo dura más de lo habitual.",
-      "min_duration_ratio_default": "Vuelta al valor predeterminado: un mínimo más alto impide reconocer un ciclo en marcha hasta que está bien avanzado."
+      "min_duration_ratio_default": "Vuelta al valor predeterminado: un mínimo más alto impide reconocer un ciclo en marcha hasta que está bien avanzado.",
+      "start_above_running": "Este electrodoméstico consume {low} W o más de principio a fin, pero el umbral de inicio es {start} W, así que un ciclo a su potencia más baja nunca arranca. Umbral de inicio fijado en la mitad de su nivel de funcionamiento más bajo, umbral de parada por debajo."
     },
     "exclusions": {
       "summary": "Excluido(s) {total} ciclo(s) mal detectado(s): {parts}.",

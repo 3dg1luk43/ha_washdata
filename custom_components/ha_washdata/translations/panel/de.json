@@ -1569,12 +1569,12 @@
       "doc": "Was ein Tippen auf die Benachrichtigung dieses Geräts öffnet. Leer: das WashData-Panel bei diesem Gerät. Geben Sie einen Dashboard-Pfad (z. B. /lovelace/laundry) oder eine URL ein, oder „none“ für keine Aktion."
     },
     "door_opens_at_end": {
-      "label": "Tür öffnet sich am Ende automatisch",
-      "doc": "Für Geschirrspüler, die am Ende zum Trocknen die Tür öffnen (z. B. AirDry). Bleibt die Tür für die unten eingestellte Verweildauer offen, endet der Zyklus, statt zu pausieren; ein kurzes Öffnen wird ignoriert. Erfordert eine Türsensor-Entität."
+      "label": "Türöffnung beendet den Zyklus",
+      "doc": "Für Geräte, deren Tür während des Betriebs verriegelt bleibt (die meisten Frontlader-Waschmaschinen) oder die sie am Ende selbst öffnen (Geschirrspüler mit AirDry). Bleibt die Tür für die unten eingestellte Verweildauer offen, endet der Zyklus, statt zu pausieren; ein kurzes Öffnen wird ignoriert. Erfordert eine Türsensor-Entität."
     },
     "door_end_dwell_seconds": {
       "label": "Türöffnungs-Endverweildauer",
-      "doc": "Bei aktivem „Tür öffnet sich am Ende automatisch“: wie lange die Tür offen bleiben muss, bevor der Zyklus endet. Lang genug, um das Nachlegen eines Geschirrteils zu ignorieren (Standard 60 s)."
+      "doc": "Wenn „Türöffnung beendet den Zyklus“ aktiv ist: wie lange die Tür offen bleiben muss, bevor der Zyklus endet. Lang genug, um das Nachlegen eines Geschirrteils zu ignorieren (Standard 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Zyklen, die ein Programm prägen",
@@ -1780,7 +1780,8 @@
       "watchdog": "So niedrig wie sicher gehalten (knapp über der p95-Aktualisierungslücke von {p95}s und mindestens 2x dem Abtastintervall von {median}s, min. 30s), damit Hänger schnell erkannt werden, ohne Fehl-Stopps auszulösen.",
       "end_energy_floor": "Auf die Untergrenze angehoben, die sich aus dem Stoppschwellenwert ({stop} W) während der Abschaltverzögerung ({off_delay} s) ergibt; darunter kann der Zyklus nur über einen Ausweichpfad enden.",
       "max_duration_ratio_default": "Zurück auf den Standardwert: Eine niedrigere Obergrenze verwirft das richtige Programm, sobald ein Durchlauf länger als üblich dauert.",
-      "min_duration_ratio_default": "Zurück auf den Standardwert: Eine höhere Untergrenze verhindert, dass ein laufender Zyklus erkannt wird, bevor er weit fortgeschritten ist."
+      "min_duration_ratio_default": "Zurück auf den Standardwert: Eine höhere Untergrenze verhindert, dass ein laufender Zyklus erkannt wird, bevor er weit fortgeschritten ist.",
+      "start_above_running": "Dieses Gerät läuft vom Start bis zum Ende mit {low} W oder mehr, aber der Startschwellenwert liegt bei {start} W, sodass ein Lauf mit der niedrigeren Leistung nie erkannt wird. Start auf die Hälfte der niedrigsten Betriebsleistung gesetzt, Stopp darunter."
     },
     "exclusions": {
       "summary": "{total} falsch erkannte Zyklen ausgeschlossen: {parts}.",

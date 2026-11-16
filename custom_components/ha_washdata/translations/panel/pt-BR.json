@@ -1514,12 +1514,12 @@
       "doc": "O que um toque na notificação deste eletrodoméstico abre. Em branco: o painel WashData neste eletrodoméstico. Informe um caminho de dashboard (ex.: /lovelace/laundry) ou uma URL, ou \"none\" para nenhuma ação ao tocar."
     },
     "door_opens_at_end": {
-      "label": "Porta Abre Automaticamente ao Final",
-      "doc": "Para lava-louças que abrem a porta no fim para secar (ex.: AirDry). Uma porta que fica aberta pelo tempo de espera abaixo termina o ciclo em vez de pausá-lo; uma abertura breve é ignorada. Requer uma Entidade do Sensor de Porta."
+      "label": "Abrir a Porta Encerra o Ciclo",
+      "doc": "Para máquinas cuja porta fica travada durante o funcionamento (a maioria das lavadoras de abertura frontal) ou que a abrem sozinhas no final (lava-louças com AirDry). Uma porta que fica aberta pelo tempo de espera abaixo termina o ciclo em vez de pausá-lo; uma abertura breve é ignorada. Requer uma Entidade do Sensor de Porta."
     },
     "door_end_dwell_seconds": {
       "label": "Tempo de Espera da Porta Aberta",
-      "doc": "Com \"Porta Abre Automaticamente ao Final\" ligado: quanto tempo a porta deve ficar aberta antes de o ciclo terminar. O suficiente para ignorar a colocação de um prato (padrão 60 s)."
+      "doc": "Com \"Abrir a Porta Encerra o Ciclo\" ligado: quanto tempo a porta deve ficar aberta antes de o ciclo terminar. O suficiente para ignorar a colocação de um prato (padrão 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Ciclos que moldam um programa",
@@ -1921,7 +1921,8 @@
       "watchdog": "Mantido tão baixo quanto é seguro (logo acima do intervalo de atualização p95 de {p95}s e pelo menos 2x o intervalo de amostragem de {median}s, mín. 30s) para que travamentos sejam detectados rapidamente sem paradas falsas.",
       "end_energy_floor": "Elevado ao mínimo implicado pelo limite de parada ({stop} W) durante o atraso de desligamento ({off_delay} s); abaixo dele, o ciclo só pode terminar por um mecanismo alternativo.",
       "max_duration_ratio_default": "De volta ao padrão: um teto mais baixo rejeita o programa certo sempre que um ciclo dura mais que o normal.",
-      "min_duration_ratio_default": "De volta ao padrão: um piso mais alto impede que um ciclo em andamento seja reconhecido até que esteja bem adiantado."
+      "min_duration_ratio_default": "De volta ao padrão: um piso mais alto impede que um ciclo em andamento seja reconhecido até que esteja bem adiantado.",
+      "start_above_running": "Este eletrodoméstico consome {low} W ou mais do início ao fim, mas o limite de início é {start} W, então um ciclo na sua menor potência nunca inicia. Limite de início definido na metade do seu menor nível de funcionamento, limite de parada abaixo disso."
     },
     "exclusions": {
       "summary": "Excluído(s) {total} ciclo(s) mal detectado(s): {parts}.",

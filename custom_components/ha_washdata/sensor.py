@@ -194,6 +194,7 @@ async def async_setup_entry(
         WasherLastCycleDurationSensor(manager, entry),
         WasherLastCycleEnergySensor(manager, entry),
         WasherLastCycleCostSensor(manager, entry),
+        WasherLastCycleStartSensor(manager, entry),
     ]
 
     # Add pump-specific sensors
@@ -1289,6 +1290,30 @@ class WasherLastCycleEnergySensor(WasherLastCycleSensor):
 
     def _figure(self, cycle: dict[str, Any]) -> float | None:
         return round(cycle_report_energy_wh(cycle) / 1000.0, 3)
+
+
+class WasherLastCycleStartSensor(WasherLastCycleSensor):
+    """When the last run started, as a timestamp (#501 follow-up).
+
+    Dashboard cards that show "last washed" take an entity whose state is a
+    datetime; the other last-cycle sensors only carry it as an attribute.
+    """
+
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
+        self.entity_description = SensorEntityDescription(
+            key="last_cycle_start",
+            translation_key="last_cycle_start",
+            device_class=SensorDeviceClass.TIMESTAMP,
+            icon="mdi:clock-start",
+        )
+        super().__init__(manager, entry)
+
+    def _figure(self, cycle: dict[str, Any]) -> Any:
+        raw = cycle.get("start_time")
+        parsed = dt_util.parse_datetime(raw) if isinstance(raw, str) else None
+        if parsed is None or parsed.tzinfo is None:
+            return None
+        return dt_util.as_utc(parsed)
 
 
 class WasherLastCycleCostSensor(WasherLastCycleSensor):

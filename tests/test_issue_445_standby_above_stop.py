@@ -122,6 +122,15 @@ def test_the_idle_plateau_is_trimmed_off_the_stored_cycle() -> None:
         f"stored trace ends on the idle plateau: tail={tail}"
     )
     assert IDLE_W not in tail
+    # ...so the level it trimmed is kept with the cycle (#525): the one TIMEOUT
+    # end that did not see the power below the threshold.
+    assert data["standby_band_w"] == pytest.approx(IDLE_W)
+
+
+def test_a_normal_timeout_carries_no_standby_level() -> None:
+    _idle_s, data = _run(_cfg(), idle_w=0.5)
+    assert data is not None and data["termination_reason"] == "timeout"
+    assert "standby_band_w" not in data
 
 
 def test_fluctuating_activity_past_expected_is_not_a_standby_plateau() -> None:
