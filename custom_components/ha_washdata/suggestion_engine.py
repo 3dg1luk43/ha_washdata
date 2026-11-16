@@ -18,6 +18,7 @@
 
 from __future__ import annotations
 
+from bisect import bisect_right
 import copy
 import logging
 import math
@@ -43,6 +44,8 @@ from .const import (
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
+    DEFAULT_COMPLETION_MIN_SECONDS,
+    DEVICE_COMPLETION_THRESHOLDS,
     CONF_POWER_OFF_THRESHOLD_W,
     CONF_END_ENERGY_THRESHOLD,
     CONF_MIN_OFF_GAP,
@@ -61,7 +64,6 @@ from .const import (
     DEVICE_TYPE_WASHER_DRYER,
     DEFAULT_OFF_DELAY_BY_DEVICE,
     DEFAULT_OFF_DELAY,
-    DEFAULT_MIN_OFF_GAP_BY_DEVICE,
     DEFAULT_MIN_OFF_GAP,
     DEFAULT_MATCH_PERSISTENCE,
     MATCH_INTERVAL_SUGGESTION_DECISION_FRAC,
@@ -100,14 +102,15 @@ def _measured_off_delay_floor(device_floor: int) -> int:
     ``DEFAULT_OFF_DELAY_BY_DEVICE`` is a blind prior for devices we have no
     traces for: the dishwasher entry (1800 s) is sized to bridge a passive
     drying phase.  Once real intra-cycle pauses have been measured that prior is
-    stale evidence, and clamping the measurement up to it is actively harmful -
-    off_delay is *never* what holds a cycle together (every finalize path in
-    ``cycle_detector`` uses ``max(off_delay, min_off_gap)``, and min_off_gap
-    keeps its own 3600 s dishwasher floor).  Solo uses of off_delay are the
-    end-gate energy lookback window, the watchdog's keepalive cadence and the
-    Rule-12 end_energy_threshold coupling - all of which get *worse* as it
-    grows: a 1800 s window sweeps standby blips into the end gate and holds the
-    cycle open long past the real end.
+    stale evidence, and clamping the measurement up to it is actively harmful:
+    a 1800 s end-gate energy window sweeps standby blips into the gate and holds
+    the cycle open long past the real end. But off_delay is NOT inert either
+    (audit 2026-11-16): it is that window, so on a dishwasher drying under the
+    stop threshold a short one lets the energy gate pass mid-drying, and neither
+    min_off_gap (its fallback no longer proposes a prior) nor end_energy holds
+    the cycle together on its own. Every end-gate value a pass proposes is
+    therefore checked against the device's own pauses together with the others
+    (`SuggestionEngine._guard_end_gate`).
 
     So a measured suggestion is floored at the generic ``DEFAULT_OFF_DELAY``,
     while device priors that are *below* it (e.g. pumps at 20 s, which cut off
@@ -124,24 +127,109 @@ _MIN_GAP_MIN_SPANS = 3
 _MIN_GAP_ABS_CAP = 3600
 
 
-def _bridged_spans(
-    points: list[tuple[float, float]], active_thr: float, max_gap_s: float
+def end_gate_pause_needs(
+    points: list[tuple[float, float]],
+    stop_w: float,
+    off_delay_s: float,
+    end_energy_wh: float,
+    max_gap_s: float = 3600.0,
 ) -> list[float]:
-    """Quiet spans a cycle has to survive to stay whole, in seconds.
+    """How long each pause of a stored cycle must be bridged to keep it whole, s.
 
-    The mirror image of the off-delay pause scan: here *any* resumption counts
-    (``min_resume_active_s=0``), including a dishwasher's short terminal
-    pump-out. That blip is deliberately excluded from the off-delay statistic -
-    it must not inflate the end-gate window - but it is exactly what
-    ``min_off_gap`` exists to bridge, because if the cycle closes before it
-    lands, the pump-out is recorded as a separate ghost cycle (#43).
+    The pauses a stored cycle demonstrably bridged: every run of readings below
+    ``stop_w`` (the detector's own quiet counter) that a reading at or above it
+    followed - a dishwasher's 16-28 W terminal pump-out included. Inside one, the
+    fallback end gate can close the cycle at any moment ``t`` at least
+    ``off_delay`` into it at which the energy of the last ``off_delay`` seconds
+    (each reading held to the next) is at most ``end_energy_wh``; the pause
+    needs bridging up to the last such moment, i.e. the gate's wait,
+    ``max(off_delay, min_off_gap)``, must exceed it. 0 when the energy gate holds
+    the whole pause (a dishwasher's drying draw over a long window), so
+    ``min_off_gap`` need not cover it. Unmatched behaviour, the worst case: no
+    Smart Termination, no matched deferral. A run straddling an outage-sized gap
+    is skipped. Pure; never raises.
     """
-    return [
-        points[resume_idx][0] - low_start
-        for low_start, resume_idx in _resumed_low_runs(
-            points, active_thr, max_gap_s, min_resume_active_s=0.0
-        )
-    ]
+    needs: list[float] = []
+    try:
+        window = float(off_delay_s)
+        limit = float(end_energy_wh)
+        stop = float(stop_w)
+        if not all(math.isfinite(v) for v in (window, limit, stop)) or window <= 0:
+            return needs
+        n = len(points)
+        i = 0
+        while i < n:
+            if points[i][1] >= stop:
+                i += 1
+                continue
+            j = i
+            outage = False
+            while j < n and points[j][1] < stop:
+                if j > i and points[j][0] - points[j - 1][0] > max_gap_s:
+                    outage = True
+                j += 1
+            if j >= n:
+                break  # the trailing quiet: the end itself, not a pause
+            if points[j][0] - points[j - 1][0] > max_gap_s:
+                outage = True
+            t0 = points[i][0]
+            t_resume = points[j][0]
+            need = 0.0
+            if not outage and t_resume - t0 > window:
+                times = [points[k][0] for k in range(i, j)]
+                watts = [points[k][1] for k in range(i, j)]
+                cum = [0.0]
+                for k in range(1, len(times)):
+                    cum.append(cum[-1] + watts[k - 1] * (times[k] - times[k - 1]) / 3600.0)
+
+                def energy_until(t: float) -> float:
+                    k = bisect_right(times, t) - 1
+                    k = max(0, min(k, len(times) - 1))
+                    return cum[k] + watts[k] * (t - times[k]) / 3600.0
+
+                # Window energy is piecewise linear between these, so its minimum
+                # over any stretch is at one of them (or just before the resume).
+                candidates = {t0 + window, t_resume - 1e-3}
+                for t in times:
+                    candidates.update((t, t + window))
+                for t in candidates:
+                    if t < t0 + window or t >= t_resume:
+                        continue
+                    if energy_until(t) - energy_until(t - window) <= limit:
+                        need = max(need, t - t0)
+            needs.append(need)
+            i = j
+    except Exception:  # noqa: BLE001 - a guard must never break a suggestion pass
+        return []
+    return needs
+
+
+def end_gate_would_split(
+    points: list[tuple[float, float]],
+    stop_w: float,
+    off_delay_s: float,
+    min_off_gap_s: float,
+    end_energy_wh: float,
+    max_gap_s: float = 3600.0,
+) -> bool:
+    """Would the fallback end gate close this cycle inside one of its own pauses?
+
+    True when a pause needs bridging (:func:`end_gate_pause_needs`) at least as
+    long as the gate's wait, ``max(off_delay, min_off_gap)``.
+
+    Audit 2026-11-16: Apply all moved off_delay 1800 -> 180, min_off_gap 2000 ->
+    210 and end_energy 0.05 -> 0.75 Wh together on two dishwashers drying at
+    0.3-0.8 W under a 1.2-1.5 W stop, and unmatched replays split 0 -> 3 of 7 and
+    1 -> 6 of 20; each value alone looked safe to the pass that proposed it.
+    """
+    try:
+        wait = max(float(off_delay_s), float(min_off_gap_s))
+    except (TypeError, ValueError):
+        return False
+    return any(
+        need >= wait > 0
+        for need in end_gate_pause_needs(points, stop_w, off_delay_s, end_energy_wh, max_gap_s)
+    )
 
 
 def _resumed_low_runs(
@@ -329,8 +417,14 @@ def _classify_cycle_health(
     readings: list[tuple[float, float]],
     duration: float,
     stop_threshold_w: float,
+    programme_length: bool = False,
 ) -> str | None:
-    """Return an exclusion reason if the trace looks mis-detected, else None."""
+    """Return an exclusion reason if the trace looks mis-detected, else None.
+
+    ``programme_length``: the cycle lasted as long as its labelled programme
+    usually does, so a long low run inside it is that programme's pause, not two
+    loads merged into one (no ``mid_restart``).
+    """
     if not readings:
         return "no_trace_short"
     if duration < _CLEAN_MIN_DURATION_S:
@@ -398,7 +492,11 @@ def _classify_cycle_health(
             if dead_start is not None:
                 run = t - dead_start
                 end_frac = (t - t0) / duration if duration > 0 else 1.0
-                if run >= _CLEAN_MID_RESTART_MIN_S and end_frac <= _CLEAN_MID_RESTART_END_GUARD:
+                if (
+                    run >= _CLEAN_MID_RESTART_MIN_S
+                    and end_frac <= _CLEAN_MID_RESTART_END_GUARD
+                    and not programme_length
+                ):
                     return "mid_restart"
                 dead_start = None
     return None
@@ -423,6 +521,7 @@ def select_clean_cycles(
     """
     clean: list[dict[str, Any]] = []
     excluded: dict[str, int] = {}
+    typical = _label_median_durations(cycles)
 
     def _bump(reason: str) -> None:
         excluded[reason] = excluded.get(reason, 0) + 1
@@ -481,13 +580,48 @@ def select_clean_cycles(
         if duration <= 0:
             duration = readings[-1][0] - readings[0][0]
 
-        reason = _classify_cycle_health(readings, duration, stop_threshold_w)
+        median = typical.get(label) if isinstance(label, str) else None
+        reason = _classify_cycle_health(
+            readings, duration, stop_threshold_w,
+            programme_length=bool(
+                median
+                and _PROGRAMME_LENGTH_RATIO[0] * median <= duration <= _PROGRAMME_LENGTH_RATIO[1] * median
+            ),
+        )
         if reason is not None:
             _bump(reason)
             continue
         clean.append(c)
 
     return clean, excluded
+
+
+# A cycle within this ratio of its label's median length is that programme run
+# once, not two merged loads (which run about twice as long): its long low phase
+# is a pause. The 2%-of-peak "dead" bar reads a dishwasher's 16-29 W circulation
+# behind a 2 kW heater as dead, and dropped 15 of 18 and 17 of 33 labelled cycles
+# whose length matched their programme as mid_restart, starving every pass that
+# reads clean cycles (audit 2026-11-16). A stop-threshold bar instead flagged real
+# sub-stop pauses on three other dishwashers; length tells them apart.
+_PROGRAMME_LENGTH_RATIO = (0.8, 1.25)
+_PROGRAMME_LENGTH_MIN_CYCLES = 3
+
+
+def _label_median_durations(cycles: list[dict[str, Any]]) -> dict[str, float]:
+    """Median stored duration per label, over its completed cycles (>= 3 of them)."""
+    by_label: dict[str, list[float]] = {}
+    for c in cycles:
+        if not isinstance(c, dict) or c.get("status") != "completed":
+            continue
+        label = c.get("profile_name") or c.get("label")
+        duration = _num(c.get("duration"))
+        if isinstance(label, str) and label and duration is not None and duration > 0:
+            by_label.setdefault(label, []).append(duration)
+    return {
+        label: float(np.median(values))
+        for label, values in by_label.items()
+        if len(values) >= _PROGRAMME_LENGTH_MIN_CYCLES
+    }
 
 
 # A final reading only counts as standby when it is at most this fraction of the
@@ -741,7 +875,8 @@ def standby_stop_floor(
         idle_w           the standby level the advisory measured
         floor_w          max(idle * STANDBY_FLOOR_RATIO, idle + STANDBY_FLOOR_MIN_MARGIN_W)
         safe             whether the clean history allows it (see the constants)
-        clean_cycles     how many clean traced cycles were checked
+        clean_cycles     how many traced cycles were checked (clean ones, and hand
+                         or force stops up to their last working reading)
         longest_pause_s  the longest resumed in-cycle pause below ``floor_w``
 
     Pure statistics, executor-safe, never raises.
@@ -753,10 +888,28 @@ def standby_stop_floor(
         idle = float(adv["idle_w"])
         floor = round(max(idle * STANDBY_FLOOR_RATIO, idle + STANDBY_FLOOR_MIN_MARGIN_W), 2)
         clean, _excl = select_clean_cycles(cycles, stop_threshold_w=stop_threshold_w)
+        # Plus the cycles stopped by hand or force-stopped, up to their last working
+        # reading: on an appliance with this fault they are most of its cycles, and
+        # without them the floor was never "safe" exactly where it is needed (5 of
+        # 8 hand stops on one washer, 7 of 8 on one dishwasher; audit 2026-11-16).
+        # The cut keeps the waiting tail out, which is the standby, not a pause.
+        evidence = [_cycle_readings(c) for c in clean]
+        for cycle in cycles:
+            if not isinstance(cycle, dict) or not (
+                cycle.get("status") == "force_stopped"
+                or cycle.get("termination_reason") == TerminationReason.USER
+            ):
+                continue
+            points = _cycle_readings(cycle)
+            peak = max((p for _t, p in points), default=0.0)
+            last_work = max(
+                (i for i, (_t, p) in enumerate(points) if p >= _STANDBY_PEAK_FRACTION * peak),
+                default=-1,
+            )
+            evidence.append(points[: last_work + 1])
         checked = 0
         longest = 0.0
-        for cycle in clean:
-            points = _cycle_readings(cycle)
+        for points in evidence:
             if len(points) < 5:
                 continue
             checked += 1
@@ -1050,7 +1203,28 @@ def _same_suggestion(stored: Any, data: dict[str, Any]) -> bool:
         and stored.get("reason") == data.get("reason")
         and stored.get("reason_key") == data.get("reason_key")
         and stored.get("reason_params") == data.get("reason_params")
+        and all(bool(stored.get(f)) == bool(data.get(f)) for f in ("corrective", "cascade"))
+        and stored.get("owner") == data.get("owner")
     )
+
+
+def _drop_inverted_threshold_pair(
+    suggestions: dict[str, Any], current: dict[str, Any]
+) -> dict[str, Any]:
+    """Withdraw start/stop suggestions that leave stop >= start against ``current``.
+
+    Reconcile keeps the pair coherent among the suggestions, but a locked side is
+    not in the map, so a suggestion can still cross the value it keeps. Mutates
+    and returns ``suggestions``.
+    """
+    start = _num((suggestions.get(CONF_START_THRESHOLD_W) or {}).get("value"))
+    stop = _num((suggestions.get(CONF_STOP_THRESHOLD_W) or {}).get("value"))
+    start = start if start is not None else _num(current.get(CONF_START_THRESHOLD_W))
+    stop = stop if stop is not None else _num(current.get(CONF_STOP_THRESHOLD_W))
+    if start is not None and stop is not None and stop >= start:
+        suggestions.pop(CONF_START_THRESHOLD_W, None)
+        suggestions.pop(CONF_STOP_THRESHOLD_W, None)
+    return suggestions
 
 
 def reconcile_suggestions(
@@ -1095,6 +1269,10 @@ def reconcile_suggestions(
 
     def is_original(key: str) -> bool:
         return key in original_keys
+
+    def is_corrective(key: str) -> bool:
+        entry = out.get(key)
+        return isinstance(entry, dict) and bool(entry.get("corrective"))
 
     def in_out(*keys: str) -> bool:
         """True if at least one key is already in the suggestion map (original or cascade)."""
@@ -1152,7 +1330,12 @@ def reconcile_suggestions(
         start = eff(CONF_START_THRESHOLD_W)
         stop = eff(CONF_STOP_THRESHOLD_W)
         if start is not None and stop is not None and start <= stop and in_out(CONF_START_THRESHOLD_W, CONF_STOP_THRESHOLD_W):
-            if is_original(CONF_START_THRESHOLD_W):
+            # A corrective stop (#458 standby floor) is the one value here that is
+            # known right: pulling it back under the start would re-create the
+            # fault it corrects, so the start yields instead.
+            if is_original(CONF_START_THRESHOLD_W) and not (
+                is_corrective(CONF_STOP_THRESHOLD_W) and not is_corrective(CONF_START_THRESHOLD_W)
+            ):
                 if round(start * 0.8, 1) < start:
                     adjust(CONF_STOP_THRESHOLD_W, round(start * 0.8, 1), "the start threshold")
                 else:
@@ -1237,31 +1420,12 @@ def reconcile_suggestions(
             else:
                 adjust(CONF_PROFILE_MATCH_MIN_DURATION_RATIO, round(max_r * 0.5, 2), "the max duration ratio")
 
-        # ── Rule 12: end_energy_threshold >= stop_threshold_w * off_delay / 3600 ──
-        # The energy end-gate is evaluated over an off_delay-long window, so it
-        # implies a wattage; below stop_threshold_w it forbids what the power gate
-        # allows and the cycle can only close via a fallback path (#376). Only ever
-        # RAISE end_energy to the implied floor (the safe direction that makes the
-        # end gate satisfiable); never lower stop_threshold_w, which would make
-        # start/end detection more aggressive.
-        stop_ee = eff(CONF_STOP_THRESHOLD_W)
-        off_delay_ee = eff(CONF_OFF_DELAY)
-        end_energy = eff(CONF_END_ENERGY_THRESHOLD)
-        if (
-            stop_ee is not None and off_delay_ee is not None and end_energy is not None
-            and off_delay_ee > 0 and end_energy < stop_ee * off_delay_ee / 3600.0
-            and in_out(CONF_END_ENERGY_THRESHOLD, CONF_STOP_THRESHOLD_W, CONF_OFF_DELAY)
-        ):
-            # Round the floor UP at adjust()'s own 2-decimal precision. Rounding
-            # to-nearest would land *below* the floor (stop=2 W, off_delay=60 s ->
-            # 0.0333 Wh -> 0.03 Wh), the next fixpoint pass would then see the same
-            # violation, find the value unchanged, and return a map that still
-            # breaks Rule 12.
-            adjust(
-                CONF_END_ENERGY_THRESHOLD,
-                math.ceil(stop_ee * off_delay_ee / 36.0) / 100.0,
-                "the stop threshold and off delay",
-            )
+        # (Rule 12, end_energy_threshold >= stop x off_delay / 3600, is gone: it
+        # raised end_energy with no evidence whenever stop or off_delay moved, and
+        # a value under that floor is what holds a dishwasher's sub-stop drying
+        # together on an unmatched run (audit 2026-11-16: 0.05 -> 0.75 Wh alone
+        # split 3 of 7 cycles). The batch's own end_energy floor is checked
+        # against the device's pauses first: `SuggestionEngine._guard_end_gate`.)
 
         if change_count[0] == prev_count:
             break
@@ -1425,44 +1589,16 @@ class SuggestionEngine:
                 "reason_key": reason_off_key,
                 "reason_params": reason_off_params,
             }
-        elif not self._is_anti_crease_enabled(_op_opts):
-            # Cadence fallback: p95_dt * 5. Safe for most devices, but on anti-crease
-            # devices the update gap is dominated by the inter-burst quiet period, so
-            # the result often exceeds the burst interval and resets the end timer on
-            # every tumble burst. Skip it when anti-crease is enabled (#343 gap B).
-            # With real traces on hand (and no long pause among them) the blind
-            # per-device prior is stale evidence: the dishwasher's 1800 s was handed
-            # to a device whose 5 traced cycles showed no pause at all (audit
-            # SUGGEST-07). Floor at the measured-path minimum instead.
-            traced = sum(1 for c in clean if c.get("power_data"))
-            fallback_floor = (
-                _measured_off_delay_floor(device_floor) if traced >= 5 else device_floor
+        # No pause evidence, no off_delay suggestion (audit 2026-11-16). The
+        # fallback (p95 cadence x 5, floored at the device prior) raised the value
+        # with nothing measured: dishwashers 180 -> 1800 s whose clean history the
+        # mid_restart filter had emptied, a washer 180 -> 430 s, each ending 3 to
+        # 5 of their cycles minutes later and preventing no split.
+
+        if CONF_OFF_DELAY in suggestions:
+            suggestions = self._guard_end_gate(
+                suggestions, _op_opts, drop_order=(CONF_OFF_DELAY,)
             )
-            suggested_off_delay = int(max(fallback_floor, p95_dt * 5))
-            reason_off = f"Based on observed update cadence (p95={p95_dt:.1f}s) * 5"
-            reason_off_key: str = "suggestion.reason.off_delay_cadence"
-            reason_off_params: dict[str, Any] = {"p95": f"{p95_dt:.1f}"}
-            if suggested_off_delay == fallback_floor:
-                # A floor set the value, not the cadence: name the floor that did.
-                if (
-                    fallback_floor == device_floor
-                    and self.device_type and self.device_type in DEFAULT_OFF_DELAY_BY_DEVICE
-                ):
-                    reason_off = (
-                        f"Used device-specific safe minimum for {self.device_type} ({device_floor}s)."
-                    )
-                    reason_off_key = "suggestion.reason.off_delay_device_floor"
-                    reason_off_params = {"device": self.device_type, "floor": device_floor}
-                else:
-                    reason_off = f"Used generic safe minimum ({fallback_floor}s)."
-                    reason_off_key = "suggestion.reason.off_delay_generic_floor"
-                    reason_off_params = {"floor": fallback_floor}
-            suggestions[CONF_OFF_DELAY] = {
-                "value": suggested_off_delay,
-                "reason": reason_off,
-                "reason_key": reason_off_key,
-                "reason_params": reason_off_params,
-            }
 
         # 4. Profile Match Interval
         #
@@ -1677,6 +1813,9 @@ class SuggestionEngine:
         )
         if min_off_gap is not None:
             suggestions[CONF_MIN_OFF_GAP] = min_off_gap
+            suggestions = self._guard_end_gate(
+                suggestions, self._entry_options(), drop_order=(CONF_MIN_OFF_GAP,)
+            )
 
         return suggestions
 
@@ -1724,6 +1863,103 @@ class SuggestionEngine:
         from .detector_config import effective_option_values  # noqa: PLC0415
 
         return effective_option_values(options, self.device_type or "")
+
+    #: The settings the fallback end gate reads (`end_gate_would_split`).
+    _END_GATE_KEYS = (
+        CONF_STOP_THRESHOLD_W, CONF_OFF_DELAY, CONF_MIN_OFF_GAP, CONF_END_ENERGY_THRESHOLD,
+    )
+
+    def _end_gate_evidence(self) -> list[list[tuple[float, float]]]:
+        """Traces of the cycles that ended on their own, any health, filler dropped.
+
+        Not only clean ones: ``select_clean_cycles`` drops most dishwasher cycles
+        as ``mid_restart``, exactly the ones with the long drying pause the end
+        gate has to bridge.
+        """
+        out: list[list[tuple[float, float]]] = []
+        for cycle in list(self.profile_store.get_past_cycles())[-200:]:
+            if (
+                not isinstance(cycle, dict)
+                or cycle.get("status") != "completed"
+                or cycle.get("termination_reason")
+                in (TerminationReason.USER, TerminationReason.FORCE_STOPPED)
+            ):
+                continue
+            synthetic = synthetic_offset_keys(cycle) or set()
+            points = [
+                (o, p) for o, p in _cycle_readings(cycle) if offset_key(o) not in synthetic
+            ]
+            if len(points) >= 10:
+                out.append(points)
+        return out
+
+    def _end_gate_splits(
+        self, evidence: list[list[tuple[float, float]]], values: dict[str, Any]
+    ) -> int:
+        stop = _num(values.get(CONF_STOP_THRESHOLD_W))
+        off_delay = _num(values.get(CONF_OFF_DELAY))
+        gap = _num(values.get(CONF_MIN_OFF_GAP))
+        energy = _num(values.get(CONF_END_ENERGY_THRESHOLD))
+        if stop is None or off_delay is None or energy is None:
+            return 0
+        return sum(
+            1 for points in evidence
+            if end_gate_would_split(points, stop, off_delay, gap or 0.0, energy)
+        )
+
+    def _guard_end_gate(
+        self,
+        suggestions: dict[str, Any],
+        options: dict[str, Any],
+        *,
+        drop_order: tuple[str, ...],
+    ) -> dict[str, Any]:
+        """Drop end-gate suggestions that would split this device's own cycles.
+
+        Compares the end gate under the settings in force plus every pending
+        suggestion of another pass (what Apply all would write together) with and
+        without this pass's values, over the cycles that ended on their own; while
+        the proposal ends more of them inside a pause, drops its keys in
+        ``drop_order``. Audit 2026-11-16: each pass judged its own key against
+        the others' current values, and Apply all wrote them together. Mutates
+        and returns ``suggestions``.
+        """
+        proposed = [k for k in drop_order if isinstance(suggestions.get(k), dict)]
+        if not proposed:
+            return suggestions
+        try:
+            evidence = self._end_gate_evidence()
+            if not evidence:
+                return suggestions
+            base = dict(self._effective_thresholds(options))
+            pending = self.profile_store.get_suggestions() or {}
+            for key in self._END_GATE_KEYS:
+                entry = pending.get(key)
+                if key not in suggestions and isinstance(entry, dict) and entry.get("value") is not None:
+                    base[key] = entry["value"]
+            allowed = self._end_gate_splits(evidence, base)
+
+            def with_proposal() -> dict[str, Any]:
+                values = dict(base)
+                for key in self._END_GATE_KEYS:
+                    entry = suggestions.get(key)
+                    if isinstance(entry, dict) and entry.get("value") is not None:
+                        values[key] = entry["value"]
+                return values
+
+            for key in proposed:
+                if self._end_gate_splits(evidence, with_proposal()) <= allowed:
+                    break
+                _LOGGER.debug(
+                    "%s suggestion withheld: with it the end gate would close own "
+                    "cycles inside a pause the settings in force bridge", key,
+                )
+                suggestions.pop(key, None)
+                if key == CONF_STOP_THRESHOLD_W:
+                    suggestions.pop(CONF_START_THRESHOLD_W, None)
+        except Exception:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("End-gate guard failed", exc_info=True)
+        return suggestions
 
     def _standby_floor(self, options: dict[str, Any]) -> dict[str, Any] | None:
         """``standby_stop_floor`` over this device's recent history (#458)."""
@@ -1815,7 +2051,19 @@ class SuggestionEngine:
             active = np.array([p for _, p in readings if p > 0.5])
             if active.size:
                 lowest_active.append(float(np.min(active)))
-        if len(lowest_active) >= 5:
+        # Only once Start and Stop are set: an unset one follows Min Power (#450:
+        # start = mp + max(1, 0.1 mp), stop = 0.6 mp), so this value would move the
+        # thresholds past every threshold guard (#455, #458, #527) - on one
+        # dishwasher Stop went under its 0.8 W drying draw and 10 Eco cycles ended
+        # force-stopped in replay (audit 2026-11-16). Not under 1 either: a Min
+        # Power below 1 W keeps a kW sensor's readings raw (``power_unit_scale``),
+        # and the 1 W clamp below would switch them to watts.
+        thresholds_set = (
+            _num(options.get(CONF_START_THRESHOLD_W)) is not None
+            and _num(options.get(CONF_STOP_THRESHOLD_W)) is not None
+        )
+        current_mp = _num(options.get(CONF_MIN_POWER))
+        if len(lowest_active) >= 5 and thresholds_set and (current_mp is None or current_mp >= 1.0):
             p05 = float(np.percentile(lowest_active, 5))
             suggested_mp = round(min(max(p05 * 0.4, 1.0), 10.0), 1)
             suggestions[CONF_MIN_POWER] = {
@@ -1864,6 +2112,17 @@ class SuggestionEngine:
             shortest = self._shortest_profile_duration()
             if shortest is not None and shortest > 0:
                 suggested_cms = int(min(suggested_cms, max(120, round(shortest * 0.5))))
+            # Never above the device default (audit 2026-11-16): half the shortest
+            # programme this user ran says nothing about the machine's quick
+            # programmes, and one shorter than the value is stored interrupted (no
+            # finish alert, trigger or Clean state) and never corrects it, since an
+            # unlabelled interrupted cycle is not evidence. Proposed: 2126-4251 s on
+            # washers and dishwashers whose catalogues have 13-16% of programmes
+            # under that. The default already filters ghosts; this may lower it.
+            suggested_cms = int(min(
+                suggested_cms,
+                DEVICE_COMPLETION_THRESHOLDS.get(self.device_type or "", DEFAULT_COMPLETION_MIN_SECONDS),
+            ))
             suggestions[CONF_COMPLETION_MIN_SECONDS] = {
                 "value": suggested_cms,
                 "reason": (
@@ -1977,8 +2236,9 @@ class SuggestionEngine:
         ``min_off_gap`` is bounded from two sides and both bounds are measurable:
 
         * **must not split** - it has to outlast the longest quiet span *inside*
-          a cycle that is followed by more of that same cycle (see
-          :func:`_bridged_spans`). This is the requirement, so it sets the value.
+          a cycle that is followed by more of that same cycle, as far as the end
+          gate could close the cycle in it (see :func:`end_gate_pause_needs`).
+          This is the requirement, so it sets the value.
         * **must not merge** - it has to stay under the shortest gap the user
           leaves between two separate loads, because a high reading while the
           previous cycle is still in ENDING revives that cycle rather than
@@ -2058,13 +2318,6 @@ class SuggestionEngine:
             return None
 
         gaps_arr = np.array(gaps)
-        # 5th percentile, kept only for the no-evidence fallback path's reason text.
-        p05_gap = float(np.percentile(gaps_arr, 5))
-        device_floor = (
-            DEFAULT_MIN_OFF_GAP_BY_DEVICE.get(self.device_type, DEFAULT_MIN_OFF_GAP)
-            if self.device_type is not None
-            else DEFAULT_MIN_OFF_GAP
-        )
         # Merge ceiling: the SHORTEST turnaround this user has actually run, less a
         # 20% margin.  Deliberately not a percentile - these distributions are
         # strongly skewed (one 181 s turnaround, then a jump to 5000 s+), so p05
@@ -2106,29 +2359,15 @@ class SuggestionEngine:
                 },
             }
 
-        # --- Fallback: no trace evidence, keep the conservative prior ----------
-        # Unchanged from the historical heuristic (p05-based, device floor wins),
-        # because with no measured bridge requirement the blind prior is still the
-        # best evidence available.
-        suggested = int(max(device_floor, min(p05_gap * 0.8, _MIN_GAP_ABS_CAP)))
-        # When the data-derived value is equal to the device floor, we have no
-        # useful signal to surface - return None to suppress a misleading suggestion.
-        if suggested == device_floor:
-            return None
-        reason = (
-            f"Based on {len(gaps)} observed inter-cycle gaps "
-            f"(p05={p05_gap:.0f}s). Device floor: {device_floor}s."
-        )
-        return {
-            "value": suggested,
-            "reason": reason,
-            "reason_key": "suggestion.reason.min_off_gap",
-            "reason_params": {
-                "gaps": len(gaps),
-                "p05": f"{p05_gap:.0f}",
-                "floor": device_floor,
-            },
-        }
+        # --- No trace evidence: propose nothing ------------------------------
+        # The blind fallback (max(device prior, 0.8 x p05 inter-cycle gap)) aimed
+        # at the merge boundary itself and skipped the ceiling above: p05 over 3
+        # gaps interpolates past the shortest one, so the #527 dryer was offered
+        # 1773 s against its own 1650 s turnaround (two real loads replay as one
+        # record), and four young installs replayed 1-6 extra merges. It runs
+        # exactly when the clean filter leaves no bridge evidence, which is when
+        # nothing is known (audit 2026-11-16). The setting in force stays.
+        return None
 
     def _measured_bridge_requirement(
         self,
@@ -2156,6 +2395,9 @@ class SuggestionEngine:
             else self._current_stop_threshold(self._entry_options())
         )
         max_gap_s = _MAX_PAUSE_GAP_H * 3600
+        eff = self._effective_thresholds(self._entry_options())
+        gate_off_delay = float(_num(eff.get(CONF_OFF_DELAY)) or DEFAULT_OFF_DELAY)
+        gate_end_energy = float(_num(eff.get(CONF_END_ENERGY_THRESHOLD)) or 0.0)
         spans: list[float] = []
         n_traced = 0
         for c in cycles:
@@ -2168,8 +2410,19 @@ class SuggestionEngine:
             if peak <= 0:
                 continue
             n_traced += 1
-            active_thr = max(stop_thr, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
-            spans.extend(_bridged_spans(readings, active_thr, max_gap_s))
+            # What the end gate needs bridged (audit 2026-11-16): pauses measured
+            # at the stop threshold, where the detector's quiet counter resets (at
+            # 2% of the peak, ~40 W behind a 2 kW heater, a dishwasher's 16-28 W
+            # terminal pump-out never ended its drying run and 210 s was proposed
+            # against 4810 s), and only as long as the energy gate would let the
+            # cycle close inside them: a drying draw the gate holds needs no gap
+            # (bridging all of it raised a dishwasher to 3600 s and its Rinse
+            # ended 23 min late).
+            spans.extend(
+                need for need in end_gate_pause_needs(
+                    readings, stop_thr, gate_off_delay, gate_end_energy, max_gap_s
+                ) if need > 0
+            )
 
         if n_traced < _MIN_GAP_MIN_TRACED_CYCLES or len(spans) < _MIN_GAP_MIN_SPANS:
             return None
@@ -2455,9 +2708,22 @@ class SuggestionEngine:
 
         # The p05 anchor above is the standby draw whenever standby-level samples
         # sit inside the cycles, so 0.8 x it is under standby (#458).
-        return apply_standby_floor(suggestions, self._standby_floor(_batch_opts))
+        suggestions = apply_standby_floor(suggestions, self._standby_floor(_batch_opts))
+        # Last: nothing here may let the end gate close a cycle inside a pause the
+        # settings in force bridge, together with what other passes have pending.
+        return self._guard_end_gate(
+            suggestions,
+            _batch_opts,
+            drop_order=(CONF_END_ENERGY_THRESHOLD, CONF_MIN_OFF_GAP, CONF_STOP_THRESHOLD_W),
+        )
 
-    def apply_suggestions(self, suggestions: dict[str, Any], *, changed: bool = False) -> None:
+    def apply_suggestions(
+        self,
+        suggestions: dict[str, Any],
+        *,
+        changed: bool = False,
+        owner: str | None = None,
+    ) -> None:
         """Persist suggestions to the profile store, then reconcile the full set.
 
         After storing the new values, cross-parameter invariants are enforced
@@ -2470,20 +2736,18 @@ class SuggestionEngine:
         operational pass re-sends the same pending values every five minutes of a
         running cycle, and each re-send rewrote the whole store. ``changed``: the
         caller already changed the stored set (it deleted a suggestion), so save
-        even when nothing here does.
+        even when nothing here does. ``owner``: the pass that produced them,
+        stored with each entry so it can withdraw them later.
         """
         stored = self.profile_store.get_suggestions()
         updated: list[str] = []
         for key, data in suggestions.items():
-            if _same_suggestion(stored.get(key), data):
+            entry = dict(data)
+            if owner is not None:
+                entry["owner"] = owner
+            if _same_suggestion(stored.get(key), entry):
                 continue
-            self.profile_store.set_suggestion(
-                key,
-                data["value"],
-                reason=data["reason"],
-                reason_key=data.get("reason_key"),
-                reason_params=data.get("reason_params"),
-            )
+            self._store_suggestion(key, entry)
             updated.append(key)
         if updated:
             _LOGGER.info("Applied %d setting suggestion(s): %s", len(updated), ", ".join(sorted(updated)))
@@ -2497,24 +2761,57 @@ class SuggestionEngine:
             else:
                 self.hass.async_create_task(save)
 
+    def _store_suggestion(self, key: str, entry: dict[str, Any]) -> None:
+        self.profile_store.set_suggestion(
+            key,
+            entry["value"],
+            reason=entry.get("reason"),
+            reason_key=entry.get("reason_key"),
+            reason_params=entry.get("reason_params"),
+            flags={f: entry.get(f) for f in ("corrective", "cascade", "owner")},
+        )
+
     def _reconcile_stored_suggestions(self) -> bool:
         """Reconcile the accumulated stored suggestions against current options.
 
-        Returns whether any stored suggestion was adjusted.
+        Cascade entries are derived, so they are re-derived from the rest every
+        time and a stale one is dropped. Unset keys are compared as they run
+        (``effective_option_values``: an unset start or stop follows min_power,
+        #450), not as None, which skipped every rule. A locked key (#343) is never
+        stored, and a threshold suggestion that would invert the pair against a
+        locked value is withdrawn: Apply all refuses an inverted pair (item 515),
+        so storing it blocked every other suggestion too.
+
+        Returns whether the stored set changed.
         """
         stored = self.profile_store.get_suggestions()
         if not stored:
             return False
-        adjusted, changed = reconcile_suggestions(stored, self._entry_options())
-        for key in changed:
-            entry = adjusted[key]
-            self.profile_store.set_suggestion(
-                key,
-                entry["value"],
-                reason=entry.get("reason"),
-                reason_key=entry.get("reason_key"),
-                reason_params=entry.get("reason_params"),
-            )
+        options = self._entry_options()
+        from .detector_config import effective_option_values  # noqa: PLC0415
+
+        current = {**effective_option_values(options, self.device_type or ""), **options}
+        try:
+            locked = set(self.profile_store.get_locked_suggestions())
+        except Exception:  # pylint: disable=broad-exception-caught
+            locked = set()
+        base = {
+            k: v for k, v in stored.items()
+            if isinstance(v, dict) and not v.get("cascade") and k not in locked
+        }
+        adjusted, _changed = reconcile_suggestions(base, current)
+        for key in locked:
+            adjusted.pop(key, None)
+        adjusted = _drop_inverted_threshold_pair(adjusted, current)
+        changed: list[str] = []
+        for key in list(stored):
+            if key not in adjusted:
+                self.profile_store.delete_suggestion(key)
+                changed.append(key)
+        for key, entry in adjusted.items():
+            if not _same_suggestion(stored.get(key), entry):
+                self._store_suggestion(key, entry)
+                changed.append(key)
         if changed:
             _LOGGER.info("Reconciled coupled parameters for consistency: %s", ", ".join(sorted(changed)))
         return bool(changed)

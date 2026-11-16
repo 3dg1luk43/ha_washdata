@@ -53,6 +53,16 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 
+# The suggestion passes, as stored with each entry they produce ("owner"): a pass
+# withdraws what it owns and no longer proposes (audit 2026-11-16).
+OWNER_OPERATIONAL = "operational"
+OWNER_STANDBY_FLOOR = "standby_floor"
+OWNER_START_THRESHOLD = "start_threshold"
+OWNER_MODEL = "model"
+OWNER_DETECTION = "detection"
+OWNER_BATCH = "batch"
+
+
 def _suggestion_min_abs_delta(key: str) -> float:
     """Return the minimum absolute change that makes a suggestion worth surfacing.
 
@@ -282,9 +292,20 @@ class LearningManager:
             return self._spawn_fn(coro)
         return self.hass.async_create_task(coro)
 
-    def _apply_suggestions_and_notify(self, suggestions: dict[str, Any]) -> None:
-        """Apply suggestions that pass quality gates."""
+    def _apply_suggestions_and_notify(
+        self, suggestions: dict[str, Any], owner: str | None = None
+    ) -> None:
+        """Apply suggestions that pass quality gates.
+
+        ``owner`` names the pass that produced them. A pass that runs and no longer
+        proposes a key it proposed before withdraws that stored entry (audit
+        2026-11-16): a withheld or corrected value otherwise stayed one Apply-all
+        away, e.g. a pre-#527 start threshold on the running level. Call it with
+        an empty map too, so the withdrawal happens.
+        """
         if not suggestions:
+            if owner is not None and self._withdraw_owned(owner, suggestions):
+                self.suggestion_engine.apply_suggestions({}, changed=True, owner=owner)
             return
 
         # Quality gate: drop or suppress suggestions that are not worth surfacing.
@@ -315,9 +336,9 @@ class LearningManager:
         except Exception:  # pylint: disable=broad-exception-caught
             locked = set()
 
+        any_deleted = owner is not None and self._withdraw_owned(owner, suggestions)
         existing_suggestions = self.profile_store.get_suggestions()
         filtered_suggestions: dict[str, Any] = {}
-        any_deleted = False
         for key, data in suggestions.items():
             if key in locked:
                 if key in existing_suggestions:
@@ -365,14 +386,24 @@ class LearningManager:
                         pass
             filtered_suggestions[key] = data
 
-        if not filtered_suggestions:
-            if any_deleted:
-                self._spawn(self.profile_store.async_save())
+        if not filtered_suggestions and not any_deleted:
             return
 
         # A deletion above is unsaved until a write: apply_suggestions saves only
-        # when it changes something itself (#510), so tell it.
-        self.suggestion_engine.apply_suggestions(filtered_suggestions, changed=any_deleted)
+        # when it changes something itself (#510), so tell it. It also re-derives
+        # the cascades of what is left.
+        self.suggestion_engine.apply_suggestions(
+            filtered_suggestions, changed=any_deleted, owner=owner
+        )
+
+    def _withdraw_owned(self, owner: str, proposed: dict[str, Any]) -> bool:
+        """Delete stored entries ``owner`` produced and no longer proposes."""
+        deleted = False
+        for key, entry in list((self.profile_store.get_suggestions() or {}).items()):
+            if isinstance(entry, dict) and entry.get("owner") == owner and key not in proposed:
+                self.profile_store.delete_suggestion(key)
+                deleted = True
+        return deleted
 
     def process_power_reading(
         self, _power: float, now: datetime, last_reading_time: datetime | None
@@ -514,10 +545,12 @@ class LearningManager:
         self._dispatch_scan_and_apply(
             self.suggestion_engine.for_job().generate_standby_floor_suggestions,
             "Standby floor",
+            owner=OWNER_STANDBY_FLOOR,
         )
         self._dispatch_scan_and_apply(
             self.suggestion_engine.for_job().generate_start_threshold_suggestions,
             "Start threshold",
+            owner=OWNER_START_THRESHOLD,
         )
 
     def _maybe_run_batch_simulation(self) -> None:
@@ -525,14 +558,7 @@ class LearningManager:
         _BATCH_MIN = 5
         _BATCH_RERUN_DELTA = 5  # Re-run every 5 new labeled cycles
 
-        labeled_cycles = [
-            c for c in self.profile_store.get_past_cycles()
-            if isinstance(c, dict)
-            and c.get("profile_name")
-            and c.get("profile_name") != "noise"
-            and c.get("power_data")
-            and c.get("status") in ("completed", "force_stopped")
-        ]
+        labeled_cycles = self._batch_cycles()
         # The list still carries force-stopped cycles - the min_off_gap merge
         # ceiling needs the user's real turnaround - but only cycles that ended
         # on their own are new evidence for the re-run cadence (#458).
@@ -553,8 +579,8 @@ class LearningManager:
             new_suggestions = await self.hass.async_add_executor_job(
                 engine.run_batch_simulation, cycles
             )
+            self._apply_suggestions_and_notify(new_suggestions or {}, owner=OWNER_BATCH)
             if new_suggestions:
-                self._apply_suggestions_and_notify(new_suggestions)
                 self._logger.debug(
                     "Batch simulation (%d cycles) produced suggestions: %s",
                     len(cycles),
@@ -585,6 +611,7 @@ class LearningManager:
         self._dispatch_scan_and_apply(
             lambda: engine.generate_operational_suggestions(p95, median),
             "Operational",
+            owner=OWNER_OPERATIONAL,
         )
 
     def _update_model_suggestions(self) -> None:
@@ -596,10 +623,11 @@ class LearningManager:
         self._dispatch_scan_and_apply(
             self.suggestion_engine.for_job().generate_model_suggestions,
             "Model",
+            owner=OWNER_MODEL,
         )
 
     def _dispatch_scan_and_apply(
-        self, generate: Callable[[], dict[str, Any]], label: str
+        self, generate: Callable[[], dict[str, Any]], label: str, owner: str | None = None
     ) -> None:
         """Run a heavy suggestion scan off the event loop, then apply results.
 
@@ -621,19 +649,17 @@ class LearningManager:
             except Exception as e:  # pylint: disable=broad-exception-caught
                 self._logger.error("%s suggestion pass failed: %s", label, e)
                 return
-            if suggestions:
-                self._apply_suggestions_and_notify(suggestions)
+            self._apply_suggestions_and_notify(suggestions or {}, owner=owner)
             return
-        self._spawn(self._async_scan_and_apply(generate, label))
+        self._spawn(self._async_scan_and_apply(generate, label, owner))
 
     async def _async_scan_and_apply(
-        self, generate: Callable[[], dict[str, Any]], label: str
+        self, generate: Callable[[], dict[str, Any]], label: str, owner: str | None = None
     ) -> None:
         """Offload ``generate`` to an executor thread, then apply on the loop."""
         try:
             suggestions = await self.hass.async_add_executor_job(generate)
-            if suggestions:
-                self._apply_suggestions_and_notify(suggestions)
+            self._apply_suggestions_and_notify(suggestions or {}, owner=owner)
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.error("%s suggestion pass failed: %s", label, e)
 
@@ -652,8 +678,8 @@ class LearningManager:
             new_suggestions = await self.hass.async_add_executor_job(
                 engine.generate_detection_suggestions
             )
+            self._apply_suggestions_and_notify(new_suggestions or {}, owner=OWNER_DETECTION)
             if new_suggestions:
-                self._apply_suggestions_and_notify(new_suggestions)
                 self._logger.debug(
                     "Detection suggestions produced: %s", list(new_suggestions.keys())
                 )
@@ -665,10 +691,57 @@ class LearningManager:
 
         Runs the operational (cadence), threshold-corrective (standby floor, start
         threshold), model, detection and batch-simulation passes over the
-        accumulated cycle history and reconciles the result.
+        accumulated cycle history and reconciles the result. Each pass withdraws
+        what it owns and no longer proposes.
         Returns ``{"count": <actionable suggestions>}``.
         """
         self._logger.info("Manual suggestion analysis requested")
+        await self._async_run_all_passes()
+        count = len(self.profile_store.get_suggestions() or {})
+        self._logger.info("Manual suggestion analysis complete: %d suggestion(s)", count)
+        return {"count": count}
+
+    async def async_refresh_suggestions(self, *, clear: bool = False) -> None:
+        """Re-derive every stored suggestion with the current code and options.
+
+        Run once HA has started and after an options change (audit 2026-11-16): a
+        suggestion computed against other options, another device type or an
+        older version is otherwise stored until its own pass happens to run, and
+        a threshold no cycle can start under never produces the cycle end that
+        runs the passes. ``clear`` drops every stored entry first (a device type
+        change); otherwise only entries no pass owns (stored before passes owned
+        their entries) are dropped. Never raises.
+        """
+        try:
+            stored = self.profile_store.get_suggestions() or {}
+            stale = [
+                key for key, entry in stored.items()
+                if clear or not isinstance(entry, dict) or not entry.get("owner")
+            ]
+            for key in stale:
+                self.profile_store.delete_suggestion(key)
+            if stale:
+                self.suggestion_engine.apply_suggestions({}, changed=True)
+            await self._async_run_all_passes()
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            self._logger.error("Suggestion refresh failed: %s", e)
+
+    def _batch_cycles(self) -> list[dict[str, Any]]:
+        """The cycles the batch pass reads: labelled, traced, completed or force-stopped.
+
+        Force-stopped ones stay in for the min_off_gap merge ceiling (#458).
+        """
+        return [
+            c for c in self.profile_store.get_past_cycles()
+            if isinstance(c, dict)
+            and c.get("profile_name")
+            and c.get("profile_name") != "noise"
+            and c.get("power_data")
+            and c.get("status") in ("completed", "force_stopped")
+        ]
+
+    async def _async_run_all_passes(self) -> None:
+        """Every suggestion pass, in cycle-end order, each with its owner."""
         try:
             model = self._sample_interval_model
             if model.count >= 20 and model.p95 is not None and model.median is not None:
@@ -677,33 +750,22 @@ class LearningManager:
                     self.suggestion_engine.for_job().generate_operational_suggestions,
                     p95, median
                 )
-                if op:
-                    self._apply_suggestions_and_notify(op)
-            for generate in (
-                self.suggestion_engine.for_job().generate_standby_floor_suggestions,
-                self.suggestion_engine.for_job().generate_start_threshold_suggestions,
+                self._apply_suggestions_and_notify(op or {}, owner=OWNER_OPERATIONAL)
+            for owner, generate in (
+                (OWNER_STANDBY_FLOOR, self.suggestion_engine.for_job().generate_standby_floor_suggestions),
+                (OWNER_START_THRESHOLD, self.suggestion_engine.for_job().generate_start_threshold_suggestions),
+                (OWNER_MODEL, self.suggestion_engine.for_job().generate_model_suggestions),
             ):
-                corrective = await self.hass.async_add_executor_job(generate)
-                if corrective:
-                    self._apply_suggestions_and_notify(corrective)
-            model_sug = await self.hass.async_add_executor_job(
-                self.suggestion_engine.for_job().generate_model_suggestions
-            )
-            if model_sug:
-                self._apply_suggestions_and_notify(model_sug)
+                found = await self.hass.async_add_executor_job(generate)
+                self._apply_suggestions_and_notify(found or {}, owner=owner)
             await self._async_run_detection_suggestions()
-            # Snapshot the live cycles list before handing it to the executor.
-            cycles = list(self.profile_store.get_past_cycles())
+            cycles = self._batch_cycles()
             batch = await self.hass.async_add_executor_job(
                 self.suggestion_engine.for_job().run_batch_simulation, cycles
             )
-            if batch:
-                self._apply_suggestions_and_notify(batch)
+            self._apply_suggestions_and_notify(batch or {}, owner=OWNER_BATCH)
         except Exception as e:  # pylint: disable=broad-exception-caught
-            self._logger.error("Manual suggestion analysis failed: %s", e)
-        count = len(self.profile_store.get_suggestions() or {})
-        self._logger.info("Manual suggestion analysis complete: %d suggestion(s)", count)
-        return {"count": count}
+            self._logger.error("Suggestion analysis failed: %s", e)
 
     def _maybe_request_feedback(
         self,

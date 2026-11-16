@@ -141,10 +141,11 @@ def test_all_locked_triggers_save(mock_hass):
 
     # Both keys deleted in-memory.
     assert ps.delete_suggestion.call_count == 2
-    # apply_suggestions NOT called (nothing to surface).
-    mgr.suggestion_engine.apply_suggestions.assert_not_called()
-    # A save task was scheduled so the deletions reach disk.
-    assert len(created_tasks) == 1
+    # Nothing to surface, but the deletions go through apply_suggestions with
+    # changed=True, which re-derives the cascades of what is left and saves.
+    mgr.suggestion_engine.apply_suggestions.assert_called_once_with(
+        {}, changed=True, owner=None
+    )
 
 
 @pytest.mark.asyncio

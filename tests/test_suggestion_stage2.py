@@ -45,7 +45,6 @@ from custom_components.ha_washdata.const import (
     CONF_STOP_THRESHOLD_W,
     CONF_WATCHDOG_INTERVAL,
     DEFAULT_OFF_DELAY,
-    DEFAULT_OFF_DELAY_BY_DEVICE,
 )
 
 
@@ -135,13 +134,11 @@ def test_off_delay_from_pauses_beats_cadence() -> None:
     assert "pause" in out[CONF_OFF_DELAY]["reason"].lower()
 
 
-def test_off_delay_falls_back_to_cadence_without_traces() -> None:
-    # No cycles at all -> no pauses measurable -> cadence heuristic.
+def test_no_off_delay_without_traces() -> None:
+    # No cycles at all -> no pauses measurable -> nothing proposed (audit
+    # 2026-11-16: the cadence fallback raised it with nothing measured).
     out = _engine([]).generate_operational_suggestions(p95_dt=20.0, median_dt=20.0)
-    off = out[CONF_OFF_DELAY]["value"]
-    # cadence path: max(device_floor, 20*5=100); washing_machine floor >= that or 100
-    assert off >= DEFAULT_OFF_DELAY or off == 100
-    assert "pause" not in out[CONF_OFF_DELAY]["reason"].lower()
+    assert CONF_OFF_DELAY not in out
 
 
 def test_off_delay_measurement_beats_dishwasher_device_floor() -> None:
@@ -166,12 +163,14 @@ def test_off_delay_measurement_beats_dishwasher_device_floor() -> None:
     assert out[CONF_OFF_DELAY]["reason_params"]["floor"] == DEFAULT_OFF_DELAY
 
 
-def test_off_delay_without_traces_keeps_dishwasher_device_floor() -> None:
-    """With no measurement the conservative per-device prior still applies."""
+def test_off_delay_without_traces_is_left_as_set_on_a_dishwasher() -> None:
+    """With no measurement the setting in force stays: the 1800 s prior was
+    proposed to dishwashers whose clean history the mid_restart filter had
+    emptied and ended their cycles minutes later (audit 2026-11-16)."""
     out = _engine([], device_type="dishwasher").generate_operational_suggestions(
         p95_dt=30.0, median_dt=30.0
     )
-    assert out[CONF_OFF_DELAY]["value"] == DEFAULT_OFF_DELAY_BY_DEVICE["dishwasher"]
+    assert CONF_OFF_DELAY not in out
 
 
 def test_off_delay_measured_floor_honours_lower_device_priors() -> None:
@@ -319,15 +318,12 @@ def test_min_off_gap_bridge_reaches_the_public_suggestion_pass() -> None:
     assert out[CONF_MIN_OFF_GAP]["value"] < DEFAULT_MIN_OFF_GAP_BY_DEVICE["dishwasher"]
 
 
-def test_min_off_gap_falls_back_to_gap_heuristic_without_traces() -> None:
-    """With no power traces the historical inter-cycle-gap path is unchanged."""
+def test_no_min_off_gap_without_traces() -> None:
+    """With no power traces nothing is proposed: the gap heuristic aimed at the
+    merge boundary with no ceiling (#527: 1773 s against a 1650 s turnaround)."""
     cycles = _timed_cycles(6, gap_s=6 * 3600, traced=False)
     eng = _engine(cycles, device_type="washing_machine")
-    out = eng._suggest_min_off_gap(cycles, stop_threshold_w=2.0, gap_cycles=cycles)
-    # Old behaviour: gap-derived, capped at 3600, reported via the original key.
-    assert out is not None
-    assert out["reason_key"] == "suggestion.reason.min_off_gap"
-    assert out["value"] == 3600
+    assert eng._suggest_min_off_gap(cycles, stop_threshold_w=2.0, gap_cycles=cycles) is None
 
 
 # ---------------------------------------------------------------------------

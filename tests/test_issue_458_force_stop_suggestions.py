@@ -164,9 +164,19 @@ def test_without_a_safe_floor_a_stop_under_standby_is_still_dropped() -> None:
     assert CONF_STOP_THRESHOLD_W not in out
 
 
-def test_too_little_clean_history_proposes_nothing() -> None:
+def test_too_little_history_proposes_nothing() -> None:
+    hist = [_clean("c0")] + [_force_stopped(f"fs{i}") for i in range(3)]
+    floor = standby_stop_floor(hist, 1.76, 180)
+    assert floor["safe"] is False and floor["clean_cycles"] == 4
+
+
+def test_hand_and_force_stops_count_up_to_their_last_working_reading() -> None:
+    """Audit 2026-11-16: on an appliance with this fault most cycles are stopped by
+    hand or force-stopped, so clean cycles alone never made the floor safe."""
     hist = _history([_clean(f"c{i}") for i in range(3)])
-    assert standby_stop_floor(hist, 1.76, 180)["safe"] is False
+    floor = standby_stop_floor(hist, 1.76, 180)
+    assert floor["clean_cycles"] == 11
+    assert floor["safe"] is True
 
 
 def test_an_appliance_that_reaches_zero_gets_no_floor() -> None:

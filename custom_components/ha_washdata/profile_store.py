@@ -158,6 +158,9 @@ from .phase_catalog import (
 )
 from .log_utils import DeviceLoggerAdapter
 
+# Suggestion entry marks kept in the store (`set_suggestion`).
+SUGGESTION_FLAG_KEYS = ("corrective", "cascade", "owner")
+
 _LOGGER = logging.getLogger(__name__)
 
 # Absolute peak-power floor below which a cycle trace is considered a
@@ -3029,13 +3032,17 @@ class ProfileStore:
         reason: str | None = None,
         reason_key: str | None = None,
         reason_params: dict[str, Any] | None = None,
+        flags: dict[str, Any] | None = None,
     ) -> None:
         """Store a suggested setting value without changing config entry options.
 
         ``reason`` is the English fallback text; ``reason_key`` + ``reason_params``
         are the localization key + interpolation values the panel resolves via
         ``_t(reason_key, reason_params, reason)``. Both localization fields are
-        optional so old callers / persisted entries keep working.
+        optional so old callers / persisted entries keep working. ``flags`` keeps
+        the entry's ``corrective`` / ``cascade`` marks and the ``owner`` pass that
+        produced it (``SUGGESTION_FLAG_KEYS``): reconcile must not move a
+        corrective, and a pass withdraws what it owns and no longer proposes.
         """
         suggestions: JSONDict = self._data.setdefault("suggestions", {})
         entry: dict[str, Any] = {
@@ -3049,6 +3056,9 @@ class ProfileStore:
             entry["reason_key"] = reason_key
         if reason_params is not None:
             entry["reason_params"] = reason_params
+        for flag in SUGGESTION_FLAG_KEYS:
+            if flags and flags.get(flag):
+                entry[flag] = flags[flag]
         suggestions[key] = entry
 
     def get_suggestions(self) -> dict[str, Any]:

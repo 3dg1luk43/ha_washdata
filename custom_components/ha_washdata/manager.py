@@ -2605,8 +2605,8 @@ class WashDataManager:
             self.hass, self._schedule_trace_summary_warm
         )
         # A threshold no cycle can start or end under is corrected at a cycle end,
-        # but one no cycle can START under (#527) never produces a cycle end: check
-        # once HA has started, off the loop.
+        # but one no cycle can START under (#527) never produces a cycle end:
+        # re-derive the suggestions once HA has started, off the loop.
         self._remove_threshold_check_at_started = async_at_started(
             self.hass, self._schedule_threshold_check
         )
@@ -2679,6 +2679,7 @@ class WashDataManager:
         self._apply_power_sensor_option()
 
         # Update device type
+        previous_device_type = self.device_type
         self.device_type = config_entry.options.get(
             CONF_DEVICE_TYPE,
             config_entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE),
@@ -2686,6 +2687,15 @@ class WashDataManager:
         # Propagate to learning pipeline (captured at construction time)
         self.learning_manager.device_type = self.device_type
         self.learning_manager.suggestion_engine.device_type = self.device_type
+        # Every stored suggestion was judged against the options (and device type)
+        # just replaced: re-derive them, off the loop. A device type change drops
+        # them all first (they name another type's floors). Audit 2026-11-16.
+        if not self._is_shutdown:
+            self._spawn_tracked(
+                self.learning_manager.async_refresh_suggestions(
+                    clear=previous_device_type != self.device_type
+                )
+            )
         # A saved reminder change (or an import) may switch a preset maintenance
         # reminder on or off: re-stamp its counting origin (#461).
         self._sync_maintenance_baselines()
@@ -5898,7 +5908,9 @@ class WashDataManager:
                     duration,
                     cycle_energy_wh,
                 )
-            self._handle_noise_cycle(max_power)
+            if reason != ghost_rules.DISCARD_PUMP_OUT:
+                # A pump-out belongs to the cycle before it, not to noise.
+                self._handle_noise_cycle(max_power)
             self._discard_cycle_cleanup()
             # Nothing is stored, so the pass the cadence commit left due runs now.
             try:
@@ -7558,10 +7570,15 @@ class WashDataManager:
 
     @callback
     def _schedule_threshold_check(self, _hass: HomeAssistant) -> None:
-        """Run the threshold-corrective suggestion passes once HA has started (#527)."""
+        """Re-derive the stored suggestions once HA has started, off the loop.
+
+        Includes the threshold correctives (#527), which a device that cannot start
+        a cycle would otherwise never reach, and drops entries an older version
+        stored that no pass owns (audit 2026-11-16).
+        """
         self._remove_threshold_check_at_started = None
         if not self._is_shutdown:
-            self.learning_manager.run_threshold_correctives()
+            self._spawn_tracked(self.learning_manager.async_refresh_suggestions())
 
     @callback
     def _schedule_notify_queue_restore(self, _hass: HomeAssistant) -> None:
@@ -8536,8 +8553,15 @@ class WashDataManager:
             _deliver(entry)
 
     def _handle_noise_cycle(self, max_power: float) -> None:
-        """Handle a detected noise cycle."""
-        # Clean up old noise events > 24h
+        """Count a ghost cycle (short and low energy), and log when they pile up.
+
+        This used to store a Min Power suggestion of 1.2 x the largest ghost peak
+        (up to 50 W), straight into the store past every suggestion gate, lock and
+        reconcile, and with no translation. With Start/Stop set Min Power does not
+        decide a start, so it could not stop a ghost and only moved the keepalive
+        gate; with them unset it moved both thresholds past every threshold guard
+        (audit 2026-11-16). A ghost is discarded without being stored either way.
+        """
         now = utc_now()
         self._noise_events = [
             t
@@ -8545,54 +8569,16 @@ class WashDataManager:
             if (now - t).total_seconds() < 86400
         ]
         self._noise_events.append(now)
-
-        # Track max power of noise
-        self._noise_max_powers = getattr(self, "_noise_max_powers", [])
-        self._noise_max_powers.append(max_power)
-
-        # If noise events exceed threshold in 24h, trigger tune
+        self._noise_max_powers = [*getattr(self, "_noise_max_powers", []), float(max_power)]
         if len(self._noise_events) >= self._noise_events_threshold:
-            # Tracked (audit MANAGER-13): it saves the store.
-            self._spawn_tracked(self._tune_threshold())
-
-    async def _tune_threshold(self) -> None:
-        """Increase the minimum power threshold."""
-        current_min = self.detector.config.min_power
-
-        # Calculate new suggested threshold
-        # Max of observed noise * 1.2 safety factor
-        noise_max = max(self._noise_max_powers)
-        new_min = noise_max * 1.2
-
-        # Cap absolute max to avoid runaway (e.g. 50W)
-        if new_min > 50.0:
-            new_min = 50.0
-
-        if new_min <= current_min:
-            # Clear events so we don't loop try to update
+            self._logger.info(
+                "%d ghost cycles in 24 h (up to %.1f W): a Start Threshold above that "
+                "level would stop them",
+                len(self._noise_events),
+                max(self._noise_max_powers),
+            )
             self._noise_events = []
             self._noise_max_powers = []
-            return
-
-        self._logger.info(
-            "Auto-Tune suggestion: min_power from %.1fW -> %.1fW due to noise",
-            current_min,
-            new_min,
-        )
-
-        # Store a suggestion (do not mutate user-set options). The suggestion is
-        # surfaced in the panel (Settings suggestions banner / per-field pill);
-        # WashData intentionally does not raise a persistent notification here.
-        self.profile_store.set_suggestion(
-            CONF_MIN_POWER,
-            float(new_min),
-            f"Auto-tune: {len(self._noise_events)} ghost cycles detected in 24h",
-        )
-        await self.profile_store.async_save()
-
-        # Reset trackers
-        self._noise_events = []
-        self._noise_max_powers = []
 
     def _update_estimates(self) -> None:
         """Update time remaining and profile estimates."""

@@ -212,6 +212,10 @@ async def test_a_deleted_suggestion_is_saved_when_the_rest_is_unchanged(
     manager = hass.data[DOMAIN][entry.entry_id]
     await _one_cycle_then_idle(hass, freezer, manager)
     store = manager.profile_store
+    if len(store.get_suggestions()) < 2:
+        # The cadence off_delay fallback that used to make the second one is gone
+        # (audit 2026-11-16): store one by hand.
+        store.set_suggestion("off_delay", 240, reason="seeded")
     stored = {k: dict(v) for k, v in store.get_suggestions().items()}
     assert len(stored) >= 2, "the cycle should leave at least two suggestions"
     gone = next(iter(stored))
