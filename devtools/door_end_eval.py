@@ -40,6 +40,9 @@ up as the matched run, over the recorded corpus, per device type:
   detector is in ENDING, where a held door ended the cycle before 0.6.1 too. The
   share of PAUSED intervals, and of cycles with any.
 
+Both are judged in programme time, as ``_gate_elapsed_s`` reads it: the replay's
+finished stalls up to that moment are left out.
+
 Rows per ratio patch the constants to one ratio for every device type; the
 ``shipped`` row runs them as they are. What this does not replay: the matcher
 (the expected duration is the leave-one-out mean, not the live gate's, and the
@@ -50,6 +53,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from bisect import bisect_right
 import sys
 from collections import defaultdict
 from contextlib import contextmanager
@@ -81,14 +85,16 @@ def _device(dev: Any) -> tuple[str, Any]:
 
 
 def _paused_door_moments(
-    pts: list[list[float]], cfg: Any, stop: float, dwell: float
-) -> list[float]:
+    pts: list[list[float]], cfg: Any, stop: float, dwell: float, duration: float
+) -> tuple[list[float], float]:
     """The cycle replayed through a ``CycleDetector`` (off delay and min off gap
     out of reach, so it stays open across every spell). Per PAUSED interval that
     activity follows, the latest moment a door can open in it and stay open for
     ``dwell`` while the power is still under the Stop Threshold (the gate is
     monotonic in time, so the latest moment decides); intervals with no such
-    moment are left out."""
+    moment are left out. Returned in programme time, with the stored
+    ``duration`` too: less every stall the replay had finished by then, as
+    ``_gate_elapsed_s`` reads it live."""
     from custom_components.ha_washdata.const import STATE_PAUSED  # noqa: PLC0415
     from custom_components.ha_washdata.cycle_detector import CycleDetector  # noqa: PLC0415
 
@@ -99,9 +105,18 @@ def _paused_door_moments(
         lambda _old, new: changes.append((now[0], new)),
         lambda _c: None,
     )
+    marks: list[float] = []
+    left_out: list[float] = []  # finished stall seconds after each reading
     for t, p in pts:
         now[0] = t
         det.process_reading(float(p), _T0 + timedelta(seconds=t))
+        marks.append(t)
+        left_out.append(sum(length for _at, length in det._gate_spans()))  # noqa: SLF001
+
+    def programme(at: float) -> float:
+        i = bisect_right(marks, at) - 1
+        return at - (left_out[i] if i >= 0 else 0.0)
+
     out: list[float] = []
     for i, (at, state) in enumerate(changes):
         if state != STATE_PAUSED:
@@ -114,8 +129,8 @@ def _paused_door_moments(
         # meets a reading at the threshold and re-arms instead of ending.
         latest = min(resumed - dwell, left if left is not None else resumed) - 1e-3
         if latest >= at:
-            out.append(latest)
-    return out
+            out.append(programme(latest))
+    return out, programme(duration)
 
 
 def _gate(device_type: str) -> Any:
@@ -187,9 +202,8 @@ def measure(root: Path, dwell: float) -> dict[str, Any]:
                 pts = ev.query_points(c)
                 t0 = pts[0][0] if pts else 0.0
                 rel = [[t - t0, p] for t, p in pts]
-                rows[device_type].append(
-                    (expected, dur, _paused_door_moments(rel, cfg, stop, dwell))
-                )
+                moments, programme_dur = _paused_door_moments(rel, cfg, stop, dwell, dur)
+                rows[device_type].append((expected, programme_dur, moments))
     report: dict[str, Any] = {}
     for device_type, items in sorted(rows.items()):
         det = _gate(device_type)
