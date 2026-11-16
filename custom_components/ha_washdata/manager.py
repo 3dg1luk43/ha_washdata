@@ -3420,18 +3420,16 @@ class WashDataManager:
             if self._is_clean_state:
                 # User opened the door after the cycle - laundry retrieved
                 self.mark_unloaded("door opened", how="door")
-            elif (
-                self._door_opens_at_end
-                and self.detector.state in _DOOR_END_STATES
-            ):
+            elif self._door_end_may_fire():
                 # Auto-open dishwasher (#342), or a washer whose door stays locked
                 # while it runs (#524): a sustained open means the cycle finished; a
                 # brief open (adding an item) does not. Arm a dwell timer instead of
                 # the sticky user-pause (which would strand the cycle in user_paused).
                 # If the door stays open past the dwell we finalize; if it closes
-                # first we cancel. PAUSED counts: once the power has dropped at the
-                # end the detector sits there for minutes before ENDING, and that is
-                # when the door is opened (#524).
+                # first we cancel. PAUSED counts once the run has reached its
+                # programme's end (#524): the detector sits there for minutes after
+                # the final power drop, which is when the door is opened. Earlier in
+                # PAUSED the door falls through to the pause below, as before 0.6.1.
                 self._logger.debug(
                     "Door opened on auto-open device: arming %ss end dwell",
                     self._door_end_dwell_seconds,
@@ -3822,8 +3820,7 @@ class WashDataManager:
         restoring a RUNNING snapshot with the door already open re-arms the dwell.
         """
         if not (
-            self.detector.state in _DOOR_END_STATES
-            and self._door_opens_at_end
+            self._door_end_may_fire()
             and self._door_sensor_entity
             and self._remove_door_end_dwell is None
         ):
@@ -3835,6 +3832,20 @@ class WashDataManager:
                 self._door_end_dwell_seconds,
             )
             self._arm_door_end_dwell()
+
+    def _door_end_may_fire(self) -> bool:
+        """Whether a held door-open ends the cycle in the detector's state now.
+
+        RUNNING and ENDING with the option on, as since #342. PAUSED only once
+        the run has reached its programme's end (``CycleDetector.door_end_due``,
+        #524): a door opened in an earlier PAUSED is a pause, as before 0.6.1, so
+        a mid-programme open does not end a cycle (or fire its end automations).
+        """
+        if not self._door_opens_at_end or self.detector.state not in _DOOR_END_STATES:
+            return False
+        return self.detector.state != STATE_PAUSED or bool(
+            self.detector.door_end_due(utc_now())
+        )
 
     def _arm_door_end_dwell(self) -> None:
         """(Re)arm the auto-open door-end dwell timer (#342)."""
@@ -3865,8 +3876,7 @@ class WashDataManager:
             else None
         )
         if (
-            self.detector.state in _DOOR_END_STATES
-            and self._door_opens_at_end
+            self._door_end_may_fire()
             and not self._is_user_paused
             and door_state is not None
             and door_state.state == "on"
@@ -3900,7 +3910,7 @@ class WashDataManager:
                 "Door held open %ss on auto-open device: finalizing cycle",
                 self._door_end_dwell_seconds,
             )
-            self.detector.user_stop()
+            self.detector.door_end()
             self._notify_update()
         else:
             self._logger.debug(

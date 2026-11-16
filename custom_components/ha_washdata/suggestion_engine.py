@@ -650,11 +650,16 @@ _STANDBY_MAX_MAD = 0.25
 
 # End paths that saw the power BELOW the stop threshold: the off delay or the
 # quiet window ran below it (timeout, the duration-anchored finalize, Smart
-# Termination in ENDING) or it dropped to 0 (terminal drop). The standby-band
-# finalize also stores TIMEOUT but marks the cycle with ``standby_band_w``.
-_BELOW_STOP_ENDS = frozenset(
-    {TerminationReason.TIMEOUT, TerminationReason.SMART, TerminationReason.TERMINAL_DROP}
-)
+# Termination in ENDING), it dropped to 0 (terminal drop), or a door held open
+# ended it (only below the threshold, ``manager._door_end_dwell_fired``). The
+# standby-band finalize also stores TIMEOUT but marks the cycle with
+# ``standby_band_w``.
+_BELOW_STOP_ENDS = frozenset({
+    TerminationReason.TIMEOUT,
+    TerminationReason.SMART,
+    TerminationReason.TERMINAL_DROP,
+    TerminationReason.DOOR,
+})
 # The settled level of a kept tail: the level it held for at least this share of
 # its time, so a wind-down at the start of the tail (a Miele's 15 W drain before
 # its 3.4 W standby) and a lone 0 W glitch between standby readings both lose.

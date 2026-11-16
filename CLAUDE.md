@@ -71,6 +71,7 @@ python3 devtools/eta_eval.py --all-formats   # first-ETA timing + ETA error by e
 python3 devtools/decisive_margin_eval.py --loo   # mid-cycle switch bypass, runner-up exposure; --switching: commit/switch accuracy
 python3 devtools/end_gate_eval.py --loo --all-formats --check devtools/end_gate_baseline.json   # exit 1 on an end-gate regression
 python3 devtools/min_off_gap_eval.py         # min_off_gap split/merge bounds (replays UNMATCHED)
+python3 devtools/door_end_eval.py            # PAUSED door-end bar (#524): real ends reached vs mid-cycle quiet spells past it
 python3 devtools/start_gate_eval.py <diag.json|history.csv|sqlite:db>   # start gates on a raw idle+cycle history (missed/late/phantom)
 python3 devtools/lead_in_eval.py               # stored cycle start vs raw onset on the start-gate manifest (#463)
 python3 devtools/playground_parity_eval.py --mode replay   # replay vs the real manager: ends/programs that differ (F7)

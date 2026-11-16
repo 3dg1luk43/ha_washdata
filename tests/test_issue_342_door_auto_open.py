@@ -89,13 +89,13 @@ def _set_door_state(mgr, state: str) -> None:
     mgr.hass.states.get = MagicMock(return_value=door)
 
 
-def test_dwell_fires_finalizes_via_user_stop(mock_hass):
+def test_dwell_fires_finalizes_as_a_door_end(mock_hass):
     mgr = _make_manager(mock_hass, {CONF_DOOR_OPENS_AT_END: True})
     mgr.detector.state = STATE_RUNNING
     _set_door_state(mgr, "on")  # door still open when the dwell fires
     mgr._is_user_paused = False
     mgr._door_end_dwell_fired(None)
-    mgr.detector.user_stop.assert_called_once()
+    mgr.detector.door_end.assert_called_once()
 
 
 def test_dwell_does_not_finalize_while_still_drawing_power(mock_hass):
@@ -114,7 +114,7 @@ def test_dwell_does_not_finalize_while_still_drawing_power(mock_hass):
     mgr._current_power = 45.0          # still washing
     with patch.object(mgr_mod, "async_call_later", return_value=lambda: None) as later:
         mgr._door_end_dwell_fired(None)
-    mgr.detector.user_stop.assert_not_called()
+    mgr.detector.door_end.assert_not_called()
     later.assert_called_once()          # re-armed, not abandoned
 
 
@@ -128,7 +128,7 @@ def test_dwell_finalizes_once_power_has_dropped(mock_hass):
     mgr._is_user_paused = False
     mgr._current_power = 0.4           # below the stop threshold
     mgr._door_end_dwell_fired(None)
-    mgr.detector.user_stop.assert_called_once()
+    mgr.detector.door_end.assert_called_once()
 
 
 def test_dwell_does_not_finalize_when_door_closed(mock_hass):
@@ -138,7 +138,7 @@ def test_dwell_does_not_finalize_when_door_closed(mock_hass):
     mgr.detector.state = STATE_RUNNING
     _set_door_state(mgr, "off")
     mgr._door_end_dwell_fired(None)
-    mgr.detector.user_stop.assert_not_called()
+    mgr.detector.door_end.assert_not_called()
 
 
 def test_dwell_does_not_finalize_when_user_paused(mock_hass):
@@ -148,7 +148,7 @@ def test_dwell_does_not_finalize_when_user_paused(mock_hass):
     _set_door_state(mgr, "on")
     mgr._is_user_paused = True
     mgr._door_end_dwell_fired(None)
-    mgr.detector.user_stop.assert_not_called()
+    mgr.detector.door_end.assert_not_called()
 
 
 def test_door_close_cancels_pending_dwell(mock_hass):

@@ -60,6 +60,8 @@ from .const import (
     DEFAULT_DEFER_FINISH_CONFIDENCE,
     DEFAULT_SMART_TERMINATION_DURATION_RATIO,
     DISHWASHER_END_SPIKE_MIN_PROGRESS,
+    DOOR_END_PAUSED_MIN_RATIO,
+    DOOR_END_PAUSED_MIN_RATIO_BY_TYPE,
     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
     DISHWASHER_END_SPIKE_WAIT_SECONDS,
     DISHWASHER_SMART_TERMINATION_DEBOUNCE_SECONDS,
@@ -6762,6 +6764,45 @@ class CycleDetector:
             # pre-stop gap and release the lockout early (#267).
             self._lockout_high_seconds = 0.0
             self._last_process_time = now
+
+    def door_end_due(self, timestamp: datetime) -> bool:
+        """Whether a door held open in PAUSED is the end of the run (#524).
+
+        Only once programme time has reached ``DOOR_END_PAUSED_MIN_RATIO`` (per
+        device type) of the matched programme's expected duration, and never
+        while user-paused. Unmatched, or earlier, the door is a pause, as before
+        0.6.1: PAUSED is also where a mid-programme quiet sits.
+        """
+        expected = float(self._expected_duration or 0.0)
+        if not self._matched_profile or expected <= 0 or self._user_paused:
+            return False
+        ratio = DOOR_END_PAUSED_MIN_RATIO_BY_TYPE.get(
+            self._config.device_type, DOOR_END_PAUSED_MIN_RATIO
+        )
+        return self._gate_elapsed_s(timestamp) >= ratio * expected
+
+    def door_end(self) -> None:
+        """Finish the cycle on a door held open at its end (#342, #524).
+
+        A natural end, not a hand stop: stored as the fallback timeout stores one
+        (a dishwasher keeps its drying tail up to ``_keep_tail_cap``, anything
+        else ends at its last active reading), under ``TerminationReason.DOOR``.
+        The manager calls it only with the power below the Stop Threshold. The
+        restart lockout is ``user_stop``'s, which this path used until 0.6.1.
+        """
+        if self._state == STATE_OFF:
+            return
+        now = utc_now()
+        self._finish_cycle(
+            now,
+            status="completed",
+            termination_reason=TerminationReason.DOOR,
+            keep_tail=self._config.device_type == "dishwasher",
+            tail_cap=self._keep_tail_cap(self._current_cycle_start or now),
+        )
+        self._ignore_power_until_idle = True
+        self._lockout_high_seconds = 0.0
+        self._last_process_time = now
 
 
     def get_power_trace(self) -> list[tuple[datetime, float]]:

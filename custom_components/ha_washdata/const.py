@@ -33,6 +33,7 @@ class TerminationReason(StrEnum):
     FORCE_STOPPED = "force_stopped"  # watchdog / no-update force end
     USER = "user"                # user manually stopped the cycle
     TERMINAL_DROP = "terminal_drop"  # anomalously-early hard cliff-to-0 (opt-in)
+    DOOR = "door"                # door held open at the end (#342, #524): natural
 
 
 # Completed cycles stay eligible for anti-wrinkle handling only for these
@@ -202,6 +203,21 @@ CONF_DOOR_OPENS_AT_END = "door_opens_at_end"
 CONF_DOOR_END_DWELL_SECONDS = "door_end_dwell_seconds"
 DEFAULT_DOOR_OPENS_AT_END = False
 DEFAULT_DOOR_END_DWELL_SECONDS = 60  # door must stay open this long to finalize
+# In PAUSED a held door ends the cycle only once the run has reached this share of
+# its matched programme's expected duration; earlier (or unmatched) it is a pause,
+# as before 0.6.1 (#524). PAUSED is where a mid-programme quiet sits, so this is
+# what keeps a door opened there to add an item from ending the cycle.
+# `devtools/door_end_eval.py` (completed cycles vs the leave-one-out mean of their
+# programme; quiet spells of 60 s+ under the Stop Threshold with activity after):
+# dishwashers at 0.9 keep 98.2% of 165 ends and 2.6% of 192 mid-cycle spells
+# (0.8: 99.4% / 45.3%). A washer's door is locked while it runs, so its quiet
+# spells cannot be opened into and its bar sits lower: 0.75 keeps 93.2% of 206
+# ends (0.9: 74.3%).
+DOOR_END_PAUSED_MIN_RATIO = 0.9
+DOOR_END_PAUSED_MIN_RATIO_BY_TYPE: dict[str, float] = {
+    "washing_machine": 0.75,
+    "washer_dryer": 0.75,
+}
 CONF_PAUSE_CUTS_POWER = "pause_cuts_power"  # Also turn off switch entity when pausing
 CONF_SWITCH_ENTITY = "switch_entity"  # Optional switch entity toggled on pause/resume
 CONF_NOTIFY_UNLOAD_DELAY_MINUTES = "notify_unload_delay_minutes"  # Minutes before "laundry waiting" nag
