@@ -159,7 +159,7 @@ async def test_an_unmatched_pause_still_pauses(
 
 
 def test_the_paused_bar_is_per_device_type() -> None:
-    """0.9 of the expected duration, 0.75 on a washer (its door is locked while it
+    """0.95 of the expected duration, 0.75 on a washer (its door is locked while it
     runs); never unmatched, user-paused or ambiguous."""
     from datetime import datetime, timezone  # noqa: PLC0415
 
@@ -178,8 +178,8 @@ def test_the_paused_bar_is_per_device_type() -> None:
             setattr(det, key, value)
         return det.door_end_due(t0 + timedelta(seconds=elapsed_ratio * 3600.0))
 
-    assert not _due("dishwasher", 0.85)
-    assert _due("dishwasher", 0.9)
+    assert not _due("dishwasher", 0.9)
+    assert _due("dishwasher", 0.95)
     assert not _due("washing_machine", 0.7)
     assert _due("washing_machine", 0.75)
     assert not _due("dishwasher", 1.2, _matched_profile=None)

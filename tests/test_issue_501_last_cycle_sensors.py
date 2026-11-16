@@ -269,3 +269,8 @@ async def test_last_cycle_start_is_a_timestamp_of_the_last_run(
     manager.notify_update()
     await hass.async_block_till_done()
     assert dt_util.parse_datetime(hass.states.get(entity_id).state) == start
+    # An out-of-range number is unknown, not a failed update.
+    manager.profile_store.get_past_cycles()[-1]["start_time"] = 10**400
+    manager.notify_update()
+    await hass.async_block_till_done()
+    assert hass.states.get(entity_id).state == "unknown"

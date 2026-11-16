@@ -1287,10 +1287,11 @@ class WasherLastCycleStartSensor(WasherLastCycleSensor):
         if isinstance(raw, (int, float)) and not isinstance(raw, bool):
             # A legacy cycle can keep unix seconds; `last_finished_cycle` orders
             # by them too (PR #529 review).
-            if not math.isfinite(raw) or raw <= 0:
-                return None
             try:
-                return dt_util.utc_from_timestamp(float(raw))
+                seconds = float(raw)
+                if not math.isfinite(seconds) or seconds <= 0:
+                    return None
+                return dt_util.utc_from_timestamp(seconds)
             except (OverflowError, OSError, ValueError):
                 return None
         parsed = dt_util.parse_datetime(raw) if isinstance(raw, str) else None

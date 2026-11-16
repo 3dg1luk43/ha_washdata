@@ -32,13 +32,13 @@ up as the matched run, over the recorded corpus, per device type:
   pauses.
 * **spells exposed**: quiet spells inside those cycles (under the Stop
   Threshold, activity after them) where a door opened while the detector is in
-  PAUSED, and held for the dwell (``--dwell``, the default 60 s) inside the
-  spell, finds the gate open: that door would end the run mid-programme. Only
-  the PAUSED part of a spell counts: from ``_dynamic_pause_threshold`` to
-  ``_dynamic_end_threshold`` into it, sized from the cadence of the 20 intervals
-  before it as ``_gate_cadence`` sizes them; past it the detector is in ENDING,
-  where a held door ended the cycle before 0.6.1 too. The share of spells, and
-  of cycles with any.
+  PAUSED, and held for the dwell (``--dwell``, the default 60 s) while still
+  quiet, finds the gate open: that door would end the run mid-programme. The
+  PAUSED intervals are the detector's own: each cycle is replayed through a
+  ``CycleDetector`` with the export's config (off delay and min off gap out of
+  reach so it stays open), and its state changes are read. Past PAUSED the
+  detector is in ENDING, where a held door ended the cycle before 0.6.1 too. The
+  share of PAUSED intervals, and of cycles with any.
 
 Rows per ratio patch the constants to one ratio for every device type; the
 ``shipped`` row runs them as they are. What this does not replay: the matcher
@@ -53,6 +53,7 @@ import json
 import sys
 from collections import defaultdict
 from contextlib import contextmanager
+from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -66,57 +67,52 @@ _T0 = datetime(2026, 1, 1, tzinfo=timezone.utc)
 _NATURAL = ("timeout", "smart", "terminal_drop", "door", None, "")
 
 
-def _stop_threshold(dev: Any) -> tuple[str, float]:
-    from custom_components.ha_washdata.const import CONF_STOP_THRESHOLD_W  # noqa: PLC0415
+def _device(dev: Any) -> tuple[str, Any]:
+    """The device type and the detector config the export's entry runs."""
     from custom_components.ha_washdata.detector_config import (  # noqa: PLC0415
-        effective_option_values,
+        build_detector_config,
     )
 
     merged = {**(dev.entry_data or {}), **(dev.entry_options or {})}
     device_type = str(merged.get("device_type") or "washing_machine")
-    eff = effective_option_values(merged, device_type)
-    return device_type, float(eff.get(CONF_STOP_THRESHOLD_W) or 0.0)
-
-
-def _cadence(dts: list[float]) -> float:
-    """``CycleDetector._gate_cadence`` over these intervals (the last 20)."""
-    from custom_components.ha_washdata.const import (  # noqa: PLC0415
-        GATE_CADENCE_MEDIAN_FACTOR,
-    )
-    from custom_components.ha_washdata.signal_processing import (  # noqa: PLC0415
-        median_fast,
-        percentile_linear,
+    return device_type, build_detector_config(
+        dev.entry_options or {}, dev.entry_data or {}, device_type
     )
 
-    recent = [d for d in dts if d > 0.1][-20:]
-    if len(recent) < 5:
-        return max(recent[-1], 1.0) if recent else 1.0
-    return min(percentile_linear(recent, 95), GATE_CADENCE_MEDIAN_FACTOR * median_fast(recent))
 
+def _paused_door_moments(
+    pts: list[list[float]], cfg: Any, stop: float, dwell: float
+) -> list[float]:
+    """The cycle replayed through a ``CycleDetector`` (off delay and min off gap
+    out of reach, so it stays open across every spell). Per PAUSED interval that
+    activity follows, the latest moment a door can open in it and stay open for
+    ``dwell`` while the power is still under the Stop Threshold (the gate is
+    monotonic in time, so the latest moment decides); intervals with no such
+    moment are left out."""
+    from custom_components.ha_washdata.const import STATE_PAUSED  # noqa: PLC0415
+    from custom_components.ha_washdata.cycle_detector import CycleDetector  # noqa: PLC0415
 
-def _paused_door_moments(pts: list[list[float]], stop: float, dwell: float) -> list[float]:
-    """Per quiet spell followed by activity, the latest moment a door can open in
-    its PAUSED part and stay open for ``dwell`` inside the spell (the gate is
-    monotonic in time, so the latest moment decides). Spells with no such moment
-    are left out."""
+    now = [0.0]
+    changes: list[tuple[float, str]] = []
+    det = CycleDetector(
+        replace(cfg, off_delay=10**7, min_off_gap=10**7),
+        lambda _old, new: changes.append((now[0], new)),
+        lambda _c: None,
+    )
+    for t, p in pts:
+        now[0] = t
+        det.process_reading(float(p), _T0 + timedelta(seconds=t))
     out: list[float] = []
-    start: float | None = None
-    dts: list[float] = []
-    for i, (t, p) in enumerate(pts):
-        if i:
-            dts.append(t - pts[i - 1][0])
-        if p < stop:
-            if start is None:
-                start = t
-                cad = _cadence(dts[:-1])
-                pause_thr = max(15.0, 3.0 * cad)
-                end_thr = max(3.0 * cad, pause_thr + 15.0)
-        else:
-            if start is not None:
-                latest = min(start + end_thr, t - dwell)
-                if latest >= start + pause_thr:
-                    out.append(latest)
-            start = None
+    for i, (at, state) in enumerate(changes):
+        if state != STATE_PAUSED:
+            continue
+        left = changes[i + 1][0] if i + 1 < len(changes) else None
+        resumed = next((t for t, p in pts if t > at and p >= stop), None)
+        if resumed is None:
+            continue  # the final quiet: the end, not a mid-cycle pause
+        latest = min(resumed - dwell, (left if left is not None else resumed) - 1e-3)
+        if latest >= at:
+            out.append(latest)
     return out
 
 
@@ -164,7 +160,8 @@ def measure(root: Path, dwell: float) -> dict[str, Any]:
     # (expected, duration, spell ends) per cycle
     rows: dict[str, list[tuple[float, float, list[float]]]] = defaultdict(list)
     for dev in devices:
-        device_type, stop = _stop_threshold(dev)
+        device_type, cfg = _device(dev)
+        stop = float(cfg.stop_threshold_w)
         if stop <= 0:
             continue
         by_profile: dict[str, list[tuple[dict, float]]] = defaultdict(list)
@@ -188,7 +185,9 @@ def measure(root: Path, dwell: float) -> dict[str, Any]:
                 pts = ev.query_points(c)
                 t0 = pts[0][0] if pts else 0.0
                 rel = [[t - t0, p] for t, p in pts]
-                rows[device_type].append((expected, dur, _paused_door_moments(rel, stop, dwell)))
+                rows[device_type].append(
+                    (expected, dur, _paused_door_moments(rel, cfg, stop, dwell))
+                )
     report: dict[str, Any] = {}
     for device_type, items in sorted(rows.items()):
         det = _gate(device_type)

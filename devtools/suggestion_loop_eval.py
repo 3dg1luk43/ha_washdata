@@ -533,7 +533,12 @@ class _ManagerTap:
             if data.get("status") == "completed" and data.get("termination_reason") not in (
                 TerminationReason.USER, TerminationReason.FORCE_STOPPED,
             ):
-                self.committed.append(list(self.pending))
+                # Live keeps the newest `_CYCLE_MAX_INTERVALS` (a bounded deque).
+                from custom_components.ha_washdata.learning import (  # noqa: PLC0415
+                    _CYCLE_MAX_INTERVALS,
+                )
+
+                self.committed.append(self.pending[-_CYCLE_MAX_INTERVALS:])
             self.pending.clear()
             orig_end(data)
 
