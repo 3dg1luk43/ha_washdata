@@ -127,6 +127,15 @@ def test_the_idle_plateau_is_trimmed_off_the_stored_cycle() -> None:
     assert data["standby_band_w"] == pytest.approx(IDLE_W)
 
 
+def test_a_loose_tier_finish_carries_no_standby_level() -> None:
+    """A flat 15 W plateau (6% of the run level, well over the near-stop ceiling)
+    closes on the loose tier at twice the expected duration: a stuck low phase, not
+    a standby, so nothing may read it as one (PR #529 review)."""
+    _idle_s, data = _run(_cfg(), idle_w=15.0)
+    assert data is not None and data["termination_reason"] == "timeout"
+    assert "standby_band_w" not in data
+
+
 def test_a_normal_timeout_carries_no_standby_level() -> None:
     _idle_s, data = _run(_cfg(), idle_w=0.5)
     assert data is not None and data["termination_reason"] == "timeout"

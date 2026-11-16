@@ -187,16 +187,24 @@ def end_gate_pause_needs(
                     k = max(0, min(k, len(times) - 1))
                     return cum[k] + watts[k] * (t - times[k]) / 3600.0
 
-                # Window energy is piecewise linear between these, so its minimum
-                # over any stretch is at one of them (or just before the resume).
-                candidates = {t0 + window, t_resume - 1e-3}
+                # The window energy W(t) = E(t) - E(t - off_delay) bends only at a
+                # reading time or a reading time + off_delay, so it is linear
+                # between consecutive points of this grid; the latest moment it is
+                # at or under the limit is one of them or, where W rises through the
+                # limit between two, that crossing.
+                grid = {t0 + window, t_resume - 1e-3}
                 for t in times:
-                    candidates.update((t, t + window))
-                for t in candidates:
-                    if t < t0 + window or t >= t_resume:
+                    grid.update((t, t + window))
+                points_t = sorted(t for t in grid if t0 + window <= t < t_resume)
+                values = [energy_until(t) - energy_until(t - window) for t in points_t]
+                for k, (t, w_t) in enumerate(zip(points_t, values)):
+                    if w_t > limit:
                         continue
-                    if energy_until(t) - energy_until(t - window) <= limit:
-                        need = max(need, t - t0)
+                    need = max(need, t - t0)
+                    if k + 1 < len(points_t) and values[k + 1] > limit:
+                        t_next, w_next = points_t[k + 1], values[k + 1]
+                        crossing = t + (limit - w_t) / (w_next - w_t) * (t_next - t)
+                        need = max(need, crossing - t0)
             needs.append(need)
             i = j
     except Exception:  # noqa: BLE001 - a guard must never break a suggestion pass
@@ -2399,6 +2407,11 @@ class SuggestionEngine:
         )
         max_gap_s = _MAX_PAUSE_GAP_H * 3600
         eff = self._effective_thresholds(self._entry_options())
+        # The stop the detector RUNS at times the quiet: an unset one is 0.6 x
+        # min_power (#450), not the min_power `_current_stop_threshold` falls
+        # back to for the clean-cycle check, and `_end_gate_evidence` already
+        # judges against it.
+        stop_thr = float(_num(eff.get(CONF_STOP_THRESHOLD_W)) or stop_thr)
         gate_off_delay = float(_num(eff.get(CONF_OFF_DELAY)) or DEFAULT_OFF_DELAY)
         gate_end_energy = float(_num(eff.get(CONF_END_ENERGY_THRESHOLD)) or 0.0)
         spans: list[float] = []

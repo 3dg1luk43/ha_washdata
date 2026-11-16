@@ -272,3 +272,28 @@ async def test_the_sensor_counts_what_settings_shows(
     state = hass.states.get(entity_id)
     assert state.state == "0"
     assert state.attributes["has_actionable_suggestions"] is False
+
+
+def test_the_latest_moment_is_found_between_two_grid_points() -> None:
+    """PR #529 review: the window energy rises through the limit between two grid
+    points, so the latest moment at or under it is that crossing. 0 W, then 5 W
+    from 1000 s into the pause: 180 s x 5 W passes 0.05 Wh at 1036 s, not 1000."""
+    from custom_components.ha_washdata.suggestion_engine import end_gate_pause_needs  # noqa: PLC0415
+
+    pts = [(0.0, 100.0), (100.0, 0.0), (1100.0, 5.0), (2100.0, 50.0)]
+    assert end_gate_pause_needs(pts, 6.0, 180, 0.05) == [1036.0]
+    assert end_gate_would_split(pts, 6.0, 180, 1020, 0.05)
+    assert not end_gate_would_split(pts, 6.0, 180, 1040, 0.05)
+
+
+async def test_a_pass_from_replaced_options_applies_nothing(mock_hass: Any) -> None:
+    """PR #529 review: a pass started before a refresh carries the old options
+    snapshot; a refresh in between makes its result stale."""
+    store = _Store()
+    lm = _learning(mock_hass, store, {CONF_START_THRESHOLD_W: 81.0, CONF_STOP_THRESHOLD_W: 54.0})
+    gen = lm._config_generation  # noqa: SLF001
+    lm._config_generation += 1  # noqa: SLF001  - what a refresh does first
+    lm._apply_if_current(gen, {CONF_START_THRESHOLD_W: _sug(454.4)}, OWNER_BATCH)  # noqa: SLF001
+    assert store.suggestions == {}
+    lm._apply_if_current(lm._config_generation, {CONF_START_THRESHOLD_W: _sug(454.4)}, OWNER_BATCH)  # noqa: SLF001
+    assert CONF_START_THRESHOLD_W in store.suggestions

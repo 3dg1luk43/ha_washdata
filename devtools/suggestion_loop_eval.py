@@ -505,7 +505,7 @@ class _ManagerTap:
     def __init__(self, sim: Any) -> None:
         det = sim.detector
         self.pending: list[float] = []
-        self.committed: list[float] = []
+        self.committed: list[list[float]] = []  # one group per cycle end, as live
         self.ends: list[float] = []
         self._last: Any = None
         self._t_recorded_end = sim.readings[-1][0]
@@ -533,7 +533,7 @@ class _ManagerTap:
             if data.get("status") == "completed" and data.get("termination_reason") not in (
                 TerminationReason.USER, TerminationReason.FORCE_STOPPED,
             ):
-                self.committed.extend(self.pending)
+                self.committed.append(list(self.pending))
             self.pending.clear()
             orig_end(data)
 
@@ -672,7 +672,7 @@ def assemble(
 ) -> tuple[list[dict], list[float], dict[str, Any]]:
     """Store what the replays emitted, in history order, as the manager would.
 
-    Returns the new ``past_cycles``, the committed cadence intervals per replayed cycle, in order,
+    Returns the new ``past_cycles``, the committed cadence intervals per detected cycle end, in order,
     and counts. ``replays`` maps a source index to :func:`replay_one`'s result; a
     source without one is kept as stored.
     """
@@ -704,7 +704,7 @@ def assemble(
             continue
         m["replayed"] += 1
         m["idle_above_stop"] += bool(rep.get("idle_above_stop"))
-        intervals.append(list(rep["committed"]))
+        intervals.extend(list(group) for group in rep["committed"])
         kept: list[dict] = []
         end_at: dict[int, float] = {}
         for i, cd in enumerate(rep["captured"]):
@@ -1291,13 +1291,18 @@ def _unmatched_task(job: tuple[str, str, dict, int]) -> tuple[str, str, int, dic
     pts = [(t, p) for t, p in _cycle_readings(src) if offset_key(t) not in synthetic]
     if len(pts) < 10:
         return path, arm, idx, None
-    t0 = pts[0][0]
-    pts = [(t - t0, p) for t, p in pts]
-    cycle = {"id": src.get("id") or f"u{idx}", "start_time": src.get("start_time"),
-             "power_data": [[t, p] for t, p in pts]}
+    cfg = dev.detector_config(options)
+    # The input `replay_one` gives the matched rounds: the stored cycle (its
+    # keepalive rows marked) thinned by the reading throttle when these options
+    # raise `sampling_interval` above the recorded one.
+    cyc = src
+    s_now = float(options.get(CONF_SAMPLING_INTERVAL, dev.s0))
+    if s_now > dev.s0:
+        thinned = _throttle(_cycle_readings(src), s_now, float(cfg.min_power))
+        if len(thinned) < len(_cycle_readings(src)):
+            cyc = dict(src, power_data=[[round(t, 1), p] for t, p in thinned])
     sim = playground._DetailSim(  # noqa: SLF001
-        cycle, dev.detector_config(options), None, None, dict(options), None,
-        compute_series=False,
+        cyc, cfg, None, None, {**dev.entry_data, **options}, None, compute_series=False,
     )
     ends: list[float] = []
     ended: list[dict] = []
@@ -1314,11 +1319,15 @@ def _unmatched_task(job: tuple[str, str, dict, int]) -> tuple[str, str, int, dic
         sim.run_tail()
         ended = list(sim.kept)
     stop = dev.recorded_stop
-    work = [t for t, p in pts if p >= stop]
+    # The end lag as `replay_one` measures it: detection time less the source's
+    # last reading at or above the recorded stop, both from the cycle's base.
+    src_readings, _pts, src_base = playground._readings_from_cycle(src)  # noqa: SLF001
+    work = [ts for ts, p in src_readings if p >= stop]
+    work_end = (work[-1] - src_base).total_seconds() if work else None
     return path, arm, idx, {
         "split": _unmatched_split(ended, pts, stop),
         "interrupted": any(e.get("status") == "interrupted" for e in ended),
-        "lag": (ends[-1] - work[-1]) if ends and work else None,
+        "lag": (ends[-1] - work_end) if ends and work_end is not None else None,
     }
 
 

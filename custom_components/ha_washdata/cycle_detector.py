@@ -5151,10 +5151,12 @@ class CycleDetector:
             # has had its terminal event is past it (the pump-out it dries for).
             and (not needs_event or self._terminal_event_seen(timestamp))
         ):
+            self._standby_band_near_stop = True
             return hi
         if needs_event:
             return None  # #518: the near-stop tier only
         if current_duration >= self._expected_duration * STANDBY_BAND_LOOSE_MIN_RATIO:
+            self._standby_band_near_stop = False
             return hi
         return None
 
@@ -5299,7 +5301,9 @@ class CycleDetector:
             status="completed",
             termination_reason=TerminationReason.TIMEOUT,
             keep_tail=False,
-            standby_band_w=power,
+            # Only the near-stop tier is a standby: the loose one also closes a
+            # 0 W soak or a 60 W rinse stuck past twice the expected duration.
+            standby_band_w=power if getattr(self, "_standby_band_near_stop", False) else None,
         )
         return True
 

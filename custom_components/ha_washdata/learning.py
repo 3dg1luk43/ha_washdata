@@ -119,7 +119,7 @@ def recent_cadence(summaries: Any) -> tuple[float, float] | None:
     for row in list(summaries or [])[-CADENCE_RECENT_CYCLES:]:
         try:
             p95, median = float(row[0]), float(row[1])
-        except (TypeError, ValueError, IndexError):
+        except (TypeError, ValueError, IndexError, OverflowError):
             continue
         if math.isfinite(p95) and math.isfinite(median) and p95 > 0 and median > 0:
             rows.append((p95, median))
@@ -253,7 +253,11 @@ class StatisticalModel:
 
     def add_sample(self, value: float, now: datetime) -> None:
         """Add a sample and update stats."""
-        self._samples.append(value)
+        self.add_samples((value,), now)
+
+    def add_samples(self, values: Any, now: datetime) -> None:
+        """Add samples and update stats once (a cycle commits thousands at a time)."""
+        self._samples.extend(values)
         if len(self._samples) > self._max_samples:
             self._samples = self._samples[-self._max_samples:]
         self._last_update = now
@@ -331,6 +335,10 @@ class LearningManager:
         self._operational_pass_due: bool = False
         self._last_batch_simulation_count: int = 0  # track when to re-run batch
         self._last_suggestions_labeled_count: int = 0  # gate model/detection passes
+        # Bumped by every refresh (an options reload, a device type change): a pass
+        # that started before it applies nothing, since its options snapshot
+        # (``for_job``) is no longer the one in force.
+        self._config_generation: int = 0
 
     def _spawn(self, coro: Coroutine[Any, Any, Any]) -> Any:
         """Start a background task through the manager's tracked spawner."""
@@ -452,6 +460,15 @@ class LearningManager:
             filtered_suggestions, changed=any_deleted, owner=owner
         )
 
+    def _apply_if_current(
+        self, generation: int, suggestions: dict[str, Any], owner: str | None
+    ) -> None:
+        """Apply a background pass's result unless a refresh superseded its snapshot."""
+        if generation != self._config_generation:
+            self._logger.debug("Discarding a %s pass computed against replaced options", owner)
+            return
+        self._apply_suggestions_and_notify(suggestions, owner=owner)
+
     def _withdraw_owned(self, owner: str, proposed: dict[str, Any]) -> bool:
         """Delete stored entries ``owner`` produced and no longer proposes."""
         deleted = False
@@ -506,8 +523,9 @@ class LearningManager:
             TerminationReason.FORCE_STOPPED,
         ):
             return False
-        for delta, ts in pending:
-            self._sample_interval_model.add_sample(delta, ts)
+        self._sample_interval_model.add_samples(
+            (delta for delta, _ts in pending), pending[-1][1]
+        )
         summary = cycle_cadence(delta for delta, _ts in pending)
         if summary is not None:
             try:
@@ -649,16 +667,19 @@ class LearningManager:
             return
 
         self._last_batch_simulation_count = current_count
-        self._spawn(self._async_run_batch_simulation(labeled_cycles))
+        self._spawn(self._async_run_batch_simulation(labeled_cycles, self._config_generation))
 
-    async def _async_run_batch_simulation(self, cycles: list[dict[str, Any]]) -> None:
+    async def _async_run_batch_simulation(
+        self, cycles: list[dict[str, Any]], generation: int | None = None
+    ) -> None:
         """Run multi-cycle batch simulation asynchronously."""
+        gen = self._config_generation if generation is None else generation
         try:
             engine = self.suggestion_engine.for_job()
             new_suggestions = await self.hass.async_add_executor_job(
                 engine.run_batch_simulation, cycles
             )
-            self._apply_suggestions_and_notify(new_suggestions or {}, owner=OWNER_BATCH)
+            self._apply_if_current(gen, new_suggestions or {}, OWNER_BATCH)
             if new_suggestions:
                 self._logger.debug(
                     "Batch simulation (%d cycles) produced suggestions: %s",
@@ -726,15 +747,20 @@ class LearningManager:
                 return
             self._apply_suggestions_and_notify(suggestions or {}, owner=owner)
             return
-        self._spawn(self._async_scan_and_apply(generate, label, owner))
+        self._spawn(self._async_scan_and_apply(generate, label, owner, self._config_generation))
 
     async def _async_scan_and_apply(
-        self, generate: Callable[[], dict[str, Any]], label: str, owner: str | None = None
+        self,
+        generate: Callable[[], dict[str, Any]],
+        label: str,
+        owner: str | None = None,
+        generation: int | None = None,
     ) -> None:
         """Offload ``generate`` to an executor thread, then apply on the loop."""
+        gen = self._config_generation if generation is None else generation
         try:
             suggestions = await self.hass.async_add_executor_job(generate)
-            self._apply_suggestions_and_notify(suggestions or {}, owner=owner)
+            self._apply_if_current(gen, suggestions or {}, owner)
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.error("%s suggestion pass failed: %s", label, e)
 
@@ -744,16 +770,17 @@ class LearningManager:
         Offloaded to an executor because it scans power traces across up to 200
         cycles for the clean-cycle health checks.
         """
-        self._spawn(self._async_run_detection_suggestions())
+        self._spawn(self._async_run_detection_suggestions(self._config_generation))
 
-    async def _async_run_detection_suggestions(self) -> None:
+    async def _async_run_detection_suggestions(self, generation: int | None = None) -> None:
         """Run the detection-suggestion pass off the event loop."""
+        gen = self._config_generation if generation is None else generation
         try:
             engine = self.suggestion_engine.for_job()
             new_suggestions = await self.hass.async_add_executor_job(
                 engine.generate_detection_suggestions
             )
-            self._apply_suggestions_and_notify(new_suggestions or {}, owner=OWNER_DETECTION)
+            self._apply_if_current(gen, new_suggestions or {}, OWNER_DETECTION)
             if new_suggestions:
                 self._logger.debug(
                     "Detection suggestions produced: %s", list(new_suggestions.keys())
@@ -787,6 +814,7 @@ class LearningManager:
         change); otherwise only entries no pass owns (stored before passes owned
         their entries) are dropped. Never raises.
         """
+        self._config_generation += 1
         try:
             stored = self.profile_store.get_suggestions() or {}
             stale = [
@@ -816,7 +844,11 @@ class LearningManager:
         ]
 
     async def _async_run_all_passes(self) -> None:
-        """Every suggestion pass, in cycle-end order, each with its owner."""
+        """Every suggestion pass, in cycle-end order, each with its owner.
+
+        Stops applying as soon as a refresh supersedes the options it started on.
+        """
+        gen = self._config_generation
         try:
             cad = self.cadence()
             if cad is not None:
@@ -825,20 +857,20 @@ class LearningManager:
                     self.suggestion_engine.for_job().generate_operational_suggestions,
                     p95, median
                 )
-                self._apply_suggestions_and_notify(op or {}, owner=OWNER_OPERATIONAL)
+                self._apply_if_current(gen, op or {}, OWNER_OPERATIONAL)
             for owner, generate in (
                 (OWNER_STANDBY_FLOOR, self.suggestion_engine.for_job().generate_standby_floor_suggestions),
                 (OWNER_START_THRESHOLD, self.suggestion_engine.for_job().generate_start_threshold_suggestions),
                 (OWNER_MODEL, self.suggestion_engine.for_job().generate_model_suggestions),
             ):
                 found = await self.hass.async_add_executor_job(generate)
-                self._apply_suggestions_and_notify(found or {}, owner=owner)
-            await self._async_run_detection_suggestions()
+                self._apply_if_current(gen, found or {}, owner)
+            await self._async_run_detection_suggestions(gen)
             cycles = self._batch_cycles()
             batch = await self.hass.async_add_executor_job(
                 self.suggestion_engine.for_job().run_batch_simulation, cycles
             )
-            self._apply_suggestions_and_notify(batch or {}, owner=OWNER_BATCH)
+            self._apply_if_current(gen, batch or {}, OWNER_BATCH)
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.error("Suggestion analysis failed: %s", e)
 

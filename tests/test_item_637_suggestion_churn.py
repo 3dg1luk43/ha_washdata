@@ -142,3 +142,27 @@ def test_the_hold_band_and_the_seconds_bars(mock_hass: Any) -> None:
         CONF_WATCHDOG_INTERVAL: {"value": 70, "reason": "r", "corrective": True},
     })
     lm.suggestion_engine.apply_suggestions.assert_called_once()
+
+
+def test_an_oversized_stored_row_is_skipped_not_fatal() -> None:
+    """PR #529 review: float(10**400) raises OverflowError; one bad imported row
+    must not throw away the others."""
+    rows = [[10**400, 5.0], [20.0, 10.0], [float("inf"), 10.0]]
+    assert recent_cadence(rows) == (20.0, 10.0)
+
+
+def test_a_whole_cycle_commits_in_one_update(mock_hass: Any) -> None:
+    """PR #529 review: one stats recompute per committed cycle, not one per interval."""
+    lm = _learning(mock_hass, _Store(), {})
+    calls = []
+    original = lm._sample_interval_model._compute_stats  # noqa: SLF001
+
+    def _count() -> None:
+        calls.append(1)
+        original()
+
+    lm._sample_interval_model._compute_stats = _count  # noqa: SLF001
+    lm._pending_intervals.extend((10.0, NOW) for _ in range(3000))  # noqa: SLF001
+    lm.close_cycle_cadence({"status": "completed", "termination_reason": "timeout"})
+    assert len(calls) == 1
+    assert lm._sample_interval_model.count == 200  # noqa: SLF001
