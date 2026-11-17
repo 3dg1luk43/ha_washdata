@@ -77,6 +77,7 @@ python3 devtools/lead_in_eval.py               # stored cycle start vs raw onset
 python3 devtools/playground_parity_eval.py --mode replay   # replay vs the real manager: ends/programs that differ (F7)
 python3 devtools/suggestion_loop_eval.py     # apply-all loop per device: fixed point / ladder / oscillation / erased cycles (F10)
 python3 devtools/suggestion_churn_eval.py    # suggestions offered per key over each history in order; --arm legacy = 0.6.0 rules (item 637)
+python3 devtools/suggestion_evidence_eval.py # clean-cycle programme-length exemption + standby advisory, swept and vs 0.6.0
 
 python3 devtools/mqtt_mock_socket.py --source <export.json>   # mock MQTT plug into a real HA (web UI :8081)
 python3 devtools/mqtt_mock_socket.py --dry-run --source <export.json> --scenario soak --mode silent
