@@ -720,7 +720,8 @@ STANDBY_LEVEL_RECENT_CYCLES = 30
 
 
 def learned_standby_level_w(
-    cycles: Any, stop_threshold_w: float, start_threshold_w: float
+    cycles: Any, stop_threshold_w: float, start_threshold_w: float,
+    *, stop_changes: Any = None,
 ) -> float | None:
     """Discussion #452: the standby/display level of a two-level appliance, or None.
 
@@ -747,7 +748,7 @@ def learned_standby_level_w(
         if not (math.isfinite(stop) and math.isfinite(start)) or stop <= 0:
             return None
         recent = [c for c in list(cycles or [])[-STANDBY_LEVEL_RECENT_CYCLES:] if isinstance(c, dict)]
-        adv = detect_standby_above_stop(recent, stop)
+        adv = detect_standby_above_stop(recent, stop, stop_changes=stop_changes)
         if adv is not None:
             level: float | None = float(adv["idle_w"])
         else:

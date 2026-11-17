@@ -23,7 +23,7 @@ import copy
 import logging
 import math
 from decimal import ROUND_CEILING, ROUND_FLOOR, Decimal
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Callable, Coroutine, TYPE_CHECKING, cast
 
 import numpy as np
@@ -741,14 +741,72 @@ def _cycle_peak_w(cycle: dict[str, Any], raw: list[Any]) -> float:
     return peak
 
 
-def _idle_evidence_w(cycle: dict[str, Any], stop_threshold_w: float) -> float | None:
+def _instant(value: Any) -> datetime | None:
+    """An ISO stamp as an aware instant (naive read as UTC), None when unreadable."""
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value)
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+
+
+def stop_threshold_changes(changelog: Any) -> list[tuple[datetime, float | None]]:
+    """The recorded Stop Threshold changes, oldest first: (when, the value before it).
+
+    Read from the settings changelog (``ProfileStore.get_settings_changelog``: the
+    newest 50 changes of any setting, newest first). Rows without a readable time
+    are skipped. Never raises: [] when nothing usable is recorded.
+    """
+    out: list[tuple[datetime, float | None]] = []
+    try:
+        for row in list(changelog or []):
+            if not isinstance(row, dict) or row.get("key") != CONF_STOP_THRESHOLD_W:
+                continue
+            when = _instant(row.get("timestamp"))
+            if when is not None:
+                out.append((when, _num(row.get("old"))))
+        out.sort(key=lambda r: r[0])
+    except Exception:  # noqa: BLE001 - a statistic input must never break its caller
+        return []
+    return out
+
+
+def recorded_stop_changes(store: Any) -> list[tuple[datetime, float | None]]:
+    """:func:`stop_threshold_changes` of ``store``'s settings changelog; [] when it has
+    none or cannot be read, which leaves the advisory as it was before item 646."""
+    try:
+        return stop_threshold_changes(store.get_settings_changelog())
+    except Exception:  # noqa: BLE001 - a statistic input must never break its caller
+        return []
+
+
+def _stop_at_end(
+    cycle: dict[str, Any], changes: list[tuple[datetime, float | None]], current: float
+) -> float | None:
+    """The Stop Threshold in force when ``cycle`` ended: the value the first recorded
+    change after its end replaced, else the current one. None when unknown."""
+    end = _instant(cycle.get("end_time"))
+    if end is None:
+        return None
+    for when, old in changes:
+        if when > end:
+            return old
+    return current
+
+
+def _idle_evidence_w(
+    cycle: dict[str, Any], stop_threshold_w: float, stop_at_end: float | None = None
+) -> float | None:
     """The level one stored cycle shows the appliance idling at, if it shows one.
 
     ``0.0`` for a cycle whose end saw the power below the threshold, the plateau
     level for a standby-band finalize, the settled kept tail for a cycle stopped
     by hand or force-stopped, None when the cycle says nothing (no trace, no tail,
     stopped by hand while still working, or a loose-tier finalize on a plateau at
-    or above the threshold).
+    or above the threshold). ``stop_at_end``: the threshold in force when it ended,
+    if known; an end below a higher one says nothing about the current one.
     """
     band = _num(cycle.get("standby_band_w"))
     if band is not None:
@@ -759,6 +817,10 @@ def _idle_evidence_w(cycle: dict[str, Any], stop_threshold_w: float) -> float | 
     if loose is not None:
         return 0.0 if loose < stop_threshold_w else None
     if cycle.get("termination_reason") in _BELOW_STOP_ENDS:
+        # It got below the threshold in force then. Below a higher one, since
+        # lowered, it may idle above the current one (register item 646).
+        if stop_at_end is not None and stop_at_end > stop_threshold_w:
+            return None
         return 0.0
     raw = cycle.get("power_data")
     if not isinstance(raw, list) or not raw:
@@ -791,6 +853,7 @@ def detect_standby_above_stop(
     *,
     recent: int = 8,
     min_hits: int = 2,
+    stop_changes: list[tuple[datetime, float | None]] | None = None,
 ) -> dict[str, Any] | None:
     """Does this appliance idle ABOVE its stop threshold? (#445 cause 1)
 
@@ -811,7 +874,9 @@ def detect_standby_above_stop(
     recent cycle is judged by how it ended (:func:`_idle_evidence_w`):
 
     * the end saw the power below the threshold (timeout, Smart Termination,
-      terminal drop): it gets there, so it does not idle above it;
+      terminal drop): it gets there, so it does not idle above it - unless
+      ``stop_changes`` (:func:`stop_threshold_changes`) shows a higher threshold
+      was in force then, which says nothing about the current one (item 646);
     * the standby-band finalize: idles above, at the plateau it recorded
       (``standby_band_w``; cycles stored before that mark read as the timeout
       they were stored as);
@@ -841,7 +906,9 @@ def detect_standby_above_stop(
         for cycle in list(cycles)[-recent:]:
             if not isinstance(cycle, dict):
                 continue
-            level = _idle_evidence_w(cycle, stop)
+            level = _idle_evidence_w(
+                cycle, stop, _stop_at_end(cycle, stop_changes, stop) if stop_changes else None
+            )
             if level is None:
                 continue
             if level > stop:
@@ -888,7 +955,8 @@ STANDBY_FLOOR_MIN_CLEAN_CYCLES = 5
 
 
 def standby_stop_floor(
-    cycles: list[dict[str, Any]], stop_threshold_w: float, off_delay_s: float
+    cycles: list[dict[str, Any]], stop_threshold_w: float, off_delay_s: float,
+    *, stop_changes: list[tuple[datetime, float | None]] | None = None,
 ) -> dict[str, Any] | None:
     """The lowest stop threshold this appliance's standby allows, if it needs one.
 
@@ -906,7 +974,7 @@ def standby_stop_floor(
     Pure statistics, executor-safe, never raises.
     """
     try:
-        adv = detect_standby_above_stop(cycles, stop_threshold_w)
+        adv = detect_standby_above_stop(cycles, stop_threshold_w, stop_changes=stop_changes)
         if adv is None:
             return None
         idle = float(adv["idle_w"])
@@ -2090,7 +2158,10 @@ class SuggestionEngine:
         if off_delay <= 0:
             off_delay = float(resolve_off_delay_default(self.device_type or ""))
         cycles = self.profile_store.get_past_cycles()[-200:]
-        return standby_stop_floor(list(cycles), stop, off_delay)
+        return standby_stop_floor(
+            list(cycles), stop, off_delay,
+            stop_changes=recorded_stop_changes(self.profile_store),
+        )
 
     def generate_standby_floor_suggestions(self) -> dict[str, Any]:
         """Raise a stop threshold that sits under the appliance's standby (#458).

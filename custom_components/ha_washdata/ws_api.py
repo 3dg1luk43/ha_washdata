@@ -1844,6 +1844,7 @@ def ws_get_devices(
                         # other use in this file does.
                         from .suggestion_engine import (  # pylint: disable=import-outside-toplevel
                             detect_standby_above_stop,
+                            recorded_stop_changes,
                         )
 
                         # #445 cause 1: an appliance whose standby draw sits ABOVE
@@ -1865,6 +1866,7 @@ def ws_get_devices(
                         info["standby_above_stop"] = detect_standby_above_stop(
                             store.get_past_cycles() or [],
                             float(_stop_w or 0.0),
+                            stop_changes=recorded_stop_changes(store),
                         )
                     except Exception:  # pylint: disable=broad-exception-caught
                         # Logged, not swallowed silently: this advisory shipped dead

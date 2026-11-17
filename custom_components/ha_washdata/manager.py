@@ -257,6 +257,7 @@ from .cycle_detector import (
     terminal_high_for_guards,
 )
 from .learning import LearningManager, resolve_review_answer, review_answer_choices
+from .suggestion_engine import recorded_stop_changes
 from .profile_store import (
     MatchResult,
     ProfileStore,
@@ -4556,11 +4557,15 @@ class WashDataManager:
                 ]
                 if isinstance(c, dict)
             ]
+            changes = recorded_stop_changes(self.profile_store)
             level = await self.hass.async_add_executor_job(
-                learned_standby_level_w,
-                cycles,
-                float(cfg.stop_threshold_w),
-                float(cfg.start_threshold_w),
+                functools.partial(
+                    learned_standby_level_w,
+                    cycles,
+                    float(cfg.stop_threshold_w),
+                    float(cfg.start_threshold_w),
+                    stop_changes=changes,
+                )
             )
             self.detector.set_standby_level(level)
             self._logger.debug("Idle display standby level: %s W", level)
