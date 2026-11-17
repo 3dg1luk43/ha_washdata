@@ -274,3 +274,13 @@ async def test_last_cycle_start_is_a_timestamp_of_the_last_run(
     manager.notify_update()
     await hass.async_block_till_done()
     assert hass.states.get(entity_id).state == "unknown"
+    # A well-formed but impossible ISO date: `parse_datetime` raises for it, and a
+    # failed update would keep the previous state, so start from a valid one.
+    manager.profile_store.get_past_cycles()[-1]["start_time"] = start.isoformat()
+    manager.notify_update()
+    await hass.async_block_till_done()
+    assert dt_util.parse_datetime(hass.states.get(entity_id).state) == start
+    manager.profile_store.get_past_cycles()[-1]["start_time"] = "2026-13-01T00:00:00+00:00"
+    manager.notify_update()
+    await hass.async_block_till_done()
+    assert hass.states.get(entity_id).state == "unknown"

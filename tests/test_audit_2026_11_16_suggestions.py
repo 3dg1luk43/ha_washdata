@@ -532,6 +532,20 @@ def test_the_latest_moment_is_found_between_two_grid_points() -> None:
     assert not end_gate_would_split(pts, 6.0, 180, 1040, 0.05)
 
 
+def test_a_non_finite_reading_does_not_stall_the_pause_scan() -> None:
+    """PR #529 review: a NaN reading is neither at nor below the stop, so the scan
+    never advanced past it and the pass (Apply all, inside the options lock) hung.
+    Non-finite readings are skipped; the pause reads as it does without them."""
+    from custom_components.ha_washdata.suggestion_engine import end_gate_pause_needs  # noqa: PLC0415
+
+    nan = float("nan")
+    pts = [(0.0, 100.0), (100.0, 0.0), (1100.0, 5.0), (2100.0, 50.0)]
+    with_nan = [(0.0, nan), *pts[:2], (600.0, nan), (700.0, float("inf")), *pts[2:]]
+    assert end_gate_pause_needs(with_nan, 6.0, 180, 0.05) == [1036.0]
+    assert end_gate_would_split(with_nan, 6.0, 180, 1020, 0.05)
+    assert end_gate_pause_needs([(0.0, nan), (10.0, nan)], 6.0, 180, 0.05) == []
+
+
 async def test_a_pass_from_replaced_options_applies_nothing(mock_hass: Any) -> None:
     """PR #529 review: a pass started before a refresh carries the old options
     snapshot; a refresh in between makes its result stale."""

@@ -158,6 +158,9 @@ def end_gate_pause_needs(
         stop = float(stop_w)
         if not all(math.isfinite(v) for v in (window, limit, stop)) or window <= 0:
             return needs
+        # A NaN reading is neither at nor below the stop, so the scan below would
+        # never get past it (PR #529 review); every finite one moves it on.
+        points = [(t, p) for t, p in points if math.isfinite(t) and math.isfinite(p)]
         n = len(points)
         i = 0
         while i < n:

@@ -1294,7 +1294,14 @@ class WasherLastCycleStartSensor(WasherLastCycleSensor):
                 return dt_util.utc_from_timestamp(seconds)
             except (OverflowError, OSError, ValueError):
                 return None
-        parsed = dt_util.parse_datetime(raw) if isinstance(raw, str) else None
+        if not isinstance(raw, str):
+            return None
+        try:
+            # Raises, rather than returning None, for a well-formed but impossible
+            # date such as month 13 (PR #529 review).
+            parsed = dt_util.parse_datetime(raw)
+        except (TypeError, ValueError, OverflowError):
+            return None
         if parsed is None or parsed.tzinfo is None:
             return None
         return dt_util.as_utc(parsed)
