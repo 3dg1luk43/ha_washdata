@@ -1,0 +1,77 @@
+"""devtools/suggestion_churn_eval.py: the legacy arm and a walk on a synthetic device.
+
+The corpus run needs ``cycle_data/`` (local only); this pins the 0.6.0 patch's
+clean-up and cadence window and walks a tiny synthetic export through both arms so
+the harness cannot rot in CI.
+"""
+from __future__ import annotations
+
+import importlib.util
+import json
+import sys
+from pathlib import Path
+
+import numpy as np
+
+from custom_components.ha_washdata import learning, suggestion_engine
+
+_PATH = Path(__file__).resolve().parents[1] / "devtools" / "suggestion_churn_eval.py"
+_spec = importlib.util.spec_from_file_location("wd_suggestion_churn_eval", _PATH)
+churn = importlib.util.module_from_spec(_spec)
+sys.modules[_spec.name] = churn
+_spec.loader.exec_module(churn)
+
+
+def test_the_legacy_patch_restores_the_shipped_rules() -> None:
+    shipped = (learning.CADENCE_HOLD_REL, learning._SECONDS_SUFFIXES, suggestion_engine.STOP_HOLD_BAND)  # noqa: SLF001
+    with churn.legacy_patch(True):
+        assert learning._SECONDS_SUFFIXES == ()  # noqa: SLF001
+        assert suggestion_engine.STOP_HOLD_BAND == float("inf")
+        assert learning.CADENCE_HOLD_REL < shipped[0]
+    assert (learning.CADENCE_HOLD_REL, learning._SECONDS_SUFFIXES, suggestion_engine.STOP_HOLD_BAND) == shipped  # noqa: SLF001
+
+
+def test_the_legacy_cadence_reads_the_newest_200_intervals() -> None:
+    assert churn.legacy_cadence([[30.0] * 19]) is None
+    p95, median = churn.legacy_cadence([[600.0] * 300, [30.0] * 200])
+    assert (p95, median) == (30.0, 30.0)
+
+
+def _export() -> dict:
+    """Eight labelled washes on a jittery 30 s plug (a 10-60 s cadence spread)."""
+    rng = np.random.default_rng(7)
+    past = []
+    for j in range(8):
+        pts, t = [[0.0, 0.0]], 15.0
+        for minutes, watts in ((15, 2000.0), (20, 150.0), (3, 0.0), (20, 150.0), (3, 500.0)):
+            for _ in range(minutes * 2):
+                w = 0.0 if watts == 0 else max(5.0, watts * (1 + 0.05 * rng.standard_normal()))
+                pts.append([round(t, 1), round(w, 1)])
+                t += float(rng.choice([10.0, 30.0, 60.0]))
+        pts.append([round(t, 1), 0.0])
+        past.append({
+            "id": f"c{j}", "profile_name": "Wash", "label_source": "manual",
+            "status": "completed", "termination_reason": "timeout",
+            "start_time": f"2026-01-{j + 1:02d}T08:00:00+00:00",
+            "duration": pts[-1][0], "power_data": pts,
+        })
+    return {
+        "version": 16, "entry_data": {"device_type": "washing_machine", "name": "Synth"},
+        "entry_options": {"min_power": 2.0, "off_delay": 180},
+        "data": {"profiles": {}, "past_cycles": past, "envelopes": {}},
+    }
+
+
+def test_both_arms_walk_a_synthetic_device(tmp_path: Path) -> None:
+    (tmp_path / "synth").mkdir()
+    (tmp_path / "synth" / "export.json").write_text(json.dumps(_export()))
+    shipped = (learning.CADENCE_HOLD_REL, learning._SECONDS_SUFFIXES, suggestion_engine.STOP_HOLD_BAND)  # noqa: SLF001
+    rows = churn.run(tmp_path, churn.ARMS, None, jobs=1)
+    assert sorted(r["arm"] for r in rows) == ["legacy", "shipped"]
+    for row in rows:
+        assert row["cycles"] == 8 and row["cycle_ends"] == 8
+        assert set(row["applies"]) == set(churn.KEYS)
+        for key, history in row["history"].items():
+            assert len(history) == row["applies"][key]
+    # A walk leaves the shipped rules in place.
+    assert (learning.CADENCE_HOLD_REL, learning._SECONDS_SUFFIXES, suggestion_engine.STOP_HOLD_BAND) == shipped  # noqa: SLF001

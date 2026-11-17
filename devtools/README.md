@@ -110,6 +110,8 @@ replay the shipped code; run with `--help` for options.
 | `terminal_drop_plugpull_eval.py` | the dishwasher plug-pull fast finalize |
 | `playground_parity_eval.py --mode replay` | Playground replay vs the real manager |
 | `suggestion_loop_eval.py` | Apply all, repeated to a fixed point |
+| `suggestion_churn_eval.py` | how often each suggestion is offered over a device's history, replayed in order; `--arm legacy` restores the 0.6.0 cadence and noise rules |
+| `door_end_eval.py` | the PAUSED door-end bar (#524): real ends reached vs mid-cycle quiet spells exposed |
 | `margin_display_fit.py` | the Status card's "~N% sure" knots, from an `eval.py --mode full` run |
 | `dtw_ab_eval.py` | the Stage-5 grouping prototype (default) and mid-cycle top-1 with `--checkpoints`; not the shipped matcher (it says so) |
 | `analyze_diag.py` | what the suggestion engine proposes for one export |
