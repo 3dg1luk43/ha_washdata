@@ -110,3 +110,35 @@ async def test_every_caller_reads_the_changelog_on_a_real_boot(
 
     await manager._async_refresh_standby_level()  # noqa: SLF001
     assert manager.detector._standby_level_w == 3.0  # noqa: SLF001
+
+
+async def test_a_stop_change_outlives_the_changelog_cap(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """The changelog keeps the newest 50 changes of any setting; recent Stop
+    Threshold rows are kept past it (at most 10), or 50 other changes after the
+    lowering would bring the stale ends back."""
+    entry = await setup_washdata_entry(options={CONF_STOP_THRESHOLD_W: 2.0, "start_threshold_w": 10.0})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    store._data["past_cycles"] = _history()  # noqa: SLF001
+    await store.async_record_settings_changes(_log(5.0, 2.0))
+    later = (CHANGED_AT + timedelta(hours=1)).isoformat()
+    await store.async_record_settings_changes(
+        [{"key": "off_delay", "old": 180 + i, "new": 181 + i, "timestamp": later} for i in range(60)]
+    )
+    log = store.get_settings_changelog()
+    assert len(log) == store.SETTINGS_CHANGELOG_MAX + 1
+    assert log[-1]["key"] == CONF_STOP_THRESHOLD_W
+    changes = stop_threshold_changes(log)
+    assert detect_standby_above_stop(store.get_past_cycles(), 2.0, stop_changes=changes) is not None
+
+    # Bounded: never more than SETTINGS_CHANGELOG_KEEP_STOP stop rows past the cap.
+    await store.async_record_settings_changes(
+        [{"key": CONF_STOP_THRESHOLD_W, "old": 2.0, "new": 2.0 + i / 10, "timestamp": later} for i in range(20)]
+    )
+    await store.async_record_settings_changes(
+        [{"key": "off_delay", "old": 1, "new": 2, "timestamp": later} for _ in range(60)]
+    )
+    tail = store.get_settings_changelog()[store.SETTINGS_CHANGELOG_MAX:]
+    assert len(tail) == store.SETTINGS_CHANGELOG_KEEP_STOP
+    assert all(row["key"] == CONF_STOP_THRESHOLD_W for row in tail)

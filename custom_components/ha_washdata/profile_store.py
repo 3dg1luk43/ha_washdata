@@ -46,6 +46,7 @@ from homeassistant.util import dt as dt_util
 
 from .const import (
     CADENCE_RECENT_CYCLES,
+    CONF_STOP_THRESHOLD_W,
     END_GATE_HAZARD_MIN_CYCLES,
     PRICE_TIMELINE_MAX_POINTS,
     PRICE_TIMELINE_PRICE_DECIMALS,
@@ -3128,6 +3129,9 @@ class ProfileStore:
 
     #: Maximum settings-changelog entries retained per device (newest kept).
     SETTINGS_CHANGELOG_MAX = 50
+    #: Stop Threshold rows kept past that cap: the standby advisory reads which
+    #: threshold each recent cycle ended under from them (register item 646).
+    SETTINGS_CHANGELOG_KEEP_STOP = 10
 
     def get_settings_changelog(self) -> list[dict[str, Any]]:
         """Return the recorded settings-change history (most-recent-first).
@@ -3180,7 +3184,11 @@ class ProfileStore:
 
         # Keep only the newest entries (list is most-recent-first).
         if len(log) > self.SETTINGS_CHANGELOG_MAX:
-            del log[self.SETTINGS_CHANGELOG_MAX:]
+            older_stops = [
+                row for row in log[self.SETTINGS_CHANGELOG_MAX:]
+                if isinstance(row, dict) and row.get("key") == CONF_STOP_THRESHOLD_W
+            ][: self.SETTINGS_CHANGELOG_KEEP_STOP]
+            log[self.SETTINGS_CHANGELOG_MAX:] = older_stops
         self._data["settings_changelog"] = log
         try:
             await self.async_save()
