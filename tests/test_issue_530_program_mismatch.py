@@ -610,3 +610,80 @@ async def test_a_pick_in_a_silent_tail_is_checked_on_the_watchdog_keepalives(
         await hass.async_block_till_done()
         assert len(det._power_readings) == held + 1  # noqa: SLF001
         assert match.await_count == before + 1
+
+
+# PR #529 review (CodeRabbit, round 23) ----------------------------------------
+
+
+async def test_a_pick_that_cannot_be_matched_is_asked_once_per_interval(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """The eligibility scans read the evidence: a pick the matcher cannot consider
+    is turned away at most once per profile_match_interval, and asked again once
+    an interval has passed, so evidence that arrives still gets checked."""
+    _entry, manager, _sent, _state = await _past_half(hass, setup_washdata_entry, freezer)
+    store = manager.profile_store
+    quiet = _result("Cotton", {"Cotton": 0.9, "Synthetics": 0.5})
+    with patch.object(store, "unmatchable_profiles", return_value={"Cotton": "no_template"}) \
+            as unmatchable, \
+            patch.object(store, "async_match_profile", AsyncMock(return_value=quiet)) as match:
+        manager._program_mismatch_last_s = None  # noqa: SLF001  (a check is due)
+        for _ in range(4):  # the readings of one interval
+            manager._schedule_program_mismatch_check()  # noqa: SLF001
+        await hass.async_block_till_done()
+        assert unmatchable.call_count == 1 and match.await_count == 0
+        unmatchable.return_value = {}
+        await _feed(hass, freezer, 200, 3 * int(manager._profile_match_interval))  # noqa: SLF001
+        assert match.await_count >= 1
+
+
+async def test_the_snapshot_keeps_the_cadence_of_a_pending_streak(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """A restart one count short of firing: the streak comes back with the trace
+    position of its last check, so the next one still waits a full interval. An
+    older snapshot without the position keeps ``fired`` and drops the streak."""
+    _entry, manager, _sent, state = await _past_half(hass, setup_washdata_entry, freezer)
+    state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
+    checked = manager._program_mismatch_last_s  # noqa: SLF001
+    assert checked is not None and checked > 0
+    snap = manager._augment_active_snapshot(manager.detector.get_state_snapshot())  # noqa: SLF001
+    raw = snap["program_mismatch"]
+    assert raw["checked_s"] == checked
+
+    manager._program_mismatch = match_rules.ProgramMismatchState()  # noqa: SLF001
+    manager._program_mismatch_last_s = None  # noqa: SLF001
+    manager._restore_program_mismatch(raw)  # noqa: SLF001
+    back = manager._program_mismatch_state()  # noqa: SLF001
+    assert back.streak == PROGRAM_MISMATCH_PERSISTENCE - 1
+    assert manager._program_mismatch_last_s == checked  # noqa: SLF001
+
+    old = {k: v for k, v in raw.items() if k != "checked_s"}
+    for legacy in (old, {**raw, "checked_s": "x"}, {**raw, "checked_s": 10**400}):
+        manager._program_mismatch = match_rules.ProgramMismatchState()  # noqa: SLF001
+        manager._program_mismatch_last_s = None  # noqa: SLF001
+        manager._restore_program_mismatch({**legacy, "fired": True, "looks_like": "Eco"})  # noqa: SLF001
+        back = manager._program_mismatch_state()  # noqa: SLF001
+        assert back.streak == 0 and back.fired and back.looks_like == "Eco"
+        assert manager._program_mismatch_last_s is None  # noqa: SLF001
+
+
+async def test_a_streak_counted_before_an_import_restarts_at_the_next_check(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """An import that lands BETWEEN two checks replaces the profiles the pending
+    streak was counted on: the first deficit against the new ones starts a run,
+    it does not complete the old one."""
+    _entry, manager, sent, state = await _past_half(hass, setup_washdata_entry, freezer)
+    store = manager.profile_store
+    state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
+    await store.async_import_data(store.export_data())  # same names and groups
+    wrong = _result("Synthetics", {"Synthetics": 0.9, "Cotton": 0.5})
+    with patch.object(store, "async_match_profile", AsyncMock(return_value=wrong)):
+        await _check(hass, manager, state.key)
+        assert _mismatches(sent) == []
+        assert state.streak == 1 and not state.fired
+        # Unchanged data from here on: the run goes on and establishes it.
+        for _ in range(PROGRAM_MISMATCH_PERSISTENCE - 1):
+            await _check(hass, manager, state.key)
+    assert len(_mismatches(sent)) == 1

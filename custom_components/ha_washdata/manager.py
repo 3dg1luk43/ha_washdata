@@ -1706,12 +1706,33 @@ class WashDataManager:
 
     def _restore_program_mismatch(self, raw: Any) -> None:
         """Take a snapshot's check back for the restored pick (#530), so a
-        restart neither repeats the trigger nor forgets the mismatch."""
+        restart neither repeats the trigger nor forgets the mismatch.
+
+        The pending streak comes back with the trace position it was last
+        checked at, so the next check still waits a full match interval (PR
+        #529 review). A snapshot without that position keeps ``fired`` and
+        drops the streak."""
         if not isinstance(raw, dict) or raw.get("program") != self._current_program:
             return
         state = self._program_mismatch_state()
-        if state is not None:
-            state.restore(raw)
+        if state is None:
+            return
+        state.restore(raw)
+        state.data_generation = getattr(self.profile_store, "_data_generation", 0)
+        checked = raw.get("checked_s")
+        try:
+            # An unbounded JSON int (10**400) raises here rather than reading inf.
+            position = (
+                float(checked)
+                if isinstance(checked, (int, float)) and not isinstance(checked, bool)
+                else math.nan
+            )
+        except (OverflowError, ValueError):
+            position = math.nan
+        if math.isfinite(position) and position >= 0:
+            self._program_mismatch_last_s = position
+        else:
+            state.streak = 0
 
     def _program_mismatch_snapshot(self) -> dict[str, Any] | None:
         """The check for the active-cycle snapshot, or None. Never raises."""
@@ -1719,7 +1740,13 @@ class WashDataManager:
             state = getattr(self, "_program_mismatch", None)
             if state is None or state.key is None or state.key != self._program_mismatch_key():
                 return None
-            return {"program": state.key[2], **state.as_dict()}
+            return {
+                "program": state.key[2],
+                **state.as_dict(),
+                # Where the last check read the trace: the cadence the streak
+                # was counted on (``_program_mismatch_last_s``).
+                "checked_s": self._program_mismatch_last_s,
+            }
         except Exception:  # pylint: disable=broad-exception-caught
             return None
 
@@ -1782,12 +1809,16 @@ class WashDataManager:
             elapsed = (readings[-1][0] - readings[0][0]).total_seconds()
             if elapsed < due:
                 return
+            # Paced before the eligibility scans, not only the match: both read
+            # the evidence, and a pick that cannot be matched would otherwise
+            # repeat them on every reading (PR #529 review). It is asked again
+            # an interval later, so evidence that arrives still gets checked.
+            self._program_mismatch_last_s = elapsed
             if not self.profile_store.has_real_profiles:
                 return
             # A pick with no template is never scored, which is no evidence.
             if state.key[2] in self.profile_store.unmatchable_profiles():
                 return
-            self._program_mismatch_last_s = elapsed
             self._program_mismatch_task = self._spawn_tracked(
                 self._async_check_program_mismatch(
                     list(readings), self._match_identity(), state.key
@@ -1880,12 +1911,19 @@ class WashDataManager:
                 return  # the pick changed while the match ran
             if getattr(self.profile_store, "_data_generation", 0) != generation:
                 state.streak = 0
+                state.data_generation = getattr(self.profile_store, "_data_generation", 0)
                 return
             if families != match_rules.program_families(self.profile_store.get_profile_groups()):
                 return
             expected = self._matched_profile_duration
             if not expected:
                 return
+            # The pending streak was counted on data an import or undo replaced
+            # BETWEEN two checks: those matches scored profiles that are gone
+            # (PR #529 review), so the run restarts on this one.
+            if state.data_generation is not None and state.data_generation != generation:
+                state.streak = 0
+            state.data_generation = generation
             selected = key[2]
             fired = match_rules.program_mismatch_tick(
                 state,

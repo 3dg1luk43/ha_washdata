@@ -1198,6 +1198,9 @@ class ProgramMismatchState:
     ``key`` is what it belongs to (the manager's cycle identity and the picked
     program); a different key starts it afresh. Once ``fired`` it stays set for
     that key: the trigger is sent once and the State sensor keeps showing it.
+    ``data_generation`` is the caller's stored-data generation the pending
+    ``streak`` was counted on (in memory only, never in ``as_dict``): matches on
+    data an import or undo has since replaced are no run of evidence.
     """
 
     key: Any = None
@@ -1205,6 +1208,7 @@ class ProgramMismatchState:
     fired: bool = False
     looks_like: str | None = None
     margin: float | None = None
+    data_generation: Any = None
 
     def as_dict(self) -> dict[str, Any]:
         return {
