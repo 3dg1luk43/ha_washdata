@@ -20,6 +20,9 @@ cycle end at a time.
   the newest ``learning._CYCLE_MAX_INTERVALS``), as ``LearningManager.close_cycle_cadence`` does; then the operational pass runs on the
   cadence model (``suggestion_loop_eval.cadence``: one ``learning.cycle_cadence``
   summary per cycle, the median over the last ``CADENCE_RECENT_CYCLES``);
+* at every stored cycle end, whatever its status, the threshold correctives run
+  (``LearningManager.run_threshold_correctives``: the standby floor, then the
+  steady-load start threshold);
 * each time 5 more labelled cycles have ended on their own, the batch pass runs
   (``_maybe_run_batch_simulation``'s own rule) on ``LearningManager._batch_cycles``;
 * each proposal goes through ``LearningManager._apply_suggestions_and_notify`` (noise
@@ -79,6 +82,8 @@ from custom_components.ha_washdata.profile_store import _parse_start_dt  # noqa:
 from custom_components.ha_washdata.suggestion_engine import (  # noqa: E402
     OWNER_BATCH,
     OWNER_OPERATIONAL,
+    OWNER_STANDBY_FLOOR,
+    OWNER_START_THRESHOLD,
 )
 
 _SLE_PATH = REPO / "devtools" / "suggestion_loop_eval.py"
@@ -165,8 +170,7 @@ def walk(corpus: str, path: str, arm: str) -> dict[str, Any] | None:
             if _labelled_own(cycle):
                 labelled += 1
             run_batch = labelled >= BATCH_MIN and labelled - last_batch >= BATCH_RERUN_DELTA
-            if cad is None and not run_batch:
-                continue
+            # No early exit: the threshold correctives run at every cycle end.
             data = dict(base)
             data.update(
                 past_cycles=past[: i + 1], suggestions={}, locked_suggestions=[],
@@ -185,6 +189,11 @@ def walk(corpus: str, path: str, arm: str) -> dict[str, Any] | None:
             if cad is not None:
                 ends += 1
                 gate(eng.for_job().generate_operational_suggestions(*cad), OWNER_OPERATIONAL)
+            # LearningManager.run_threshold_correctives: every cycle end, whatever
+            # its status, after the operational pass (PR #529 review: the start
+            # pass proposes Start Threshold with no cadence and no batch).
+            gate(eng.for_job().generate_standby_floor_suggestions(), OWNER_STANDBY_FLOOR)
+            gate(eng.for_job().generate_start_threshold_suggestions(), OWNER_START_THRESHOLD)
             if run_batch:
                 last_batch = labelled
                 gate(eng.for_job().run_batch_simulation(lm._batch_cycles()), OWNER_BATCH)  # noqa: SLF001

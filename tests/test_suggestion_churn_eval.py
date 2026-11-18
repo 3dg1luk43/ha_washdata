@@ -87,3 +87,28 @@ def test_both_arms_walk_a_synthetic_device(tmp_path: Path) -> None:
             assert len(history) == row["applies"][key]
     # A walk leaves the shipped rules in place.
     assert (learning.CADENCE_HOLD_REL, learning._SECONDS_SUFFIXES, suggestion_engine.STOP_HOLD_BAND) == shipped  # noqa: SLF001
+
+
+def test_the_start_threshold_corrective_runs_at_every_cycle_end(tmp_path: Path) -> None:
+    """PR #529 review: Start 450 W, Stop 100 W and three 400 W steady loads; the
+    shipped corrective pass offers Start 200 W at a cycle end with no cadence (too
+    few readings) and no batch (unlabelled). The walk ran only those two passes."""
+    past = []
+    for j in range(3):
+        # 6 intervals a cycle: 18 in all, under the cadence model's 20.
+        pts = [[k * 120.0, 400.0 + (k % 3)] for k in range(6)] + [[720.0, 0.0]]
+        past.append({
+            "id": f"s{j}", "status": "completed", "termination_reason": "smart",
+            "start_time": f"2026-02-{j + 1:02d}T08:00:00+00:00",
+            "duration": pts[-1][0], "power_data": pts,
+        })
+    doc = {
+        "version": 16, "entry_data": {"device_type": "dryer", "name": "Steady"},
+        "entry_options": {"start_threshold_w": 450.0, "stop_threshold_w": 100.0},
+        "data": {"profiles": {}, "past_cycles": past, "envelopes": {}},
+    }
+    (tmp_path / "steady").mkdir()
+    (tmp_path / "steady" / "export.json").write_text(json.dumps(doc))
+    (row,) = churn.run(tmp_path, ("shipped",), None, jobs=1)
+    assert row["cycle_ends"] == 0
+    assert row["history"]["start_threshold_w"] == [[450.0, 200.0]]
