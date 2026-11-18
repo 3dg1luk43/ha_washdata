@@ -908,8 +908,8 @@ class WashDataManager:
         # missed one (it would hand the restart's own write back as fresh).
         self._restored_sensor_clock: tuple[datetime, float | None] | None = None
         self._setup_report_ts: datetime | None = None
-        self._noise_events: list[datetime] = []
-        self._noise_max_powers: list[float] = []
+        # (time, peak W) of each ghost cycle in the last 24 h.
+        self._noise_events: list[tuple[datetime, float]] = []
         self._last_match_result = None
         self._last_phase_estimate_time = None
         self._matching_task: Task[Any] | None = None
@@ -3592,6 +3592,13 @@ class WashDataManager:
         old_val = old_state.state if old_state else None
 
         if new_val in ("unavailable", "unknown"):
+            # Contact lost: the door can close unseen, so a running end dwell no
+            # longer proves it stayed open (PR #529 review). A recovery to "on"
+            # starts a fresh one below.
+            if self._remove_door_end_dwell is not None:
+                self._logger.debug("Door sensor lost contact: cancelling the end dwell")
+                self._cancel_door_end_dwell()
+                self._notify_update()
             return
         if self._clean_door_recheck_pending:
             # The sensor was not up when the restored Clean state was checked:
@@ -3600,8 +3607,19 @@ class WashDataManager:
             if new_val == "on" and self._is_clean_state:
                 self.mark_unloaded("door open after restart", how="door")
                 return
-        # Ignore unavailability transitions
+        # Ignore unavailability transitions, except that a door reported open when
+        # the sensor comes back may start a fresh end dwell (a lost one was
+        # cancelled above), through the same eligibility check.
         if old_val in ("unavailable", "unknown"):
+            if (
+                new_val == "on"
+                and not self._is_clean_state
+                and self._remove_door_end_dwell is None
+                and self._door_end_may_fire()
+            ):
+                self._logger.debug("Door open after the sensor came back: arming a fresh end dwell")
+                self._arm_door_end_dwell()
+                self._notify_update()
             return
 
         door_open = new_val == "on"  # binary_sensor: on = open
@@ -4087,11 +4105,16 @@ class WashDataManager:
                 stop_thr = float(getattr(self.detector.config, "stop_threshold_w", 0.0) or 0.0)
             except (TypeError, ValueError, OverflowError):
                 stop_thr = 0.0
-            if stop_thr > 0.0 and self._current_power >= stop_thr:
+            # The sensor's own state, not the cache: a reading the sampling throttle
+            # dropped can leave the cache low while the appliance runs again (PR
+            # #529 review). The cache stands in while the sensor is unavailable.
+            live = self._live_power_state()
+            power_now = live[0] if live is not None else self._current_power
+            if stop_thr > 0.0 and power_now >= stop_thr:
                 self._logger.debug(
                     "Door-end dwell fired but power %.1fW is still at/above the stop "
                     "threshold %.1fW: treating as a mid-cycle door open, re-arming",
-                    self._current_power,
+                    power_now,
                     stop_thr,
                 )
                 self._arm_door_end_dwell()
@@ -8768,22 +8791,22 @@ class WashDataManager:
         (audit 2026-11-16). A ghost is discarded without being stored either way.
         """
         now = utc_now()
+        # (time, peak) pairs, so the count and the peak describe the same 24 h (PR
+        # #529 review: a 40 W ghost aged out still set the advised level).
         self._noise_events = [
-            t
-            for t in getattr(self, "_noise_events", [])
+            (t, p)
+            for t, p in getattr(self, "_noise_events", [])
             if (now - t).total_seconds() < 86400
         ]
-        self._noise_events.append(now)
-        self._noise_max_powers = [*getattr(self, "_noise_max_powers", []), float(max_power)]
+        self._noise_events.append((now, float(max_power)))
         if len(self._noise_events) >= self._noise_events_threshold:
             self._logger.info(
                 "%d ghost cycles in 24 h (up to %.1f W): a Start Threshold above that "
                 "level would stop them",
                 len(self._noise_events),
-                max(self._noise_max_powers),
+                max(p for _t, p in self._noise_events),
             )
             self._noise_events = []
-            self._noise_max_powers = []
 
     def _update_estimates(self) -> None:
         """Update time remaining and profile estimates."""
