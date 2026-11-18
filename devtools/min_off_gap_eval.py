@@ -43,6 +43,11 @@ is the production config's. ``--all-formats`` reads diagnostics dumps too (the
 format is read, as before. Figures taken before this rewrite (the suggestion
 engine's "152 clean cycles" note) measured the old loop.
 
+The ``SHIPPED`` row is what the product offers: the model pass
+(``generate_model_suggestions``) on the export's history and options, its end-gate
+guard included, ``(suppressed)`` when it offers no Min Off Gap. The other rows
+replay each sizing statistic as is, to compare the methods.
+
 Usage:  python3 devtools/min_off_gap_eval.py [--all-formats] [--jobs N]
 
 Exit codes: 0 ok, 2 no usable export in cycle_data/.
@@ -179,27 +184,39 @@ def _real_gaps(cycles: list[dict]) -> list[float]:
     ]
 
 
-def _shipped_suggestion(device_type, clean, raw, stop, options) -> int | None:
-    """Whatever `SuggestionEngine._suggest_min_off_gap` proposes for this export."""
+def _shipped_suggestion(
+    device_type: str, raw: list[dict], options: dict, profiles: dict | None = None
+) -> int | None:
+    """The Min Off Gap the shipped model pass offers for this export, or None.
+
+    Drives ``SuggestionEngine.generate_model_suggestions`` with the export's history
+    and options (PR #529 review): it sizes the value with ``_suggest_min_off_gap``
+    and then withholds it when the end-gate guard finds that it ends one of the
+    device's own cycles inside a pause the setting in force bridges, a cycle the
+    clean filter may have left out of the sizing. Scoring the sizing helper alone
+    reported a value the product never offers. Nothing else is pending (the
+    export's stored suggestions predate the per-pass owners), so this is the model
+    pass against the settings in force.
+    """
     from unittest.mock import MagicMock  # noqa: PLC0415
 
+    from custom_components.ha_washdata.const import CONF_MIN_OFF_GAP  # noqa: PLC0415
     from custom_components.ha_washdata.suggestion_engine import (  # noqa: PLC0415
         SuggestionEngine,
     )
 
     hass = MagicMock()
     hass.config_entries.async_get_entry.return_value = None
+    hass.states.get.return_value = None
     store = MagicMock()
-    store.get_past_cycles.return_value = raw
-    store.get_profiles.return_value = {}
+    store.get_past_cycles.return_value = list(raw)
+    store.get_profiles.return_value = dict(profiles or {})
     store.get_suggestions.return_value = {}
-    # The export's own options (PR #529 review): `_measured_bridge_requirement`
-    # reads Off Delay, End Energy and the Stop Threshold from them.
     eng = SuggestionEngine(hass, "eval", store, device_type=device_type).for_job(options=options)
-    out = eng._suggest_min_off_gap(  # pylint: disable=protected-access
-        clean, stop_threshold_w=stop, gap_cycles=raw
-    )
-    return int(out["value"]) if out else None
+    out = eng.generate_model_suggestions().get(CONF_MIN_OFF_GAP)
+    if not isinstance(out, dict) or out.get("value") is None:
+        return None
+    return int(out["value"])
 
 
 def _scan(job: tuple[str, bool]) -> tuple[list[str], dict[str, dict[str, int]]] | None:
@@ -251,9 +268,13 @@ def _scan(job: tuple[str, bool]) -> tuple[list[str], dict[str, dict[str, int]]] 
         + (f"{min(gaps):.0f}s" if gaps else "n/a")
     )
 
-    # The value the shipped heuristic actually proposes, evaluated alongside
-    # the raw candidates so the regression is validated, not just the choice.
-    shipped = _shipped_suggestion(device_type, clean, cycles, stop, replay_opts)
+    # The value the shipped model pass actually offers (sized, then judged by the
+    # end-gate guard), evaluated alongside the raw candidates so the regression is
+    # validated, not just the choice.
+    profiles = (doc.get("data") or {}).get("profiles")
+    shipped = _shipped_suggestion(
+        device_type, cycles, replay_opts, profiles if isinstance(profiles, dict) else None
+    )
     candidates = dict(CANDIDATES)
     if shipped is not None:
         candidates["SHIPPED"] = lambda _s, _g, v=shipped: float(v) - BUFFER_S

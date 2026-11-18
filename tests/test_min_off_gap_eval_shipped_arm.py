@@ -1,0 +1,99 @@
+# WashData - Home Assistant integration for appliance cycle monitoring via smart plugs.
+# Copyright (C) 2026 Lukas Bandura
+# SPDX-License-Identifier: AGPL-3.0-or-later
+"""PR #529 review: ``min_off_gap_eval``'s SHIPPED row is what the product offers.
+
+It scored ``_suggest_min_off_gap`` alone, so a value the model pass's end-gate
+guard withholds (it ends a cycle the clean filter left out of the sizing inside a
+pause the setting in force bridges) was reported as shipped.
+"""
+from __future__ import annotations
+
+import json
+import logging
+import sys
+from pathlib import Path
+
+import pytest
+
+REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO / "devtools"))
+
+import min_off_gap_eval  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _logging_untouched():
+    root = logging.getLogger()
+    before = (logging.root.manager.disable, root.level, list(root.handlers))
+    yield
+    assert (logging.root.manager.disable, root.level, list(root.handlers)) == before
+
+
+def _cycle(day: int, pause_s: int, *, lead_in: bool) -> dict:
+    """A 10 s trace: 600 s at ~1 kW, ``pause_s`` at 0 W, 600 s more, a quiet tail."""
+    trace: list[list[float]] = []
+    t = 0.0
+    if lead_in:
+        trace.append([t, 0.5])
+        t += 10.0
+    for k in range(60):
+        trace.append([t, 1000.0 + (k % 5)])
+        t += 10.0
+    for _ in range(pause_s // 10):
+        trace.append([t, 0.0])
+        t += 10.0
+    for k in range(60):
+        trace.append([t, 1000.0 + (k % 5)])
+        t += 10.0
+    for _ in range(3):
+        trace.append([t, 0.0])
+        t += 10.0
+    duration = trace[-1][0]
+    start = f"2026-09-{day:02d}T08:00:00+00:00"
+    hh, rem = divmod(int(duration), 3600)
+    mm, ss = divmod(rem, 60)
+    end = f"2026-09-{day:02d}T{8 + hh:02d}:{mm:02d}:{ss:02d}+00:00"
+    return {
+        "id": f"c{day}", "start_time": start, "end_time": end, "duration": duration,
+        "status": "completed", "termination_reason": "smart",
+        "profile_name": "Cotton", "label_source": "manual", "power_data": trace,
+    }
+
+
+def _export(path: Path, min_off_gap: int) -> None:
+    # Five clean cycles size 400 s + 60 s; a sixth starts at full power (no lead-in,
+    # dropped as high_start) and holds a 1000 s pause.
+    cycles = [_cycle(10 + i, 400, lead_in=True) for i in range(5)]
+    cycles.append(_cycle(15, 1000, lead_in=False))
+    path.write_text(json.dumps({
+        "device_fingerprint": {"device_type": "washing_machine"},
+        "entry_data": {},
+        "entry_options": {"stop_threshold_w": 2.0, "min_off_gap": min_off_gap},
+        "data": {"past_cycles": cycles, "profiles": {"Cotton": {}}},
+    }), encoding="utf-8")
+
+
+def test_shipped_row_is_suppressed_when_the_guard_withholds_the_key(tmp_path: Path) -> None:
+    # 1200 s in force bridges the 1000 s pause; the sized 460 s would end it there,
+    # so the model pass withholds the key and the product offers nothing.
+    path = tmp_path / "export.json"
+    _export(path, 1200)
+    out = min_off_gap_eval._scan((str(path), False))  # noqa: SLF001
+    assert out is not None
+    lines, totals = out
+    assert any("SHIPPED" in line and "(suppressed)" in line for line in lines), lines
+    assert "SHIPPED" not in totals
+    # The sizing statistics are still replayed side by side.
+    assert {"p95_all", "max"} <= set(totals)
+
+
+def test_shipped_row_is_the_offered_value_when_the_guard_keeps_it(tmp_path: Path) -> None:
+    # 480 s in force already ends the 1000 s pause, so 460 s splits nothing more.
+    path = tmp_path / "export.json"
+    _export(path, 480)
+    out = min_off_gap_eval._scan((str(path), False))  # noqa: SLF001
+    assert out is not None
+    lines, totals = out
+    assert "SHIPPED" in totals
+    assert any("SHIPPED" in line and "460s" in line for line in lines), lines
