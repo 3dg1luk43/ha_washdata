@@ -582,3 +582,51 @@ async def test_an_import_that_reloads_the_entry_arms_nothing_on_the_retired_mana
     assert old not in armed
     old._is_shutdown = False  # noqa: SLF001
     hass.data[DOMAIN][entry.entry_id] = old
+
+
+async def test_a_rebuild_asked_for_during_a_pass_runs_again_when_it_ends(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """PR #529 review: an import or undo landing while the one-time rebuild runs makes
+    that pass leave the marker unset, and its own request was dropped, so the new
+    data waited for the next restart. The request is remembered and the pass runs
+    once more; a pass that leaves the marker unset with no new request is not
+    repeated."""
+    import asyncio  # noqa: PLC0415
+    from unittest.mock import AsyncMock, patch  # noqa: PLC0415
+
+    from custom_components.ha_washdata.const import CUT_SHORT_REBUILD_KEY  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(device_type="dishwasher", options={"stop_threshold_w": 4.5})
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store = manager.profile_store
+    await hass.async_block_till_done()
+    store._data.pop(CUT_SHORT_REBUILD_KEY, None)  # noqa: SLF001
+    gate = asyncio.Event()
+    calls = 0
+
+    async def rebuild() -> int:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            await gate.wait()  # an import lands meanwhile: the marker stays unset
+            return 0
+        store._data[CUT_SHORT_REBUILD_KEY] = True  # noqa: SLF001
+        return 1
+
+    with patch.object(store, "async_rebuild_for_cut_short_rule", new=rebuild):
+        manager.async_schedule_cut_short_rebuild()
+        await asyncio.sleep(0)
+        manager.async_schedule_cut_short_rebuild()  # the import's request
+        gate.set()
+        await hass.async_block_till_done()
+    assert calls == 2
+    assert not store.cut_short_rebuild_pending()
+
+    store._data.pop(CUT_SHORT_REBUILD_KEY, None)  # noqa: SLF001
+    with patch.object(
+        store, "async_rebuild_for_cut_short_rule", AsyncMock(return_value=0)
+    ) as once:
+        manager.async_schedule_cut_short_rebuild()
+        await hass.async_block_till_done()
+    assert once.await_count == 1

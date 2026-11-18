@@ -923,6 +923,9 @@ class WashDataManager:
         self._banked_tail_repair_task: Task[Any] | None = None
         self._energy_rebuild_task: Task[Any] | None = None
         self._cut_short_rebuild_task: Task[Any] | None = None
+        # An import or undo asked for the #531 rebuild while a pass ran: the pass
+        # sees the data change and leaves the marker unset, so it runs again.
+        self._cut_short_rebuild_again = False
         self._backfill_tail_cut_task: Task[Any] | None = None
         # Detached store-touching tasks (matching trigger, active-cycle clear,
         # post-cycle processing) tracked so async_shutdown can cancel them before a
@@ -2596,24 +2599,36 @@ class WashDataManager:
     async def _async_rebuild_for_cut_short_rule(self) -> None:
         """Rebuild a dishwasher's profiles once under the #531 cut-off rule, so a
         programme that was ending inside its drying stops at the first run after
-        the update. Never raises."""
-        try:
-            count = await self.profile_store.async_rebuild_for_cut_short_rule()
-            self._logger.info(
-                "Rebuilt %d profiles without runs cut inside their drying (#531)", count
-            )
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            self._logger.warning("Rebuild under the #531 cut-off rule failed: %s", exc)
+        the update. Runs again when a request arrived during the pass and the
+        marker is still unset (PR #529 review). Never raises."""
+        while True:
+            self._cut_short_rebuild_again = False
+            try:
+                count = await self.profile_store.async_rebuild_for_cut_short_rule()
+                self._logger.info(
+                    "Rebuilt %d profiles without runs cut inside their drying (#531)", count
+                )
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                self._logger.warning("Rebuild under the #531 cut-off rule failed: %s", exc)
+            if (
+                not self._cut_short_rebuild_again
+                or self._is_shutdown
+                or self.device_type != DEVICE_TYPE_DISHWASHER
+                or not self.profile_store.cut_short_rebuild_pending()
+            ):
+                return
 
     def async_schedule_cut_short_rebuild(self) -> None:
         """#531: rebuild a dishwasher's profiles once under the cut-off rule, in the
         background (not billed to the startup time, #408). Called at setup and
-        after an import or undo, whose payload may predate the rule. A second call
-        while one runs is a no-op."""
+        after an import or undo, whose payload may predate the rule. A call while
+        one runs is remembered, not dropped: that pass sees the data replaced and
+        leaves the marker unset, so it runs once more when it ends."""
         if self.device_type != DEVICE_TYPE_DISHWASHER or not self.profile_store.cut_short_rebuild_pending():
             return
         existing = self._cut_short_rebuild_task
         if existing is not None and not existing.done():
+            self._cut_short_rebuild_again = True
             return
         self._cut_short_rebuild_task = self._spawn_tracked(self._async_rebuild_for_cut_short_rule())
 
