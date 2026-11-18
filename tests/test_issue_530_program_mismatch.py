@@ -521,3 +521,48 @@ async def test_the_readings_between_two_checks_never_build_the_cut_trace(
         assert built.call_count == 1 and match.await_count == 1
     assert manager._program_mismatch_last_s == exact  # noqa: SLF001
     assert match.await_args.args[1] == exact
+
+
+async def test_a_pick_in_a_silent_tail_is_checked_on_the_watchdog_keepalives(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """A pick made in a silent low-power tail (a dishwasher's ENDING drying: the
+    detector's match tick frozen) refreshes only the ETA, and no reading reaches the
+    power-event handler after it. The watchdog's keepalives extend the trace, so
+    they schedule the check too."""
+    entry = await setup_washdata_entry(
+        power_sensor=POWER, options={**FAST, "off_delay": 1800, "min_off_gap": 1800}
+    )
+    manager = hass.data[DOMAIN][entry.entry_id]
+    await _seed(manager)
+    await _feed(hass, freezer, 200, 16 * 60)
+    await _feed(hass, freezer, 0.5, 180)
+    det = manager.detector
+    assert det.is_waiting_low_power()
+    assert manager.check_state() in ("paused", "ending"), manager.check_state()
+    quiet = _result("Cotton", {"Cotton": 0.9, "Synthetics": 0.5})
+    with patch.object(det, "_try_profile_match", lambda *_a, **_k: None), \
+            patch.object(manager.profile_store, "async_match_profile",
+                         AsyncMock(return_value=quiet)) as match:
+        assert manager.set_manual_program("Cotton")
+        await hass.async_block_till_done()
+        assert match.await_count == 0
+        held = len(det._power_readings)  # noqa: SLF001
+        for _ in range(8):  # the plug stays silent: only the watchdog timer
+            freezer.tick(timedelta(seconds=30))
+            async_fire_time_changed(hass, dt_util.utcnow())
+            await hass.async_block_till_done()
+        assert len(det._power_readings) > held  # noqa: SLF001  (keepalives)
+        assert manager.check_state() in ("running", "paused", "ending")
+        # One per profile_match_interval (60 s) of trace, the keepalives 30 s apart.
+        assert match.await_count >= 2
+        assert all(c.kwargs["in_progress"] is True for c in match.await_args_list)
+        # A report the watchdog's resync catches up on is such a reading too.
+        before = match.await_count
+        manager._program_mismatch_last_s = None  # noqa: SLF001  (a check is due)
+        manager._last_real_reading_time -= timedelta(hours=1)  # noqa: SLF001  (missed)
+        held = len(det._power_readings)  # noqa: SLF001
+        manager._resync_power_from_state(dt_util.utcnow(), feed_detector=True)  # noqa: SLF001
+        await hass.async_block_till_done()
+        assert len(det._power_readings) == held + 1  # noqa: SLF001
+        assert match.await_count == before + 1

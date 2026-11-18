@@ -1748,9 +1748,10 @@ class WashDataManager:
         """Start the background check of a hand-picked program (#530), at most once
         per ``profile_match_interval`` of elapsed time and one at a time. Called
         from the pin's matcher branch with the detector's match trace, and from
-        every reading of a live cycle (``_update_estimates``, ``readings`` None:
-        the same trace, read here), so a pick still gets checked while the
-        detector's own match tick is frozen. Never raises."""
+        every reading of a live cycle (``_update_estimates`` and the watchdog's
+        own readings, ``readings`` None: the same trace, read here), so a pick
+        still gets checked while the detector's own match tick is frozen. Never
+        raises."""
         try:
             if self._is_shutdown:
                 return
@@ -1794,6 +1795,19 @@ class WashDataManager:
             )
         except Exception:  # pylint: disable=broad-exception-caught
             self._logger.debug("Could not start the program check", exc_info=True)
+
+    def _check_pick_after_watchdog_reading(self) -> None:
+        """#530: a reading the watchdog hands the detector (a keepalive, or a report
+        the resync caught up on) extends the trace without passing through
+        ``_update_estimates``. A pick made in a frozen silent tail (the dishwasher
+        ENDING freeze) refreshes only the ETA, so without this nothing checks it
+        before the cycle ends. Only while the cycle is still live; the scheduler's
+        own guards set the cadence."""
+        if (
+            getattr(self, "_manual_program_active", False)
+            and self.detector.state in self._MATCH_ACTIVE_STATES
+        ):
+            self._schedule_program_mismatch_check()
 
     def _match_trace_span_bound(self) -> float | None:
         """At least the seconds the detector's match trace spans, read without
@@ -5510,6 +5524,7 @@ class WashDataManager:
             self.detector.process_reading(power, now)
             self._last_reading_time = now
             self._last_real_reading_time = report_ts
+            self._check_pick_after_watchdog_reading()
         self._current_power = power
 
     def _low_power_silence_budget_s(
@@ -5826,6 +5841,7 @@ class WashDataManager:
                 self.detector.process_reading(
                     _ka_w, now, synthetic=True, observed=_ka_obs
                 )
+                self._check_pick_after_watchdog_reading()
                 self._last_reading_time = now
                 self._current_power = _ka_w
                 self._save_snapshot_while_silent(now)
@@ -5851,6 +5867,7 @@ class WashDataManager:
             self.detector.process_reading(
                 _ka_w, now, synthetic=True, observed=_ka_obs
             )
+            self._check_pick_after_watchdog_reading()
             self._last_reading_time = now
             self._current_power = _ka_w
             self._save_snapshot_while_silent(now)
