@@ -1359,14 +1359,15 @@ def _unmatched_task(job: tuple[str, str, dict, int]) -> tuple[str, str, int, dic
         cyc, cfg, None, _NoProfiles(match_mgr.profile_store), {**dev.entry_data, **options},
         None, compute_series=False,
     )
-    ends: list[float] = []
+    # Each detected end with the record it closed, so the lag is the kept cycle's.
+    ends: list[tuple[float, dict]] = []
     ended: list[dict] = []
     if sim.ready:
         det = sim.detector
         original = det._on_cycle_end  # noqa: SLF001
 
         def _end(data: dict, _original: Any = original) -> None:
-            ends.append(float(sim.cursor["t"]))
+            ends.append((float(sim.cursor["t"]), data))
             _original(data)
 
         det._on_cycle_end = _end  # noqa: SLF001
@@ -1379,10 +1380,14 @@ def _unmatched_task(job: tuple[str, str, dict, int]) -> tuple[str, str, int, dic
     src_readings, _pts, src_base = playground._readings_from_cycle(src)  # noqa: SLF001
     work = [ts for ts, p in src_readings if p >= stop]
     work_end = (work[-1] - src_base).total_seconds() if work else None
+    # The last end the replay keeps (PR #529 review): a dishwasher pump-out the
+    # manager discards ends later, and its time is not this cycle's end.
+    kept = {id(e) for e in ended}
+    kept_ends = [t for t, data in ends if id(data) in kept]
     return path, arm, idx, {
         "split": _unmatched_split(ended, pts, stop),
         "interrupted": any(e.get("status") == "interrupted" for e in ended),
-        "lag": (ends[-1] - work_end) if ends and work_end is not None else None,
+        "lag": (kept_ends[-1] - work_end) if kept_ends and work_end is not None else None,
     }
 
 

@@ -306,3 +306,51 @@ def test_a_length_timedelta_cannot_hold_is_an_unknown_end() -> None:
     for bad in (1e300, float("inf"), float("nan"), 10**400):
         assert loop._stored_end({"start_time": start, "duration": bad}) is None
 
+
+class _TwoEndSim:
+    """A replay that ends the cycle, then a pump-out the manager discards."""
+
+    def __init__(self, cyc, cfg, _view, store, options, _x, compute_series=False):
+        self.ready, self.n_readings = True, 1
+        self.cursor = {"t": 0.0}
+        self.captured: list[dict] = []
+        self.discarded: list[str | None] = []
+        self.detector = type("Det", (), {})()
+        self.detector._on_cycle_end = self._on_cycle_end  # noqa: SLF001
+
+    def _on_cycle_end(self, data: dict) -> None:
+        self.captured.append(data)
+        self.discarded.append("pump_out" if data["duration"] < 300 else None)
+
+    def step(self, _a, _b) -> None:
+        for t, duration in ((2340.0, 2340.0), (3240.0, 120.0)):
+            self.cursor["t"] = t
+            self.detector._on_cycle_end({"duration": duration, "status": "completed"})  # noqa: SLF001
+
+    def run_tail(self) -> None:
+        return None
+
+    @property
+    def kept(self) -> list[dict]:
+        return [c for c, why in zip(self.captured, self.discarded) if why is None]
+
+
+def test_unmatched_end_lag_is_the_kept_cycles_not_a_discarded_pump_out(monkeypatch):
+    """PR #529 review: the lag read the LAST end callback, a pump-out the replay
+    discards 15 min after the kept cycle ended."""
+    from types import SimpleNamespace
+
+    # Last work reading at 29 x 60 = 1740 s; the kept cycle ends at 2340 s.
+    src = {"id": "main", "start_time": "2026-10-01T08:00:00+00:00", "status": "completed",
+           "power_data": [[t * 60.0, 1500.0 if t < 30 else 0.5] for t in range(40)]}
+    dev = SimpleNamespace(
+        past=[src], s0=60.0, entry_data={}, recorded_stop=2.0,
+        detector_config=lambda _o: SimpleNamespace(min_power=1.0),
+        match_side=lambda _o: (SimpleNamespace(profile_store=None), None),
+    )
+    monkeypatch.setitem(loop._DEVICES, "dev", dev)  # noqa: SLF001
+    monkeypatch.setattr(loop.playground, "_DetailSim", _TwoEndSim)
+    _path, _arm, _idx, row = loop._unmatched_task(("dev", "initial", {}, 0))  # noqa: SLF001
+    assert row["lag"] == 600.0
+    assert row["split"] is False
+
