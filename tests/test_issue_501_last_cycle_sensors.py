@@ -284,3 +284,20 @@ async def test_last_cycle_start_is_a_timestamp_of_the_last_run(
     manager.notify_update()
     await hass.async_block_till_done()
     assert hass.states.get(entity_id).state == "unknown"
+
+
+async def test_an_in_place_start_rewrite_reaches_the_cached_last_cycle(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """PR #529 review: Process History moves a run's start in place; the cached
+    newest run must not hide it."""
+    entry = await setup_washdata_entry()
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    t = dt_util.utcnow().replace(microsecond=0) - timedelta(days=1)
+    await store.async_add_cycle(_cycle(t, 60.0))
+    await store.async_add_cycle(_cycle(t + timedelta(minutes=1), 60.0))
+    older, newer = sorted(store.get_past_cycles(), key=lambda c: c["start_time"])
+    assert store.last_finished_cycle() is newer
+    older["start_time"] = (t + timedelta(minutes=2)).isoformat()  # the rewrite
+    store._start_edit_gen = getattr(store, "_start_edit_gen", 0) + 1  # noqa: SLF001
+    assert store.last_finished_cycle() is older

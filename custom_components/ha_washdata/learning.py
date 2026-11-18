@@ -32,6 +32,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_send
 import homeassistant.util.dt as dt_util
 
 from .const import (
+    CONF_POWER_SENSOR,
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_LEARNING_CONFIDENCE,
     CONF_PROFILE_MIN_WARMUP_CYCLES,
@@ -601,7 +602,7 @@ class LearningManager:
         summary = cycle_cadence(delta for delta, _ts in pending)
         if summary is not None:
             try:
-                self.profile_store.add_cadence_summary(*summary)
+                self.profile_store.add_cadence_summary(*summary, sensor=self._power_sensor())
             except Exception:  # pylint: disable=broad-exception-caught
                 self._logger.debug("Could not store the cycle cadence", exc_info=True)
         # The operational pass's one run per cycle: its cadence input changes only
@@ -618,7 +619,7 @@ class LearningManager:
         survive a restart; before any is stored, the newest committed intervals.
         """
         try:
-            stored = recent_cadence(self.profile_store.get_cadence_summaries())
+            stored = recent_cadence(self.profile_store.get_cadence_summaries(self._power_sensor()))
         except Exception:  # pylint: disable=broad-exception-caught
             stored = None
         if stored is not None:
@@ -627,6 +628,24 @@ class LearningManager:
         if model.count < CADENCE_MIN_INTERVALS or model.p95 is None or model.median is None:
             return None
         return model.p95, model.median
+
+    def _power_sensor(self) -> str | None:
+        """The entry's power sensor, the identity of its cadence. Never raises."""
+        try:
+            entry = self.hass.config_entries.async_get_entry(self.entry_id)
+            if entry is None:
+                return None
+            sensor = {**entry.data, **entry.options}.get(CONF_POWER_SENSOR)
+            return str(sensor) if sensor else None
+        except Exception:  # pylint: disable=broad-exception-caught
+            return None
+
+    def reset_cadence_evidence(self) -> None:
+        """Forget the update intervals measured so far (a history wipe, PR #529
+        review): the stored summaries go with the history, and without this the
+        in-memory model kept sizing the operational pass from before the wipe."""
+        self._sample_interval_model = StatisticalModel(max_samples=200)
+        self._pending_intervals.clear()
 
     def run_due_operational_pass(self) -> None:
         """Run the operational pass a cadence commit left due, once.

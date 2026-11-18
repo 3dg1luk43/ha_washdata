@@ -1381,12 +1381,12 @@ BANKED_TAIL_REPAIR_KEY = "_banked_tail_repair_pending"
 # config and can take minutes on a large store, so it runs after setup, not in the
 # migration.
 CYCLE_ENERGY_REBUILD_KEY = "_cycle_energy_rebuild_pending"
-# Store key: a dishwasher store has asked for the one envelope rebuild under the
-# #531 cut-off rule (`profile_store.cut_short_mask`). Absent on every store from
-# before it, so a programme that was ending inside its drying stops at the first run
-# after the update, not the second: it arms CYCLE_ENERGY_REBUILD_KEY, whose rebuild
-# runs in the background after setup. No storage version.
-CUT_SHORT_REBUILD_KEY = "_cut_short_rebuild_armed"
+# Store key: a dishwasher store has had the one rebuild under the #531 cut-off rule
+# (`profile_store.cut_short_mask`). Absent on every store from before it, so a
+# programme that was ending inside its drying stops at the first run after the
+# update, not the second; the manager rebuilds every profile with traced evidence in
+# the background after setup and sets it. No storage version.
+CUT_SHORT_REBUILD_KEY = "_cut_short_rebuild_done"
 # Store key for the one pass that cuts the end wait off history-imported dishwasher
 # cycles already labelled before the cut existed (#518). Absent counts as pending,
 # so every store that predates it runs the pass once without a storage version;

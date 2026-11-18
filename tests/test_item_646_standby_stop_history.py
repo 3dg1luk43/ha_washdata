@@ -142,3 +142,20 @@ async def test_a_stop_change_outlives_the_changelog_cap(
     tail = store.get_settings_changelog()[store.SETTINGS_CHANGELOG_MAX:]
     assert len(tail) == store.SETTINGS_CHANGELOG_KEEP_STOP
     assert all(row["key"] == CONF_STOP_THRESHOLD_W for row in tail)
+
+
+async def test_a_merged_newer_stop_row_survives_the_prune(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """A history merge appends imported rows after the local ones; the prune must
+    judge them by their time, not their place (PR #529 review)."""
+    entry = await setup_washdata_entry()
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    old = [{"key": CONF_STOP_THRESHOLD_W, "old": 3.0, "new": 2.0 + i / 10,
+            "timestamp": (T0 - timedelta(days=30 - i)).isoformat()} for i in range(store.SETTINGS_CHANGELOG_KEEP_STOP)]
+    filler = [{"key": "off_delay", "old": 1, "new": 2, "timestamp": (T0 - timedelta(days=40)).isoformat()}
+              for _ in range(store.SETTINGS_CHANGELOG_MAX)]
+    merged_in = {"key": CONF_STOP_THRESHOLD_W, "old": 5.0, "new": 2.0, "timestamp": CHANGED_AT.isoformat()}
+    store._data["settings_changelog"] = filler + old + [merged_in]  # noqa: SLF001 - as a merge leaves it
+    await store.async_record_settings_changes([{"key": "off_delay", "old": 2, "new": 3}])
+    assert any(r is merged_in or r == merged_in for r in store.get_settings_changelog())

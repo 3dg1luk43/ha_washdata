@@ -2096,7 +2096,7 @@ class SuggestionEngine:
             _LOGGER.debug("End-gate guard failed", exc_info=True)
         return suggestions
 
-    def joint_end_gate_drops(self, stored: dict[str, Any]) -> list[str]:
+    def joint_end_gate_drops(self, stored: dict[str, Any], *, strict: bool = False) -> list[str]:
         """Stored keys to withdraw so Apply all splits no more own cycles than now.
 
         ``_guard_end_gate`` judges a pass's values against what is pending when it
@@ -2110,7 +2110,9 @@ class SuggestionEngine:
         until it splits no more. Cascades are derived, so never withdrawn here; a
         min_off_gap cascade is left out of the count, since the off delay it
         follows already sets the wait and it goes with that off delay. A withdrawn
-        stop takes its start. Executor-safe; never raises.
+        stop takes its start. Executor-safe; never raises unless ``strict``, where a
+        failed check raises instead of reading as "nothing to withdraw" (Apply all
+        must not write a set nobody judged, PR #529 review).
         """
         try:
             values = {
@@ -2147,6 +2149,8 @@ class SuggestionEngine:
                 drops.append(CONF_START_THRESHOLD_W)
             return drops
         except Exception:  # pylint: disable=broad-exception-caught
+            if strict:
+                raise
             _LOGGER.debug("Joint end-gate check failed", exc_info=True)
             return []
 
@@ -2987,8 +2991,9 @@ class SuggestionEngine:
 
         ``power_unit_scale`` reads a kW (or larger) sensor raw once Min Power is
         under 1, so a reconcile cascade there would stop every cycle from starting
-        (PR #529). A sensor not loaded yet counts as one that could be kW.
-        Loop-only (reads ``hass.states``). Never raises.
+        (PR #529). A sensor not loaded yet, or unavailable / unknown without a unit,
+        counts as one that could be kW. Loop-only (reads ``hass.states``). Never
+        raises.
         """
         try:
             mp = _num(options.get(CONF_MIN_POWER))
@@ -2998,6 +3003,8 @@ class SuggestionEngine:
             if state is None:
                 return 1.0
             unit = state.attributes.get("unit_of_measurement")
+            if not str(unit or "").strip() and state.state in ("unavailable", "unknown"):
+                return 1.0
             return 1.0 if power_unit_scale(unit, mp) > 1.0 else 0.0
         except Exception:  # pylint: disable=broad-exception-caught
             return 1.0

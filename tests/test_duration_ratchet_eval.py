@@ -44,7 +44,14 @@ def _curve() -> list[tuple[float, float]]:
 
 def test_a_store_of_cut_off_runs_no_longer_ends_the_next_one_early() -> None:
     res = ratchet.run(_curve(), seed=4, cut=8, cut_min=131.0, cycles=2, hold_min=20.0)
-    assert res["ended_early"] == 0
+    assert res["ended_early"] == 0 and res["no_completed_record"] == 0
+    assert (res["seed_full"], res["seed_cut"]) == (4, 8)
     for row in res["rows"]:
         assert row["end_min"] >= res["real_end_min"] - 1
-        assert row["learned_min"] >= res["real_end_min"] - 2
+        assert row["learned_after_min"] >= res["real_end_min"] - 2
+
+
+def test_a_curve_that_never_reaches_the_stop_is_bad_input(tmp_path: Path) -> None:
+    flat = tmp_path / "flat.csv"
+    flat.write_text("minutes_since_start,power_w\n0,3.3\n1,3.3\n")
+    assert ratchet.main(["--curve", str(flat)]) == 2

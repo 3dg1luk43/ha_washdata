@@ -183,7 +183,13 @@ async def test_a_store_from_before_the_rule_is_rebuilt_once_at_setup(
     hass_storage[f"{STORAGE_KEY}.{entry.entry_id}"] = {
         "version": STORAGE_VERSION, "minor_version": 1, "key": f"{STORAGE_KEY}.{entry.entry_id}",
         "data": {
-            "profiles": {"ECO": {"avg_duration": stale}},
+            # "Imported": known only by its saved envelope (no cycles of its own).
+            "profiles": {"ECO": {"avg_duration": stale}, "Imported": {"avg_duration": 3600.0}},
+            "envelopes": {"Imported": {
+                "time_grid": [0.0, 1800.0, 3600.0], "avg": [5.0, 1900.0, 3.0],
+                "min": [0.0, 1800.0, 0.0], "max": [10.0, 2000.0, 6.0], "std": [1.0, 50.0, 1.0],
+                "target_duration": 3600.0, "cycle_count": 3,
+            }},
             "past_cycles": [
                 {"id": f"c{i}", "profile_name": "ECO", "status": "completed",
                  "termination_reason": "smart", "start_time": (T0 + timedelta(days=i)).isoformat(),
@@ -197,4 +203,77 @@ async def test_a_store_from_before_the_rule_is_rebuilt_once_at_setup(
     store = hass.data[DOMAIN][entry.entry_id].profile_store
     assert store._data.get(CUT_SHORT_REBUILD_KEY) is True  # noqa: SLF001
     assert store.get_profiles()["ECO"]["avg_duration"] > stale + 50 * 60
-    assert store.arm_cut_short_rebuild() is False  # once only
+    assert store.cut_short_rebuild_pending() is False  # once only
+    # The envelope-only profile is not sent through a rebuild that would drop it.
+    assert "Imported" in store._data["envelopes"]  # noqa: SLF001
+
+
+# PR #529 review (CodeRabbit, 2026-11-18) ------------------------------------------
+
+
+def test_a_heater_restart_after_a_pause_is_not_a_terminal_event() -> None:
+    """Main activity after 700 s of quiet resets the quiet; it is not an end."""
+    pts = [(t, 2000.0 if t < 600 or t >= 1300 else 2.0) for t in range(0, 2000, 10)]
+    assert _events_after_quiet([t for t, _ in pts], [p for _, p in pts], 2000.0) == []
+
+
+def test_siblings_still_working_at_the_candidate_s_end_do_not_vote() -> None:
+    """Siblings whose quiet starts well after the candidate ended were not drying
+    when it ended: a silent complete run stays complete."""
+    def run(total_s: float, dry_from: float | None) -> tuple:
+        pts = []
+        for t in range(0, int(total_s) + 1, 10):
+            if dry_from is not None and t >= dry_from:
+                p = 25.0 if t >= total_s - 40 else 0.5
+            else:
+                p = 1950.0 if 600 <= t < 1200 else 30.0
+            pts.append((float(t), p))
+        return _run(pts)
+    complete = [run(3000, None) for _ in range(4)]          # ends silently at 3000 s
+    longer = [run(5400, 3000 + 1200) for _ in range(4)]     # dry from 4200 s, pump-out at 5360 s
+    assert not any(cut_short_mask(complete + longer)[:4])
+
+
+def test_mis_captures_do_not_vote_and_a_user_trim_counts_as_corrected() -> None:
+    from custom_components.ha_washdata.profile_store import ProfileStore  # noqa: PLC0415
+
+    class _Probe(ProfileStore):
+        def __init__(self) -> None:  # noqa: D401 - only the build's own state
+            self.device_type = "dishwasher"
+            self.dtw_bandwidth = 0.1
+            self.energy_mode = "mean"
+            self._logger = __import__("logging").getLogger("probe")
+
+    full = _eco(hold_s=30)
+    cut = _eco(cut_s=131 * 60)
+    # Three 10 W mis-captures with a 1 W rise after a long quiet: no votes.
+    miscap = [(t, 10.0 if t < 3000 else (1.0 if t < 4800 else 2.5)) for t, _ in full[: len(full) // 2]]
+
+    def cyc(pts: list, i: int, **extra: Any) -> dict:
+        return {"id": f"c{i}", "profile_name": "ECO", "status": "completed", "duration": pts[-1][0],
+                "power_data": [[t, p] for t, p in pts], **extra}
+
+    probe = _Probe()
+    built = probe._rebuild_envelope_sync([cyc(full, 0), cyc(full, 1), cyc(cut, 2)] + [cyc(miscap, 3 + k) for k in range(3)])  # noqa: SLF001
+    assert built is not None and len(built[1]) == 3  # the cut run is kept: 2 full voters only
+    trimmed = cyc(cut, 9, meta={"trim": [0.0, cut[-1][0]]})
+    built = probe._rebuild_envelope_sync([cyc(full, k) for k in range(5)] + [trimmed])  # noqa: SLF001
+    assert built is not None and len(built[1]) == 6  # a user-trimmed run is never a cut-off
+
+
+def test_a_sensor_outage_is_not_quiet_before_a_blip() -> None:
+    """700 s with no reading, then the blip: the quiet was not observed, so the
+    beep rule does not arm the end; the run waits as before (PR #529 review)."""
+    pts = [(t, p) for t, p in _eco(hold_s=1800) if not (BEEP_S - 700 <= t < BEEP_S)]
+    end_min, _cycle = _replay(192.0, pts)
+    assert end_min is None or end_min > BEEP_S / 60 + 10
+
+
+def test_an_unmatched_run_takes_no_blip_as_its_end() -> None:
+    from custom_components.ha_washdata.cycle_detector import CycleDetector as _CD  # noqa: PLC0415
+
+    cfg = build_detector_config({"stop_threshold_w": 4.5}, {"device_type": "dishwasher"}, "dishwasher")
+    det = _CD(cfg, lambda _o, _n: None, lambda _c: None)
+    for t, p in _eco(hold_s=0):
+        det.process_reading(p, T0 + timedelta(seconds=t))
+    assert det._is_terminal_blip(T0 + timedelta(seconds=BEEP_S + 1), 6.3) is False  # noqa: SLF001

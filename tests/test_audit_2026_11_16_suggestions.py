@@ -211,6 +211,11 @@ async def test_the_floor_follows_the_sensor_s_unit(hass: Any) -> None:
     assert floor({CONF_MIN_POWER: 1.0, "power_sensor": "sensor.w"}) == 0.0
     assert floor({CONF_MIN_POWER: 0.005, "power_sensor": "sensor.kw"}) == 0.0  # already raw
     assert floor({CONF_MIN_POWER: 1.0, "power_sensor": "sensor.missing"}) == 1.0
+    # Unavailable without a unit (PR #529 review): it may come back as kW.
+    hass.states.async_set("sensor.gone", "unavailable", {})
+    assert floor({CONF_MIN_POWER: 1.0, "power_sensor": "sensor.gone"}) == 1.0
+    hass.states.async_set("sensor.gone_w", "unavailable", {"unit_of_measurement": "W"})
+    assert floor({CONF_MIN_POWER: 1.0, "power_sensor": "sensor.gone_w"}) == 0.0
 
 
 # --------------------------------------------------------------------- the end gate
@@ -393,12 +398,12 @@ async def test_apply_all_during_a_pass_s_joint_check_writes_no_unsafe_set(
     real = SuggestionEngine.joint_end_gate_drops
     entered, release, calls = threading.Event(), threading.Event(), []
 
-    def held_first(self: Any, stored: dict[str, Any]) -> list[str]:
+    def held_first(self: Any, stored: dict[str, Any], **kwargs: Any) -> list[str]:
         calls.append(sorted(stored))
         if len(calls) == 1:  # the pass's check
             entered.set()
             release.wait(10)
-        return real(self, stored)
+        return real(self, stored, **kwargs)
 
     monkeypatch.setattr(SuggestionEngine, "joint_end_gate_drops", held_first)
     task = hass.async_create_task(lm._run_pass(  # noqa: SLF001
@@ -590,3 +595,87 @@ async def test_passes_run_one_at_a_time(mock_hass: Any) -> None:
         lm._async_scan_and_apply(second, "second", OWNER_STANDBY_FLOOR, gen),  # noqa: SLF001
     )
     assert seen == [{CONF_START_THRESHOLD_W}]
+
+
+async def test_a_failed_joint_check_aborts_apply_all(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """PR #529 review: the joint end-gate check swallowed its own failure as "nothing
+    to withdraw", so Apply all wrote a set nobody judged. Apply now writes nothing."""
+    from unittest.mock import patch  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(options={
+        CONF_STOP_THRESHOLD_W: 3.0, CONF_START_THRESHOLD_W: 5.0, CONF_OFF_DELAY: 60,
+        CONF_MIN_OFF_GAP: 60, CONF_END_ENERGY_THRESHOLD: 0.01,
+    })
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store = manager.profile_store
+    store._data["past_cycles"] = [_paused_cycle(i, pause_w=1.0) for i in range(6)]  # noqa: SLF001
+    store.set_suggestion(CONF_END_ENERGY_THRESHOLD, 1.0, reason="r", flags={"owner": OWNER_BATCH})
+    engine_cls = type(manager.learning_manager.suggestion_engine)
+    client = await hass_ws_client(hass)
+    with patch.object(engine_cls, "_end_gate_splits", side_effect=RuntimeError("boom")):
+        await client.send_json_auto_id({
+            "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry.entry_id,
+            "keys": [CONF_END_ENERGY_THRESHOLD],
+        })
+        res = await client.receive_json()
+    assert res["success"] is False and res["error"]["code"] == "end_gate_check_failed"
+    await hass.async_block_till_done()
+    assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_END_ENERGY_THRESHOLD] == 0.01
+
+
+async def test_a_mute_that_lands_while_apply_waits_is_respected(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """PR #529 review: Apply all picked its suggestions before waiting for the
+    options lock, so a mute completed meanwhile was still written."""
+    from custom_components.ha_washdata import ws_api  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(options={CONF_END_ENERGY_THRESHOLD: 0.01})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    store.set_suggestion(CONF_END_ENERGY_THRESHOLD, 0.02, reason="r", flags={"owner": OWNER_BATCH})
+    client = await hass_ws_client(hass)
+    lock = ws_api._entry_options_lock(hass, entry.entry_id)  # noqa: SLF001
+    await lock.acquire()  # a settings save in progress
+    try:
+        await client.send_json_auto_id({
+            "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry.entry_id,
+            "keys": [CONF_END_ENERGY_THRESHOLD],
+        })
+        for _ in range(5):
+            await asyncio.sleep(0)
+        await store.set_suggestion_locked(CONF_END_ENERGY_THRESHOLD, True)  # muted meanwhile
+    finally:
+        lock.release()
+    res = await client.receive_json()
+    assert res["success"] and res["result"]["applied"] == []
+    await hass.async_block_till_done()
+    assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_END_ENERGY_THRESHOLD] == 0.01
+
+
+async def test_cadence_rows_belong_to_their_sensor_and_go_with_a_wipe(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """PR #529 review: after a sensor swap the old plug's cadence rows outvoted the
+    new one's; after a wipe the in-memory interval model still sized the pass."""
+    entry = await setup_washdata_entry()
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store, lm = manager.profile_store, manager.learning_manager
+    sensor = lm._power_sensor()  # noqa: SLF001
+    assert sensor
+    for _ in range(3):
+        store.add_cadence_summary(60.0, 30.0, sensor="sensor.old_plug")
+    assert store.get_cadence_summaries(sensor) == []  # another plug's rows
+    store.add_cadence_summary(10.0, 5.0, sensor=sensor)
+    assert store.get_cadence_summaries(sensor) == [[10.0, 5.0]]  # replaced, not mixed
+
+    from custom_components.ha_washdata.time_utils import utc_now  # noqa: PLC0415
+
+    lm._sample_interval_model.add_samples([30.0] * 40, utc_now())  # noqa: SLF001
+    assert lm.cadence() is not None
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({"type": f"{DOMAIN}/wipe_history", "entry_id": entry.entry_id})
+    res = await client.receive_json()
+    assert res["success"]
+    assert lm.cadence() is None

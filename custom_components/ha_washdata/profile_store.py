@@ -510,16 +510,19 @@ def trim_zero_power_data(
 def _events_after_quiet(offsets: list[float], values: list[float], peak: float) -> list[tuple[float, float]]:
     """``(quiet_start_s, event_s)`` for each terminal event a run shows after at least
     ``TERMINAL_BLIP_QUIET_MIN_S`` of quiet (#531): a reading above
-    ``TERMINAL_EVENT_PEAK_FRAC`` of its peak, or a blip inside the quiet of
-    ``TERMINAL_BLIP_RATIO`` x the quiet's level and ``TERMINAL_BLIP_MIN_W`` more."""
+    ``TERMINAL_EVENT_PEAK_FRAC`` of its peak but not main activity (at most
+    ``TERMINAL_EVENT_MAX_PEAK_FRAC`` of it: a heater restart after a pause is not an
+    end), or a blip inside the quiet of ``TERMINAL_BLIP_RATIO`` x the quiet's level
+    and ``TERMINAL_BLIP_MIN_W`` more."""
     ceiling = TERMINAL_EVENT_PEAK_FRAC * peak
+    main = TERMINAL_EVENT_MAX_PEAK_FRAC * peak
     events: list[tuple[float, float]] = []
     q_start: float | None = None
     q_vals: list[float] = []
     q_level: float | None = None
-    for t, v in zip(offsets, values):
+    for t, v in zip(offsets, values, strict=False):
         if v > ceiling:
-            if q_start is not None and t - q_start >= TERMINAL_BLIP_QUIET_MIN_S:
+            if q_start is not None and t - q_start >= TERMINAL_BLIP_QUIET_MIN_S and v <= main:
                 events.append((q_start, t))
             q_start, q_vals, q_level = None, [], None
             continue
@@ -545,9 +548,10 @@ def cut_short_mask(runs: list[tuple[list[float], list[float], float, bool, float
     in its last ``TERMINAL_BLIP_QUIET_MIN_S`` (a load-adaptive programme's shorter
     runs end on their own event and are complete) and at least
     ``CUT_SHORT_MIN_RUNS`` (and ``CUT_SHORT_MIN_SHARE`` of the runs) others go on
-    past its end into at least ``TERMINAL_BLIP_QUIET_MIN_S`` of quiet and then show
-    one (:func:`_events_after_quiet`): its end came before the programme's. A
-    pinned run (golden or a corrected length) never is. Pure; never raises.
+    past its end into at least ``TERMINAL_BLIP_QUIET_MIN_S`` of quiet, begun no
+    later than that long after its end, and then show one
+    (:func:`_events_after_quiet`): its end came before the programme's. A pinned
+    run (golden or a corrected length) never is. Pure; never raises.
     """
     try:
         n = len(runs)
@@ -562,7 +566,12 @@ def cut_short_mask(runs: list[tuple[list[float], list[float], float, bool, float
                 continue
             later = sum(
                 1 for j, ev in enumerate(events)
-                if j != i and any(t_e > d_i and t_e - max(q0, d_i) >= TERMINAL_BLIP_QUIET_MIN_S for q0, t_e in ev)
+                if j != i and any(
+                    t_e > d_i
+                    and q0 <= d_i + TERMINAL_BLIP_QUIET_MIN_S
+                    and t_e - max(q0, d_i) >= TERMINAL_BLIP_QUIET_MIN_S
+                    for q0, t_e in ev
+                )
             )
             mask.append(later >= need)
         return mask
@@ -3175,16 +3184,27 @@ class ProfileStore:
         self._data["suggestions"] = {}
         await self.async_save()
 
-    def get_cadence_summaries(self) -> list[list[float]]:
-        """Per-cycle ``[p95, median]`` update intervals, newest last (item 637)."""
+    def get_cadence_summaries(self, sensor: str | None = None) -> list[list[float]]:
+        """Per-cycle ``[p95, median]`` update intervals, newest last (item 637).
+
+        ``sensor``: the power sensor asked about. Rows measured on another one are
+        not its cadence (PR #529 review: after a swap the old plug's rows outvoted
+        the new one's), so none are returned; rows from before the sensor was
+        recorded count for any.
+        """
+        recorded = self._data.get("cadence_sensor")
+        if sensor is not None and recorded is not None and recorded != sensor:
+            return []
         raw = self._data.get("cadence_summaries")
         return [list(r) for r in raw if isinstance(r, (list, tuple))] if isinstance(raw, list) else []
 
-    def add_cadence_summary(self, p95: float, median: float) -> None:
-        """Keep one cycle's cadence; saved with the cycle-end write."""
-        rows = self.get_cadence_summaries()
+    def add_cadence_summary(self, p95: float, median: float, sensor: str | None = None) -> None:
+        """Keep one cycle's cadence, for ``sensor``; saved with the cycle-end write."""
+        rows = self.get_cadence_summaries(sensor)
         rows.append([round(float(p95), 2), round(float(median), 2)])
         self._data["cadence_summaries"] = rows[-CADENCE_RECENT_CYCLES:]
+        if sensor is not None:
+            self._data["cadence_sensor"] = sensor
 
     def get_suggestion_apply_cycle_count(self) -> int:
         """Return the total cycle count recorded at the last user suggestion apply."""
@@ -3250,6 +3270,17 @@ class ProfileStore:
 
         if not added:
             return
+
+        # Newest first by the time each row records, not by position: a history
+        # merge appends the imported rows after the local ones whatever their age,
+        # and the limits below would drop a newer imported row (PR #529 review).
+        def _age(row: Any) -> datetime:
+            when = _parse_start_dt(row.get("timestamp")) if isinstance(row, dict) else None
+            if when is None:
+                return datetime.min.replace(tzinfo=dt_util.UTC)
+            return when if when.tzinfo else when.replace(tzinfo=dt_util.UTC)
+
+        log.sort(key=_age, reverse=True)
 
         # Keep only the newest entries (list is most-recent-first).
         if len(log) > self.SETTINGS_CHANGELOG_MAX:
@@ -3534,11 +3565,17 @@ class ProfileStore:
 
         Called on every entity refresh, so the scan is cached while the list, its
         length and its last element are unchanged and the cached cycle still sits
-        at its index; a delete, merge, split, import or wipe changes one of those.
-        The returned dict is the stored one, so an in-place trim or relabel shows.
+        at its index; a delete, merge, split, import or wipe changes one of those,
+        and an in-place start time rewrite (reprocess, trim, interactive merge)
+        bumps ``_start_edit_gen`` (PR #529 review: a reprocessed run moved from 10:00
+        to 10:02 stayed behind a cached 10:01 one). The returned dict is the stored
+        one, so an in-place trim or relabel shows.
         """
         cycles = self.get_past_cycles()
-        key = (id(cycles), len(cycles), id(cycles[-1]) if cycles else None)
+        key = (
+            id(cycles), len(cycles), id(cycles[-1]) if cycles else None,
+            getattr(self, "_start_edit_gen", 0),
+        )
         cached = getattr(self, "_last_finished_cache", None)
         if cached is not None and cached[0] == key:
             idx, cycle = cached[1], cached[2]
@@ -7132,6 +7169,7 @@ class ProfileStore:
                                     raise ValueError("unparseable start_time")
                                 new_start = start_dt + timedelta(seconds=first_offset)
                                 cycle["start_time"] = dt_util.as_utc(new_start).isoformat()
+                                self._start_edit_gen = getattr(self, "_start_edit_gen", 0) + 1
 
                                 # Re-normalize offsets to 0
                                 shifted_data: list[list[float]] = []
@@ -7353,20 +7391,32 @@ class ProfileStore:
         # expected duration is the envelope's `target_duration`) nor `avg_duration`
         # (`cut_short_mask`). A corrected length or a golden pin is the user's word
         # and always counts.
-        cut_short = (
-            cut_short_mask([
-                (o, v, d, bool(g or c.get("manual_duration")), pk)
-                for (o, v, d, g, pk), (c, _pairs) in zip(parsed, decoded)
-            ])
-            if self.device_type == "dishwasher"
-            else [False] * len(parsed)
-        )
-
         # Degeneracy floor: below max(_DEGENERATE_POWER_FLOOR, 10% of the median
         # peak) a cycle is treated as a mis-capture and dropped (unless golden).
         peaks = sorted(p[4] for p in parsed)
         median_peak = peaks[len(peaks) // 2] if peaks else 0.0
         degen_floor = max(_DEGENERATE_POWER_FLOOR, 0.10 * median_peak)
+
+        # Only the runs the build keeps may vote on each other (a mis-capture is no
+        # evidence). A user trim or edit is a corrected length, as manual_duration.
+        cut_short = [False] * len(parsed)
+        if self.device_type == "dishwasher":
+            voters = [k for k, p in enumerate(parsed) if p[4] >= degen_floor or p[3]]
+
+            def _corrected(c: Any) -> bool:
+                meta = c.get("meta")
+                return bool(
+                    c.get("manual_duration")
+                    or (isinstance(meta, dict) and (meta.get("trim") or meta.get("edited")))
+                )
+
+            sub = cut_short_mask([
+                (parsed[k][0], parsed[k][1], parsed[k][2],
+                 bool(parsed[k][3] or _corrected(decoded[k][0])), parsed[k][4])
+                for k in voters
+            ])
+            for k, cut in zip(voters, sub, strict=True):
+                cut_short[k] = cut
 
         raw_cycles_data: list[tuple[list[float], list[float], float]] = []
         durations: list[float] = []
@@ -8080,14 +8130,37 @@ class ProfileStore:
         """Whether the envelope rebuild armed by the v18 energy fix still has to run."""
         return bool(self._data.get(CYCLE_ENERGY_REBUILD_KEY))
 
-    def arm_cut_short_rebuild(self) -> bool:
-        """Ask once for every envelope to be rebuilt under the #531 cut-off rule
-        (`CUT_SHORT_REBUILD_KEY`); True when this call armed it."""
-        if self._data.get(CUT_SHORT_REBUILD_KEY):
-            return False
-        self._data[CUT_SHORT_REBUILD_KEY] = True
-        self._data[CYCLE_ENERGY_REBUILD_KEY] = True
-        return True
+    def cut_short_rebuild_pending(self) -> bool:
+        """Whether this store still has to be rebuilt once under the #531 cut-off
+        rule (`CUT_SHORT_REBUILD_KEY` absent: a store from before it)."""
+        return not self._data.get(CUT_SHORT_REBUILD_KEY)
+
+    async def async_rebuild_for_cut_short_rule(self) -> int:
+        """Rebuild, once, every profile that has traced evidence cycles (#531).
+
+        Only those: a profile known only by its saved envelope (an import without
+        its cycles) has nothing to rebuild from, and the rebuild's no-evidence path
+        would delete that envelope. The marker is set after the pass and saved;
+        an interrupted pass runs again at the next start. Returns how many
+        envelopes were rebuilt. Never raises.
+        """
+        count = 0
+        try:
+            profiles = set(self._data.get("profiles") or {})
+            names = sorted({
+                str(c.get("profile_name"))
+                for c in self.iter_evidence_cycles()
+                if isinstance(c, dict) and c.get("profile_name") and c.get("power_data")
+            } & profiles)
+            for name in names:
+                with contextlib.suppress(Exception):
+                    if await self.async_rebuild_envelope(name):
+                        count += 1
+            self._data[CUT_SHORT_REBUILD_KEY] = True
+            await self.async_save()
+        except Exception as exc:  # noqa: BLE001 - never cost the user their history
+            self._logger.warning("Rebuild under the #531 cut-off rule aborted: %s", exc)
+        return count
 
     def backfill_tail_cut_pending(self) -> bool:
         """Whether the one-time import tail cut (#518) still has to run. Absent
@@ -13204,6 +13277,7 @@ class ProfileStore:
                 cycle["start_time"] = dt_util.utc_from_timestamp(
                     start_ts + base
                 ).isoformat()
+                self._start_edit_gen = getattr(self, "_start_edit_gen", 0) + 1
 
         # Recompute sampling interval
         if len(renorm) > 1:
@@ -13733,6 +13807,7 @@ class ProfileStore:
         new_dur = (final_end_dt - c1_start_dt).total_seconds()
 
         c1["start_time"] = dt_util.as_utc(c1_start_dt).isoformat()
+        self._start_edit_gen = getattr(self, "_start_edit_gen", 0) + 1
         c1["end_time"] = dt_util.as_utc(final_end_dt).isoformat()
         c1["duration"] = round(new_dur, 1)
         c1["max_power"] = max_power

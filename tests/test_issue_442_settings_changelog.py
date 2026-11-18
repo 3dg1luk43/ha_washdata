@@ -51,6 +51,9 @@ def _hass() -> tuple[MagicMock, MagicMock]:
     manager.profile_store.get_suggestions.return_value = {}
     hass = MagicMock()
     hass.data = {DOMAIN: {"e1": manager}}
+    # Apply all's joint end-gate check runs in the executor and fails closed
+    # (PR #529 review): a job that cannot be awaited would refuse every apply.
+    hass.async_add_executor_job = AsyncMock(side_effect=lambda fn, *a: fn(*a))
     return hass, manager
 
 

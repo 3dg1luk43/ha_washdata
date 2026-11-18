@@ -11,10 +11,12 @@ import { options } from '../helpers/ws-handlers';
 
 const LOW_STOP = { ...options, min_power: 1.0, start_threshold_w: 5, stop_threshold_w: 0.8 };
 
-function statesIn(unit: string) {
+function statesIn(unit: string, state?: string) {
+  const attributes: Record<string, string> = { device_class: 'power' };
+  if (unit) attributes.unit_of_measurement = unit;
   return {
     states: {
-      'sensor.washer_power': { state: unit === 'kW' ? '0.002' : '2', attributes: { device_class: 'power', unit_of_measurement: unit } },
+      'sensor.washer_power': { state: state ?? (unit === 'kW' ? '0.002' : '2'), attributes },
     },
   };
 }
@@ -38,4 +40,21 @@ test('a W sensor: the same values are still flagged', async ({ page }) => {
   await bootPanel(page, { 'ha_washdata/get_options': { options: LOW_STOP } }, statesIn('W'));
   const err = await minPowerError(page);
   await expect(err).toBeVisible({ timeout: 8_000 });
+});
+
+test('a kW sensor: Min Power 2 over a 1.1 W stop is flagged, its fix never under 1 W', async ({ page }) => {
+  await page.goto('/');
+  const opts = { ...options, min_power: 2.0, start_threshold_w: 10, stop_threshold_w: 1.1 };
+  await bootPanel(page, { 'ha_washdata/get_options': { options: opts } }, statesIn('kW'));
+  const err = await minPowerError(page);
+  await expect(err).toBeVisible({ timeout: 8_000 });
+  // Not waived (1 W fits under a 1.1 W stop), and the fix stays at the 1 W floor.
+  await expect(page.locator('.wd-conflict-fix[data-ckey="min_power"]')).toHaveAttribute('data-cval', '1');
+});
+
+test('an unavailable sensor without a unit counts as one that could be kW', async ({ page }) => {
+  await page.goto('/');
+  await bootPanel(page, { 'ha_washdata/get_options': { options: LOW_STOP } }, statesIn('', 'unavailable'));
+  const err = await minPowerError(page);
+  await expect(err).toBeHidden();
 });

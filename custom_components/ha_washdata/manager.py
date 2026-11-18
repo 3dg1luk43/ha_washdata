@@ -2472,6 +2472,18 @@ class WashDataManager:
         except Exception as exc:  # pylint: disable=broad-exception-caught
             self._logger.warning("Envelope rebuild after the energy fix failed: %s", exc)
 
+    async def _async_rebuild_for_cut_short_rule(self) -> None:
+        """Rebuild a dishwasher's profiles once under the #531 cut-off rule, so a
+        programme that was ending inside its drying stops at the first run after
+        the update. Never raises."""
+        try:
+            count = await self.profile_store.async_rebuild_for_cut_short_rule()
+            self._logger.info(
+                "Rebuilt %d profiles without runs cut inside their drying (#531)", count
+            )
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            self._logger.warning("Rebuild under the #531 cut-off rule failed: %s", exc)
+
     def async_schedule_energy_rebuild(self) -> None:
         """Run the envelope rebuild armed by the v18 migration or an import of an
         older export, in the background (it rebuilds every profile, which must not
@@ -2832,8 +2844,9 @@ class WashDataManager:
         # ProfileStore: an untracked task would keep writing to the store a reload
         # had already swapped out.
         self.async_schedule_banked_tail_repair()
-        if self.device_type == DEVICE_TYPE_DISHWASHER and self.profile_store.arm_cut_short_rebuild():
-            self._logger.info("Rebuilding the profiles once without runs cut inside their drying (#531)")
+        if self.device_type == DEVICE_TYPE_DISHWASHER and self.profile_store.cut_short_rebuild_pending():
+            # #531: once, in the background (not billed to the startup time, #408).
+            self._spawn_tracked(self._async_rebuild_for_cut_short_rule())
         self.async_schedule_energy_rebuild()
         self.async_schedule_backfill_tail_cut()
 
@@ -4051,9 +4064,14 @@ class WashDataManager:
         """
         if not self._door_opens_at_end or self.detector.state not in _DOOR_END_STATES:
             return False
-        return self.detector.state != STATE_PAUSED or bool(
-            self.detector.door_end_due(utc_now())
-        )
+        if self.detector.state != STATE_PAUSED:
+            return True
+        # A program picked by hand reaches the detector at its next match tick; until
+        # then `door_end_due` would judge the run by the previous program's length
+        # (PR #529 review). Wait for the detector to hold the pick.
+        if self._manual_program_active and self.detector.matched_profile != self._current_program:
+            return False
+        return bool(self.detector.door_end_due(utc_now()))
 
     def _arm_door_end_dwell(self) -> None:
         """(Re)arm the auto-open door-end dwell timer (#342)."""

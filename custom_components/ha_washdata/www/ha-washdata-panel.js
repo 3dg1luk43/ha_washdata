@@ -346,7 +346,7 @@ const _SETTINGS_SECTIONS = [
       { key: 'door_sensor_entity', label: 'Door Sensor Entity', basic: true, type: 'entity', domain: 'binary_sensor',
         doc: 'Optional door sensor. Shows when the appliance was opened to unload after a cycle.' },
       { key: 'door_opens_at_end', label: 'Opening the Door Ends the Cycle', type: 'checkbox',
-        doc: 'For machines whose door stays locked while they run (most front-loading washers) or that open it themselves at the end (dishwashers with AirDry). A door held open for the dwell time below ends the cycle instead of pausing it; a brief open is ignored. While the cycle is paused, it ends only once the recognised program is nearly done, so opening the door mid-program still pauses it. Needs a Door Sensor Entity.' },
+        doc: 'For machines whose door stays locked while they run (most front-loading washers) or that open it themselves at the end (dishwashers with AirDry). A door held open for the dwell time below, with the power down, ends the cycle instead of pausing it; a brief open is ignored. In a pause this happens only once the recognised program is nearly done, so a pause mid-program stays a pause. Needs a Door Sensor Entity.' },
       { key: 'door_end_dwell_seconds', label: 'Door-Open End Dwell', unit: 's', type: 'number', min: 1, def: 60,
         doc: 'With "Opening the Door Ends the Cycle" on: how long the door must stay open before the cycle ends. Long enough to ignore adding a dish (default 60 s).' },
       { key: 'pause_cuts_power', label: 'Pause Also Cuts Power (via switch)', type: 'checkbox',
@@ -534,13 +534,15 @@ const _ENERGY_UNITS = new Set(['mwh', 'wh', 'kwh', 'gwh', 'twh', 'j', 'kj', 'mj'
 
 // Whether a Min Power under 1 W would switch this Power Sensor to raw readings:
 // const.power_unit_scale reads a kW (or larger) sensor raw below 1 (#481), so no
-// cycle would start (PR #529). A sensor not in the states yet counts as one that
-// could be kW, as SuggestionEngine._min_power_floor does.
+// cycle would start (PR #529). A sensor not in the states yet, or unavailable /
+// unknown without a unit, counts as one that could be kW, as
+// SuggestionEngine._min_power_floor does.
 function _minPowerMustStayAtOne(id, ctx) {
   const st = (id && ctx && ctx.stateOf) ? ctx.stateOf(id) : null;
   if (!st) return true;
   const attrs = st.attributes || {};
   const unit = String(attrs.unit_of_measurement == null ? '' : attrs.unit_of_measurement).trim();
+  if (!unit && (st.state === 'unavailable' || st.state === 'unknown')) return true;
   const own = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key) ? obj[key] : null;
   let scale = own({ mW: 0.001, W: 1, kW: 1000, MW: 1e6, GW: 1e9 }, unit);
   if (scale == null) scale = unit.toLowerCase() === 'kw' ? 1000 : 1;
@@ -596,16 +598,19 @@ const _SETTING_CONFLICTS = [
     }),
   },
   {
-    // min_power <= stop_threshold_w (noise gate must sit below the stop floor). Not
-    // where Min Power cannot follow the stop under 1 W without switching a kW sensor
-    // to raw readings (PR #529; reconcile holds it at 1 the same way). Over the stop
-    // it is soft: no detection threshold reads it once start and stop are set.
+    // min_power <= stop_threshold_w (noise gate must sit below the stop floor). On a
+    // sensor Min Power under 1 W switches to raw readings (a kW one, PR #529;
+    // reconcile holds it at 1 the same way) its fix is never under 1 W, and the
+    // conflict is waived only where nothing at or above 1 W can sit at or under the
+    // stop. Over the stop it is soft: no detection threshold reads it once start and
+    // stop are set.
     keys: ['min_power', 'stop_threshold_w'],
     check: (v, ctx) => v.min_power != null && v.stop_threshold_w != null && v.min_power > v.stop_threshold_w
-      && !(v.min_power >= 1 && +(v.stop_threshold_w * 0.8).toFixed(1) < 1
-        && _minPowerMustStayAtOne(v.power_sensor, ctx)),
-    fieldErrors: v => ({
-      min_power:        { msgKey: 'conflict.min_power.min_power', msgVars: {stop: v.stop_threshold_w}, msgFb: `Must be at or below Stop Threshold (${v.stop_threshold_w} W)`, fixVal: +(v.stop_threshold_w * 0.8).toFixed(1) },
+      && !(v.min_power >= 1 && v.stop_threshold_w < 1 && _minPowerMustStayAtOne(v.power_sensor, ctx)),
+    fieldErrors: (v, ctx) => ({
+      min_power:        { msgKey: 'conflict.min_power.min_power', msgVars: {stop: v.stop_threshold_w}, msgFb: `Must be at or below Stop Threshold (${v.stop_threshold_w} W)`,
+        fixVal: _minPowerMustStayAtOne(v.power_sensor, ctx)
+          ? Math.max(1, +(v.stop_threshold_w * 0.8).toFixed(1)) : +(v.stop_threshold_w * 0.8).toFixed(1) },
       stop_threshold_w: { msgKey: 'conflict.min_power.stop',      msgVars: {min: v.min_power},  msgFb: `Must be at or above Min Power (${v.min_power} W)`, fixVal: +(v.min_power * 1.25).toFixed(1) },
     }),
   },
@@ -3282,6 +3287,8 @@ class HaWashdataPanel extends HTMLElement {
         const m = /\(([-\d.]+) W\)[^(]*\(([-\d.]+) W\)/.exec(String(e.message || ''));
         e.message = this._tText('msg.invalid_threshold_pair',
           { stop: m ? m[1] : '?', start: m ? m[2] : '?' }, e.message);
+      } else if (e && e.code === 'end_gate_check_failed') {
+        e.message = this._tText('msg.end_gate_check_failed', {}, e.message);
       }
       throw e;
     }

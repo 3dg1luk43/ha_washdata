@@ -203,6 +203,8 @@ async def test_apply_all_never_applies_a_muted_key() -> None:
     manager.profile_store.get_lifetime_cycle_count.return_value = 10
     manager.profile_store.clear_suggestions = AsyncMock()
     hass = MagicMock()
+    # The joint end-gate check runs in the executor and fails closed (PR #529).
+    hass.async_add_executor_job = AsyncMock(side_effect=lambda fn, *a: fn(*a))
     with patch.object(ws_api, "_get_manager", return_value=manager), patch.object(
         ws_api, "_get_entry", return_value=entry
     ), patch.object(ws_api, "_record_option_changes", AsyncMock()):

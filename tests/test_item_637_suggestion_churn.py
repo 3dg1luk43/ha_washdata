@@ -47,10 +47,10 @@ class _Store:
         self.suggestions: dict[str, Any] = {}
         self.cadences: list[list[float]] = []
 
-    def get_cadence_summaries(self) -> list[list[float]]:
+    def get_cadence_summaries(self, sensor: Any = None) -> list[list[float]]:
         return [list(r) for r in self.cadences]
 
-    def add_cadence_summary(self, p95: float, median: float) -> None:
+    def add_cadence_summary(self, p95: float, median: float, sensor: Any = None) -> None:
         self.cadences = (self.cadences + [[p95, median]])[-CADENCE_RECENT_CYCLES:]
 
     def get_suggestions(self) -> dict[str, Any]:

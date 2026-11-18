@@ -1116,6 +1116,7 @@
     "hist_warn_naive_time_other": "{n} timestamps have no time zone and were read as UTC. If the file uses local time, cycles are shifted by your UTC offset and readings near a DST change may be dropped.",
     "hist_tail_trimmed": "{min} min of waiting after the cycle ended were trimmed, as the live integration trims them",
     "invalid_threshold_pair": "Stop Threshold ({stop} W) must be below Start Threshold ({start} W). Nothing was saved; change both together.",
+    "end_gate_check_failed": "The suggested timing settings could not be checked against this appliance's pauses. Nothing was saved; try again.",
     "bp_admin_only": "An administrator installs templates.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Created by WashData for {device}. Add your actions (notify, lights, ...).",
@@ -1310,7 +1311,7 @@
     },
     "door_opens_at_end": {
       "label": "Opening the Door Ends the Cycle",
-      "doc": "For machines whose door stays locked while they run (most front-loading washers) or that open it themselves at the end (dishwashers with AirDry). A door held open for the dwell time below ends the cycle instead of pausing it; a brief open is ignored. While the cycle is paused, it ends only once the recognised program is nearly done, so opening the door mid-program still pauses it. Needs a Door Sensor Entity."
+      "doc": "For machines whose door stays locked while they run (most front-loading washers) or that open it themselves at the end (dishwashers with AirDry). A door held open for the dwell time below, with the power down, ends the cycle instead of pausing it; a brief open is ignored. In a pause this happens only once the recognised program is nearly done, so a pause mid-program stays a pause. Needs a Door Sensor Entity."
     },
     "door_sensor_entity": {
       "doc": "Optional door sensor. Shows when the appliance was opened to unload after a cycle.",

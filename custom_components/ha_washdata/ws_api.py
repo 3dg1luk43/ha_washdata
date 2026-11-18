@@ -320,20 +320,21 @@ def _visible_suggestions(
 
 async def _drop_unsafe_end_gate_updates(
     hass: HomeAssistant, manager: Any, visible: dict[str, Any], updates: dict[str, Any]
-) -> None:
+) -> bool:
     """Withdraw from ``updates`` what, written together, splits own cycles (PR #529).
 
     A pass stores its values before its joint check
     (``LearningManager._enforce_joint_end_gate``) can withdraw any, and Apply all
     does not wait for it, so the stored set can briefly be one no pass would leave.
-    This judges exactly what is written. Never raises: on a failure the set is
-    written as stored (each pass's own checks still ran).
+    This judges exactly what is written. Never raises. False when the check could
+    not run: the caller writes nothing, since an unjudged end-gate set can split
+    cycles (PR #529 review). True otherwise, with ``updates`` withdrawn from.
     """
     # Imported here to keep the ws_api import graph free of suggestion_engine.
     from .suggestion_engine import END_GATE_KEYS  # pylint: disable=import-outside-toplevel
 
     if not any(key in END_GATE_KEYS for key in updates):
-        return
+        return True
     try:
         engine = manager.learning_manager.suggestion_engine.for_job()
         # As written: a cascade the selection carries is a value like any other
@@ -342,12 +343,15 @@ async def _drop_unsafe_end_gate_updates(
             key: {**visible[key], "value": val, "cascade": False}
             for key, val in updates.items()
         }
-        drops = await hass.async_add_executor_job(engine.joint_end_gate_drops, judged)
+        drops = await hass.async_add_executor_job(
+            functools.partial(engine.joint_end_gate_drops, judged, strict=True)
+        )
     except Exception:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("Joint end-gate check on apply failed", exc_info=True)
-        return
+        _LOGGER.warning("Joint end-gate check on apply failed; nothing applied", exc_info=True)
+        return False
     for key in list(drops or ()):
         updates.pop(key, None)
+    return True
 
 
 def _threshold_pair_message(start: float, stop: float) -> str:
@@ -4416,6 +4420,9 @@ async def ws_wipe_history(
         # the authoritative one, so the pin has to be retired there too or the next
         # cycle re-applies a program from before the wipe.
         manager.clear_armed_program()
+        learning = getattr(manager, "learning_manager", None)
+        if learning is not None:
+            learning.reset_cadence_evidence()
         manager.notify_update()
         _send_result(connection, msg["id"], "wipe_history", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -5051,34 +5058,42 @@ async def ws_apply_suggestions(
         return
 
     try:
-        merged = {**entry.data, **entry.options}
-        # Only what the Settings list would show: a muted key re-created by the
-        # reconcile cascade used to be applied here (audit SUGGEST-11).
-        visible = {
-            key: item
-            for key, item, _s, _c in _visible_suggestions(
-                manager.profile_store, merged,
-                getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
-            )
-        }
         updates: dict[str, Any] = {}
-        for key in msg["keys"]:
-            item = visible.get(key)
-            if not isinstance(item, dict) or item.get("value") is None:
-                continue
-            val = item["value"]
-            updates[key] = (
-                int(float(val)) if key in _SUGGESTION_INT_KEYS else float(val)
-            )
-        if updates:
-            # Same critical section as ws_set_options (#442 follow-up): the
-            # changelog snapshot and the options write must be atomic per entry.
-            async with _entry_options_lock(hass, entry_id):
+        # Same critical section as ws_set_options (#442 follow-up): the changelog
+        # snapshot and the options write must be atomic per entry. The selection is
+        # inside it too, and a mute takes the same lock, so a mute that completed
+        # while Apply waited is seen (PR #529 review).
+        async with _entry_options_lock(hass, entry_id):
+            merged = {**entry.data, **entry.options}
+            # Only what the Settings list would show: a muted key re-created by the
+            # reconcile cascade used to be applied here (audit SUGGEST-11).
+            visible = {
+                key: item
+                for key, item, _s, _c in _visible_suggestions(
+                    manager.profile_store, merged,
+                    getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
+                )
+            }
+            for key in msg["keys"]:
+                item = visible.get(key)
+                if not isinstance(item, dict) or item.get("value") is None:
+                    continue
+                val = item["value"]
+                updates[key] = (
+                    int(float(val)) if key in _SUGGESTION_INT_KEYS else float(val)
+                )
+            if updates:
                 # Both checks read the options as they are now, inside the lock: a
                 # settings save can land while it is awaited or during the
                 # end-gate scan (PR #529).
                 fresh = {**entry.data, **entry.options}
-                await _drop_unsafe_end_gate_updates(hass, manager, visible, updates)
+                if not await _drop_unsafe_end_gate_updates(hass, manager, visible, updates):
+                    connection.send_error(
+                        msg["id"], "end_gate_check_failed",
+                        "The suggested timing settings could not be checked against "
+                        "this appliance's pauses. Nothing was saved; try again.",
+                    )
+                    return
                 # Item 515: the reconciler keeps a stored start/stop pair ordered,
                 # but applying one of the two alone (a subset, a muted cascade, or
                 # a pair reconciled against options that changed since) could
@@ -5173,7 +5188,10 @@ async def ws_set_suggestion_lock(
         _err_not_found(connection, msg["id"], entry_id)
         return
     try:
-        await manager.profile_store.set_suggestion_locked(key, bool(msg["locked"]))
+        # The lock Apply all selects under (PR #529 review): a mute that completes
+        # before Apply reads the list is seen by it.
+        async with _entry_options_lock(hass, msg["entry_id"]):
+            await manager.profile_store.set_suggestion_locked(key, bool(msg["locked"]))
         learning = getattr(manager, "learning_manager", None)
         if msg["locked"] and learning is not None:
             # The muted entry may be what made another pending one safe (PR #529).

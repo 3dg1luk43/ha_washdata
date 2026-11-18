@@ -91,3 +91,17 @@ async def test_the_ghost_log_names_a_peak_inside_its_24_h(
         manager._handle_noise_cycle(5.0)  # noqa: SLF001
     logged = [r.getMessage() for r in caplog.records if "ghost cycles in 24 h" in r.getMessage()]
     assert logged and "up to 5.0 W" in logged[-1], logged
+
+
+async def test_a_new_pick_waits_for_the_detector_before_a_paused_door_end(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """Re-picked to a longer program, the detector still holds the old one until its
+    next match: the door must not end the run by the old program's length."""
+    manager, _ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    assert manager._door_end_may_fire()  # noqa: SLF001 - "Cotton" matched, at its end
+    manager._manual_program_active = True  # noqa: SLF001
+    manager._current_program = "Intensive"  # noqa: SLF001 - picked, detector not told yet
+    assert manager._door_end_may_fire() is False  # noqa: SLF001
+    manager._current_program = "Cotton"  # noqa: SLF001 - the pick and the detector agree
+    assert manager._door_end_may_fire()  # noqa: SLF001

@@ -95,6 +95,10 @@ def make_run(curve: list[tuple[float, float]], day: int, rng: np.random.Generato
     }
 
 
+def _learned_min(store: Any) -> float:
+    return round(float((store.get_profiles() or {}).get(PROGRAM, {}).get("avg_duration") or 0.0) / 60, 1)
+
+
 def run(curve: list[tuple[float, float]], *, seed: int = 30, cycles: int = 60,
         stop: float = 4.5, start: float = 5.0, hold_min: float = 40.0, rng_seed: int = 531,
         cut: int = 0, cut_min: float = 131.0) -> dict[str, Any]:
@@ -106,26 +110,29 @@ def run(curve: list[tuple[float, float]], *, seed: int = 30, cycles: int = 60,
     past = [make_run(curve, d, rng, cut_s=end_s + 30) for d in range(seed)]
     # The reporter's store after the ratchet: runs closed inside the drying (#531).
     past += [make_run(curve, seed + d, rng, cut_s=cut_min * 60) for d in range(cut)]
-    seed += cut
     data = {"profiles": {PROGRAM: {}}, "past_cycles": past, "envelopes": {}, "profile_groups": {}}
     mgr = sle._manager(entry_data, options, "eval", data)  # noqa: SLF001
     store = mgr.profile_store
     cfg = mgr.detector.config
     ev.run_coro(store.async_rebuild_envelope(PROGRAM))
     rows: list[dict[str, Any]] = []
+    early = unfinished = 0
     for k in range(cycles):
-        src = make_run(curve, seed + k, rng, hold_min=hold_min)
+        src = make_run(curve, seed + cut + k, rng, hold_min=hold_min)
         prebuilt = playground._build_match_snapshots(store)  # noqa: SLF001
         rep = sle.replay_one(src, cfg, store, prebuilt, {**entry_data, **options}, None, stop)
-        learned = float((store.get_profiles() or {}).get(PROGRAM, {}).get("avg_duration") or 0.0)
-        row: dict[str, Any] = {"run": k, "learned_min": round(learned / 60, 1)}
+        before = _learned_min(store)
+        row: dict[str, Any] = {"run": k, "learned_before_min": before}
         kept = [c for c in (rep or {}).get("captured", []) if c.get("status") == "completed"]
         if kept:
             primary = max(kept, key=lambda c: float(c.get("duration") or 0.0))
             idx = rep["captured"].index(primary)
             ends = rep.get("ends") or []
+            end_at = float(ends[idx]) if idx < len(ends) else None
+            # Judged on the seconds, rounded only for display: 301 s early is early.
+            early += end_at is not None and end_at < end_s - 300
             row.update(
-                end_min=round(ends[idx] / 60, 1) if idx < len(ends) else None,
+                end_min=round(end_at / 60, 1) if end_at is not None else None,
                 stored_min=round(float(primary.get("duration") or 0.0) / 60, 1),
                 reason=str(primary.get("termination_reason")),
                 records=len(rep["captured"]),
@@ -134,13 +141,15 @@ def run(curve: list[tuple[float, float]], *, seed: int = 30, cycles: int = 60,
             cd["profile_name"], cd["label_source"] = PROGRAM, "manual"
             store._add_cycle_data(cd)  # noqa: SLF001
             ev.run_coro(store.async_rebuild_envelope(PROGRAM))
+        else:
+            unfinished += 1  # no completed record: neither on time nor early
+        row["learned_after_min"] = _learned_min(store)
         rows.append(row)
-    early = [r for r in rows if r.get("end_min") is not None and r["end_min"] * 60 < end_s - 300]
     return {
-        "real_end_min": round(end_s / 60, 1), "seed": seed, "cycles": cycles, "rows": rows,
-        "ended_early": len(early),
-        "learned_first_min": rows[0]["learned_min"] if rows else None,
-        "learned_last_min": round(float((store.get_profiles() or {}).get(PROGRAM, {}).get("avg_duration") or 0) / 60, 1),
+        "real_end_min": round(end_s / 60, 1), "seed_full": seed, "seed_cut": cut, "cycles": cycles,
+        "rows": rows, "ended_early": early, "no_completed_record": unfinished,
+        "learned_first_min": rows[0]["learned_before_min"] if rows else _learned_min(store),
+        "learned_last_min": _learned_min(store),
     }
 
 
@@ -160,14 +169,20 @@ def main(argv: list[str] | None = None) -> int:
     if not path.is_file():
         print(f"no curve at {path}", file=sys.stderr)
         return 2
-    res = run(read_curve(path), seed=a.seed, cycles=a.cycles, stop=a.stop, start=a.start, hold_min=a.hold,
+    curve = read_curve(path)
+    if not any(p >= a.stop for _t, p in curve):
+        print(f"no reading at or above the {a.stop:g} W Stop Threshold in {path}", file=sys.stderr)
+        return 2
+    res = run(curve, seed=a.seed, cycles=a.cycles, stop=a.stop, start=a.start, hold_min=a.hold,
               cut=a.cut, cut_min=a.cut_min)
-    print(f"real end {res['real_end_min']} min; seed {res['seed']} full runs; {res['cycles']} replayed")
-    print(f"  {'run':>4s} {'learned':>8s} {'end':>7s} {'stored':>7s}  reason")
+    print(f"real end {res['real_end_min']} min; seed {res['seed_full']} full + {res['seed_cut']} cut "
+          f"runs; {res['cycles']} replayed")
+    print(f"  {'run':>4s} {'learned':>8s} {'end':>7s} {'stored':>7s} {'learned':>8s}  reason")
     for r in res["rows"]:
-        print(f"  {r['run']:4d} {r['learned_min']:8.1f} {str(r.get('end_min')):>7s} "
-              f"{str(r.get('stored_min')):>7s}  {r.get('reason')}")
+        print(f"  {r['run']:4d} {r['learned_before_min']:8.1f} {str(r.get('end_min')):>7s} "
+              f"{str(r.get('stored_min')):>7s} {r['learned_after_min']:8.1f}  {r.get('reason')}")
     print(f"ended > 5 min before the real end: {res['ended_early']} of {res['cycles']}; "
+          f"no completed record: {res['no_completed_record']}; "
           f"learned {res['learned_first_min']} -> {res['learned_last_min']} min")
     if a.json:
         Path(a.json).write_text(json.dumps(res, indent=1))

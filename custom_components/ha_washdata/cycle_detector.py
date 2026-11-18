@@ -6343,17 +6343,27 @@ class CycleDetector:
         readings under the threshold, ``TERMINAL_BLIP_RATIO`` x their median and
         ``TERMINAL_BLIP_MIN_W`` more is the terminal event too. Asked only for a
         reading that already clears the threshold, so it walks the quiet rarely.
+
+        Only on a matched run (the progress gate then holds it to the programme's
+        end; unmatched, the end spike also shortens the wait to 30 min, which a
+        drying blip must not do), and only over quiet that was observed: a gap of
+        ``TERMINAL_BLIP_QUIET_MIN_S`` or more between readings (a sensor outage)
+        ends the stretch, so it cannot stand in for the quiet (PR #529 review).
         """
+        if not self._matched_profile or float(self._expected_duration or 0.0) <= 0:
+            return False
         stop = float(self._config.stop_threshold_w)
         quiet: list[float] = []
         quiet_start: datetime | None = None
+        newer = timestamp
         for ts, pw in reversed(self._power_readings):
             if ts >= timestamp:
                 continue
-            if float(pw) >= stop:
+            if float(pw) >= stop or (newer - ts).total_seconds() >= TERMINAL_BLIP_QUIET_MIN_S:
                 break
             quiet.append(float(pw))
             quiet_start = ts
+            newer = ts
         if quiet_start is None or (timestamp - quiet_start).total_seconds() < TERMINAL_BLIP_QUIET_MIN_S:
             return False
         level = float(np.median(quiet))
