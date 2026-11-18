@@ -865,13 +865,25 @@ def apply_all(
 
     ``refused`` is the (start, stop) pair when the handler refuses the apply (item
     515), with ``updates`` then empty: the user is stuck, which is not a fixed point.
+
+    The end-gate check runs as the handler runs it (PR #529 review): the handler's
+    own ``_drop_unsafe_end_gate_updates`` on the coerced values as written, cascade
+    flags dropped, which can withdraw a value the pass-time check on the stored set
+    let through (a muted or hidden key is judged there but never written).
     """
     updates: dict[str, Any] = {}
+    visible: dict[str, Any] = {}
     for key, item, _s, _c in ws_api._visible_suggestions(  # noqa: SLF001
         mgr.profile_store, merged, device_type
     ):
         val = item["value"]
+        visible[key] = item
         updates[key] = int(float(val)) if key in ws_api._SUGGESTION_INT_KEYS else float(val)  # noqa: SLF001
+    if updates and not ev.run_coro(ws_api._drop_unsafe_end_gate_updates(  # noqa: SLF001
+        ev._InlineHass(), mgr, visible, updates  # noqa: SLF001
+    )):
+        # The handler writes nothing and reports an error; here it is a harness bug.
+        raise RuntimeError(f"apply_all: the end-gate check failed on {sorted(updates)}")
     # Item 515: the handler refuses an apply that would leave stop >= start.
     pair = ws_api.inverted_threshold_pair(merged, {**merged, **updates}, device_type)
     if pair is not None:

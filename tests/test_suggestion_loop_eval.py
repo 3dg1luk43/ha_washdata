@@ -354,3 +354,42 @@ def test_unmatched_end_lag_is_the_kept_cycles_not_a_discarded_pump_out(monkeypat
     assert row["lag"] == 600.0
     assert row["split"] is False
 
+
+def test_apply_all_judges_the_end_gate_on_the_values_as_written(monkeypatch):
+    """PR #529 review: Apply all wrote what the pass-time check judged on the stored
+    set. The handler re-judges what it writes: here the off delay that made the
+    stored Min Off Gap safe is muted, so only the gap is written, and on its own it
+    ends this dishwasher's 50 min drying pause (below the stop, then the pump-out)."""
+    # 1 kW for 20 min, 0.5 W for 50 min, a 20 W pump-out, off: one 60 s trace.
+    trace = ([[t * 60.0, 1000.0] for t in range(20)]
+             + [[(20 + t) * 60.0, 0.5] for t in range(50)]
+             + [[(70 + t) * 60.0, 20.0] for t in range(3)]
+             + [[(73 + t) * 60.0, 0.0] for t in range(3)])
+    cycle = {"id": "dw", "start_time": "2026-10-01T08:00:00+00:00", "status": "completed",
+             "termination_reason": "smart", "duration": trace[-1][0], "power_data": trace}
+    data = {
+        "profiles": {}, "past_cycles": [cycle], "locked_suggestions": ["off_delay"],
+        "suggestions": {
+            # Judged together the 3300 s wait holds the pause; the stored gap is a
+            # fractional cascade, judged as the int the handler writes.
+            "off_delay": {"value": 3300, "reason": "r", "owner": "operational"},
+            "min_off_gap": {"value": 600.7, "reason": "r", "owner": "model", "cascade": True},
+        },
+    }
+    entry_data = {"device_type": "dishwasher", "name": "dw", "power_sensor": "sensor.dw"}
+    options = {"stop_threshold_w": 2.0, "start_threshold_w": 5.0, "off_delay": 180}
+    mgr = loop._manager(entry_data, options, "dw", data)  # noqa: SLF001
+    judged: list[dict] = []
+    real = SuggestionEngine.joint_end_gate_drops
+
+    def _spy(self, stored, *, strict=False):
+        judged.append({k: dict(v) for k, v in stored.items()})
+        return real(self, stored, strict=strict)
+
+    monkeypatch.setattr(SuggestionEngine, "joint_end_gate_drops", _spy)
+    updates, refused = loop.apply_all(mgr, {**entry_data, **options}, "dishwasher")
+    assert refused is None
+    assert "min_off_gap" not in updates
+    assert judged and judged[-1]["min_off_gap"]["value"] == 600
+    assert judged[-1]["min_off_gap"]["cascade"] is False
+
