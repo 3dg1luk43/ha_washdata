@@ -655,7 +655,7 @@
     },
     "program_mismatch": {
       "name": "Töötav programm erineb valitust",
-      "description": "Käivitub üks kord tsükli kohta, kui käsitsi valitud programm ei sarnane jooksva tsükliga: mõni teine programm sobib sellele selgelt paremini.",
+      "description": "Käivitub üks kord iga valitud programmi kohta, kui käsitsi valitud programm ei sarnane jooksva tsükliga: mõni teine programm sobib sellele selgelt paremini. Uus valik tsükli ajal alustab uut kontrolli.",
       "fields": {
         "program": {
           "name": "Programm",

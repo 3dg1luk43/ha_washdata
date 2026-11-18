@@ -655,7 +655,7 @@
     },
     "program_mismatch": {
       "name": "Programul care rulează diferă de cel selectat",
-      "description": "Se declanșează o dată pe ciclu când programul pe care l-ai ales manual nu seamănă cu ciclul curent: alt program i se potrivește clar mai bine.",
+      "description": "Se declanșează o dată pentru fiecare program ales când programul pe care l-ai ales manual nu seamănă cu ciclul curent: alt program i se potrivește clar mai bine. O nouă alegere în timpul ciclului pornește o nouă verificare.",
       "fields": {
         "program": {
           "name": "Program",

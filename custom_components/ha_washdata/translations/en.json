@@ -441,7 +441,7 @@
     },
     "program_mismatch": {
       "name": "Running program differs from the selected one",
-      "description": "Triggers once per cycle when the program you picked by hand does not look like the cycle that is running: another program fits it clearly better.",
+      "description": "Triggers once per picked program when the program you picked by hand does not look like the cycle that is running: another program fits it clearly better. A new pick during the cycle starts a new check.",
       "fields": {
         "program": {
           "name": "Program",

@@ -655,7 +655,7 @@
     },
     "program_mismatch": {
       "name": "Futó program eltér a kiválasztottól",
-      "description": "Aktiválódik egyszer ciklusonként, amikor a kézzel kiválasztott program nem hasonlít a futó ciklusra: egy másik program egyértelműen jobban illik hozzá.",
+      "description": "Aktiválódik egyszer kiválasztott programonként, amikor a kézzel kiválasztott program nem hasonlít a futó ciklusra: egy másik program egyértelműen jobban illik hozzá. A ciklus közbeni új választás új ellenőrzést indít.",
       "fields": {
         "program": {
           "name": "Program",

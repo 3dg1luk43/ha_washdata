@@ -655,7 +655,7 @@
     },
     "program_mismatch": {
       "name": "O programa em andamento difere do selecionado",
-      "description": "Aciona uma vez por ciclo quando o programa que você escolheu manualmente não se parece com o ciclo em andamento: outro programa corresponde claramente melhor.",
+      "description": "Aciona uma vez por programa escolhido quando o programa que você escolheu manualmente não se parece com o ciclo em andamento: outro programa corresponde claramente melhor. Uma nova escolha durante o ciclo inicia uma nova verificação.",
       "fields": {
         "program": {
           "name": "Programa",

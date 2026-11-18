@@ -655,7 +655,7 @@
     },
     "program_mismatch": {
       "name": "Lopend programma wijkt af van het gekozen programma",
-      "description": "Wordt eenmaal per cyclus geactiveerd wanneer de lopende cyclus niet lijkt op het programma dat u handmatig hebt gekozen: een ander programma past duidelijk beter.",
+      "description": "Wordt eenmaal per gekozen programma geactiveerd wanneer de lopende cyclus niet lijkt op het programma dat u handmatig hebt gekozen: een ander programma past duidelijk beter. Een nieuwe keuze tijdens de cyclus start een nieuwe controle.",
       "fields": {
         "program": {
           "name": "Programma",

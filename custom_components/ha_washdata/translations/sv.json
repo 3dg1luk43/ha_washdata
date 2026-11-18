@@ -655,7 +655,7 @@
     },
     "program_mismatch": {
       "name": "Pågående program skiljer sig från det valda",
-      "description": "Utlöses en gång per cykel, när den pågående cykeln inte liknar programmet du har valt manuellt: ett annat program passar tydligt bättre.",
+      "description": "Utlöses en gång per valt program, när den pågående cykeln inte liknar programmet du har valt manuellt: ett annat program passar tydligt bättre. Ett nytt val under cykeln startar en ny kontroll.",
       "fields": {
         "program": {
           "name": "Program",

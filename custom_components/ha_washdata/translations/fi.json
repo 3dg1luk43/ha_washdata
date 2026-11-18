@@ -655,7 +655,7 @@
     },
     "program_mismatch": {
       "name": "Käynnissä oleva ohjelma eroaa valitusta",
-      "description": "Käynnistyy kerran sykliä kohti, kun itse valitsemasi ohjelma ei vastaa käynnissä olevaa sykliä: jokin toinen ohjelma sopii siihen selvästi paremmin.",
+      "description": "Käynnistyy kerran valittua ohjelmaa kohti, kun itse valitsemasi ohjelma ei vastaa käynnissä olevaa sykliä: jokin toinen ohjelma sopii siihen selvästi paremmin. Uusi valinta syklin aikana aloittaa uuden tarkistuksen.",
       "fields": {
         "program": {
           "name": "Ohjelma",

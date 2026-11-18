@@ -655,7 +655,7 @@
     },
     "program_mismatch": {
       "name": "Le programme en cours diffère de celui choisi",
-      "description": "Se déclenche une fois par cycle quand le programme que vous avez choisi à la main ne ressemble pas au cycle en cours : un autre programme lui correspond nettement mieux.",
+      "description": "Se déclenche une fois par programme choisi quand le programme que vous avez choisi à la main ne ressemble pas au cycle en cours : un autre programme lui correspond nettement mieux. Un nouveau choix pendant le cycle démarre une nouvelle vérification.",
       "fields": {
         "program": {
           "name": "Programme",
