@@ -1023,23 +1023,99 @@ async def test_undo_import_forgets_the_cadence_measured_before_it(
     hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
 ) -> None:
     """PR #529 review: the wipe reset the cadence evidence, Undo Import did not, so
-    the in-memory intervals from before it sized the next operational pass."""
-    from unittest.mock import AsyncMock, patch  # noqa: PLC0415
+    the in-memory intervals from before it sized the next operational pass. Reset
+    once the restore point has replaced the store, before its first write."""
+    from unittest.mock import patch  # noqa: PLC0415
 
     from custom_components.ha_washdata.time_utils import utc_now  # noqa: PLC0415
 
     entry = await setup_washdata_entry()
     manager = hass.data[DOMAIN][entry.entry_id]
+    store = manager.profile_store
+    store._data["profiles"]["P"] = {}  # noqa: SLF001  (an import needs a profile)
+    await store.async_import_data(store.export_data())  # leaves a restore point
     lm = manager.learning_manager
     lm._sample_interval_model.add_samples([30.0] * 40, utc_now())  # noqa: SLF001
     assert lm.cadence() is not None
-    restore = AsyncMock(return_value={"restored_from": None, "counts": {}})
+    real_save = store.async_save
+    at_first_write: list[Any] = []
+
+    async def save(*a: Any, **k: Any) -> Any:
+        at_first_write.append(lm.cadence())
+        return await real_save(*a, **k)
+
     client = await hass_ws_client(hass)
-    with patch.object(manager.profile_store, "async_restore_pre_import_snapshot", restore):
+    with patch.object(store, "async_save", side_effect=save):
         await client.send_json_auto_id({"type": f"{DOMAIN}/undo_import", "entry_id": entry.entry_id})
         assert (await client.receive_json())["success"]
-    assert restore.await_count == 1
+    assert at_first_write and at_first_write[0] is None
     assert lm.cadence() is None
+
+
+async def test_a_refused_undo_import_keeps_the_cadence(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """PR #529 review: with no restore point Undo Import answers not_found, and the
+    running cycle's held intervals and the committed cadence are left as they were."""
+    from custom_components.ha_washdata.time_utils import utc_now  # noqa: PLC0415
+
+    entry = await setup_washdata_entry()
+    lm = hass.data[DOMAIN][entry.entry_id].learning_manager
+    lm._sample_interval_model.add_samples([30.0] * 40, utc_now())  # noqa: SLF001
+    lm._pending_intervals.append((30.0, utc_now()))  # noqa: SLF001
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({"type": f"{DOMAIN}/undo_import", "entry_id": entry.entry_id})
+    res = await client.receive_json()
+    assert res["success"] is False and res["error"]["code"] == "not_found"
+    assert lm.cadence() is not None
+    assert len(lm._pending_intervals) == 1  # noqa: SLF001
+
+
+async def test_undo_import_schedules_its_rebuilds_on_the_entry_s_current_manager(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """A reload during the undo's writes retires the manager the handler started
+    with; the post-restore rebuilds go to the entry's manager as it is after them,
+    and to none when that one is shut down."""
+    from types import SimpleNamespace  # noqa: PLC0415
+    from unittest.mock import Mock, patch  # noqa: PLC0415
+
+    from custom_components.ha_washdata import ws_api  # noqa: PLC0415
+
+    entry = await setup_washdata_entry()
+    old = hass.data[DOMAIN][entry.entry_id]
+    store = old.profile_store
+    store._data["profiles"]["P"] = {}  # noqa: SLF001
+    names = (
+        "async_schedule_banked_tail_repair", "async_schedule_energy_rebuild",
+        "async_schedule_cut_short_rebuild", "notify_update",
+    )
+    new = SimpleNamespace(_is_shutdown=False, **{n: Mock() for n in names})
+    real_restore_options = ws_api._async_restore_entry_options  # noqa: SLF001
+
+    async def reloaded_meanwhile(*a: Any) -> None:
+        await real_restore_options(*a)
+        old._is_shutdown = True  # noqa: SLF001
+        if successor is not None:
+            hass.data[DOMAIN][entry.entry_id] = successor
+
+    client = await hass_ws_client(hass)
+    try:
+        for successor in (new, None):
+            await store.async_import_data(store.export_data(), entry_options=dict(entry.options))
+            with patch.object(ws_api, "_async_restore_entry_options", side_effect=reloaded_meanwhile), \
+                    patch.multiple(old, **{n: Mock() for n in names}):
+                await client.send_json_auto_id(
+                    {"type": f"{DOMAIN}/undo_import", "entry_id": entry.entry_id}
+                )
+                assert (await client.receive_json())["success"]
+                assert not any(getattr(old, n).called for n in names)
+            hass.data[DOMAIN][entry.entry_id] = old
+            old._is_shutdown = False  # noqa: SLF001
+        assert all(getattr(new, n).call_count == 1 for n in names)
+    finally:
+        hass.data[DOMAIN][entry.entry_id] = old
+        old._is_shutdown = False  # noqa: SLF001
 
 
 async def test_apply_writes_nothing_after_a_restore_it_waited_through(

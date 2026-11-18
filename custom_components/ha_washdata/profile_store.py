@@ -12434,7 +12434,9 @@ class ProfileStore:
         # A fresh Store object: the old one may still hold the loaded record.
         self._pre_import_store = self._new_pre_import_store()
 
-    async def async_restore_pre_import_snapshot(self) -> JSONDict:
+    async def async_restore_pre_import_snapshot(
+        self, *, on_replace: Callable[[], Any] | None = None
+    ) -> JSONDict:
         """Put the store back exactly as it was before the last replace import.
 
         Raises ``ValueError`` when there is no usable restore point. The snapshot is
@@ -12442,6 +12444,11 @@ class ProfileStore:
         applied twice over newer data. Returns ``restored_from`` (when the snapshot
         was taken), ``counts`` and ``entry_options`` (``None`` = leave them alone);
         the caller writes the options, which live on the config entry.
+
+        ``on_replace`` is called once the validated snapshot has replaced the data
+        in memory, before the first write: state derived from the replaced history
+        goes with it, and an undo refused above keeps it (PR #529 review). Never
+        raises from it.
         """
         raw = await self._async_load_pre_import_snapshot()
         if raw is None:
@@ -12474,6 +12481,11 @@ class ProfileStore:
         self._data_generation = getattr(self, "_data_generation", 0) + 1
         self._cached_sample_segments = {}
         self._cohesion_cache_generation += 1
+        if on_replace is not None:
+            try:
+                on_replace()
+            except Exception:  # noqa: BLE001 - the restore itself must complete
+                self._logger.debug("Restore follow-up failed", exc_info=True)
         await self.async_save()
         await self.async_flush_saves()
         await self.async_discard_pre_import_snapshot()

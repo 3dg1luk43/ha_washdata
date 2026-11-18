@@ -4934,11 +4934,12 @@ async def ws_undo_import(
     async with _entry_write_lock(hass, entry_id):
         try:
             # As the wipe: the intervals measured before the restore and any pass
-            # in flight go with the history it replaces (PR #529 review).
+            # in flight go with the history it replaces (PR #529 review), once the
+            # restore point has really replaced it: a refused undo keeps them.
             learning = getattr(manager, "learning_manager", None)
-            if learning is not None:
-                learning.reset_cadence_evidence()
-            restored = await manager.profile_store.async_restore_pre_import_snapshot()
+            restored = await manager.profile_store.async_restore_pre_import_snapshot(
+                on_replace=getattr(learning, "reset_cadence_evidence", None),
+            )
             result = {
                 "success": True,
                 "summary": {
@@ -4958,10 +4959,15 @@ async def ws_undo_import(
             snapshot_options = restored.get("entry_options")
             if entry is not None and isinstance(snapshot_options, dict):
                 await _async_restore_entry_options(hass, entry, snapshot_options)
-            manager.async_schedule_banked_tail_repair()
-            manager.async_schedule_energy_rebuild()
-            manager.async_schedule_cut_short_rebuild()
-            manager.notify_update()
+            # The entry's manager as it is now, after the writes: a reload during
+            # them retires the one captured above, and its tracked spawner does not
+            # check for that, so the rebuilds would run against a dead store.
+            current = _get_manager(hass, entry_id)
+            if current is not None and not getattr(current, "_is_shutdown", False):
+                current.async_schedule_banked_tail_repair()
+                current.async_schedule_energy_rebuild()
+                current.async_schedule_cut_short_rebuild()
+                current.notify_update()
             _send_result(connection, msg["id"], "undo_import", result)
         except ValueError as exc:
             connection.send_error(msg["id"], "not_found", str(exc))
