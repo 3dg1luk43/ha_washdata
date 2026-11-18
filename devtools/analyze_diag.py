@@ -42,9 +42,9 @@ already runs with dropped.
 One input is approximated: the operational pass reads the cadence model the
 manager fills from live reading intervals of cycles that ended on their own
 (``LearningManager.close_cycle_cadence``). A file does not carry it, so it is
-rebuilt from the stored traces of completed cycles (intervals in (0.1, 1800) s,
-the newest 200 per cycle and overall). A trace stored with a throttle or a trim
-can differ from what the manager saw.
+rebuilt from the stored traces of completed cycles (intervals in (0.1, 1800) s
+from each real reading to the stored reading before it, a keepalive included).
+A trace stored with a throttle or a trim can differ from what the manager saw.
 
 ``--no-color`` is accepted for compatibility (the output has no colour).
 
@@ -67,8 +67,6 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO_ROOT))
 sys.path.insert(0, str(_REPO_ROOT / "devtools"))
 
-#: Reading intervals the cadence model accepts (``LearningManager.process_power_reading``).
-_MIN_INTERVAL_S, _MAX_INTERVAL_S = 0.1, 1800.0
 _MAX_PER_CYCLE = 20000  # a whole cycle, as learning._CYCLE_MAX_INTERVALS (item 637)
 
 
@@ -76,11 +74,12 @@ def _cadence_intervals(cycles: list[dict[str, Any]]) -> list[list[float]]:
     """Reading intervals of each cycle that ended on their own, oldest first.
 
     One list per cycle, as ``suggestion_loop_eval.cadence`` (and the live
-    ``LearningManager.cadence``) summarises them per cycle (item 637).
+    ``LearningManager.cadence``) summarises them per cycle (item 637), each timed
+    as the live model times it (``suggestion_loop_eval.stored_cycle_intervals``: a
+    keepalive moves the clock, only a real reading adds an interval), so a cycle
+    below ``CADENCE_MIN_INTERVALS`` real ones gets no summary, as live.
     """
-    from custom_components.ha_washdata.suggestion_engine import (  # noqa: PLC0415
-        _cycle_readings,
-    )
+    import suggestion_loop_eval as slo  # noqa: PLC0415
 
     out: list[list[float]] = []
     for c in cycles:
@@ -88,12 +87,7 @@ def _cadence_intervals(cycles: list[dict[str, Any]]) -> list[list[float]]:
             continue
         if str(c.get("termination_reason") or "") in ("user", "force_stopped"):
             continue
-        pts = _cycle_readings(c)
-        deltas = [
-            b[0] - a[0] for a, b in zip(pts, pts[1:])
-            if _MIN_INTERVAL_S < b[0] - a[0] < _MAX_INTERVAL_S
-        ]
-        out.append(deltas[-_MAX_PER_CYCLE:])
+        out.append(slo.stored_cycle_intervals(c)[-_MAX_PER_CYCLE:])
     return out
 
 
