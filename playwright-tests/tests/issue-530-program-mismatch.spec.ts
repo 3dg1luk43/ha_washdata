@@ -67,6 +67,32 @@ test('no badge once the cycle is over', async ({ page }) => {
   await expect(page.locator('[data-testid="program-mismatch"]')).toHaveCount(0);
 });
 
+test('a slower device list sent before a program change does not bring the badge back', async ({ page }) => {
+  await bootPanel(page, { 'ha_washdata/get_devices': running({ manual_program: true }) });
+  await expect(page.locator('#wd-status-prog')).toHaveValue('Cotton 40°C', { timeout: 8_000 });
+  const stale = running({ manual_program: true, program_mismatch: MISMATCH });
+  const fresh = running({ manual_program: true });
+  const shown = await page.evaluate(async ({ stale, fresh }) => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    const real = el._ws.bind(el);
+    let release: () => void = () => {};
+    const slow = new Promise<void>((r) => { release = r; });
+    let n = 0;
+    el._ws = (msg: any) => {
+      if (msg.type !== 'ha_washdata/get_devices') return real(msg);
+      n += 1;
+      return n === 1 ? slow.then(() => stale) : Promise.resolve(fresh);
+    };
+    const older = el._fetchAll();   // a poll in flight when the program changed
+    await el._fetchAll();           // the refresh after the change
+    release();
+    await older;
+    return el._devices[el._selIdx].program_mismatch ?? null;
+  }, { stale, fresh });
+  expect(shown).toBeNull();
+  await expect(page.locator('[data-testid="program-mismatch"]')).toHaveCount(0);
+});
+
 test('the program it looks like renders as text, never as markup', async ({ page }) => {
   await bootPanel(page, { 'ha_washdata/get_devices': running({
     manual_program: true,

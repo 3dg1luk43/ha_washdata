@@ -2463,6 +2463,11 @@ class HaWashdataPanel extends HTMLElement {
     this._constants = { stateColors: {}, deviceTypes: [], mlLabEnabled: false, mlTrainingAvailable: false, storeOnlineAvailable: false, storeOnlineEnabled: false, storeWebOrigin: '', storePrefs: {}, pgMatchDefaults: {}, version: '', iconUrl: '' };
     this._constantsLoaded = false;
     this._devices = [];
+    // get_devices requests issued / the newest one applied: a slower reply to an
+    // older request (a poll sent before a program change) must not replace a
+    // newer list, or it re-shows what the change cleared (#530 mismatch badge).
+    this._devicesReqSeq = 0;
+    this._devicesAppliedSeq = 0;
     this._cycles = [];
     this._refCycles = [];  // imported store recordings (shown alongside real cycles)
     this._shareableCycles = [];  // get_shareable_cycles result for the share-device tree
@@ -3317,7 +3322,10 @@ class HaWashdataPanel extends HTMLElement {
         this._constantsLoaded = true;
       }
 
+      const seq = ++this._devicesReqSeq;
       const res = await this._ws({ type: `${_DOMAIN}/get_devices` });
+      if (seq < this._devicesAppliedSeq) return;   // superseded: a newer list is in
+      this._devicesAppliedSeq = seq;
       this._lastFetchErr = null;   // recovered: report the next failure even if identical
       this._fetchFailed = false;
       this._devices = res.devices || [];
