@@ -2471,6 +2471,9 @@ class HaWashdataPanel extends HTMLElement {
     // newer list, or it re-shows what the change cleared (#530 mismatch badge).
     this._devicesReqSeq = 0;
     this._devicesAppliedSeq = 0;
+    // The live chart's history reads, ordered by their own request (PR #529 review).
+    this._powerReqSeq = 0;
+    this._powerAppliedSeq = 0;
     this._cycles = [];
     this._refCycles = [];  // imported store recordings (shown alongside real cycles)
     this._shareableCycles = [];  // get_shareable_cycles result for the share-device tree
@@ -3314,6 +3317,7 @@ class HaWashdataPanel extends HTMLElement {
     // superseded: its error is no news and the newer call does the finishing paint.
     let seq = null;
     let stale = false;
+    let historyApplied = false;   // this call's live-chart history landed
     const superseded = () => seq !== null && seq < this._devicesAppliedSeq;
     try {
       if (!this._constantsLoaded) {
@@ -3375,8 +3379,14 @@ class HaWashdataPanel extends HTMLElement {
         // fetch it whenever the Status tab is visible.
         if (dev && this._tab === 'status') {
           try {
+            // Ordered against the newest history that landed, not the newest device
+            // list: a read slower than the poll would otherwise be dropped on every
+            // poll and the chart never move. Still only for the appliance shown.
+            const hseq = ++this._powerReqSeq;
             const pd = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: dev.entry_id, with_raw: this._pref('show_raw_active', false) });
-            if (owns()) this._powerData = pd;
+            if (this._isActiveEntry(dev.entry_id) && hseq > this._powerAppliedSeq) {
+              this._powerData = pd; this._powerAppliedSeq = hseq; historyApplied = true;
+            }
           } catch (_) { /* keep previous */ }
           if (!owns()) return;
           if (this._pref('show_debug', false)) {
@@ -3436,8 +3446,13 @@ class HaWashdataPanel extends HTMLElement {
               }
             }
           }
-          // D1: keep the matched profile's phase ranges for the Status timeline.
-          await this._ensureStatusPhases(dev.entry_id, dev.current_program);
+          // D1: keep the matched profile's phase ranges for the Status timeline,
+          // unless the appliance or program shown changed while the envelope was
+          // awaited: the call would claim the phase slot for the old pair.
+          const shown = this._devices[this._selIdx];
+          if (shown && shown.entry_id === eid && shown.current_program === prog) {
+            await this._ensureStatusPhases(eid, prog);
+          }
         } else {
           this._statusEnvSeq++; this._statusEnvWant = null;
           this._statusEnv = null; this._statusEnvName = null; this._statusEnvEid = null;
@@ -3503,7 +3518,9 @@ class HaWashdataPanel extends HTMLElement {
       // Superseded, at its list or while its reads were in flight: the newer call
       // clears the spinner and paints once its own data is in. Painting here showed
       // the screen before it had.
-      if (!stale && !superseded()) this._finishFetch(firstLoad, painted);
+      // A superseded call whose own history landed paints it: the newer one may
+      // still be waiting on its read.
+      if (!stale && (!superseded() || historyApplied)) this._finishFetch(firstLoad, painted);
     }
   }
 

@@ -364,8 +364,15 @@ class LearningManager:
         gates and the reconcile after the pass's own guard can remove a pending
         value another entry was judged with.
         """
+        # Read before the lock wait: a pass can hold inputs taken at spawn (the
+        # batch pass its cycles), and a store Undo Import replaced meanwhile is
+        # not the one they came from (PR #529 review).
+        data_generation = getattr(self.profile_store, "_data_generation", 0)
         async with self._pass_lock:
             found = await self.hass.async_add_executor_job(generate, *args)
+            if getattr(self.profile_store, "_data_generation", 0) != data_generation:
+                self._logger.debug("Discarding a %s pass computed against a replaced store", owner)
+                return {}
             self._apply_if_current(generation, found or {}, owner)
             if generation == self._config_generation:
                 await self._enforce_joint_end_gate()

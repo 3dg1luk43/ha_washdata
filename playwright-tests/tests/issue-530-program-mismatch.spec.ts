@@ -377,3 +377,74 @@ test('the Automations tab starts an automation from the trigger', async ({ page 
     { trigger: 'ha_washdata.program_mismatch', target: { device_id: ['wd-device'] }, options: {} },
   ]);
 });
+
+test('a history read slower than the poll still lands and paints', async ({ page }) => {
+  await bootPanel(page, { 'ha_washdata/get_devices': running({ manual_program: true }) });
+  await expect(page.locator('#wd-status-prog')).toHaveValue('Cotton 40°C', { timeout: 8_000 });
+  const got = await page.evaluate(async () => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    const real = el._ws.bind(el);
+    const gates: Array<() => void> = [];
+    const asked: Array<() => void> = [];
+    const askedP = [0, 1, 2].map((i) => new Promise<void>((r) => { asked[i] = r; }));
+    let n = 0;
+    el._ws = (msg: any) => {
+      if (msg.type !== 'ha_washdata/get_power_history') return real(msg);
+      const i = n++;
+      const open = new Promise<void>((r) => { gates[i] = r; });
+      asked[i]();
+      return open.then(() => ({ live: [], raw: [], cycle_active: true, cycle_elapsed_s: 0, n: i }));
+    };
+    let paints = 0;
+    const finish = el._finishFetch.bind(el);
+    el._finishFetch = (...a: unknown[]) => { paints += 1; return finish(...a); };
+    const first = el._fetchAll();
+    await askedP[0];
+    const second = el._fetchAll();   // the next poll's list is in, its read is not
+    await askedP[1];
+    gates[0]();
+    await first;
+    const landed = { n: el._powerData.n, paints };
+    const third = el._fetchAll();
+    await askedP[2];
+    gates[2]();
+    await third;
+    gates[1]();                       // older than what already landed
+    await second;
+    return { landed, after: el._powerData.n, paints };
+  });
+  expect(got).toEqual({ landed: { n: 0, paints: 1 }, after: 2, paints: 2 });
+});
+
+test('a refresh whose appliance changed under it does not claim the phase slot', async ({ page }) => {
+  await bootPanel(page, { 'ha_washdata/get_devices': running({ manual_program: true }) });
+  await expect(page.locator('#wd-status-prog')).toHaveValue('Cotton 40°C', { timeout: 8_000 });
+  const calls = await page.evaluate(async ({ two }) => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    const real = el._ws.bind(el);
+    let release: () => void = () => {};
+    const slow = new Promise<void>((r) => { release = r; });
+    let asked: () => void = () => {};
+    const envAsked = new Promise<void>((r) => { asked = r; });
+    el._ws = (msg: any) => {
+      if (msg.type === 'ha_washdata/get_devices') return Promise.resolve(two);
+      if (msg.type === 'ha_washdata/get_profile_envelope' && msg.entry_id === 'test-entry-001') {
+        asked();
+        return slow.then(() => real(msg));
+      }
+      return real(msg);
+    };
+    const seen: string[] = [];
+    const ensure = el._ensureStatusPhases.bind(el);
+    el._ensureStatusPhases = (eid: string, prog: string) => { seen.push(eid); return ensure(eid, prog); };
+    el._statusEnvEid = null; el._statusEnvName = null; el._statusEnvWant = null;
+    el._selIdx = 0;
+    const older = el._fetchAll();
+    await envAsked;
+    el._selIdx = 1;                   // the user is on the dryer now
+    release();
+    await older;
+    return seen;
+  }, { two: twoRunning() });
+  expect(calls).not.toContain('test-entry-001');
+});

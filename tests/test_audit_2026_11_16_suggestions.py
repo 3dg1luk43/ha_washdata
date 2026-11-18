@@ -910,3 +910,22 @@ async def test_apply_stops_at_a_reload_between_its_writes(
         assert ("history" if after == "_record_option_changes" else "cleared") in res["error"]["message"]
         assert cleared.called is (after == "clear_suggestions")
         assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_END_ENERGY_THRESHOLD] == 0.01
+
+
+async def test_a_pass_from_before_a_restore_applies_nothing(mock_hass: Any) -> None:
+    """PR #529 review: Undo Import replaces the store without a settings change, so
+    the config generation stays put and a pass in flight stored its result into the
+    restored set."""
+    from unittest.mock import AsyncMock  # noqa: PLC0415
+
+    store = _Store()
+    store._data_generation = 0  # noqa: SLF001
+    lm = _learning(mock_hass, store, {CONF_START_THRESHOLD_W: 81.0, CONF_STOP_THRESHOLD_W: 54.0})
+
+    def _scan() -> dict[str, Any]:
+        store._data_generation += 1  # noqa: SLF001 - the undo lands while it scans
+        return {CONF_START_THRESHOLD_W: _sug(454.4)}
+
+    mock_hass.async_add_executor_job = AsyncMock(side_effect=lambda fn, *a: fn(*a))
+    assert await lm._run_pass(_scan, OWNER_BATCH, lm._config_generation) == {}  # noqa: SLF001
+    assert store.suggestions == {}
