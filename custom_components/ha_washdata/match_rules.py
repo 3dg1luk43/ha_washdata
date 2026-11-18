@@ -1225,8 +1225,13 @@ class ProgramMismatchState:
         looks_like = raw.get("looks_like")
         self.looks_like = looks_like if isinstance(looks_like, str) and looks_like else None
         margin = raw.get("margin")
-        if isinstance(margin, (int, float)) and not isinstance(margin, bool) and math.isfinite(margin):
-            self.margin = float(margin)
+        if isinstance(margin, (int, float)) and not isinstance(margin, bool):
+            try:
+                value = float(margin)  # an unbounded JSON int (10**400) raises here
+            except (OverflowError, ValueError):
+                value = math.nan
+            if math.isfinite(value):
+                self.margin = value
 
 
 def program_families(profile_groups: Any) -> dict[str, str]:
@@ -1243,7 +1248,14 @@ def program_families(profile_groups: Any) -> dict[str, str]:
 
 
 def _candidate_family(cand: dict[str, Any], key: str) -> str | None:
+    """The profile group a candidate stands for, from the producer's Stage-5
+    provenance only: a family's own entry carries ``group_best_member``
+    (``profile_store.collapse_group_candidates``), a winner resolved to its member
+    ``stage5_group``. A profile that is merely NAMED ``__group__G`` is an
+    ordinary programme."""
     value = cand.get(key)
+    if key == "name" and not isinstance(cand.get("group_best_member"), str):
+        return None
     if isinstance(value, str) and value.startswith(_GROUP_PREFIX):
         return value[len(_GROUP_PREFIX):]
     return None

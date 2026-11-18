@@ -10,6 +10,7 @@ the pick's.
 """
 from __future__ import annotations
 
+import asyncio
 from datetime import timedelta
 from types import SimpleNamespace
 from typing import Any
@@ -83,6 +84,18 @@ def test_a_stage5_family_score_stands_for_its_member() -> None:
     assert match_rules.selected_program_deficit(won, "Cotton 40", fam) is None
 
 
+def test_only_the_stage5_provenance_makes_a_family() -> None:
+    """A profile literally named ``__group__Cottons`` is an ordinary programme: only
+    the producer's ``group_best_member`` marks a family's own entry."""
+    fam = {"Cotton 40": "Cottons", "Cotton 60": "Cottons"}
+    res = SimpleNamespace(best_profile="Synthetics", candidates=[
+        {"name": "Synthetics", "score": 0.9},
+        {"name": "__group__Cottons", "score": 0.85},
+        {"name": "Cotton 40", "score": 0.5},
+    ])
+    assert match_rules.selected_program_deficit(res, "Cotton 40", fam) == ("Synthetics", 0.9 - 0.5)
+
+
 def test_the_tick_needs_persistence_and_the_minimum_fraction() -> None:
     wrong = _result("Synthetics", {"Synthetics": 0.9, "Cotton": 0.9 - PROGRAM_MISMATCH_MIN_MARGIN})
     close = _result("Synthetics", {"Synthetics": 0.9, "Cotton": 0.85})
@@ -121,6 +134,10 @@ def test_the_state_round_trips_a_snapshot() -> None:
     junk = match_rules.ProgramMismatchState()
     junk.restore({"streak": "x", "fired": "yes", "looks_like": 3, "margin": float("nan")})
     assert junk.as_dict() == match_rules.ProgramMismatchState().as_dict()
+    # JSON keeps an oversized integer unbounded: float() of it raises, not inf.
+    huge = match_rules.ProgramMismatchState()
+    huge.restore({"streak": 2, "fired": True, "looks_like": "Eco", "margin": 10**400})
+    assert huge.as_dict() == {"streak": 2, "fired": True, "looks_like": "Eco", "margin": None}
 
 
 # ── The manager, on a real boot ──────────────────────────────────────────────
@@ -305,3 +322,106 @@ async def test_the_snapshot_carries_the_check_across_a_restart(
     manager._program_mismatch = match_rules.ProgramMismatchState()  # noqa: SLF001
     manager._restore_program_mismatch({**snap["program_mismatch"], "program": "Eco"})  # noqa: SLF001
     assert manager.program_mismatch is None
+
+
+async def _past_half(hass: HomeAssistant, setup_washdata_entry, freezer):
+    """Cotton picked on a run past half its usual duration, no check counted yet."""
+    entry, manager, sent = await _picked_cycle(hass, setup_washdata_entry, freezer, "Cotton")
+    quiet = _result("Cotton", {"Cotton": 0.9, "Synthetics": 0.5})
+    with patch.object(manager.profile_store, "async_match_profile", AsyncMock(return_value=quiet)):
+        await _feed(hass, freezer, 200, 16 * 60)
+    state = manager._program_mismatch_state()  # noqa: SLF001
+    assert state is not None and state.streak == 0 and not state.fired
+    return entry, manager, sent, state
+
+
+async def _check(hass: HomeAssistant, manager: Any, key: Any) -> None:
+    await manager._async_check_program_mismatch(  # noqa: SLF001
+        list(manager.detector.get_power_trace()), manager._match_identity(),  # noqa: SLF001
+        key, DURATION,
+    )
+    await hass.async_block_till_done()
+
+
+async def test_a_group_edited_during_the_match_discards_it(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """The ranking was built with Cotton in the Wash group (so the Wash family's
+    win is no mismatch); read against the groups AFTER the match, Cotton is no
+    longer in it and its absence from the list read as a deficit."""
+    _entry, manager, sent, state = await _past_half(hass, setup_washdata_entry, freezer)
+    store = manager.profile_store
+    won = SimpleNamespace(best_profile="Synthetics", candidates=[
+        {"name": "Synthetics", "score": 0.9, "stage5_group": "__group__Wash"},
+        *({"name": n, "score": s} for n, s in (("A", 0.8), ("B", 0.7), ("C", 0.6), ("D", 0.5))),
+    ])
+
+    async def match_and_ungroup(*_a: Any, **_k: Any) -> Any:
+        store._data["profile_groups"] = {}  # noqa: SLF001  (the user ungroups meanwhile)
+        return won
+
+    store._data["profile_groups"] = {"Wash": {"members": ["Cotton", "Synthetics"]}}  # noqa: SLF001
+    state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
+    with patch.object(store, "async_match_profile", new=match_and_ungroup):
+        await _check(hass, manager, state.key)
+    assert _mismatches(sent) == []
+    assert state.streak == PROGRAM_MISMATCH_PERSISTENCE - 1  # discarded, not counted
+    # The same ranking with the groups unchanged throughout does establish it.
+    with patch.object(store, "async_match_profile", AsyncMock(return_value=won)):
+        await _check(hass, manager, state.key)
+    assert len(_mismatches(sent)) == 1
+
+
+async def test_a_check_from_an_earlier_pick_of_the_same_program_does_not_count(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """Cotton -> Synthetics -> Cotton while Cotton's check is still matching: the
+    new Cotton pick is a new selection and starts from nothing."""
+    _entry, manager, sent, state = await _past_half(hass, setup_washdata_entry, freezer)
+    state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
+    key = state.key
+    gate = asyncio.Event()
+    wrong = _result("Synthetics", {"Synthetics": 0.9, "Cotton": 0.5})
+
+    async def slow(*_a: Any, **_k: Any) -> Any:
+        await gate.wait()
+        return wrong
+
+    with patch.object(manager.profile_store, "async_match_profile", new=slow):
+        task = hass.async_create_task(_check(hass, manager, key))
+        await asyncio.sleep(0)
+        assert manager.set_manual_program("Synthetics")
+        assert manager.set_manual_program("Cotton")
+        gate.set()
+        await task
+        await hass.async_block_till_done()
+    assert _mismatches(sent) == []
+    fresh = manager._program_mismatch_state()  # noqa: SLF001
+    assert fresh is not None and fresh.key != key and fresh.streak == 0
+    # Picking the program already picked is no new selection: the check goes on.
+    fresh.streak = 3
+    assert manager.set_manual_program("Cotton")
+    assert manager._program_mismatch_state() is fresh and fresh.streak == 3  # noqa: SLF001
+
+
+async def test_the_check_runs_while_the_detector_match_tick_is_frozen(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """The dishwasher ENDING freeze (and the anti-crease one) stop the detector's
+    match tick, the pin's only path to the check: it runs from the readings too."""
+    _entry, manager, _sent = await _picked_cycle(
+        hass, setup_washdata_entry, freezer, "Synthetics"
+    )
+    with patch.object(manager.detector, "_try_profile_match", lambda *_a, **_k: None), \
+            patch.object(match_rules, "program_mismatch_tick",
+                         wraps=match_rules.program_mismatch_tick) as checks:
+        # Each reading through the power-event handler: `_feed` fires the timer
+        # first, so the watchdog's resync takes the report instead.
+        for _ in range(20):
+            freezer.tick(timedelta(seconds=30))
+            hass.states.async_set(POWER, "200", {"unit_of_measurement": "W"}, force_update=True)
+            await hass.async_block_till_done()
+            async_fire_time_changed(hass, dt_util.utcnow())
+            await hass.async_block_till_done()
+    # One per profile_match_interval (60 s) once one has passed.
+    assert checks.call_count >= 8

@@ -877,11 +877,14 @@ class WashDataManager:
         self._tumble_held: dict[str, Any] | None = None
         self._restored_trigger_marks: Any = None
         # #530: the background check of a hand-picked program (keyed by the cycle
-        # and the pick, see _program_mismatch_state), the in-flight check, and the
-        # elapsed time of the last one (the profile_match_interval cadence).
+        # and the pick, see _program_mismatch_state), the in-flight check, the
+        # elapsed time of the last one (the profile_match_interval cadence), and
+        # the pick's generation: every new selection is a new key, so a check
+        # still in flight for an earlier pick of the same program never counts.
         self._program_mismatch = match_rules.ProgramMismatchState()
         self._program_mismatch_task: asyncio.Task[Any] | None = None
         self._program_mismatch_last_s: float | None = None
+        self._program_pick_generation = 0
         self._cycle_start_time: datetime | None = None
         # Per-cycle UUID: the identity token the live match and the cycle-end tail
         # check so work for one cycle never lands on the next, even when both share
@@ -1678,14 +1681,15 @@ class WashDataManager:
 
     def _program_mismatch_key(self) -> tuple[Any, ...] | None:
         """What the hand-picked program check belongs to: this cycle and this
-        pick, or None without a pick. A new cycle or a new pick is a new key."""
+        pick, or None without a pick. A new cycle or a new selection is a new key,
+        even one that picks the same program again (``_program_pick_generation``)."""
         if not getattr(self, "_manual_program_active", False):
             return None
         program = self._current_program
         if not match_rules.program_is_committed(program):
             return None
         token, start, _active = self._match_identity()
-        return (token, start, program)
+        return (token, start, program, getattr(self, "_program_pick_generation", 0))
 
     def _program_mismatch_state(self) -> match_rules.ProgramMismatchState | None:
         """The check for the current cycle and pick, started afresh on a new key."""
@@ -1738,14 +1742,15 @@ class WashDataManager:
             return None
 
     def _schedule_program_mismatch_check(
-        self, readings: list[tuple[datetime, float]]
+        self, readings: list[tuple[datetime, float]] | None = None
     ) -> None:
         """Start the background check of a hand-picked program (#530), at most once
         per ``profile_match_interval`` of elapsed time and one at a time. Called
-        from the pin's matcher branch; never raises."""
+        from the pin's matcher branch with the detector's match trace, and from
+        every reading of a live cycle (``_update_estimates``, ``readings`` None:
+        the same trace, read here), so a pick still gets checked while the
+        detector's own match tick is frozen. Never raises."""
         try:
-            if not readings or len(readings) < 2:
-                return
             if not trigger_rules.trigger_offered(TRIGGER_PROGRAM_MISMATCH, self.device_type):
                 return
             state = self._program_mismatch_state()
@@ -1754,13 +1759,18 @@ class WashDataManager:
             expected = self._matched_profile_duration
             if not expected:
                 return
+            task = self._program_mismatch_task
+            if task is not None and not task.done():
+                return
+            if readings is None:
+                # What the detector hands its matcher (item 511's stall cut).
+                readings = self.detector._match_readings()  # pylint: disable=protected-access
+            if not readings or len(readings) < 2:
+                return
             elapsed = (readings[-1][0] - readings[0][0]).total_seconds()
             interval = float(self._profile_match_interval or DEFAULT_PROFILE_MATCH_INTERVAL)
             last = self._program_mismatch_last_s
             if elapsed < (interval if last is None else last + interval):
-                return
-            task = self._program_mismatch_task
-            if task is not None and not task.done():
                 return
             if not self.profile_store.has_real_profiles:
                 return
@@ -1790,6 +1800,12 @@ class WashDataManager:
         ``program_mismatch`` trigger on the match that establishes it."""
         try:
             duration = (readings[-1][0] - readings[0][0]).total_seconds()
+            # The profile groups the ranking is built from: the matcher reads them
+            # before it leaves the loop, so read here, next to the call. A group
+            # edited while the match ran makes the ranking describe neither
+            # membership (a ``__group__`` family no longer linked to the pick reads
+            # as a deficit), so that result is discarded, the streak untouched.
+            families = match_rules.program_families(self.profile_store.get_profile_groups())
             result = await self.profile_store.async_match_profile(
                 readings,
                 duration,
@@ -1801,6 +1817,8 @@ class WashDataManager:
             state = self._program_mismatch_state()
             if state is None or state.key != key:
                 return  # the pick changed while the match ran
+            if families != match_rules.program_families(self.profile_store.get_profile_groups()):
+                return
             selected = key[2]
             fired = match_rules.program_mismatch_tick(
                 state,
@@ -1808,9 +1826,7 @@ class WashDataManager:
                 selected,
                 elapsed_s=duration,
                 expected_s=expected,
-                families=match_rules.program_families(
-                    self.profile_store.get_profile_groups()
-                ),
+                families=families,
             )
             if not fired:
                 return
@@ -8859,6 +8875,13 @@ class WashDataManager:
 
         now = utc_now()
 
+        # #530: the hand-picked program's background check, on every reading of a
+        # live cycle. The pin's matcher branch runs only on the detector's match
+        # tick, which the dishwasher ENDING freeze and the anti-crease freeze stop,
+        # so a pick made then was never checked. Its own guards set the cadence.
+        if self._manual_program_active:
+            self._schedule_program_mismatch_check()
+
         # Throttle heavy matching to configured interval (default: 5 minutes)
         effective_match_interval = self._profile_match_interval
         if (
@@ -10815,6 +10838,13 @@ class WashDataManager:
         self, profile_name: str, profile: dict[str, Any] | None
     ) -> None:
         """Pin *profile_name* to the cycle in progress. Shared by set and re-arm."""
+        if not (
+            getattr(self, "_manual_program_active", False)
+            and getattr(self, "_current_program", None) == profile_name
+        ):
+            # A new selection (#530): a check in flight for an earlier one, even of
+            # this same program, must not count. Re-picking the pick keeps it.
+            self._program_pick_generation = getattr(self, "_program_pick_generation", 0) + 1
         self._current_program = profile_name
         self._manual_program_active = True
 
