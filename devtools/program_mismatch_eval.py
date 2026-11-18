@@ -19,45 +19,52 @@ usual duration elapsed). This replays that on the corpus.
 device with >= 2 programmes (``devtools/eval.py``'s corpus rules: clone files and
 twin entries dropped, the label keeps another traced cycle) is removed from every
 list and its programme's envelope rebuilt, on a store a real ``WashDataManager``
-builds from the export's options (``eval.fresh_store``). The prefix at every
-``profile_match_interval`` of elapsed time (the device's own, 300 s by default) is
-matched with ``ProfileStore.async_match_profile(..., in_progress=True)``, what the
-background check calls. One match per tick serves every pick: the rule reads the
-ranking against the picked program, so each tick is judged for
+builds from the export's options (``eval.fresh_store``). A check runs where the
+manager schedules one (``check_prefixes``): on the first recorded reading at least
+one ``profile_match_interval`` (the device's own, 300 s by default) after the last
+check, strictly before the recorded end. A stretch without a reading runs none, so
+a silent plug never feeds the persistence rule one unchanged prefix several times.
+The prefix through that reading is matched with
+``ProfileStore.async_match_profile(..., in_progress=True)``, what the background
+check calls. One match per tick serves every pick: the rule reads the ranking
+against the picked program, so each tick is judged for
 
 * **(a) the right pick**: the cycle's own label is selected. A fire is a false
   alarm (``false_alarm``, per cycle: the trigger fires at most once);
-* **(b) a wrong pick**: each other programme of the device that has a learned
-  duration, alias twins of the label excluded (the same trace stored under two
-  names, ``eval.alias_classes``). ``detect`` is the share of (cycle, wrong pick)
-  pairs that fire before the cycle ends, ``elapsed_frac`` the median fraction of
-  the cycle's own duration at the fire. ``nearest`` repeats it for the wrong pick
-  whose usual duration is closest to the label's, the confusion a user is most
-  likely to make.
+* **(b) a wrong pick**: each other programme of the device, alias twins of the
+  label excluded (the same trace stored under two names, ``eval.alias_classes``).
+  ``detect`` is the share of (cycle, wrong pick) pairs that fire strictly before
+  the cycle ends, ``elapsed_frac`` the median fraction of the cycle's own duration
+  at the fire. ``nearest`` repeats it for the wrong pick whose usual duration is
+  closest to the label's **in proportion** (smallest ``|ln(pick / label)|``, then
+  name), the confusion a user is most likely to make.
 
 Figures are pooled, then split into ``own history`` (one appliance's recorded
 cycles) and ``store packages`` (``store/``: community downloads, several users'
 runs per file, where one programme can sit under two names), then by device type.
-A pick the manager would not check (no template, ``unmatchable_profiles``) never
-fires.
+A pick the manager would not check (no template, ``unmatchable_profiles``, or no
+learned duration) never fires and stays in the denominator as a miss.
 
 ``--sweep`` replays the rule over a grid of margin x persistence x minimum fraction
 on the recorded ticks (no new matching) and prints every row with its false-alarm
 and detection rates; the shipped constants are marked. ``--json`` writes the ticks
 and the summary; ``--from-rows`` reads such a file instead of matching again.
 
-**Last run** (2026-11-18, 958 cycles of 86 devices, ~10 min on 7 workers), the
-shipped 0.18 / 6 / 0.5: false alarms 15 (1.6%), 3 of them on the 449 own-history
-cycles (0.7%); wrong picks caught 41.6% at a median 0.62 of the cycle, the
-nearest-duration wrong pick 44.9% at 0.54. By type: washers 1.4% / 44.2%,
-dishwashers 1.4% / 37.2%, washer-dryers 6.1% / 40.5%, dryers 0% / 13.9% (short
-programmes rarely hold six matches past half their length). Per tick the
-deficit separates a wrong pick from the right one at AUC 0.89, the pick's own
-score at 0.79.
+**Last run** (2026-11-18, 958 cycles of 86 devices, ~12 min on 7 workers), the
+shipped 0.18 / 6 / 0.5: false alarms 16 (1.7%), 5 of them on the 449 own-history
+cycles (1.1%); wrong picks caught 39.3% (1957 of 4981) at a median 0.62 of the
+cycle, the nearest-duration wrong pick 42.8% at 0.52. By type: washers 1.8% /
+42.2%, dishwashers 0.9% / 32.2%, washer-dryers 6.1% / 40.3%, dryers 1.0% / 14.4%
+(short programmes rarely hold six matches past half their length). The replay
+before it matched at fixed interval marks (an unchanged prefix again on a silent
+plug) and left out picks with no trace: 15 (1.6%), 3 own-history, 41.6% of 4855
+at 0.62. Per tick (that replay) the deficit separates a wrong pick from the right
+one at AUC 0.89, the pick's own score at 0.79.
 
-**Not modelled**: the live cadence is reading-driven (a match on the first reading
-at least one interval after the last), here exactly every interval; the stall cut
-the detector applies to its match trace (``_match_readings``); a restart.
+**Not modelled**: the keepalives the watchdog injects into a silent low-power
+stretch (each a new reading live, so a check) where the recorded trace has none;
+the stall cut the detector applies to its match trace (``_match_readings``); a
+reading that arrives while a check is still matching; a restart.
 
 Exit codes: 0, 2 no corpus.
 """
@@ -108,6 +115,29 @@ SWEEP_FRACTIONS = (0.15, 0.25, 0.35, 0.5)
 
 # ----------------------------------------------------------------------- replay
 
+def check_prefixes(pts: list[list[float]], interval: float,
+                   end: float) -> list[tuple[list[list[float]], float]]:
+    """``(prefix, elapsed s)`` for each background check the manager would run on
+    this trace: on the first reading at least ``interval`` after the last check
+    (``manager._schedule_program_mismatch_check``), strictly before ``end``. A
+    stretch without a reading runs no check, so a silent plug never feeds the
+    persistence rule one unchanged prefix several times."""
+    out: list[tuple[list[list[float]], float]] = []
+    if not pts:
+        return out
+    t0 = pts[0][0]
+    last: float | None = None
+    for i, p in enumerate(pts):
+        elapsed = p[0] - t0
+        if elapsed >= end:
+            break
+        if i < 1 or elapsed < (interval if last is None else last + interval):
+            continue
+        last = elapsed
+        out.append(([list(x) for x in pts[:i + 1]], elapsed))
+    return out
+
+
 async def device_folds(dev: Any, base: dict, idxs: list[int]) -> list[dict]:
     """One row per held-out cycle: its label, durations and the tick rankings."""
     full = ev.base_data(dev)   # the same cycle objects as dev.cycles: removal is by identity
@@ -126,25 +156,18 @@ async def device_folds(dev: Any, base: dict, idxs: list[int]) -> list[dict]:
         st, mgr = ev.fresh_store(dev, fd, {})
         await st.async_rebuild_envelope(label)
         interval = float(mgr._profile_match_interval or 300)  # noqa: SLF001
-        traced = {
-            c.get("profile_name") for key, _ in ev.LISTS for c in fd[key]
-            if isinstance(c, dict) and c.get("power_data")
-        }
+        # Every programme a user can pick, and the learned durations: a pick
+        # without one, or without a template, is never checked (a miss).
+        programs = sorted(str(n) for n in (st.get_profiles() or {}))
         durations = {}
         for name, prof in (st.get_profiles() or {}).items():
             avg = match_rules.profile_duration(prof.get("avg_duration")) if isinstance(prof, dict) else None
-            if avg and name in traced:
-                durations[name] = round(avg, 1)
+            if avg:
+                durations[str(name)] = round(avg, 1)
         if label not in durations:
             continue
         ticks = []
-        k = 1
-        while k * interval <= dur:
-            q = [list(p) for p in pts if p[0] <= pts[0][0] + k * interval]
-            k += 1
-            if len(q) < ev.MIN_PREFIX_POINTS or q[-1][0] - q[0][0] <= 0:
-                continue
-            qdur = q[-1][0] - q[0][0]
+        for q, qdur in check_prefixes(pts, interval, dur):
             res = await st.async_match_profile(q, qdur, in_progress=True)
             ticks.append({
                 "t": round(qdur, 1),
@@ -155,6 +178,7 @@ async def device_folds(dev: Any, base: dict, idxs: list[int]) -> list[dict]:
         rows.append({
             "path": dev.key, "id": ids[i], "dev": mgr.device_type, "label": label,
             "duration": round(dur, 1), "interval": interval, "durations": durations,
+            "programs": programs,
             "families": match_rules.program_families(st.get_profile_groups()),
             # The manager never checks a pick the matcher cannot score.
             "unmatchable": sorted(st.unmatchable_profiles()),
@@ -169,6 +193,7 @@ _W: dict[str, Any] = {}
 
 def _worker_init(root: str) -> None:
     _W["root"] = Path(root)
+    _W["devs"] = {}  # loaded under this root only: the cache is keyed by relative path
     ev._quiet_logs()  # noqa: SLF001
 
 
@@ -226,12 +251,18 @@ STORE_DIRS = ("store",)
 
 
 def _wrong_picks(row: dict) -> list[str]:
+    """Every other programme of the device (alias twins of the label excluded),
+    with or without a learned duration or a template: a user can pick any of them,
+    and one the manager cannot check is a miss, not a pair left out."""
     twins = set(row.get("twins") or ())
-    return sorted(s for s in row["durations"] if s != row["label"] and s not in twins)
+    names = set(row.get("programs") or ()) | set(row["durations"])
+    return sorted(s for s in names if s != row["label"] and s not in twins)
 
 
 def _nearest_wrong(row: dict) -> str | None:
-    wrong = _wrong_picks(row)
+    """The wrong pick closest to the label in **proportion** of usual duration
+    (``|ln(pick / label)|``, then name): 30 min reads as close to 40 as 60 to 80."""
+    wrong = [s for s in _wrong_picks(row) if row["durations"].get(s)]
     if not wrong:
         return None
     own = row["durations"][row["label"]]
@@ -241,8 +272,8 @@ def _nearest_wrong(row: dict) -> str | None:
 def pick_sequence(row: dict, selected: str) -> list[tuple[float, Any, float]]:
     """``(fraction of the pick's usual duration, selected_program_deficit, elapsed s)``
     per tick: what ``match_rules.program_mismatch_tick`` reads, computed once. Empty
-    for a pick the manager does not check (no template)."""
-    if selected in (row.get("unmatchable") or ()):
+    for a pick the manager does not check (no template, no learned duration)."""
+    if selected in (row.get("unmatchable") or ()) or not row["durations"].get(selected):
         return []
     expected = float(row["durations"][selected])
     fam = row.get("families") or {}
@@ -256,11 +287,14 @@ def pick_sequence(row: dict, selected: str) -> list[tuple[float, Any, float]]:
 
 
 def fire_at(seq: list[tuple[float, Any, float]], margin: float, persistence: int,
-            fraction: float) -> float | None:
-    """Elapsed seconds at which the rule fires on ``seq``, or None
+            fraction: float, end: float | None = None) -> float | None:
+    """Elapsed seconds at which the rule fires on ``seq`` strictly before ``end``
+    (the cycle's recorded end; None: no bound), or None
     (``match_rules.program_mismatch_step``, the tick's own rule)."""
     state = match_rules.ProgramMismatchState()
     for frac, hit, t in seq:
+        if end is not None and not t < end:
+            break
         if match_rules.program_mismatch_step(
             state, hit, frac, min_margin=margin, persistence=persistence, min_fraction=fraction
         ):
@@ -308,17 +342,18 @@ def score(prep: list[dict], margin: float, persistence: int, fraction: float,
         fracs: list[float] = []
         n_fracs: list[float] = []
         for p in grp:
-            if fire_at(p["own"], margin, persistence, fraction) is not None:
+            end = p["duration"]
+            if fire_at(p["own"], margin, persistence, fraction, end) is not None:
                 fa += 1
             for seq in p["wrong"]:
                 pairs += 1
-                t = fire_at(seq, margin, persistence, fraction)
+                t = fire_at(seq, margin, persistence, fraction, end)
                 if t is not None:
                     det += 1
                     fracs.append(t / p["duration"])
             if p["nearest"] is not None:
                 n_pairs += 1
-                t = fire_at(p["nearest"], margin, persistence, fraction)
+                t = fire_at(p["nearest"], margin, persistence, fraction, end)
                 if t is not None:
                     n_det += 1
                     n_fracs.append(t / p["duration"])
@@ -349,7 +384,7 @@ def sweep(prep: list[dict]) -> list[dict]:
 
 def _print_summary(summary: dict[str, Any]) -> None:
     print(f"{'device':16s} {'cycles':>6s} {'false':>11s} {'wrong picks':>18s} {'frac':>6s}"
-          f" {'nearest':>16s} {'frac':>6s}")
+          f" {'nearest by ratio':>16s} {'frac':>6s}")
     for name, s in summary.items():
         print(f"{name:16s} {s['cycles']:6d} {s['false_alarm']:4d} {100 * (s['false_alarm_rate'] or 0):5.1f}%"
               f" {s['detect']:5d}/{s['pairs']:<5d} {100 * (s['detect_rate'] or 0):5.1f}%"
@@ -384,7 +419,8 @@ def main(argv: list[str] | None = None) -> int:
     _print_summary(summary)
     grid = sweep(prep) if a.sweep else None
     if grid is not None:
-        print("\nmargin persist minfrac  false%  detect%  frac  nearest%  frac | own history false% detect%")
+        print("\nmargin persist minfrac  false%  detect%  frac  nearest%  frac | own history false% detect%"
+              "  (nearest: the closest usual duration by ratio)")
         for g in grid:
             mark = " <- shipped" if (g["margin"], g["persistence"], g["min_fraction"]) == SHIPPED else ""
             print(f"{g['margin']:6.2f} {g['persistence']:7d} {g['min_fraction']:7.2f}"
