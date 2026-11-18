@@ -1751,26 +1751,34 @@ class WashDataManager:
         the same trace, read here), so a pick still gets checked while the
         detector's own match tick is frozen. Never raises."""
         try:
+            if self._is_shutdown:
+                return
             if not trigger_rules.trigger_offered(TRIGGER_PROGRAM_MISMATCH, self.device_type):
                 return
             state = self._program_mismatch_state()
             if state is None or state.fired:
                 return
-            expected = self._matched_profile_duration
-            if not expected:
+            if not self._matched_profile_duration:
                 return
             task = self._program_mismatch_task
             if task is not None and not task.done():
                 return
+            interval = float(self._profile_match_interval or DEFAULT_PROFILE_MATCH_INTERVAL)
+            last = self._program_mismatch_last_s
+            due = interval if last is None else last + interval
             if readings is None:
+                # Programme time first: after a stall the cut trace is a new list
+                # built from every reading, so the readings between two checks
+                # must not build it.
+                bound = self._match_trace_span_bound()
+                if bound is not None and bound < due:
+                    return
                 # What the detector hands its matcher (item 511's stall cut).
                 readings = self.detector._match_readings()  # pylint: disable=protected-access
             if not readings or len(readings) < 2:
                 return
             elapsed = (readings[-1][0] - readings[0][0]).total_seconds()
-            interval = float(self._profile_match_interval or DEFAULT_PROFILE_MATCH_INTERVAL)
-            last = self._program_mismatch_last_s
-            if elapsed < (interval if last is None else last + interval):
+            if elapsed < due:
                 return
             if not self.profile_store.has_real_profiles:
                 return
@@ -1780,24 +1788,58 @@ class WashDataManager:
             self._program_mismatch_last_s = elapsed
             self._program_mismatch_task = self._spawn_tracked(
                 self._async_check_program_mismatch(
-                    list(readings), self._match_identity(), state.key, float(expected)
+                    list(readings), self._match_identity(), state.key
                 )
             )
         except Exception:  # pylint: disable=broad-exception-caught
             self._logger.debug("Could not start the program check", exc_info=True)
+
+    def _match_trace_span_bound(self) -> float | None:
+        """At least the seconds the detector's match trace spans, read without
+        building it: the stored trace's span less the finished stalls and user
+        pauses wholly inside it. The cut trace leaves each of them out (item 511),
+        so it can only be shorter. None when the detector cannot be read (the
+        caller then builds the trace). Never raises."""
+        try:
+            det = self.detector
+            raw = det._power_readings  # pylint: disable=protected-access
+            if len(raw) < 2:
+                return 0.0
+            first, last = raw[0][0], raw[-1][0]
+            bound = (last - first).total_seconds()
+            start = det._current_cycle_start  # pylint: disable=protected-access
+            if start is None:
+                return bound  # nothing is cut without a cycle start
+            lo = (first - start).total_seconds()
+            hi = (last - start).total_seconds()
+            covered = lo
+            for at, length in sorted(det._gate_spans()):  # pylint: disable=protected-access
+                end = at + length
+                if at < lo or end > hi:
+                    continue
+                begin = max(at, covered)
+                if end > begin:
+                    bound -= end - begin
+                    covered = end
+            return bound
+        except Exception:  # pylint: disable=broad-exception-caught
+            return None
 
     async def _async_check_program_mismatch(
         self,
         readings: list[tuple[datetime, float]],
         identity: tuple[str, datetime | None, bool],
         key: tuple[Any, ...],
-        expected: float,
     ) -> None:
         """One background match of a hand-picked program (#530): the live tick's
         own ``async_match_profile`` call, read only by
         ``match_rules.program_mismatch_tick``. The displayed program, the expected
         duration, the detector and the labels are never touched. Sends the
-        ``program_mismatch`` trigger on the match that establishes it."""
+        ``program_mismatch`` trigger on the match that establishes it.
+
+        The fraction gate reads the pick's usual duration as it is when the match
+        lands: picking the same program again keeps the check going (no new
+        generation) but can bring a new duration."""
         try:
             duration = (readings[-1][0] - readings[0][0]).total_seconds()
             # The profile groups the ranking is built from: the matcher reads them
@@ -1812,12 +1854,15 @@ class WashDataManager:
                 in_progress=True,
                 stop_threshold_w=float(self.detector.config.stop_threshold_w),
             )
-            if not self._match_still_current(identity):
+            if self._is_shutdown or not self._match_still_current(identity):
                 return
             state = self._program_mismatch_state()
             if state is None or state.key != key:
                 return  # the pick changed while the match ran
             if families != match_rules.program_families(self.profile_store.get_profile_groups()):
+                return
+            expected = self._matched_profile_duration
+            if not expected:
                 return
             selected = key[2]
             fired = match_rules.program_mismatch_tick(
@@ -1825,7 +1870,7 @@ class WashDataManager:
                 result,
                 selected,
                 elapsed_s=duration,
-                expected_s=expected,
+                expected_s=float(expected),
                 families=families,
             )
             if not fired:

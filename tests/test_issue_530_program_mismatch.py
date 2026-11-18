@@ -338,7 +338,7 @@ async def _past_half(hass: HomeAssistant, setup_washdata_entry, freezer):
 async def _check(hass: HomeAssistant, manager: Any, key: Any) -> None:
     await manager._async_check_program_mismatch(  # noqa: SLF001
         list(manager.detector.get_power_trace()), manager._match_identity(),  # noqa: SLF001
-        key, DURATION,
+        key,
     )
     await hass.async_block_till_done()
 
@@ -425,3 +425,99 @@ async def test_the_check_runs_while_the_detector_match_tick_is_frozen(
             await hass.async_block_till_done()
     # One per profile_match_interval (60 s) once one has passed.
     assert checks.call_count >= 8
+
+
+def _slow(gate: asyncio.Event, result: Any):
+    async def match(*_a: Any, **_k: Any) -> Any:
+        await gate.wait()
+        return result
+    return match
+
+
+async def test_no_check_starts_or_lands_after_shutdown(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """An unload sets ``_is_shutdown``: a match still in flight must not land, and a
+    reading that arrives after it must not start another."""
+    _entry, manager, sent, state = await _past_half(hass, setup_washdata_entry, freezer)
+    state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
+    wrong = _result("Synthetics", {"Synthetics": 0.9, "Cotton": 0.5})
+    gate = asyncio.Event()
+    try:
+        with patch.object(manager.profile_store, "async_match_profile", new=_slow(gate, wrong)):
+            task = hass.async_create_task(_check(hass, manager, state.key))
+            await asyncio.sleep(0)
+            manager._is_shutdown = True  # noqa: SLF001
+            gate.set()
+            await task
+        assert _mismatches(sent) == []
+        assert state.streak == PROGRAM_MISMATCH_PERSISTENCE - 1
+        manager._program_mismatch_last_s = None  # noqa: SLF001  (a check is due)
+        with patch.object(
+            manager.profile_store, "async_match_profile", AsyncMock(return_value=wrong)
+        ) as match:
+            manager._schedule_program_mismatch_check()  # noqa: SLF001
+            await hass.async_block_till_done()
+        assert match.await_count == 0
+    finally:
+        manager._is_shutdown = False  # noqa: SLF001
+    assert _mismatches(sent) == []
+
+
+async def test_a_new_duration_for_the_same_pick_is_read_when_the_match_lands(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """Cotton picked again after its usual length grew is no new selection, so the
+    check in flight goes on, but it was dispatched against the old length: past
+    half of 30 min is not past half of 2 h, so it counts without firing."""
+    _entry, manager, sent, state = await _past_half(hass, setup_washdata_entry, freezer)
+    state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
+    wrong = _result("Synthetics", {"Synthetics": 0.9, "Cotton": 0.5})
+    gate = asyncio.Event()
+    with patch.object(manager.profile_store, "async_match_profile", new=_slow(gate, wrong)):
+        task = hass.async_create_task(_check(hass, manager, state.key))
+        await asyncio.sleep(0)
+        manager.profile_store._data["profiles"]["Cotton"]["avg_duration"] = 4 * DURATION  # noqa: SLF001
+        assert manager.set_manual_program("Cotton")
+        assert manager._program_mismatch_state() is state  # noqa: SLF001
+        assert manager._matched_profile_duration == 4 * DURATION  # noqa: SLF001
+        gate.set()
+        await task
+    assert _mismatches(sent) == []
+    assert state.streak == PROGRAM_MISMATCH_PERSISTENCE and not state.fired
+
+
+async def test_the_readings_between_two_checks_never_build_the_cut_trace(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """After a stall the detector's match trace is a new list built from every
+    reading (item 511's cut). A reading before the next check is due is turned away
+    on programme time without building it; the check itself still reads it."""
+    _entry, manager, _sent, _state = await _past_half(hass, setup_washdata_entry, freezer)
+    det = manager.detector
+    raw = det._power_readings  # noqa: SLF001
+    start = det._current_cycle_start  # noqa: SLF001
+    det._stall_spans = [((raw[4][0] - start).total_seconds(), 600.0)]  # noqa: SLF001
+    cut = det._match_readings()  # noqa: SLF001
+    assert cut is not raw and len(cut) < len(raw)
+    exact = (cut[-1][0] - cut[0][0]).total_seconds()
+    span = (raw[-1][0] - raw[0][0]).total_seconds()
+    bound = manager._match_trace_span_bound()  # noqa: SLF001
+    assert exact <= bound < span
+    interval = float(manager._profile_match_interval)  # noqa: SLF001
+    quiet = _result("Cotton", {"Cotton": 0.9, "Synthetics": 0.5})
+    with patch.object(det, "_match_readings", wraps=det._match_readings) as built, \
+            patch.object(manager.profile_store, "async_match_profile",
+                         AsyncMock(return_value=quiet)) as match:
+        # Due just past the programme time: the stored trace spans far more.
+        manager._program_mismatch_last_s = bound + 1.0 - interval  # noqa: SLF001
+        manager._schedule_program_mismatch_check()  # noqa: SLF001
+        await hass.async_block_till_done()
+        assert not built.called and match.await_count == 0
+        # Due: the trace is built and the check runs on it.
+        manager._program_mismatch_last_s = exact - interval  # noqa: SLF001
+        manager._schedule_program_mismatch_check()  # noqa: SLF001
+        await hass.async_block_till_done()
+        assert built.call_count == 1 and match.await_count == 1
+    assert manager._program_mismatch_last_s == exact  # noqa: SLF001
+    assert match.await_args.args[1] == exact
