@@ -416,6 +416,82 @@ test('a history read slower than the poll still lands and paints', async ({ page
   expect(got).toEqual({ landed: { n: 0, paints: 1 }, after: 2, paints: 2 });
 });
 
+test('a history read slower than the poll does not stop the recording and match-debug reads', async ({ page }) => {
+  await bootPanel(page, { 'ha_washdata/get_devices': running({ manual_program: true, recording: true }) });
+  await expect(page.locator('#wd-status-prog')).toHaveValue('Cotton 40°C', { timeout: 8_000 });
+  const got = await page.evaluate(async () => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    el._stopPoll();
+    el._panelCfg.prefs = { ...(el._panelCfg.prefs || {}), show_debug: true };
+    const real = el._ws.bind(el);
+    // The first two history reads wait for their gate; later ones answer at once.
+    const gates: Array<() => void> = [];
+    const asked: Array<() => void> = [];
+    const askedP = [0, 1].map((i) => new Promise<void>((r) => { asked[i] = r; }));
+    let h = 0;
+    // Match debug and recording state answers carry their request number; an armed
+    // type keeps its next request waiting until `held[type]` is called.
+    const n: Record<string, number> = { md: 0, rs: 0 };
+    const hold: Record<string, (() => void) | null> = { md: null, rs: null };
+    const held: Record<string, () => void> = {};
+    const arm = (k: string) => new Promise<void>((r) => { hold[k] = r; });
+    el._ws = (msg: any) => {
+      if (msg.type === 'ha_washdata/get_power_history') {
+        const i = h++;
+        const answer = { live: [], raw: [], cycle_active: true, cycle_elapsed_s: 0 };
+        if (i > 1) return Promise.resolve(answer);
+        asked[i]();
+        return new Promise<void>((r) => { gates[i] = r; }).then(() => answer);
+      }
+      const k = msg.type === 'ha_washdata/get_match_debug' ? 'md'
+        : msg.type === 'ha_washdata/get_recording_state' ? 'rs' : null;
+      if (!k) return real(msg);
+      const answer = k === 'md'
+        ? { n: n[k]++ }
+        : { state: 'recording', duration_s: 60, sample_count: 5, n: n[k]++ };
+      const notify = hold[k];
+      if (!notify) return Promise.resolve(answer);
+      hold[k] = null;
+      return new Promise<void>((r) => { held[k] = r; notify(); }).then(() => answer);
+    };
+    let reviewed = 0;
+    const review = el._refreshReviewQuestion.bind(el);
+    el._refreshReviewQuestion = (d: unknown) => { reviewed += 1; return review(d); };
+    const first = el._fetchAll();
+    await askedP[0];
+    const second = el._fetchAll();   // the next poll's list is in, its history is not
+    await askedP[1];
+    gates[0]();
+    await first;                     // superseded by now: its live reads still land
+    const landed = { md: el._matchDebug?.n ?? null, rs: el._recState?.n ?? null, reviewed };
+    // An older match-debug answer never replaces a newer one ...
+    const mdHeld = arm('md');
+    gates[1]();
+    await mdHeld;
+    await el._fetchAll();
+    const third = { md: el._matchDebug.n, rs: el._recState.n };
+    held.md();
+    await second;
+    const afterMd = el._matchDebug.n;
+    // ... nor an older recording-state answer a newer one.
+    const rsHeld = arm('rs');
+    const fourth = el._fetchAll();
+    await rsHeld;
+    await el._fetchAll();
+    const fifthRs = el._recState.n;
+    held.rs();
+    await fourth;
+    return { landed, third, afterMd, fifthRs, afterRs: el._recState.n };
+  });
+  expect(got).toEqual({
+    landed: { md: 0, rs: 0, reviewed: 1 },
+    third: { md: 2, rs: 1 },
+    afterMd: 2,
+    fifthRs: 4,
+    afterRs: 4,
+  });
+});
+
 test('a refresh whose appliance changed under it does not claim the phase slot', async ({ page }) => {
   await bootPanel(page, { 'ha_washdata/get_devices': running({ manual_program: true }) });
   await expect(page.locator('#wd-status-prog')).toHaveValue('Cotton 40°C', { timeout: 8_000 });

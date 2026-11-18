@@ -2474,6 +2474,12 @@ class HaWashdataPanel extends HTMLElement {
     // The live chart's history reads, ordered by their own request (PR #529 review).
     this._powerReqSeq = 0;
     this._powerAppliedSeq = 0;
+    // Likewise the match-debug and recording-state reads (_fetchMatchDebug /
+    // _fetchRecState), so a slow history read before them cannot stop them.
+    this._matchDebugReqSeq = 0;
+    this._matchDebugAppliedSeq = 0;
+    this._recStateReqSeq = 0;
+    this._recStateAppliedSeq = 0;
     this._cycles = [];
     this._refCycles = [];  // imported store recordings (shown alongside real cycles)
     this._shareableCycles = [];  // get_shareable_cycles result for the share-device tree
@@ -3317,7 +3323,7 @@ class HaWashdataPanel extends HTMLElement {
     // superseded: its error is no news and the newer call does the finishing paint.
     let seq = null;
     let stale = false;
-    let historyApplied = false;   // this call's live-chart history landed
+    let liveApplied = false;   // this call's chart history, match debug or recording state landed
     const superseded = () => seq !== null && seq < this._devicesAppliedSeq;
     try {
       if (!this._constantsLoaded) {
@@ -3370,10 +3376,15 @@ class HaWashdataPanel extends HTMLElement {
       const dev = this._devices[this._selIdx];
       // The live chart and the matched program's overlay are independent reads, so
       // they go out together rather than one after the other (audit UI-19).
-      // Each read below lands only while this refresh still owns it: no newer device
-      // list is in and the same appliance is shown. With raw power on, the washer's
-      // history can wait on the recorder while the user switches to the dryer.
-      const owns = () => !superseded() && !!dev && this._isActiveEntry(dev.entry_id);
+      // Each read below lands only while the same appliance is shown. With raw power
+      // on, the washer's history can wait on the recorder while the user switches to
+      // the dryer. The live reads are ordered by their own requests, not by the
+      // device list: a history read slower than the poll would otherwise stop them
+      // on every poll. The row they read is the newest list's.
+      const shownRow = () => {
+        const cur = this._devices[this._selIdx];
+        return dev && cur && cur.entry_id === dev.entry_id ? cur : null;
+      };
       const statusData = async () => {
         // Live chart is served from the integration so it survives a refresh:
         // fetch it whenever the Status tab is visible.
@@ -3385,15 +3396,12 @@ class HaWashdataPanel extends HTMLElement {
             const hseq = ++this._powerReqSeq;
             const pd = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: dev.entry_id, with_raw: this._pref('show_raw_active', false) });
             if (this._isActiveEntry(dev.entry_id) && hseq > this._powerAppliedSeq) {
-              this._powerData = pd; this._powerAppliedSeq = hseq; historyApplied = true;
+              this._powerData = pd; this._powerAppliedSeq = hseq; liveApplied = true;
             }
           } catch (_) { /* keep previous */ }
-          if (!owns()) return;
-          if (this._pref('show_debug', false)) {
-            try {
-              const md = await this._ws({ type: `${_DOMAIN}/get_match_debug`, entry_id: dev.entry_id });
-              if (owns()) this._matchDebug = md;
-            } catch (_) { /* keep previous */ }
+          if (!shownRow()) return;
+          if (this._pref('show_debug', false) && await this._fetchMatchDebug(dev.entry_id)) {
+            liveApplied = true;
           }
           // Keep the Manual Recording widget's live duration / sample count fresh
           // while a recording is running (the backend reports them live; without
@@ -3402,15 +3410,14 @@ class HaWashdataPanel extends HTMLElement {
           // _recState, which is null on first load and would otherwise never be
           // populated -- leaving the widget showing "Start Recording" during an
           // active recording (#313).
-          if (this._canEdit() && dev.recording && owns()) {
-            try {
-              const rs = await this._ws({ type: `${_DOMAIN}/get_recording_state`, entry_id: dev.entry_id });
-              if (owns()) this._recState = rs;
-            } catch (_) { /* keep previous */ }
+          const row = shownRow();
+          if (this._canEdit() && row && row.recording && await this._fetchRecState(dev.entry_id)) {
+            liveApplied = true;
           }
           // The Overview's waiting review question, in the background so it never
           // holds the first paint (audit UI-19); refetched only when the count moves.
-          if (owns()) this._refreshReviewQuestion(dev);
+          const cur = shownRow();
+          if (cur) this._refreshReviewQuestion(cur);
         }
       };
       const overlayData = async () => {
@@ -3518,9 +3525,9 @@ class HaWashdataPanel extends HTMLElement {
       // Superseded, at its list or while its reads were in flight: the newer call
       // clears the spinner and paints once its own data is in. Painting here showed
       // the screen before it had.
-      // A superseded call whose own history landed paints it: the newer one may
-      // still be waiting on its read.
-      if (!stale && (!superseded() || historyApplied)) this._finishFetch(firstLoad, painted);
+      // A superseded call whose own live reads landed paints them: the newer one may
+      // still be waiting on its history read.
+      if (!stale && (!superseded() || liveApplied)) this._finishFetch(firstLoad, painted);
     }
   }
 
@@ -4226,10 +4233,8 @@ class HaWashdataPanel extends HTMLElement {
         // D1: matched-profile phases for the compact Status phase timeline.
         await this._ensureStatusPhases(eid, dev.current_program);
         this._refreshReviewQuestion(dev);
-        if (this._pref('show_debug', false)) {
-          try { this._matchDebug = await this._ws({ type: `${_DOMAIN}/get_match_debug`, entry_id: eid }); } catch (_) { /* keep */ }
-        }
-        if (this._canEdit()) { try { this._recState = await this._ws({ type: `${_DOMAIN}/get_recording_state`, entry_id: eid }); } catch (_) {} }
+        if (this._pref('show_debug', false)) await this._fetchMatchDebug(eid);
+        if (this._canEdit()) await this._fetchRecState(eid);
         // Fetch setup guidance phase (always, not just when profileCount === 0)
         try {
           this._setupStatus = await this._ws({
@@ -4488,8 +4493,28 @@ class HaWashdataPanel extends HTMLElement {
     });
   }
 
+  // The Manual Recording widget's live detail and the Live Match Debug card, each
+  // ordered by its own requests: a slower answer to an older read (a poll's, sent
+  // before Stop) never replaces a newer one, and none lands under another
+  // appliance. True when this answer was applied; a failed read keeps the last.
   async _fetchRecState(eid) {
-    try { this._recState = await this._ws({ type: `${_DOMAIN}/get_recording_state`, entry_id: eid }); } catch (_) {}
+    const seq = ++this._recStateReqSeq;
+    try {
+      const rs = await this._ws({ type: `${_DOMAIN}/get_recording_state`, entry_id: eid });
+      if (!this._isActiveEntry(eid) || seq < this._recStateAppliedSeq) return false;
+      this._recState = rs; this._recStateAppliedSeq = seq;
+      return true;
+    } catch (_) { return false; }
+  }
+
+  async _fetchMatchDebug(eid) {
+    const seq = ++this._matchDebugReqSeq;
+    try {
+      const md = await this._ws({ type: `${_DOMAIN}/get_match_debug`, entry_id: eid });
+      if (!this._isActiveEntry(eid) || seq < this._matchDebugAppliedSeq) return false;
+      this._matchDebug = md; this._matchDebugAppliedSeq = seq;
+      return true;
+    } catch (_) { return false; }
   }
 
   async _fetchFeedbacks(eid) {
