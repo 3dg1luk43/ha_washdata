@@ -123,6 +123,7 @@ from .const import (
     TRIGGER_MAINTENANCE_RECHECK_S,
     TRIGGER_MAINTENANCE_IDLE_CHECK_S,
     TRIGGER_PHASE_STARTED,
+    TRIGGER_PROGRAM_MISMATCH,
     TRIGGER_PROGRAM_RECOGNISED,
     DATA_TRIGGER_LISTENERS,
     TRIGGER_MILESTONE_REACHED,
@@ -875,6 +876,12 @@ class WashDataManager:
         self._maintenance_checked: tuple[datetime, int] | None = None
         self._tumble_held: dict[str, Any] | None = None
         self._restored_trigger_marks: Any = None
+        # #530: the background check of a hand-picked program (keyed by the cycle
+        # and the pick, see _program_mismatch_state), the in-flight check, and the
+        # elapsed time of the last one (the profile_match_interval cadence).
+        self._program_mismatch = match_rules.ProgramMismatchState()
+        self._program_mismatch_task: asyncio.Task[Any] | None = None
+        self._program_mismatch_last_s: float | None = None
         self._cycle_start_time: datetime | None = None
         # Per-cycle UUID: the identity token the live match and the cycle-end tail
         # check so work for one cycle never lands on the next, even when both share
@@ -1109,7 +1116,7 @@ class WashDataManager:
                 # Elements 5-8 stay False: a manual pin is certain by definition,
                 # so there is no mismatch or ambiguity to report.
                 terminal_high = self._terminal_high_for_guards(self._current_program)
-                return (
+                manual_tuple = (
                     self._current_program,
                     1.0,
                     expected_duration,
@@ -1151,6 +1158,10 @@ class WashDataManager:
                         self.profile_store, self._current_program, self.device_type
                     ),
                 )
+                # #530: rank the trace in the background against the pick. It
+                # changes nothing above: the tuple stays the pin's.
+                self._schedule_program_mismatch_check(readings)
+                return manual_tuple
 
             if not readings:
                 return None
@@ -1663,6 +1674,166 @@ class WashDataManager:
         except Exception as e:
             self._logger.error("Perform combined matching failed: %s", e, exc_info=True)
 
+    # ─── #530: a hand-picked program the cycle does not look like ─────────────
+
+    def _program_mismatch_key(self) -> tuple[Any, ...] | None:
+        """What the hand-picked program check belongs to: this cycle and this
+        pick, or None without a pick. A new cycle or a new pick is a new key."""
+        if not getattr(self, "_manual_program_active", False):
+            return None
+        program = self._current_program
+        if not match_rules.program_is_committed(program):
+            return None
+        token, start, _active = self._match_identity()
+        return (token, start, program)
+
+    def _program_mismatch_state(self) -> match_rules.ProgramMismatchState | None:
+        """The check for the current cycle and pick, started afresh on a new key."""
+        key = self._program_mismatch_key()
+        if key is None:
+            return None
+        state = getattr(self, "_program_mismatch", None)
+        if state is None or state.key != key:
+            state = match_rules.ProgramMismatchState(key=key)
+            self._program_mismatch = state
+            self._program_mismatch_last_s = None
+        return state
+
+    def _restore_program_mismatch(self, raw: Any) -> None:
+        """Take a snapshot's check back for the restored pick (#530), so a
+        restart neither repeats the trigger nor forgets the mismatch."""
+        if not isinstance(raw, dict) or raw.get("program") != self._current_program:
+            return
+        state = self._program_mismatch_state()
+        if state is not None:
+            state.restore(raw)
+
+    def _program_mismatch_snapshot(self) -> dict[str, Any] | None:
+        """The check for the active-cycle snapshot, or None. Never raises."""
+        try:
+            state = getattr(self, "_program_mismatch", None)
+            if state is None or state.key is None or state.key != self._program_mismatch_key():
+                return None
+            return {"program": state.key[2], **state.as_dict()}
+        except Exception:  # pylint: disable=broad-exception-caught
+            return None
+
+    @property
+    def program_mismatch(self) -> dict[str, Any] | None:
+        """``{selected, looks_like, margin}`` once the cycle has been found not to
+        look like the program picked by hand (#530), else None. Display and
+        automations only: nothing that ends, labels or switches a cycle reads it."""
+        try:
+            state = getattr(self, "_program_mismatch", None)
+            if state is None or not state.fired or state.key is None:
+                return None
+            if state.key != self._program_mismatch_key():
+                return None
+            return {
+                "selected": str(state.key[2]),
+                "looks_like": state.looks_like,
+                "margin": state.margin,
+            }
+        except Exception:  # pylint: disable=broad-exception-caught
+            return None
+
+    def _schedule_program_mismatch_check(
+        self, readings: list[tuple[datetime, float]]
+    ) -> None:
+        """Start the background check of a hand-picked program (#530), at most once
+        per ``profile_match_interval`` of elapsed time and one at a time. Called
+        from the pin's matcher branch; never raises."""
+        try:
+            if not readings or len(readings) < 2:
+                return
+            if not trigger_rules.trigger_offered(TRIGGER_PROGRAM_MISMATCH, self.device_type):
+                return
+            state = self._program_mismatch_state()
+            if state is None or state.fired:
+                return
+            expected = self._matched_profile_duration
+            if not expected:
+                return
+            elapsed = (readings[-1][0] - readings[0][0]).total_seconds()
+            interval = float(self._profile_match_interval or DEFAULT_PROFILE_MATCH_INTERVAL)
+            last = self._program_mismatch_last_s
+            if elapsed < (interval if last is None else last + interval):
+                return
+            task = self._program_mismatch_task
+            if task is not None and not task.done():
+                return
+            if not self.profile_store.has_real_profiles:
+                return
+            # A pick with no template is never scored, which is no evidence.
+            if state.key[2] in self.profile_store.unmatchable_profiles():
+                return
+            self._program_mismatch_last_s = elapsed
+            self._program_mismatch_task = self._spawn_tracked(
+                self._async_check_program_mismatch(
+                    list(readings), self._match_identity(), state.key, float(expected)
+                )
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Could not start the program check", exc_info=True)
+
+    async def _async_check_program_mismatch(
+        self,
+        readings: list[tuple[datetime, float]],
+        identity: tuple[str, datetime | None, bool],
+        key: tuple[Any, ...],
+        expected: float,
+    ) -> None:
+        """One background match of a hand-picked program (#530): the live tick's
+        own ``async_match_profile`` call, read only by
+        ``match_rules.program_mismatch_tick``. The displayed program, the expected
+        duration, the detector and the labels are never touched. Sends the
+        ``program_mismatch`` trigger on the match that establishes it."""
+        try:
+            duration = (readings[-1][0] - readings[0][0]).total_seconds()
+            result = await self.profile_store.async_match_profile(
+                readings,
+                duration,
+                in_progress=True,
+                stop_threshold_w=float(self.detector.config.stop_threshold_w),
+            )
+            if not self._match_still_current(identity):
+                return
+            state = self._program_mismatch_state()
+            if state is None or state.key != key:
+                return  # the pick changed while the match ran
+            selected = key[2]
+            fired = match_rules.program_mismatch_tick(
+                state,
+                result,
+                selected,
+                elapsed_s=duration,
+                expected_s=expected,
+                families=match_rules.program_families(
+                    self.profile_store.get_profile_groups()
+                ),
+            )
+            if not fired:
+                return
+            self._logger.info(
+                "The running cycle does not look like the picked program %r: %r fits "
+                "better by %.3f after %.0f s",
+                selected, state.looks_like, state.margin or 0.0, duration,
+            )
+            self._fire_device_trigger(
+                TRIGGER_PROGRAM_MISMATCH,
+                selected,
+                looks_like=state.looks_like,
+                margin=state.margin,
+                elapsed_seconds=round(duration),
+            )
+            # A restart must not send it again (as the live trigger marks).
+            if self._has_trigger_listeners():
+                snapshot = self._augment_active_snapshot(self.detector.get_state_snapshot())
+                self._spawn_tracked(self.profile_store.async_save_active_cycle(snapshot))
+            self._notify_update_deferrable()
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Program check failed", exc_info=True)
+
     @property
     def top_candidates(self) -> list[dict[str, Any]]:
         """Return a lightweight list of top candidates from the last match."""
@@ -2109,6 +2280,9 @@ class WashDataManager:
                     )
                     self._restored_trigger_marks = active_snapshot_to_restore.get(
                         "trigger_marks"
+                    )
+                    self._restore_program_mismatch(
+                        active_snapshot_to_restore.get("program_mismatch")
                     )
                     _gaps = active_snapshot_to_restore.get("restart_gaps")
                     self._restart_gaps = [
@@ -6548,6 +6722,8 @@ class WashDataManager:
         tracker = getattr(self, "_live_triggers", None)
         if tracker is not None:
             snapshot["trigger_marks"] = tracker.marks()
+        # #530: the hand-picked program check, so a restart sends no second trigger.
+        snapshot["program_mismatch"] = self._program_mismatch_snapshot()
         snapshot["restart_gaps"] = list(self._restart_gaps)
         snapshot["live_activity_started"] = bool(self._live_activity_started)
         # When the power sensor last really reported, and the value the manager

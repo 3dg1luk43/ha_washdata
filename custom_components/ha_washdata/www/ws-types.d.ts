@@ -90,6 +90,7 @@ export interface DeviceInfo {
   envelope_position: number | null;
   match_uncertainty: MatchUncertainty | null;
   match_choices: string[] | null;
+  program_mismatch: ProgramMismatch | null;
   suggestions_count: number;
   suggestion_keys: string[];
   feedback_count: number;
@@ -436,6 +437,12 @@ export interface ProfileGroupInfo {
   members: string[];
   cohesion: number;
   cohesive: boolean;
+}
+
+export interface ProgramMismatch {
+  selected: string;
+  looks_like: string | null;
+  margin: number | null;
 }
 
 export interface RunSuggestionAnalysisResponse {

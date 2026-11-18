@@ -1747,6 +1747,8 @@ def ws_get_devices(
             # The two programmes a live match is torn between: the Status card's
             # "X or Y?" manual pick (match_rules.live_torn_choices).
             "match_choices": None,
+            # #530: the running cycle does not look like the hand-picked program.
+            "program_mismatch": None,
             # Merged data+options, matching ``ws_get_options`` and the
             # options-first resolution in WashDataManager (#450). An entry added
             # after its last schema migration carries the structural keys in
@@ -1815,6 +1817,9 @@ def ws_get_devices(
                     [str(n) for n in _choices[:2]]
                     if isinstance(_choices, list) and len(_choices) >= 2 else None
                 )
+                # #530: the Status card's "does not look like <pick>" badge.
+                _mismatch = getattr(manager, "program_mismatch", None)
+                info["program_mismatch"] = _mismatch if isinstance(_mismatch, dict) else None
 
                 store = getattr(manager, "profile_store", None)
                 if store is not None:

@@ -122,6 +122,7 @@ const _WD_TRIGGERS = [
   { key: 'phase_started', name: 'Phase started', only: _TRIGGER_MATCHING_TYPES },
   { key: 'finishing_soon', name: 'Finishing soon', only: _TRIGGER_MATCHING_TYPES, options: { minutes: 10 } },
   { key: 'cycle_overrun', name: 'Cycle running long', only: _TRIGGER_MATCHING_TYPES, options: { percent: 20 } },
+  { key: 'program_mismatch', name: 'Running program differs from the selected one', only: _TRIGGER_MATCHING_TYPES },
   { key: 'cycle_paused', name: 'Cycle paused', options: { include_detected: false } },
   { key: 'cycle_resumed', name: 'Cycle resumed', options: { include_detected: false } },
   { key: 'cycle_stalled', name: 'Cycle stalled' },
@@ -5152,6 +5153,18 @@ class HaWashdataPanel extends HTMLElement {
     return `<span class="wd-prog-unc" style="font-size:.82em;color:var(--warning-color,#ff9800)">${what}${sure}</span>${tip}`;
   }
 
+  // #530: the background check of a hand-picked program found that another program
+  // fits the running cycle clearly better (backend match_rules.program_mismatch_tick).
+  // Display only: the pick, its time estimate and the label stay as they are.
+  _htmlProgramMismatch(dev, isRunning, manual) {
+    const m = dev && dev.program_mismatch;
+    if (!m || !isRunning || !manual || !m.looks_like) return '';
+    const what = this._t('status.program_mismatch', {program: m.looks_like}, 'Looks more like {program}');
+    const tip = _tip(this._tText('status.program_mismatch_tip', {selected: m.selected, program: m.looks_like},
+      'This cycle does not look like {selected}, the program you picked: {program} fits it clearly better. Nothing is changed. An automation can react with the "Running program differs from the selected one" trigger.'));
+    return `<span class="wd-prog-mismatch" data-testid="program-mismatch" style="font-size:.82em;color:var(--warning-color,#ff9800)">\u26A0 ${what}</span>${tip}`;
+  }
+
   // "X or Y?" while the live match is torn between two programmes (audit item 1):
   // the backend's match_choices (match_rules.live_torn_choices) is set when the
   // winner is ambiguous or leads by less than the cycle-end label margin, i.e. the
@@ -5497,7 +5510,7 @@ class HaWashdataPanel extends HTMLElement {
           <select id="wd-status-prog">
             <option value="auto_detect" ${selVal === 'auto_detect' ? 'selected' : ''}>${this._t('status.auto_detect', {}, 'Auto-detect')}</option>
             ${profOpts}
-          </select>${tag}${this._htmlTornChips(dev, isRunning, manual) || this._htmlMatchUncertainty(dev, isRunning, manual)}</div>`;
+          </select>${tag}${this._htmlProgramMismatch(dev, isRunning, manual) || this._htmlTornChips(dev, isRunning, manual) || this._htmlMatchUncertainty(dev, isRunning, manual)}</div>`;
 
     const attn = [];
     if (dev.recording && this._canEdit()) attn.push(`<div class="wd-attn-card"><span class="wd-attn-icon">●</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.recording_in_progress', {}, 'Recording in progress')}</div><div class="wd-attn-sub">${this._t('msg.see_recorder', {}, 'See recorder widget below')}</div></div></div>`);

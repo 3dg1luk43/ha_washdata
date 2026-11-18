@@ -65,6 +65,7 @@ from .const import (
     TRIGGER_FINISHING_SOON_DEFAULT_MINUTES,
     TRIGGER_MAINTENANCE_DUE,
     TRIGGER_PHASE_STARTED,
+    TRIGGER_PROGRAM_MISMATCH,
     TRIGGER_PROGRAM_RECOGNISED,
     TRIGGER_STATE_CHANGED,
     TRIGGER_STILL_TUMBLING,
@@ -149,6 +150,7 @@ OPTION_FIELDS: dict[str, dict[Any, Any]] = {
             _CoerceInt(), vol.Range(min=PERCENT_RANGE[0], max=PERCENT_RANGE[1])
         ),
     },
+    TRIGGER_PROGRAM_MISMATCH: {vol.Optional(OPT_PROGRAM): _TEXT},
     TRIGGER_CYCLE_PAUSED: {vol.Optional(OPT_INCLUDE_DETECTED, default=False): bool},
     TRIGGER_CYCLE_RESUMED: {vol.Optional(OPT_INCLUDE_DETECTED, default=False): bool},
     TRIGGER_CYCLE_FINISHED: {vol.Optional(OPT_PROGRAM): _TEXT},
@@ -198,7 +200,9 @@ def run_variables(  # noqa: C901 - one flat branch per trigger type
     filter it out. Never raises; drops the ``_`` keys."""
     opts = options or {}
     public = {k: v for k, v in variables.items() if not str(k).startswith("_")}
-    if trigger_type in (TRIGGER_PROGRAM_RECOGNISED, TRIGGER_CYCLE_FINISHED):
+    if trigger_type in (
+        TRIGGER_PROGRAM_RECOGNISED, TRIGGER_CYCLE_FINISHED, TRIGGER_PROGRAM_MISMATCH
+    ):
         wanted = opts.get(OPT_PROGRAM)
         if wanted and not _same_text(wanted, variables.get("program")):
             return None

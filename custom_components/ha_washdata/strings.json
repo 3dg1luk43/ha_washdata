@@ -71,6 +71,7 @@
       "phase_started": "Phase started",
       "finishing_soon": "Finishing soon",
       "cycle_overrun": "Cycle running long",
+      "program_mismatch": "Running program differs from the selected one",
       "cycle_paused": "Cycle paused",
       "cycle_resumed": "Cycle resumed",
       "cycle_stalled": "Cycle stalled",
@@ -435,6 +436,16 @@
         "percent": {
           "name": "Longer by",
           "description": "Percent over the program's usual duration."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Running program differs from the selected one",
+      "description": "Triggers once per cycle when the program you picked by hand does not look like the cycle that is running: another program fits it clearly better.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Only when this program is the one picked, by its exact name. Leave empty for any program."
         }
       }
     },

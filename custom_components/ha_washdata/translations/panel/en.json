@@ -1722,7 +1722,9 @@
     "unlabelling": "Unlabelling…",
     "working": "Working…",
     "torn_pick": "{a} or {b}?",
-    "torn_tip": "WashData cannot tell these two apart yet, so pick the one that is running to label this cycle with it (Auto-detect undoes the choice)."
+    "torn_tip": "WashData cannot tell these two apart yet, so pick the one that is running to label this cycle with it (Auto-detect undoes the choice).",
+    "program_mismatch": "Looks more like {program}",
+    "program_mismatch_tip": "This cycle does not look like {selected}, the program you picked: {program} fits it clearly better. Nothing is changed. An automation can react with the \"Running program differs from the selected one\" trigger."
   },
   "suggestion": {
     "observed_label": "Observed",
@@ -2232,6 +2234,9 @@
     },
     "cycle_overrun": {
       "name": "Cycle running long"
+    },
+    "program_mismatch": {
+      "name": "Running program differs from the selected one"
     },
     "cycle_paused": {
       "name": "Cycle paused"

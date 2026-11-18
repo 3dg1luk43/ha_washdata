@@ -15,6 +15,9 @@
     "cycle_overrun": {
       "trigger": "mdi:timer-alert-outline"
     },
+    "program_mismatch": {
+      "trigger": "mdi:help-rhombus-outline"
+    },
     "cycle_paused": {
       "trigger": "mdi:pause-circle-outline"
     },

@@ -63,9 +63,11 @@ from .const import (
     STATE_FORCE_STOPPED,
     STATE_UNKNOWN,
     STATE_CLEAN,
+    TRIGGER_PROGRAM_MISMATCH,
 )
 from .manager import WashDataManager
 from .profile_store import cycle_report_energy_wh
+from .trigger_rules import trigger_offered
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -335,6 +337,14 @@ class WasherStateSensor(WasherBaseSensor):
         envelope_position = self._manager.envelope_position
         if envelope_position is not None:
             attrs["envelope_position"] = envelope_position
+        # #530: the running cycle does not look like the program picked by hand
+        # (the program_mismatch trigger). Visible only; cleared with the pick and
+        # at the next cycle.
+        if trigger_offered(TRIGGER_PROGRAM_MISMATCH, self._manager.device_type):
+            mismatch = getattr(self._manager, "program_mismatch", None)
+            attrs["program_mismatch"] = isinstance(mismatch, dict)
+            if isinstance(mismatch, dict):
+                attrs["program_mismatch_looks_like"] = mismatch.get("looks_like")
         # Post-cycle anomaly data (underrun, energy spike/low) from last completed cycle.
         last_post = self._manager.last_cycle_post_anomaly
         if isinstance(last_post, dict):
