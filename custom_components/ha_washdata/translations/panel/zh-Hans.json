@@ -1693,7 +1693,9 @@
         "match_sure": "约 {pct}% 把握",
         "match_uncertain_tip": "WashData 尚未确定程序。该数值表示在过去的周期中，领先猜测 {top} 领先这么多时猜对的频率。仅供参考。",
         "torn_pick": "{a} 还是 {b}？",
-        "torn_tip": "WashData 暂时还无法区分这两个程序，因此请选择正在运行的程序，将此周期标记为该程序（选择“自动检测”可撤销此选择）。"
+        "torn_tip": "WashData 暂时还无法区分这两个程序，因此请选择正在运行的程序，将此周期标记为该程序（选择“自动检测”可撤销此选择）。",
+        "program_mismatch": "更像 {program}",
+        "program_mismatch_tip": "此周期看起来不像您选择的程序 {selected}：{program} 明显更匹配。不会做任何更改。自动化可以通过“运行中的程序与所选程序不同”触发器作出响应。"
     },
     "tab": {
         "advanced": "高级",
@@ -2212,6 +2214,9 @@
         },
         "cycle_overrun": {
             "name": "周期运行过长"
+        },
+        "program_mismatch": {
+            "name": "运行中的程序与所选程序不同"
         },
         "cycle_paused": {
             "name": "周期已暂停"

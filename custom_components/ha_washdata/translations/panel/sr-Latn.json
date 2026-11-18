@@ -1710,7 +1710,9 @@
     "match_sure": "~{pct}% sigurnosti",
     "match_uncertain_tip": "WashData se još nije odlučio za program. Broj pokazuje koliko je često vodeća pretpostavka, {top}, bila tačna u prošlim ciklusima uz ovakvu prednost. Samo informativno.",
     "torn_pick": "{a} ili {b}?",
-    "torn_tip": "WashData još ne može da razlikuje ova dva programa, pa izaberite onaj koji radi da biste njime označili ovaj ciklus (Automatska detekcija poništava izbor)."
+    "torn_tip": "WashData još ne može da razlikuje ova dva programa, pa izaberite onaj koji radi da biste njime označili ovaj ciklus (Automatska detekcija poništava izbor).",
+    "program_mismatch": "Izgleda više kao {program}",
+    "program_mismatch_tip": "Ovaj ciklus ne liči na program {selected} koji ste izabrali: {program} mu jasno bolje odgovara. Ništa se ne menja. Automatizacija na to može da reaguje okidačem „Program u toku se razlikuje od izabranog“."
   },
   "suggestion": {
     "observed_label": "Izmereno",
@@ -2252,6 +2254,9 @@
     },
     "cycle_overrun": {
       "name": "Ciklus traje predugo"
+    },
+    "program_mismatch": {
+      "name": "Program u toku se razlikuje od izabranog"
     },
     "cycle_paused": {
       "name": "Ciklus pauziran"

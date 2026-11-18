@@ -575,6 +575,7 @@
       "phase_started": "Fase gestart",
       "finishing_soon": "Bijna klaar",
       "cycle_overrun": "Cyclus loopt te lang",
+      "program_mismatch": "Lopend programma wijkt af van het gekozen programma",
       "cycle_paused": "Cyclus gepauzeerd",
       "cycle_resumed": "Cyclus hervat",
       "still_tumbling": "Trommel draait nog na de cyclus",
@@ -649,6 +650,16 @@
         "percent": {
           "name": "Langer met",
           "description": "Procent boven de gebruikelijke programmauur."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Lopend programma wijkt af van het gekozen programma",
+      "description": "Wordt eenmaal per cyclus geactiveerd wanneer de lopende cyclus niet lijkt op het programma dat u handmatig hebt gekozen: een ander programma past duidelijk beter.",
+      "fields": {
+        "program": {
+          "name": "Programma",
+          "description": "Alleen wanneer dit programma is gekozen, op exacte naam. Leeg laten voor elk programma."
         }
       }
     },

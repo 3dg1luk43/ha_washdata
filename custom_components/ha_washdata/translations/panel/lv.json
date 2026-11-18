@@ -1710,7 +1710,9 @@
     "match_sure": "~{pct}% pārliecība",
     "match_uncertain_tip": "WashData vēl nav izlēmis par programmu. Skaitlis rāda, cik bieži vadošais minējums, {top}, iepriekšējos ciklos bija pareizs, kad tas vadīja ar tik lielu pārsvaru. Tikai informācijai.",
     "torn_pick": "{a} vai {b}?",
-    "torn_tip": "WashData vēl nespēj atšķirt šīs divas programmas, tāpēc izvēlieties to, kas pašlaik darbojas, lai ar to iezīmētu šo ciklu (Automātiska noteikšana izvēli atceļ)."
+    "torn_tip": "WashData vēl nespēj atšķirt šīs divas programmas, tāpēc izvēlieties to, kas pašlaik darbojas, lai ar to iezīmētu šo ciklu (Automātiska noteikšana izvēli atceļ).",
+    "program_mismatch": "Drīzāk tā ir {program}",
+    "program_mismatch_tip": "Šis cikls nelīdzinās jūsu izvēlētajai programmai {selected}: {program} tam atbilst skaidri labāk. Nekas netiek mainīts. Automatizācija var uz to reaģēt ar trigeri „Darbojošā programma atšķiras no izvēlētās”."
   },
   "tab": {
     "advanced": "Papildu",
@@ -2252,6 +2254,9 @@
     },
     "cycle_overrun": {
       "name": "Cikls ilgst pārāk ilgi"
+    },
+    "program_mismatch": {
+      "name": "Darbojošā programma atšķiras no izvēlētās"
     },
     "cycle_paused": {
       "name": "Cikls pauzēts"

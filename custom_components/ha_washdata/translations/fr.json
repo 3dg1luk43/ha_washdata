@@ -575,6 +575,7 @@
       "phase_started": "Phase commencée",
       "finishing_soon": "Bientôt terminé",
       "cycle_overrun": "Cycle en retard",
+      "program_mismatch": "Le programme en cours diffère de celui choisi",
       "cycle_paused": "Cycle en pause",
       "cycle_resumed": "Cycle repris",
       "still_tumbling": "Toujours en rotation après le cycle",
@@ -649,6 +650,16 @@
         "percent": {
           "name": "Dépassement de",
           "description": "Pourcentage au-delà de la durée habituelle du programme."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Le programme en cours diffère de celui choisi",
+      "description": "Se déclenche une fois par cycle quand le programme que vous avez choisi à la main ne ressemble pas au cycle en cours : un autre programme lui correspond nettement mieux.",
+      "fields": {
+        "program": {
+          "name": "Programme",
+          "description": "Uniquement quand ce programme est celui choisi, par son nom exact. Laisser vide pour tout programme."
         }
       }
     },

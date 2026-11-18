@@ -575,6 +575,7 @@
       "phase_started": "阶段已开始",
       "finishing_soon": "即将完成",
       "cycle_overrun": "周期运行过长",
+      "program_mismatch": "运行中的程序与所选程序不同",
       "cycle_paused": "周期已暂停",
       "cycle_resumed": "周期已恢复",
       "still_tumbling": "周期结束后仍在转动",
@@ -649,6 +650,16 @@
         "percent": {
           "name": "超出",
           "description": "超过程序通常时长的百分比。"
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "运行中的程序与所选程序不同",
+      "description": "当您手动选择的程序与正在运行的周期不相符、另一个程序明显更匹配时，每个周期触发一次。",
+      "fields": {
+        "program": {
+          "name": "程序",
+          "description": "仅当所选程序为此程序时，使用准确名称。留空表示任意程序。"
         }
       }
     },

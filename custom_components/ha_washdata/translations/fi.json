@@ -575,6 +575,7 @@
       "phase_started": "Vaihe alkoi",
       "finishing_soon": "Päättyy pian",
       "cycle_overrun": "Sykli kestää liian kauan",
+      "program_mismatch": "Käynnissä oleva ohjelma eroaa valitusta",
       "cycle_paused": "Sykli keskeytetty",
       "cycle_resumed": "Sykli jatkui",
       "still_tumbling": "Rumpu pyörii yhä syklin jälkeen",
@@ -649,6 +650,16 @@
         "percent": {
           "name": "Pidempi kuin",
           "description": "Prosenttia yli ohjelman tavallisen keston."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Käynnissä oleva ohjelma eroaa valitusta",
+      "description": "Käynnistyy kerran sykliä kohti, kun itse valitsemasi ohjelma ei vastaa käynnissä olevaa sykliä: jokin toinen ohjelma sopii siihen selvästi paremmin.",
+      "fields": {
+        "program": {
+          "name": "Ohjelma",
+          "description": "Vain kun tämä ohjelma on valittuna, tarkalla nimellä. Jätä tyhjäksi mille tahansa ohjelmalle."
         }
       }
     },

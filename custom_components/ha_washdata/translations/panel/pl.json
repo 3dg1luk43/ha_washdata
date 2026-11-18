@@ -1728,7 +1728,9 @@
     "match_sure": "~{pct}% pewności",
     "match_uncertain_tip": "WashData nie wybrał jeszcze programu. Liczba pokazuje, jak często wiodący kandydat, {top}, okazywał się trafny w poprzednich cyklach przy takiej przewadze. Tylko informacyjnie.",
     "torn_pick": "{a} czy {b}?",
-    "torn_tip": "WashData nie potrafi jeszcze rozróżnić tych dwóch programów, więc wybierz ten, który właśnie działa, aby oznaczyć nim ten cykl (Automatyczne wykrywanie cofa wybór)."
+    "torn_tip": "WashData nie potrafi jeszcze rozróżnić tych dwóch programów, więc wybierz ten, który właśnie działa, aby oznaczyć nim ten cykl (Automatyczne wykrywanie cofa wybór).",
+    "program_mismatch": "Wygląda raczej jak {program}",
+    "program_mismatch_tip": "Ten cykl nie przypomina wybranego przez Ciebie programu {selected}: {program} pasuje do niego wyraźnie lepiej. Nic nie zostaje zmienione. Automatyzacja może na to zareagować wyzwalaczem „Działający program różni się od wybranego”."
   },
   "suggestion": {
     "observed_label": "Zmierzono",
@@ -2272,6 +2274,9 @@
     },
     "cycle_overrun": {
       "name": "Cykl trwa za długo"
+    },
+    "program_mismatch": {
+      "name": "Działający program różni się od wybranego"
     },
     "cycle_paused": {
       "name": "Cykl wstrzymany"

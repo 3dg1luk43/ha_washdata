@@ -1708,6 +1708,8 @@
     "working": "Arbejder…",
     "torn_pick": "{a} eller {b}?",
     "torn_tip": "WashData kan endnu ikke skelne mellem disse to, så vælg det program, der kører, for at mærke denne cyklus med det (Automatisk registrering fortryder valget).",
+    "program_mismatch": "Ligner mere {program}",
+    "program_mismatch_tip": "Denne cyklus ligner ikke {selected}, det program, du valgte: {program} passer tydeligt bedre. Intet ændres. En automatisering kan reagere med triggeren \"Kørende program afviger fra det valgte\".",
     "match_uncertain": "Usikker: {top} eller {runner}",
     "match_uncertain_single": "Usikker: måske {top}",
     "match_sure": "~{pct}% sikker",
@@ -2232,6 +2234,9 @@
     },
     "cycle_overrun": {
       "name": "Cyklus kører for længe"
+    },
+    "program_mismatch": {
+      "name": "Kørende program afviger fra det valgte"
     },
     "cycle_paused": {
       "name": "Cyklus sat på pause"

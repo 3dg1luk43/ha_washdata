@@ -1672,6 +1672,8 @@
     "working": "Procesando…",
     "torn_pick": "¿{a} o {b}?",
     "torn_tip": "WashData todavía no distingue estos dos programas, así que elija el que está en marcha para etiquetar este ciclo con él (la opción Detección automática deshace la elección).",
+    "program_mismatch": "Se parece más a {program}",
+    "program_mismatch_tip": "Este ciclo no se parece a {selected}, el programa que eligió: {program} encaja claramente mejor. No se cambia nada. Una automatización puede reaccionar con el disparador \"El programa en curso difiere del seleccionado\".",
     "match_uncertain": "Incierto: {top} o {runner}",
     "match_uncertain_single": "Incierto: quizá {top}",
     "match_sure": "~{pct} % de certeza",
@@ -2252,6 +2254,9 @@
     },
     "cycle_overrun": {
       "name": "Ciclo en retardo"
+    },
+    "program_mismatch": {
+      "name": "El programa en curso difiere del seleccionado"
     },
     "cycle_paused": {
       "name": "Ciclo en pausa"

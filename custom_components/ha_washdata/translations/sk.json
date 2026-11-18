@@ -575,6 +575,7 @@
       "phase_started": "Fáza spustená",
       "finishing_soon": "Čoskoro koniec",
       "cycle_overrun": "Cyklus trvá príliš dlho",
+      "program_mismatch": "Bežiaci program sa líši od vybraného",
       "cycle_paused": "Cyklus pozastavený",
       "cycle_resumed": "Cyklus obnovený",
       "still_tumbling": "Stále otáča bubnom po skončení",
@@ -649,6 +650,16 @@
         "percent": {
           "name": "Dlhšie o",
           "description": "Percent nad bežnou dĺžkou programu."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Bežiaci program sa líši od vybraného",
+      "description": "Spustí sa raz za cyklus, keď sa ručne vybraný program nepodobá prebiehajúcemu cyklu: iný program mu zodpovedá zreteľne lepšie.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Iba keď je vybraný tento program, presným názvom. Prázdne = ľubovoľný program."
         }
       }
     },

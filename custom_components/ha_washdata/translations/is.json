@@ -575,6 +575,7 @@
       "phase_started": "Fasi hafinn",
       "finishing_soon": "Nálægt lokum",
       "cycle_overrun": "Lota rennur yfir",
+      "program_mismatch": "Forrit í gangi víkur frá völdu forriti",
       "cycle_paused": "Hlé á lotu",
       "cycle_resumed": "Lota haldið áfram",
       "still_tumbling": "Tromlan snýst enn eftir lotu",
@@ -649,6 +650,16 @@
         "percent": {
           "name": "Lengur um",
           "description": "Prósent yfir venjulegan tíma forritsins."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Forrit í gangi víkur frá völdu forriti",
+      "description": "Kveikir einu sinni á lotu þegar lotan í gangi líkist ekki forritinu sem þú valdir handvirkt: annað forrit passar greinilega betur.",
+      "fields": {
+        "program": {
+          "name": "Forrit",
+          "description": "Aðeins þegar þetta forrit er valið, eftir nákvæmu nafni. Láttu tómt fyrir hvaða forrit sem er."
         }
       }
     },

@@ -575,6 +575,7 @@
       "phase_started": "Faza se je začela",
       "finishing_soon": "Kmalu konec",
       "cycle_overrun": "Cikel traja predolgo",
+      "program_mismatch": "Tekoči program se razlikuje od izbranega",
       "cycle_paused": "Cikel je ustavljen",
       "cycle_resumed": "Cikel je nadaljeval",
       "still_tumbling": "Po koncu še vedno vrti boben",
@@ -649,6 +650,16 @@
         "percent": {
           "name": "Dlje za",
           "description": "Odstotkov nad običajnim trajanjem programa."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Tekoči program se razlikuje od izbranega",
+      "description": "Sproži enkrat na cikel, ko ročno izbrani program ni podoben tekočemu ciklu: drug program se z njim opazno bolje ujema.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Samo ko je izbran ta program, po točnem imenu. Prazno = kateri koli program."
         }
       }
     },

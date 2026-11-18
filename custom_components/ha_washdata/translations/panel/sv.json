@@ -1708,6 +1708,8 @@
     "working": "Arbetar…",
     "torn_pick": "{a} eller {b}?",
     "torn_tip": "WashData kan ännu inte skilja dessa två åt, så välj det program som körs för att märka den här cykeln med det (Autoidentifiera ångrar valet).",
+    "program_mismatch": "Liknar mer {program}",
+    "program_mismatch_tip": "Den här cykeln liknar inte {selected}, programmet du valde: {program} passar tydligt bättre. Inget ändras. En automatisering kan reagera med triggern \"Pågående program skiljer sig från det valda\".",
     "match_uncertain": "Osäker: {top} eller {runner}",
     "match_uncertain_single": "Osäker: kanske {top}",
     "match_sure": "~{pct}% säker",
@@ -2232,6 +2234,9 @@
     },
     "cycle_overrun": {
       "name": "Cykel kör för länge"
+    },
+    "program_mismatch": {
+      "name": "Pågående program skiljer sig från det valda"
     },
     "cycle_paused": {
       "name": "Cykel pausad"

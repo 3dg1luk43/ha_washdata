@@ -575,6 +575,7 @@
       "phase_started": "Aşama başladı",
       "finishing_soon": "Yakında bitiyor",
       "cycle_overrun": "Döngü çok uzun sürüyor",
+      "program_mismatch": "Çalışan program seçilenden farklı",
       "cycle_paused": "Döngü duraklatıldı",
       "cycle_resumed": "Döngü devam etti",
       "still_tumbling": "Döngüden sonra hâlâ dönüyor",
@@ -649,6 +650,16 @@
         "percent": {
           "name": "Daha uzun",
           "description": "Programın olağan süresinin yüzde üzeri."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Çalışan program seçilenden farklı",
+      "description": "Elle seçtiğiniz program çalışan döngüye benzemediğinde ve başka bir program açıkça daha iyi uyduğunda, döngü başına bir kez tetiklenir.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Yalnızca seçilen program bu olduğunda, tam adıyla. Herhangi bir program için boş bırakın."
         }
       }
     },

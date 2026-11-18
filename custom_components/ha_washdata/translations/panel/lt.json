@@ -1728,7 +1728,9 @@
     "match_sure": "~{pct} % tikrumas",
     "match_uncertain_tip": "WashData dar nenusprendė, kuri tai programa. Skaičius rodo, kaip dažnai pirmaujantis spėjimas, {top}, ankstesniuose cikluose pasitvirtindavo, kai pirmavo tiek pat. Tik informacija.",
     "torn_pick": "{a} ar {b}?",
-    "torn_tip": "WashData dar negali atskirti šių dviejų programų, todėl pasirinkite tą, kuri dabar veikia, kad ja pažymėtumėte šį ciklą (Automatinis aptikimas pasirinkimą atšaukia)."
+    "torn_tip": "WashData dar negali atskirti šių dviejų programų, todėl pasirinkite tą, kuri dabar veikia, kad ja pažymėtumėte šį ciklą (Automatinis aptikimas pasirinkimą atšaukia).",
+    "program_mismatch": "Labiau tinka {program}",
+    "program_mismatch_tip": "Šis ciklas nepanašus į jūsų pasirinktą programą {selected}: {program} jam tinka aiškiai geriau. Niekas nekeičiama. Automatika gali į tai sureaguoti paleidikliu „Veikianti programa skiriasi nuo pasirinktos“."
   },
   "tab": {
     "advanced": "Išplėstinė",
@@ -2272,6 +2274,9 @@
     },
     "cycle_overrun": {
       "name": "Ciklas trunka per ilgai"
+    },
+    "program_mismatch": {
+      "name": "Veikianti programa skiriasi nuo pasirinktos"
     },
     "cycle_paused": {
       "name": "Ciklas pristabdytas"

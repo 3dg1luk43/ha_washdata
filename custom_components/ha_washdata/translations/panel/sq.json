@@ -1684,6 +1684,8 @@
         "working": "Po përpunohet…",
         "torn_pick": "{a} apo {b}?",
         "torn_tip": "WashData ende nuk i dallon dot këto dy programe, ndaj zgjidhni atë që po punon për ta etiketuar këtë cikël me të (opsioni Zbulim automatik e anulon zgjedhjen).",
+        "program_mismatch": "Duket më shumë si {program}",
+        "program_mismatch_tip": "Ky cikël nuk i ngjan {selected}, programit që zgjodhët: {program} i përshtatet qartë më mirë. Asgjë nuk ndryshohet. Një automatizim mund të reagojë me triggerin \"Programi që po ekzekutohet ndryshon nga ai i zgjedhur\".",
         "match_uncertain": "E pasigurt: {top} ose {runner}",
         "match_uncertain_single": "E pasigurt: ndoshta {top}",
         "match_sure": "~{pct}% e sigurt",
@@ -2232,6 +2234,9 @@
         },
         "cycle_overrun": {
             "name": "Cikli po zgjat shumë"
+        },
+        "program_mismatch": {
+            "name": "Programi që po ekzekutohet ndryshon nga ai i zgjedhur"
         },
         "cycle_paused": {
             "name": "Cikli u ndërpre"

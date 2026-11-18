@@ -1708,6 +1708,8 @@
         "working": "İşleniyor…",
         "torn_pick": "{a} veya {b}?",
         "torn_tip": "WashData bu iki programı henüz ayırt edemiyor, bu yüzden bu döngüyü onunla etiketlemek için çalışan programı seçin (Otomatik algıla bu seçimi geri alır).",
+        "program_mismatch": "Daha çok şuna benziyor: {program}",
+        "program_mismatch_tip": "Bu döngü seçtiğiniz programa ({selected}) benzemiyor: {program} açıkça daha iyi uyuyor. Hiçbir şey değiştirilmez. Bir otomasyon \"Çalışan program seçilenden farklı\" tetikleyicisiyle tepki verebilir.",
         "match_uncertain": "Belirsiz: {top} veya {runner}",
         "match_uncertain_single": "Belirsiz: belki {top}",
         "match_sure": "~%{pct} emin",
@@ -2232,6 +2234,9 @@
         },
         "cycle_overrun": {
             "name": "Döngü çok uzun sürüyor"
+        },
+        "program_mismatch": {
+            "name": "Çalışan program seçilenden farklı"
         },
         "cycle_paused": {
             "name": "Döngü duraklatıldı"

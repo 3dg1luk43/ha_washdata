@@ -1708,6 +1708,8 @@
     "working": "Wird ausgeführt…",
     "torn_pick": "{a} oder {b}?",
     "torn_tip": "WashData kann diese beiden noch nicht unterscheiden, wählen Sie also das laufende Programm, um diesen Zyklus damit zu beschriften (Automatische Erkennung macht die Auswahl rückgängig).",
+    "program_mismatch": "Sieht eher nach {program} aus",
+    "program_mismatch_tip": "Dieser Zyklus sieht nicht nach {selected} aus, dem von Ihnen gewählten Programm: {program} passt deutlich besser. Es wird nichts geändert. Eine Automatisierung kann mit dem Trigger \"Laufendes Programm weicht vom gewählten ab\" darauf reagieren.",
     "match_uncertain": "Unsicher: {top} oder {runner}",
     "match_uncertain_single": "Unsicher: vielleicht {top}",
     "match_sure": "~{pct}% sicher",
@@ -2232,6 +2234,9 @@
     },
     "cycle_overrun": {
       "name": "Zyklus läuft zu lang"
+    },
+    "program_mismatch": {
+      "name": "Laufendes Programm weicht vom gewählten ab"
     },
     "cycle_paused": {
       "name": "Zyklus angehalten"

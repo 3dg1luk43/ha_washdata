@@ -1708,6 +1708,8 @@
     "working": "Í vinnslu…",
     "torn_pick": "{a} eða {b}?",
     "torn_tip": "WashData getur ekki enn greint þessi tvö kerfi í sundur, svo veldu kerfið sem er í gangi til að merkja þessa lotu með því (Sjálfvirk skynjun afturkallar valið).",
+    "program_mismatch": "Líkist frekar {program}",
+    "program_mismatch_tip": "Þessi lota líkist ekki {selected}, kerfinu sem þú valdir: {program} passar greinilega betur. Engu er breytt. Sjálfvirkni getur brugðist við með kveikjunni \"Forrit í gangi víkur frá völdu forriti\".",
     "match_uncertain": "Óvíst: {top} eða {runner}",
     "match_uncertain_single": "Óvíst: kannski {top}",
     "match_sure": "~{pct}% vissa",
@@ -2232,6 +2234,9 @@
     },
     "cycle_overrun": {
       "name": "Lota rennur yfir"
+    },
+    "program_mismatch": {
+      "name": "Forrit í gangi víkur frá völdu forriti"
     },
     "cycle_paused": {
       "name": "Hlé á lotu"

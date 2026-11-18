@@ -575,6 +575,7 @@
       "phase_started": "Faas algas",
       "finishing_soon": "Lõpeb peagi",
       "cycle_overrun": "Tsükkel kestab liiga kaua",
+      "program_mismatch": "Töötav programm erineb valitust",
       "cycle_paused": "Tsükkel peatati",
       "cycle_resumed": "Tsükkel jätkus",
       "still_tumbling": "Trummel pöörleb veel pärast tsüklit",
@@ -649,6 +650,16 @@
         "percent": {
           "name": "Pikem kui",
           "description": "Protsent üle programmi tavapärase kestuse."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Töötav programm erineb valitust",
+      "description": "Käivitub üks kord tsükli kohta, kui käsitsi valitud programm ei sarnane jooksva tsükliga: mõni teine programm sobib sellele selgelt paremini.",
+      "fields": {
+        "program": {
+          "name": "Programm",
+          "description": "Ainult siis, kui valitud on see programm, täpse nimega. Jätke tühjaks mis tahes programmi jaoks."
         }
       }
     },

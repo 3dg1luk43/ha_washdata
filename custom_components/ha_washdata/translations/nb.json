@@ -575,6 +575,7 @@
       "phase_started": "Fase startet",
       "finishing_soon": "Snart ferdig",
       "cycle_overrun": "Syklus kjører for lenge",
+      "program_mismatch": "Pågående program avviker fra det valgte",
       "cycle_paused": "Syklus satt på pause",
       "cycle_resumed": "Syklus gjenopptatt",
       "still_tumbling": "Trommelen roterer fortsatt etter syklusen",
@@ -649,6 +650,16 @@
         "percent": {
           "name": "Lengre med",
           "description": "Prosent over programmets normale varighet."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Pågående program avviker fra det valgte",
+      "description": "Utløses én gang per syklus, når den pågående syklusen ikke ligner programmet du har valgt manuelt: et annet program passer tydelig bedre.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Kun når dette programmet er valgt, ved nøyaktig navn. La feltet stå tomt for ethvert program."
         }
       }
     },

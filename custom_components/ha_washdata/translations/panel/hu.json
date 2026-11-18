@@ -1692,7 +1692,9 @@
         "match_sure": "~{pct}% biztos",
         "match_uncertain_tip": "A WashData még nem döntött a programról. A szám azt mutatja, a korábbi ciklusokban milyen gyakran volt helyes a vezető tipp, {top}, amikor ennyivel vezetett. Csak tájékoztató.",
         "torn_pick": "{a} vagy {b}?",
-        "torn_tip": "A WashData még nem tudja megkülönböztetni ezt a kettőt, ezért válassza ki a futó programot, hogy a ciklus azt a címkét kapja (az Automatikus felismerés visszavonja a választást)."
+        "torn_tip": "A WashData még nem tudja megkülönböztetni ezt a kettőt, ezért válassza ki a futó programot, hogy a ciklus azt a címkét kapja (az Automatikus felismerés visszavonja a választást).",
+        "program_mismatch": "Inkább erre hasonlít: {program}",
+        "program_mismatch_tip": "Ez a ciklus nem hasonlít az Ön által választott programra ({selected}). Egy másik program egyértelműen jobban illik hozzá: {program}. Semmi sem változik. Egy automatizálás a \"Futó program eltér a kiválasztottól\" triggerrel reagálhat."
     },
     "tab": {
         "advanced": "Fejlett",
@@ -2232,6 +2234,9 @@
         },
         "cycle_overrun": {
             "name": "Ciklus túllépi az időt"
+        },
+        "program_mismatch": {
+            "name": "Futó program eltér a kiválasztottól"
         },
         "cycle_paused": {
             "name": "Ciklus szüneteltetva"

@@ -1711,7 +1711,9 @@
     "match_sure": "~{pct}% kindel",
     "match_uncertain_tip": "WashData pole veel programmi valinud. Protsent näitab, kui sageli juhtiv oletus, {top}, oli varasemates tsüklites õige, kui see oli nii palju ees. Ainult teadmiseks.",
     "torn_pick": "{a} või {b}?",
-    "torn_tip": "WashData ei suuda neid kahte veel eristada, seega valige praegu töötav programm, millega see tsükkel sildistatakse (Automaatne tuvastamine tühistab valiku)."
+    "torn_tip": "WashData ei suuda neid kahte veel eristada, seega valige praegu töötav programm, millega see tsükkel sildistatakse (Automaatne tuvastamine tühistab valiku).",
+    "program_mismatch": "Sarnaneb rohkem programmiga {program}",
+    "program_mismatch_tip": "See tsükkel ei sarnane teie valitud programmiga {selected}: {program} sobib sellele selgelt paremini. Midagi ei muudeta. Automatiseerimine saab reageerida triggeriga \"Töötav programm erineb valitust\"."
   },
   "tab": {
     "advanced": "Täpsemalt",
@@ -2232,6 +2234,9 @@
     },
     "cycle_overrun": {
       "name": "Tsükkel kestab liiga kaua"
+    },
+    "program_mismatch": {
+      "name": "Töötav programm erineb valitust"
     },
     "cycle_paused": {
       "name": "Tsükkel peatati"

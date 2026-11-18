@@ -1728,7 +1728,9 @@
     "match_sure": "~{pct} % gotovosti",
     "match_uncertain_tip": "WashData se še ni odločil za program. Številka pove, kako pogosto je imelo vodilno ugibanje, {top}, prav v preteklih ciklih pri takšni prednosti. Samo informativno.",
     "torn_pick": "{a} ali {b}?",
-    "torn_tip": "WashData teh dveh programov še ne zna ločiti, zato izberite tistega, ki teče, da z njim označite ta cikel (možnost Samodejno zaznaj razveljavi izbiro)."
+    "torn_tip": "WashData teh dveh programov še ne zna ločiti, zato izberite tistega, ki teče, da z njim označite ta cikel (možnost Samodejno zaznaj razveljavi izbiro).",
+    "program_mismatch": "Videti je bolj kot {program}",
+    "program_mismatch_tip": "Ta cikel ni podoben programu {selected}, ki ste ga izbrali: {program} se z njim opazno bolje ujema. Nič se ne spremeni. Avtomatizacija se lahko odzove s sprožilcem »Tekoči program se razlikuje od izbranega«."
   },
   "suggestion": {
     "observed_label": "Izmerjeno",
@@ -2272,6 +2274,9 @@
     },
     "cycle_overrun": {
       "name": "Cikel traja predolgo"
+    },
+    "program_mismatch": {
+      "name": "Tekoči program se razlikuje od izbranega"
     },
     "cycle_paused": {
       "name": "Cikel je ustavljen"

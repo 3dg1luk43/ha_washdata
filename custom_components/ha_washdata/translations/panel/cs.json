@@ -1728,7 +1728,9 @@
     "match_sure": "jistota ~{pct} %",
     "match_uncertain_tip": "WashData se zatím nerozhodl pro program. Číslo udává, jak často měl vedoucí odhad, {top}, v minulých cyklech pravdu při takovém náskoku. Jen pro informaci.",
     "torn_pick": "{a} nebo {b}?",
-    "torn_tip": "WashData zatím tyto dva programy nedokáže rozlišit, proto vyberte ten, který právě běží, abyste jím tento cyklus označili (Automatická detekce volbu vrátí zpět)."
+    "torn_tip": "WashData zatím tyto dva programy nedokáže rozlišit, proto vyberte ten, který právě běží, abyste jím tento cyklus označili (Automatická detekce volbu vrátí zpět).",
+    "program_mismatch": "Vypadá spíš jako {program}",
+    "program_mismatch_tip": "Tento cyklus se nepodobá programu {selected}, který jste vybrali: {program} mu odpovídá zřetelně lépe. Nic se nemění. Automatizace na to může reagovat spouštěčem „Běžící program se liší od vybraného“."
   },
   "suggestion": {
     "observed_label": "Naměřeno",
@@ -2272,6 +2274,9 @@
     },
     "cycle_overrun": {
       "name": "Cyklus trvá příliš dlouho"
+    },
+    "program_mismatch": {
+      "name": "Běžící program se liší od vybraného"
     },
     "cycle_paused": {
       "name": "Cyklus pozastaven"

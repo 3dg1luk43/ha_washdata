@@ -1653,6 +1653,8 @@
     "working": "Se procesează…",
     "torn_pick": "{a} sau {b}?",
     "torn_tip": "WashData nu poate încă deosebi aceste două programe, așa că alegeți programul care rulează pentru a eticheta acest ciclu cu el (opțiunea Detectare automată anulează alegerea).",
+    "program_mismatch": "Seamănă mai mult cu {program}",
+    "program_mismatch_tip": "Acest ciclu nu seamănă cu {selected}, programul pe care l-ați ales: {program} i se potrivește clar mai bine. Nu se modifică nimic. O automatizare poate reacționa cu declanșatorul \"Programul care rulează diferă de cel selectat\".",
     "match_uncertain": "Incert: {top} sau {runner}",
     "match_uncertain_single": "Incert: poate {top}",
     "match_sure": "~{pct}% certitudine",
@@ -2252,6 +2254,9 @@
     },
     "cycle_overrun": {
       "name": "Ciclu în depășire"
+    },
+    "program_mismatch": {
+      "name": "Programul care rulează diferă de cel selectat"
     },
     "cycle_paused": {
       "name": "Ciclu în pauză"
