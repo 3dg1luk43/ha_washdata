@@ -1826,9 +1826,9 @@ def _sane_manual_duration(value: Any, trace_span_s: float) -> float | None:
 def envelope_shape_count(envelope: Any) -> int:
     """How many cycles shaped ``envelope`` (``shape_cycle_count``).
 
-    The envelope's ``cycle_count`` is a USAGE figure: once any reference or
-    backfill cycle exists it counts real cycles only (and counts them even when
-    the evidence choice keeps real cycles out of the curve). Gating the envelope
+    The envelope's ``cycle_count`` is a USAGE figure: it counts real cycles
+    only, every one of them (also those the evidence choice, the mis-capture
+    floor or the #531 cut-off rule keep out of the curve). Gating the envelope
     template on it made a backfill-only or store-only profile match one sample
     cycle, never the envelope its cycles built (audit MR-11). An envelope built
     before ``shape_cycle_count`` existed falls back to ``cycle_count``.
@@ -7952,7 +7952,10 @@ class ProfileStore:
         if avg_energy is None:
             # avg_curve is in Watts, time_grid in seconds; integrate_wh returns Wh.
             avg_energy = integrate_wh(time_grid, avg_curve) / 1000.0
-        cycle_count = len(real_cycles) if ref_cycles else len(durations)
+        # Every real run, as avg_energy: the curve's own filters (a mis-capture, a
+        # #531 run cut inside its drying) shape `shape_cycle_count`, not the usage
+        # count (PR #529 review: four runs with one cut off read as three).
+        cycle_count = len(real_cycles)
 
         envelope_data: dict[str, Any] = {
             "time_grid": time_grid,  # Time grid used by manager for phase estimation

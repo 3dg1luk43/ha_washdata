@@ -153,6 +153,10 @@ async def test_the_envelope_and_its_length_leave_cut_offs_out(
     full_min = _eco(hold_s=30)[-1][0] / 60
     assert abs(store.get_profiles()["ECO"]["avg_duration"] / 60 - full_min) < 1
     assert abs(store._data["envelopes"]["ECO"]["target_duration"] / 60 - full_min) < 1  # noqa: SLF001
+    # The cut-offs leave the curve, not the usage count (PR #529 review).
+    env = store._data["envelopes"]["ECO"]  # noqa: SLF001
+    assert env["shape_cycle_count"] == 5
+    assert env["cycle_count"] == len(runs)
 
 
 async def test_a_store_from_before_the_rule_is_rebuilt_once_at_setup(
