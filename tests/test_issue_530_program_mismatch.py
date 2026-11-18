@@ -372,6 +372,35 @@ async def test_a_group_edited_during_the_match_discards_it(
     assert len(_mismatches(sent)) == 1
 
 
+async def test_an_undo_import_during_the_match_discards_it(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """Undo Import replaces the store while the match runs: the programme names
+    and groups are unchanged, but the ranking scored the replaced profiles, so
+    it is discarded and the run of counting matches restarts."""
+    _entry, manager, sent, state = await _past_half(hass, setup_washdata_entry, freezer)
+    store = manager.profile_store
+    # An import of the device's own export, same names and groups: a restore point.
+    await store.async_import_data(store.export_data())
+    wrong = _result("Synthetics", {"Synthetics": 0.9, "Cotton": 0.5})
+
+    async def match_and_undo(*_a: Any, **_k: Any) -> Any:
+        await store.async_restore_pre_import_snapshot()
+        return wrong
+
+    state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
+    with patch.object(store, "async_match_profile", new=match_and_undo):
+        await _check(hass, manager, state.key)
+    assert manager._program_mismatch_state() is state  # noqa: SLF001  (same pick)
+    assert _mismatches(sent) == []
+    assert state.streak == 0 and not state.fired
+    # A check on unchanged data still counts.
+    state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
+    with patch.object(store, "async_match_profile", AsyncMock(return_value=wrong)):
+        await _check(hass, manager, state.key)
+    assert len(_mismatches(sent)) == 1
+
+
 async def test_a_check_from_an_earlier_pick_of_the_same_program_does_not_count(
     hass: HomeAssistant, setup_washdata_entry, freezer
 ) -> None:

@@ -1863,6 +1863,10 @@ class WashDataManager:
             # membership (a ``__group__`` family no longer linked to the pick reads
             # as a deficit), so that result is discarded, the streak untouched.
             families = match_rules.program_families(self.profile_store.get_profile_groups())
+            # An import or Undo Import replaces the store under the match: the
+            # ranking then scored profiles that are gone, even under the same
+            # names, so it is discarded and the run of counting matches restarts.
+            generation = getattr(self.profile_store, "_data_generation", 0)
             result = await self.profile_store.async_match_profile(
                 readings,
                 duration,
@@ -1874,6 +1878,9 @@ class WashDataManager:
             state = self._program_mismatch_state()
             if state is None or state.key != key:
                 return  # the pick changed while the match ran
+            if getattr(self.profile_store, "_data_generation", 0) != generation:
+                state.streak = 0
+                return
             if families != match_rules.program_families(self.profile_store.get_profile_groups()):
                 return
             expected = self._matched_profile_duration
