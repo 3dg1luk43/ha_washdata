@@ -753,6 +753,31 @@ MATCH_LABEL_MIN_MARGIN = 0.08
 # so this is the conservative end of an accuracy/stability trade. Do not retune it
 # in isolation: any Stage-2 scoring change rescales the margin along with it.
 MATCH_DECISIVE_MARGIN = 0.12
+# Issue #530: a hand-picked program the running cycle does not look like
+# (match_rules.program_mismatch_tick). While a program is picked by hand the live
+# match does not run; a background match on the same profile_match_interval
+# cadence ranks the trace without changing anything, and the mismatch is
+# established once another program beats the picked one by at least
+# PROGRAM_MISMATCH_MIN_MARGIN on PROGRAM_MISMATCH_PERSISTENCE consecutive
+# background matches, with at least PROGRAM_MISMATCH_MIN_FRACTION of the picked
+# program's usual duration elapsed. A margin, not the confidence (item 305): per
+# tick the deficit separates a wrong pick from the right one at AUC 0.89, the
+# pick's own score at 0.79. devtools/program_mismatch_eval.py (LOO, 958 labelled
+# cycles of 86 devices, a match every profile_match_interval):
+#   margin persist minfrac  false alarm  wrong picks caught  at (median)
+#    0.12      3     0.25      8.1%            72.3%            0.32
+#    0.15      6     0.50      2.9%            51.8%            0.58
+#    0.18      6     0.50      1.6%            41.6%            0.62
+#    0.22      6     0.50      1.0%            31.1%            0.62
+# False alarm: the cycle's own program picked (once per cycle); 3 of the 15 here
+# are on the 449 cycles of single-appliance histories (0.7%), the rest on store
+# packages that hold one programme under two names. Caught: every other programme
+# of the device picked; 44.9% for the one closest in duration. "At": fraction of
+# the cycle elapsed. The false alarms are mid-cycle matcher errors, so no
+# threshold reaches zero; 0.18 keeps own-history alarms at the strictest row's.
+PROGRAM_MISMATCH_MIN_MARGIN = 0.18
+PROGRAM_MISMATCH_PERSISTENCE = 6
+PROGRAM_MISMATCH_MIN_FRACTION = 0.5
 # The first commit of a live programme (match_rules.decide_switch, Case 1). A winner
 # that is AMBIGUOUS on the tick (inside MATCH_AMBIGUITY_MARGIN of the runner-up, or
 # flagged by a Stage-5 safeguard) commits only once it has led for this many times

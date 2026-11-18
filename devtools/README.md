@@ -113,6 +113,7 @@ replay the shipped code; run with `--help` for options.
 | `suggestion_churn_eval.py` | how often each suggestion is offered over a device's history, replayed in order; `--arm legacy` restores the 0.6.0 cadence and noise rules |
 | `door_end_eval.py` | the PAUSED door-end bar (#524): real ends reached vs mid-cycle quiet spells exposed |
 | `duration_ratchet_eval.py` | a dishwasher programme's learned length over runs replayed one at a time against it (#531: runs cut inside the drying shrinking it) |
+| `program_mismatch_eval.py --sweep` | the hand-picked program check (#530): false alarms with the right program picked, wrong picks caught and how early, LOO |
 | `suggestion_evidence_eval.py` | which stored cycles the suggestion engine counts: the programme-length exemption from `mid_restart` and the standby advisory, swept and against the 0.6.0 rules |
 | `margin_display_fit.py` | the Status card's "~N% sure" knots, from an `eval.py --mode full` run |
 | `dtw_ab_eval.py` | the Stage-5 grouping prototype (default) and mid-cycle top-1 with `--checkpoints`; not the shipped matcher (it says so) |
