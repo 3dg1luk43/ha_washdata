@@ -126,6 +126,163 @@ test('a slower expected curve for the previous program never shows under the new
   expect(shown).toEqual({ name: 'Eco 60°C', env: 'Eco 60°C' });
 });
 
+// Two appliances running a program of the same name.
+function twoRunning(fields: Record<string, unknown> = {}) {
+  const two = running({ manual_program: true, ...fields });
+  two.devices.push({ ...two.devices[0], entry_id: 'test-entry-002', title: 'Dryer' });
+  return two;
+}
+
+test('the expected curve and phases are kept per appliance, not per program name', async ({ page }) => {
+  await bootPanel(page, { 'ha_washdata/get_devices': running({ manual_program: true }) });
+  await expect(page.locator('#wd-status-prog')).toHaveValue('Cotton 40°C', { timeout: 8_000 });
+  const got = await page.evaluate(async ({ two }) => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    const real = el._ws.bind(el);
+    const asked: string[] = [];
+    el._ws = (msg: any) => {
+      if (msg.type === 'ha_washdata/get_devices') return Promise.resolve(two);
+      if (msg.type === 'ha_washdata/get_profile_envelope') {
+        asked.push(msg.entry_id);
+        return Promise.resolve({ envelope: { entry: msg.entry_id } });
+      }
+      if (msg.type === 'ha_washdata/get_profile_phases') {
+        return Promise.resolve({ phases: [{ name: msg.entry_id, start: 0, end: 60 }] });
+      }
+      return real(msg);
+    };
+    el._statusEnv = null; el._statusEnvName = null; el._statusEnvEid = null; el._statusEnvWant = null;
+    el._statusPhases = []; el._statusPhasesName = null; el._statusPhasesEid = null;
+    await el._fetchAll();
+    el._selIdx = 1;     // another appliance shown without a device switch (a ?device= link)
+    await el._fetchAll();
+    return { asked, env: el._statusEnv && el._statusEnv.entry, phase: el._statusPhases[0]?.name };
+  }, { two: twoRunning() });
+  expect(got).toEqual({
+    asked: ['test-entry-001', 'test-entry-002'], env: 'test-entry-002', phase: 'test-entry-002',
+  });
+});
+
+test('a failed expected-curve request is asked again on the next poll', async ({ page }) => {
+  await bootPanel(page, { 'ha_washdata/get_devices': running({ manual_program: true }) });
+  await expect(page.locator('#wd-status-prog')).toHaveValue('Cotton 40°C', { timeout: 8_000 });
+  const got = await page.evaluate(async () => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    const real = el._ws.bind(el);
+    let n = 0;
+    el._ws = (msg: any) => {
+      if (msg.type !== 'ha_washdata/get_profile_envelope') return real(msg);
+      n += 1;
+      return n === 1 ? Promise.reject(new Error('timeout')) : Promise.resolve({ envelope: null });
+    };
+    el._statusEnv = null; el._statusEnvName = null; el._statusEnvEid = null; el._statusEnvWant = null;
+    await el._fetchAll();
+    const afterFailure = { asked: n, name: el._statusEnvName };
+    await el._fetchAll();   // asked again
+    await el._fetchAll();   // an answer without an envelope is kept
+    return { afterFailure, asked: n, name: el._statusEnvName };
+  });
+  expect(got).toEqual({ afterFailure: { asked: 1, name: null }, asked: 2, name: 'Cotton 40°C' });
+});
+
+test('a slower phase answer for a superseded program never replaces the current one', async ({ page }) => {
+  await bootPanel(page, { 'ha_washdata/get_devices': running({ manual_program: true }) });
+  await expect(page.locator('#wd-status-prog')).toHaveValue('Cotton 40°C', { timeout: 8_000 });
+  const got = await page.evaluate(async () => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    const real = el._ws.bind(el);
+    const releases: Array<() => void> = [];
+    let failCotton = false;
+    el._ws = (msg: any) => {
+      if (msg.type !== 'ha_washdata/get_profile_phases') return real(msg);
+      const answer = { phases: [{ name: msg.profile_name, start: 0, end: 60 }] };
+      if (msg.profile_name !== 'Cotton 40°C') return Promise.resolve(answer);
+      return new Promise((resolve, reject) => {
+        releases.push(() => (failCotton ? reject(new Error('lost')) : resolve(answer)));
+      });
+    };
+    const out: string[] = [];
+    for (const fail of [false, true]) {
+      failCotton = fail;
+      el._statusPhases = []; el._statusPhasesName = null; el._statusPhasesEid = null;
+      const older = el._ensureStatusPhases('test-entry-001', 'Cotton 40°C');
+      await el._ensureStatusPhases('test-entry-001', 'Eco 60°C');   // the program changed
+      releases.shift()!();
+      await older;
+      out.push(el._statusPhases.map((p: any) => p.name).join(','));
+    }
+    return out;
+  });
+  expect(got).toEqual(['Eco 60°C', 'Eco 60°C']);
+});
+
+test('the mismatch badge comes and goes in place while the program selector is open', async ({ page }) => {
+  await bootPanel(page, { 'ha_washdata/get_devices': running({ manual_program: true }) });
+  const sel = page.locator('#wd-status-prog');
+  await expect(sel).toHaveValue('Cotton 40°C', { timeout: 8_000 });
+  await sel.focus();
+  const seen = await page.evaluate(async ({ on, off }) => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    const sr = el.shadowRoot;
+    const real = el._ws.bind(el);
+    let list = on;
+    el._ws = (msg: any) => (msg.type === 'ha_washdata/get_devices' ? Promise.resolve(list) : real(msg));
+    const before = sr.getElementById('wd-status-prog');
+    const state = () => ({
+      badge: sr.querySelectorAll('[data-testid="program-mismatch"]').length,
+      same: sr.getElementById('wd-status-prog') === before,
+      focused: sr.activeElement === before,
+    });
+    await el._fetchAll();
+    const shown = state();
+    list = off;
+    await el._fetchAll();
+    return { shown, cleared: state() };
+  }, {
+    on: running({ manual_program: true, program_mismatch: MISMATCH }),
+    off: running({ manual_program: true }),
+  });
+  expect(seen).toEqual({
+    shown: { badge: 1, same: true, focused: true },
+    cleared: { badge: 0, same: true, focused: true },
+  });
+  await expect(page.locator('[data-testid="program-mismatch"]')).toHaveCount(0);
+});
+
+test('a slower power history for the previous appliance never lands under the new one', async ({ page }) => {
+  await bootPanel(page, { 'ha_washdata/get_devices': running({ manual_program: true }) });
+  await expect(page.locator('#wd-status-prog')).toHaveValue('Cotton 40°C', { timeout: 8_000 });
+  const got = await page.evaluate(async ({ two }) => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    const real = el._ws.bind(el);
+    let release: () => void = () => {};
+    const slow = new Promise<void>((r) => { release = r; });
+    let asked: () => void = () => {};
+    const washerAsked = new Promise<void>((r) => { asked = r; });
+    el._ws = (msg: any) => {
+      if (msg.type === 'ha_washdata/get_devices') return Promise.resolve(two);
+      if (msg.type !== 'ha_washdata/get_power_history') return real(msg);
+      const answer = { live: [], raw: [], cycle_active: true, cycle_elapsed_s: 0, of: msg.entry_id };
+      if (msg.entry_id !== 'test-entry-001') return Promise.resolve(answer);
+      asked();
+      return slow.then(() => answer);
+    };
+    let paints = 0;
+    const finish = el._finishFetch.bind(el);
+    el._finishFetch = (...a: unknown[]) => { paints += 1; return finish(...a); };
+    el._selIdx = 0;
+    const older = el._fetchAll();   // the washer's history waits on the recorder
+    await washerAsked;
+    el._selIdx = 1;                 // the user is on the dryer now
+    await el._fetchAll();
+    const paintsBefore = paints;
+    release();
+    await older;
+    return { of: el._powerData.of, paintsBefore, paints };
+  }, { two: twoRunning() });
+  expect(got).toEqual({ of: 'test-entry-002', paintsBefore: 1, paints: 1 });
+});
+
 test('a superseded refresh leaves the first paint to the newer one', async ({ page }) => {
   await bootPanel(page, { 'ha_washdata/get_devices': running({ manual_program: true }) });
   await expect(page.locator('#wd-status-prog')).toHaveValue('Cotton 40°C', { timeout: 8_000 });

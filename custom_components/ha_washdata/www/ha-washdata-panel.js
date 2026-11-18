@@ -2524,8 +2524,9 @@ class HaWashdataPanel extends HTMLElement {
     this._powerT0 = null;
     this._statusEnv = null;    // matched profile envelope (expected curve overlay)
     this._statusEnvName = null;   // the program _statusEnv belongs to
+    this._statusEnvEid = null;    // and the appliance (entry id)
     this._statusEnvSeq = 0;       // envelope requests issued: only the newest applies
-    this._statusEnvWant = null;   // the program an envelope request is in flight for
+    this._statusEnvWant = null;   // the appliance and program a request is in flight for
     this._powerData = { live: [], raw: [], cycle_active: false, cycle_elapsed_s: 0 };
     this._stagedSuggestions = false;   // a suggestion was applied to a field this session
     this._pendingSettings = {};        // unsaved edits accumulated across section switches
@@ -2590,6 +2591,7 @@ class HaWashdataPanel extends HTMLElement {
     // D1: matched-profile phases for the Status-tab phase timeline
     this._statusPhases = [];
     this._statusPhasesName = null;
+    this._statusPhasesEid = null;   // the appliance the phases belong to
     // D3: cycle-list pagination. Imported (reference + backfill) cycles page on
     // their own cursor, outside the real-cycle offset/total (register item 129a).
     this._cycleOffset = 0;
@@ -3364,13 +3366,24 @@ class HaWashdataPanel extends HTMLElement {
       const dev = this._devices[this._selIdx];
       // The live chart and the matched program's overlay are independent reads, so
       // they go out together rather than one after the other (audit UI-19).
+      // Each read below lands only while this refresh still owns it: no newer device
+      // list is in and the same appliance is shown. With raw power on, the washer's
+      // history can wait on the recorder while the user switches to the dryer.
+      const owns = () => !superseded() && !!dev && this._isActiveEntry(dev.entry_id);
       const statusData = async () => {
         // Live chart is served from the integration so it survives a refresh:
         // fetch it whenever the Status tab is visible.
         if (dev && this._tab === 'status') {
-          try { this._powerData = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: dev.entry_id, with_raw: this._pref('show_raw_active', false) }); } catch (_) { /* keep previous */ }
+          try {
+            const pd = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: dev.entry_id, with_raw: this._pref('show_raw_active', false) });
+            if (owns()) this._powerData = pd;
+          } catch (_) { /* keep previous */ }
+          if (!owns()) return;
           if (this._pref('show_debug', false)) {
-            try { this._matchDebug = await this._ws({ type: `${_DOMAIN}/get_match_debug`, entry_id: dev.entry_id }); } catch (_) { /* keep previous */ }
+            try {
+              const md = await this._ws({ type: `${_DOMAIN}/get_match_debug`, entry_id: dev.entry_id });
+              if (owns()) this._matchDebug = md;
+            } catch (_) { /* keep previous */ }
           }
           // Keep the Manual Recording widget's live duration / sample count fresh
           // while a recording is running (the backend reports them live; without
@@ -3379,36 +3392,47 @@ class HaWashdataPanel extends HTMLElement {
           // _recState, which is null on first load and would otherwise never be
           // populated -- leaving the widget showing "Start Recording" during an
           // active recording (#313).
-          if (this._canEdit() && dev.recording) {
-            try { this._recState = await this._ws({ type: `${_DOMAIN}/get_recording_state`, entry_id: dev.entry_id }); } catch (_) { /* keep previous */ }
+          if (this._canEdit() && dev.recording && owns()) {
+            try {
+              const rs = await this._ws({ type: `${_DOMAIN}/get_recording_state`, entry_id: dev.entry_id });
+              if (owns()) this._recState = rs;
+            } catch (_) { /* keep previous */ }
           }
           // The Overview's waiting review question, in the background so it never
           // holds the first paint (audit UI-19); refetched only when the count moves.
-          this._refreshReviewQuestion(dev);
+          if (owns()) this._refreshReviewQuestion(dev);
         }
       };
       const overlayData = async () => {
         // When a program is matched, keep its expected envelope for the status overlay.
         if (dev && dev.current_program) {
           const eid = dev.entry_id, prog = dev.current_program;
-          if (this._statusEnvName !== prog && this._statusEnvWant !== prog) {
+          // Keyed by appliance AND program: two appliances can run programs of the
+          // same name, and the selected one can change without a device switch
+          // (a ?device= link, an entry removed from the list).
+          const want = `${eid}\n${prog}`;
+          const have = this._statusEnvEid === eid && this._statusEnvName === prog;
+          if (!have && this._statusEnvWant !== want) {
             // The envelope and the program it belongs to are set together, and only
             // by the newest request while its device and program are still the ones
             // shown: a slower answer for the previous program would otherwise show
             // under the new one, and its name would stop every later fetch.
             const tok = ++this._statusEnvSeq;
-            this._statusEnvWant = prog;
-            this._statusEnv = null; this._statusEnvName = null;
-            let env = null;
+            this._statusEnvWant = want;
+            this._statusEnv = null; this._statusEnvName = null; this._statusEnvEid = null;
+            let env = null, answered = false;
             try {
               const r = await this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: eid, profile_name: prog });
               env = r.envelope || null;
+              answered = true;
             } catch (_) { env = null; }
             if (tok === this._statusEnvSeq) {
               this._statusEnvWant = null;
               const cur = this._devices[this._selIdx];
-              if (cur && cur.entry_id === eid && cur.current_program === prog) {
-                this._statusEnv = env; this._statusEnvName = prog;
+              // A failed request caches nothing, so the next poll asks again; an
+              // answer without an envelope is cached like one with it.
+              if (answered && cur && cur.entry_id === eid && cur.current_program === prog) {
+                this._statusEnv = env; this._statusEnvName = prog; this._statusEnvEid = eid;
               }
             }
           }
@@ -3416,8 +3440,8 @@ class HaWashdataPanel extends HTMLElement {
           await this._ensureStatusPhases(dev.entry_id, dev.current_program);
         } else {
           this._statusEnvSeq++; this._statusEnvWant = null;
-          this._statusEnv = null; this._statusEnvName = null;
-          this._statusPhases = []; this._statusPhasesName = null;
+          this._statusEnv = null; this._statusEnvName = null; this._statusEnvEid = null;
+          this._statusPhases = []; this._statusPhasesName = null; this._statusPhasesEid = null;
         }
       };
       await Promise.all([statusData(), overlayData()]);
@@ -3476,9 +3500,10 @@ class HaWashdataPanel extends HTMLElement {
       // "No devices configured yet", and a lost connection kept "Running 45%".
       this._fetchFailed = true;
     } finally {
-      // Superseded: the newer call clears the spinner and paints once its own data
-      // is in. Painting here showed the screen before it had.
-      if (!stale) this._finishFetch(firstLoad, painted);
+      // Superseded, at its list or while its reads were in flight: the newer call
+      // clears the spinner and paints once its own data is in. Painting here showed
+      // the screen before it had.
+      if (!stale && !superseded()) this._finishFetch(firstLoad, painted);
     }
   }
 
@@ -3500,9 +3525,11 @@ class HaWashdataPanel extends HTMLElement {
       this._render();
     } else if (this._tab === 'status' && !this._modal && interacting) {
       // Don't rebuild the DOM under an open dropdown / focused field; keep the
-      // live curve and device bar fresh instead so nothing is lost.
+      // live curve, the device bar and the mismatch badge fresh instead so
+      // nothing is lost.
       this._drawStatusCurve();
       this._refreshDeviceBar();
+      this._refreshProgramMismatch();
     } else {
       this._refreshDeviceBar();
     }
@@ -3558,15 +3585,19 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   // D1: cache the matched profile's phase ranges (start/end in seconds) for the
-  // Status-tab phase timeline. Cheap + cached per program name.
+  // Status-tab phase timeline. Cheap + cached per appliance and program, and only
+  // the request for the ones still wanted writes: a slower answer for a superseded
+  // program kept its phases on screen.
   async _ensureStatusPhases(entryId, program) {
-    if (!program) { this._statusPhases = []; this._statusPhasesName = null; return; }
-    if (this._statusPhasesName === program) return;
-    this._statusPhasesName = program;
+    if (!program) { this._statusPhases = []; this._statusPhasesName = null; this._statusPhasesEid = null; return; }
+    if (this._statusPhasesName === program && this._statusPhasesEid === entryId) return;
+    this._statusPhasesName = program; this._statusPhasesEid = entryId;
+    const current = () => this._statusPhasesName === program && this._statusPhasesEid === entryId;
     try {
       const r = await this._ws({ type: `${_DOMAIN}/get_profile_phases`, entry_id: entryId, profile_name: program });
+      if (!current()) return;
       this._statusPhases = (r.phases || []).map(p => ({ name: p.name, start: p.start, end: p.end }));
-    } catch (_) { this._statusPhases = []; }
+    } catch (_) { if (current()) this._statusPhases = []; }
   }
 
   // D7: fetch the per-setting changelog (most-recent-first) and index it by key
@@ -4044,8 +4075,8 @@ class HaWashdataPanel extends HTMLElement {
     // ML comparison / cycle-ML index / settings comparison / profile envelopes.
     this._mlComparison = null; this._mlById = {}; this._profileEnvCache = {};
     this._powerHistory = []; this._powerT0 = null; this._statusEnv = null; this._statusEnvName = null;
-    this._statusEnvSeq++; this._statusEnvWant = null;
-    this._statusPhases = []; this._statusPhasesName = null;
+    this._statusEnvEid = null; this._statusEnvSeq++; this._statusEnvWant = null;
+    this._statusPhases = []; this._statusPhasesName = null; this._statusPhasesEid = null;
     this._cycleOffset = 0; this._cyclesTotal = 0; this._cyclesHasMore = false;
     this._importedOffset = 0; this._importedHasMore = false;
     this._settingsChangelog = null; this._settingsChangeByKey = {};
@@ -5216,6 +5247,31 @@ class HaWashdataPanel extends HTMLElement {
     return `<span class="wd-prog-mismatch" data-testid="program-mismatch" style="font-size:.82em;color:var(--warning-color,#ff9800)">\u26A0 ${what}</span>${tip}`;
   }
 
+  // The badge's place beside the program selector, there with or without a badge,
+  // so a poll that must not rebuild the card (an open dropdown, a focused field)
+  // can add or drop it in place (`_refreshProgramMismatch`). `display: contents`
+  // keeps the badge and its tip items of the selector row. A badge needs a pick
+  // and the torn chips / uncertainty line need none, so the two never share it.
+  _htmlProgramMismatchSlot(dev, isRunning, manual) {
+    return `<span class="wd-prog-mm-slot" style="display:contents">${this._htmlProgramMismatch(dev, isRunning, manual)}</span>`;
+  }
+
+  // Whether the Status card shows `dev` as running (a recording counts).
+  _statusRunning(dev) {
+    const state = dev.is_user_paused ? 'user_paused' : (dev.detector_state || 'unknown');
+    return !!dev.recording || _ACTIVE_STATES.includes(state);
+  }
+
+  _refreshProgramMismatch() {
+    const slot = this.shadowRoot && this.shadowRoot.querySelector('.wd-prog-mm-slot');
+    if (!slot) return;
+    const dev = this._devices[this._selIdx];
+    const html = dev ? this._htmlProgramMismatch(dev, this._statusRunning(dev), !!dev.manual_program) : '';
+    if (slot._wdHtml === html) return;
+    slot.innerHTML = html;
+    slot._wdHtml = html;
+  }
+
   // "X or Y?" while the live match is torn between two programmes (audit item 1):
   // the backend's match_choices (match_rules.live_torn_choices) is set when the
   // winner is ambiguous or leads by less than the cycle-end label margin, i.e. the
@@ -5535,7 +5591,7 @@ class HaWashdataPanel extends HTMLElement {
     const rec = !!dev.recording;
     const color = rec ? 'var(--error-color, #f44336)' : this._stateColor(state);
     const label = rec ? this._t('status.recording', {}, 'Recording') : this._stateLabel(state);
-    const isRunning = rec || _ACTIVE_STATES.includes(state);
+    const isRunning = this._statusRunning(dev);
     const prog = dev.cycle_progress_pct;
     const rem = dev.time_remaining_s;
 
@@ -5561,7 +5617,7 @@ class HaWashdataPanel extends HTMLElement {
           <select id="wd-status-prog">
             <option value="auto_detect" ${selVal === 'auto_detect' ? 'selected' : ''}>${this._t('status.auto_detect', {}, 'Auto-detect')}</option>
             ${profOpts}
-          </select>${tag}${this._htmlProgramMismatch(dev, isRunning, manual) || this._htmlTornChips(dev, isRunning, manual) || this._htmlMatchUncertainty(dev, isRunning, manual)}</div>`;
+          </select>${tag}${this._htmlProgramMismatchSlot(dev, isRunning, manual)}${this._htmlTornChips(dev, isRunning, manual) || this._htmlMatchUncertainty(dev, isRunning, manual)}</div>`;
 
     const attn = [];
     if (dev.recording && this._canEdit()) attn.push(`<div class="wd-attn-card"><span class="wd-attn-icon">●</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.recording_in_progress', {}, 'Recording in progress')}</div><div class="wd-attn-sub">${this._t('msg.see_recorder', {}, 'See recorder widget below')}</div></div></div>`);
