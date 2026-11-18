@@ -2435,7 +2435,7 @@ class SuggestionEngine:
                 reason_params["cap"] = f"{suggested_cms / 60:.0f}"
                 reason_key = "suggestion.reason.completion_min_seconds_capped"
                 reason = (
-                    f"Capped at {suggested_cms / 60:.0f} min so the shortest programmes "
+                    f"Capped at {suggested_cms / 60:.0f} min so the shortest programs "
                     f"still count; half the p05 clean-cycle duration ({p05d / 60:.0f} min, "
                     f"{len(durations)} cycles) would be more.{excl_note}"
                 )
