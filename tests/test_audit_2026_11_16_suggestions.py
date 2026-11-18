@@ -779,3 +779,134 @@ async def test_apply_writes_nothing_after_a_reload_it_waited_through(
         res = await client.receive_json()
     assert res["success"] is False and res["error"]["code"] == "entry_reloaded"
     assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_END_ENERGY_THRESHOLD] == 0.01
+
+
+async def test_the_wipe_retires_cadence_work_before_it_awaits_the_store(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """PR #529 review: a cadence pass that finished while the wipe awaited its write
+    still held the current generation and could refill the cleared suggestions."""
+    from unittest.mock import patch  # noqa: PLC0415
+
+    entry = await setup_washdata_entry()
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store, lm = manager.profile_store, manager.learning_manager
+    gen = lm._config_generation  # noqa: SLF001
+    seen: list[int] = []
+
+    async def _clear() -> None:
+        seen.append(lm._config_generation)  # noqa: SLF001
+        raise RuntimeError("disk full")
+
+    client = await hass_ws_client(hass)
+    with patch.object(store, "clear_all_data", side_effect=_clear):
+        await client.send_json_auto_id({"type": f"{DOMAIN}/wipe_history", "entry_id": entry.entry_id})
+        res = await client.receive_json()
+    assert res["success"] is False
+    assert seen and seen[0] > gen
+
+
+async def test_a_joint_verdict_from_before_a_restore_withdraws_nothing(mock_hass: Any) -> None:
+    """PR #529 review: Undo Import replaced the history while the joint check ran.
+    The old verdict must not withdraw from the restored set, which is judged again
+    on its own history."""
+    from types import SimpleNamespace  # noqa: PLC0415
+    from unittest.mock import AsyncMock  # noqa: PLC0415
+
+    mock_hass.async_add_executor_job = AsyncMock(side_effect=lambda fn, *a: fn(*a))
+    store = _Store()
+    store._data_generation = 0  # noqa: SLF001
+    lm = _learning(mock_hass, store, {})
+    store.set_suggestion(CONF_END_ENERGY_THRESHOLD, 0.4, reason="r", flags={"owner": OWNER_BATCH})
+    calls: list[int] = []
+
+    def _drops(stored: dict[str, Any]) -> list[str]:
+        calls.append(store._data_generation)  # noqa: SLF001
+        if len(calls) == 1:
+            store._data_generation += 1  # noqa: SLF001 - restored meanwhile, same pending value
+            return [CONF_END_ENERGY_THRESHOLD]
+        return []  # the restored history has no pause it splits
+
+    lm.suggestion_engine = SimpleNamespace(
+        for_job=lambda: SimpleNamespace(joint_end_gate_drops=_drops),
+        apply_suggestions=lambda *a, **k: None,
+    )
+    await lm._enforce_joint_end_gate()  # noqa: SLF001
+    assert calls == [0, 1]
+    assert CONF_END_ENERGY_THRESHOLD in store.get_suggestions()
+
+
+async def test_cadence_is_filed_under_the_sensor_that_reported_it(
+    hass: Any, setup_washdata_entry: Any
+) -> None:
+    """PR #529 review: sensor B selected while A still reports the running cycle
+    (the swap waits for the end). A's intervals were stored as B's, and B's cadence
+    fell back to A's in-memory model."""
+    from datetime import timedelta  # noqa: PLC0415
+    from unittest.mock import patch  # noqa: PLC0415
+
+    from custom_components.ha_washdata.time_utils import utc_now  # noqa: PLC0415
+
+    entry = await setup_washdata_entry()
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store, lm = manager.profile_store, manager.learning_manager
+    t0 = utc_now()
+    with patch.object(lm, "_power_sensor", return_value="sensor.plug_b"):
+        for i in range(40):
+            lm.process_power_reading(
+                300.0, t0 + timedelta(seconds=30 * (i + 1)), t0 + timedelta(seconds=30 * i),
+                sensor="sensor.plug_a",
+            )
+        assert lm.close_cycle_cadence({"status": "completed", "termination_reason": "smart"})
+        assert store.get_cadence_summaries("sensor.plug_b") == []
+        assert store.get_cadence_summaries("sensor.plug_a") != []
+        assert lm.cadence() is None  # nothing measured on B yet
+    with patch.object(lm, "_power_sensor", return_value="sensor.plug_a"):
+        assert lm.cadence() is not None
+
+
+async def test_apply_stops_at_a_reload_between_its_writes(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """PR #529 review: a reload while Apply awaited the settings history or the
+    suggestion clear left it writing on to the old manager's store, then saying
+    nothing about what it had already written."""
+    from unittest.mock import MagicMock, patch  # noqa: PLC0415
+
+    from custom_components.ha_washdata import ws_api  # noqa: PLC0415
+
+    for after in ("_record_option_changes", "clear_suggestions"):
+        entry = await setup_washdata_entry(options={CONF_END_ENERGY_THRESHOLD: 0.01, CONF_OFF_DELAY: 60})
+        manager = hass.data[DOMAIN][entry.entry_id]
+        store = manager.profile_store
+        store.set_suggestion(CONF_END_ENERGY_THRESHOLD, 0.02, reason="r", flags={"owner": OWNER_BATCH})
+        real_get = ws_api._get_manager  # noqa: SLF001
+        state = {"reloaded": False}
+
+        def current(h: Any, eid: str, _real=real_get) -> Any:
+            return MagicMock() if state["reloaded"] else _real(h, eid)
+
+        real_record, real_clear = ws_api._record_option_changes, store.clear_suggestions  # noqa: SLF001
+
+        async def record(*a: Any, _which=after, _real=real_record) -> None:
+            await _real(*a)
+            state["reloaded"] = state["reloaded"] or _which == "_record_option_changes"
+
+        async def clear(*a: Any, _which=after, _real=real_clear) -> None:
+            await _real(*a)
+            state["reloaded"] = state["reloaded"] or _which == "clear_suggestions"
+
+        cleared = MagicMock(side_effect=clear)
+        client = await hass_ws_client(hass)
+        with patch.object(ws_api, "_get_manager", side_effect=current), \
+                patch.object(ws_api, "_record_option_changes", side_effect=record), \
+                patch.object(store, "clear_suggestions", cleared):
+            await client.send_json_auto_id({
+                "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry.entry_id,
+                "keys": [CONF_END_ENERGY_THRESHOLD],
+            })
+            res = await client.receive_json()
+        assert res["success"] is False and res["error"]["code"] == "entry_reloaded", after
+        assert ("history" if after == "_record_option_changes" else "cleared") in res["error"]["message"]
+        assert cleared.called is (after == "clear_suggestions")
+        assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_END_ENERGY_THRESHOLD] == 0.01

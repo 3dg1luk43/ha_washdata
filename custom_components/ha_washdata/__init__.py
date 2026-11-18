@@ -1592,6 +1592,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             # schedule it directly rather than leaving it for the next restart.
             manager.async_schedule_banked_tail_repair()
             manager.async_schedule_energy_rebuild()
+            manager.async_schedule_cut_short_rebuild()
 
             manager._logger.info("Imported ha_washdata entry %s from %s", entry_id, source)
 

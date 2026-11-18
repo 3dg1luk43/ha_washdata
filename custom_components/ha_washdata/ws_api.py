@@ -4415,14 +4415,16 @@ async def ws_wipe_history(
         return
 
     try:
+        # Before the wipe awaits its write: a cadence pass finishing meanwhile must
+        # not refill the cleared suggestions, and a failed write must not skip it.
+        learning = getattr(manager, "learning_manager", None)
+        if learning is not None:
+            learning.reset_cadence_evidence()
         await manager.profile_store.clear_all_data()
         # clear_all_data pops the persisted arm, but the manager's in-memory field is
         # the authoritative one, so the pin has to be retired there too or the next
         # cycle re-applies a program from before the wipe.
         manager.clear_armed_program()
-        learning = getattr(manager, "learning_manager", None)
-        if learning is not None:
-            learning.reset_cadence_evidence()
         manager.notify_update()
         _send_result(connection, msg["id"], "wipe_history", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -4586,6 +4588,7 @@ async def ws_import_config(
             # the imported tails inflating avg_duration until the next restart.
             manager.async_schedule_banked_tail_repair()
             manager.async_schedule_energy_rebuild()
+            manager.async_schedule_cut_short_rebuild()
             manager.notify_update()
             _send_result(connection, msg["id"], "import_config", result)
         except json.JSONDecodeError as exc:
@@ -4824,6 +4827,7 @@ async def ws_import_config_selective(
             # wait for a restart.
             manager.async_schedule_banked_tail_repair()
             manager.async_schedule_energy_rebuild()
+            manager.async_schedule_cut_short_rebuild()
             manager.notify_update()
             _send_result(
                 connection, msg["id"], "import_config_selective",
@@ -4920,6 +4924,7 @@ async def ws_undo_import(
                 await _async_restore_entry_options(hass, entry, snapshot_options)
             manager.async_schedule_banked_tail_repair()
             manager.async_schedule_energy_rebuild()
+            manager.async_schedule_cut_short_rebuild()
             manager.notify_update()
             _send_result(connection, msg["id"], "undo_import", result)
         except ValueError as exc:
@@ -5137,7 +5142,25 @@ async def ws_apply_suggestions(
                     # persist, and the reload the latter schedules rebuilds the
                     # store (#442).
                     await _record_option_changes(hass, entry, updates, "apply_suggestions")
+                    # Each write is awaited: a reload in between leaves the rest
+                    # unwritten, and the reply says what already was (PR #529 review).
+                    if _get_manager(hass, entry_id) is not manager:
+                        connection.send_error(
+                            msg["id"], "entry_reloaded",
+                            "The appliance was reloaded while the suggestions were applied. "
+                            "The change is in the settings history, but no setting was "
+                            "saved; try again.",
+                        )
+                        return
                     await manager.profile_store.clear_suggestions()
+                    if _get_manager(hass, entry_id) is not manager:
+                        connection.send_error(
+                            msg["id"], "entry_reloaded",
+                            "The appliance was reloaded while the suggestions were applied. "
+                            "The suggestions were cleared, but no setting was saved; "
+                            "try again once they are offered again.",
+                        )
+                        return
                     # Suggested values are all tunables -> layer them onto the
                     # existing options; never spread entry.data into options.
                     new_options = {**entry.options, **updates}

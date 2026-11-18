@@ -3386,7 +3386,16 @@ class CycleDetector:
         if is_high:
             self._time_above_threshold += high_dt
             self._time_below_threshold = 0.0
-            self._gapfree_before_high = self._time_below_threshold_gapfree
+            # The interval this reading closes was quiet too (the previous reading
+            # was low), credited by the tally's own test when observed; a reading
+            # that opens a quiet pulse has had it credited above (PR #529 review).
+            tail_quiet = (
+                dt
+                if not opens_pulse and not prev_high and unobserved <= 0
+                and not (synthetic and not observed) and dt <= outage_ceiling
+                else 0.0
+            )
+            self._gapfree_before_high = self._time_below_threshold_gapfree + tail_quiet
             self._time_below_threshold_gapfree = 0.0
             self._time_below_unobserved = 0.0
             # Energy for the guarded interval, computed with high_dt above.
@@ -6363,10 +6372,13 @@ class CycleDetector:
         quiet: list[float] = []
         quiet_start: datetime | None = None
         newer = timestamp
+        # The level of the stretch that qualified: the walk stops at a step the
+        # cadence calls an outage, as the gap-free tally does (PR #529 review).
+        outage_ceiling = min(3600.0, max(60.0, 10.0 * self._prior_p95_dt))
         for ts, pw in reversed(self._power_readings):
             if ts >= timestamp:
                 continue
-            if float(pw) >= stop or (newer - ts).total_seconds() >= TERMINAL_BLIP_QUIET_MIN_S:
+            if float(pw) >= stop or (newer - ts).total_seconds() > outage_ceiling:
                 break
             quiet.append(float(pw))
             quiet_start = ts

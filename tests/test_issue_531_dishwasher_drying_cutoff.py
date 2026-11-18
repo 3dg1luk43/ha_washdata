@@ -348,3 +348,109 @@ async def test_the_one_time_rebuild_stays_pending_after_a_failure_or_a_swap(
     assert store.cut_short_rebuild_pending()
     await store.async_rebuild_for_cut_short_rule()
     assert not store.cut_short_rebuild_pending()
+
+
+def test_the_interval_that_ends_at_the_beep_counts_as_quiet() -> None:
+    """The quiet a beep ends includes the interval the beep itself closes (from the
+    last 3.3 W reading to the beep), when it was observed (PR #529 review): without
+    it 590 s of readings before a beep 10 s later read as 590 s, not 600 s."""
+    cfg = build_detector_config({"stop_threshold_w": 4.5}, {"device_type": "dishwasher"}, "dishwasher")
+    det = CycleDetector(cfg, lambda _o, _n: None, lambda _c: None)
+    t = T0
+    for _ in range(60):  # a working cycle on a 10 s plug
+        det.process_reading(1500.0, t)
+        t += timedelta(seconds=10)
+    for _ in range(60):
+        det.process_reading(3.3, t)
+        t += timedelta(seconds=10)
+    before = det._time_below_threshold_gapfree  # noqa: SLF001
+    det.process_reading(6.3, t)  # the beep, 10 s after the last quiet reading
+    assert det._gapfree_before_high == before + 10.0  # noqa: SLF001
+
+
+def test_the_blip_level_comes_from_the_stretch_that_qualified() -> None:
+    """Old 0 W readings before a 200 s outage must not set the level: after it the
+    quiet sits at 3.3 W, and 4.0 W is no blip over that (PR #529 review)."""
+    cfg = build_detector_config({"stop_threshold_w": 3.5}, {"device_type": "dishwasher"}, "dishwasher")
+    det = CycleDetector(cfg, lambda _o, _n: None, lambda _c: None)
+    det._matched_profile, det._expected_duration = "ECO", 12000.0  # noqa: SLF001
+    det._prior_p95_dt = 10.0  # noqa: SLF001 - 10 s cadence: a 200 s step is an outage
+    det._gapfree_before_high = 700.0  # noqa: SLF001 - observed since the outage
+    old = [(T0 + timedelta(seconds=10 * k), 0.0) for k in range(300)]
+    new = [(T0 + timedelta(seconds=3200 + 10 * k), 3.3) for k in range(70)]
+    det._power_readings = old + new  # noqa: SLF001
+    blip_at = new[-1][0] + timedelta(seconds=10)
+    assert det._is_terminal_blip(blip_at, 4.0) is False  # noqa: SLF001
+    assert det._is_terminal_blip(blip_at, 6.3) is True  # noqa: SLF001
+
+
+def test_keepalives_are_not_observed_quiet_for_the_cut_off_rule() -> None:
+    """Siblings whose 1000 s quiet before a 20 W reading is only WashData's own
+    keepalives show no terminal event, so a run ending inside it stays a run
+    (PR #529 review)."""
+    from custom_components.ha_washdata.profile_store import ProfileStore  # noqa: PLC0415
+
+    class _Probe(ProfileStore):
+        def __init__(self) -> None:  # noqa: D401 - only the build's own state
+            self.device_type = "dishwasher"
+            self.dtw_bandwidth = 0.1
+            self.energy_mode = "mean"
+            self._logger = __import__("logging").getLogger("probe")
+
+    work = [[float(t), 2000.0 if 600 <= t < 1800 else 40.0] for t in range(0, 3000, 10)]
+    keepalives = [float(t) for t in range(3060, 4000, 60)]
+    sibling = work + [[3000.0, 2.0]] + [[t, 2.0] for t in keepalives] + [[4000.0, 20.0]] + [
+        [float(t), 0.5] for t in range(4010, 4300, 10)]
+    cut = work + [[float(t), 2.0] for t in range(3000, 3110, 10)]
+
+    def cyc(pts: list, i: int, **extra: Any) -> dict:
+        return {"id": f"k{i}", "profile_name": "ECO", "status": "completed", "duration": pts[-1][0],
+                "power_data": pts, **extra}
+
+    runs = [cyc(sibling, i, synthetic_offsets=keepalives) for i in range(3)] + [cyc(cut, 9)]
+    built = _Probe()._rebuild_envelope_sync(runs)  # noqa: SLF001
+    assert built is not None and len(built[1]) == 4  # the short run is kept
+
+
+async def test_an_import_from_before_the_rule_is_rebuilt_under_it(
+    hass: HomeAssistant, setup_washdata_entry, hass_ws_client
+) -> None:
+    """PR #529 review: a backup from before #531 replaced a store that had already
+    run the sweep, kept that store's marker, and its programme kept the cut-off length."""
+    import json  # noqa: PLC0415
+
+    from custom_components.ha_washdata.const import CUT_SHORT_REBUILD_KEY, STORAGE_VERSION  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(device_type="dishwasher", options={"stop_threshold_w": 4.5})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    await hass.async_block_till_done()
+    assert store._data.get(CUT_SHORT_REBUILD_KEY) is True  # noqa: SLF001 - swept already
+    stale = 131 * 60.0
+    runs = [_eco(hold_s=30)] * 5 + [_eco(cut_s=131 * 60)] * 12
+    backup = {
+        "version": STORAGE_VERSION,
+        "data": {
+            "profiles": {"ECO": {"avg_duration": stale}},
+            "envelopes": {"ECO": {
+                "time_grid": [0.0, stale / 2, stale], "avg": [30.0, 1950.0, 3.3],
+                "min": [0.0, 1900.0, 0.0], "max": [40.0, 2000.0, 6.0], "std": [1.0, 50.0, 1.0],
+                "target_duration": stale, "cycle_count": 17,
+            }},
+            "past_cycles": [
+                {"id": f"c{i}", "profile_name": "ECO", "status": "completed",
+                 "termination_reason": "smart", "start_time": (T0 + timedelta(days=i)).isoformat(),
+                 "duration": pts[-1][0], "power_data": [[t, p] for t, p in pts]}
+                for i, pts in enumerate(runs)
+            ],
+        },
+    }
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({
+        "type": f"{DOMAIN}/import_config", "entry_id": entry.entry_id, "json_data": json.dumps(backup),
+    })
+    res = await client.receive_json()
+    assert res["success"], res
+    await hass.async_block_till_done()
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    assert store.get_profiles()["ECO"]["avg_duration"] > stale + 50 * 60
+    assert store.cut_short_rebuild_pending() is False

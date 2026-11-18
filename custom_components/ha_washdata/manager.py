@@ -922,6 +922,7 @@ class WashDataManager:
         self._cycle_end_task: Task[Any] | None = None
         self._banked_tail_repair_task: Task[Any] | None = None
         self._energy_rebuild_task: Task[Any] | None = None
+        self._cut_short_rebuild_task: Task[Any] | None = None
         self._backfill_tail_cut_task: Task[Any] | None = None
         # Detached store-touching tasks (matching trigger, active-cycle clear,
         # post-cycle processing) tracked so async_shutdown can cancel them before a
@@ -2545,6 +2546,18 @@ class WashDataManager:
         except Exception as exc:  # pylint: disable=broad-exception-caught
             self._logger.warning("Rebuild under the #531 cut-off rule failed: %s", exc)
 
+    def async_schedule_cut_short_rebuild(self) -> None:
+        """#531: rebuild a dishwasher's profiles once under the cut-off rule, in the
+        background (not billed to the startup time, #408). Called at setup and
+        after an import or undo, whose payload may predate the rule. A second call
+        while one runs is a no-op."""
+        if self.device_type != DEVICE_TYPE_DISHWASHER or not self.profile_store.cut_short_rebuild_pending():
+            return
+        existing = self._cut_short_rebuild_task
+        if existing is not None and not existing.done():
+            return
+        self._cut_short_rebuild_task = self._spawn_tracked(self._async_rebuild_for_cut_short_rule())
+
     def async_schedule_energy_rebuild(self) -> None:
         """Run the envelope rebuild armed by the v18 migration or an import of an
         older export, in the background (it rebuilds every profile, which must not
@@ -2905,9 +2918,7 @@ class WashDataManager:
         # ProfileStore: an untracked task would keep writing to the store a reload
         # had already swapped out.
         self.async_schedule_banked_tail_repair()
-        if self.device_type == DEVICE_TYPE_DISHWASHER and self.profile_store.cut_short_rebuild_pending():
-            # #531: once, in the background (not billed to the startup time, #408).
-            self._spawn_tracked(self._async_rebuild_for_cut_short_rule())
+        self.async_schedule_cut_short_rebuild()
         self.async_schedule_energy_rebuild()
         self.async_schedule_backfill_tail_cut()
 
@@ -3697,6 +3708,11 @@ class WashDataManager:
             return
 
         door_open = new_val == "on"  # binary_sensor: on = open
+
+        if door_open and old_val == "on" and self._remove_door_end_dwell is not None:
+            # An attribute-only update of a door still open: the dwell that is
+            # running keeps its deadline (PR #529 review).
+            return
 
         if door_open:
             if self._is_clean_state:
@@ -4780,7 +4796,7 @@ class WashDataManager:
             STATE_ENDING,
         ):
             self.learning_manager.process_power_reading(
-                power, now, self._last_reading_time
+                power, now, self._last_reading_time, sensor=self.power_sensor_entity_id
             )
         self._last_reading_time = now
         if self._restored_sensor_clock is not None:

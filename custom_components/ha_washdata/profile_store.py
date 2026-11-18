@@ -2386,7 +2386,10 @@ _IMPORT_CORE_KEY_TYPES: dict[str, type] = {
 #: Keys a wholesale import never keeps from the target even when the payload lacks
 #: them. Envelopes are derived from the payload's profiles and cycles (a target one
 #: would describe a profile the import replaced); the in-flight cycle is per-install.
-_WHOLESALE_IMPORT_PAYLOAD_OWNED_KEYS = frozenset({"envelopes", "active_cycle", "last_active_save"})
+#: The #531 marker describes how those envelopes were built, so it goes with them.
+_WHOLESALE_IMPORT_PAYLOAD_OWNED_KEYS = frozenset(
+    {"envelopes", "active_cycle", "last_active_save", CUT_SHORT_REBUILD_KEY}
+)
 
 
 def unwrap_import_payload(payload: Any) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -7424,8 +7427,18 @@ class ProfileStore:
                     isinstance(meta, dict) and (meta.get("trim") or meta.get("edited"))
                 )
 
+            def _observed(k: int) -> tuple[list[float], list[float]]:
+                # WashData's own keepalives are no observation: left out, the quiet
+                # they filled reads as the gap it was (PR #529 review).
+                syn = synthetic_offset_keys(decoded[k][0]) or set()
+                pairs = [
+                    (t, v) for t, v in zip(parsed[k][0], parsed[k][1], strict=True)
+                    if offset_key(t) not in syn
+                ]
+                return [t for t, _ in pairs], [v for _, v in pairs]
+
             sub = cut_short_mask([
-                (parsed[k][0], parsed[k][1], parsed[k][2],
+                (*_observed(k), parsed[k][2],
                  bool(parsed[k][3] or _corrected(decoded[k][0], parsed[k][0])), parsed[k][4])
                 for k in voters
             ])

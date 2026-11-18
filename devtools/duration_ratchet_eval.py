@@ -100,8 +100,9 @@ def _learned_min(store: Any) -> float:
 
 
 def _target_s(store: Any) -> float | None:
-    """The envelope length the detector is fed as the expected duration (the live
-    match's ``expected_duration``), unrounded; None without an envelope."""
+    """The envelope's stored ``target_duration``, unrounded; None without an
+    envelope. What the matcher starts from, not necessarily what the detector is
+    fed (the live match can rescale it), hence ``envelope_target_s``."""
     env = (store._data.get("envelopes") or {}).get(PROGRAM)  # noqa: SLF001
     target = env.get("target_duration") if isinstance(env, dict) else None
     return float(target) if target else None
@@ -130,7 +131,7 @@ def run(curve: list[tuple[float, float]], *, seed: int = 30, cycles: int = 60,
         prebuilt = playground._build_match_snapshots(store)  # noqa: SLF001
         rep = sle.replay_one(src, cfg, store, prebuilt, {**entry_data, **options}, None, stop)
         before = _learned_min(store)
-        row: dict[str, Any] = {"run": k, "learned_before_min": before, "gate_expected_s": _target_s(store)}
+        row: dict[str, Any] = {"run": k, "learned_before_min": before, "envelope_target_s": _target_s(store)}
         kept = [c for c in (rep or {}).get("captured", []) if c.get("status") == "completed"]
         if kept:
             primary = max(kept, key=lambda c: float(c.get("duration") or 0.0))
@@ -192,10 +193,10 @@ def main(argv: list[str] | None = None) -> int:
               cut=a.cut, cut_min=a.cut_min)
     print(f"real end {res['real_end_min']} min; seed {res['seed_full']} full + {res['seed_cut']} cut "
           f"runs; {res['cycles']} replayed")
-    print(f"  {'run':>4s} {'gate':>7s} {'learned':>8s} {'end':>7s} {'stored':>7s} {'learned':>8s}  reason")
+    print(f"  {'run':>4s} {'target':>7s} {'learned':>8s} {'end':>7s} {'stored':>7s} {'learned':>8s}  reason")
     for r in res["rows"]:
-        gate = r.get("gate_expected_s")
-        print(f"  {r['run']:4d} {('%.1f' % (gate / 60)) if gate else '-':>7s} {r['learned_before_min']:8.1f} "
+        target = r.get("envelope_target_s")
+        print(f"  {r['run']:4d} {('%.1f' % (target / 60)) if target else '-':>7s} {r['learned_before_min']:8.1f} "
               f"{str(r.get('end_min')):>7s} {str(r.get('stored_min')):>7s} {r['learned_after_min']:8.1f}  "
               f"{r.get('reason')}")
     print(f"ended > 5 min before the real end: {res['ended_early']} of {res['cycles']}; "

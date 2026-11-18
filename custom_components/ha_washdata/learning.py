@@ -330,6 +330,11 @@ class LearningManager:
         # no-update timeouts would be re-suggested from it every five minutes.
         # Bounded like the model itself: only its last 200 survive a commit anyway.
         self._pending_intervals: deque[tuple[float, datetime]] = deque(maxlen=_CYCLE_MAX_INTERVALS)
+        # Which sensor reported the held intervals and the in-memory model's: a
+        # sensor swap is deferred while a cycle runs, so the selected sensor is not
+        # always the one reporting (PR #529 review).
+        self._pending_sensor: str | None = None
+        self._model_sensor: str | None = None
         # Set by a cadence commit, consumed by run_due_operational_pass once the
         # cycle is stored, so the pass's pause scan sees the cycle that just ended.
         self._operational_pass_due: bool = False
@@ -384,21 +389,28 @@ class LearningManager:
         The trace scan runs in the executor against a snapshot; an entry is only
         withdrawn if it is still the one that was judged.
         """
-        stored = {
-            k: dict(v) for k, v in (self.profile_store.get_suggestions() or {}).items()
-            if isinstance(v, dict)
-        }
-        if not any(k in END_GATE_KEYS for k in stored):
+        # A store replaced meanwhile (Undo Import, a restore) is judged again on
+        # its own history; bounded, so a store that keeps changing cannot spin.
+        for _attempt in range(3):
+            stored = {
+                k: dict(v) for k, v in (self.profile_store.get_suggestions() or {}).items()
+                if isinstance(v, dict)
+            }
+            if not any(k in END_GATE_KEYS for k in stored):
+                return
+            generation = self._config_generation
+            data_generation = getattr(self.profile_store, "_data_generation", 0)
+            drops = await self.hass.async_add_executor_job(
+                self.suggestion_engine.for_job().joint_end_gate_drops, stored
+            )
+            # Judged against options a refresh has since replaced: the next check
+            # judges the new set (PR #529 review).
+            if generation != self._config_generation:
+                return
+            if getattr(self.profile_store, "_data_generation", 0) != data_generation:
+                continue
+            self._withdraw_joint_drops(stored, drops or [])
             return
-        generation = self._config_generation
-        drops = await self.hass.async_add_executor_job(
-            self.suggestion_engine.for_job().joint_end_gate_drops, stored
-        )
-        # Judged against options a refresh has since replaced: the next check
-        # judges the new set (PR #529 review).
-        if generation != self._config_generation:
-            return
-        self._withdraw_joint_drops(stored, drops or [])
 
     def _withdraw_joint_drops(self, judged: dict[str, Any], drops: list[str]) -> None:
         current = self.profile_store.get_suggestions() or {}
@@ -564,7 +576,11 @@ class LearningManager:
         return deleted
 
     def process_power_reading(
-        self, _power: float, now: datetime, last_reading_time: datetime | None
+        self,
+        _power: float,
+        now: datetime,
+        last_reading_time: datetime | None,
+        sensor: str | None = None,
     ) -> None:
         """Hold this reading's update interval for the cycle-end cadence commit.
 
@@ -575,6 +591,10 @@ class LearningManager:
         a ~100-trace executor scan for nothing (#510 follow-up). The pass runs
         once per cycle end, in ``run_due_operational_pass``.
         """
+        if sensor is not None and sensor != self._pending_sensor:
+            # Another sensor's intervals are not this one's cadence.
+            self._pending_intervals.clear()
+            self._pending_sensor = sensor
         if last_reading_time:
             delta = (now - last_reading_time).total_seconds()
             # Ignore ultra-small jitter (<0.1s) and massive gaps (>1800s - likely downtime)
@@ -608,13 +628,17 @@ class LearningManager:
             TerminationReason.FORCE_STOPPED,
         ):
             return False
+        sensor = self._pending_sensor or self._power_sensor()
+        if sensor != self._model_sensor:
+            self._sample_interval_model = StatisticalModel(max_samples=200)
+            self._model_sensor = sensor
         self._sample_interval_model.add_samples(
             (delta for delta, _ts in pending), pending[-1][1]
         )
         summary = cycle_cadence(delta for delta, _ts in pending)
         if summary is not None:
             try:
-                self.profile_store.add_cadence_summary(*summary, sensor=self._power_sensor())
+                self.profile_store.add_cadence_summary(*summary, sensor=sensor)
             except Exception:  # pylint: disable=broad-exception-caught
                 self._logger.debug("Could not store the cycle cadence", exc_info=True)
         # The operational pass's one run per cycle: its cadence input changes only
@@ -630,13 +654,16 @@ class LearningManager:
         The median over the stored per-cycle summaries (``recent_cadence``), which
         survive a restart; before any is stored, the newest committed intervals.
         """
+        sensor = self._power_sensor()
         try:
-            stored = recent_cadence(self.profile_store.get_cadence_summaries(self._power_sensor()))
+            stored = recent_cadence(self.profile_store.get_cadence_summaries(sensor))
         except Exception:  # pylint: disable=broad-exception-caught
             stored = None
         if stored is not None:
             return stored
         model = self._sample_interval_model
+        if self._model_sensor is not None and self._model_sensor != sensor:
+            return None  # another sensor's intervals
         if model.count < CADENCE_MIN_INTERVALS or model.p95 is None or model.median is None:
             return None
         return model.p95, model.median
@@ -657,6 +684,7 @@ class LearningManager:
         review): the stored summaries go with the history, and without this the
         in-memory model kept sizing the operational pass from before the wipe."""
         self._sample_interval_model = StatisticalModel(max_samples=200)
+        self._model_sensor = None
         self._pending_intervals.clear()
         # A pass already in the executor read the old cadence: its result must not
         # refill the wiped store (PR #529 review). A new cadence commit schedules a

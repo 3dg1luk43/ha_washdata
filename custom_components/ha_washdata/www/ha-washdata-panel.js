@@ -16543,8 +16543,12 @@ class HaWashdataPanel extends HTMLElement {
         // Tag the error with `suggFix` when a pending suggestion for this key
         // would satisfy the constraint — so the panel can explain that instead
         // of offering a generic "Use X" fix button.
+        // Only when staging it breaks no rule that holds now: an 8 W Stop over a
+        // 7 W Start would cascade Start up rather than keep the user's (PR #529 review).
         const sugV = suggMap[key];
-        const errInfo = (sugV != null && !rule.check({...vals, [key]: sugV}, ctx))
+        const staged = {...vals, [key]: sugV};
+        const errInfo = (sugV != null && !rule.check(staged, ctx)
+          && _SETTING_CONFLICTS.every(r => r.check(vals, ctx) || !r.check(staged, ctx)))
           ? {...info, suggFix: sugV}
           : info;
         (keyErrors[key] = keyErrors[key] || []).push(errInfo);

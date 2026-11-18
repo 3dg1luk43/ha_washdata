@@ -79,3 +79,36 @@ test('a Stop fix that stays under Start is still offered', async ({ page }) => {
   await page.locator('button[data-sec="detection"]').first().click();
   await expect(page.locator('.wd-conflict-fix[data-ckey="stop_threshold_w"]')).toHaveAttribute('data-cval', '2.5', { timeout: 8_000 });
 });
+
+test('a pending Stop suggestion over the unsaved Start is not recommended', async ({ page }) => {
+  await page.goto('/');
+  const opts = { ...options, min_power: 6.0, start_threshold_w: 7.0, stop_threshold_w: 5.0 };
+  await bootPanel(page, {
+    'ha_washdata/get_options': { options: opts },
+    'ha_washdata/get_suggestions': {
+      suggestions: [{ key: 'stop_threshold_w', current: 5.0, suggested: 8.0, reason: 'r' }],
+      locked_suggestions: [],
+    },
+  }, statesIn('W'), { settingsLevel: 'advanced' });
+  await clickTab(page, 'settings');
+  await page.locator('button[data-sec="detection"]').first().click();
+  await expect(page.locator('[data-cerr="stop_threshold_w"]')).toBeVisible({ timeout: 8_000 });
+  // 8 W would resolve Min Power, but invert Start/Stop: neither it nor 7.5 W is offered.
+  await expect(page.locator('[data-cerr="stop_threshold_w"] .wd-conflict-sug-note')).toHaveCount(0);
+  await expect(page.locator('.wd-conflict-fix[data-ckey="stop_threshold_w"]')).toHaveCount(0);
+});
+
+test('a pending Stop suggestion under Start is still recommended', async ({ page }) => {
+  await page.goto('/');
+  const opts = { ...options, min_power: 6.0, start_threshold_w: 12.0, stop_threshold_w: 5.0 };
+  await bootPanel(page, {
+    'ha_washdata/get_options': { options: opts },
+    'ha_washdata/get_suggestions': {
+      suggestions: [{ key: 'stop_threshold_w', current: 5.0, suggested: 8.0, reason: 'r' }],
+      locked_suggestions: [],
+    },
+  }, statesIn('W'), { settingsLevel: 'advanced' });
+  await clickTab(page, 'settings');
+  await page.locator('button[data-sec="detection"]').first().click();
+  await expect(page.locator('[data-cerr="stop_threshold_w"] .wd-conflict-sug-note')).toBeVisible({ timeout: 8_000 });
+});

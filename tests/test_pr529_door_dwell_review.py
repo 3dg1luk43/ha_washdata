@@ -119,3 +119,19 @@ async def test_a_paused_door_end_needs_a_usable_power_reading(
         manager._door_end_dwell_fired(utc_now())  # noqa: SLF001
     assert ends == []
     assert manager._remove_door_end_dwell is not None  # noqa: SLF001
+
+
+async def test_an_attribute_update_keeps_the_running_dwell(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """PR #529 review: an on -> on attribute update re-armed the dwell, so a sensor
+    reporting more often than the dwell kept the door from ever ending the run."""
+    manager, ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    hass.states.async_set(DOOR, "on")
+    await hass.async_block_till_done()
+    for i in range(3):
+        await _tick(hass, freezer, 25, None)
+        hass.states.async_set(DOOR, "on", {"battery": 90 - i})
+        await hass.async_block_till_done()
+    await _tick(hass, freezer, 10, None)
+    assert len(ends) == 1
