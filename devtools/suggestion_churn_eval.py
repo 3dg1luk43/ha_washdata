@@ -15,8 +15,9 @@ cycle end at a time.
 **Walk** (per corpus device, stored cycles in start order, all production code):
 
 * every cycle that ended on its own commits its update intervals (``0.1 < dt < 1800``
-  s between stored readings, WashData's synthetic keepalives skipped, the newest
-  ``learning._CYCLE_MAX_INTERVALS``), as ``LearningManager.close_cycle_cadence`` does; then the operational pass runs on the
+  s from each real reading to the stored reading before it, a synthetic keepalive
+  included, as the live clock runs: ``suggestion_loop_eval.stored_cycle_intervals``;
+  the newest ``learning._CYCLE_MAX_INTERVALS``), as ``LearningManager.close_cycle_cadence`` does; then the operational pass runs on the
   cadence model (``suggestion_loop_eval.cadence``: one ``learning.cycle_cadence``
   summary per cycle, the median over the last ``CADENCE_RECENT_CYCLES``);
 * each time 5 more labelled cycles have ended on their own, the batch pass runs
@@ -78,9 +79,7 @@ from custom_components.ha_washdata.profile_store import _parse_start_dt  # noqa:
 from custom_components.ha_washdata.suggestion_engine import (  # noqa: E402
     OWNER_BATCH,
     OWNER_OPERATIONAL,
-    _cycle_readings,
 )
-from custom_components.ha_washdata.time_utils import offset_key, synthetic_offset_keys  # noqa: E402
 
 _SLE_PATH = REPO / "devtools" / "suggestion_loop_eval.py"
 _spec = importlib.util.spec_from_file_location("wd_suggestion_churn_sle", _SLE_PATH)
@@ -123,9 +122,8 @@ def legacy_cadence(per_cycle: list[list[float]]) -> tuple[float, float] | None:
 
 
 def _intervals(cycle: dict[str, Any]) -> list[float]:
-    synthetic = synthetic_offset_keys(cycle) or set()
-    pts = [(t, p) for t, p in _cycle_readings(cycle) if offset_key(t) not in synthetic]
-    return [t1 - t0 for (t0, _), (t1, _) in zip(pts, pts[1:]) if 0.1 < t1 - t0 < 1800]
+    """The intervals a cycle commits to the live cadence model (keepalives move the clock)."""
+    return sle.stored_cycle_intervals(cycle)
 
 
 def _start_key(cycle: dict[str, Any]) -> datetime:

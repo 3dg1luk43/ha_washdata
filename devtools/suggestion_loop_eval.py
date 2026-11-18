@@ -776,6 +776,25 @@ def assemble(
     return out, intervals, m
 
 
+def stored_cycle_intervals(cycle: dict[str, Any]) -> list[float]:
+    """A stored cycle's update intervals as the live cadence model takes them.
+
+    ``LearningManager.process_power_reading`` times a real reading against the
+    manager's ``_last_reading_time``, which the watchdog's keepalives (the
+    ``synthetic_offsets`` rows) advance too: every reading moves the clock, only a
+    real one adds an interval (as ``_ManagerTap`` does on a replay). ``0.1 < dt <
+    1800`` s, oldest first.
+    """
+    synthetic = synthetic_offset_keys(cycle) or set()
+    out: list[float] = []
+    prev: float | None = None
+    for t, _p in _cycle_readings(cycle):
+        if prev is not None and offset_key(t) not in synthetic and 0.1 < t - prev < 1800:
+            out.append(t - prev)
+        prev = t
+    return out
+
+
 def cadence(per_cycle: list[list[float]]) -> tuple[float, float] | None:
     """(p95, median) the operational pass sizes from, as ``LearningManager.cadence``.
 
