@@ -45,6 +45,11 @@ manager fills from live reading intervals of cycles that ended on their own
 rebuilt from the stored traces of completed cycles (intervals in (0.1, 1800) s
 from each real reading to the stored reading before it, a keepalive included).
 A trace stored with a throttle or a trim can differ from what the manager saw.
+It is not scoped to the power sensor either: the live model reads only the
+summaries measured on the current sensor (``ProfileStore.get_cadence_summaries``),
+but a stored cycle does not record its sensor, so after a sensor swap this report
+also times the replaced sensor's cycles and can propose other values than the
+live pass.
 
 ``--no-color`` is accepted for compatibility (the output has no colour).
 
