@@ -34,6 +34,18 @@ class TerminationReason(StrEnum):
     USER = "user"                # user manually stopped the cycle
     TERMINAL_DROP = "terminal_drop"  # anomalously-early hard cliff-to-0 (opt-in)
     DOOR = "door"                # door held open at the end (#342, #524): natural
+    EXTERNAL = "external"        # External End Trigger fired (register 640): natural
+
+
+#: Natural ends that automations still see as ``user``, the reason both carried
+#: until 0.6.1: stored under their own reason so the statistics count them as
+#: ends the appliance reached, reported as before so no automation changes.
+AUTOMATION_USER_REASONS = frozenset({TerminationReason.DOOR, TerminationReason.EXTERNAL})
+
+
+def automation_termination_reason(reason: Any) -> Any:
+    """The ``termination_reason`` an automation sees for a stored one."""
+    return TerminationReason.USER.value if reason in AUTOMATION_USER_REASONS else reason
 
 
 # Completed cycles stay eligible for anti-wrinkle handling only for these

@@ -35,10 +35,14 @@ from typing import Any
 
 from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
-from pytest_homeassistant_custom_component.common import async_fire_time_changed
+from pytest_homeassistant_custom_component.common import (
+    async_capture_events,
+    async_fire_time_changed,
+)
 
 from custom_components.ha_washdata.const import (
     DOMAIN,
+    EVENT_CYCLE_ENDED,
     STATE_PAUSED,
     STATE_RUNNING,
     TerminationReason,
@@ -108,6 +112,7 @@ async def test_door_held_open_while_paused_ends_the_cycle(
     hass: HomeAssistant, setup_washdata_entry, freezer
 ) -> None:
     manager, ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    events = async_capture_events(hass, EVENT_CYCLE_ENDED)
 
     hass.states.async_set(DOOR, "on")
     await hass.async_block_till_done()
@@ -125,6 +130,8 @@ async def test_door_held_open_while_paused_ends_the_cycle(
     assert ends[0]["duration"] <= WASH_S
     # It saw the power below the threshold: no "Still drawing" evidence.
     assert _idle_evidence_w(ends[0], 4.0) == 0.0
+    # Automations still see `user`, as before 0.6.1 (register 640).
+    assert [e.data["cycle_data"]["termination_reason"] for e in events] == ["user"]
 
 
 async def test_door_opened_early_in_a_pause_still_pauses(

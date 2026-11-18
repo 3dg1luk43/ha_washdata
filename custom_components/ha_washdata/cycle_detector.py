@@ -6733,8 +6733,13 @@ class CycleDetector:
             )
             self._ignore_power_until_idle = False
 
-    def user_stop(self) -> None:
-        """Handle user-initiated stop."""
+    def user_stop(self, reason: str = TerminationReason.USER) -> None:
+        """Handle a user-initiated stop, or another one with the same mechanics.
+
+        ``reason``: ``TerminationReason.EXTERNAL`` for the External End Trigger
+        (register 640): the same tail and restart lockout, since it can fire while
+        the appliance still draws, but a natural end in the statistics.
+        """
         if self._state != STATE_OFF:
             now = utc_now()
             # "Done now" keeps the tail only while the machine is still running.
@@ -6749,7 +6754,7 @@ class CycleDetector:
             self._finish_cycle(
                 now,
                 status="completed",
-                termination_reason=TerminationReason.USER,
+                termination_reason=reason,
                 keep_tail=True,  # User implies "Done Now"
                 tail_cap=(
                     self._keep_tail_cap(self._current_cycle_start or now)
@@ -6794,7 +6799,8 @@ class CycleDetector:
 
         A natural end, not a hand stop: stored as the fallback timeout stores one
         (a dishwasher keeps its drying tail up to ``_keep_tail_cap``, anything
-        else ends at its last active reading), under ``TerminationReason.DOOR``.
+        else ends at its last active reading), under ``TerminationReason.DOOR``
+        (automations still see ``user``: ``automation_termination_reason``).
         The manager calls it only with the power below the Stop Threshold. The
         restart lockout is ``user_stop``'s, which this path used until 0.6.1.
         """

@@ -63,6 +63,8 @@ from homeassistant.helpers.storage import Store
 
 from .const import NOTIFY_QUEUE_STORE_SUFFIX, STORAGE_KEY
 from .const import (
+    TerminationReason,
+    automation_termination_reason,
     resolve_off_delay_default,
     CADENCE_RESET_FROM_STATES,
     DOMAIN,
@@ -395,6 +397,16 @@ _UNSET: Any = object()
 _EVENT_EXCLUDED_FIELDS = frozenset(
     {"power_data", "debug_data", "power_trace", "price_timeline", SYNTHETIC_OFFSETS_KEY}
 )
+
+
+def _event_cycle_data(cycle_data: dict[str, Any]) -> dict[str, Any]:
+    """``cycle_data`` as the ``ha_washdata_cycle_ended`` event carries it: no trace
+    fields, and a door or External End Trigger end reported as ``user``, as before
+    0.6.1 (register 640): they are natural ends in the store, not to automations."""
+    out = {k: v for k, v in cycle_data.items() if k not in _EVENT_EXCLUDED_FIELDS}
+    if "termination_reason" in out:
+        out["termination_reason"] = automation_termination_reason(out["termination_reason"])
+    return out
 
 
 def _finite_power(raw: Any) -> float | None:
@@ -3994,7 +4006,8 @@ class WashDataManager:
                 self.detector.reset(STATE_OFF)
                 self._logger.info("%s exited via external trigger", self.detector.state)
             elif self.detector.state != STATE_OFF:
-                self.detector.user_stop()
+                # A natural end in the statistics, `user` to automations (register 640).
+                self.detector.user_stop(reason=TerminationReason.EXTERNAL)
                 self._logger.info("Cycle completed via external trigger")
 
     def _external_end_trigger_available(self) -> bool:
@@ -7022,9 +7035,7 @@ class WashDataManager:
 
         # Prepare cycle data for event (enrich if needed)
         # IMPORTANT: Exclude large fields to prevent exceeding HA's 32KB event data limit
-        event_cycle_data = {
-            k: v for k, v in cycle_data.items() if k not in _EVENT_EXCLUDED_FIELDS
-        }
+        event_cycle_data = _event_cycle_data(cycle_data)
         event_cycle_data["device_type"] = self.device_type
         # The program to SHOW: the stored label, else THIS cycle's captured live
         # program (not the live field, which may already belong to a newly-started
@@ -9910,9 +9921,7 @@ class WashDataManager:
             program = self._trigger_ended_program
         if bus:
             try:
-                event_cycle_data = {
-                    k: v for k, v in cycle_data.items() if k not in _EVENT_EXCLUDED_FIELDS
-                }
+                event_cycle_data = _event_cycle_data(cycle_data)
                 self.hass.bus.async_fire(
                     EVENT_CYCLE_ENDED,
                     {
