@@ -1105,6 +1105,7 @@
         "cycle_context_none": "A rögzítő nem tárol leolvasásokat a ciklus körül (a Home Assistant alapértelmezés szerint 10 napnyi előzményt őriz meg).",
         "cycle_context_tip": "Csak megjelenítés: a teljesítményérzékelő rögzítő-előzményeit mutatja a ciklus körül, ha még megvannak. Ha a megszakadt indítási kísérleteket a jövőbeli ciklusokhoz szeretné adni, használja a Görbe előfutama beállítást (Beállítások > Érzékelés > Ciklus indítása), amely megváltoztatja a tárolt időtartamokat.",
         "invalid_threshold_pair": "A Leállítási küszöbnek ({stop} W) kisebbnek kell lennie az Indítási küszöbnél ({start} W). Semmi sem lett mentve; a kettőt együtt módosítsa.",
+        "end_gate_check_failed": "A javasolt időzítési beállításokat nem sikerült ellenőrizni a készülék szüneteihez képest. Semmi sem lett mentve; próbálja újra.",
         "bp_admin_only": "A sablonokat egy rendszergazda telepíti.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "A WashData hozta létre {device} számára. Adja hozzá a saját műveleteit (értesítés, világítás, ...).",
@@ -1543,7 +1544,7 @@
         },
         "door_opens_at_end": {
             "label": "Az ajtó kinyitása befejezi a ciklust",
-            "doc": "Olyan gépekhez, amelyek ajtaja működés közben reteszelve marad (a legtöbb elöltöltős mosógép), vagy amelyek a végén maguk nyitják ki (AirDry funkciós mosogatógépek). Ha az ajtó az alábbi várakozási ideig nyitva marad, a ciklus befejeződik, nem szünetel; a rövid nyitást figyelmen kívül hagyja. Ha a ciklus szünetel, csak akkor fejeződik be, amikor a felismert program már majdnem kész, így a program közbeni ajtónyitás továbbra is csak szünetelteti a ciklust. Ajtóérzékelő entitás szükséges."
+            "doc": "Olyan gépekhez, amelyek ajtaja működés közben reteszelve marad (a legtöbb elöltöltős mosógép), vagy amelyek a végén maguk nyitják ki (AirDry funkciós mosogatógépek). Ha az ajtó alacsony teljesítmény mellett az alábbi várakozási ideig nyitva marad, a ciklus befejeződik, nem szünetel; a rövid nyitást figyelmen kívül hagyja. Szünet közben ez csak akkor történik meg, amikor a felismert program már majdnem kész, így a program közbeni szünet szünet marad. Ajtóérzékelő entitás szükséges."
         },
         "door_end_dwell_seconds": {
             "label": "Ajtó-nyitásvégi várakozási idő",

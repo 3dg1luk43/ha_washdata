@@ -1139,6 +1139,7 @@
     "cycle_context_none": "Recorder okoli tega cikla ne hrani nobenih odčitkov (Home Assistant privzeto hrani zgodovino 10 dni).",
     "cycle_context_tip": "Samo za prikaz: pokaže zgodovino senzorja moči iz recorderja okoli tega cikla, če je še shranjena. Če želite neuspele poskuse zagona dodati prihodnjim ciklom, uporabite Uvodne sekunde krivulje (Nastavitve > Zaznavanje > Začetek cikla), kar spremeni shranjena trajanja.",
     "invalid_threshold_pair": "Prag zaustavitve ({stop} W) mora biti pod Pragom zagona ({start} W). Nič ni bilo shranjeno; spremenite obe vrednosti hkrati.",
+    "end_gate_check_failed": "Predlaganih nastavitev časovanja ni bilo mogoče preveriti glede na premore te naprave. Nič ni bilo shranjeno; poskusite znova.",
     "bp_admin_only": "Predloge namesti skrbnik.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Ustvaril WashData za {device}. Dodajte svoja dejanja (obvestilo, luči, ...).",
@@ -1587,7 +1588,7 @@
     },
     "door_opens_at_end": {
       "label": "Odprtje vrat konča cikel",
-      "doc": "Za stroje, katerih vrata med delovanjem ostanejo zaklenjena (večina pralnih strojev s sprednjim polnjenjem) ali jih ob koncu odprejo sami (pomivalni stroji z AirDry). Vrata, odprta za spodnji čas zadrževanja, cikel končajo, namesto da ga zaustavijo; kratko odprtje se prezre. Ko je cikel zaustavljen, ga vrata končajo šele, ko je prepoznani program skoraj končan, zato ga odprtje vrat sredi programa še vedno zaustavi. Potrebuje Entiteto senzorja vrat."
+      "doc": "Za stroje, katerih vrata med delovanjem ostanejo zaklenjena (večina pralnih strojev s sprednjim polnjenjem) ali jih ob koncu odprejo sami (pomivalni stroji z AirDry). Vrata, ki so pri nizki moči odprta za spodnji čas zadrževanja, cikel končajo, namesto da ga zaustavijo; kratko odprtje se prezre. Ko je cikel zaustavljen, se to zgodi šele, ko je prepoznani program skoraj končan, zato premor sredi programa ostane premor. Potrebuje Entiteto senzorja vrat."
     },
     "door_end_dwell_seconds": {
       "label": "Čas odprtosti vrat za zaključek",

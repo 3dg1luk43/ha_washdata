@@ -1053,6 +1053,7 @@
     "pg_in_sample_note": "Estes ciclos ajudaram a construir os perfis com que são comparados, por isso os resultados são otimistas: conte com um pouco menos de correspondências certas em ciclos novos.",
     "hist_tail_trimmed": "Foram cortados {min} min de espera após o fim do ciclo, tal como faz a integração em tempo real",
     "invalid_threshold_pair": "O Limiar de Paragem ({stop} W) tem de ser inferior ao Limiar de Início ({start} W). Nada foi guardado; altere ambos em conjunto.",
+    "end_gate_check_failed": "Não foi possível verificar as definições de tempo sugeridas em relação às pausas deste aparelho. Nada foi guardado; tente novamente.",
     "hist_truncated": "parou no limite de {n} leituras, pelo que o resto do histórico não foi analisado",
     "hist_warn_kw": "A leitura mais alta é de apenas {w}. Este sensor parece indicar quilowatts; o WashData precisa de watts, por isso não é possível detetar ciclos.",
     "hist_warn_naive_time": "{n} carimbos de data/hora não têm fuso horário e foram lidos como UTC. Se o ficheiro usar a hora local, os ciclos ficam desfasados pela sua diferença em relação ao UTC e podem perder-se leituras perto de uma mudança da hora de verão.",
@@ -1534,7 +1535,7 @@
     },
     "door_opens_at_end": {
       "label": "Abrir a Porta Termina o Ciclo",
-      "doc": "Para máquinas cuja porta fica trancada durante o funcionamento (a maioria das máquinas de lavar roupa de carga frontal) ou que a abrem sozinhas no fim (máquinas de lavar loiça com AirDry). Uma porta que fica aberta durante o tempo de espera abaixo termina o ciclo em vez de o pausar; uma abertura breve é ignorada. Com o ciclo em pausa, só termina quando o programa reconhecido está quase concluído, por isso abrir a porta a meio do programa apenas o pausa. Requer uma Entidade do Sensor de Porta."
+      "doc": "Para máquinas cuja porta fica trancada durante o funcionamento (a maioria das máquinas de lavar roupa de carga frontal) ou que a abrem sozinhas no fim (máquinas de lavar loiça com AirDry). Uma porta que fica aberta durante o tempo de espera abaixo, com a potência já baixa, termina o ciclo em vez de o pausar; uma abertura breve é ignorada. Em pausa, isto só acontece quando o programa reconhecido está quase concluído, por isso uma pausa a meio do programa continua a ser uma pausa. Requer uma Entidade do Sensor de Porta."
     },
     "door_end_dwell_seconds": {
       "label": "Tempo de Espera com Porta Aberta para Fim",

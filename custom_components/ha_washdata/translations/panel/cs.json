@@ -1139,6 +1139,7 @@
     "cycle_context_none": "Recorder kolem tohoto cyklu neuchovává žádné odečty (Home Assistant ve výchozím nastavení uchovává historii 10 dní).",
     "cycle_context_tip": "Jen pro zobrazení: ukazuje historii snímače výkonu z recorderu kolem tohoto cyklu, pokud je ještě uložená. Chcete-li přidávat neúspěšné pokusy o spuštění do budoucích cyklů, použijte Náběh křivky (Nastavení > Detekce > Start cyklu), který mění uložené doby trvání.",
     "invalid_threshold_pair": "Práh zastavení ({stop} W) musí být nižší než Práh spuštění ({start} W). Nic nebylo uloženo; změňte obě hodnoty společně.",
+    "end_gate_check_failed": "Navrhovaná nastavení časování se nepodařilo ověřit vůči pauzám tohoto spotřebiče. Nic nebylo uloženo; zkuste to znovu.",
     "bp_admin_only": "Šablony instaluje správce.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Vytvořeno WashData pro {device}. Přidejte své akce (oznámení, světla, ...).",
@@ -1583,7 +1584,7 @@
     },
     "door_opens_at_end": {
       "label": "Otevření dveří ukončí cyklus",
-      "doc": "Pro spotřebiče, jejichž dveře zůstávají během chodu zamčené (většina praček s předním plněním), nebo které je na konci samy otevřou (myčky s AirDry). Dveře otevřené po dobu níže cyklus ukončí místo pozastavení; krátké otevření se ignoruje. Když je cyklus pozastavený, dveře jej ukončí až ve chvíli, kdy je rozpoznaný program téměř u konce, takže otevření dveří uprostřed programu cyklus dál jen pozastaví. Vyžaduje Entitu senzoru dveří."
+      "doc": "Pro spotřebiče, jejichž dveře zůstávají během chodu zamčené (většina praček s předním plněním), nebo které je na konci samy otevřou (myčky s AirDry). Dveře otevřené při nízkém výkonu po dobu uvedenou níže cyklus ukončí místo pozastavení; krátké otevření se ignoruje. Když je cyklus pozastavený, stane se to až ve chvíli, kdy je rozpoznaný program téměř u konce, takže pozastavení uprostřed programu zůstane pozastavením. Vyžaduje Entitu senzoru dveří."
     },
     "door_end_dwell_seconds": {
       "label": "Čekání na otevření dveří pro ukončení",

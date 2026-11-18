@@ -1122,6 +1122,7 @@
     "cycle_context_none": "Recorder nema očitanja oko ovog ciklusa (Home Assistant standardno čuva povijest 10 dana).",
     "cycle_context_tip": "Samo za prikaz: pokazuje povijest senzora snage iz recordera oko ovog ciklusa, ako je još spremljena. Da biste neuspjele pokušaje pokretanja dodali budućim ciklusima, koristite Uvodne sekunde krivulje (Postavke > Otkrivanje > Početak ciklusa), što mijenja spremljena trajanja.",
     "invalid_threshold_pair": "Prag zaustavljanja ({stop} W) mora biti ispod Praga pokretanja ({start} W). Ništa nije spremljeno; promijenite obje vrijednosti zajedno.",
+    "end_gate_check_failed": "Predložene postavke vremena nije bilo moguće provjeriti u odnosu na pauze ovog uređaja. Ništa nije spremljeno; pokušajte ponovno.",
     "bp_admin_only": "Predloške instalira administrator.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Stvorio WashData za {device}. Dodajte svoje radnje (obavijest, svjetla, ...).",
@@ -1569,7 +1570,7 @@
     },
     "door_opens_at_end": {
       "label": "Otvaranje vrata završava ciklus",
-      "doc": "Za uređaje čija vrata ostaju zaključana tijekom rada (većina perilica rublja s prednjim punjenjem) ili koji ih sami otvore na kraju (perilice posuđa s AirDry). Vrata otvorena tijekom vremena zadržavanja ispod završavaju ciklus umjesto da ga pauziraju; kratko otvaranje se zanemaruje. Dok je ciklus pauziran, vrata ga završavaju tek kad je prepoznati program pri kraju, pa ga otvaranje vrata usred programa i dalje pauzira. Zahtijeva Entitet senzora vrata."
+      "doc": "Za uređaje čija vrata ostaju zaključana tijekom rada (većina perilica rublja s prednjim punjenjem) ili koji ih sami otvore na kraju (perilice posuđa s AirDry). Vrata otvorena uz nisku snagu tijekom vremena zadržavanja navedenog ispod završavaju ciklus umjesto da ga pauziraju; kratko otvaranje se zanemaruje. Dok je ciklus pauziran, to se događa tek kad je prepoznati program pri kraju, pa pauza usred programa ostaje pauza. Zahtijeva Entitet senzora vrata."
     },
     "door_end_dwell_seconds": {
       "label": "Zadržavanje otvorenih vrata za završetak",

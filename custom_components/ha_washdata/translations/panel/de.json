@@ -1102,6 +1102,7 @@
     "hist_warn_naive_time_other": "{n} Zeitstempel haben keine Zeitzone und wurden als UTC gelesen. Wenn die Datei Ortszeit verwendet, sind die Zyklen um Ihren UTC-Versatz verschoben, und Messwerte nahe einer Sommerzeitumstellung können verloren gehen.",
     "hist_tail_trimmed": "{min} Min. Wartezeit nach dem Zyklusende wurden abgeschnitten, wie es auch die Integration im laufenden Betrieb tut",
     "invalid_threshold_pair": "Der Stoppschwellenwert ({stop} W) muss unter dem Startschwellenwert ({start} W) liegen. Es wurde nichts gespeichert; ändern Sie beide Werte gemeinsam.",
+    "end_gate_check_failed": "Die vorgeschlagenen Zeiteinstellungen konnten nicht mit den Pausen dieses Geräts abgeglichen werden. Es wurde nichts gespeichert; versuchen Sie es erneut.",
     "import_undo_hint": "Ein Wiederherstellungspunkt von vor dem letzten Import ({when}) wird aufbewahrt: {profiles} Profil(e) und {cycles} Zyklus/Zyklen.",
     "replace_undo_hint": "Zuvor wird ein Wiederherstellungspunkt gespeichert, sodass Sie diesen Import unter „Exportieren / Importieren“ rückgängig machen können.",
     "pg_in_sample_note": "Diese Zyklen haben die Profile mitgebildet, mit denen sie abgeglichen werden, daher sind die Ergebnisse optimistisch: Bei neuen Zyklen ist mit etwas weniger richtigen Zuordnungen zu rechnen.",
@@ -1570,7 +1571,7 @@
     },
     "door_opens_at_end": {
       "label": "Türöffnung beendet den Zyklus",
-      "doc": "Für Geräte, deren Tür während des Betriebs verriegelt bleibt (die meisten Frontlader-Waschmaschinen) oder die sie am Ende selbst öffnen (Geschirrspüler mit AirDry). Bleibt die Tür für die unten eingestellte Verweildauer offen, endet der Zyklus, statt zu pausieren; ein kurzes Öffnen wird ignoriert. Ist der Zyklus pausiert, endet er erst, wenn das erkannte Programm fast fertig ist, sodass ein Öffnen der Tür mitten im Programm ihn weiterhin pausiert. Erfordert eine Türsensor-Entität."
+      "doc": "Für Geräte, deren Tür während des Betriebs verriegelt bleibt (die meisten Frontlader-Waschmaschinen) oder die sie am Ende selbst öffnen (Geschirrspüler mit AirDry). Bleibt die Tür bei niedriger Leistung für die unten eingestellte Verweildauer offen, endet der Zyklus, statt zu pausieren; ein kurzes Öffnen wird ignoriert. In einer Pause geschieht das erst, wenn das erkannte Programm fast fertig ist, sodass eine Pause mitten im Programm eine Pause bleibt. Erfordert eine Türsensor-Entität."
     },
     "door_end_dwell_seconds": {
       "label": "Türöffnungs-Endverweildauer",

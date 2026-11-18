@@ -1105,6 +1105,7 @@
     "cycle_context_none": "Salvestis pole selle tsükli ümber ühtegi näitu (Home Assistant hoiab vaikimisi 10 päeva ajalugu).",
     "cycle_context_tip": "Ainult kuvamiseks: näitab võimsusanduri salvesti ajalugu selle tsükli ümber, kui see on veel alles. Katkenud käivituskatsete lisamiseks tulevastesse tsüklitesse kasutage sätet Kõvera eeljooks (Seaded > Tuvastamine > Tsükli Algus), mis muudab salvestatud kestusi.",
     "invalid_threshold_pair": "Peatumise Lävi ({stop} W) peab olema väiksem kui Käivitumise Lävi ({start} W). Midagi ei salvestatud; muutke mõlemat korraga.",
+    "end_gate_check_failed": "Soovitatud ajastussätteid ei õnnestunud selle seadme pauside suhtes kontrollida. Midagi ei salvestatud; proovige uuesti.",
     "bp_admin_only": "Malle installib administraator.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Loodud WashData poolt {device} jaoks. Lisa oma toimingud (teavitus, tuled, ...).",
@@ -1570,7 +1571,7 @@
     },
     "door_opens_at_end": {
       "label": "Ukse avamine lõpetab tsükli",
-      "doc": "Masinatele, mille uks on töö ajal lukus (enamik eestlaetavaid pesumasinaid) või mis avavad selle lõpus ise (AirDry-funktsiooniga nõudepesumasinad). Kui uks jääb allpool määratud viibimisajaks avatuks, lõpetab see tsükli, mitte ei peata seda; lühikest avamist eiratakse. Kui tsükkel on peatatud, lõpetab uks selle alles siis, kui tuvastatud programm on peaaegu lõpus, nii et ukse avamine programmi keskel peatab tsükli endiselt. Vajab sätet Ukse Anduri Olem."
+      "doc": "Masinatele, mille uks on töö ajal lukus (enamik eestlaetavaid pesumasinaid) või mis avavad selle lõpus ise (AirDry-funktsiooniga nõudepesumasinad). Kui uks jääb madala võimsuse juures allpool määratud viibimisajaks avatuks, lõpetab see tsükli, mitte ei peata seda; lühikest avamist eiratakse. Pausi ajal juhtub see alles siis, kui tuvastatud programm on peaaegu lõpus, nii et paus programmi keskel jääb pausiks. Vajab sätet Ukse Anduri Olem."
     },
     "door_end_dwell_seconds": {
       "label": "Ukse avamise lõppviibimisaeg",

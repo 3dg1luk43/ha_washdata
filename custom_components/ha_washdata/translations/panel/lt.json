@@ -1139,6 +1139,7 @@
     "cycle_context_none": "Recorder neturi rodmenų prieš šį ciklą ir po jo (Home Assistant pagal numatytuosius nustatymus saugo 10 dienų istoriją).",
     "cycle_context_tip": "Tik rodymui: rodo galios jutiklio recorder istoriją aplink šį ciklą, jei ji dar saugoma. Norėdami nepavykusius paleidimo bandymus pridėti prie būsimų ciklų, naudokite „Kreivės įžanginės sekundės“ (Nustatymai > Aptikimas > Ciklo pradžia); tai pakeičia išsaugotas trukmes.",
     "invalid_threshold_pair": "Sustabdymo slenkstis ({stop} W) turi būti mažesnis už Paleidimo slenkstį ({start} W). Niekas neišsaugota; keiskite abu kartu.",
+    "end_gate_check_failed": "Nepavyko patikrinti siūlomų laiko nustatymų pagal šio prietaiso pauzes. Niekas neišsaugota; bandykite dar kartą.",
     "bp_admin_only": "Šablonus diegia administratorius.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Sukurta WashData, skirta {device}. Pridėkite savo veiksmus (pranešimai, šviesos, ...).",
@@ -1587,7 +1588,7 @@
     },
     "door_opens_at_end": {
       "label": "Durų atidarymas užbaigia ciklą",
-      "doc": "Prietaisams, kurių durys veikimo metu lieka užrakintos (dauguma priekinio pakrovimo skalbimo mašinų) arba kurie pabaigoje patys jas atidaro (indaplovės su AirDry). Jei durys lieka atviros toliau nurodytą laukimo laiką, ciklas užbaigiamas, o ne pristabdomas; trumpas atidarymas ignoruojamas. Kai ciklas pristabdytas, durys jį užbaigia tik tada, kai atpažinta programa beveik baigta, todėl atidarius duris programos viduryje ciklas vis tiek pristabdomas. Reikalingas Durų jutiklio objektas."
+      "doc": "Prietaisams, kurių durys veikimo metu lieka užrakintos (dauguma priekinio pakrovimo skalbimo mašinų) arba kurie pabaigoje patys jas atidaro (indaplovės su AirDry). Jei esant mažai galiai durys lieka atviros toliau nurodytą laukimo laiką, ciklas užbaigiamas, o ne pristabdomas; trumpas atidarymas ignoruojamas. Kai ciklas pristabdytas, tai įvyksta tik tada, kai atpažinta programa beveik baigta, todėl pauzė programos viduryje lieka pauze. Reikalingas Durų jutiklio objektas."
     },
     "door_end_dwell_seconds": {
       "label": "Durų atidarymo pabaigos laukimas",

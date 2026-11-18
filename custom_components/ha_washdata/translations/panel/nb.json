@@ -1102,6 +1102,7 @@
     "hist_warn_naive_time_other": "{n} tidsstempler har ingen tidssone og ble lest som UTC. Hvis filen bruker lokal tid, er syklusene forskjøvet med UTC-forskyvningen din, og målinger rundt et sommertidsskifte kan gå tapt.",
     "hist_tail_trimmed": "{min} min venting etter at syklusen var ferdig ble klippet bort, slik integrasjonen gjør under drift",
     "invalid_threshold_pair": "Stoppterskel ({stop} W) må være under Startterskel ({start} W). Ingenting ble lagret; endre begge samtidig.",
+    "end_gate_check_failed": "De foreslåtte tidsinnstillingene kunne ikke kontrolleres mot pausene til dette apparatet. Ingenting ble lagret; prøv igjen.",
     "import_undo_hint": "Et gjenopprettingspunkt fra før siste import ({when}) er beholdt: {profiles} profil(er) og {cycles} syklus(er).",
     "replace_undo_hint": "Et gjenopprettingspunkt lagres først, så du kan angre denne importen fra Eksporter / Importer.",
     "pg_in_sample_note": "Disse syklusene var med på å bygge profilene de matches mot, så resultatene er optimistiske: forvent litt færre riktige match på nye sykluser.",
@@ -1570,7 +1571,7 @@
     },
     "door_opens_at_end": {
       "label": "Åpning av døren avslutter syklusen",
-      "doc": "For maskiner der døren forblir låst mens de kjører (de fleste frontmatede vaskemaskiner), eller som selv åpner den på slutten (oppvaskmaskiner med AirDry). En dør som står åpen i ventetiden nedenfor, avslutter syklusen i stedet for å sette den på pause; en kort åpning ignoreres. Mens syklusen er satt på pause, avsluttes den først når det gjenkjente programmet nesten er ferdig, så åpnes døren midt i programmet, settes syklusen fortsatt på pause. Krever en Dørsensorenhet."
+      "doc": "For maskiner der døren forblir låst mens de kjører (de fleste frontmatede vaskemaskiner), eller som selv åpner den på slutten (oppvaskmaskiner med AirDry). En dør som står åpen i ventetiden nedenfor ved lav effekt, avslutter syklusen i stedet for å sette den på pause; en kort åpning ignoreres. Under en pause skjer dette først når det gjenkjente programmet nesten er ferdig, så en pause midt i programmet forblir en pause. Krever en Dørsensorenhet."
     },
     "door_end_dwell_seconds": {
       "label": "Dørens åpningstid ved avslutning",

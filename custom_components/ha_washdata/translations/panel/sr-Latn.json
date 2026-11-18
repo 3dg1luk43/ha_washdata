@@ -1122,6 +1122,7 @@
     "cycle_context_none": "Recorder nema očitavanja oko ovog ciklusa (Home Assistant podrazumevano čuva istoriju 10 dana).",
     "cycle_context_tip": "Samo za prikaz: pokazuje istoriju senzora snage iz recordera oko ovog ciklusa, ako je još sačuvana. Da biste neuspele pokušaje pokretanja dodali budućim ciklusima, koristite Uvodne sekunde krive (Podešavanja > Detekcija > Start ciklusa), što menja sačuvana trajanja.",
     "invalid_threshold_pair": "Prag zaustavljanja ({stop} W) mora biti ispod Praga pokretanja ({start} W). Ništa nije sačuvano; promenite obe vrednosti zajedno.",
+    "end_gate_check_failed": "Predložena podešavanja vremena nije bilo moguće proveriti u odnosu na pauze ovog uređaja. Ništa nije sačuvano; pokušajte ponovo.",
     "bp_admin_only": "Predloške instalira administrator.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Kreirao WashData za {device}. Dodajte svoje akcije (obaveštenje, svetla, ...).",
@@ -1569,7 +1570,7 @@
     },
     "door_opens_at_end": {
       "label": "Otvaranje vrata završava ciklus",
-      "doc": "Za mašine čija vrata ostaju zaključana tokom rada (većina mašina za pranje veša sa prednjim punjenjem) ili koje ih same otvaraju na kraju (mašine za pranje sudova sa AirDry). Vrata otvorena tokom vremena zadržavanja ispod završavaju ciklus umesto da ga pauziraju; kratko otvaranje se zanemaruje. Dok je ciklus pauziran, vrata ga završavaju tek kada je prepoznati program pri kraju, pa ga otvaranje vrata usred programa i dalje pauzira. Zahteva Entitet senzora vrata."
+      "doc": "Za mašine čija vrata ostaju zaključana tokom rada (većina mašina za pranje veša sa prednjim punjenjem) ili koje ih same otvaraju na kraju (mašine za pranje sudova sa AirDry). Vrata otvorena uz nisku snagu tokom vremena zadržavanja navedenog ispod završavaju ciklus umesto da ga pauziraju; kratko otvaranje se zanemaruje. Dok je ciklus pauziran, to se dešava tek kada je prepoznati program pri kraju, pa pauza usred programa ostaje pauza. Zahteva Entitet senzora vrata."
     },
     "door_end_dwell_seconds": {
       "label": "Zadržavanje pri otvorenim vratima",

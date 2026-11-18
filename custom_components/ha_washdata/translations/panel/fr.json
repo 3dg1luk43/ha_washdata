@@ -1053,6 +1053,7 @@
     "pg_in_sample_note": "Ces cycles ont servi à construire les profils auxquels ils sont comparés, les résultats sont donc optimistes : attendez-vous à un peu moins de correspondances justes sur de nouveaux cycles.",
     "hist_tail_trimmed": "{min} min d'attente après la fin du cycle ont été supprimées, comme le fait l'intégration en direct",
     "invalid_threshold_pair": "Le Seuil d'arrêt ({stop} W) doit être inférieur au Seuil de démarrage ({start} W). Rien n'a été enregistré ; modifiez les deux ensemble.",
+    "end_gate_check_failed": "Les réglages de temporisation suggérés n'ont pas pu être vérifiés au regard des pauses de cet appareil. Rien n'a été enregistré ; réessayez.",
     "hist_truncated": "arrêté à la limite de {n} mesures, le reste de l'historique n'a donc pas été analysé",
     "hist_warn_kw": "La mesure la plus élevée n'est que de {w}. Ce capteur semble indiquer des kilowatts ; WashData a besoin de watts, donc aucun cycle ne peut être détecté.",
     "hist_warn_naive_time": "{n} horodatages n'ont pas de fuseau horaire et ont été lus en UTC. Si le fichier est en heure locale, les cycles sont décalés de votre écart avec UTC et des mesures proches d'un changement d'heure peuvent être perdues.",
@@ -1534,7 +1535,7 @@
     },
     "door_opens_at_end": {
       "label": "L'ouverture de la porte termine le cycle",
-      "doc": "Pour les appareils dont la porte reste verrouillée pendant le fonctionnement (la plupart des lave-linge à hublot) ou qui l'ouvrent eux-mêmes en fin de cycle (lave-vaisselle avec AirDry). Une porte restée ouverte pendant le délai ci-dessous termine le cycle au lieu de le mettre en pause ; une brève ouverture est ignorée. Si le cycle est en pause, il ne se termine que lorsque le programme reconnu est presque fini ; ouvrir la porte en milieu de programme ne fait donc que le mettre en pause. Nécessite une Entité capteur de porte."
+      "doc": "Pour les appareils dont la porte reste verrouillée pendant le fonctionnement (la plupart des lave-linge à hublot) ou qui l'ouvrent eux-mêmes en fin de cycle (lave-vaisselle avec AirDry). Une porte restée ouverte pendant le délai ci-dessous, alors que la puissance est retombée, termine le cycle au lieu de le mettre en pause ; une brève ouverture est ignorée. En pause, cela ne se produit qu'une fois le programme reconnu presque fini ; une pause en milieu de programme reste donc une pause. Nécessite une Entité capteur de porte."
     },
     "door_end_dwell_seconds": {
       "label": "Durée d'attente porte ouverte",

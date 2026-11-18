@@ -1105,6 +1105,7 @@
         "cycle_context_none": "Kaydedicide bu döngünün çevresine ait okuma yok (Home Assistant varsayılan olarak 10 günlük geçmiş tutar).",
         "cycle_context_tip": "Yalnızca görüntüleme: hâlâ saklanıyorsa güç sensörünün bu döngü çevresindeki kaydedici geçmişini gösterir. Başarısız başlatma denemelerini gelecekteki döngülere eklemek için Eğri Ön Kaydı'nı kullanın (Ayarlar > Algılama > Döngü Başlangıcı); bu, kaydedilen süreleri değiştirir.",
         "invalid_threshold_pair": "Durdurma Eşiği ({stop} W), Başlangıç Eşiği'nden ({start} W) düşük olmalı. Hiçbir şey kaydedilmedi; ikisini birlikte değiştirin.",
+        "end_gate_check_failed": "Önerilen zamanlama ayarları bu cihazın duraklamalarına göre kontrol edilemedi. Hiçbir şey kaydedilmedi; tekrar deneyin.",
         "bp_admin_only": "Şablonları bir yönetici yükler.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "{device} için WashData tarafından oluşturuldu. Eylemlerinizi ekleyin (bildir, ışıklar, ...).",
@@ -1558,7 +1559,7 @@
         },
         "door_opens_at_end": {
             "label": "Kapının Açılması Döngüyü Bitirir",
-            "doc": "Çalışırken kapısı kilitli kalan (çoğu önden yüklemeli çamaşır makinesi) veya sonda kapıyı kendisi açan (AirDry özellikli bulaşık makineleri) cihazlar için. Aşağıdaki bekleme süresi kadar açık kalan kapı döngüyü duraklatmak yerine bitirir; kısa bir açılma yok sayılır. Döngü duraklatılmışken kapı onu yalnızca tanınan program bitmek üzereyken bitirir, bu nedenle programın ortasında kapıyı açmak döngüyü yine duraklatır. Kapı Sensörü Varlığı gerektirir."
+            "doc": "Çalışırken kapısı kilitli kalan (çoğu önden yüklemeli çamaşır makinesi) veya sonda kapıyı kendisi açan (AirDry özellikli bulaşık makineleri) cihazlar için. Güç düşükken aşağıdaki bekleme süresi kadar açık kalan kapı döngüyü duraklatmak yerine bitirir; kısa bir açılma yok sayılır. Duraklama sırasında bu yalnızca tanınan program bitmek üzereyken olur, bu nedenle programın ortasındaki bir duraklama duraklama olarak kalır. Kapı Sensörü Varlığı gerektirir."
         },
         "door_end_dwell_seconds": {
             "label": "Kapı Açık Bekleme Süresi",

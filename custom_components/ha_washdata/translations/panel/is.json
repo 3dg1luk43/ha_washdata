@@ -1102,6 +1102,7 @@
     "hist_warn_naive_time_other": "{n} tímastimplar hafa ekkert tímabelti og voru lesnir sem UTC. Ef skráin notar staðartíma hliðrast lotur um UTC-frávikið þitt, og mælingar í kringum skipti yfir í sumartíma geta glatast.",
     "hist_tail_trimmed": "{min} mín. bið eftir lok lotunnar var klippt af, eins og samþættingin gerir í rauntíma",
     "invalid_threshold_pair": "Stöðvunarþröskuldur ({stop} W) verður að vera undir Ræsingarþröskuldi ({start} W). Ekkert var vistað; breyttu báðum saman.",
+    "end_gate_check_failed": "Ekki var hægt að bera tímastillingarnar sem lagðar voru til saman við hlé þessa tækis. Ekkert var vistað; reyndu aftur.",
     "import_undo_hint": "Endurheimtarpunktur frá því fyrir síðasta innflutning ({when}) er geymdur með {profiles} prófíl(um) og {cycles} lotu(m).",
     "replace_undo_hint": "Endurheimtarpunktur er vistaður fyrst, svo þú getur afturkallað þennan innflutning undir Útflutningur / Innflutningur.",
     "pg_in_sample_note": "Þessar lotur hjálpuðu til við að byggja sniðin sem þær eru bornar saman við, svo niðurstöðurnar eru bjartsýnar: búast má við aðeins færri réttum samsvörunum á nýjum lotum.",
@@ -1570,7 +1571,7 @@
     },
     "door_opens_at_end": {
       "label": "Opnun hurðar lýkur lotunni",
-      "doc": "Fyrir vélar sem halda hurðinni læstri meðan þær ganga (flestar framhlaðnar þvottavélar) eða opna hana sjálfar í lokin (uppþvottavélar með AirDry). Hurð sem stendur opin í dvaltímann hér að neðan lýkur lotunni í stað þess að gera hlé á henni; stutt opnun er hunsuð. Á meðan hlé er á lotunni lýkur hurðin henni aðeins þegar þekkta kerfið er næstum búið, svo ef hurðin er opnuð í miðju kerfi er lotan áfram í hléi. Krefst Dyraskynjareiningar."
+      "doc": "Fyrir vélar sem halda hurðinni læstri meðan þær ganga (flestar framhlaðnar þvottavélar) eða opna hana sjálfar í lokin (uppþvottavélar með AirDry). Hurð sem stendur opin í dvaltímann hér að neðan, á meðan aflið er lágt, lýkur lotunni í stað þess að gera hlé á henni; stutt opnun er hunsuð. Í hléi gerist þetta aðeins þegar þekkta kerfið er næstum búið, svo hlé í miðju kerfi helst hlé. Krefst Dyraskynjareiningar."
     },
     "door_end_dwell_seconds": {
       "label": "Dvaltími hurðar við lok",

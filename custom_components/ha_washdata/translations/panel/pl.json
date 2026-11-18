@@ -1139,6 +1139,7 @@
     "cycle_context_none": "Recorder nie przechowuje żadnych odczytów z okresu wokół tego cyklu (Home Assistant domyślnie przechowuje historię przez 10 dni).",
     "cycle_context_tip": "Tylko podgląd: pokazuje historię czujnika mocy z recordera wokół tego cyklu, jeśli jest jeszcze przechowywana. Aby dołączać nieudane próby startu do przyszłych cykli, użyj ustawienia Wstępny zapis krzywej (Ustawienia > Wykrywanie > Start Cyklu), które zmienia zapisane czasy trwania.",
     "invalid_threshold_pair": "Próg Zatrzymania ({stop} W) musi być niższy niż Próg Startu ({start} W). Nic nie zostało zapisane; zmień obie wartości razem.",
+    "end_gate_check_failed": "Nie udało się sprawdzić sugerowanych ustawień czasowych względem przerw tego urządzenia. Nic nie zostało zapisane; spróbuj ponownie.",
     "bp_admin_only": "Szablony instaluje administrator.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Utworzone przez WashData dla {device}. Dodaj swoje akcje (powiadomienie, światła, ...).",
@@ -1583,7 +1584,7 @@
     },
     "door_opens_at_end": {
       "label": "Otwarcie drzwi kończy cykl",
-      "doc": "Dla urządzeń, których drzwi pozostają zablokowane podczas pracy (większość pralek ładowanych od przodu) albo które same otwierają je na końcu (zmywarki z AirDry). Drzwi otwarte przez czas oczekiwania poniżej kończą cykl zamiast go wstrzymywać; krótkie otwarcie jest ignorowane. Gdy cykl jest wstrzymany, drzwi kończą go dopiero wtedy, gdy rozpoznany program jest bliski końca, więc otwarcie drzwi w trakcie programu nadal go tylko wstrzymuje. Wymaga Encji Czujnika Drzwi."
+      "doc": "Dla urządzeń, których drzwi pozostają zablokowane podczas pracy (większość pralek ładowanych od przodu) albo które same otwierają je na końcu (zmywarki z AirDry). Drzwi otwarte przy niskiej mocy przez czas oczekiwania podany poniżej kończą cykl zamiast go wstrzymywać; krótkie otwarcie jest ignorowane. Gdy cykl jest wstrzymany, dzieje się to dopiero wtedy, gdy rozpoznany program jest bliski końca, więc wstrzymanie w trakcie programu pozostaje wstrzymaniem. Wymaga Encji Czujnika Drzwi."
     },
     "door_end_dwell_seconds": {
       "label": "Czas otwarcia drzwi do zakończenia cyklu",

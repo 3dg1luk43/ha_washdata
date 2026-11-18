@@ -1122,6 +1122,7 @@
         "cycle_context_none": "Recorder nema očitanja oko ovog ciklusa (Home Assistant standardno čuva historiju 10 dana).",
         "cycle_context_tip": "Samo za prikaz: pokazuje historiju senzora snage iz recordera oko ovog ciklusa, ako je još sačuvana. Da biste neuspjele pokušaje pokretanja dodali budućim ciklusima, koristite Uvodne sekunde krivulje (Postavke > Detekcija > Početak ciklusa), što mijenja sačuvana trajanja.",
         "invalid_threshold_pair": "Prag zaustavljanja ({stop} W) mora biti ispod Praga pokretanja ({start} W). Ništa nije sačuvano; promijenite obje vrijednosti zajedno.",
+        "end_gate_check_failed": "Predložene postavke vremena nije bilo moguće provjeriti u odnosu na pauze ovog uređaja. Ništa nije sačuvano; pokušajte ponovo.",
         "bp_admin_only": "Predloške instalira administrator.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "Kreirao WashData za {device}. Dodajte svoje radnje (obavijest, svjetla, ...).",
@@ -1569,7 +1570,7 @@
         },
         "door_opens_at_end": {
             "label": "Otvaranje vrata završava ciklus",
-            "doc": "Za mašine čija vrata ostaju zaključana tokom rada (većina mašina za veš s prednjim punjenjem) ili koje ih same otvore na kraju (mašine za suđe s AirDry). Vrata otvorena tokom vremena zadržavanja ispod završavaju ciklus umjesto da ga pauziraju; kratko otvaranje se zanemaruje. Dok je ciklus pauziran, vrata ga završavaju tek kad je prepoznati program pri kraju, pa ga otvaranje vrata sredinom programa i dalje pauzira. Zahtijeva Entitet senzora vrata."
+            "doc": "Za mašine čija vrata ostaju zaključana tokom rada (većina mašina za veš s prednjim punjenjem) ili koje ih same otvore na kraju (mašine za suđe s AirDry). Vrata otvorena uz nisku snagu tokom vremena zadržavanja navedenog ispod završavaju ciklus umjesto da ga pauziraju; kratko otvaranje se zanemaruje. Dok je ciklus pauziran, to se dešava tek kad je prepoznati program pri kraju, pa pauza sredinom programa ostaje pauza. Zahtijeva Entitet senzora vrata."
         },
         "door_end_dwell_seconds": {
             "label": "Zadržavanje otvorenih vrata za završetak",

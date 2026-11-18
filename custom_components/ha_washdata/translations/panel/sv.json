@@ -1102,6 +1102,7 @@
     "hist_warn_naive_time_other": "{n} tidsstämplar saknar tidszon och lästes som UTC. Om filen använder lokal tid är cyklerna förskjutna med din UTC-förskjutning, och mätvärden kring ett sommartidsbyte kan försvinna.",
     "hist_tail_trimmed": "{min} min väntan efter att cykeln avslutats klipptes bort, precis som integrationen gör under drift",
     "invalid_threshold_pair": "Stopptröskel ({stop} W) måste vara under Starttröskel ({start} W). Inget sparades; ändra båda tillsammans.",
+    "end_gate_check_failed": "De föreslagna tidsinställningarna kunde inte kontrolleras mot den här apparatens pauser. Inget sparades; försök igen.",
     "import_undo_hint": "En återställningspunkt från före den senaste importen ({when}) finns kvar: {profiles} profil(er) och {cycles} cykel/cykler.",
     "replace_undo_hint": "En återställningspunkt sparas först, så att du kan ångra den här importen under Exportera / Importera.",
     "pg_in_sample_note": "De här cyklerna var med och byggde de profiler de matchas mot, så resultaten är optimistiska: räkna med något färre korrekta matchningar på nya cykler.",
@@ -1570,7 +1571,7 @@
     },
     "door_opens_at_end": {
       "label": "Dörröppning avslutar cykeln",
-      "doc": "För maskiner vars dörr förblir låst medan de kör (de flesta frontmatade tvättmaskiner) eller som själva öppnar den i slutet (diskmaskiner med AirDry). En dörr som står öppen under uppehållstiden nedan avslutar cykeln i stället för att pausa den; en kort öppning ignoreras. Medan cykeln är pausad avslutas den först när det identifierade programmet nästan är klart, så om dörren öppnas mitt i programmet pausas cykeln fortfarande. Kräver en Dörrsensorentitet."
+      "doc": "För maskiner vars dörr förblir låst medan de kör (de flesta frontmatade tvättmaskiner) eller som själva öppnar den i slutet (diskmaskiner med AirDry). En dörr som står öppen under uppehållstiden nedan vid låg effekt avslutar cykeln i stället för att pausa den; en kort öppning ignoreras. Under en paus sker detta först när det identifierade programmet nästan är klart, så en paus mitt i programmet förblir en paus. Kräver en Dörrsensorentitet."
     },
     "door_end_dwell_seconds": {
       "label": "Dörröppningens uppehållstid vid avslut",

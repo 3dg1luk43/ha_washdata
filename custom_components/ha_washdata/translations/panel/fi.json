@@ -1105,6 +1105,7 @@
     "cycle_context_none": "Tallentimessa ei ole lukemia tämän syklin ympäriltä (Home Assistant säilyttää oletuksena 10 päivän historian).",
     "cycle_context_tip": "Vain näyttöä varten: näyttää tehoanturin tallentimen historian tämän syklin ympäriltä, jos se on vielä tallessa. Jos haluat liittää keskeytyneet käynnistysyritykset tuleviin sykleihin, käytä asetusta Käyrän esijakso (Asetukset > Tunnistus > Syklin alku). Se muuttaa tallennettuja kestoja.",
     "invalid_threshold_pair": "Pysäytyskynnyksen ({stop} W) on oltava pienempi kuin Käynnistyskynnys ({start} W). Mitään ei tallennettu; muuta molempia yhdessä.",
+    "end_gate_check_failed": "Ehdotettuja ajoitusasetuksia ei voitu tarkistaa tämän laitteen taukoja vasten. Mitään ei tallennettu; yritä uudelleen.",
     "bp_admin_only": "Järjestelmänvalvoja asentaa mallit.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "WashDatan luoma automaatio laitteelle {device}. Lisää omat toimintosi (ilmoitus, valot, ...).",
@@ -1570,7 +1571,7 @@
     },
     "door_opens_at_end": {
       "label": "Oven avaaminen päättää syklin",
-      "doc": "Koneille, joiden ovi pysyy lukittuna käytön aikana (useimmat edestä täytettävät pyykinpesukoneet) tai jotka avaavat sen itse lopussa (AirDry-toiminnolla varustetut astianpesukoneet). Jos ovi pysyy auki alla asetetun viiveen ajan, sykli päättyy tauon sijaan; lyhyt avaus ohitetaan. Kun sykli on tauolla, se päättyy vasta, kun tunnistettu ohjelma on lähes valmis, joten oven avaaminen kesken ohjelman asettaa syklin edelleen tauolle. Vaatii asetuksen Ovianturin entiteetti."
+      "doc": "Koneille, joiden ovi pysyy lukittuna käytön aikana (useimmat edestä täytettävät pyykinpesukoneet) tai jotka avaavat sen itse lopussa (AirDry-toiminnolla varustetut astianpesukoneet). Jos ovi pysyy auki alla asetetun viiveen ajan tehon ollessa alhainen, sykli päättyy tauon sijaan; lyhyt avaus ohitetaan. Tauon aikana näin käy vasta, kun tunnistettu ohjelma on lähes valmis, joten tauko kesken ohjelman pysyy taukona. Vaatii asetuksen Ovianturin entiteetti."
     },
     "door_end_dwell_seconds": {
       "label": "Oven avauksen loppuviive",

@@ -1053,6 +1053,7 @@
     "pg_in_sample_note": "Aceste cicluri au ajutat la construirea profilurilor cu care sunt comparate, deci rezultatele sunt optimiste: așteptați-vă la ceva mai puține potriviri corecte pe cicluri noi.",
     "hist_tail_trimmed": "Au fost eliminate {min} min de așteptare după sfârșitul ciclului, la fel cum face integrarea în timp real",
     "invalid_threshold_pair": "Pragul de Oprire ({stop} W) trebuie să fie sub Pragul de Pornire ({start} W). Nu s-a salvat nimic; modificați-le pe amândouă împreună.",
+    "end_gate_check_failed": "Setările de temporizare sugerate nu au putut fi verificate în raport cu pauzele acestui aparat. Nu s-a salvat nimic; încercați din nou.",
     "hist_truncated": "oprit la limita de {n} citiri, așa că restul istoricului nu a fost analizat",
     "hist_warn_kw": "Cea mai mare citire este doar {w}. Acest senzor pare să raporteze kilowați; WashData are nevoie de wați, așa că nu se poate detecta niciun ciclu.",
     "hist_warn_naive_time": "{n} de marcaje temporale nu au fus orar și au fost citite ca UTC. Dacă fișierul folosește ora locală, ciclurile sunt decalate cu diferența dvs. față de UTC, iar citirile din jurul trecerii la ora de vară se pot pierde.",
@@ -1515,7 +1516,7 @@
     },
     "door_opens_at_end": {
       "label": "Deschiderea ușii încheie ciclul",
-      "doc": "Pentru aparatele a căror ușă rămâne blocată în timpul funcționării (majoritatea mașinilor de spălat rufe cu încărcare frontală) sau care o deschid singure la final (mașini de spălat vase cu AirDry). O ușă lăsată deschisă pe durata de mai jos încheie ciclul în loc să îl pună pe pauză; o deschidere scurtă este ignorată. Cât timp ciclul este pe pauză, se încheie doar când programul recunoscut este aproape gata, așa că deschiderea ușii la mijlocul programului doar îl pune pe pauză. Necesită o Entitate Senzor Ușă."
+      "doc": "Pentru aparatele a căror ușă rămâne blocată în timpul funcționării (majoritatea mașinilor de spălat rufe cu încărcare frontală) sau care o deschid singure la final (mașini de spălat vase cu AirDry). O ușă lăsată deschisă pe durata de mai jos, cu puterea deja scăzută, încheie ciclul în loc să îl pună pe pauză; o deschidere scurtă este ignorată. În pauză, acest lucru se întâmplă doar când programul recunoscut este aproape gata, așa că o pauză la mijlocul programului rămâne o pauză. Necesită o Entitate Senzor Ușă."
     },
     "door_end_dwell_seconds": {
       "label": "Durată de așteptare la deschiderea ușii",

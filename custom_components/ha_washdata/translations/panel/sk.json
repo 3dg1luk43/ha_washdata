@@ -1139,6 +1139,7 @@
     "cycle_context_none": "Recorder okolo tohto cyklu neuchováva žiadne merania (Home Assistant štandardne uchováva históriu 10 dní).",
     "cycle_context_tip": "Len na zobrazenie: ukazuje históriu senzora výkonu z recordera okolo tohto cyklu, ak je ešte uložená. Ak chcete pridávať neúspešné pokusy o spustenie do budúcich cyklov, použite Nábeh krivky (Nastavenia > Detekcia > Začiatok cyklu), ktorý mení uložené doby trvania.",
     "invalid_threshold_pair": "Prah zastavenia ({stop} W) musí byť nižší ako Prah spustenia ({start} W). Nič sa neuložilo; zmeňte obe hodnoty spolu.",
+    "end_gate_check_failed": "Navrhované nastavenia časovania sa nepodarilo overiť voči pauzám tohto spotrebiča. Nič sa neuložilo; skúste to znova.",
     "bp_admin_only": "Šablóny inštaluje správca.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Vytvorené WashData pre {device}. Pridajte svoje akcie (upozornenie, svetlá, ...).",
@@ -1583,7 +1584,7 @@
     },
     "door_opens_at_end": {
       "label": "Otvorenie dverí ukončí cyklus",
-      "doc": "Pre spotrebiče, ktorých dvere zostávajú počas chodu zamknuté (väčšina práčok s predným plnením), alebo ktoré ich na konci samy otvoria (umývačky s AirDry). Dvere otvorené počas času nižšie cyklus ukončia namiesto pozastavenia; krátke otvorenie sa ignoruje. Keď je cyklus pozastavený, dvere ho ukončia až vtedy, keď je rozpoznaný program takmer na konci, takže otvorenie dverí uprostred programu cyklus naďalej len pozastaví. Vyžaduje Entitu senzora dverí."
+      "doc": "Pre spotrebiče, ktorých dvere zostávajú počas chodu zamknuté (väčšina práčok s predným plnením), alebo ktoré ich na konci samy otvoria (umývačky s AirDry). Dvere otvorené pri nízkom výkone počas času uvedeného nižšie cyklus ukončia namiesto pozastavenia; krátke otvorenie sa ignoruje. Keď je cyklus pozastavený, stane sa to až vtedy, keď je rozpoznaný program takmer na konci, takže pozastavenie uprostred programu zostane pozastavením. Vyžaduje Entitu senzora dverí."
     },
     "door_end_dwell_seconds": {
       "label": "Čakanie na otvorenie dverí pre ukončenie",

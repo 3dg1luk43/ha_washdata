@@ -1100,6 +1100,7 @@
         "cycle_context_none": "Regjistruesi nuk ka lexime rreth këtij cikli (si parazgjedhje Home Assistant ruan historikun e 10 ditëve).",
         "cycle_context_tip": "Vetëm për shfaqje: tregon historikun e regjistruesit për sensorin e fuqisë rreth këtij cikli, nëse ruhet ende. Për të shtuar përpjekjet e dështuara të nisjes në ciklet e ardhshme, përdorni Sekondat hyrëse të kurbës (Cilësimet > Zbulim > Fillimi i ciklit), që ndryshon kohëzgjatjet e ruajtura.",
         "invalid_threshold_pair": "Pragu i ndalimit ({stop} W) duhet të jetë më i ulët se Pragu i nisjes ({start} W). Nuk u ruajt asgjë; ndryshojini të dy bashkë.",
+        "end_gate_check_failed": "Cilësimet e sugjeruara të kohës nuk mund të kontrolloheshin kundrejt pauzave të kësaj pajisjeje. Nuk u ruajt asgjë; provoni përsëri.",
         "bp_admin_only": "Shabllonët i instalon një administrator.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "Krijuar nga WashData për {device}. Shtoni veprimet tuaja (njoftim, dritat, ...).",
@@ -1542,7 +1543,7 @@
         },
         "door_opens_at_end": {
             "label": "Hapja e derës e përfundon ciklin",
-            "doc": "Për pajisjet që e mbajnë derën të kyçur gjatë punës (shumica e lavatriçeve me ngarkim përpara) ose që e hapin vetë në fund (pjatalarëset me AirDry). Një derë e lënë hapur për kohën e pritjes më poshtë e përfundon ciklin në vend që ta vërë në pauzë; një hapje e shkurtër injorohet. Kur cikli është në pauzë, ai përfundon vetëm kur programi i njohur pothuajse ka mbaruar, prandaj hapja e derës në mes të programit thjesht e vë në pauzë. Kërkon cilësimin Entiteta e sensorit të derës."
+            "doc": "Për pajisjet që e mbajnë derën të kyçur gjatë punës (shumica e lavatriçeve me ngarkim përpara) ose që e hapin vetë në fund (pjatalarëset me AirDry). Një derë e lënë hapur për kohën e pritjes më poshtë, me fuqinë tashmë të rënë, e përfundon ciklin në vend që ta vërë në pauzë; një hapje e shkurtër injorohet. Në pauzë kjo ndodh vetëm kur programi i njohur pothuajse ka mbaruar, prandaj një pauzë në mes të programit mbetet pauzë. Kërkon cilësimin Entiteta e sensorit të derës."
         },
         "door_end_dwell_seconds": {
             "label": "Koha e pritjes me derë të hapur",

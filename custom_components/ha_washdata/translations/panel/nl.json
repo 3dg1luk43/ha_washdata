@@ -1102,6 +1102,7 @@
     "hist_warn_naive_time_other": "{n} tijdstempels hebben geen tijdzone en zijn als UTC gelezen. Als het bestand lokale tijd gebruikt, zijn cycli verschoven met uw UTC-verschil en kunnen metingen rond een zomertijdwissel wegvallen.",
     "hist_tail_trimmed": "{min} min wachten na het einde van de cyclus is weggeknipt, zoals de integratie dat tijdens gebruik ook doet",
     "invalid_threshold_pair": "Stopdrempel ({stop} W) moet lager zijn dan Startdrempel ({start} W). Er is niets opgeslagen; wijzig beide samen.",
+    "end_gate_check_failed": "De voorgestelde tijdinstellingen konden niet worden getoetst aan de pauzes van dit apparaat. Er is niets opgeslagen; probeer het opnieuw.",
     "import_undo_hint": "Er wordt een herstelpunt van vóór de laatste import ({when}) bewaard: {profiles} profiel(en) en {cycles} cyclus(sen).",
     "replace_undo_hint": "Eerst wordt een herstelpunt opgeslagen, zodat deze import via Exporteren / importeren ongedaan kan worden gemaakt.",
     "pg_in_sample_note": "Deze cycli hebben de profielen helpen opbouwen waarmee ze worden vergeleken, dus de resultaten zijn optimistisch: verwacht bij nieuwe cycli iets minder juiste matches.",
@@ -1570,7 +1571,7 @@
     },
     "door_opens_at_end": {
       "label": "Deur openen beëindigt de cyclus",
-      "doc": "Voor machines waarvan de deur vergrendeld blijft zolang ze draaien (de meeste voorladers) of die hem aan het einde zelf openen (vaatwassers met AirDry). Blijft de deur open gedurende de verwijltijd hieronder, dan eindigt de cyclus in plaats van te pauzeren; kort openen wordt genegeerd. Terwijl de cyclus gepauzeerd is, eindigt hij pas als het herkende programma bijna klaar is, zodat het openen van de deur halverwege het programma de cyclus nog steeds pauzeert. Vereist een Deursensorentiteit."
+      "doc": "Voor machines waarvan de deur vergrendeld blijft zolang ze draaien (de meeste voorladers) of die hem aan het einde zelf openen (vaatwassers met AirDry). Blijft de deur bij laag vermogen open gedurende de verwijltijd hieronder, dan eindigt de cyclus in plaats van te pauzeren; kort openen wordt genegeerd. In een pauze gebeurt dit pas als het herkende programma bijna klaar is, zodat een pauze halverwege het programma een pauze blijft. Vereist een Deursensorentiteit."
     },
     "door_end_dwell_seconds": {
       "label": "Deuropen-eindverwijltijd",
