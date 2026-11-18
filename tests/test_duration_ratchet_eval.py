@@ -55,3 +55,9 @@ def test_a_curve_that_never_reaches_the_stop_is_bad_input(tmp_path: Path) -> Non
     flat = tmp_path / "flat.csv"
     flat.write_text("minutes_since_start,power_w\n0,3.3\n1,3.3\n")
     assert ratchet.main(["--curve", str(flat)]) == 2
+
+
+def test_a_cut_that_does_not_shorten_the_curve_is_bad_input(tmp_path: Path) -> None:
+    curve = tmp_path / "c.csv"
+    curve.write_text("minutes_since_start,power_w\n" + "".join(f"{m},{1900 if m < 60 else 3.3}\n" for m in range(90)))
+    assert ratchet.main(["--curve", str(curve), "--cut", "3", "--cut-min", "131"]) == 2

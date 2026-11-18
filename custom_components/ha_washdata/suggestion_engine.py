@@ -135,6 +135,8 @@ def end_gate_pause_needs(
     off_delay_s: float,
     end_energy_wh: float,
     max_gap_s: float = 3600.0,
+    *,
+    strict: bool = False,
 ) -> list[float]:
     """How long each pause of a stored cycle must be bridged to keep it whole, s.
 
@@ -213,6 +215,8 @@ def end_gate_pause_needs(
             needs.append(need)
             i = j
     except Exception:  # noqa: BLE001 - a guard must never break a suggestion pass
+        if strict:
+            raise  # Apply all's check: a failed scan is not "no pause" (PR #529 review)
         return []
     return needs
 
@@ -224,6 +228,8 @@ def end_gate_would_split(
     min_off_gap_s: float,
     end_energy_wh: float,
     max_gap_s: float = 3600.0,
+    *,
+    strict: bool = False,
 ) -> bool:
     """Would the fallback end gate close this cycle inside one of its own pauses?
 
@@ -241,7 +247,9 @@ def end_gate_would_split(
         return False
     return any(
         need >= wait > 0
-        for need in end_gate_pause_needs(points, stop_w, off_delay_s, end_energy_wh, max_gap_s)
+        for need in end_gate_pause_needs(
+            points, stop_w, off_delay_s, end_energy_wh, max_gap_s, strict=strict
+        )
     )
 
 
@@ -2017,7 +2025,8 @@ class SuggestionEngine:
         return out
 
     def _end_gate_splits(
-        self, evidence: list[list[tuple[float, float]]], values: dict[str, Any]
+        self, evidence: list[list[tuple[float, float]]], values: dict[str, Any],
+        *, strict: bool = False,
     ) -> int:
         stop = _num(values.get(CONF_STOP_THRESHOLD_W))
         off_delay = _num(values.get(CONF_OFF_DELAY))
@@ -2027,7 +2036,7 @@ class SuggestionEngine:
             return 0
         return sum(
             1 for points in evidence
-            if end_gate_would_split(points, stop, off_delay, gap or 0.0, energy)
+            if end_gate_would_split(points, stop, off_delay, gap or 0.0, energy, strict=strict)
         )
 
     def _guard_end_gate(
@@ -2127,9 +2136,9 @@ class SuggestionEngine:
             if not evidence:
                 return []
             base = dict(self._effective_thresholds(self._entry_options()))
-            allowed = self._end_gate_splits(evidence, base)
+            allowed = self._end_gate_splits(evidence, base, strict=strict)
             drops: list[str] = []
-            while self._end_gate_splits(evidence, {**base, **values}) > allowed:
+            while self._end_gate_splits(evidence, {**base, **values}, strict=strict) > allowed:
                 candidates = [k for k in values if not stored[k].get("cascade")]
                 if not candidates:
                     break
@@ -2137,7 +2146,7 @@ class SuggestionEngine:
                 def cost(key: str) -> tuple[int, bool, int]:
                     rest = {k: v for k, v in values.items() if k != key}
                     return (
-                        self._end_gate_splits(evidence, {**base, **rest}),
+                        self._end_gate_splits(evidence, {**base, **rest}, strict=strict),
                         bool(stored[key].get("corrective")),
                         self._END_GATE_KEYS.index(key),
                     )

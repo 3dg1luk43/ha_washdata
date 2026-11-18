@@ -75,7 +75,10 @@ async def test_apply_all_suggestions_is_recorded_and_revertible() -> None:
     """The reporter's case, with their own before/after values."""
     # (The reporter's third key, smoothing_window, is no longer suggested - it sizes
     # a buffer nothing reads, audit SUGGEST-12 - so min_off_gap stands in for it.)
-    entry = _entry({"off_delay": 1780, "min_power": 1.2, "min_off_gap": 2000})
+    # Explicit thresholds: Min Power alone is not applied while Start/Stop follow
+    # it (PR #529 review), and this test is about recording, not that rule.
+    entry = _entry({"off_delay": 1780, "min_power": 1.2, "min_off_gap": 2000,
+                    "start_threshold_w": 5.0, "stop_threshold_w": 2.0})
     hass, manager = _hass()
     manager.profile_store.get_suggestions.return_value = {
         "off_delay": {"value": 1327},
@@ -272,7 +275,7 @@ async def test_every_option_writer_records_before_it_writes(drive) -> None:
     (old and new) BEFORE `async_update_entry` schedules the reload that rebuilds
     the store. Two of them (store download, selective import) had no test of it
     until this replaced a source-text count (audit TESTING-13)."""
-    entry = _entry({"min_power": 1.2})
+    entry = _entry({"min_power": 1.2, "start_threshold_w": 5.0, "stop_threshold_w": 2.0})
     hass, manager = _hass()
     hass.async_add_executor_job = AsyncMock(side_effect=lambda fn, *a: fn(*a))
     order: list[str] = []

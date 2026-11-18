@@ -390,13 +390,25 @@ class LearningManager:
         }
         if not any(k in END_GATE_KEYS for k in stored):
             return
+        generation = self._config_generation
         drops = await self.hass.async_add_executor_job(
             self.suggestion_engine.for_job().joint_end_gate_drops, stored
         )
+        # Judged against options a refresh has since replaced: the next check
+        # judges the new set (PR #529 review).
+        if generation != self._config_generation:
+            return
         self._withdraw_joint_drops(stored, drops or [])
 
     def _withdraw_joint_drops(self, judged: dict[str, Any], drops: list[str]) -> None:
         current = self.profile_store.get_suggestions() or {}
+        # The verdict holds only for the set it judged: if any pending end-gate
+        # value moved meanwhile, leave everything for a check of the new set.
+        for key in END_GATE_KEYS:
+            was = judged.get(key, {}).get("value") if isinstance(judged.get(key), dict) else None
+            now = current.get(key, {}).get("value") if isinstance(current.get(key), dict) else None
+            if was != now:
+                return
         gone = [
             key for key in drops
             if isinstance(current.get(key), dict)
@@ -646,6 +658,11 @@ class LearningManager:
         in-memory model kept sizing the operational pass from before the wipe."""
         self._sample_interval_model = StatisticalModel(max_samples=200)
         self._pending_intervals.clear()
+        # A pass already in the executor read the old cadence: its result must not
+        # refill the wiped store (PR #529 review). A new cadence commit schedules a
+        # pass in the new generation.
+        self._config_generation += 1
+        self._operational_pass_due = False
 
     def run_due_operational_pass(self) -> None:
         """Run the operational pass a cadence commit left due, once.

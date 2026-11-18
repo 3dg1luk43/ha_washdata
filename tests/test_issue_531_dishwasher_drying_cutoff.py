@@ -259,6 +259,11 @@ def test_mis_captures_do_not_vote_and_a_user_trim_counts_as_corrected() -> None:
     trimmed = cyc(cut, 9, meta={"trim": [0.0, cut[-1][0]]})
     built = probe._rebuild_envelope_sync([cyc(full, k) for k in range(5)] + [trimmed])  # noqa: SLF001
     assert built is not None and len(built[1]) == 6  # a user-trimmed run is never a cut-off
+    # A manual_duration the build rejects as a unit error (385200 s on a 7860 s
+    # trace) is no correction: that run is still a cut-off (PR #529 review).
+    absurd = cyc(cut, 10, manual_duration=385200.0)
+    built = probe._rebuild_envelope_sync([cyc(full, k) for k in range(5)] + [absurd])  # noqa: SLF001
+    assert built is not None and len(built[1]) == 5
 
 
 def test_a_sensor_outage_is_not_quiet_before_a_blip() -> None:
@@ -277,3 +282,69 @@ def test_an_unmatched_run_takes_no_blip_as_its_end() -> None:
     for t, p in _eco(hold_s=0):
         det.process_reading(p, T0 + timedelta(seconds=t))
     assert det._is_terminal_blip(T0 + timedelta(seconds=BEEP_S + 1), 6.3) is False  # noqa: SLF001
+
+
+def test_short_outages_do_not_add_up_to_observed_quiet() -> None:
+    """A pump reading, 90 s of 3.3 W, a 469 s outage, 60 s more, then the beep: no
+    single gap is 600 s, but most of the quiet was not observed (PR #529 review)."""
+    pump = BEEP_S - 711
+    pts = []
+    for t, p in _eco(hold_s=1800):
+        if pump <= t < pump + 10:
+            p = 25.0  # the last activity before the beep
+        if BEEP_S - 529 <= t < BEEP_S - 60:
+            continue  # the outage
+        pts.append((t, p))
+    # The beep at 91% of a 210 min programme: only the blip could end it there.
+    end_min, _cycle = _replay(210.0, pts)
+    assert end_min is None or end_min > 200
+    # The same beep after continuously observed drying does end it.
+    end_ok, _ = _replay(210.0, _eco(hold_s=1800))
+    assert end_ok is not None and end_ok < BEEP_S / 60 + 5
+
+
+def test_an_unobserved_gap_is_not_quiet_before_a_terminal_event() -> None:
+    """A 2 W reading, 900 s with no reading, then 20 W: not a terminal event."""
+    pts = [(float(t), 1900.0) for t in range(0, 600, 10)] + [(600.0, 2.0), (1500.0, 20.0)]
+    assert _events_after_quiet([t for t, _ in pts], [p for _, p in pts], 1900.0) == []
+
+
+async def test_the_one_time_rebuild_stays_pending_after_a_failure_or_a_swap(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """PR #529 review: a profile whose rebuild raised, or data an undo replaced while
+    the pass ran, must not be marked rebuilt."""
+    from unittest.mock import patch  # noqa: PLC0415
+
+    from custom_components.ha_washdata.const import CUT_SHORT_REBUILD_KEY  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(device_type="dishwasher", options={"stop_threshold_w": 4.5})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    store._data["profiles"] = {"A": {}, "B": {}}  # noqa: SLF001
+    store._data["past_cycles"] = [  # noqa: SLF001
+        {"id": f"{n}{i}", "profile_name": n, "status": "completed", "duration": 600.0,
+         "start_time": (T0 + timedelta(days=i)).isoformat(),
+         "power_data": [[float(t), 1000.0 if t < 500 else 1.0] for t in range(0, 601, 10)]}
+        for n in "AB" for i in range(3)
+    ]
+    store._data.pop(CUT_SHORT_REBUILD_KEY, None)  # noqa: SLF001
+    real = store.async_rebuild_envelope
+
+    async def flaky(name: str) -> bool:
+        if name == "B":
+            raise RuntimeError("boom")
+        return await real(name)
+
+    with patch.object(store, "async_rebuild_envelope", side_effect=flaky):
+        assert await store.async_rebuild_for_cut_short_rule() == 1  # A rebuilt
+    assert store.cut_short_rebuild_pending()
+
+    async def swapped(name: str) -> bool:
+        store._data_generation = getattr(store, "_data_generation", 0) + 1  # noqa: SLF001 - an undo
+        return await real(name)
+
+    with patch.object(store, "async_rebuild_envelope", side_effect=swapped):
+        await store.async_rebuild_for_cut_short_rule()
+    assert store.cut_short_rebuild_pending()
+    await store.async_rebuild_for_cut_short_rule()
+    assert not store.cut_short_rebuild_pending()

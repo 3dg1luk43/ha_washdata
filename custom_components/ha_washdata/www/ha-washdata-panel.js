@@ -611,7 +611,10 @@ const _SETTING_CONFLICTS = [
       min_power:        { msgKey: 'conflict.min_power.min_power', msgVars: {stop: v.stop_threshold_w}, msgFb: `Must be at or below Stop Threshold (${v.stop_threshold_w} W)`,
         fixVal: _minPowerMustStayAtOne(v.power_sensor, ctx)
           ? Math.max(1, +(v.stop_threshold_w * 0.8).toFixed(1)) : +(v.stop_threshold_w * 0.8).toFixed(1) },
-      stop_threshold_w: { msgKey: 'conflict.min_power.stop',      msgVars: {min: v.min_power},  msgFb: `Must be at or above Min Power (${v.min_power} W)`, fixVal: +(v.min_power * 1.25).toFixed(1) },
+      // Not a Stop fix that would reach Start: it would cascade into Start, and this
+      // conflict is soft when both are set (PR #529 review).
+      stop_threshold_w: { msgKey: 'conflict.min_power.stop',      msgVars: {min: v.min_power},  msgFb: `Must be at or above Min Power (${v.min_power} W)`,
+        fixVal: (v.start_threshold_w != null && +(v.min_power * 1.25).toFixed(1) >= v.start_threshold_w) ? null : +(v.min_power * 1.25).toFixed(1) },
     }),
   },
   {

@@ -5087,6 +5087,14 @@ async def ws_apply_suggestions(
                 # settings save can land while it is awaited or during the
                 # end-gate scan (PR #529).
                 fresh = {**entry.data, **entry.options}
+                # Min Power alone moves an unset Start or Stop Threshold, which
+                # follows it (#450), past every threshold check: not without that
+                # threshold in the same write (PR #529 review).
+                if CONF_MIN_POWER in updates and any(
+                    fresh.get(key) is None and key not in updates
+                    for key in (CONF_START_THRESHOLD_W, CONF_STOP_THRESHOLD_W)
+                ):
+                    updates.pop(CONF_MIN_POWER)
                 if not await _drop_unsafe_end_gate_updates(hass, manager, visible, updates):
                     connection.send_error(
                         msg["id"], "end_gate_check_failed",
@@ -5106,6 +5114,15 @@ async def ws_apply_suggestions(
                 if _inverted is not None:
                     connection.send_error(
                         msg["id"], "invalid_threshold_pair", _threshold_pair_message(*_inverted)
+                    )
+                    return
+                if updates and _get_manager(hass, entry_id) is not manager:
+                    # Reloaded while the check was awaited: the old manager's store
+                    # is gone, so nothing is written (PR #529 review).
+                    connection.send_error(
+                        msg["id"], "entry_reloaded",
+                        "The appliance was reloaded while the suggestions were applied. "
+                        "Nothing was saved; try again.",
                     )
                     return
                 if updates:
@@ -5191,6 +5208,11 @@ async def ws_set_suggestion_lock(
         # The lock Apply all selects under (PR #529 review): a mute that completes
         # before Apply reads the list is seen by it.
         async with _entry_options_lock(hass, msg["entry_id"]):
+            # Resolved again inside the lock: a reload while it waited replaced it.
+            manager = _get_manager(hass, entry_id)
+            if manager is None:
+                _err_not_found(connection, msg["id"], entry_id)
+                return
             await manager.profile_store.set_suggestion_locked(key, bool(msg["locked"]))
         learning = getattr(manager, "learning_manager", None)
         if msg["locked"] and learning is not None:

@@ -974,6 +974,8 @@ class CycleDetector:
         # dishwasher quiet-release gates so a single low sample after a telemetry
         # dropout can't satisfy them without the quiet having been observed.
         self._time_below_threshold_gapfree: float = 0.0
+        # The gap-free quiet a high reading ended, read by the terminal blip (#531).
+        self._gapfree_before_high: float = 0.0
         # The part of the current below-threshold run that fell inside a sensor
         # outage and so was NOT added to `_time_below_threshold` (item 266). Only
         # the hazard gate reads it, to place the quiet run's start honestly.
@@ -3384,6 +3386,7 @@ class CycleDetector:
         if is_high:
             self._time_above_threshold += high_dt
             self._time_below_threshold = 0.0
+            self._gapfree_before_high = self._time_below_threshold_gapfree
             self._time_below_threshold_gapfree = 0.0
             self._time_below_unobserved = 0.0
             # Energy for the guarded interval, computed with high_dt above.
@@ -6346,11 +6349,15 @@ class CycleDetector:
 
         Only on a matched run (the progress gate then holds it to the programme's
         end; unmatched, the end spike also shortens the wait to 30 min, which a
-        drying blip must not do), and only over quiet that was observed: a gap of
-        ``TERMINAL_BLIP_QUIET_MIN_S`` or more between readings (a sensor outage)
-        ends the stretch, so it cannot stand in for the quiet (PR #529 review).
+        drying blip must not do), and only after observed quiet: the gap-free
+        quiet this reading ended (``_time_below_threshold_gapfree`` before it was
+        reset, which an outage or an unobserved keepalive already resets) must
+        reach ``TERMINAL_BLIP_QUIET_MIN_S`` (PR #529 review). The readings give
+        the quiet's level.
         """
         if not self._matched_profile or float(self._expected_duration or 0.0) <= 0:
+            return False
+        if self._gapfree_before_high < TERMINAL_BLIP_QUIET_MIN_S:
             return False
         stop = float(self._config.stop_threshold_w)
         quiet: list[float] = []

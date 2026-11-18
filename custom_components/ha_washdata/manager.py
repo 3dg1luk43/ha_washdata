@@ -4143,6 +4143,14 @@ class WashDataManager:
             # dropped can leave the cache low while the appliance runs again (PR
             # #529 review). The cache stands in while the sensor is unavailable.
             live = self._live_power_state()
+            if live is None and self.detector.state == STATE_PAUSED:
+                # In a pause the cached reading may predate a resume the sensor never
+                # reported: no door end without a usable reading (PR #529 review; a
+                # PAUSED door end is new in 0.6.1, before it the dwell never fired
+                # there). Re-arm, so a sensor that comes back still gets its turn.
+                self._logger.debug("Door-end dwell fired in a pause with no usable power reading: re-arming")
+                self._arm_door_end_dwell()
+                return
             power_now = live[0] if live is not None else self._current_power
             if stop_thr > 0.0 and power_now >= stop_thr:
                 self._logger.debug(

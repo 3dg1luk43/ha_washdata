@@ -674,8 +674,108 @@ async def test_cadence_rows_belong_to_their_sensor_and_go_with_a_wipe(
 
     lm._sample_interval_model.add_samples([30.0] * 40, utc_now())  # noqa: SLF001
     assert lm.cadence() is not None
+    gen = lm._config_generation  # noqa: SLF001
+    lm._operational_pass_due = True  # noqa: SLF001
     client = await hass_ws_client(hass)
     await client.send_json_auto_id({"type": f"{DOMAIN}/wipe_history", "entry_id": entry.entry_id})
     res = await client.receive_json()
     assert res["success"]
     assert lm.cadence() is None
+    # A pass in flight read the old cadence: its result is discarded, none is due.
+    assert lm._config_generation > gen and lm._operational_pass_due is False  # noqa: SLF001
+
+
+async def test_a_joint_verdict_on_a_set_that_changed_withdraws_nothing(mock_hass: Any) -> None:
+    """PR #529 review: the verdict was taken with off_delay 180 s pending; once that
+    is 1800 s the energy raise may be safe, so it must not be withdrawn."""
+    store = _Store()
+    lm = _learning(mock_hass, store, {})
+    store.set_suggestion(CONF_END_ENERGY_THRESHOLD, 0.4, reason="r", flags={"owner": OWNER_BATCH})
+    store.set_suggestion(CONF_OFF_DELAY, 1800, reason="r", flags={"owner": OWNER_OPERATIONAL})
+    judged = {CONF_END_ENERGY_THRESHOLD: {"value": 0.4}, CONF_OFF_DELAY: {"value": 180}}
+    lm._withdraw_joint_drops(judged, [CONF_END_ENERGY_THRESHOLD])  # noqa: SLF001
+    assert CONF_END_ENERGY_THRESHOLD in store.get_suggestions()
+
+
+def test_a_failed_pause_scan_raises_in_strict_mode_only() -> None:
+    """PR #529 review: a scan failure read as "no pause", so Apply all's strict
+    check could still pass an unverified set. Background passes keep the fallback."""
+    from unittest.mock import patch  # noqa: PLC0415
+
+    import pytest  # noqa: PLC0415
+
+    from custom_components.ha_washdata import suggestion_engine as se  # noqa: PLC0415
+
+    pts = [(0.0, 100.0), (100.0, 0.0), (1100.0, 5.0), (2100.0, 50.0)]
+    with patch.object(se, "bisect_right", side_effect=RuntimeError("boom")):
+        assert se.end_gate_pause_needs(pts, 6.0, 180, 0.05) == []
+        assert se.end_gate_would_split(pts, 6.0, 180, 200, 0.05) is False
+        with pytest.raises(RuntimeError):
+            se.end_gate_pause_needs(pts, 6.0, 180, 0.05, strict=True)
+        with pytest.raises(RuntimeError):
+            se.end_gate_would_split(pts, 6.0, 180, 200, 0.05, strict=True)
+
+
+async def test_min_power_alone_does_not_move_an_unset_stop(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """PR #529 review: with Stop unset it follows Min Power (#450), so applying a
+    Min Power cascade alone moved Stop past every threshold check."""
+    entry = await setup_washdata_entry(options={CONF_MIN_POWER: 5.0, CONF_START_THRESHOLD_W: 10.0})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    store.set_suggestion(CONF_MIN_POWER, 1.0, reason="r", flags={"cascade": True})
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({
+        "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry.entry_id, "keys": [CONF_MIN_POWER],
+    })
+    res = await client.receive_json()
+    assert res["success"] and res["result"]["applied"] == []
+    await hass.async_block_till_done()
+    assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_MIN_POWER] == 5.0
+
+
+async def test_an_explicit_stop_lets_min_power_apply(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    entry = await setup_washdata_entry(options={
+        CONF_MIN_POWER: 5.0, CONF_START_THRESHOLD_W: 10.0, CONF_STOP_THRESHOLD_W: 6.0,
+    })
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    store.set_suggestion(CONF_MIN_POWER, 4.0, reason="r", flags={"owner": OWNER_BATCH})
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({
+        "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry.entry_id, "keys": [CONF_MIN_POWER],
+    })
+    res = await client.receive_json()
+    assert res["success"] and res["result"]["applied"] == [CONF_MIN_POWER]
+    await hass.async_block_till_done()
+
+
+async def test_apply_writes_nothing_after_a_reload_it_waited_through(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """PR #529 review: a reload while Apply awaited its check left it writing to the
+    old manager's store."""
+    from unittest.mock import MagicMock, patch  # noqa: PLC0415
+
+    from custom_components.ha_washdata import ws_api  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(options={CONF_END_ENERGY_THRESHOLD: 0.01, CONF_OFF_DELAY: 60})
+    manager = hass.data[DOMAIN][entry.entry_id]
+    manager.profile_store.set_suggestion(CONF_END_ENERGY_THRESHOLD, 0.02, reason="r", flags={"owner": OWNER_BATCH})
+    real = ws_api._get_manager  # noqa: SLF001
+    calls = {"n": 0}
+
+    def reloaded(h: Any, eid: str) -> Any:
+        calls["n"] += 1
+        return real(h, eid) if calls["n"] == 1 else MagicMock()
+
+    client = await hass_ws_client(hass)
+    with patch.object(ws_api, "_get_manager", side_effect=reloaded):
+        await client.send_json_auto_id({
+            "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry.entry_id,
+            "keys": [CONF_END_ENERGY_THRESHOLD],
+        })
+        res = await client.receive_json()
+    assert res["success"] is False and res["error"]["code"] == "entry_reloaded"
+    assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_END_ENERGY_THRESHOLD] == 0.01

@@ -516,11 +516,20 @@ def _events_after_quiet(offsets: list[float], values: list[float], peak: float) 
     and ``TERMINAL_BLIP_MIN_W`` more."""
     ceiling = TERMINAL_EVENT_PEAK_FRAC * peak
     main = TERMINAL_EVENT_MAX_PEAK_FRAC * peak
+    # Only observed quiet counts (PR #529 review): a step longer than the gap ceiling
+    # of the dishwasher gap-free rule, clip(10 x p95 dt, 60, 3600) s, restarts it.
+    steps = np.diff(np.asarray(offsets, dtype=float)) if len(offsets) > 1 else np.asarray([])
+    gap_ceiling = float(np.clip(10.0 * np.percentile(steps, 95), 60.0, 3600.0)) if steps.size else 60.0
     events: list[tuple[float, float]] = []
     q_start: float | None = None
     q_vals: list[float] = []
     q_level: float | None = None
+    prev_t: float | None = None
     for t, v in zip(offsets, values, strict=False):
+        unobserved = prev_t is not None and t - prev_t > gap_ceiling
+        prev_t = t
+        if unobserved:
+            q_start, q_vals, q_level = None, [], None
         if v > ceiling:
             if q_start is not None and t - q_start >= TERMINAL_BLIP_QUIET_MIN_S and v <= main:
                 events.append((q_start, t))
@@ -7403,16 +7412,21 @@ class ProfileStore:
         if self.device_type == "dishwasher":
             voters = [k for k, p in enumerate(parsed) if p[4] >= degen_floor or p[3]]
 
-            def _corrected(c: Any) -> bool:
+            def _corrected(c: Any, offsets: list[float]) -> bool:
+                # The correction the build itself accepts, not the raw field: a
+                # unit-error manual_duration it rejects is no user correction.
+                manual = c.get("manual_duration")
+                sane = bool(manual) and (
+                    _sane_manual_duration(manual, offsets[-1] - offsets[0]) is not None
+                )
                 meta = c.get("meta")
-                return bool(
-                    c.get("manual_duration")
-                    or (isinstance(meta, dict) and (meta.get("trim") or meta.get("edited")))
+                return sane or bool(
+                    isinstance(meta, dict) and (meta.get("trim") or meta.get("edited"))
                 )
 
             sub = cut_short_mask([
                 (parsed[k][0], parsed[k][1], parsed[k][2],
-                 bool(parsed[k][3] or _corrected(decoded[k][0])), parsed[k][4])
+                 bool(parsed[k][3] or _corrected(decoded[k][0], parsed[k][0])), parsed[k][4])
                 for k in voters
             ])
             for k, cut in zip(voters, sub, strict=True):
@@ -8141,21 +8155,30 @@ class ProfileStore:
         Only those: a profile known only by its saved envelope (an import without
         its cycles) has nothing to rebuild from, and the rebuild's no-evidence path
         would delete that envelope. The marker is set after the pass and saved;
-        an interrupted pass runs again at the next start. Returns how many
-        envelopes were rebuilt. Never raises.
+        an interrupted pass runs again at the next start, and so does one where a
+        profile's rebuild raised or an import/undo replaced the data meanwhile (PR
+        #529 review: the marker must not land on data the pass never rebuilt).
+        Returns how many envelopes were rebuilt. Never raises.
         """
         count = 0
         try:
+            data_generation = getattr(self, "_data_generation", 0)
             profiles = set(self._data.get("profiles") or {})
             names = sorted({
                 str(c.get("profile_name"))
                 for c in self.iter_evidence_cycles()
                 if isinstance(c, dict) and c.get("profile_name") and c.get("power_data")
             } & profiles)
+            failed: list[str] = []
             for name in names:
-                with contextlib.suppress(Exception):
+                try:
                     if await self.async_rebuild_envelope(name):
                         count += 1
+                except Exception as exc:  # noqa: BLE001 - keep the rest, retry later
+                    failed.append(name)
+                    self._logger.warning("Rebuild of %s under the #531 rule failed: %s", name, exc)
+            if failed or getattr(self, "_data_generation", 0) != data_generation:
+                return count  # still pending: the next start runs it again
             self._data[CUT_SHORT_REBUILD_KEY] = True
             await self.async_save()
         except Exception as exc:  # noqa: BLE001 - never cost the user their history

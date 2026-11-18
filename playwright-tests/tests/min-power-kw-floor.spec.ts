@@ -58,3 +58,24 @@ test('an unavailable sensor without a unit counts as one that could be kW', asyn
   const err = await minPowerError(page);
   await expect(err).toBeHidden();
 });
+
+test('no Stop fix that would reach an explicit Start', async ({ page }) => {
+  await page.goto('/');
+  const opts = { ...options, min_power: 2.0, start_threshold_w: 2.0, stop_threshold_w: 1.1 };
+  await bootPanel(page, { 'ha_washdata/get_options': { options: opts } }, statesIn('W'), { settingsLevel: 'advanced' });
+  await clickTab(page, 'settings');
+  await page.locator('button[data-sec="detection"]').first().click();
+  await expect(page.locator('input[data-opt="stop_threshold_w"]').first()).toBeVisible({ timeout: 8_000 });
+  // The conflict shows on Stop, without a fix that would push it to Start.
+  await expect(page.locator('[data-cerr="stop_threshold_w"]')).toBeVisible();
+  await expect(page.locator('.wd-conflict-fix[data-ckey="stop_threshold_w"]')).toHaveCount(0);
+});
+
+test('a Stop fix that stays under Start is still offered', async ({ page }) => {
+  await page.goto('/');
+  const opts = { ...options, min_power: 2.0, start_threshold_w: 10.0, stop_threshold_w: 1.1 };
+  await bootPanel(page, { 'ha_washdata/get_options': { options: opts } }, statesIn('W'), { settingsLevel: 'advanced' });
+  await clickTab(page, 'settings');
+  await page.locator('button[data-sec="detection"]').first().click();
+  await expect(page.locator('.wd-conflict-fix[data-ckey="stop_threshold_w"]')).toHaveAttribute('data-cval', '2.5', { timeout: 8_000 });
+});

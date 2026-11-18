@@ -105,3 +105,17 @@ async def test_a_new_pick_waits_for_the_detector_before_a_paused_door_end(
     assert manager._door_end_may_fire() is False  # noqa: SLF001
     manager._current_program = "Cotton"  # noqa: SLF001 - the pick and the detector agree
     assert manager._door_end_may_fire()  # noqa: SLF001
+
+
+async def test_a_paused_door_end_needs_a_usable_power_reading(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """The plug dropped out after 0 W: the cached reading cannot say the appliance
+    did not resume, so the dwell re-arms instead of ending the run (PR #529 review)."""
+    manager, ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    hass.states.async_set(DOOR, "on")
+    await hass.async_block_till_done()
+    with patch.object(manager, "_live_power_state", return_value=None):
+        manager._door_end_dwell_fired(utc_now())  # noqa: SLF001
+    assert ends == []
+    assert manager._remove_door_end_dwell is not None  # noqa: SLF001
