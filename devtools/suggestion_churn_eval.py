@@ -15,8 +15,8 @@ cycle end at a time.
 **Walk** (per corpus device, stored cycles in start order, all production code):
 
 * every cycle that ended on its own commits its update intervals (``0.1 < dt < 1800``
-  s between stored readings, WashData's synthetic keepalives skipped), as
-  ``LearningManager.close_cycle_cadence`` does; then the operational pass runs on the
+  s between stored readings, WashData's synthetic keepalives skipped, the newest
+  ``learning._CYCLE_MAX_INTERVALS``), as ``LearningManager.close_cycle_cadence`` does; then the operational pass runs on the
   cadence model (``suggestion_loop_eval.cadence``: one ``learning.cycle_cadence``
   summary per cycle, the median over the last ``CADENCE_RECENT_CYCLES``);
 * each time 5 more labelled cycles have ended on their own, the batch pass runs
@@ -161,7 +161,8 @@ def walk(corpus: str, path: str, arm: str) -> dict[str, Any] | None:
         for i, cycle in enumerate(past):
             cad = None
             if learning._ended_on_its_own(cycle):  # noqa: SLF001
-                per_cycle.append(_intervals(cycle))
+                # The newest _CYCLE_MAX_INTERVALS, as LearningManager._pending_intervals keeps.
+                per_cycle.append(_intervals(cycle)[-learning._CYCLE_MAX_INTERVALS:])  # noqa: SLF001
                 cad = cadence_of(per_cycle)
             if _labelled_own(cycle):
                 labelled += 1
