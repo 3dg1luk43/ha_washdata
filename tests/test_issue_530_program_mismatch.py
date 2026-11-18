@@ -96,6 +96,21 @@ def test_only_the_stage5_provenance_makes_a_family() -> None:
     assert match_rules.selected_program_deficit(res, "Cotton 40", fam) == ("Synthetics", 0.9 - 0.5)
 
 
+def test_a_pick_named_like_a_family_is_not_read_off_the_family_row() -> None:
+    """PR #529 review: the pick is an ordinary programme named ``__group__Quick``
+    and a group ``Quick`` exists. Its family row carries the same name, ranks
+    higher, and must not stand for the pick."""
+    fam = {"Quick 40": "Quick", "Quick 60": "Quick"}
+    res = SimpleNamespace(best_profile="Synthetics", candidates=[
+        {"name": "Synthetics", "score": 0.9},
+        {"name": "__group__Quick", "score": 0.85, "group_best_member": "Quick 40"},
+        {"name": "__group__Quick", "score": 0.3},
+    ])
+    hit = match_rules.selected_program_deficit(res, "__group__Quick", fam)
+    assert hit is not None and hit[0] == "Synthetics"
+    assert abs(hit[1] - 0.6) < 1e-9
+
+
 def test_the_tick_needs_persistence_and_the_minimum_fraction() -> None:
     wrong = _result("Synthetics", {"Synthetics": 0.9, "Cotton": 0.9 - PROGRAM_MISMATCH_MIN_MARGIN})
     close = _result("Synthetics", {"Synthetics": 0.9, "Cotton": 0.85})

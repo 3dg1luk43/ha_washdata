@@ -1297,7 +1297,10 @@ def selected_program_deficit(
         picked: float | None = None
         for cand in candidates:
             name = cand.get("name")
-            if name == selected or (
+            # A family's own entry is named ``__group__G``: a pick literally named
+            # that is another programme, so only the family branch reads the row.
+            is_family_row = isinstance(cand.get("group_best_member"), str)
+            if (name == selected and not is_family_row) or (
                 own_family is not None and _candidate_family(cand, "name") == own_family
             ):
                 picked = float(cand.get("score", 0.0) or 0.0)
