@@ -762,24 +762,24 @@ MATCH_DECISIVE_MARGIN = 0.12
 # background matches, with at least PROGRAM_MISMATCH_MIN_FRACTION of the picked
 # program's usual duration elapsed. A margin, not the confidence (item 305): per
 # tick the deficit separates a wrong pick from the right one at AUC 0.89, the
-# pick's own score at 0.79. devtools/program_mismatch_eval.py (LOO, 958 labelled
+# pick's own score at 0.79. devtools/program_mismatch_eval.py (LOO, 946 labelled
 # cycles of 86 devices, a match on the first reading one profile_match_interval
 # after the last, as the manager schedules it):
 #   margin persist minfrac  false alarm  wrong picks caught  at (median)
-#    0.12      3     0.25      7.8%            70.1%            0.33
-#    0.15      6     0.50      2.4%            49.4%            0.58
-#    0.18      6     0.50      1.7%            39.3%            0.62
-#    0.22      6     0.50      1.1%            28.9%            0.62
+#    0.12      3     0.25      7.9%            70.5%            0.33
+#    0.15      6     0.50      2.4%            49.6%            0.58
+#    0.18      6     0.50      1.7%            39.5%            0.62
+#    0.22      6     0.50      1.2%            29.0%            0.62
 # False alarm: the cycle's own program picked (once per cycle); 5 of the 16 here
-# are on the 449 cycles of single-appliance histories (1.1%), the rest on store
+# are on the 437 cycles of single-appliance histories (1.1%), the rest on store
 # packages that hold one programme under two names. Caught: every other programme
 # of the device picked, one without a template or a learned duration counted as
-# missed; 42.8% for the one closest in duration. "At": fraction of the cycle
+# missed; 43.3% for the one closest in duration. "At": fraction of the cycle
 # elapsed. The false alarms are mid-cycle matcher errors, so no threshold reaches
 # zero. 0.18 was chosen when it kept own-history alarms at the strictest row's (3
 # of 449, on a replay that matched at fixed interval marks); the two added since
 # hover at the bar (0.17-0.20 at one end of a six-match run), which a shift of the
-# match times moves across it (0.20 holds 3 of 449 at 33.6% caught).
+# match times moves across it (0.20 holds 3 of 437 at 33.7% caught).
 PROGRAM_MISMATCH_MIN_MARGIN = 0.18
 PROGRAM_MISMATCH_PERSISTENCE = 6
 PROGRAM_MISMATCH_MIN_FRACTION = 0.5

@@ -18,8 +18,10 @@ usual duration elapsed). This replays that on the corpus.
 **Replay** (leave-one-out, production code): each scorable labelled cycle of a
 device with >= 2 programmes (``devtools/eval.py``'s corpus rules: clone files and
 twin entries dropped, the label keeps another traced cycle) is removed from every
-list and its programme's envelope rebuilt, on a store a real ``WashDataManager``
-builds from the export's options (``eval.fresh_store``). A check runs where the
+list and its programme's envelope and usual duration rebuilt from the others (a
+fold whose rebuild learns no duration is left out), on a store a real
+``WashDataManager`` builds from the export's options (``eval.fresh_store``). A
+record whose stored duration is no finite number is left out of every list. A check runs where the
 manager schedules one (``check_prefixes``): on the first recorded reading at least
 one ``profile_match_interval`` (the device's own, 300 s by default) after the last
 check, strictly before the recorded end. A stretch without a reading runs none, so
@@ -50,14 +52,19 @@ on the recorded ticks (no new matching) and prints every row with its false-alar
 and detection rates; the shipped constants are marked. ``--json`` writes the ticks
 and the summary; ``--from-rows`` reads such a file instead of matching again.
 
-**Last run** (2026-11-18, 958 cycles of 86 devices, ~8 min on 7 workers), the
-shipped 0.18 / 6 / 0.5: false alarms 16 (1.7%), 5 of them on the 449 own-history
-cycles (1.1%); wrong picks caught 39.3% (1957 of 4981) at a median 0.62 of the
-cycle, the nearest-duration wrong pick 42.8% at 0.52. By type: washers 1.8% /
-42.2%, dishwashers 0.9% / 32.2%, washer-dryers 6.1% / 40.3%, dryers 1.0% / 14.4%
-(short programmes rarely hold six matches past half their length). Each fold on
-its own copy of the cycles, the end check on the stored offset and full-precision
-rows left every figure here as it was (one pair of 4981 moved at 0.12 / 3 / 0.25).
+**Last run** (2026-11-18, 946 folds of 86 devices, ~8 min on 7 workers), the
+shipped 0.18 / 6 / 0.5: false alarms 16 (1.7%), 5 of them on the 437 own-history
+cycles (1.1%); wrong picks caught 39.5% (1957 of 4957) at a median 0.62 of the
+cycle, the nearest-duration wrong pick 43.3% at 0.52. By type: washers 1.8% /
+42.2%, dishwashers 0.9% / 33.2%, washer-dryers 6.1% / 40.3%, dryers 1.0% / 14.4%
+(short programmes rarely hold six matches past half their length). The held-out
+programme's usual duration cleared before its rebuild (the base learned it from
+the held-out cycle too) left out 12 own-history folds whose rebuild learns none;
+the run before, with them: 958 folds, 39.3% of 4981 caught, 42.8% nearest, the
+same 16 alarms. Reading the fire fraction from the cycle start moved no median.
+Each fold on its own copy of the cycles, the end check on the stored offset and
+full-precision rows left every figure as it was (one pair of 4981 moved at
+0.12 / 3 / 0.25).
 The replay before it matched at fixed interval marks (an unchanged prefix again on a silent
 plug) and left out picks with no trace: 15 (1.6%), 3 own-history, 41.6% of 4855
 at 0.62. Per tick (that replay) the deficit separates a wrong pick from the right
@@ -68,7 +75,8 @@ stretch (each a new reading live, so a check) where the recorded trace has none;
 the stall cut the detector applies to its match trace (``_match_readings``); a
 reading that arrives while a check is still matching; a restart.
 
-Exit codes: 0, 2 no corpus.
+Exit codes: 0, 2 no corpus, 3 a ``--from-rows`` file whose ticks lack their stored
+offset (written before it was kept: match again).
 """
 from __future__ import annotations
 
@@ -145,14 +153,58 @@ def check_prefixes(pts: list[list[float]], interval: float,
 
 
 def recorded_duration(cyc: dict, pts: list) -> float | None:
-    """The cycle's recorded duration in seconds, or None when it is not a finite
-    positive number (an imported ``1e400`` reads as ``inf``: no check would ever
-    reach its end, and the rows would no longer be valid JSON)."""
+    """The cycle's end in seconds from its start, the clock the end check reads
+    (``check_prefixes``), or None when there is none to use.
+
+    The recorded duration when it is a positive number. Without one (absent, null,
+    zero or negative) the trace's final offset, on that same clock: the span from
+    the first reading ended a trace that starts late that much early. A duration
+    that is not a finite number (an imported ``1e400`` reads as ``inf``: no check
+    would reach its end, and the rows would no longer be valid JSON) is None."""
     try:
-        dur = float(ev.cycle_duration(cyc, pts))
+        dur = float(cyc.get("duration") or 0.0)
     except (TypeError, ValueError, OverflowError):
         return None
+    if not math.isfinite(dur):
+        return None
+    if dur <= 0:
+        dur = float(pts[-1][0]) if len(pts) > 1 else 0.0
     return dur if math.isfinite(dur) and dur > 0 else None
+
+
+def _usable_duration(cyc: Any) -> bool:
+    """False for a record whose stored ``duration`` is there but no finite number:
+    an int ``float`` cannot hold (``10**400`` raises OverflowError when the folds
+    are selected), ``inf``/``nan``, a string or a null (the rebuild's
+    ``duration > 60`` raises). An absent one is the store's "unknown"."""
+    if not isinstance(cyc, dict) or "duration" not in cyc:
+        return True
+    raw = cyc["duration"]
+    if isinstance(raw, bool) or not isinstance(raw, (int, float)):
+        return False
+    try:
+        return math.isfinite(float(raw))
+    except OverflowError:
+        return False
+
+
+def usable_device(dev: Any) -> Any:
+    """``dev`` without the records whose duration is unusable (``_usable_duration``),
+    in every list a rebuild reads and in its cycles, so one malformed record neither
+    aborts the run nor trains a fold. Applied where the folds are selected and where
+    a worker loads the device, so both see the same cycles in the same order."""
+    if dev is None:
+        return None
+    if all(_usable_duration(c) for key, _ in ev.LISTS for c in dev.data.get(key) or []):
+        return dev
+    data = dict(dev.data)
+    for key, _ in ev.LISTS:
+        if isinstance(data.get(key), list):
+            data[key] = [c for c in data[key] if _usable_duration(c)]
+    keep = [k for k, (c, _e) in enumerate(dev.cycles) if _usable_duration(c)]
+    return dataclasses.replace(
+        dev, data=data, cycles=[dev.cycles[k] for k in keep],
+        hashes=[dev.hashes[k] for k in keep])
 
 
 def private_device(dev: Any) -> Any:
@@ -168,13 +220,21 @@ def fold_store_data(dev: Any, base: dict, blob: bytes, pos: tuple[str, int]) -> 
     """The store without the held-out cycle (``pos``: its list and index), on this
     fold's own copy of every other cycle (``blob``: the lists as loaded, pickled),
     of the profiles and of the envelope map, so nothing a fold's rebuild changes
-    reaches the next fold (``private_device``)."""
+    reaches the next fold (``private_device``).
+
+    The base learned the held-out programme's usual duration from every cycle, the
+    held-out one included, so it is cleared: only what the fold's rebuild learns
+    from the others may size the gate (``device_folds`` skips a fold whose rebuild
+    learns none)."""
     d = ev.base_data(dev)
     lists = pickle.loads(blob)
     key, j = pos
-    del lists[key][j]
+    held = lists[key].pop(j)
     d.update(lists)
     d["profiles"] = pickle.loads(pickle.dumps(base["profiles"], protocol=pickle.HIGHEST_PROTOCOL))
+    prof = d["profiles"].get(held.get("profile_name")) if isinstance(held, dict) else None
+    if isinstance(prof, dict):
+        prof.pop("avg_duration", None)
     d["envelopes"] = dict(base["envelopes"])
     return d
 
@@ -203,7 +263,9 @@ async def device_folds(dev: Any, base: dict, idxs: list[int]) -> list[dict]:
         await st.async_rebuild_envelope(label)
         interval = float(mgr._profile_match_interval or 300)  # noqa: SLF001
         # Every programme a user can pick, and the learned durations: a pick
-        # without one, or without a template, is never checked (a miss).
+        # without one, or without a template, is never checked (a miss). The
+        # label's is the rebuild's, from the other cycles (``fold_store_data``):
+        # none learned, no fold.
         programs = sorted(str(n) for n in (st.get_profiles() or {}))
         durations = {}
         for name, prof in (st.get_profiles() or {}).items():
@@ -249,7 +311,7 @@ def _worker_init(root: str) -> None:
 def _device(path: str) -> Any:
     memo = _W.setdefault("devs", {})
     if path not in memo:
-        memo[path] = ev.load_device(_W["root"], path)
+        memo[path] = usable_device(ev.load_device(_W["root"], path))
     return memo[path]
 
 
@@ -265,6 +327,9 @@ def _job_folds(args: tuple[str, dict, list[int]]) -> list[dict]:
 def replay(corpus: Path, device: str | None = None, max_per_device: int | None = None,
            jobs: int = 1, log=print) -> list[dict]:
     devices, _dropped = ev.load_corpus(corpus)
+    # Durations validated before anything reads them (``ev.scorable`` converts
+    # them), the same way the workers load each device (``_device``).
+    devices = [usable_device(d) for d in devices]
     devices = [d for d in devices if len(d.labels) >= 2 and (not device or device in d.path)]
     twins = ev.twin_entries(devices)
     devices = [d for d in devices if d.path not in twins]
@@ -321,9 +386,9 @@ def _nearest_wrong(row: dict) -> str | None:
 def pick_sequence(row: dict, selected: str) -> list[tuple[float, Any, float, float]]:
     """``(fraction of the pick's usual duration, selected_program_deficit, elapsed s,
     stored offset s)`` per tick: what ``match_rules.program_mismatch_tick`` reads,
-    computed once, and where the end check reads the tick (a row written before the
-    offset was kept: its elapsed time). Empty for a pick the manager does not check
-    (no template, no learned duration)."""
+    computed once, and where the end check reads the tick. Empty for a pick the
+    manager does not check (no template, no learned duration). A tick without its
+    stored offset raises KeyError (``rows_have_offsets``)."""
     if selected in (row.get("unmatchable") or ()) or not row["durations"].get(selected):
         return []
     expected = float(row["durations"][selected])
@@ -332,24 +397,33 @@ def pick_sequence(row: dict, selected: str) -> list[tuple[float, Any, float, flo
         (tick["t"] / expected,
          match_rules.selected_program_deficit(
              SimpleNamespace(best_profile=tick["best"], candidates=tick["c"]), selected, fam),
-         tick["t"], tick.get("at", tick["t"]))
+         tick["t"], tick["at"])
         for tick in row["ticks"]
     ]
 
 
+def rows_have_offsets(rows: list[dict]) -> bool:
+    """Whether every tick keeps its stored offset (``at``). A rows file written
+    before it was kept holds only ``t``, the seconds since the first reading: on a
+    trace that starts late, read as the offset it puts a tick past the cycle end
+    inside it. Such a file is matched again, never rescored."""
+    return all(isinstance(t, dict) and "at" in t for r in rows for t in r.get("ticks") or ())
+
+
 def fire_at(seq: list[tuple[float, Any, float, float]], margin: float, persistence: int,
             fraction: float, end: float | None = None) -> float | None:
-    """Elapsed seconds at which the rule fires on ``seq`` strictly before ``end``
-    (the cycle's recorded end, against each tick's stored offset; None: no bound),
-    or None (``match_rules.program_mismatch_step``, the tick's own rule)."""
+    """The stored offset (seconds from the cycle start) of the tick at which the
+    rule fires on ``seq`` strictly before ``end`` (the cycle's recorded end, on the
+    same clock; None: no bound), or None (``match_rules.program_mismatch_step``,
+    the tick's own rule, which reads the seconds since the first reading)."""
     state = match_rules.ProgramMismatchState()
-    for frac, hit, t, at in seq:
+    for frac, hit, _t, at in seq:
         if end is not None and not at < end:
             break
         if match_rules.program_mismatch_step(
             state, hit, frac, min_margin=margin, persistence=persistence, min_fraction=fraction
         ):
-            return t
+            return at
     return None
 
 
@@ -396,18 +470,20 @@ def score(prep: list[dict], margin: float, persistence: int, fraction: float,
             end = p["duration"]
             if fire_at(p["own"], margin, persistence, fraction, end) is not None:
                 fa += 1
+            # The fraction of the cycle at the fire: its offset from the cycle
+            # start, the duration's clock.
             for seq in p["wrong"]:
                 pairs += 1
-                t = fire_at(seq, margin, persistence, fraction, end)
-                if t is not None:
+                at = fire_at(seq, margin, persistence, fraction, end)
+                if at is not None:
                     det += 1
-                    fracs.append(t / p["duration"])
+                    fracs.append(at / p["duration"])
             if p["nearest"] is not None:
                 n_pairs += 1
-                t = fire_at(p["nearest"], margin, persistence, fraction, end)
-                if t is not None:
+                at = fire_at(p["nearest"], margin, persistence, fraction, end)
+                if at is not None:
                     n_det += 1
-                    n_fracs.append(t / p["duration"])
+                    n_fracs.append(at / p["duration"])
         out[name] = {
             "cycles": len(grp),
             "false_alarm": fa, "false_alarm_rate": round(fa / len(grp), 4) if grp else None,
@@ -456,6 +532,10 @@ def main(argv: list[str] | None = None) -> int:
     a = ap.parse_args(argv)
     if a.from_rows:
         rows = json.loads(a.from_rows.read_text(encoding="utf-8"))["rows"]
+        if not rows_have_offsets(rows):
+            print(f"{a.from_rows}: ticks without their stored offset (written before it "
+                  "was kept): run the replay again", file=sys.stderr)
+            return 3
     else:
         if not a.corpus.is_dir():
             print(f"no corpus at {a.corpus}", file=sys.stderr)

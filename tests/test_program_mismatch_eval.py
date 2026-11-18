@@ -87,7 +87,7 @@ def test_the_rows_round_trip_through_the_json_file(tmp_path: Path) -> None:
         "interval": 300.0, "durations": {"A": 1200.0, "B": 1200.0}, "families": {},
         "twins": [], "unmatchable": [],
         "ticks": [
-            {"t": 300.0 * k, "best": "B",
+            {"t": 300.0 * k, "at": 300.0 * k, "best": "B",
              "c": [{"name": "B", "score": 0.9}, {"name": "A", "score": 0.5}]}
             for k in range(1, 5)
         ],
@@ -116,7 +116,7 @@ def test_every_other_programme_is_a_wrong_pick() -> None:
         "duration": 1800.0, "interval": 300.0, "durations": {"A": 1800.0, "B": 1700.0, "U": 1750.0},
         "programs": ["A", "B", "C", "U"], "families": {}, "twins": [], "unmatchable": ["U"],
         "ticks": [
-            {"t": 300.0 * k, "best": "A",
+            {"t": 300.0 * k, "at": 300.0 * k, "best": "A",
              "c": [{"name": "A", "score": 0.9}, {"name": "B", "score": 0.4}]}
             for k in range(1, 6)
         ],
@@ -204,14 +204,43 @@ def test_the_end_check_reads_the_stored_offset() -> None:
     checks = list(pme.check_prefixes(pts, 300.0, 1820.0))
     assert [t for _q, t in checks] == [300.0, 600.0, 900.0, 1200.0, 1500.0]
     assert [q[-1][0] for q, _t in checks] == [360.0, 660.0, 960.0, 1260.0, 1560.0]
-    # The scoring reads each tick's stored offset too.
+    # The scoring reads each tick's stored offset too, and reports the fire at it.
     row = _behind([(300.0 * k, 300.0 * k + 60.0) for k in range(1, 7)], 1820.0)
     seq = pme.pick_sequence(row, "A")
-    assert pme.fire_at(seq, 0.18, 6, 0.0) == 1800.0
+    assert pme.fire_at(seq, 0.18, 6, 0.0) == 1860.0
     assert pme.fire_at(seq, 0.18, 6, 0.0, end=row["duration"]) is None
-    assert pme.fire_at(seq, 0.18, 5, 0.0, end=row["duration"]) == 1500.0
+    assert pme.fire_at(seq, 0.18, 5, 0.0, end=row["duration"]) == 1560.0
     # A tick exactly at the end is past it.
     assert pme.fire_at(seq, 0.18, 5, 0.0, end=1560.0) is None
+
+
+def test_the_reported_fraction_reads_the_cycle_start_clock() -> None:
+    """A 3600 s cycle whose first reading is 600 s in: the wrong pick fires on the
+    check 1800 s after that reading, 2400 s into the cycle, i.e. two thirds of it
+    (read against the first reading it was reported as half). The rule itself still
+    reads the 1800 s."""
+    row = _behind([(300.0 * k, 300.0 * k + 600.0) for k in range(1, 8)], 3600.0)
+    for tick in row["ticks"]:  # A, the label, leads: B is the wrong pick that fires
+        tick["best"], tick["c"] = "A", [{"name": "A", "score": 0.9}, {"name": "B", "score": 0.5}]
+    s = pme.score(pme.prepare([row]), 0.18, 6, 0.5)["all"]
+    assert (s["false_alarm"], s["detect"], s["nearest_detect"]) == (0, 1, 1)
+    assert s["elapsed_frac"] == s["nearest_elapsed_frac"] == round(2400.0 / 3600.0, 3)
+
+
+def test_rows_without_the_stored_offsets_are_refused(tmp_path: Path, capsys) -> None:
+    """A rows file written before the ticks kept their offset holds only ``t``, the
+    seconds since the first reading. Read as the offset it can put a tick of a
+    trace that starts late past the cycle end inside it: such a file is refused,
+    to be matched again."""
+    row = _behind([(300.0 * k, 300.0 * k + 600.0) for k in range(1, 12)], 3600.0)
+    for tick in row["ticks"]:
+        del tick["at"]
+    out = tmp_path / "rows.json"
+    out.write_text(json.dumps({"rows": [row]}))
+    assert pme.main(["--from-rows", str(out)]) == 3
+    assert "offset" in capsys.readouterr().err
+    with pytest.raises(KeyError):
+        pme.pick_sequence(row, "A")
 
 
 def test_the_saved_end_keeps_full_precision(tmp_path: Path) -> None:
@@ -230,19 +259,25 @@ def test_the_saved_end_keeps_full_precision(tmp_path: Path) -> None:
         assert all(at < row["duration"] for *_rest, at in pme.pick_sequence(row, row["label"]))
 
 
-@pytest.mark.filterwarnings("ignore:invalid value encountered:RuntimeWarning")
-def test_a_non_finite_recorded_duration_skips_its_fold(tmp_path: Path) -> None:
-    """An imported ``1e400`` parses as ``inf``: no check would reach its end and the
-    rows file would hold ``Infinity``, which is not JSON. That fold is skipped, the
-    rest are replayed. (Cotton's other folds train on it, so Cotton has no finite
-    usual duration there and the manager would not check it: no row, as for any
-    pick without one.)"""
+@pytest.mark.parametrize("literal", ["1e400", "1" + "0" * 400, '"3600"', "null"],
+                         ids=["inf", "int-overflow", "string", "null"])
+def test_a_record_with_an_unusable_duration_is_left_out(tmp_path: Path, literal: str) -> None:
+    """An imported ``1e400`` parses as ``inf`` (no check would reach its end, and
+    the rows file would hold ``Infinity``, which is not JSON); an integer literal
+    ``1`` and 400 zeros parses as an int ``float`` cannot hold, and selecting the
+    folds raised OverflowError for the whole corpus; a string or a null makes the
+    rebuild's ``duration > 60`` raise. The record is left out of the folds and of
+    every rebuild, so the rest of the device is replayed, Cotton's other folds
+    included."""
     doc = _export()
-    doc["data"]["past_cycles"][0]["duration"] = "__huge__"
-    _write(tmp_path, json.dumps(doc).replace('"__huge__"', "1e400"))
+    doc["data"]["past_cycles"][0]["duration"] = "__bad__"
+    path = _write(tmp_path, json.dumps(doc).replace('"__bad__"', literal))
     rows = pme.replay(tmp_path, jobs=1, log=lambda *a, **k: None)
-    assert "Cotton-0" not in {r["id"] for r in rows}
-    assert sorted(r["id"] for r in rows) == [f"Synthetics-{j}" for j in range(4)]
+    assert sorted(r["id"] for r in rows) == sorted(
+        [f"Cotton-{j}" for j in range(1, 4)] + [f"Synthetics-{j}" for j in range(4)])
+    # The worker's copy of the device is the one the selection read.
+    pme._worker_init(str(tmp_path))
+    assert "Cotton-0" not in {c["id"] for c, _ in pme._device(path).cycles}
     out = tmp_path / "o.json"
     assert pme.main(["--corpus", str(tmp_path), "--jobs", "1", "--json", str(out)]) == 0
 
@@ -296,3 +331,32 @@ def test_a_recorded_duration_must_be_positive_and_finite(duration: float) -> Non
     assert pme.recorded_duration({"duration": float("inf")}, pts) is None
     assert pme.recorded_duration({"duration": 10 ** 400}, pts) is None
     assert pme.recorded_duration({"duration": 1234.56}, pts) == 1234.56
+
+
+def test_a_missing_duration_ends_at_the_final_offset() -> None:
+    """Without a recorded duration the end is the trace's final offset, on the
+    cycle-start clock the end check reads. The span from the first reading ended a
+    trace that starts 600 s in 600 s early, so its last two checks never ran."""
+    pts = [[600.0 + 30.0 * k, 100.0] for k in range(101)]   # 600 .. 3600 s
+    for missing in ({}, {"duration": 0}, {"duration": None}, {"duration": -5.0}):
+        assert pme.recorded_duration(missing, pts) == 3600.0
+    assert pme.recorded_duration({"duration": 3000.0}, pts) == 3000.0
+    end = pme.recorded_duration({}, pts)
+    assert [t for _q, t in pme.check_prefixes(pts, 300.0, end)][-1] == 2700.0
+
+
+def test_a_fold_never_reads_the_held_out_cycles_duration(tmp_path: Path) -> None:
+    """The base profiles are built from every cycle. When a fold's rebuild learns no
+    duration for the held-out programme (here its other cycles were interrupted,
+    which no rebuild reads), the base's, learned from the held-out cycle itself, set
+    the fraction gate: that fold is left out. The folds trained on it keep theirs."""
+    doc = _export()
+    for cyc in doc["data"]["past_cycles"]:
+        if cyc["profile_name"] == "Cotton" and cyc["id"] != "Cotton-0":
+            cyc["status"] = "interrupted"
+    _write(tmp_path, doc)
+    rows = pme.replay(tmp_path, jobs=1, log=lambda *a, **k: None)
+    ids = {r["id"] for r in rows}
+    assert "Cotton-0" not in ids
+    assert {f"Cotton-{j}" for j in range(1, 4)} <= ids
+    assert all(r["durations"]["Cotton"] == 2400.0 for r in rows if r["label"] == "Cotton")
