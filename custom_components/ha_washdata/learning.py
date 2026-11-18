@@ -302,6 +302,7 @@ class LearningManager:
         device_type: str | None = None,
         device_name: str = "",
         spawn: Callable[[Coroutine[Any, Any, Any]], Any] | None = None,
+        on_suggestions_changed: Callable[[], Any] | None = None,
     ) -> None:
         """Initialize the learning manager.
 
@@ -310,10 +311,15 @@ class LearningManager:
         ProfileStore, and an untracked one survives an entry reload and can write
         the OLD store over the new one under the same Store key. Without it (unit
         tests) a plain ``hass.async_create_task`` is used.
+
+        ``on_suggestions_changed`` is called when a background pass or a refresh
+        has changed what is stored: the Suggested Settings sensor does not poll
+        (PR #529 review). The manager's pushes an entity update.
         """
         self._logger = DeviceLoggerAdapter(_LOGGER, device_name)
         self.hass = hass
         self._spawn_fn = spawn
+        self._on_suggestions_changed = on_suggestions_changed
         self.entry_id = entry_id
         self.profile_store = profile_store
         self.device_type = device_type
@@ -375,10 +381,36 @@ class LearningManager:
             if getattr(self.profile_store, "_data_generation", 0) != data_generation:
                 self._logger.debug("Discarding a %s pass computed against a replaced store", owner)
                 return None
-            self._apply_if_current(generation, found or {}, owner)
-            if generation == self._config_generation:
-                await self._enforce_joint_end_gate()
+            before = self._stored_suggestions()
+            try:
+                self._apply_if_current(generation, found or {}, owner)
+                if generation == self._config_generation:
+                    await self._enforce_joint_end_gate()
+            finally:
+                self._announce_if_changed(before)
             return found or {}
+
+    def _stored_suggestions(self) -> dict[str, Any]:
+        """A comparable copy of the stored suggestions."""
+        return {
+            k: dict(v) if isinstance(v, dict) else v
+            for k, v in (self.profile_store.get_suggestions() or {}).items()
+        }
+
+    def _announce_suggestions(self) -> None:
+        """Tell the manager the stored suggestions changed. Never raises."""
+        notify = self._on_suggestions_changed
+        if notify is None:
+            return
+        try:
+            notify()
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Suggestion update notify failed", exc_info=True)
+
+    def _announce_if_changed(self, before: dict[str, Any]) -> None:
+        """``_announce_suggestions`` when the store no longer holds ``before``."""
+        if self._on_suggestions_changed is not None and self._stored_suggestions() != before:
+            self._announce_suggestions()
 
     def schedule_joint_end_gate_check(self) -> None:
         """Spawn ``async_check_joint_end_gate`` (tracked, so an unload cancels it)."""
@@ -388,7 +420,11 @@ class LearningManager:
         """Re-judge the stored set after a change no pass made (a mute). Never raises."""
         try:
             async with self._pass_lock:
-                await self._enforce_joint_end_gate()
+                before = self._stored_suggestions()
+                try:
+                    await self._enforce_joint_end_gate()
+                finally:
+                    self._announce_if_changed(before)
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.debug("Joint end-gate check failed: %s", e)
 
@@ -938,7 +974,9 @@ class LearningManager:
         """
         self._spawn(self._async_run_detection_suggestions(self._config_generation))
 
-    async def _async_run_detection_suggestions(self, generation: int | None = None) -> None:
+    async def _async_run_detection_suggestions(
+        self, generation: int | None = None, *, raise_errors: bool = False
+    ) -> None:
         """Run the detection-suggestion pass off the event loop."""
         gen = self._config_generation if generation is None else generation
         try:
@@ -952,6 +990,8 @@ class LearningManager:
                 )
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.error("Detection suggestion pass failed: %s", e)
+            if raise_errors:
+                raise
 
     async def async_run_full_analysis(self) -> dict[str, int]:
         """Run every suggestion pass now (manual trigger from the panel).
@@ -960,10 +1000,12 @@ class LearningManager:
         threshold), model, detection and batch-simulation passes over the
         accumulated cycle history and reconciles the result. Each pass withdraws
         what it owns and no longer proposes.
-        Returns ``{"count": <actionable suggestions>}``.
+        Returns ``{"count": <actionable suggestions>}``. A pass that raises is
+        raised to the caller (PR #529 review): the passes after it never ran, so
+        the count is no complete analysis and must not be reported as one.
         """
         self._logger.info("Manual suggestion analysis requested")
-        await self._async_run_all_passes()
+        await self._async_run_all_passes(raise_errors=True)
         count = len(self.profile_store.get_suggestions() or {})
         self._logger.info("Manual suggestion analysis complete: %d suggestion(s)", count)
         return {"count": count}
@@ -978,6 +1020,9 @@ class LearningManager:
         runs the passes. ``clear`` drops every stored entry first (a device type
         change); otherwise only entries no pass owns (stored before passes owned
         their entries) are dropped. Never raises.
+
+        Ends with an entity update whatever it changed: the options or device type
+        it follows decide which stored entries the sensor shows (PR #529 review).
         """
         self._config_generation += 1
         try:
@@ -993,6 +1038,7 @@ class LearningManager:
             await self._async_run_all_passes()
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.error("Suggestion refresh failed: %s", e)
+        self._announce_suggestions()
 
     def _batch_cycles(self) -> list[dict[str, Any]]:
         """The cycles the batch pass reads: labelled, traced, completed or force-stopped.
@@ -1008,10 +1054,12 @@ class LearningManager:
             and c.get("status") in ("completed", "force_stopped")
         ]
 
-    async def _async_run_all_passes(self) -> None:
+    async def _async_run_all_passes(self, *, raise_errors: bool = False) -> None:
         """Every suggestion pass, in cycle-end order, each with its owner.
 
         Stops applying as soon as a refresh supersedes the options it started on.
+        A pass that raises ends the run; ``raise_errors`` hands that to the caller
+        (the manual analysis), otherwise it is logged.
         """
         gen = self._config_generation
         try:
@@ -1032,13 +1080,15 @@ class LearningManager:
                 (OWNER_MODEL, self.suggestion_engine.for_job().generate_model_suggestions),
             ):
                 await self._run_pass(generate, owner, gen)
-            await self._async_run_detection_suggestions(gen)
+            await self._async_run_detection_suggestions(gen, raise_errors=raise_errors)
             await self._run_pass(
                 self.suggestion_engine.for_job().run_batch_simulation,
                 OWNER_BATCH, gen, self._batch_cycles(),
             )
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.error("Suggestion analysis failed: %s", e)
+            if raise_errors:
+                raise
 
     def _maybe_request_feedback(
         self,

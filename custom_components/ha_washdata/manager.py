@@ -974,6 +974,7 @@ class WashDataManager:
             # Its store saves and suggestion passes are cancelled with ours on an
             # unload (audit MANAGER-13), not left writing the swapped-out store.
             spawn=self._spawn_tracked,
+            on_suggestions_changed=self._on_suggestions_changed,
         )
         self.recorder = CycleRecorder(hass, self.entry_id, device_name=config_entry.title)
         self._store_bridge: Any = None  # lazy community-store bridge (online features)
@@ -10558,6 +10559,13 @@ class WashDataManager:
     def notify_update(self) -> None:
         """Public method to notify entities of update."""
         self._notify_update()
+
+    def _on_suggestions_changed(self) -> None:
+        """A background suggestion pass or refresh changed what is stored: the
+        Suggested Settings sensor does not poll, so push it (PR #529 review). Not
+        after an unload."""
+        if not getattr(self, "_is_shutdown", False):
+            self._notify_update_deferrable()
 
     @property
     def is_user_paused(self) -> bool:
