@@ -12,7 +12,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 ### TL;DR
 
 - Dishwashers that dry at their standby power finish at the real end again, not up to an hour early.
-- Setting suggestions re-audited: they no longer split, merge or block cycles, and no longer change with every cycle.
+- Timing suggestions are checked together against the appliance's own pauses, and suggestions come back far less often.
 - A dryer or pump that stopped starting cycles after a suggested start threshold gets a correction.
 - No false "Still drawing X W" warning on appliances that do switch off.
 - The dashboard card shows the running state in your language.
