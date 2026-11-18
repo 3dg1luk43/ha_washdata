@@ -454,3 +454,78 @@ async def test_an_import_from_before_the_rule_is_rebuilt_under_it(
     store = hass.data[DOMAIN][entry.entry_id].profile_store
     assert store.get_profiles()["ECO"]["avg_duration"] > stale + 50 * 60
     assert store.cut_short_rebuild_pending() is False
+
+
+def test_the_blip_level_stops_where_the_observed_quiet_began() -> None:
+    """1250 s at 0 W, an outage the reading cadence alone does not show (the
+    gap-free tally restarted there), then 610 s at 3.3 W: the bar is set by the
+    3.3 W stretch, so 4.6 W is no blip and the 6.3 W beep still is (PR #529 review)."""
+    cfg = build_detector_config({"stop_threshold_w": 4.5}, {"device_type": "dishwasher"}, "dishwasher")
+    det = CycleDetector(cfg, lambda _o, _n: None, lambda _c: None)
+    det._matched_profile, det._expected_duration = "ECO", 12000.0  # noqa: SLF001
+    det._prior_p95_dt = 10.0  # noqa: SLF001 - 10 s cadence: the walk's own ceiling is 100 s
+    old = [(T0 + timedelta(seconds=10 * k), 0.0) for k in range(125)]
+    new = [(T0 + timedelta(seconds=1300 + 10 * k), 3.3) for k in range(61)]  # a 50 s step
+    det._power_readings = old + new  # noqa: SLF001
+    blip_at = new[-1][0] + timedelta(seconds=10)
+    det._gapfree_before_high = (blip_at - new[0][0]).total_seconds()  # noqa: SLF001 - 610 s
+    assert det._is_terminal_blip(blip_at, 4.6) is False  # noqa: SLF001
+    assert det._is_terminal_blip(blip_at, 6.3) is True  # noqa: SLF001
+
+
+def test_a_sibling_s_events_past_its_corrected_end_do_not_vote() -> None:
+    """Siblings corrected to 3000 s whose traces run on to 4000 s, quiet from
+    2800 s and a 20 W reading at 3900 s: that reading came after their runs, so a
+    silent 3100 s run stays a run (PR #529 review)."""
+    from custom_components.ha_washdata.profile_store import ProfileStore  # noqa: PLC0415
+
+    class _Probe(ProfileStore):
+        def __init__(self) -> None:  # noqa: D401 - only the build's own state
+            self.device_type = "dishwasher"
+            self.dtw_bandwidth = 0.1
+            self.energy_mode = "mean"
+            self._logger = __import__("logging").getLogger("probe")
+
+    def work(t: int) -> float:
+        return 2000.0 if 600 <= t < 1800 else 40.0
+
+    sibling = [[float(t), work(t) if t < 2800 else (20.0 if 3900 <= t < 3930 else 1.0)]
+               for t in range(0, 4001, 10)]
+    candidate = [[float(t), work(t) if t < 2800 else 1.0] for t in range(0, 3101, 10)]
+
+    def cyc(pts: list, i: int, **extra: Any) -> dict:
+        return {"id": f"m{i}", "profile_name": "ECO", "status": "completed", "duration": pts[-1][0],
+                "power_data": pts, **extra}
+
+    runs = [cyc(sibling, i, manual_duration=3000.0) for i in range(3)] + [cyc(candidate, 9)]
+    built = _Probe()._rebuild_envelope_sync(runs)  # noqa: SLF001
+    assert built is not None and len(built[1]) == 4  # the 3100 s run is kept
+    # Without the correction the same reading is the siblings' terminal event.
+    runs = [cyc(sibling, i) for i in range(3)] + [cyc(candidate, 9)]
+    built = _Probe()._rebuild_envelope_sync(runs)  # noqa: SLF001
+    assert built is not None and len(built[1]) == 3
+
+
+async def test_a_device_type_change_rebuilds_the_envelope(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """PR #529 review: the build memo did not know the device type, so a profile
+    built as a washer kept its cut-off runs once the device became a dishwasher."""
+    entry = await setup_washdata_entry(options={"stop_threshold_w": 4.5})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    runs = [_eco(hold_s=30)] * 5 + [_eco(cut_s=131 * 60)] * 12
+    store._data["profiles"]["ECO"] = {}  # noqa: SLF001
+    store._data["past_cycles"] = [  # noqa: SLF001
+        {"id": f"c{i}", "profile_name": "ECO", "status": "completed", "termination_reason": "smart",
+         "start_time": (T0 + timedelta(days=i)).isoformat(), "duration": pts[-1][0],
+         "power_data": [[t, p] for t, p in pts]}
+        for i, pts in enumerate(runs)
+    ]
+    store.device_type = "washing_machine"
+    assert await store.async_rebuild_envelope("ECO")
+    washer_min = store.get_profiles()["ECO"]["avg_duration"] / 60
+    store.device_type = "dishwasher"
+    await store.async_rebuild_envelope("ECO")
+    full_min = _eco(hold_s=30)[-1][0] / 60
+    assert washer_min < full_min - 20  # the cut-offs counted for the washer
+    assert abs(store.get_profiles()["ECO"]["avg_duration"] / 60 - full_min) < 1

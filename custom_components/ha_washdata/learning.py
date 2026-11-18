@@ -357,22 +357,24 @@ class LearningManager:
         owner: str | None,
         generation: int,
         *args: Any,
-    ) -> dict[str, Any]:
+        data_generation: int | None = None,
+    ) -> dict[str, Any] | None:
         """Scan in the executor and apply on the loop, holding ``_pass_lock``.
 
         Then judge the stored set as a whole (``_enforce_joint_end_gate``): the
         gates and the reconcile after the pass's own guard can remove a pending
         value another entry was judged with.
         """
-        # Read before the lock wait: a pass can hold inputs taken at spawn (the
-        # batch pass its cycles), and a store Undo Import replaced meanwhile is
-        # not the one they came from (PR #529 review).
-        data_generation = getattr(self.profile_store, "_data_generation", 0)
+        # Read before the lock wait, or where the inputs were taken (the batch pass
+        # takes its cycles at spawn): a store Undo Import replaced meanwhile is not
+        # the one they came from (PR #529 review). None when discarded.
+        if data_generation is None:
+            data_generation = getattr(self.profile_store, "_data_generation", 0)
         async with self._pass_lock:
             found = await self.hass.async_add_executor_job(generate, *args)
             if getattr(self.profile_store, "_data_generation", 0) != data_generation:
                 self._logger.debug("Discarding a %s pass computed against a replaced store", owner)
-                return {}
+                return None
             self._apply_if_current(generation, found or {}, owner)
             if generation == self._config_generation:
                 await self._enforce_joint_end_gate()
@@ -810,18 +812,30 @@ class LearningManager:
             return
 
         self._last_batch_simulation_count = current_count
-        self._spawn(self._async_run_batch_simulation(labeled_cycles, self._config_generation))
+        self._spawn(self._async_run_batch_simulation(
+            labeled_cycles, self._config_generation,
+            getattr(self.profile_store, "_data_generation", 0),
+        ))
 
     async def _async_run_batch_simulation(
-        self, cycles: list[dict[str, Any]], generation: int | None = None
+        self,
+        cycles: list[dict[str, Any]],
+        generation: int | None = None,
+        data_generation: int | None = None,
     ) -> None:
         """Run multi-cycle batch simulation asynchronously."""
         gen = self._config_generation if generation is None else generation
         try:
             engine = self.suggestion_engine.for_job()
             new_suggestions = await self._run_pass(
-                engine.run_batch_simulation, OWNER_BATCH, gen, cycles
+                engine.run_batch_simulation, OWNER_BATCH, gen, cycles,
+                data_generation=data_generation,
             )
+            if new_suggestions is None:
+                # Its cycles were replaced (Undo Import): the restored history has
+                # had no batch, so the next cycle end runs one (PR #529 review).
+                self._last_batch_simulation_count = 0
+                return
             if new_suggestions:
                 self._logger.debug(
                     "Batch simulation (%d cycles) produced suggestions: %s",
@@ -841,6 +855,9 @@ class LearningManager:
         """
         cad = self.cadence()
         if cad is None:
+            # No cadence for this sensor (a new one, a wipe): what the pass stored
+            # was measured on another, so it goes (PR #529 review).
+            self._apply_suggestions_and_notify({}, owner=OWNER_OPERATIONAL)
             return
         p95, median = cad
 
@@ -1005,6 +1022,10 @@ class LearningManager:
                     self.suggestion_engine.for_job().generate_operational_suggestions,
                     OWNER_OPERATIONAL, gen, p95, median,
                 )
+            else:
+                # A power sensor with no cadence yet: entries measured on the old
+                # one go rather than wait for a pass that will not run (PR #529 review).
+                self._apply_suggestions_and_notify({}, owner=OWNER_OPERATIONAL)
             for owner, generate in (
                 (OWNER_STANDBY_FLOOR, self.suggestion_engine.for_job().generate_standby_floor_suggestions),
                 (OWNER_START_THRESHOLD, self.suggestion_engine.for_job().generate_start_threshold_suggestions),

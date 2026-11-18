@@ -4902,6 +4902,11 @@ async def ws_undo_import(
     # as the imports and cannot interleave with a reprocess / recording persist.
     async with _entry_write_lock(hass, entry_id):
         try:
+            # As the wipe: the intervals measured before the restore and any pass
+            # in flight go with the history it replaces (PR #529 review).
+            learning = getattr(manager, "learning_manager", None)
+            if learning is not None:
+                learning.reset_cadence_evidence()
             restored = await manager.profile_store.async_restore_pre_import_snapshot()
             result = {
                 "success": True,
@@ -5100,6 +5105,16 @@ async def ws_apply_suggestions(
                     for key in (CONF_START_THRESHOLD_W, CONF_STOP_THRESHOLD_W)
                 ):
                     updates.pop(CONF_MIN_POWER)
+                # An Undo Import takes the write lock, not this one: a store it
+                # replaces meanwhile was not the one these values were judged on
+                # (PR #529 review).
+                data_generation = getattr(manager.profile_store, "_data_generation", 0)
+
+                def _still_current() -> bool:
+                    return _get_manager(hass, entry_id) is manager and getattr(
+                        manager.profile_store, "_data_generation", 0
+                    ) == data_generation
+
                 if not await _drop_unsafe_end_gate_updates(hass, manager, visible, updates):
                     connection.send_error(
                         msg["id"], "end_gate_check_failed",
@@ -5121,13 +5136,13 @@ async def ws_apply_suggestions(
                         msg["id"], "invalid_threshold_pair", _threshold_pair_message(*_inverted)
                     )
                     return
-                if updates and _get_manager(hass, entry_id) is not manager:
-                    # Reloaded while the check was awaited: the old manager's store
-                    # is gone, so nothing is written (PR #529 review).
+                if updates and not _still_current():
+                    # Reloaded or restored while the check was awaited: the store it
+                    # judged is gone, so nothing is written (PR #529 review).
                     connection.send_error(
                         msg["id"], "entry_reloaded",
-                        "The appliance was reloaded while the suggestions were applied. "
-                        "Nothing was saved; try again.",
+                        "The appliance was reloaded or its data restored while the "
+                        "suggestions were applied. Nothing was saved; try again.",
                     )
                     return
                 if updates:
@@ -5144,21 +5159,21 @@ async def ws_apply_suggestions(
                     await _record_option_changes(hass, entry, updates, "apply_suggestions")
                     # Each write is awaited: a reload in between leaves the rest
                     # unwritten, and the reply says what already was (PR #529 review).
-                    if _get_manager(hass, entry_id) is not manager:
+                    if not _still_current():
                         connection.send_error(
                             msg["id"], "entry_reloaded",
-                            "The appliance was reloaded while the suggestions were applied. "
-                            "The change is in the settings history, but no setting was "
-                            "saved; try again.",
+                            "The appliance was reloaded or its data restored while the "
+                            "suggestions were applied. The change is in the settings "
+                            "history, but no setting was saved; try again.",
                         )
                         return
                     await manager.profile_store.clear_suggestions()
-                    if _get_manager(hass, entry_id) is not manager:
+                    if not _still_current():
                         connection.send_error(
                             msg["id"], "entry_reloaded",
-                            "The appliance was reloaded while the suggestions were applied. "
-                            "The suggestions were cleared, but no setting was saved; "
-                            "try again once they are offered again.",
+                            "The appliance was reloaded or its data restored while the "
+                            "suggestions were applied. The suggestions were cleared, but "
+                            "no setting was saved; try again once they are offered again.",
                         )
                         return
                     # Suggested values are all tunables -> layer them onto the

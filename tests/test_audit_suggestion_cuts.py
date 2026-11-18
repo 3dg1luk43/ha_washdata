@@ -288,3 +288,45 @@ def test_an_unset_stop_threshold_sets_the_end_energy_floor_at_what_the_detector_
     opts = {CONF_MIN_POWER: 2.0, CONF_OFF_DELAY: 600, CONF_END_ENERGY_THRESHOLD: 0.25}
     out = _engine(cycles, options=opts).run_batch_simulation(cycles)
     assert CONF_END_ENERGY_THRESHOLD not in out
+
+
+def test_min_power_is_not_suggested_across_a_milliwatt_sensor_s_raw_line() -> None:
+    """PR #529 review: a milliwatt sensor with Min Power 1500 is read raw (start
+    1500, stop 900 in its own unit). Min Power 10 would read it in watts while the
+    thresholds stay put, so no cycle could start; a watt sensor keeps it."""
+    from custom_components.ha_washdata.const import (  # noqa: PLC0415
+        CONF_MIN_POWER,
+        CONF_POWER_SENSOR,
+        CONF_START_THRESHOLD_W,
+        CONF_STOP_THRESHOLD_W,
+    )
+
+    opts = {CONF_MIN_POWER: 1500.0, CONF_START_THRESHOLD_W: 1500.0, CONF_STOP_THRESHOLD_W: 900.0,
+            CONF_POWER_SENSOR: "sensor.plug"}
+    cycles = [_cycle(i) for i in range(30)]
+    for unit, offered in (("mW", False), ("W", True)):
+        eng = _engine(cycles, options=opts)
+        state = MagicMock()
+        state.state, state.attributes = "1200", {"unit_of_measurement": unit}
+        eng.hass.states.get.return_value = state
+        out = eng.for_job(opts).generate_detection_suggestions()
+        assert (CONF_MIN_POWER in out) is offered, unit
+    # Not loaded yet: the unit could be mW, so no change across the line either.
+    eng = _engine(cycles, options=opts)
+    eng.hass.states.get.return_value = None
+    assert CONF_MIN_POWER not in eng.for_job(opts).generate_detection_suggestions()
+
+
+def test_a_capped_completion_minimum_says_so() -> None:
+    """PR #529 review: capped at half the shortest programme, the value was still
+    explained as half the p05 duration."""
+    cycles = [_cycle(i, duration=9000.0, name="Cotton") for i in range(30)]
+    eng = _engine(cycles)
+    with patch.object(SuggestionEngine, "_shortest_profile_duration", return_value=2870.0):
+        out = eng.generate_detection_suggestions()[CONF_COMPLETION_MIN_SECONDS]
+    assert out["reason_key"] == "suggestion.reason.completion_min_seconds_capped"
+    assert out["reason_params"]["cap"] == f"{out['value'] / 60:.0f}"
+    eng = _engine([_cycle(i, duration=600.0, name="Quick") for i in range(30)])
+    with patch.object(SuggestionEngine, "_shortest_profile_duration", return_value=600.0):
+        out = eng.generate_detection_suggestions()[CONF_COMPLETION_MIN_SECONDS]
+    assert out["reason_key"] == "suggestion.reason.completion_min_seconds"

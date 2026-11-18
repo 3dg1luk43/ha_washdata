@@ -195,3 +195,30 @@ async def test_a_real_boot_proposes_the_correction_without_a_cycle_end(
     assert CONF_START_THRESHOLD_W in sug, sug
     assert sug[CONF_START_THRESHOLD_W]["value"] < 370  # today's draw starts a cycle
     assert sug[CONF_STOP_THRESHOLD_W]["value"] < sug[CONF_START_THRESHOLD_W]["value"]
+
+
+def _idling_cycle(day: int, run_w: float, idle_w: float) -> dict[str, Any]:
+    """A steady ``run_w`` hour with ten minutes at ``idle_w`` before and after."""
+    cycle = _dryer_cycle(day, run_w)
+    pts = [[10.0 * k, idle_w] for k in range(60)]
+    pts += [[600.0 + 30.0 * (i + 1), run_w + (3.0 if i % 2 else -2.0)] for i in range(120)]
+    pts += [[4200.0 + 10.0 * k, idle_w] for k in range(1, 61)]
+    cycle["power_data"] = pts
+    cycle["duration"] = pts[-1][0]
+    return cycle
+
+
+def test_no_pair_under_the_standby_the_cycles_show() -> None:
+    """PR #529 review: running at 100 W, idling at 60 W, Stop 80 W: start 50 / stop
+    40 would sit under the standby, so a cycle would start idle and never end."""
+    idling = [_idling_cycle(d, 100.0, 60.0) for d in range(8)]
+    adv = start_above_running(idling, 120.0, 80.0)
+    assert adv is not None and adv["standby_w"] == 60.0
+    assert steady_load_threshold_suggestions(adv) == {}
+    # A 5 W standby leaves the same pair well clear.
+    quiet = [_idling_cycle(d, 100.0, 5.0) for d in range(8)]
+    adv = start_above_running(quiet, 120.0, 80.0)
+    sug = steady_load_threshold_suggestions(adv)
+    start = round(adv["low_w"] * STEADY_LOAD_START_RATIO, 1)  # ~50 W
+    assert sug[CONF_START_THRESHOLD_W]["value"] == start
+    assert sug[CONF_STOP_THRESHOLD_W]["value"] == round(start * STEADY_LOAD_STOP_RATIO, 1)

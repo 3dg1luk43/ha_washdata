@@ -573,10 +573,12 @@ def cut_short_mask(runs: list[tuple[list[float], list[float], float, bool, float
             if pinned or any(t_e >= d_i - TERMINAL_BLIP_QUIET_MIN_S for _q0, t_e in events[i]):
                 mask.append(False)
                 continue
+            # A sibling's evidence ends where its accepted length does: a trace
+            # kept past a corrected end shows what came after the run (PR #529 review).
             later = sum(
                 1 for j, ev in enumerate(events)
                 if j != i and any(
-                    t_e > d_i
+                    d_i < t_e <= runs[j][2]
                     and q0 <= d_i + TERMINAL_BLIP_QUIET_MIN_S
                     and t_e - max(q0, d_i) >= TERMINAL_BLIP_QUIET_MIN_S
                     for q0, t_e in ev
@@ -7758,7 +7760,11 @@ class ProfileStore:
                 repr(prof.get(k))
                 for k in ("min_duration", "max_duration", "avg_duration", "sample_cycle_id")
             )
-        evidence = (tuple(self._evidence_sources), self.dtw_bandwidth, tuple(rows))
+        # The device type too: the build filters a dishwasher's cut-off runs
+        # (#531), so a type change must not reuse the other type's build.
+        evidence = (
+            tuple(self._evidence_sources), self.dtw_bandwidth, self.device_type, tuple(rows),
+        )
         return evidence, built, refs
 
     async def async_rebuild_envelope(self, profile_name: str) -> bool:

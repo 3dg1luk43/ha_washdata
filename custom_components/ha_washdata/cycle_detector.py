@@ -6375,10 +6375,18 @@ class CycleDetector:
         # The level of the stretch that qualified: the walk stops at a step the
         # cadence calls an outage, as the gap-free tally does (PR #529 review).
         outage_ceiling = min(3600.0, max(60.0, 10.0 * self._prior_p95_dt))
+        # Nor further back than the gap-free tally reaches: it also restarts at an
+        # outage shorter than that ceiling (an unread keepalive, unobserved time),
+        # and older readings across it must not set the level (PR #529 review).
+        since = timestamp - timedelta(seconds=self._gapfree_before_high + 0.001)
         for ts, pw in reversed(self._power_readings):
             if ts >= timestamp:
                 continue
-            if float(pw) >= stop or (newer - ts).total_seconds() > outage_ceiling:
+            if (
+                ts < since
+                or float(pw) >= stop
+                or (newer - ts).total_seconds() > outage_ceiling
+            ):
                 break
             quiet.append(float(pw))
             quiet_start = ts

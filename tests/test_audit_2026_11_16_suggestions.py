@@ -927,5 +927,148 @@ async def test_a_pass_from_before_a_restore_applies_nothing(mock_hass: Any) -> N
         return {CONF_START_THRESHOLD_W: _sug(454.4)}
 
     mock_hass.async_add_executor_job = AsyncMock(side_effect=lambda fn, *a: fn(*a))
-    assert await lm._run_pass(_scan, OWNER_BATCH, lm._config_generation) == {}  # noqa: SLF001
+    assert await lm._run_pass(_scan, OWNER_BATCH, lm._config_generation) is None  # noqa: SLF001
     assert store.suggestions == {}
+
+
+def test_user_stopped_runs_do_not_set_a_programme_s_length() -> None:
+    """PR #529 review: three runs the user cut short at 2400 s made 2400 s the
+    programme's length, so a merged 2400 s trace passed as one run of it."""
+    from custom_components.ha_washdata.suggestion_engine import _label_median_durations  # noqa: PLC0415
+
+    def run(d: float, reason: str) -> dict[str, Any]:
+        return {"status": "completed", "termination_reason": reason, "profile_name": "Eco", "duration": d}
+
+    cut = [run(2400.0, "user") for _ in range(3)]
+    assert _label_median_durations(cut) == {}
+    assert _label_median_durations(cut + [run(5400.0, "timeout") for _ in range(3)]) == {"Eco": 5400.0}
+
+
+def test_standby_before_the_first_working_reading_is_no_pause() -> None:
+    """PR #529 review: 500 s of standby ahead of the cycle read as a pause it
+    bridged, so the joint check could refuse a Min Off Gap that was safe."""
+    from custom_components.ha_washdata.suggestion_engine import end_gate_pause_needs  # noqa: PLC0415
+
+    lead = [(float(t), 0.5) for t in range(0, 500, 10)]
+    work = [(500.0 + t, 300.0) for t in range(0, 600, 10)]
+    assert end_gate_pause_needs(lead + work, 5.0, 180, 0.05) == []
+    # The same quiet after work began is a pause.
+    pause = [(1100.0 + t, 0.5) for t in range(0, 500, 10)]
+    assert end_gate_pause_needs(work + pause + [(1600.0, 300.0)], 5.0, 180, 0.05) != []
+
+
+def test_the_settled_tail_is_walked_once_per_stored_trace() -> None:
+    """PR #529 review: the device-list callback walked and sorted every hand-stopped
+    cycle's tail on each poll (23.6 ms over eight 3 h tails); an edited trace is
+    walked again."""
+    from unittest.mock import patch  # noqa: PLC0415
+
+    from custom_components.ha_washdata import suggestion_engine as se  # noqa: PLC0415
+
+    pts = [[float(t), 2000.0] for t in range(0, 600, 10)] + [[600.0 + t, 3.4] for t in range(0, 3600, 10)]
+    cycle = {"id": "tail-1", "status": "completed", "termination_reason": "user",
+             "power_data": pts, "signature": {"max_power": 2000.0}}
+    real = se._tail_settled_w_uncached  # noqa: SLF001
+    with patch.object(se, "_tail_settled_w_uncached", side_effect=real) as walked:
+        for _ in range(5):
+            assert se.detect_standby_above_stop([cycle, dict(cycle)], 2.56) is not None
+        assert walked.call_count == 1
+        cycle["power_data"] = pts[:-60]  # trimmed by the user
+        se.detect_standby_above_stop([cycle], 2.56)
+        assert walked.call_count == 2
+
+
+async def test_a_batch_taken_before_a_restore_is_discarded_and_rerun(mock_hass: Any) -> None:
+    """PR #529 review: the batch takes its cycles at spawn. A restore before the
+    pass first ran passed the store check taken there; and a discarded batch left
+    its count, so the restored history waited five more cycles for one."""
+    from unittest.mock import AsyncMock  # noqa: PLC0415
+
+    store = _Store()
+    store._data_generation = 0  # noqa: SLF001
+    lm = _learning(mock_hass, store, {})
+    mock_hass.async_add_executor_job = AsyncMock(side_effect=lambda fn, *a: fn(*a))
+    spawned: list[Any] = []
+    lm._spawn = spawned.append  # noqa: SLF001
+    lm._batch_cycles = lambda: [{"status": "completed", "termination_reason": "timeout"}] * 6  # noqa: SLF001
+    lm._maybe_run_batch_simulation()  # noqa: SLF001
+    assert lm._last_batch_simulation_count == 6  # noqa: SLF001
+    store._data_generation += 1  # noqa: SLF001 - Undo Import before the task first runs
+    lm.suggestion_engine.for_job = lambda: type("E", (), {
+        "run_batch_simulation": staticmethod(lambda cycles: {CONF_START_THRESHOLD_W: _sug(9.0)}),
+    })()
+    await spawned[0]
+    assert store.suggestions == {}
+    assert lm._last_batch_simulation_count == 0  # noqa: SLF001
+
+
+async def test_a_new_sensor_without_cadence_drops_the_old_one_s_entries(mock_hass: Any) -> None:
+    """PR #529 review: after a power sensor change the refresh kept the watchdog
+    value measured on the old plug, one Apply away, since the operational pass had
+    no cadence to run on and so never withdrew it."""
+    from unittest.mock import AsyncMock  # noqa: PLC0415
+
+    from custom_components.ha_washdata.const import CONF_WATCHDOG_INTERVAL  # noqa: PLC0415
+
+    mock_hass.async_add_executor_job = AsyncMock(side_effect=lambda fn, *a: fn(*a))
+    store = _Store()
+    lm = _learning(mock_hass, store, {})
+    store.set_suggestion(CONF_WATCHDOG_INTERVAL, 95, reason="r", flags={"owner": OWNER_OPERATIONAL})
+    assert lm.cadence() is None
+    await lm.async_refresh_suggestions()
+    assert CONF_WATCHDOG_INTERVAL not in store.get_suggestions()
+
+
+async def test_undo_import_forgets_the_cadence_measured_before_it(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """PR #529 review: the wipe reset the cadence evidence, Undo Import did not, so
+    the in-memory intervals from before it sized the next operational pass."""
+    from unittest.mock import AsyncMock, patch  # noqa: PLC0415
+
+    from custom_components.ha_washdata.time_utils import utc_now  # noqa: PLC0415
+
+    entry = await setup_washdata_entry()
+    manager = hass.data[DOMAIN][entry.entry_id]
+    lm = manager.learning_manager
+    lm._sample_interval_model.add_samples([30.0] * 40, utc_now())  # noqa: SLF001
+    assert lm.cadence() is not None
+    restore = AsyncMock(return_value={"restored_from": None, "counts": {}})
+    client = await hass_ws_client(hass)
+    with patch.object(manager.profile_store, "async_restore_pre_import_snapshot", restore):
+        await client.send_json_auto_id({"type": f"{DOMAIN}/undo_import", "entry_id": entry.entry_id})
+        assert (await client.receive_json())["success"]
+    assert restore.await_count == 1
+    assert lm.cadence() is None
+
+
+async def test_apply_writes_nothing_after_a_restore_it_waited_through(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """PR #529 review: Undo Import replaced the store while Apply awaited its
+    end-gate check; the manager was the same, so Apply wrote values judged on the
+    replaced cycles and cleared the restored suggestions."""
+    from unittest.mock import patch  # noqa: PLC0415
+
+    from custom_components.ha_washdata import ws_api  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(options={CONF_END_ENERGY_THRESHOLD: 0.01, CONF_OFF_DELAY: 60})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    store.set_suggestion(CONF_END_ENERGY_THRESHOLD, 0.02, reason="r", flags={"owner": OWNER_BATCH})
+    real = ws_api._drop_unsafe_end_gate_updates  # noqa: SLF001
+
+    async def restored_meanwhile(*a: Any) -> bool:
+        ok = await real(*a)
+        store._data_generation = getattr(store, "_data_generation", 0) + 1  # noqa: SLF001
+        return ok
+
+    client = await hass_ws_client(hass)
+    with patch.object(ws_api, "_drop_unsafe_end_gate_updates", side_effect=restored_meanwhile):
+        await client.send_json_auto_id({
+            "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry.entry_id,
+            "keys": [CONF_END_ENERGY_THRESHOLD],
+        })
+        res = await client.receive_json()
+    assert res["success"] is False and res["error"]["code"] == "entry_reloaded"
+    assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_END_ENERGY_THRESHOLD] == 0.01
+    assert CONF_END_ENERGY_THRESHOLD in store.get_suggestions()

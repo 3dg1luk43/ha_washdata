@@ -52,6 +52,7 @@ from .const import (
     CONF_MIN_OFF_GAP,
     CONF_MIN_POWER,
     CONF_POWER_SENSOR,
+    DEFAULT_MIN_POWER,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_ANTI_WRINKLE_ENABLED,
@@ -73,7 +74,12 @@ from .const import (
 )
 from .options_utils import option_int
 from .signal_processing import longest_resumed_pause_s
-from .time_utils import offset_key, power_data_to_offsets, synthetic_offset_keys
+from .time_utils import (
+    SYNTHETIC_OFFSETS_KEY,
+    offset_key,
+    power_data_to_offsets,
+    synthetic_offset_keys,
+)
 
 # ─── Clean-cycle selection ────────────────────────────────────────────────────
 # Suggestions must learn only from cycles that were detected correctly. A cycle
@@ -164,7 +170,9 @@ def end_gate_pause_needs(
         # never get past it (PR #529 review); every finite one moves it on.
         points = [(t, p) for t, p in points if math.isfinite(t) and math.isfinite(p)]
         n = len(points)
-        i = 0
+        # From the first working reading: a leading quiet is the standby before the
+        # cycle, not a pause it bridged (PR #529 review).
+        i = next((k for k, (_t, p) in enumerate(points) if p >= stop), n)
         while i < n:
             if points[i][1] >= stop:
                 i += 1
@@ -629,10 +637,17 @@ _PROGRAMME_LENGTH_MIN_CYCLES = 3
 
 
 def _label_median_durations(cycles: list[dict[str, Any]]) -> dict[str, float]:
-    """Median stored duration per label, over its completed cycles (>= 3 of them)."""
+    """Median stored duration per label, over its completed cycles (>= 3 of them).
+
+    Not the ones the user cut short ("Force cycle end": stored completed with
+    ``termination_reason`` user): ``select_clean_cycles`` rejects them, so they must
+    not grant the programme-length exemption either (PR #529 review).
+    """
     by_label: dict[str, list[float]] = {}
     for c in cycles:
         if not isinstance(c, dict) or c.get("status") != "completed":
+            continue
+        if c.get("termination_reason") == TerminationReason.USER:
             continue
         label = c.get("profile_name") or c.get("label")
         duration = _num(c.get("duration"))
@@ -679,7 +694,36 @@ _BELOW_STOP_ENDS = frozenset({
 _TAIL_SETTLED_FRACTION = 0.25
 
 
+# `_tail_settled_w` per stored cycle: the device-list callback asks on every poll,
+# and a cycle stopped by hand after hours of standby has thousands of tail readings
+# to walk and sort (23.6 ms a call over eight 3 h tails at 2 s, PR #529 review). A
+# stored cycle's trace does not change in place; an edit replaces it, so its
+# length or last offset moves with it.
+_TAIL_SETTLED_CACHE: dict[tuple[Any, ...], float | None] = {}
+_TAIL_SETTLED_CACHE_MAX = 512
+
+
 def _tail_settled_w(cycle: dict[str, Any], raw: list[Any], peak: float) -> float | None:
+    """:func:`_tail_settled_w_uncached`, remembered per cycle trace."""
+    try:
+        last = raw[-1][0] if raw and isinstance(raw[-1], (list, tuple)) else None
+        syn = cycle.get(SYNTHETIC_OFFSETS_KEY)
+        key = (cycle.get("id"), len(raw), last, peak, len(syn) if isinstance(syn, list) else -1)
+        hash(key)
+    except Exception:  # noqa: BLE001 - an odd row: just compute it
+        return _tail_settled_w_uncached(cycle, raw, peak)
+    if key[0] is None:
+        return _tail_settled_w_uncached(cycle, raw, peak)
+    if key in _TAIL_SETTLED_CACHE:
+        return _TAIL_SETTLED_CACHE[key]
+    value = _tail_settled_w_uncached(cycle, raw, peak)
+    if len(_TAIL_SETTLED_CACHE) >= _TAIL_SETTLED_CACHE_MAX:
+        _TAIL_SETTLED_CACHE.pop(next(iter(_TAIL_SETTLED_CACHE)))
+    _TAIL_SETTLED_CACHE[key] = value
+    return value
+
+
+def _tail_settled_w_uncached(cycle: dict[str, Any], raw: list[Any], peak: float) -> float | None:
     """Where a kept tail settled after the cycle's last working reading (#525).
 
     Working means at or above ``_STANDBY_PEAK_FRACTION`` of the cycle's peak. Each
@@ -1147,6 +1191,9 @@ def start_above_running(
         cycles    how many cycles were read
         start_w   the start threshold
         stop_w    the stop threshold
+        standby_w the level those cycles idle at under the stop threshold (the
+                  median of each one's readings there, from at least two cycles
+                  with three such readings), None when they show none
 
     Pure statistics, executor-safe, never raises.
     """
@@ -1156,16 +1203,18 @@ def start_above_running(
         if not (math.isfinite(start) and math.isfinite(stop)) or start <= 0:
             return None
         lows: list[float] = []
+        idles: list[float] = []
         ran = [
             c for c in list(cycles or [])
             if isinstance(c, dict) and c.get("status") in ("completed", "force_stopped")
         ][-STEADY_LOAD_RECENT_CYCLES:]
         for cycle in ran:
             synthetic = synthetic_offset_keys(cycle) or set()
-            running = [
-                p for o, p in _cycle_readings(cycle)
-                if p >= stop and p > 0 and offset_key(o) not in synthetic
-            ]
+            readings = [(o, p) for o, p in _cycle_readings(cycle) if offset_key(o) not in synthetic]
+            running = [p for _o, p in readings if p >= stop and p > 0]
+            idle = [p for _o, p in readings if 0 <= p < stop]
+            if len(idle) >= 3:
+                idles.append(float(np.median(idle)))
             if len(running) < 5:
                 continue
             low = float(np.percentile(running, _STEADY_LOAD_LOW_PCT))
@@ -1181,6 +1230,7 @@ def start_above_running(
             "cycles": len(lows),
             "start_w": round(start, 2),
             "stop_w": round(stop, 2),
+            "standby_w": round(float(np.median(idles)), 2) if len(idles) >= 2 else None,
         }
     except Exception:  # noqa: BLE001 - a statistic must never break a suggestion pass
         return None
@@ -1192,12 +1242,24 @@ def steady_load_threshold_suggestions(adv: dict[str, Any] | None) -> dict[str, A
     Start goes to ``STEADY_LOAD_START_RATIO`` of the running level; stop only moves
     when it would no longer sit below that start, to ``STEADY_LOAD_STOP_RATIO`` of it.
     Corrective, so the post-apply cooldown does not hold it back: no cycle can start
-    under the current value.
+    under the current value. Not offered when the cycles show a standby the pair
+    would not clear by the standby floor's margin (PR #529 review): idling at or
+    above it, the appliance would start without running and never end. Cycles
+    ended on power carry no standby readings, so a missing level is no objection.
     """
     if not adv:
         return {}
     low = float(adv["low_w"])
     start = round(low * STEADY_LOAD_START_RATIO, 1)
+    stop_after = (
+        round(start * STEADY_LOAD_STOP_RATIO, 1) if float(adv["stop_w"]) >= start
+        else float(adv["stop_w"])
+    )
+    standby = _num(adv.get("standby_w"))
+    if standby is not None and stop_after < max(
+        standby * STANDBY_FLOOR_RATIO, standby + STANDBY_FLOOR_MIN_MARGIN_W
+    ):
+        return {}
     params = {"low": f"{low:.0f}", "start": f"{float(adv['start_w']):g}"}
     entry = {
         "reason": (
@@ -1212,9 +1274,7 @@ def steady_load_threshold_suggestions(adv: dict[str, Any] | None) -> dict[str, A
     }
     out: dict[str, Any] = {CONF_START_THRESHOLD_W: {"value": start, **entry}}
     if float(adv["stop_w"]) >= start:
-        out[CONF_STOP_THRESHOLD_W] = {
-            "value": round(start * STEADY_LOAD_STOP_RATIO, 1), **entry,
-        }
+        out[CONF_STOP_THRESHOLD_W] = {"value": stop_after, **entry}
     return out
 
 
@@ -1626,7 +1686,38 @@ class SuggestionEngine:
         job._options_snapshot = (
             dict(options) if options is not None else self._read_entry_options()
         )
+        job._power_unit_snapshot = job._read_power_unit(job._options_snapshot)
         return job
+
+    def _read_power_unit(self, options: dict[str, Any]) -> tuple[bool, Any]:
+        """``(known, unit)`` of the power sensor, read on the loop for a job.
+
+        Not known for a sensor not loaded yet, or unavailable / unknown without a
+        unit (as ``_min_power_floor``). Never raises.
+        """
+        try:
+            state = self.hass.states.get(str(options.get(CONF_POWER_SENSOR) or ""))
+            if state is None:
+                return False, None
+            unit = state.attributes.get("unit_of_measurement")
+            if not str(unit or "").strip() and state.state in ("unavailable", "unknown"):
+                return False, None
+            return True, unit
+        except Exception:  # pylint: disable=broad-exception-caught
+            return False, None
+
+    def _keeps_power_scale(self, current: float | None, proposed: float) -> bool:
+        """Does Min Power ``proposed`` read the sensor in the same unit as ``current``?
+
+        ``power_unit_scale`` keeps a milliwatt sensor raw from 1000 and a kilowatt
+        one under 1, so a Min Power across either line rescales every reading
+        while the thresholds stay put (PR #529 review). An unknown unit must hold
+        for any of them.
+        """
+        known, unit = getattr(self, "_power_unit_snapshot", (False, None))
+        units = [unit] if known else ["mW", "W", "kW"]
+        cur = DEFAULT_MIN_POWER if current is None else current
+        return all(power_unit_scale(u, cur) == power_unit_scale(u, proposed) for u in units)
 
     def generate_operational_suggestions(self, p95_dt: float, median_dt: float) -> dict[str, Any]:
         """Generate suggestions for operational parameters based on cadence."""
@@ -2268,9 +2359,14 @@ class SuggestionEngine:
             and _num(options.get(CONF_STOP_THRESHOLD_W)) is not None
         )
         current_mp = _num(options.get(CONF_MIN_POWER))
-        if len(lowest_active) >= 5 and thresholds_set and (current_mp is None or current_mp >= 1.0):
-            p05 = float(np.percentile(lowest_active, 5))
-            suggested_mp = round(min(max(p05 * 0.4, 1.0), 10.0), 1)
+        eligible = (
+            len(lowest_active) >= 5 and thresholds_set and (current_mp is None or current_mp >= 1.0)
+        )
+        p05 = float(np.percentile(lowest_active, 5)) if eligible else 0.0
+        suggested_mp = round(min(max(p05 * 0.4, 1.0), 10.0), 1)
+        # Nor across the line where a milliwatt sensor's readings switch from raw
+        # to watts: the thresholds would not follow (PR #529 review).
+        if eligible and self._keeps_power_scale(current_mp, suggested_mp):
             suggestions[CONF_MIN_POWER] = {
                 "value": suggested_mp,
                 "reason": (
@@ -2314,6 +2410,7 @@ class SuggestionEngine:
         if len(durations) >= 10:
             p05d = float(np.percentile(durations, 5))
             suggested_cms = int(max(120, round(p05d * 0.5)))
+            uncapped_cms = suggested_cms
             shortest = self._shortest_profile_duration()
             if shortest is not None and shortest > 0:
                 suggested_cms = int(min(suggested_cms, max(120, round(shortest * 0.5))))
@@ -2328,18 +2425,31 @@ class SuggestionEngine:
                 suggested_cms,
                 DEVICE_COMPLETION_THRESHOLDS.get(self.device_type or "", DEFAULT_COMPLETION_MIN_SECONDS),
             ))
-            suggestions[CONF_COMPLETION_MIN_SECONDS] = {
-                "value": suggested_cms,
-                "reason": (
+            reason_params: dict[str, Any] = {
+                "minutes": f"{p05d / 60:.0f}",
+                "cycles": len(durations),
+                "excl": excl_note,
+            }
+            if suggested_cms < uncapped_cms:
+                # A cap set it, not the p05 (PR #529 review).
+                reason_params["cap"] = f"{suggested_cms / 60:.0f}"
+                reason_key = "suggestion.reason.completion_min_seconds_capped"
+                reason = (
+                    f"Capped at {suggested_cms / 60:.0f} min so the shortest programmes "
+                    f"still count; half the p05 clean-cycle duration ({p05d / 60:.0f} min, "
+                    f"{len(durations)} cycles) would be more.{excl_note}"
+                )
+            else:
+                reason_key = "suggestion.reason.completion_min_seconds"
+                reason = (
                     f"Half the p05 clean-cycle duration ({p05d / 60:.0f} min) across "
                     f"{len(durations)} cycles; filters ghost cycles.{excl_note}"
-                ),
-                "reason_key": "suggestion.reason.completion_min_seconds",
-                "reason_params": {
-                    "minutes": f"{p05d / 60:.0f}",
-                    "cycles": len(durations),
-                    "excl": excl_note,
-                },
+                )
+            suggestions[CONF_COMPLETION_MIN_SECONDS] = {
+                "value": suggested_cms,
+                "reason": reason,
+                "reason_key": reason_key,
+                "reason_params": reason_params,
                 "exclusions": excl_summary,
             }
 
