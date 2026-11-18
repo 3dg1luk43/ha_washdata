@@ -1570,7 +1570,7 @@
     },
     "door_opens_at_end": {
       "label": "Otvaranje vrata završava ciklus",
-      "doc": "Za uređaje čija vrata ostaju zaključana tijekom rada (većina perilica rublja s prednjim punjenjem) ili koji ih sami otvore na kraju (perilice posuđa s AirDry). Vrata otvorena uz nisku snagu tijekom vremena zadržavanja navedenog ispod završavaju ciklus umjesto da ga pauziraju; kratko otvaranje se zanemaruje. Dok je ciklus pauziran, to se događa tek kad je prepoznati program pri kraju, pa pauza usred programa ostaje pauza. Zahtijeva Entitet senzora vrata."
+      "doc": "Uz Entitet senzora vrata, vrata otvorena uz nisku snagu tijekom vremena zadržavanja navedenog ispod završavaju ciklus umjesto da ga pauziraju. Dok je ciklus pauziran, to se događa tek kad je prepoznati program pri kraju, pa pauza usred programa ostaje pauza."
     },
     "door_end_dwell_seconds": {
       "label": "Zadržavanje otvorenih vrata za završetak",
@@ -1713,7 +1713,7 @@
     "torn_pick": "{a} ili {b}?",
     "torn_tip": "WashData još ne može razlikovati ova dva programa, pa odaberite onaj koji radi kako biste njime označili ovaj ciklus (Automatsko otkrivanje poništava odabir).",
     "program_mismatch": "Izgleda više kao {program}",
-    "program_mismatch_tip": "Ovaj ciklus ne nalikuje programu {selected} koji ste odabrali: {program} mu jasno bolje odgovara. Ništa se ne mijenja. Automatizacija na to može reagirati okidačem „Program u tijeku razlikuje se od odabranog”."
+    "program_mismatch_tip": "Ovaj ciklus jasno više nalikuje programu {program} nego programu {selected}, ali WashData zadržava program koji ste odabrali."
   },
   "suggestion": {
     "observed_label": "Izmjereno",
@@ -1765,6 +1765,7 @@
     },
     "reason": {
       "completion_min_seconds": "Polovica trajanja čistog ciklusa p05 ({minutes} min) kroz {cycles} ciklusa; filtrira lažne cikluse.{excl}",
+      "completion_min_seconds_capped": "Ograničeno na {cap} min kako bi se i najkraći programi računali; polovica trajanja čistog ciklusa p05 ({minutes} min, {cycles} ciklusa) bila bi dulja.{excl}",
       "match_interval": "Na temelju uočene učestalosti ažuriranja (medijan={median}s) * 10.",
       "match_interval_capped": "Ograničeno tako da {persistence} uzastopnih podudaranja stane u {pct}% najkraćeg programa ({shortest}s); sama učestalost ažuriranja (medijan={median}s) predložila bi dulji interval.",
       "match_interval_floored": "Najkraći program ({shortest}s) ograničio bi ovo na {cap}s, ispod minimuma od {minimum}s, pa se koristi minimum: {persistence} uzastopnih podudaranja traje {budget}s, više od {pct}% tog programa. Podudaranje se izvodi samo kad stigne očitanje (medijan={median}s), pa to ništa ne košta.",

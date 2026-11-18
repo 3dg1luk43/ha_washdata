@@ -1543,7 +1543,7 @@
         },
         "door_opens_at_end": {
             "label": "Hapja e derës e përfundon ciklin",
-            "doc": "Për pajisjet që e mbajnë derën të kyçur gjatë punës (shumica e lavatriçeve me ngarkim përpara) ose që e hapin vetë në fund (pjatalarëset me AirDry). Një derë e lënë hapur për kohën e pritjes më poshtë, me fuqinë tashmë të rënë, e përfundon ciklin në vend që ta vërë në pauzë; një hapje e shkurtër injorohet. Në pauzë kjo ndodh vetëm kur programi i njohur pothuajse ka mbaruar, prandaj një pauzë në mes të programit mbetet pauzë. Kërkon cilësimin Entiteta e sensorit të derës."
+            "doc": "Me cilësimin Entiteta e sensorit të derës, një derë e lënë hapur për kohën e pritjes më poshtë, me fuqi të ulët, e përfundon ciklin në vend që ta vërë në pauzë. Në pauzë kjo ndodh vetëm kur programi i njohur pothuajse ka mbaruar, prandaj një pauzë në mes të programit mbetet pauzë."
         },
         "door_end_dwell_seconds": {
             "label": "Koha e pritjes me derë të hapur",
@@ -1686,7 +1686,7 @@
         "torn_pick": "{a} apo {b}?",
         "torn_tip": "WashData ende nuk i dallon dot këto dy programe, ndaj zgjidhni atë që po punon për ta etiketuar këtë cikël me të (opsioni Zbulim automatik e anulon zgjedhjen).",
         "program_mismatch": "Duket më shumë si {program}",
-        "program_mismatch_tip": "Ky cikël nuk i ngjan {selected}, programit që zgjodhët: {program} i përshtatet qartë më mirë. Asgjë nuk ndryshohet. Një automatizim mund të reagojë me triggerin \"Programi që po ekzekutohet ndryshon nga ai i zgjedhur\".",
+        "program_mismatch_tip": "Ky cikël i ngjan qartë më shumë {program} se sa {selected}, por WashData e mban programin që zgjodhët.",
         "match_uncertain": "E pasigurt: {top} ose {runner}",
         "match_uncertain_single": "E pasigurt: ndoshta {top}",
         "match_sure": "~{pct}% e sigurt",
@@ -1936,6 +1936,7 @@
         },
         "reason": {
             "completion_min_seconds": "Gjysma e kohëzgjatjes p05 të cikleve të pastra ({minutes} min) në {cycles} cikle; filtron ciklet e rreme.{excl}",
+            "completion_min_seconds_capped": "I kufizuar në {cap} min që edhe programet më të shkurtra të numërohen; gjysma e kohëzgjatjes p05 të cikleve të pastra ({minutes} min, {cycles} cikle) do të ishte më e gjatë.{excl}",
             "match_interval": "Bazuar në ritmin e vëzhguar të përditësimit (mesatarja={median}s) * 10.",
             "match_interval_capped": "Kufizuar që {persistence} përputhje të njëpasnjëshme të hyjnë në {pct}% të programit më të shkurtër ({shortest}s); vetëm ritmi i përditësimit (mesatarja={median}s) do të kishte sugjeruar një interval më të gjatë.",
             "match_interval_floored": "Programi më i shkurtër ({shortest}s) do ta kufizonte këtë në {cap}s, nën minimumin prej {minimum}s, prandaj përdoret minimumi: {persistence} përputhje të njëpasnjëshme zgjasin {budget}s, mbi {pct}% të atij programi. Përputhja kryhet vetëm kur vjen një lexim (mediana={median}s), ndaj kjo nuk kushton asgjë.",

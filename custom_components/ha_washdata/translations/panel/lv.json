@@ -1570,7 +1570,7 @@
     },
     "door_opens_at_end": {
       "label": "Durvju atvēršana beidz ciklu",
-      "doc": "Iekārtām, kuru durvis darbības laikā paliek bloķētas (lielākā daļa veļas mazgājamo mašīnu ar priekšējo ielādi) vai kuras beigās tās atver pašas (trauku mazgājamās mašīnas ar AirDry). Ja pie zemas jaudas durvis paliek atvērtas zemāk norādīto uzturēšanās laiku, cikls beidzas, nevis tiek pauzēts; īsa atvēršana tiek ignorēta. Kamēr cikls ir pauzēts, tas notiek tikai tad, kad atpazītā programma ir gandrīz pabeigta, tāpēc pauze programmas vidū paliek pauze. Nepieciešama Durvju sensora entītija."
+      "doc": "Ar Durvju sensora entītiju durvis, kas pie zemas jaudas paliek atvērtas zemāk norādīto uzturēšanās laiku, beidz ciklu, nevis to pauzē. Kamēr cikls ir pauzēts, tas notiek tikai tad, kad atpazītā programma ir gandrīz pabeigta, tāpēc pauze programmas vidū paliek pauze."
     },
     "door_end_dwell_seconds": {
       "label": "Durvju atvēršanas beigu uzturēšanās laiks",
@@ -1713,7 +1713,7 @@
     "torn_pick": "{a} vai {b}?",
     "torn_tip": "WashData vēl nespēj atšķirt šīs divas programmas, tāpēc izvēlieties to, kas pašlaik darbojas, lai ar to iezīmētu šo ciklu (Automātiska noteikšana izvēli atceļ).",
     "program_mismatch": "Drīzāk tā ir {program}",
-    "program_mismatch_tip": "Šis cikls nelīdzinās jūsu izvēlētajai programmai {selected}: {program} tam atbilst skaidri labāk. Nekas netiek mainīts. Automatizācija var uz to reaģēt ar trigeri „Darbojošā programma atšķiras no izvēlētās”."
+    "program_mismatch_tip": "Šis cikls skaidri vairāk līdzinās programmai {program} nekā {selected}, taču WashData saglabā jūsu izvēlēto programmu."
   },
   "tab": {
     "advanced": "Papildu",
@@ -1961,6 +1961,7 @@
     },
     "reason": {
       "completion_min_seconds": "Puse no p05 tīro ciklu ilguma ({minutes} min) {cycles} ciklos; filtrē viltus ciklus.{excl}",
+      "completion_min_seconds_capped": "Ierobežots līdz {cap} min, lai tiktu ieskaitītas arī īsākās programmas; puse no p05 tīro ciklu ilguma ({minutes} min, ciklu skaits: {cycles}) būtu garāka.{excl}",
       "match_interval": "Pamatots ar novēroto atjaunināšanas biežumu (mediāna={median}s) * 10.",
       "match_interval_capped": "Ierobežots tā, lai {persistence} secīgas atbilstības ietilptu {pct}% no īsākās programmas ({shortest}s); tikai atjaunināšanas biežums (mediāna={median}s) būtu ieteicis garāku intervālu.",
       "match_interval_floored": "Īsākā programma ({shortest}s) ierobežotu šo vērtību līdz {cap}s, kas ir zem {minimum}s minimuma, tāpēc tiek izmantots minimums: {persistence} secīgas atbilstības aizņem {budget}s, vairāk nekā {pct}% no šīs programmas. Saskaņošana notiek tikai tad, kad pienāk rādījums (mediāna={median}s), tāpēc tas neko nemaksā.",

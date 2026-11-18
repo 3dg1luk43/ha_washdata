@@ -1571,7 +1571,7 @@
     },
     "door_opens_at_end": {
       "label": "Dörröppning avslutar cykeln",
-      "doc": "För maskiner vars dörr förblir låst medan de kör (de flesta frontmatade tvättmaskiner) eller som själva öppnar den i slutet (diskmaskiner med AirDry). En dörr som står öppen under uppehållstiden nedan vid låg effekt avslutar cykeln i stället för att pausa den; en kort öppning ignoreras. Under en paus sker detta först när det identifierade programmet nästan är klart, så en paus mitt i programmet förblir en paus. Kräver en Dörrsensorentitet."
+      "doc": "Med en Dörrsensorentitet avslutar en dörr som står öppen under uppehållstiden nedan vid låg effekt cykeln i stället för att pausa den. Under en paus sker detta först när det identifierade programmet nästan är klart, så en paus mitt i programmet förblir en paus."
     },
     "door_end_dwell_seconds": {
       "label": "Dörröppningens uppehållstid vid avslut",
@@ -1710,7 +1710,7 @@
     "torn_pick": "{a} eller {b}?",
     "torn_tip": "WashData kan ännu inte skilja dessa två åt, så välj det program som körs för att märka den här cykeln med det (Autoidentifiera ångrar valet).",
     "program_mismatch": "Liknar mer {program}",
-    "program_mismatch_tip": "Den här cykeln liknar inte {selected}, programmet du valde: {program} passar tydligt bättre. Inget ändras. En automatisering kan reagera med triggern \"Pågående program skiljer sig från det valda\".",
+    "program_mismatch_tip": "Den här cykeln liknar tydligt mer {program} än {selected}, men WashData behåller programmet du valde.",
     "match_uncertain": "Osäker: {top} eller {runner}",
     "match_uncertain_single": "Osäker: kanske {top}",
     "match_sure": "~{pct}% säker",
@@ -1766,6 +1766,7 @@
     },
     "reason": {
       "completion_min_seconds": "Hälften av p05-varaktigheten för rena cykler ({minutes} min) över {cycles} cykler; filtrerar bort spökcykler.{excl}",
+      "completion_min_seconds_capped": "Begränsat till {cap} min så att de kortaste programmen fortfarande räknas; hälften av p05-varaktigheten för rena cykler ({minutes} min, {cycles} cykler) skulle vara längre.{excl}",
       "match_interval": "Baserat på observerad uppdateringstakt (median={median}s) * 10.",
       "match_interval_capped": "Begränsad så att {persistence} matchningar i följd får plats inom {pct}% av det kortaste programmet ({shortest}s); enbart uppdateringstakten (median={median}s) hade föreslagit ett längre intervall.",
       "match_interval_floored": "Det kortaste programmet ({shortest}s) skulle begränsa detta till {cap}s, under minimivärdet {minimum}s, så minimivärdet används: {persistence} matchningar i följd tar {budget}s, över {pct}% av det programmet. Matchningen körs bara när ett mätvärde kommer (median={median}s), så det kostar inget.",

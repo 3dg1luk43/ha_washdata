@@ -1541,7 +1541,7 @@
         },
         "door_opens_at_end": {
             "label": "开门即结束周期",
-            "doc": "适用于运行时门保持锁定的机器（大多数滚筒洗衣机），或在结束时自行开门的机器（带 AirDry 的洗碗机）。在功率已降低时，门保持打开达到下方的停留时间后，将结束周期而不是暂停；短暂开门会被忽略。暂停期间，仅当已识别的程序接近完成时才会这样，因此程序中途的暂停仍是暂停。需要门传感器实体。"
+            "doc": "设置门传感器实体后，在功率较低时门保持打开达到下方的停留时间，将结束周期而不是暂停。暂停期间，仅当已识别的程序接近完成时才会这样，因此程序中途的暂停仍是暂停。"
         },
         "door_end_dwell_seconds": {
             "label": "门开放终止停留时间",
@@ -1696,7 +1696,7 @@
         "torn_pick": "{a} 还是 {b}？",
         "torn_tip": "WashData 暂时还无法区分这两个程序，因此请选择正在运行的程序，将此周期标记为该程序（选择“自动检测”可撤销此选择）。",
         "program_mismatch": "更像 {program}",
-        "program_mismatch_tip": "此周期看起来不像您选择的程序 {selected}：{program} 明显更匹配。不会做任何更改。自动化可以通过“运行中的程序与所选程序不同”触发器作出响应。"
+        "program_mismatch_tip": "此周期明显更像 {program} 而不是 {selected}，但 WashData 会保留您选择的程序。"
     },
     "tab": {
         "advanced": "高级",
@@ -1940,6 +1940,7 @@
         },
         "reason": {
             "completion_min_seconds": "{cycles} 个周期中 p05 正常周期时长的一半（{minutes} min）；用于过滤误检周期。{excl}",
+            "completion_min_seconds_capped": "已限制为 {cap} min，以便最短的程序仍能计入；p05 正常周期时长的一半（{minutes} min，{cycles} 个周期）会更长。{excl}",
             "match_interval": "基于观测到的更新频率（中位数={median}s） * 10。",
             "max_duration_ratio": "基于已标注的周期时长（p95={p95}）。",
             "min_off_gap": "基于观测到的 {gaps} 个周期间间隔（p05={p05}s）。设备下限：{floor}s。",

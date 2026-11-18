@@ -1571,7 +1571,7 @@
     },
     "door_opens_at_end": {
       "label": "Oven avaaminen päättää syklin",
-      "doc": "Koneille, joiden ovi pysyy lukittuna käytön aikana (useimmat edestä täytettävät pyykinpesukoneet) tai jotka avaavat sen itse lopussa (AirDry-toiminnolla varustetut astianpesukoneet). Jos ovi pysyy auki alla asetetun viiveen ajan tehon ollessa alhainen, sykli päättyy tauon sijaan; lyhyt avaus ohitetaan. Tauon aikana näin käy vasta, kun tunnistettu ohjelma on lähes valmis, joten tauko kesken ohjelman pysyy taukona. Vaatii asetuksen Ovianturin entiteetti."
+      "doc": "Kun Ovianturin entiteetti on asetettu, ovi, joka pysyy auki alla asetetun viiveen ajan tehon ollessa alhainen, päättää syklin tauon sijaan. Tauon aikana näin käy vasta, kun tunnistettu ohjelma on lähes valmis, joten tauko kesken ohjelman pysyy taukona."
     },
     "door_end_dwell_seconds": {
       "label": "Oven avauksen loppuviive",
@@ -1714,7 +1714,7 @@
     "torn_pick": "{a} vai {b}?",
     "torn_tip": "WashData ei vielä osaa erottaa näitä kahta toisistaan, joten valitse käynnissä oleva ohjelma, niin tämä sykli merkitään sillä (Automaattinen tunnistus kumoaa valinnan).",
     "program_mismatch": "Näyttää enemmän ohjelmalta {program}",
-    "program_mismatch_tip": "Tämä sykli ei näytä valitsemaltasi ohjelmalta {selected}: {program} sopii siihen selvästi paremmin. Mitään ei muuteta. Automaatio voi reagoida triggerillä \"Käynnissä oleva ohjelma eroaa valitusta\"."
+    "program_mismatch_tip": "Tämä sykli näyttää selvästi enemmän ohjelmalta {program} kuin ohjelmalta {selected}, mutta WashData pitää valitsemasi ohjelman."
   },
   "suggestion": {
     "observed_label": "Havaittu",
@@ -1766,6 +1766,7 @@
     },
     "reason": {
       "completion_min_seconds": "Puolet puhtaiden jaksojen p05-kestosta ({minutes} min) {cycles} jakson joukossa; suodattaa haamujaksot pois.{excl}",
+      "completion_min_seconds_capped": "Rajattu arvoon {cap} min, jotta lyhimmätkin ohjelmat lasketaan; puolet puhtaiden jaksojen p05-kestosta ({minutes} min, {cycles} jaksoa) olisi pidempi.{excl}",
       "match_interval": "Perustuu havaittuun päivitystahtiin (mediaani={median}s) * 10.",
       "match_interval_capped": "Rajoitettu niin, että {persistence} peräkkäistä täsmäystä mahtuu {pct} prosenttiin lyhimmästä ohjelmasta ({shortest}s); pelkkä päivitystahti (mediaani={median}s) olisi ehdottanut pidempää väliä.",
       "match_interval_floored": "Lyhin ohjelma ({shortest}s) rajaisi tämän arvoon {cap}s, alle {minimum}s vähimmäisarvon, joten käytetään vähimmäisarvoa: {persistence} peräkkäistä täsmäytystä kestää {budget}s, yli {pct} % kyseisestä ohjelmasta. Täsmäytys tehdään vain lukeman saapuessa (mediaani={median}s), joten tämä ei maksa mitään.",

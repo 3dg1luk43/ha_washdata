@@ -1571,7 +1571,7 @@
     },
     "door_opens_at_end": {
       "label": "Türöffnung beendet den Zyklus",
-      "doc": "Für Geräte, deren Tür während des Betriebs verriegelt bleibt (die meisten Frontlader-Waschmaschinen) oder die sie am Ende selbst öffnen (Geschirrspüler mit AirDry). Bleibt die Tür bei niedriger Leistung für die unten eingestellte Verweildauer offen, endet der Zyklus, statt zu pausieren; ein kurzes Öffnen wird ignoriert. In einer Pause geschieht das erst, wenn das erkannte Programm fast fertig ist, sodass eine Pause mitten im Programm eine Pause bleibt. Erfordert eine Türsensor-Entität."
+      "doc": "Mit einer Türsensor-Entität beendet eine Tür, die bei niedriger Leistung für die unten eingestellte Verweildauer offen bleibt, den Zyklus, statt ihn zu pausieren. In einer Pause geschieht das erst, wenn das erkannte Programm fast fertig ist, sodass eine Pause mitten im Programm eine Pause bleibt."
     },
     "door_end_dwell_seconds": {
       "label": "Türöffnungs-Endverweildauer",
@@ -1710,7 +1710,7 @@
     "torn_pick": "{a} oder {b}?",
     "torn_tip": "WashData kann diese beiden noch nicht unterscheiden, wählen Sie also das laufende Programm, um diesen Zyklus damit zu beschriften (Automatische Erkennung macht die Auswahl rückgängig).",
     "program_mismatch": "Sieht eher nach {program} aus",
-    "program_mismatch_tip": "Dieser Zyklus sieht nicht nach {selected} aus, dem von Ihnen gewählten Programm: {program} passt deutlich besser. Es wird nichts geändert. Eine Automatisierung kann mit dem Trigger \"Laufendes Programm weicht vom gewählten ab\" darauf reagieren.",
+    "program_mismatch_tip": "Dieser Zyklus sieht deutlich eher nach {program} aus als nach {selected}, aber WashData behält das von Ihnen gewählte Programm bei.",
     "match_uncertain": "Unsicher: {top} oder {runner}",
     "match_uncertain_single": "Unsicher: vielleicht {top}",
     "match_sure": "~{pct}% sicher",
@@ -1766,6 +1766,7 @@
     },
     "reason": {
       "completion_min_seconds": "Die Hälfte der p05-Dauer sauberer Zyklen ({minutes} min) über {cycles} Zyklen; filtert Geisterzyklen heraus.{excl}",
+      "completion_min_seconds_capped": "Auf {cap} min begrenzt, damit auch die kürzesten Programme zählen; die Hälfte der p05-Dauer sauberer Zyklen ({minutes} min, {cycles} Zyklen) wäre länger.{excl}",
       "match_interval": "Basierend auf dem beobachteten Aktualisierungsrhythmus (Median={median}s) * 10.",
       "match_interval_capped": "Begrenzt, damit {persistence} aufeinanderfolgende Zuordnungen in {pct}% des kürzesten Programms ({shortest}s) passen; der Aktualisierungsrhythmus allein (Median={median}s) hätte ein längeres Intervall vorgeschlagen.",
       "match_interval_floored": "Das kürzeste Programm ({shortest}s) würde dies auf {cap}s begrenzen, unter dem Minimum von {minimum}s, daher gilt das Minimum: {persistence} aufeinanderfolgende Zuordnungen dauern {budget}s, über {pct}% dieses Programms. Der Abgleich läuft nur, wenn ein Messwert eintrifft (Median={median}s), das kostet also nichts.",

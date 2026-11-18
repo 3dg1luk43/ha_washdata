@@ -1535,7 +1535,7 @@
     },
     "door_opens_at_end": {
       "label": "L'ouverture de la porte termine le cycle",
-      "doc": "Pour les appareils dont la porte reste verrouillée pendant le fonctionnement (la plupart des lave-linge à hublot) ou qui l'ouvrent eux-mêmes en fin de cycle (lave-vaisselle avec AirDry). Une porte restée ouverte pendant le délai ci-dessous, alors que la puissance est retombée, termine le cycle au lieu de le mettre en pause ; une brève ouverture est ignorée. En pause, cela ne se produit qu'une fois le programme reconnu presque fini ; une pause en milieu de programme reste donc une pause. Nécessite une Entité capteur de porte."
+      "doc": "Avec une Entité capteur de porte, une porte restée ouverte pendant le délai ci-dessous alors que la puissance est basse termine le cycle au lieu de le mettre en pause. En pause, cela ne se produit qu'une fois le programme reconnu presque fini ; une pause en milieu de programme reste donc une pause."
     },
     "door_end_dwell_seconds": {
       "label": "Durée d'attente porte ouverte",
@@ -1674,7 +1674,7 @@
     "torn_pick": "{a} ou {b} ?",
     "torn_tip": "WashData ne sait pas encore distinguer ces deux programmes, choisissez donc celui qui est en cours pour étiqueter ce cycle en conséquence (l'option Détection automatique annule ce choix).",
     "program_mismatch": "Ressemble plutôt à {program}",
-    "program_mismatch_tip": "Ce cycle ne ressemble pas à {selected}, le programme que vous avez choisi : {program} lui correspond nettement mieux. Rien n'est modifié. Une automatisation peut réagir avec le déclencheur « Le programme en cours diffère de celui choisi ».",
+    "program_mismatch_tip": "Ce cycle ressemble nettement plus à {program} qu'à {selected}, mais WashData conserve le programme que vous avez choisi.",
     "match_uncertain": "Incertain : {top} ou {runner}",
     "match_uncertain_single": "Incertain : peut-être {top}",
     "match_sure": "~{pct} % de certitude",
@@ -1926,6 +1926,7 @@
     },
     "reason": {
       "completion_min_seconds": "La moitié de la durée p05 des cycles propres ({minutes} min) sur {cycles} cycles ; filtre les cycles fantômes.{excl}",
+      "completion_min_seconds_capped": "Limité à {cap} min pour que les programmes les plus courts comptent encore ; la moitié de la durée p05 des cycles propres ({minutes} min, {cycles} cycles) serait plus longue.{excl}",
       "match_interval": "D'après la cadence de mise à jour observée (médiane={median}s) * 10.",
       "match_interval_capped": "Plafonné pour que {persistence} correspondances consécutives tiennent dans {pct} % du programme le plus court ({shortest}s) ; la cadence de mise à jour seule (médiane={median}s) aurait suggéré un intervalle plus long.",
       "match_interval_floored": "Le programme le plus court ({shortest}s) limiterait cette valeur à {cap}s, sous le minimum de {minimum}s, donc le minimum est utilisé : {persistence} correspondances consécutives prennent {budget}s, plus de {pct}% de ce programme. La correspondance ne tourne qu'à l'arrivée d'une mesure (médiane={median}s), cela ne coûte donc rien.",

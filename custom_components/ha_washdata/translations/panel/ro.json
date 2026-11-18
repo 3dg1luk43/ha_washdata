@@ -1516,7 +1516,7 @@
     },
     "door_opens_at_end": {
       "label": "Deschiderea ușii încheie ciclul",
-      "doc": "Pentru aparatele a căror ușă rămâne blocată în timpul funcționării (majoritatea mașinilor de spălat rufe cu încărcare frontală) sau care o deschid singure la final (mașini de spălat vase cu AirDry). O ușă lăsată deschisă pe durata de mai jos, cu puterea deja scăzută, încheie ciclul în loc să îl pună pe pauză; o deschidere scurtă este ignorată. În pauză, acest lucru se întâmplă doar când programul recunoscut este aproape gata, așa că o pauză la mijlocul programului rămâne o pauză. Necesită o Entitate Senzor Ușă."
+      "doc": "Cu o Entitate Senzor Ușă, o ușă lăsată deschisă pe durata de așteptare de mai jos, cu puterea scăzută, încheie ciclul în loc să îl pună pe pauză. În pauză, acest lucru se întâmplă doar când programul recunoscut este aproape gata, așa că o pauză la mijlocul programului rămâne o pauză."
     },
     "door_end_dwell_seconds": {
       "label": "Durată de așteptare la deschiderea ușii",
@@ -1655,7 +1655,7 @@
     "torn_pick": "{a} sau {b}?",
     "torn_tip": "WashData nu poate încă deosebi aceste două programe, așa că alegeți programul care rulează pentru a eticheta acest ciclu cu el (opțiunea Detectare automată anulează alegerea).",
     "program_mismatch": "Seamănă mai mult cu {program}",
-    "program_mismatch_tip": "Acest ciclu nu seamănă cu {selected}, programul pe care l-ați ales: {program} i se potrivește clar mai bine. Nu se modifică nimic. O automatizare poate reacționa cu declanșatorul \"Programul care rulează diferă de cel selectat\".",
+    "program_mismatch_tip": "Acest ciclu seamănă clar mai mult cu {program} decât cu {selected}, dar WashData păstrează programul pe care l-ați ales.",
     "match_uncertain": "Incert: {top} sau {runner}",
     "match_uncertain_single": "Incert: poate {top}",
     "match_sure": "~{pct}% certitudine",
@@ -1907,6 +1907,7 @@
     },
     "reason": {
       "completion_min_seconds": "Jumătate din durata p05 a ciclurilor curate ({minutes} min) pe {cycles} cicluri; filtrează ciclurile false.{excl}",
+      "completion_min_seconds_capped": "Limitat la {cap} min pentru ca și cele mai scurte programe să conteze; jumătate din durata p05 a ciclurilor curate ({minutes} min, {cycles} cicluri) ar fi mai lungă.{excl}",
       "match_interval": "Pe baza cadenței de actualizare observate (mediană={median}s) * 10.",
       "match_interval_capped": "Limitat astfel încât {persistence} potriviri consecutive să încapă în {pct}% din cel mai scurt program ({shortest}s); singură, cadența de actualizare (mediană={median}s) ar fi sugerat un interval mai lung.",
       "match_interval_floored": "Cel mai scurt program ({shortest}s) ar limita această valoare la {cap}s, sub minimul de {minimum}s, așa că se folosește minimul: {persistence} potriviri consecutive durează {budget}s, peste {pct}% din acel program. Potrivirea rulează doar când sosește o citire (mediana={median}s), deci nu costă nimic.",

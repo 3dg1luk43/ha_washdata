@@ -1584,7 +1584,7 @@
     },
     "door_opens_at_end": {
       "label": "Otvorenie dverí ukončí cyklus",
-      "doc": "Pre spotrebiče, ktorých dvere zostávajú počas chodu zamknuté (väčšina práčok s predným plnením), alebo ktoré ich na konci samy otvoria (umývačky s AirDry). Dvere otvorené pri nízkom výkone počas času uvedeného nižšie cyklus ukončia namiesto pozastavenia; krátke otvorenie sa ignoruje. Keď je cyklus pozastavený, stane sa to až vtedy, keď je rozpoznaný program takmer na konci, takže pozastavenie uprostred programu zostane pozastavením. Vyžaduje Entitu senzora dverí."
+      "doc": "S Entitou senzora dverí dvere otvorené pri nízkom výkone počas času čakania uvedeného nižšie cyklus ukončia namiesto pozastavenia. Keď je cyklus pozastavený, stane sa to až vtedy, keď je rozpoznaný program takmer na konci, takže pozastavenie uprostred programu zostane pozastavením."
     },
     "door_end_dwell_seconds": {
       "label": "Čakanie na otvorenie dverí pre ukončenie",
@@ -1731,7 +1731,7 @@
     "torn_pick": "{a} alebo {b}?",
     "torn_tip": "WashData zatiaľ tieto dva programy nedokáže rozlíšiť, preto vyberte ten, ktorý práve beží, aby ste ním označili tento cyklus (Automatické zisťovanie výber vráti späť).",
     "program_mismatch": "Vyzerá skôr ako {program}",
-    "program_mismatch_tip": "Tento cyklus sa nepodobá programu {selected}, ktorý ste vybrali: {program} mu zodpovedá zreteľne lepšie. Nič sa nemení. Automatizácia na to môže reagovať spúšťačom „Bežiaci program sa líši od vybraného“."
+    "program_mismatch_tip": "Tento cyklus sa zreteľne viac podobá programu {program} než {selected}, WashData však ponechá vami vybraný program."
   },
   "suggestion": {
     "observed_label": "Namerané",
@@ -1783,6 +1783,7 @@
     },
     "reason": {
       "completion_min_seconds": "Polovica dĺžky p05 čistého cyklu ({minutes} min) naprieč {cycles} cyklami; odfiltruje falošné cykly.{excl}",
+      "completion_min_seconds_capped": "Obmedzené na {cap} min, aby sa započítali aj najkratšie programy; polovica dĺžky p05 čistého cyklu ({minutes} min, cyklov: {cycles}) by bola dlhšia.{excl}",
       "match_interval": "Na základe pozorovanej frekvencie aktualizácií (medián={median}s) * 10.",
       "match_interval_capped": "Obmedzené tak, aby sa {persistence} po sebe idúcich zhôd zmestilo do {pct}% najkratšieho programu ({shortest}s); samotná frekvencia aktualizácií (medián={median}s) by navrhla dlhší interval.",
       "match_interval_floored": "Najkratší program ({shortest}s) by hodnotu obmedzil na {cap}s, pod minimum {minimum}s, takže sa použije minimum: {persistence} po sebe idúcich zhôd trvá {budget}s, viac ako {pct}% tohto programu. Párovanie beží len pri príchode hodnoty (medián={median}s), takže to nič nestojí.",

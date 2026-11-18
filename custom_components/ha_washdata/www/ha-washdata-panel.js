@@ -346,7 +346,7 @@ const _SETTINGS_SECTIONS = [
       { key: 'door_sensor_entity', label: 'Door Sensor Entity', basic: true, type: 'entity', domain: 'binary_sensor',
         doc: 'Optional door sensor. Shows when the appliance was opened to unload after a cycle.' },
       { key: 'door_opens_at_end', label: 'Opening the Door Ends the Cycle', type: 'checkbox',
-        doc: 'For machines whose door stays locked while they run (most front-loading washers) or that open it themselves at the end (dishwashers with AirDry). A door held open for the dwell time below, with the power down, ends the cycle instead of pausing it; a brief open is ignored. In a pause this happens only once the recognised program is nearly done, so a pause mid-program stays a pause. Needs a Door Sensor Entity.' },
+        doc: 'With a Door Sensor Entity, a door held open for the dwell time below while the power is low ends the cycle instead of pausing it. In a paused cycle this happens only once the recognised program is nearly finished, so a pause mid-program stays a pause.' },
       { key: 'door_end_dwell_seconds', label: 'Door-Open End Dwell', unit: 's', type: 'number', min: 1, def: 60,
         doc: 'With "Opening the Door Ends the Cycle" on: how long the door must stay open before the cycle ends. Long enough to ignore adding a dish (default 60 s).' },
       { key: 'pause_cuts_power', label: 'Pause Also Cuts Power (via switch)', type: 'checkbox',
@@ -5285,7 +5285,7 @@ class HaWashdataPanel extends HTMLElement {
     if (!m || !isRunning || !manual || !m.looks_like) return '';
     const what = this._t('status.program_mismatch', {program: m.looks_like}, 'Looks more like {program}');
     const tip = _tip(this._tText('status.program_mismatch_tip', {selected: m.selected, program: m.looks_like},
-      'This cycle does not look like {selected}, the program you picked: {program} fits it clearly better. Nothing is changed. An automation can react with the "Running program differs from the selected one" trigger.'));
+      'This cycle looks clearly more like {program} than {selected}, but WashData keeps the program you picked.'));
     return `<span class="wd-prog-mismatch" data-testid="program-mismatch" style="font-size:.82em;color:var(--warning-color,#ff9800)">\u26A0 ${what}</span>${tip}`;
   }
 

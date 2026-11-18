@@ -1571,7 +1571,7 @@
     },
     "door_opens_at_end": {
       "label": "Deur openen beëindigt de cyclus",
-      "doc": "Voor machines waarvan de deur vergrendeld blijft zolang ze draaien (de meeste voorladers) of die hem aan het einde zelf openen (vaatwassers met AirDry). Blijft de deur bij laag vermogen open gedurende de verwijltijd hieronder, dan eindigt de cyclus in plaats van te pauzeren; kort openen wordt genegeerd. In een pauze gebeurt dit pas als het herkende programma bijna klaar is, zodat een pauze halverwege het programma een pauze blijft. Vereist een Deursensorentiteit."
+      "doc": "Met een Deursensorentiteit beëindigt een deur die bij laag vermogen open blijft gedurende de verwijltijd hieronder de cyclus in plaats van hem te pauzeren. In een pauze gebeurt dit pas als het herkende programma bijna klaar is, zodat een pauze halverwege het programma een pauze blijft."
     },
     "door_end_dwell_seconds": {
       "label": "Deuropen-eindverwijltijd",
@@ -1710,7 +1710,7 @@
     "torn_pick": "{a} of {b}?",
     "torn_tip": "WashData kan deze twee nog niet van elkaar onderscheiden, dus kies het programma dat draait om deze cyclus daarmee te labelen (Automatische detectie maakt de keuze ongedaan).",
     "program_mismatch": "Lijkt meer op {program}",
-    "program_mismatch_tip": "Deze cyclus lijkt niet op {selected}, het programma dat u hebt gekozen: {program} past duidelijk beter. Er wordt niets gewijzigd. Een automatisering kan reageren met de trigger \"Lopend programma wijkt af van het gekozen programma\".",
+    "program_mismatch_tip": "Deze cyclus lijkt duidelijk meer op {program} dan op {selected}, maar WashData behoudt het programma dat u hebt gekozen.",
     "match_uncertain": "Onzeker: {top} of {runner}",
     "match_uncertain_single": "Onzeker: misschien {top}",
     "match_sure": "~{pct}% zeker",
@@ -1766,6 +1766,7 @@
     },
     "reason": {
       "completion_min_seconds": "De helft van de p05-duur van schone cycli ({minutes} min) over {cycles} cycli; filtert spookcycli eruit.{excl}",
+      "completion_min_seconds_capped": "Begrensd op {cap} min zodat de kortste programma's nog meetellen; de helft van de p05-duur van schone cycli ({minutes} min, {cycles} cycli) zou langer zijn.{excl}",
       "match_interval": "Op basis van de waargenomen updatecadans (mediaan={median}s) * 10.",
       "match_interval_capped": "Begrensd zodat {persistence} opeenvolgende herkenningen binnen {pct}% van het kortste programma ({shortest}s) passen; de updatecadans alleen (mediaan={median}s) had een langer interval voorgesteld.",
       "match_interval_floored": "Het kortste programma ({shortest}s) zou dit begrenzen op {cap}s, onder het minimum van {minimum}s, dus wordt het minimum gebruikt: {persistence} opeenvolgende matches duren {budget}s, meer dan {pct}% van dat programma. De herkenning draait alleen als er een meting binnenkomt (mediaan={median}s), dus dit kost niets.",

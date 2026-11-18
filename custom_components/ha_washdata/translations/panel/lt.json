@@ -1588,7 +1588,7 @@
     },
     "door_opens_at_end": {
       "label": "Durų atidarymas užbaigia ciklą",
-      "doc": "Prietaisams, kurių durys veikimo metu lieka užrakintos (dauguma priekinio pakrovimo skalbimo mašinų) arba kurie pabaigoje patys jas atidaro (indaplovės su AirDry). Jei esant mažai galiai durys lieka atviros toliau nurodytą laukimo laiką, ciklas užbaigiamas, o ne pristabdomas; trumpas atidarymas ignoruojamas. Kai ciklas pristabdytas, tai įvyksta tik tada, kai atpažinta programa beveik baigta, todėl pauzė programos viduryje lieka pauze. Reikalingas Durų jutiklio objektas."
+      "doc": "Su Durų jutiklio objektu durys, esant mažai galiai paliktos atviros toliau nurodytą laukimo laiką, ciklą užbaigia, o ne pristabdo. Kai ciklas pristabdytas, tai įvyksta tik tada, kai atpažinta programa beveik baigta, todėl pauzė programos viduryje lieka pauze."
     },
     "door_end_dwell_seconds": {
       "label": "Durų atidarymo pabaigos laukimas",
@@ -1731,7 +1731,7 @@
     "torn_pick": "{a} ar {b}?",
     "torn_tip": "WashData dar negali atskirti šių dviejų programų, todėl pasirinkite tą, kuri dabar veikia, kad ja pažymėtumėte šį ciklą (Automatinis aptikimas pasirinkimą atšaukia).",
     "program_mismatch": "Labiau tinka {program}",
-    "program_mismatch_tip": "Šis ciklas nepanašus į jūsų pasirinktą programą {selected}: {program} jam tinka aiškiai geriau. Niekas nekeičiama. Automatika gali į tai sureaguoti paleidikliu „Veikianti programa skiriasi nuo pasirinktos“."
+    "program_mismatch_tip": "Šis ciklas aiškiai labiau panašus į programą {program} nei į {selected}, tačiau WashData palieka jūsų pasirinktą programą."
   },
   "tab": {
     "advanced": "Išplėstinė",
@@ -1981,6 +1981,7 @@
     },
     "reason": {
       "completion_min_seconds": "Pusė p05 švarių ciklų trukmės ({minutes} min) iš {cycles} ciklų; atfiltruoja netikrus ciklus.{excl}",
+      "completion_min_seconds_capped": "Apribota iki {cap} min, kad būtų įskaitomos ir trumpiausios programos; pusė p05 švarių ciklų trukmės ({minutes} min, ciklų: {cycles}) būtų ilgesnė.{excl}",
       "match_interval": "Pagrįsta stebimu atnaujinimo dažniu (mediana={median}s) * 10.",
       "match_interval_capped": "Apribota taip, kad {persistence} iš eilės einančios atitiktys tilptų į {pct}% trumpiausios programos ({shortest}s); vien atnaujinimo dažnis (mediana={median}s) būtų pasiūlęs ilgesnį intervalą.",
       "match_interval_floored": "Trumpiausia programa ({shortest}s) apribotų šią reikšmę iki {cap}s, o tai mažiau nei {minimum}s minimumas, todėl naudojamas minimumas: {persistence} atitiktys iš eilės užtrunka {budget}s, daugiau nei {pct}% tos programos. Atitikimas vykdomas tik gavus rodmenį (mediana={median}s), todėl tai nieko nekainuoja.",

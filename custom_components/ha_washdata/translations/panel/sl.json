@@ -1588,7 +1588,7 @@
     },
     "door_opens_at_end": {
       "label": "Odprtje vrat konča cikel",
-      "doc": "Za stroje, katerih vrata med delovanjem ostanejo zaklenjena (večina pralnih strojev s sprednjim polnjenjem) ali jih ob koncu odprejo sami (pomivalni stroji z AirDry). Vrata, ki so pri nizki moči odprta za spodnji čas zadrževanja, cikel končajo, namesto da ga zaustavijo; kratko odprtje se prezre. Ko je cikel zaustavljen, se to zgodi šele, ko je prepoznani program skoraj končan, zato premor sredi programa ostane premor. Potrebuje Entiteto senzorja vrat."
+      "doc": "Z Entiteto senzorja vrat vrata, ki so pri nizki moči odprta za spodnji čas zadrževanja, cikel končajo, namesto da ga zaustavijo. Ko je cikel zaustavljen, se to zgodi šele, ko je prepoznani program skoraj končan, zato premor sredi programa ostane premor."
     },
     "door_end_dwell_seconds": {
       "label": "Čas odprtosti vrat za zaključek",
@@ -1731,7 +1731,7 @@
     "torn_pick": "{a} ali {b}?",
     "torn_tip": "WashData teh dveh programov še ne zna ločiti, zato izberite tistega, ki teče, da z njim označite ta cikel (možnost Samodejno zaznaj razveljavi izbiro).",
     "program_mismatch": "Videti je bolj kot {program}",
-    "program_mismatch_tip": "Ta cikel ni podoben programu {selected}, ki ste ga izbrali: {program} se z njim opazno bolje ujema. Nič se ne spremeni. Avtomatizacija se lahko odzove s sprožilcem »Tekoči program se razlikuje od izbranega«."
+    "program_mismatch_tip": "Ta cikel je opazno bolj podoben programu {program} kot {selected}, vendar WashData obdrži program, ki ste ga izbrali."
   },
   "suggestion": {
     "observed_label": "Izmerjeno",
@@ -1783,6 +1783,7 @@
     },
     "reason": {
       "completion_min_seconds": "Polovica trajanja čistega cikla p05 ({minutes} min) čez {cycles} ciklov; odfiltrira lažne cikle.{excl}",
+      "completion_min_seconds_capped": "Omejeno na {cap} min, da se upoštevajo tudi najkrajši programi; polovica trajanja čistega cikla p05 ({minutes} min, ciklov: {cycles}) bi bila daljša.{excl}",
       "match_interval": "Na podlagi opažene frekvence posodobitev (mediana={median}s) * 10.",
       "match_interval_capped": "Omejeno tako, da {persistence} zaporednih ujemanj sodi v {pct}% najkrajšega programa ({shortest}s); sama frekvenca posodobitev (mediana={median}s) bi predlagala daljši interval.",
       "match_interval_floored": "Najkrajši program ({shortest}s) bi to omejil na {cap}s, pod minimum {minimum}s, zato se uporabi minimum: {persistence} zaporednih ujemanj traja {budget}s, več kot {pct}% tega programa. Ujemanje teče le ob prihodu odčitka (mediana={median}s), zato to nič ne stane.",

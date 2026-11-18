@@ -1584,7 +1584,7 @@
     },
     "door_opens_at_end": {
       "label": "Otwarcie drzwi kończy cykl",
-      "doc": "Dla urządzeń, których drzwi pozostają zablokowane podczas pracy (większość pralek ładowanych od przodu) albo które same otwierają je na końcu (zmywarki z AirDry). Drzwi otwarte przy niskiej mocy przez czas oczekiwania podany poniżej kończą cykl zamiast go wstrzymywać; krótkie otwarcie jest ignorowane. Gdy cykl jest wstrzymany, dzieje się to dopiero wtedy, gdy rozpoznany program jest bliski końca, więc wstrzymanie w trakcie programu pozostaje wstrzymaniem. Wymaga Encji Czujnika Drzwi."
+      "doc": "Jeśli ustawiono Encję Czujnika Drzwi, drzwi otwarte przy niskiej mocy przez czas oczekiwania podany poniżej kończą cykl zamiast go wstrzymywać. Gdy cykl jest wstrzymany, dzieje się to dopiero wtedy, gdy rozpoznany program jest bliski końca, więc wstrzymanie w trakcie programu pozostaje wstrzymaniem."
     },
     "door_end_dwell_seconds": {
       "label": "Czas otwarcia drzwi do zakończenia cyklu",
@@ -1731,7 +1731,7 @@
     "torn_pick": "{a} czy {b}?",
     "torn_tip": "WashData nie potrafi jeszcze rozróżnić tych dwóch programów, więc wybierz ten, który właśnie działa, aby oznaczyć nim ten cykl (Automatyczne wykrywanie cofa wybór).",
     "program_mismatch": "Wygląda raczej jak {program}",
-    "program_mismatch_tip": "Ten cykl nie przypomina wybranego przez Ciebie programu {selected}: {program} pasuje do niego wyraźnie lepiej. Nic nie zostaje zmienione. Automatyzacja może na to zareagować wyzwalaczem „Działający program różni się od wybranego”."
+    "program_mismatch_tip": "Ten cykl wyraźnie bardziej przypomina program {program} niż {selected}, ale WashData zachowuje wybrany przez Ciebie program."
   },
   "suggestion": {
     "observed_label": "Zmierzono",
@@ -1783,6 +1783,7 @@
     },
     "reason": {
       "completion_min_seconds": "Połowa czasu trwania p05 poprawnego cyklu ({minutes} min) dla {cycles} cykli; odfiltrowuje fałszywe cykle.{excl}",
+      "completion_min_seconds_capped": "Ograniczono do {cap} min, aby liczyły się też najkrótsze programy; połowa czasu trwania p05 poprawnego cyklu ({minutes} min, liczba cykli: {cycles}) byłaby dłuższa.{excl}",
       "match_interval": "Na podstawie obserwowanej częstotliwości aktualizacji (mediana={median}s) * 10.",
       "match_interval_capped": "Ograniczone tak, aby {persistence} kolejnych dopasowań zmieściło się w {pct}% najkrótszego programu ({shortest}s); sama częstotliwość aktualizacji (mediana={median}s) sugerowałaby dłuższy interwał.",
       "match_interval_floored": "Najkrótszy program ({shortest}s) ograniczyłby tę wartość do {cap}s, poniżej minimum {minimum}s, więc użyto minimum: {persistence} kolejnych dopasowań zajmuje {budget}s, ponad {pct}% tego programu. Dopasowanie uruchamia się tylko po nadejściu odczytu (mediana={median}s), więc nic to nie kosztuje.",

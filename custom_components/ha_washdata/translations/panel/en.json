@@ -1311,7 +1311,7 @@
     },
     "door_opens_at_end": {
       "label": "Opening the Door Ends the Cycle",
-      "doc": "For machines whose door stays locked while they run (most front-loading washers) or that open it themselves at the end (dishwashers with AirDry). A door held open for the dwell time below, with the power down, ends the cycle instead of pausing it; a brief open is ignored. In a pause this happens only once the recognised program is nearly done, so a pause mid-program stays a pause. Needs a Door Sensor Entity."
+      "doc": "With a Door Sensor Entity, a door held open for the dwell time below while the power is low ends the cycle instead of pausing it. In a paused cycle this happens only once the recognised program is nearly finished, so a pause mid-program stays a pause."
     },
     "door_sensor_entity": {
       "doc": "Optional door sensor. Shows when the appliance was opened to unload after a cycle.",
@@ -1725,7 +1725,7 @@
     "torn_pick": "{a} or {b}?",
     "torn_tip": "WashData cannot tell these two apart yet, so pick the one that is running to label this cycle with it (Auto-detect undoes the choice).",
     "program_mismatch": "Looks more like {program}",
-    "program_mismatch_tip": "This cycle does not look like {selected}, the program you picked: {program} fits it clearly better. Nothing is changed. An automation can react with the \"Running program differs from the selected one\" trigger."
+    "program_mismatch_tip": "This cycle looks clearly more like {program} than {selected}, but WashData keeps the program you picked."
   },
   "suggestion": {
     "observed_label": "Observed",
@@ -1788,6 +1788,7 @@
       "max_duration_ratio": "Based on labeled cycle durations (p95={p95}).",
       "min_power": "40% of the p05 lowest active power ({p05}W) across {cycles} clean cycles, keeping the off-gate below real draw.{excl}",
       "completion_min_seconds": "Half the p05 clean-cycle duration ({minutes} min) across {cycles} cycles; filters ghost cycles.{excl}",
+      "completion_min_seconds_capped": "Capped at {cap} min so the shortest programmes still count; half the p05 clean-cycle duration ({minutes} min, {cycles} cycles) would be more.{excl}",
       "min_off_gap": "Based on {gaps} observed inter-cycle gaps (p05={p05}s). Device floor: {floor}s.",
       "min_off_gap_bridge": "Sized to bridge the longest quiet stretch inside a cycle: {span}s + 60s buffer, from {spans} bridged gaps across {cycles} clean cycles (stays under your {ceiling}s back-to-back headroom).",
       "standby_floor": "Every recent cycle was still drawing {idle}W when it ended, so a threshold below that can never see the appliance switch off. Kept above it; the {cycles} clean cycles on record never paused under it for more than {pause}s.",

@@ -1535,7 +1535,7 @@
     },
     "door_opens_at_end": {
       "label": "Abrir la puerta finaliza el ciclo",
-      "doc": "Para máquinas cuya puerta queda bloqueada mientras funcionan (la mayoría de las lavadoras de carga frontal) o que la abren solas al final (lavavajillas con AirDry). Una puerta que queda abierta durante el tiempo de espera de abajo, con la potencia ya baja, termina el ciclo en lugar de pausarlo; una apertura breve se ignora. En pausa, esto solo ocurre cuando el programa reconocido está a punto de acabar, así que una pausa a mitad del programa sigue siendo una pausa. Requiere una Entidad de sensor de puerta."
+      "doc": "Con una Entidad de sensor de puerta, una puerta que queda abierta durante el tiempo de espera de abajo, con la potencia baja, termina el ciclo en lugar de pausarlo. En pausa, esto solo ocurre cuando el programa reconocido está a punto de acabar, así que una pausa a mitad del programa sigue siendo una pausa."
     },
     "door_end_dwell_seconds": {
       "label": "Tiempo mínimo de puerta abierta para finalizar",
@@ -1674,7 +1674,7 @@
     "torn_pick": "¿{a} o {b}?",
     "torn_tip": "WashData todavía no distingue estos dos programas, así que elija el que está en marcha para etiquetar este ciclo con él (la opción Detección automática deshace la elección).",
     "program_mismatch": "Se parece más a {program}",
-    "program_mismatch_tip": "Este ciclo no se parece a {selected}, el programa que eligió: {program} encaja claramente mejor. No se cambia nada. Una automatización puede reaccionar con el disparador \"El programa en curso difiere del seleccionado\".",
+    "program_mismatch_tip": "Este ciclo se parece claramente más a {program} que a {selected}, pero WashData mantiene el programa que eligió.",
     "match_uncertain": "Incierto: {top} o {runner}",
     "match_uncertain_single": "Incierto: quizá {top}",
     "match_sure": "~{pct} % de certeza",
@@ -1926,6 +1926,7 @@
     },
     "reason": {
       "completion_min_seconds": "La mitad de la duración p05 de los ciclos limpios ({minutes} min) en {cycles} ciclos; filtra los ciclos fantasma.{excl}",
+      "completion_min_seconds_capped": "Limitado a {cap} min para que los programas más cortos sigan contando; la mitad de la duración p05 de los ciclos limpios ({minutes} min, {cycles} ciclos) sería mayor.{excl}",
       "match_interval": "Según la cadencia de actualización observada (mediana={median}s) * 10.",
       "match_interval_capped": "Limitado para que {persistence} coincidencias consecutivas quepan en el {pct}% del programa más corto ({shortest}s); la cadencia de actualización por sí sola (mediana={median}s) habría sugerido un intervalo más largo.",
       "match_interval_floored": "El programa más corto ({shortest}s) limitaría este valor a {cap}s, por debajo del mínimo de {minimum}s, así que se usa el mínimo: {persistence} coincidencias seguidas tardan {budget}s, más del {pct}% de ese programa. La coincidencia solo se ejecuta cuando llega una lectura (mediana={median}s), así que no cuesta nada.",

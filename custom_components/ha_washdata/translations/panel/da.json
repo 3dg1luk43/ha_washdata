@@ -1571,7 +1571,7 @@
     },
     "door_opens_at_end": {
       "label": "Åbning af døren afslutter cyklussen",
-      "doc": "Til maskiner, hvis dør forbliver låst, mens de kører (de fleste frontbetjente vaskemaskiner), eller som selv åbner den ved slutningen (opvaskemaskiner med AirDry). En dør, der står åben i ventetiden nedenfor ved lav effekt, afslutter cyklussen i stedet for at sætte den på pause; en kort åbning ignoreres. Under en pause sker det først, når det genkendte program næsten er færdigt, så en pause midt i programmet forbliver en pause. Kræver en Dørsensorenhed."
+      "doc": "Med en Dørsensorenhed afslutter en dør, der står åben i ventetiden nedenfor ved lav effekt, cyklussen i stedet for at sætte den på pause. Under en pause sker det først, når det genkendte program næsten er færdigt, så en pause midt i programmet forbliver en pause."
     },
     "door_end_dwell_seconds": {
       "label": "Dørens åbningstid ved afslutning",
@@ -1710,7 +1710,7 @@
     "torn_pick": "{a} eller {b}?",
     "torn_tip": "WashData kan endnu ikke skelne mellem disse to, så vælg det program, der kører, for at mærke denne cyklus med det (Automatisk registrering fortryder valget).",
     "program_mismatch": "Ligner mere {program}",
-    "program_mismatch_tip": "Denne cyklus ligner ikke {selected}, det program, du valgte: {program} passer tydeligt bedre. Intet ændres. En automatisering kan reagere med triggeren \"Kørende program afviger fra det valgte\".",
+    "program_mismatch_tip": "Denne cyklus ligner tydeligt mere {program} end {selected}, men WashData beholder det program, du valgte.",
     "match_uncertain": "Usikker: {top} eller {runner}",
     "match_uncertain_single": "Usikker: måske {top}",
     "match_sure": "~{pct}% sikker",
@@ -1766,6 +1766,7 @@
     },
     "reason": {
       "completion_min_seconds": "Halvdelen af p05-varigheden for rene cyklusser ({minutes} min) på tværs af {cycles} cyklusser; filtrerer spøgelsescyklusser fra.{excl}",
+      "completion_min_seconds_capped": "Begrænset til {cap} min, så de korteste programmer stadig tæller; halvdelen af p05-varigheden for rene cyklusser ({minutes} min, {cycles} cyklusser) ville være længere.{excl}",
       "match_interval": "Baseret på observeret opdateringskadence (median={median}s) * 10.",
       "match_interval_capped": "Begrænset, så {persistence} på hinanden følgende match kan være inden for {pct}% af det korteste program ({shortest}s); opdateringskadencen alene (median={median}s) ville have foreslået et længere interval.",
       "match_interval_floored": "Det korteste program ({shortest}s) ville begrænse dette til {cap}s, under minimummet på {minimum}s, så minimummet bruges: {persistence} match i træk tager {budget}s, over {pct}% af det program. Matchning kører kun, når en måling kommer (median={median}s), så det koster intet.",

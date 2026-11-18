@@ -1571,7 +1571,7 @@
     },
     "door_opens_at_end": {
       "label": "Ukse avamine lõpetab tsükli",
-      "doc": "Masinatele, mille uks on töö ajal lukus (enamik eestlaetavaid pesumasinaid) või mis avavad selle lõpus ise (AirDry-funktsiooniga nõudepesumasinad). Kui uks jääb madala võimsuse juures allpool määratud viibimisajaks avatuks, lõpetab see tsükli, mitte ei peata seda; lühikest avamist eiratakse. Pausi ajal juhtub see alles siis, kui tuvastatud programm on peaaegu lõpus, nii et paus programmi keskel jääb pausiks. Vajab sätet Ukse Anduri Olem."
+      "doc": "Ukse Anduri Olemi korral lõpetab uks, mis jääb madala võimsuse juures allpool määratud viibimisajaks avatuks, tsükli, mitte ei peata seda. Pausi ajal juhtub see alles siis, kui tuvastatud programm on peaaegu lõpus, nii et paus programmi keskel jääb pausiks."
     },
     "door_end_dwell_seconds": {
       "label": "Ukse avamise lõppviibimisaeg",
@@ -1714,7 +1714,7 @@
     "torn_pick": "{a} või {b}?",
     "torn_tip": "WashData ei suuda neid kahte veel eristada, seega valige praegu töötav programm, millega see tsükkel sildistatakse (Automaatne tuvastamine tühistab valiku).",
     "program_mismatch": "Sarnaneb rohkem programmiga {program}",
-    "program_mismatch_tip": "See tsükkel ei sarnane teie valitud programmiga {selected}: {program} sobib sellele selgelt paremini. Midagi ei muudeta. Automatiseerimine saab reageerida triggeriga \"Töötav programm erineb valitust\"."
+    "program_mismatch_tip": "See tsükkel sarnaneb selgelt rohkem programmiga {program} kui programmiga {selected}, kuid WashData säilitab teie valitud programmi."
   },
   "tab": {
     "advanced": "Täpsemalt",
@@ -1960,6 +1960,7 @@
     },
     "reason": {
       "completion_min_seconds": "Pool puhaste tsüklite p05 kestusest ({minutes} min) {cycles} tsükli lõikes; filtreerib välja kummitustsüklid.{excl}",
+      "completion_min_seconds_capped": "Piiratud väärtusega {cap} min, et ka lühimad programmid arvesse läheksid; pool puhaste tsüklite p05 kestusest ({minutes} min, {cycles} tsüklit) oleks pikem.{excl}",
       "match_interval": "Põhineb täheldatud uuendustempol (mediaan={median}s) * 10.",
       "match_interval_capped": "Piiratud nii, et {persistence} järjestikust vastet mahuks lühima programmi ({shortest}s) {pct}% sisse; ainuüksi uuendustempo (mediaan={median}s) oleks soovitanud pikemat intervalli.",
       "match_interval_floored": "Lühim programm ({shortest}s) piiraks selle väärtusega {cap}s, mis jääb alla {minimum}s miinimumi, seega kasutatakse miinimumi: {persistence} järjestikust vastet võtab {budget}s, üle {pct}% sellest programmist. Sobitamine käib ainult näidu saabudes (mediaan={median}s), seega see ei maksa midagi.",
