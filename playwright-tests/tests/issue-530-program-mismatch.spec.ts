@@ -37,10 +37,10 @@ test('a hand-picked program the cycle does not look like gets a badge', async ({
   const badge = page.locator('[data-testid="program-mismatch"]');
   await expect(badge).toBeVisible({ timeout: 8_000 });
   await expect(badge).toContainText('Looks more like Eco 60°C');
-  // The tip names the pick and says nothing was changed.
+  // The tip names both programs and says the pick is kept.
   const tip = page.locator('.wd-prog-ctl .wd-tip').last();
-  await expect(tip).toHaveAttribute('aria-label', /does not look like Cotton 40°C/);
-  await expect(tip).toHaveAttribute('aria-label', /Nothing is changed/);
+  await expect(tip).toHaveAttribute('aria-label', /more like Eco 60°C than Cotton 40°C/);
+  await expect(tip).toHaveAttribute('aria-label', /WashData keeps the program you picked/);
   // The pick stays selected and is still marked as the user's.
   await expect(page.locator('#wd-status-prog')).toHaveValue('Cotton 40°C');
   await expect(page.locator('.wd-prog-tag.manual')).toBeVisible();
