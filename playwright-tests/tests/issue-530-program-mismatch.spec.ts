@@ -93,6 +93,98 @@ test('a slower device list sent before a program change does not bring the badge
   await expect(page.locator('[data-testid="program-mismatch"]')).toHaveCount(0);
 });
 
+test('a slower expected curve for the previous program never shows under the new one', async ({ page }) => {
+  await bootPanel(page, { 'ha_washdata/get_devices': running({ manual_program: true }) });
+  await expect(page.locator('#wd-status-prog')).toHaveValue('Cotton 40°C', { timeout: 8_000 });
+  const eco = running({ manual_program: true, current_program: 'Eco 60°C' });
+  const shown = await page.evaluate(async ({ eco }) => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    const real = el._ws.bind(el);
+    let release: () => void = () => {};
+    const slow = new Promise<void>((r) => { release = r; });
+    let asked: () => void = () => {};
+    const cottonAsked = new Promise<void>((r) => { asked = r; });
+    let devices: any = null;
+    el._ws = (msg: any) => {
+      if (msg.type === 'ha_washdata/get_devices' && devices) return Promise.resolve(devices);
+      if (msg.type !== 'ha_washdata/get_profile_envelope') return real(msg);
+      const answer = { envelope: { program: msg.profile_name } };
+      if (msg.profile_name !== 'Cotton 40°C') return Promise.resolve(answer);
+      asked();
+      return slow.then(() => answer);
+    };
+    el._statusEnv = null; el._statusEnvName = null; el._statusEnvWant = null;
+    const older = el._fetchAll();   // Cotton's curve in flight
+    await cottonAsked;
+    devices = eco;                  // the program changed to Eco
+    await el._fetchAll();
+    release();
+    await older;
+    await el._fetchAll();           // a later poll
+    return { name: el._statusEnvName, env: el._statusEnv && el._statusEnv.program };
+  }, { eco });
+  expect(shown).toEqual({ name: 'Eco 60°C', env: 'Eco 60°C' });
+});
+
+test('a superseded refresh leaves the first paint to the newer one', async ({ page }) => {
+  await bootPanel(page, { 'ha_washdata/get_devices': running({ manual_program: true }) });
+  await expect(page.locator('#wd-status-prog')).toHaveValue('Cotton 40°C', { timeout: 8_000 });
+  const fresh = running({ manual_program: true });
+  const loading = await page.evaluate(async ({ fresh }) => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    const real = el._ws.bind(el);
+    let releaseList: () => void = () => {};
+    const slowList = new Promise<void>((r) => { releaseList = r; });
+    let releaseData: () => void = () => {};
+    const slowData = new Promise<void>((r) => { releaseData = r; });
+    let n = 0;
+    el._ws = (msg: any) => {
+      if (msg.type === 'ha_washdata/get_power_history') return slowData.then(() => real(msg));
+      if (msg.type !== 'ha_washdata/get_devices') return real(msg);
+      n += 1;
+      return n === 1 ? slowList.then(() => fresh) : Promise.resolve(fresh);
+    };
+    el._loading = true;               // a first load
+    const older = el._fetchAll();
+    const newer = el._fetchAll();     // its list is in, its live data is not
+    await new Promise((r) => setTimeout(r, 50));
+    releaseList();
+    await older;
+    const whileNewerLoads = el._loading;
+    releaseData();
+    await newer;
+    return { whileNewerLoads, after: el._loading };
+  }, { fresh });
+  expect(loading).toEqual({ whileNewerLoads: true, after: false });
+});
+
+test('a stale device-list error after a newer list is not a lost connection', async ({ page }) => {
+  await bootPanel(page, { 'ha_washdata/get_devices': running({ manual_program: true }) });
+  await expect(page.locator('#wd-status-prog')).toHaveValue('Cotton 40°C', { timeout: 8_000 });
+  const fresh = running({ manual_program: true });
+  const failed = await page.evaluate(async ({ fresh }) => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    const real = el._ws.bind(el);
+    let release: () => void = () => {};
+    const slow = new Promise<void>((r) => { release = r; });
+    let n = 0;
+    el._ws = (msg: any) => {
+      if (msg.type !== 'ha_washdata/get_devices') return real(msg);
+      n += 1;
+      return n === 1
+        ? slow.then(() => { throw new Error('connection lost'); })
+        : Promise.resolve(fresh);
+    };
+    const older = el._fetchAll();
+    await el._fetchAll();
+    release();
+    await older;
+    return el._fetchFailed;
+  }, { fresh });
+  expect(failed).toBe(false);
+  await expect(page.locator('#wd-status-prog')).toHaveValue('Cotton 40°C');
+});
+
 test('the program it looks like renders as text, never as markup', async ({ page }) => {
   await bootPanel(page, { 'ha_washdata/get_devices': running({
     manual_program: true,

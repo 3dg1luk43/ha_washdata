@@ -2523,7 +2523,9 @@ class HaWashdataPanel extends HTMLElement {
     this._powerHistory = [];   // [[elapsedSeconds, watts], ...]
     this._powerT0 = null;
     this._statusEnv = null;    // matched profile envelope (expected curve overlay)
-    this._statusEnvName = null;
+    this._statusEnvName = null;   // the program _statusEnv belongs to
+    this._statusEnvSeq = 0;       // envelope requests issued: only the newest applies
+    this._statusEnvWant = null;   // the program an envelope request is in flight for
     this._powerData = { live: [], raw: [], cycle_active: false, cycle_elapsed_s: 0 };
     this._stagedSuggestions = false;   // a suggestion was applied to a field this session
     this._pendingSettings = {};        // unsaved edits accumulated across section switches
@@ -3306,6 +3308,11 @@ class HaWashdataPanel extends HTMLElement {
     if (!this._hass) return;
     const firstLoad = this._loading;
     let painted = false;   // first load only: the early Status paint already ran
+    // This call's get_devices request. Once a newer one's list is in, this call is
+    // superseded: its error is no news and the newer call does the finishing paint.
+    let seq = null;
+    let stale = false;
+    const superseded = () => seq !== null && seq < this._devicesAppliedSeq;
     try {
       if (!this._constantsLoaded) {
         // Independent of each other, so one round trip instead of two (audit UI-19).
@@ -3325,9 +3332,9 @@ class HaWashdataPanel extends HTMLElement {
         this._constantsLoaded = true;
       }
 
-      const seq = ++this._devicesReqSeq;
+      seq = ++this._devicesReqSeq;
       const res = await this._ws({ type: `${_DOMAIN}/get_devices` });
-      if (seq < this._devicesAppliedSeq) return;   // superseded: a newer list is in
+      if (superseded()) { stale = true; return; }   // a newer list is in
       this._devicesAppliedSeq = seq;
       this._lastFetchErr = null;   // recovered: report the next failure even if identical
       this._fetchFailed = false;
@@ -3383,16 +3390,32 @@ class HaWashdataPanel extends HTMLElement {
       const overlayData = async () => {
         // When a program is matched, keep its expected envelope for the status overlay.
         if (dev && dev.current_program) {
-          if (this._statusEnvName !== dev.current_program) {
-            this._statusEnvName = dev.current_program;
+          const eid = dev.entry_id, prog = dev.current_program;
+          if (this._statusEnvName !== prog && this._statusEnvWant !== prog) {
+            // The envelope and the program it belongs to are set together, and only
+            // by the newest request while its device and program are still the ones
+            // shown: a slower answer for the previous program would otherwise show
+            // under the new one, and its name would stop every later fetch.
+            const tok = ++this._statusEnvSeq;
+            this._statusEnvWant = prog;
+            this._statusEnv = null; this._statusEnvName = null;
+            let env = null;
             try {
-              const r = await this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: dev.entry_id, profile_name: dev.current_program });
-              this._statusEnv = r.envelope || null;
-            } catch (_) { this._statusEnv = null; }
+              const r = await this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: eid, profile_name: prog });
+              env = r.envelope || null;
+            } catch (_) { env = null; }
+            if (tok === this._statusEnvSeq) {
+              this._statusEnvWant = null;
+              const cur = this._devices[this._selIdx];
+              if (cur && cur.entry_id === eid && cur.current_program === prog) {
+                this._statusEnv = env; this._statusEnvName = prog;
+              }
+            }
           }
           // D1: keep the matched profile's phase ranges for the Status timeline.
           await this._ensureStatusPhases(dev.entry_id, dev.current_program);
         } else {
+          this._statusEnvSeq++; this._statusEnvWant = null;
           this._statusEnv = null; this._statusEnvName = null;
           this._statusPhases = []; this._statusPhasesName = null;
         }
@@ -3440,6 +3463,8 @@ class HaWashdataPanel extends HTMLElement {
         this._fetchLogs().then(() => this._refreshLogDrawer()).catch(() => {});
       }
     } catch (err) {
+      // A newer list came in after this request: its failure is no lost connection.
+      if (superseded()) { stale = true; return; }
       // Collapse repeats: a poll failure is usually transient and identical on
       // every poll, and six copies of the same line buries whatever else is in the console.
       const text = _wsErrText(err);
@@ -3451,28 +3476,35 @@ class HaWashdataPanel extends HTMLElement {
       // "No devices configured yet", and a lost connection kept "Running 45%".
       this._fetchFailed = true;
     } finally {
-      this._loading = false;
-      this._refreshStaleChip();
-      // The poll must never clobber editing on another tab or inside a modal.
-      const sr = this.shadowRoot;
-      const ae = sr && sr.activeElement;
-      const interacting = !!(ae && ['SELECT', 'INPUT', 'TEXTAREA', 'OPTION'].includes(ae.tagName));
-      if (firstLoad && !painted) {
-        this._render();
-      } else if (firstLoad && !this._modal && !interacting) {
-        // The primed data landed after the early paint: render it in, unless the
-        // user is already inside a field or a modal (handled like a poll below).
-        this._render();
-      } else if (this._tab === 'status' && !this._modal && !interacting) {
-        this._render();
-      } else if (this._tab === 'status' && !this._modal && interacting) {
-        // Don't rebuild the DOM under an open dropdown / focused field; keep the
-        // live curve and device bar fresh instead so nothing is lost.
-        this._drawStatusCurve();
-        this._refreshDeviceBar();
-      } else {
-        this._refreshDeviceBar();
-      }
+      // Superseded: the newer call clears the spinner and paints once its own data
+      // is in. Painting here showed the screen before it had.
+      if (!stale) this._finishFetch(firstLoad, painted);
+    }
+  }
+
+  // The end of a _fetchAll that is still the newest (or failed as the newest).
+  _finishFetch(firstLoad, painted) {
+    this._loading = false;
+    this._refreshStaleChip();
+    // The poll must never clobber editing on another tab or inside a modal.
+    const sr = this.shadowRoot;
+    const ae = sr && sr.activeElement;
+    const interacting = !!(ae && ['SELECT', 'INPUT', 'TEXTAREA', 'OPTION'].includes(ae.tagName));
+    if (firstLoad && !painted) {
+      this._render();
+    } else if (firstLoad && !this._modal && !interacting) {
+      // The primed data landed after the early paint: render it in, unless the
+      // user is already inside a field or a modal (handled like a poll below).
+      this._render();
+    } else if (this._tab === 'status' && !this._modal && !interacting) {
+      this._render();
+    } else if (this._tab === 'status' && !this._modal && interacting) {
+      // Don't rebuild the DOM under an open dropdown / focused field; keep the
+      // live curve and device bar fresh instead so nothing is lost.
+      this._drawStatusCurve();
+      this._refreshDeviceBar();
+    } else {
+      this._refreshDeviceBar();
     }
   }
 
@@ -4012,6 +4044,7 @@ class HaWashdataPanel extends HTMLElement {
     // ML comparison / cycle-ML index / settings comparison / profile envelopes.
     this._mlComparison = null; this._mlById = {}; this._profileEnvCache = {};
     this._powerHistory = []; this._powerT0 = null; this._statusEnv = null; this._statusEnvName = null;
+    this._statusEnvSeq++; this._statusEnvWant = null;
     this._statusPhases = []; this._statusPhasesName = null;
     this._cycleOffset = 0; this._cyclesTotal = 0; this._cyclesHasMore = false;
     this._importedOffset = 0; this._importedHasMore = false;
