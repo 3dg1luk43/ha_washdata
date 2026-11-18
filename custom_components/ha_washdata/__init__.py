@@ -48,6 +48,7 @@ from .const import (
 from .const import (
     DEVICE_COMPLETION_THRESHOLDS,
     DOMAIN,
+    device_entry_ids,
     CONFIG_ENTRY_MINOR_VERSION,
     CONFIG_ENTRY_VERSION,
     SERVICE_SUBMIT_FEEDBACK,
@@ -235,13 +236,12 @@ def _service_manager(hass: HomeAssistant, device_id: str) -> tuple[str, Any]:
             translation_domain=DOMAIN, translation_key="device_not_found"
         )
     loaded = hass.data.get(DOMAIN, {})
-    entry_id = next((eid for eid in device.config_entries if eid in loaded), None)
+    entry_ids = device_entry_ids(device)
+    entry_id = next((eid for eid in entry_ids if eid in loaded), None)
     if entry_id is None:
         raise ServiceValidationError(
             translation_domain=DOMAIN,
-            translation_key=(
-                "integration_not_loaded" if device.config_entries else "no_config_entry"
-            ),
+            translation_key="integration_not_loaded" if entry_ids else "no_config_entry",
         )
     return entry_id, loaded[entry_id]
 
@@ -1052,8 +1052,8 @@ def _service_entry_ids(hass: HomeAssistant, call: ServiceCall) -> list[str | Non
         if device is not None:
             loaded = hass.data.get(DOMAIN, {})
             dev_entry = next(
-                (e for e in device.config_entries if e in loaded),
-                next(iter(device.config_entries), None),
+                (e for e in device_entry_ids(device) if e in loaded),
+                next(iter(device_entry_ids(device)), None),
             )
             if dev_entry is not None and dev_entry not in ids:
                 ids.append(dev_entry)
@@ -1655,11 +1655,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     translation_key="device_not_found",
                 )
             entry_id = next(
-                (eid for eid in device.config_entries if eid in hass.data.get(DOMAIN, {})),
+                (eid for eid in device_entry_ids(device) if eid in hass.data.get(DOMAIN, {})),
                 None,
             )
             if not entry_id:
-                if any(eid for eid in device.config_entries):
+                if any(eid for eid in device_entry_ids(device)):
                     raise ServiceValidationError(
                         translation_domain=DOMAIN,
                         translation_key="integration_not_loaded",
@@ -1693,11 +1693,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     translation_key="device_not_found",
                 )
             entry_id = next(
-                (eid for eid in device.config_entries if eid in hass.data.get(DOMAIN, {})),
+                (eid for eid in device_entry_ids(device) if eid in hass.data.get(DOMAIN, {})),
                 None,
             )
             if not entry_id:
-                if any(eid for eid in device.config_entries):
+                if any(eid for eid in device_entry_ids(device)):
                     raise ServiceValidationError(
                         translation_domain=DOMAIN,
                         translation_key="integration_not_loaded",
@@ -1734,11 +1734,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     translation_key="device_not_found",
                 )
             entry_id = next(
-                (eid for eid in device.config_entries if eid in hass.data.get(DOMAIN, {})),
+                (eid for eid in device_entry_ids(device) if eid in hass.data.get(DOMAIN, {})),
                 None,
             )
             if not entry_id:
-                if any(eid for eid in device.config_entries):
+                if any(eid for eid in device_entry_ids(device)):
                     raise ServiceValidationError(
                         translation_domain=DOMAIN,
                         translation_key="integration_not_loaded",

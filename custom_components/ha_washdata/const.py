@@ -2783,3 +2783,19 @@ def drop_invalid_numeric_options(options: Any) -> tuple[dict[str, Any], list[str
                 clean[key] = number
     return clean, dropped
 
+
+
+def device_entry_ids(device: Any) -> list[str]:
+    """The config entry ids of a device registry entry (#532).
+
+    Home Assistant 2026.9 gave a device a single ``config_entry_id`` and turned
+    ``config_entries`` into a deprecated shim that logs a warning on every read
+    (removed in 2027.10); older releases only have ``config_entries``. Never raises.
+    """
+    try:
+        entry_id = getattr(device, "config_entry_id", None)
+        if isinstance(entry_id, str) and entry_id:
+            return [entry_id]
+        return [e for e in (getattr(device, "config_entries", None) or ()) if isinstance(e, str) and e]
+    except Exception:  # noqa: BLE001 - a lookup helper must never raise
+        return []

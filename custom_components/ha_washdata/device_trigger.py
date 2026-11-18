@@ -50,6 +50,7 @@ from .const import (
     DEVICE_TRIGGER_TYPES,
     DOMAIN,
     SIGNAL_DEVICE_TRIGGER,
+    device_entry_ids,
 )
 from .trigger_rules import (
     OPT_FROM,
@@ -99,7 +100,7 @@ def entry_for_device(hass: HomeAssistant, device_id: str) -> ConfigEntry | None:
     if device is None:
         return None
     candidates = [ident for domain, ident in device.identifiers if domain == DOMAIN]
-    candidates += list(device.config_entries)
+    candidates += device_entry_ids(device)
     for entry_id in candidates:
         entry = hass.config_entries.async_get_entry(entry_id)
         if entry is not None and entry.domain == DOMAIN:
