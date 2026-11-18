@@ -63,6 +63,7 @@ from homeassistant.helpers.storage import Store
 
 from .const import NOTIFY_QUEUE_STORE_SUFFIX, STORAGE_KEY
 from .const import (
+    DEVICE_TYPE_DISHWASHER,
     TerminationReason,
     automation_termination_reason,
     resolve_off_delay_default,
@@ -2657,6 +2658,8 @@ class WashDataManager:
         # ProfileStore: an untracked task would keep writing to the store a reload
         # had already swapped out.
         self.async_schedule_banked_tail_repair()
+        if self.device_type == DEVICE_TYPE_DISHWASHER and self.profile_store.arm_cut_short_rebuild():
+            self._logger.info("Rebuilding the profiles once without runs cut inside their drying (#531)")
         self.async_schedule_energy_rebuild()
         self.async_schedule_backfill_tail_cut()
 

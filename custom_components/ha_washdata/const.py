@@ -1356,6 +1356,12 @@ BANKED_TAIL_REPAIR_KEY = "_banked_tail_repair_pending"
 # config and can take minutes on a large store, so it runs after setup, not in the
 # migration.
 CYCLE_ENERGY_REBUILD_KEY = "_cycle_energy_rebuild_pending"
+# Store key: a dishwasher store has asked for the one envelope rebuild under the
+# #531 cut-off rule (`profile_store.cut_short_mask`). Absent on every store from
+# before it, so a programme that was ending inside its drying stops at the first run
+# after the update, not the second: it arms CYCLE_ENERGY_REBUILD_KEY, whose rebuild
+# runs in the background after setup. No storage version.
+CUT_SHORT_REBUILD_KEY = "_cut_short_rebuild_armed"
 # Store key for the one pass that cuts the end wait off history-imported dishwasher
 # cycles already labelled before the cut existed (#518). Absent counts as pending,
 # so every store that predates it runs the pass once without a storage version;
@@ -2082,6 +2088,24 @@ GROUP_MIN_COHESION = 0.80
 # The quiet minimum separates "the event after the drying phase" from an ordinary
 # gap inside the wash; 120 s is well under the measured p10 of 624 s.
 TERMINAL_EVENT_PEAK_FRAC = 0.004
+# #531: a dishwasher's terminal event after a long quiet can be a blip far under
+# TERMINAL_EVENT_PEAK_FRAC of its peak: the Bauknecht beeps at 6.3 W after drying at
+# 3.3 W, its own standby level, against a 1.97 kW peak (0.3%). After at least
+# TERMINAL_BLIP_QUIET_MIN_S of quiet, a reading of TERMINAL_BLIP_RATIO x the quiet's
+# level and TERMINAL_BLIP_MIN_W more is one too: the detector's end spike (above
+# the Stop Threshold) and `profile_store.cut_short_mask`.
+# A run closed inside its programme's quiet phase is a cut-off, not a short run: it
+# builds neither the envelope nor the learned length, or every gate that ends a run
+# at that length (Smart Termination, the end-spike wait and its quiet release)
+# stores the next run as short too and the length only ever shrinks. Cut off = at
+# least CUT_SHORT_MIN_RUNS (and CUT_SHORT_MIN_SHARE) of the programme's runs go on
+# past its end into TERMINAL_BLIP_QUIET_MIN_S or more of quiet and then show a
+# terminal event. Measured with devtools/duration_ratchet_eval.py.
+TERMINAL_BLIP_QUIET_MIN_S = 600.0
+TERMINAL_BLIP_RATIO = 1.5
+TERMINAL_BLIP_MIN_W = 1.0
+CUT_SHORT_MIN_RUNS = 3
+CUT_SHORT_MIN_SHARE = 0.10
 TERMINAL_QUIET_MIN_S = 120.0
 # ...but a gap of 120 s also sits between a dishwasher's own heating blocks
 # (120-160 s on 01KGM619), so a cycle closed before its pump-out offered its LAST

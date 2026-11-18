@@ -47,6 +47,11 @@ from homeassistant.util import dt as dt_util
 from .const import (
     CADENCE_RECENT_CYCLES,
     CONF_STOP_THRESHOLD_W,
+    TERMINAL_BLIP_MIN_W,
+    TERMINAL_BLIP_RATIO,
+    CUT_SHORT_MIN_RUNS,
+    CUT_SHORT_MIN_SHARE,
+    TERMINAL_BLIP_QUIET_MIN_S,
     END_GATE_HAZARD_MIN_CYCLES,
     PRICE_TIMELINE_MAX_POINTS,
     PRICE_TIMELINE_PRICE_DECIMALS,
@@ -64,6 +69,7 @@ from .const import (
     BACKFILL_TAIL_TRACE_KEY,
     BANKED_TAIL_REPAIR_KEY,
     CYCLE_ENERGY_REBUILD_KEY,
+    CUT_SHORT_REBUILD_KEY,
     BANKED_TAIL_REPAIR_MIN_S,
     TERMINAL_QUIET_CAP_S,
     TERMINAL_QUIET_MIN_CONSISTENCY,
@@ -499,6 +505,69 @@ def trim_zero_power_data(
 
     # Return trimmed slice (inclusive of end)
     return data[start_idx:end_idx + 1]
+
+
+def _events_after_quiet(offsets: list[float], values: list[float], peak: float) -> list[tuple[float, float]]:
+    """``(quiet_start_s, event_s)`` for each terminal event a run shows after at least
+    ``TERMINAL_BLIP_QUIET_MIN_S`` of quiet (#531): a reading above
+    ``TERMINAL_EVENT_PEAK_FRAC`` of its peak, or a blip inside the quiet of
+    ``TERMINAL_BLIP_RATIO`` x the quiet's level and ``TERMINAL_BLIP_MIN_W`` more."""
+    ceiling = TERMINAL_EVENT_PEAK_FRAC * peak
+    events: list[tuple[float, float]] = []
+    q_start: float | None = None
+    q_vals: list[float] = []
+    q_level: float | None = None
+    for t, v in zip(offsets, values):
+        if v > ceiling:
+            if q_start is not None and t - q_start >= TERMINAL_BLIP_QUIET_MIN_S:
+                events.append((q_start, t))
+            q_start, q_vals, q_level = None, [], None
+            continue
+        if q_start is None:
+            q_start, q_vals, q_level = t, [v], None
+            continue
+        if q_level is None and t - q_start >= TERMINAL_BLIP_QUIET_MIN_S:
+            q_level = float(np.median(q_vals))
+        if q_level is not None and v >= max(TERMINAL_BLIP_RATIO * q_level, q_level + TERMINAL_BLIP_MIN_W):
+            events.append((q_start, t))
+            q_start, q_vals, q_level = None, [], None
+            continue
+        if q_level is None:
+            q_vals.append(v)
+    return events
+
+
+def cut_short_mask(runs: list[tuple[list[float], list[float], float, bool, float]]) -> list[bool]:
+    """Which of a dishwasher programme's runs were closed inside its quiet phase (#531).
+
+    ``runs``: ``(offsets, values, duration_s, pinned, peak)`` per run, as the envelope
+    build parses them. A run is cut off when it shows no terminal event of its own
+    in its last ``TERMINAL_BLIP_QUIET_MIN_S`` (a load-adaptive programme's shorter
+    runs end on their own event and are complete) and at least
+    ``CUT_SHORT_MIN_RUNS`` (and ``CUT_SHORT_MIN_SHARE`` of the runs) others go on
+    past its end into at least ``TERMINAL_BLIP_QUIET_MIN_S`` of quiet and then show
+    one (:func:`_events_after_quiet`): its end came before the programme's. A
+    pinned run (golden or a corrected length) never is. Pure; never raises.
+    """
+    try:
+        n = len(runs)
+        need = max(CUT_SHORT_MIN_RUNS, math.ceil(CUT_SHORT_MIN_SHARE * n))
+        if n <= need:
+            return [False] * n
+        events = [_events_after_quiet(o, v, pk) for o, v, _d, _p, pk in runs]
+        mask: list[bool] = []
+        for i, (_o, _v, d_i, pinned, _pk) in enumerate(runs):
+            if pinned or any(t_e >= d_i - TERMINAL_BLIP_QUIET_MIN_S for _q0, t_e in events[i]):
+                mask.append(False)
+                continue
+            later = sum(
+                1 for j, ev in enumerate(events)
+                if j != i and any(t_e > d_i and t_e - max(q0, d_i) >= TERMINAL_BLIP_QUIET_MIN_S for q0, t_e in ev)
+            )
+            mask.append(later >= need)
+        return mask
+    except Exception:  # noqa: BLE001 - a statistic must never break an envelope build
+        return [False] * len(runs)
 
 
 def filter_duration_outliers(durations: list[float]) -> list[float]:
@@ -7279,6 +7348,20 @@ class ProfileStore:
         if not parsed:
             return None
 
+        # #531: a dishwasher run closed inside its programme's quiet phase is a prefix
+        # of the programme, so it builds neither the curve, its length (the live
+        # expected duration is the envelope's `target_duration`) nor `avg_duration`
+        # (`cut_short_mask`). A corrected length or a golden pin is the user's word
+        # and always counts.
+        cut_short = (
+            cut_short_mask([
+                (o, v, d, bool(g or c.get("manual_duration")), pk)
+                for (o, v, d, g, pk), (c, _pairs) in zip(parsed, decoded)
+            ])
+            if self.device_type == "dishwasher"
+            else [False] * len(parsed)
+        )
+
         # Degeneracy floor: below max(_DEGENERATE_POWER_FLOOR, 10% of the median
         # peak) a cycle is treated as a mis-capture and dropped (unless golden).
         peaks = sorted(p[4] for p in parsed)
@@ -7289,13 +7372,18 @@ class ProfileStore:
         durations: list[float] = []
         golden_mask: list[bool] = []
         dropped = 0
-        for offsets, values, final_dur, is_golden, peak in parsed:
-            if peak < degen_floor and not is_golden:
+        for (offsets, values, final_dur, is_golden, peak), cut in zip(parsed, cut_short):
+            if (peak < degen_floor and not is_golden) or cut:
                 dropped += 1
                 continue
             raw_cycles_data.append((offsets, values, final_dur))
             durations.append(final_dur)
             golden_mask.append(is_golden)
+        if any(cut_short):
+            self._logger.debug(
+                "Envelope rebuild: %d run(s) closed inside the programme's quiet phase "
+                "left out of its length (#531)", sum(cut_short),
+            )
 
         # Never drop everything: if the filter removed all cycles (e.g. a truly
         # low-power profile misjudged), fall back to using them all.
@@ -7991,6 +8079,15 @@ class ProfileStore:
     def cycle_energy_rebuild_pending(self) -> bool:
         """Whether the envelope rebuild armed by the v18 energy fix still has to run."""
         return bool(self._data.get(CYCLE_ENERGY_REBUILD_KEY))
+
+    def arm_cut_short_rebuild(self) -> bool:
+        """Ask once for every envelope to be rebuilt under the #531 cut-off rule
+        (`CUT_SHORT_REBUILD_KEY`); True when this call armed it."""
+        if self._data.get(CUT_SHORT_REBUILD_KEY):
+            return False
+        self._data[CUT_SHORT_REBUILD_KEY] = True
+        self._data[CYCLE_ENERGY_REBUILD_KEY] = True
+        return True
 
     def backfill_tail_cut_pending(self) -> bool:
         """Whether the one-time import tail cut (#518) still has to run. Absent

@@ -35,6 +35,9 @@ from .log_utils import DeviceLoggerAdapter
 from .time_utils import SYNTHETIC_OFFSETS_KEY, utc_now
 from .const import (
     DEFAULT_ANTI_WRINKLE_EXIT_POWER,
+    TERMINAL_BLIP_MIN_W,
+    TERMINAL_BLIP_QUIET_MIN_S,
+    TERMINAL_BLIP_RATIO,
     TERMINAL_EVENT_PEAK_FRAC,
     TERMINAL_EVENT_MAX_PEAK_FRAC,
     TERMINAL_QUIET_MIN_S,
@@ -4007,7 +4010,13 @@ class CycleDetector:
                     float(self._config.stop_threshold_w),
                     TERMINAL_EVENT_PEAK_FRAC * float(self._cycle_max_power),
                 )
-                if power > spike_floor and (
+                if (
+                    power > spike_floor
+                    or (
+                        power > float(self._config.stop_threshold_w)
+                        and self._is_terminal_blip(timestamp, power)
+                    )
+                ) and (
                     self._expected_duration <= 0
                     or current_duration
                     >= self._expected_duration * DISHWASHER_END_SPIKE_MIN_PROGRESS
@@ -6323,6 +6332,32 @@ class CycleDetector:
         ):
             return 0.0
         return DISHWASHER_QUIET_RELEASE_TERMINAL_MARGIN * max(d for _f, d in cat[1])
+
+    def _is_terminal_blip(self, timestamp: datetime, power: float) -> bool:
+        """A reading over the Stop Threshold that stands out of a long quiet (#531).
+
+        The Bauknecht in #531 dries 53 min at 3.3 W (its own standby level, under a
+        4.5 W Stop Threshold) and beeps at 6.3 W at the real end, 0.3% of its 1.97 kW
+        peak, so the peak-fraction floor never counted it and every run waited the
+        whole spike window past it. After at least ``TERMINAL_BLIP_QUIET_MIN_S`` of
+        readings under the threshold, ``TERMINAL_BLIP_RATIO`` x their median and
+        ``TERMINAL_BLIP_MIN_W`` more is the terminal event too. Asked only for a
+        reading that already clears the threshold, so it walks the quiet rarely.
+        """
+        stop = float(self._config.stop_threshold_w)
+        quiet: list[float] = []
+        quiet_start: datetime | None = None
+        for ts, pw in reversed(self._power_readings):
+            if ts >= timestamp:
+                continue
+            if float(pw) >= stop:
+                break
+            quiet.append(float(pw))
+            quiet_start = ts
+        if quiet_start is None or (timestamp - quiet_start).total_seconds() < TERMINAL_BLIP_QUIET_MIN_S:
+            return False
+        level = float(np.median(quiet))
+        return power >= max(TERMINAL_BLIP_RATIO * level, level + TERMINAL_BLIP_MIN_W)
 
     def _spike_follows_terminal_quiet(
         self, timestamp: datetime, *, latest: bool = False
