@@ -79,6 +79,7 @@ python3 devtools/suggestion_loop_eval.py     # apply-all loop per device: fixed 
 python3 devtools/suggestion_churn_eval.py    # suggestions offered per key over each history in order; --arm legacy = 0.6.0 rules (item 637)
 python3 devtools/suggestion_evidence_eval.py # clean-cycle programme-length exemption + standby advisory, swept and vs 0.6.0
 python3 devtools/duration_ratchet_eval.py    # closed loop: does a programme's learned length shrink when runs end early (#531)
+python3 devtools/program_mismatch_eval.py --sweep   # hand-picked program check (#530): false alarms vs wrong picks caught, LOO
 
 python3 devtools/mqtt_mock_socket.py --source <export.json>   # mock MQTT plug into a real HA (web UI :8081)
 python3 devtools/mqtt_mock_socket.py --dry-run --source <export.json> --scenario soak --mode silent
