@@ -236,7 +236,7 @@ def _service_manager(hass: HomeAssistant, device_id: str) -> tuple[str, Any]:
             translation_domain=DOMAIN, translation_key="device_not_found"
         )
     loaded = hass.data.get(DOMAIN, {})
-    entry_ids = device_entry_ids(device)
+    entry_ids = device_entry_ids(device, dr.async_get(hass))
     entry_id = next((eid for eid in entry_ids if eid in loaded), None)
     if entry_id is None:
         raise ServiceValidationError(
@@ -1051,10 +1051,8 @@ def _service_entry_ids(hass: HomeAssistant, call: ServiceCall) -> list[str | Non
         device = dr.async_get(hass).async_get(device_id)
         if device is not None:
             loaded = hass.data.get(DOMAIN, {})
-            dev_entry = next(
-                (e for e in device_entry_ids(device) if e in loaded),
-                next(iter(device_entry_ids(device)), None),
-            )
+            dev_ids = device_entry_ids(device, dr.async_get(hass))
+            dev_entry = next((e for e in dev_ids if e in loaded), next(iter(dev_ids), None))
             if dev_entry is not None and dev_entry not in ids:
                 ids.append(dev_entry)
     return ids or [None]
@@ -1568,6 +1566,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             # device's, which silently disconnects it (register item 317).
             from .ws_api import (  # pylint: disable=import-outside-toplevel
                 _entry_write_lock,
+                _schedule_post_import_repairs,
                 async_apply_imported_entry_options,
             )
 
@@ -1590,9 +1589,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             # An old payload re-arms the one-time banked-tail repair. Nothing here
             # reloads the entry unless the payload brought settings with it, so
             # schedule it directly rather than leaving it for the next restart.
-            manager.async_schedule_banked_tail_repair()
-            manager.async_schedule_energy_rebuild()
-            manager.async_schedule_cut_short_rebuild()
+            # On the entry's current manager: the options write above reloads the
+            # entry and retires the one captured before it (PR #529 review).
+            _schedule_post_import_repairs(hass, entry_id)
 
             manager._logger.info("Imported ha_washdata entry %s from %s", entry_id, source)
 
@@ -1654,12 +1653,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     translation_domain=DOMAIN,
                     translation_key="device_not_found",
                 )
-            entry_id = next(
-                (eid for eid in device_entry_ids(device) if eid in hass.data.get(DOMAIN, {})),
-                None,
-            )
+            dev_ids = device_entry_ids(device, registry)
+            entry_id = next((eid for eid in dev_ids if eid in hass.data.get(DOMAIN, {})), None)
             if not entry_id:
-                if any(eid for eid in device_entry_ids(device)):
+                if dev_ids:
                     raise ServiceValidationError(
                         translation_domain=DOMAIN,
                         translation_key="integration_not_loaded",
@@ -1692,12 +1689,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     translation_domain=DOMAIN,
                     translation_key="device_not_found",
                 )
-            entry_id = next(
-                (eid for eid in device_entry_ids(device) if eid in hass.data.get(DOMAIN, {})),
-                None,
-            )
+            dev_ids = device_entry_ids(device, registry)
+            entry_id = next((eid for eid in dev_ids if eid in hass.data.get(DOMAIN, {})), None)
             if not entry_id:
-                if any(eid for eid in device_entry_ids(device)):
+                if dev_ids:
                     raise ServiceValidationError(
                         translation_domain=DOMAIN,
                         translation_key="integration_not_loaded",
@@ -1733,12 +1728,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     translation_domain=DOMAIN,
                     translation_key="device_not_found",
                 )
-            entry_id = next(
-                (eid for eid in device_entry_ids(device) if eid in hass.data.get(DOMAIN, {})),
-                None,
-            )
+            dev_ids = device_entry_ids(device, registry)
+            entry_id = next((eid for eid in dev_ids if eid in hass.data.get(DOMAIN, {})), None)
             if not entry_id:
-                if any(eid for eid in device_entry_ids(device)):
+                if dev_ids:
                     raise ServiceValidationError(
                         translation_domain=DOMAIN,
                         translation_key="integration_not_loaded",

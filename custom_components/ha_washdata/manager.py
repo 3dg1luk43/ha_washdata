@@ -4169,6 +4169,12 @@ class WashDataManager:
         # (PR #529 review). Wait for the detector to hold the pick.
         if self._manual_program_active and self.detector.matched_profile != self._current_program:
             return False
+        # Nor while it holds the pick at a length the pick no longer has: the same
+        # program re-picked after its learned length changed (PR #529 review).
+        if self._manual_program_active and self._matched_profile_duration:
+            held = float(self.detector.expected_duration_seconds or 0.0)
+            if abs(held - float(self._matched_profile_duration)) > 1.0:
+                return False
         return bool(self.detector.door_end_due(utc_now()))
 
     def _arm_door_end_dwell(self) -> None:

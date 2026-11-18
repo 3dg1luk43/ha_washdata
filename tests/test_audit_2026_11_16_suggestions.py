@@ -1072,3 +1072,86 @@ async def test_apply_writes_nothing_after_a_restore_it_waited_through(
     assert res["success"] is False and res["error"]["code"] == "entry_reloaded"
     assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_END_ENERGY_THRESHOLD] == 0.01
     assert CONF_END_ENERGY_THRESHOLD in store.get_suggestions()
+
+
+def test_no_min_power_cascade_while_an_unset_start_follows_it() -> None:
+    """PR #529 review: Min Power 2 W, Start unset (runs at 3 W), a corrective Stop of
+    1.51 W: the Min Power cascade to 1.2 W would move the derived Start to 2.2 W."""
+    from custom_components.ha_washdata.const import CONF_MIN_POWER  # noqa: PLC0415
+    from custom_components.ha_washdata.suggestion_engine import reconcile_suggestions  # noqa: PLC0415
+
+    current = {CONF_MIN_POWER: 2.0, CONF_START_THRESHOLD_W: 3.0, CONF_STOP_THRESHOLD_W: 1.2}
+    stop = {CONF_STOP_THRESHOLD_W: {"value": 1.51, "corrective": True}}
+    out, _ = reconcile_suggestions(stop, current, explicit_thresholds=frozenset({CONF_STOP_THRESHOLD_W}))
+    assert CONF_MIN_POWER not in out and out[CONF_STOP_THRESHOLD_W]["value"] == 1.51
+    # Both set: the cascade still keeps Min Power under the Stop.
+    out, _ = reconcile_suggestions(stop, current)
+    assert out[CONF_MIN_POWER]["value"] == round(1.51 * 0.8, 1)
+
+
+async def test_apply_judges_again_when_a_cycle_lands_during_its_check(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """PR #529 review: a cycle stored while Apply's end-gate scan ran may or may not
+    have been read; the verdict is taken again on the evidence as it then stands."""
+    from unittest.mock import patch  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(options={
+        CONF_STOP_THRESHOLD_W: 3.0, CONF_START_THRESHOLD_W: 5.0, CONF_OFF_DELAY: 60,
+        CONF_MIN_OFF_GAP: 60, CONF_END_ENERGY_THRESHOLD: 0.01,
+    })
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store = manager.profile_store
+    store.set_suggestion(CONF_END_ENERGY_THRESHOLD, 1.0, reason="r", flags={"owner": OWNER_BATCH})
+    engine_cls = type(manager.learning_manager.suggestion_engine)
+    calls: list[int] = []
+
+    def drops(self: Any, stored: Any, *, strict: bool = False) -> list[str]:
+        calls.append(len(store.get_past_cycles()))
+        if len(calls) == 1:
+            store._data["past_cycles"].append(_paused_cycle(99, pause_w=1.0))  # noqa: SLF001
+            return []  # judged without it
+        return [CONF_END_ENERGY_THRESHOLD]  # with it, the raise splits that cycle
+
+    client = await hass_ws_client(hass)
+    with patch.object(engine_cls, "joint_end_gate_drops", drops):
+        await client.send_json_auto_id({
+            "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry.entry_id,
+            "keys": [CONF_END_ENERGY_THRESHOLD],
+        })
+        res = await client.receive_json()
+    assert len(calls) == 2
+    assert res["success"] and res["result"]["applied"] == []
+    await hass.async_block_till_done()
+    assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_END_ENERGY_THRESHOLD] == 0.01
+
+
+async def test_apply_writes_nothing_after_a_wipe_it_waited_through(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """PR #529 review: Wipe History cleared the suggestions while Apply awaited its
+    check, but left the store generation alone, so Apply wrote the removed value."""
+    from unittest.mock import patch  # noqa: PLC0415
+
+    from custom_components.ha_washdata import ws_api  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(options={CONF_END_ENERGY_THRESHOLD: 0.01, CONF_OFF_DELAY: 60})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    store.set_suggestion(CONF_END_ENERGY_THRESHOLD, 0.02, reason="r", flags={"owner": OWNER_BATCH})
+    real = ws_api._drop_unsafe_end_gate_updates  # noqa: SLF001
+
+    async def wiped_meanwhile(*a: Any) -> bool:
+        ok = await real(*a)
+        await store.clear_all_data()
+        return ok
+
+    client = await hass_ws_client(hass)
+    with patch.object(ws_api, "_drop_unsafe_end_gate_updates", side_effect=wiped_meanwhile):
+        await client.send_json_auto_id({
+            "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry.entry_id,
+            "keys": [CONF_END_ENERGY_THRESHOLD],
+        })
+        res = await client.receive_json()
+    assert res["success"] is False and res["error"]["code"] == "entry_reloaded"
+    await hass.async_block_till_done()
+    assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_END_ENERGY_THRESHOLD] == 0.01

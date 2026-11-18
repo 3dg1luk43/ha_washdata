@@ -57,3 +57,35 @@ def test_no_module_reads_the_deprecated_attribute() -> None:
             if re.search(r"\b(?!hass\b|self\b)\w+\.config_entries\b(?!\.)", code) and "import" not in code:
                 hits.append(f"{path.name}:{n}: {line.strip()}")
     assert hits == []
+
+
+class _Dev:
+    def __init__(self, dev_id: str, entry_id: str, composite: str | None = None) -> None:
+        self.id, self.config_entry_id, self.composite_device_id = dev_id, entry_id, composite
+
+
+class _Registry:
+    def __init__(self, *devices: _Dev) -> None:
+        self.devices = {d.id: d for d in devices}
+
+
+def test_a_pre_split_device_id_still_finds_washdata_s_entry() -> None:
+    """PR #529 review: HA 2026.9 split a device shared by a plug's entry and
+    WashData's into one per entry; the old id resolves to a composite whose
+    ``config_entry_id`` is only the former primary (the plug's)."""
+    composite = _Dev("old-id", "plug-entry")
+    registry = _Registry(
+        _Dev("split-1", "plug-entry", composite="old-id"),
+        _Dev("split-2", "wd-entry", composite="old-id"),
+        _Dev("other", "x-entry"),
+    )
+    assert device_entry_ids(composite) == ["plug-entry"]
+    assert device_entry_ids(composite, registry) == ["plug-entry", "wd-entry"]
+    assert device_entry_ids(_Dev("plain", "wd-entry"), registry) == ["wd-entry"]
+
+
+def test_every_device_lookup_passes_the_registry() -> None:
+    calls = []
+    for path in (_SRC / "__init__.py", _SRC / "device_trigger.py"):
+        calls += re.findall(r"device_entry_ids\(([^)]*)\)", path.read_text(encoding="utf-8"))
+    assert calls and all("," in args for args in calls), calls

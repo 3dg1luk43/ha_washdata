@@ -1395,6 +1395,7 @@ def reconcile_suggestions(
     current: dict[str, Any],
     *,
     min_power_floor: float = 0.0,
+    explicit_thresholds: frozenset[str] | None = None,
 ) -> tuple[dict[str, Any], set[str]]:
     """Enforce cross-parameter invariants over a suggestion map.
 
@@ -1418,8 +1419,16 @@ def reconcile_suggestions(
     ``min_power_floor``: Min Power is never moved below it (1.0 on a kW sensor
     whose Min Power is 1 or more: under 1 its readings are read raw,
     ``power_unit_scale``; see ``SuggestionEngine._min_power_floor``).
+
+    ``explicit_thresholds``: which of Start and Stop Threshold the options set (None:
+    both). An unset one follows Min Power (#450), so Min Power is not cascaded
+    while one would still follow it after apply (PR #529 review).
     """
     out: dict[str, Any] = {k: dict(v) if isinstance(v, dict) else v for k, v in suggestions.items()}
+    explicit = (
+        frozenset({CONF_START_THRESHOLD_W, CONF_STOP_THRESHOLD_W})
+        if explicit_thresholds is None else explicit_thresholds
+    )
     # Track which keys the engine originally proposed - used for direction logic.
     original_keys: frozenset[str] = frozenset(
         k for k, v in out.items() if isinstance(v, dict) and v.get("value") is not None
@@ -1525,6 +1534,10 @@ def reconcile_suggestions(
             stop is not None and mp is not None and mp > stop
             and in_out(CONF_STOP_THRESHOLD_W, CONF_MIN_POWER)
             and round(stop * 0.8, 1) >= min_power_floor
+            and all(
+                k in explicit or isinstance(out.get(k), dict)
+                for k in (CONF_START_THRESHOLD_W, CONF_STOP_THRESHOLD_W)
+            )
         ):
             adjust(CONF_MIN_POWER, round(stop * 0.8, 1), "the stop threshold")
 
@@ -3157,7 +3170,11 @@ class SuggestionEngine:
             if isinstance(v, dict) and not v.get("cascade") and k not in locked
         }
         adjusted, _changed = reconcile_suggestions(
-            base, current, min_power_floor=self._min_power_floor(current)
+            base, current, min_power_floor=self._min_power_floor(current),
+            explicit_thresholds=frozenset(
+                k for k in (CONF_START_THRESHOLD_W, CONF_STOP_THRESHOLD_W)
+                if _num(options.get(k)) is not None
+            ),
         )
         for key in locked:
             adjusted.pop(key, None)

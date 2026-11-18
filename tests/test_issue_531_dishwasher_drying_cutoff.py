@@ -529,3 +529,56 @@ async def test_a_device_type_change_rebuilds_the_envelope(
     full_min = _eco(hold_s=30)[-1][0] / 60
     assert washer_min < full_min - 20  # the cut-offs counted for the washer
     assert abs(store.get_profiles()["ECO"]["avg_duration"] / 60 - full_min) < 1
+
+
+async def test_an_import_that_reloads_the_entry_arms_nothing_on_the_retired_manager(
+    hass: HomeAssistant, setup_washdata_entry, tmp_path
+) -> None:
+    """PR #529 review: the import service armed the rebuilds on the manager it
+    captured, which the options write had reloaded away; a rebuild started there
+    ran against the retired store."""
+    import json  # noqa: PLC0415
+    from unittest.mock import patch  # noqa: PLC0415
+
+    from homeassistant.helpers import device_registry as dr  # noqa: PLC0415
+
+    from custom_components.ha_washdata import ws_api  # noqa: PLC0415
+    from custom_components.ha_washdata.manager import WashDataManager  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(device_type="dishwasher", options={"stop_threshold_w": 4.5})
+    old = hass.data[DOMAIN][entry.entry_id]
+    dev = dr.async_entries_for_config_entry(dr.async_get(hass), entry.entry_id)[0]
+    hass.config.allowlist_external_dirs = {str(tmp_path)}
+    path = tmp_path / "exp.json"
+    path.write_text(json.dumps({
+        "version": 2,
+        "data": {
+            "profiles": {"ECO": {"avg_duration": 3600.0}},
+            "past_cycles": [{
+                "id": "c1", "start_time": "2026-01-01T00:00:00+00:00", "duration": 3600.0,
+                "status": "completed", "profile_name": "ECO",
+                "power_data": [[0, 100.0], [1800, 500.0], [3600, 0.0]],
+            }],
+        },
+        "entry_options": {"off_delay": 99},
+    }))
+    real_apply = ws_api.async_apply_imported_entry_options
+    armed: list[Any] = []
+
+    async def reload_during(*a: Any, **k: Any) -> Any:
+        out = await real_apply(*a, **k)
+        old._is_shutdown = True  # noqa: SLF001 - the reload retired it
+        hass.data[DOMAIN].pop(entry.entry_id, None)
+        return out
+
+    def record(self: Any) -> None:
+        armed.append(self)
+
+    with patch.object(ws_api, "async_apply_imported_entry_options", side_effect=reload_during), \
+            patch.object(WashDataManager, "async_schedule_cut_short_rebuild", record):
+        await hass.services.async_call(
+            DOMAIN, "import_config", {"device_id": dev.id, "path": str(path)}, blocking=True
+        )
+    assert old not in armed
+    old._is_shutdown = False  # noqa: SLF001
+    hass.data[DOMAIN][entry.entry_id] = old

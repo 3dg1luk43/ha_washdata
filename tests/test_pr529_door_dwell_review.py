@@ -135,3 +135,19 @@ async def test_an_attribute_update_keeps_the_running_dwell(
         await hass.async_block_till_done()
     await _tick(hass, freezer, 10, None)
     assert len(ends) == 1
+
+
+async def test_a_re_pick_at_a_new_length_waits_for_the_detector(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """PR #529 review: Cotton re-picked after its learned length grew; the detector
+    still holds the old length until its next match, so the door must not end the
+    run by it. At the length it holds, it still ends."""
+    manager, _ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    held = float(manager.detector.expected_duration_seconds)
+    manager._manual_program_active = True  # noqa: SLF001
+    manager._current_program = manager.detector.matched_profile  # noqa: SLF001
+    manager._matched_profile_duration = held * 2.5  # noqa: SLF001 - the pick's new length
+    assert manager._door_end_may_fire() is False  # noqa: SLF001
+    manager._matched_profile_duration = held  # noqa: SLF001
+    assert manager._door_end_may_fire()  # noqa: SLF001

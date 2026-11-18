@@ -335,6 +335,17 @@ async def _drop_unsafe_end_gate_updates(
 
     if not any(key in END_GATE_KEYS for key in updates):
         return True
+    store = manager.profile_store
+
+    def _evidence() -> tuple[Any, ...]:
+        # What the scan reads (the newest 200 stored cycles, each trace by
+        # identity: an edit replaces it) and the store it reads them from.
+        past = list(store.get_past_cycles() or [])[-200:]
+        return (
+            getattr(store, "_data_generation", 0), len(past),
+            tuple(id(c.get("power_data")) if isinstance(c, dict) else id(c) for c in past),
+        )
+
     try:
         engine = manager.learning_manager.suggestion_engine.for_job()
         # As written: a cascade the selection carries is a value like any other
@@ -343,9 +354,19 @@ async def _drop_unsafe_end_gate_updates(
             key: {**visible[key], "value": val, "cascade": False}
             for key, val in updates.items()
         }
-        drops = await hass.async_add_executor_job(
-            functools.partial(engine.joint_end_gate_drops, judged, strict=True)
-        )
+        # A cycle stored or edited while the scan ran was judged or not by chance:
+        # judge again on the evidence as it now stands (PR #529 review); a store
+        # that keeps changing fails closed like a failed scan.
+        for _attempt in range(3):
+            before = _evidence()
+            drops = await hass.async_add_executor_job(
+                functools.partial(engine.joint_end_gate_drops, judged, strict=True)
+            )
+            if _evidence() == before:
+                break
+        else:
+            _LOGGER.warning("Cycle evidence kept changing during the joint end-gate check")
+            return False
     except Exception:  # pylint: disable=broad-exception-caught
         _LOGGER.warning("Joint end-gate check on apply failed; nothing applied", exc_info=True)
         return False
@@ -4431,6 +4452,20 @@ async def ws_wipe_history(
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
 
+def _schedule_post_import_repairs(hass: HomeAssistant, entry_id: str) -> None:
+    """Arm the one-time repairs an imported store may need, on the entry's CURRENT
+    manager. An options write during the import reloads the entry, which retires
+    the manager the handler captured; its ``_spawn_tracked`` does not check
+    shutdown, so a rebuild started there ran against the retired store (PR #529
+    review). The replacement's own setup arms them for the data it loaded."""
+    current = _get_manager(hass, entry_id)
+    if current is None or getattr(current, "_is_shutdown", False) is True:
+        return
+    current.async_schedule_banked_tail_repair()
+    current.async_schedule_energy_rebuild()
+    current.async_schedule_cut_short_rebuild()
+
+
 def _export_json(payload: dict[str, Any]) -> str:
     """Serialise an export payload compactly, the way the store is written to disk.
 
@@ -4586,9 +4621,7 @@ async def ws_import_config(
             # options write above is the only thing here that could reload the
             # entry - so an import that carries no options would otherwise leave
             # the imported tails inflating avg_duration until the next restart.
-            manager.async_schedule_banked_tail_repair()
-            manager.async_schedule_energy_rebuild()
-            manager.async_schedule_cut_short_rebuild()
+            _schedule_post_import_repairs(hass, entry_id)
             manager.notify_update()
             _send_result(connection, msg["id"], "import_config", result)
         except json.JSONDecodeError as exc:
@@ -4825,9 +4858,7 @@ async def ws_import_config_selective(
             # whose settings subset comes back empty) skips the options write
             # above, so nothing reloads the entry and the re-armed repair would
             # wait for a restart.
-            manager.async_schedule_banked_tail_repair()
-            manager.async_schedule_energy_rebuild()
-            manager.async_schedule_cut_short_rebuild()
+            _schedule_post_import_repairs(hass, entry_id)
             manager.notify_update()
             _send_result(
                 connection, msg["id"], "import_config_selective",

@@ -2785,17 +2785,37 @@ def drop_invalid_numeric_options(options: Any) -> tuple[dict[str, Any], list[str
 
 
 
-def device_entry_ids(device: Any) -> list[str]:
+def device_entry_ids(device: Any, registry: Any = None) -> list[str]:
     """The config entry ids of a device registry entry (#532).
 
     Home Assistant 2026.9 gave a device a single ``config_entry_id`` and turned
     ``config_entries`` into a deprecated shim that logs a warning on every read
-    (removed in 2027.10); older releases only have ``config_entries``. Never raises.
+    (removed in 2027.10); older releases only have ``config_entries``. It also
+    split every device shared by several entries into one device per entry, and
+    ``async_get`` on the old id returns a read-only composite whose
+    ``config_entry_id`` is only the former primary: with ``registry`` given, the
+    entries of the devices split from ``device`` (``composite_device_id``) follow
+    it, so a service or trigger naming the old id still finds WashData's.
+    Never raises.
     """
+    out: list[str] = []
     try:
         entry_id = getattr(device, "config_entry_id", None)
         if isinstance(entry_id, str) and entry_id:
-            return [entry_id]
-        return [e for e in (getattr(device, "config_entries", None) or ()) if isinstance(e, str) and e]
+            out.append(entry_id)
+        else:
+            out.extend(
+                e for e in (getattr(device, "config_entries", None) or ())
+                if isinstance(e, str) and e
+            )
+        device_id = getattr(device, "id", None)
+        if registry is not None and isinstance(entry_id, str) and isinstance(device_id, str):
+            for split in list(getattr(registry, "devices", {}).values()):
+                if getattr(split, "composite_device_id", None) != device_id:
+                    continue
+                split_entry = getattr(split, "config_entry_id", None)
+                if isinstance(split_entry, str) and split_entry and split_entry not in out:
+                    out.append(split_entry)
     except Exception:  # noqa: BLE001 - a lookup helper must never raise
-        return []
+        return out
+    return out

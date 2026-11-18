@@ -96,11 +96,12 @@ async def async_validate_trigger_config(
 @callback
 def entry_for_device(hass: HomeAssistant, device_id: str) -> ConfigEntry | None:
     """The WashData config entry behind a device: identifier ``(DOMAIN, entry_id)``."""
-    device = dr.async_get(hass).async_get(device_id)
+    registry = dr.async_get(hass)
+    device = registry.async_get(device_id)
     if device is None:
         return None
     candidates = [ident for domain, ident in device.identifiers if domain == DOMAIN]
-    candidates += device_entry_ids(device)
+    candidates += device_entry_ids(device, registry)
     for entry_id in candidates:
         entry = hass.config_entries.async_get_entry(entry_id)
         if entry is not None and entry.domain == DOMAIN:

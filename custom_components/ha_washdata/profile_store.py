@@ -11721,6 +11721,9 @@ class ProfileStore:
 
     async def clear_all_data(self) -> None:
         """Clear all profiles, cycle data, and derived state."""
+        # A replacement like an import: work taken from the old data (Apply all's
+        # selection, a pass in flight) must see it (PR #529 review).
+        self._data_generation = getattr(self, "_data_generation", 0) + 1
         self._data["past_cycles"] = []
         self._data["reference_cycles"] = []
         self._data["backfill_cycles"] = []
