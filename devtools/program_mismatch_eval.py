@@ -50,13 +50,15 @@ on the recorded ticks (no new matching) and prints every row with its false-alar
 and detection rates; the shipped constants are marked. ``--json`` writes the ticks
 and the summary; ``--from-rows`` reads such a file instead of matching again.
 
-**Last run** (2026-11-18, 958 cycles of 86 devices, ~12 min on 7 workers), the
+**Last run** (2026-11-18, 958 cycles of 86 devices, ~8 min on 7 workers), the
 shipped 0.18 / 6 / 0.5: false alarms 16 (1.7%), 5 of them on the 449 own-history
 cycles (1.1%); wrong picks caught 39.3% (1957 of 4981) at a median 0.62 of the
 cycle, the nearest-duration wrong pick 42.8% at 0.52. By type: washers 1.8% /
 42.2%, dishwashers 0.9% / 32.2%, washer-dryers 6.1% / 40.3%, dryers 1.0% / 14.4%
-(short programmes rarely hold six matches past half their length). The replay
-before it matched at fixed interval marks (an unchanged prefix again on a silent
+(short programmes rarely hold six matches past half their length). Each fold on
+its own copy of the cycles, the end check on the stored offset and full-precision
+rows left every figure here as it was (one pair of 4981 moved at 0.12 / 3 / 0.25).
+The replay before it matched at fixed interval marks (an unchanged prefix again on a silent
 plug) and left out picks with no trace: 15 (1.6%), 3 own-history, 41.6% of 4855
 at 0.62. Per tick (that replay) the deficit separates a wrong pick from the right
 one at AUC 0.89, the pick's own score at 0.79.
@@ -76,16 +78,18 @@ for _var in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
     os.environ.setdefault(_var, "1")
 
 import argparse  # noqa: E402
+import dataclasses  # noqa: E402
 import importlib.util  # noqa: E402
 import json  # noqa: E402
 import math  # noqa: E402
+import pickle  # noqa: E402
 import statistics  # noqa: E402
 import sys  # noqa: E402
 from collections import defaultdict  # noqa: E402
 from concurrent.futures import ProcessPoolExecutor  # noqa: E402
 from pathlib import Path  # noqa: E402
 from types import SimpleNamespace  # noqa: E402
-from typing import Any  # noqa: E402
+from typing import Any, Iterator  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
 if str(REPO) not in sys.path:
@@ -116,32 +120,74 @@ SWEEP_FRACTIONS = (0.15, 0.25, 0.35, 0.5)
 # ----------------------------------------------------------------------- replay
 
 def check_prefixes(pts: list[list[float]], interval: float,
-                   end: float) -> list[tuple[list[list[float]], float]]:
+                   end: float) -> Iterator[tuple[list[list[float]], float]]:
     """``(prefix, elapsed s)`` for each background check the manager would run on
-    this trace: on the first reading at least ``interval`` after the last check
-    (``manager._schedule_program_mismatch_check``), strictly before ``end``. A
-    stretch without a reading runs no check, so a silent plug never feeds the
-    persistence rule one unchanged prefix several times."""
-    out: list[tuple[list[list[float]], float]] = []
+    this trace, one at a time: on the first reading at least ``interval`` after the
+    last check (``manager._schedule_program_mismatch_check``), strictly before
+    ``end``. A stretch without a reading runs no check, so a silent plug never feeds
+    the persistence rule one unchanged prefix several times.
+
+    ``end`` is the recorded duration, measured from the cycle start, so the end
+    check reads the reading's stored offset (``prefix[-1][0]``); the cadence and
+    the rule read seconds since the first reading, what the manager's trace spans."""
     if not pts:
-        return out
+        return
     t0 = pts[0][0]
     last: float | None = None
     for i, p in enumerate(pts):
-        elapsed = p[0] - t0
-        if elapsed >= end:
+        if not p[0] < end:
             break
+        elapsed = p[0] - t0
         if i < 1 or elapsed < (interval if last is None else last + interval):
             continue
         last = elapsed
-        out.append(([list(x) for x in pts[:i + 1]], elapsed))
-    return out
+        yield [list(x) for x in pts[:i + 1]], elapsed
+
+
+def recorded_duration(cyc: dict, pts: list) -> float | None:
+    """The cycle's recorded duration in seconds, or None when it is not a finite
+    positive number (an imported ``1e400`` reads as ``inf``: no check would ever
+    reach its end, and the rows would no longer be valid JSON)."""
+    try:
+        dur = float(ev.cycle_duration(cyc, pts))
+    except (TypeError, ValueError, OverflowError):
+        return None
+    return dur if math.isfinite(dur) and dur > 0 else None
+
+
+def private_device(dev: Any) -> Any:
+    """``dev`` with its own copy of the store data. A rebuild cuts imported
+    dishwasher cycles in place (``meta.tail_cut_s``, #518): on the loaded objects
+    the cut would reach every later fold, and a worker's folds would differ from
+    another's by which rebuilds it happened to run."""
+    return dataclasses.replace(dev, data=pickle.loads(
+        pickle.dumps(dev.data, protocol=pickle.HIGHEST_PROTOCOL)))
+
+
+def fold_store_data(dev: Any, base: dict, blob: bytes, pos: tuple[str, int]) -> dict:
+    """The store without the held-out cycle (``pos``: its list and index), on this
+    fold's own copy of every other cycle (``blob``: the lists as loaded, pickled),
+    of the profiles and of the envelope map, so nothing a fold's rebuild changes
+    reaches the next fold (``private_device``)."""
+    d = ev.base_data(dev)
+    lists = pickle.loads(blob)
+    key, j = pos
+    del lists[key][j]
+    d.update(lists)
+    d["profiles"] = pickle.loads(pickle.dumps(base["profiles"], protocol=pickle.HIGHEST_PROTOCOL))
+    d["envelopes"] = dict(base["envelopes"])
+    return d
 
 
 async def device_folds(dev: Any, base: dict, idxs: list[int]) -> list[dict]:
-    """One row per held-out cycle: its label, durations and the tick rankings."""
-    full = ev.base_data(dev)   # the same cycle objects as dev.cycles: removal is by identity
-    full["profiles"], full["envelopes"] = base["profiles"], base["envelopes"]
+    """One row per held-out cycle: its label, durations and the tick rankings.
+
+    Each fold reads the held-out cycle as loaded and trains on its own copy of the
+    others (``fold_store_data``), so a row depends neither on the folds run before
+    it nor on ``--jobs``."""
+    lists = {key: list(dev.data.get(key) or []) for key, _ in ev.LISTS}
+    where = {id(c): (key, j) for key, cs in lists.items() for j, c in enumerate(cs)}
+    blob = pickle.dumps(lists, protocol=pickle.HIGHEST_PROTOCOL)
     ids = ev.fold_ids(dev)
     aliases = ev.alias_classes(dev)
     rows: list[dict] = []
@@ -149,10 +195,10 @@ async def device_folds(dev: Any, base: dict, idxs: list[int]) -> list[dict]:
         cyc, _evidence = dev.cycles[i]
         label = cyc["profile_name"]
         pts = ev.query_points(cyc)
-        dur = ev.cycle_duration(cyc, pts)
-        fd = ev.fold_data(full, cyc)
-        if len(pts) < ev.MIN_TRACE_POINTS or dur <= 0:
+        dur = recorded_duration(cyc, pts)
+        if len(pts) < ev.MIN_TRACE_POINTS or dur is None or id(cyc) not in where:
             continue
+        fd = fold_store_data(dev, base, blob, where[id(cyc)])
         st, mgr = ev.fresh_store(dev, fd, {})
         await st.async_rebuild_envelope(label)
         interval = float(mgr._profile_match_interval or 300)  # noqa: SLF001
@@ -163,21 +209,24 @@ async def device_folds(dev: Any, base: dict, idxs: list[int]) -> list[dict]:
         for name, prof in (st.get_profiles() or {}).items():
             avg = match_rules.profile_duration(prof.get("avg_duration")) if isinstance(prof, dict) else None
             if avg:
-                durations[str(name)] = round(avg, 1)
+                durations[str(name)] = avg
         if label not in durations:
             continue
         ticks = []
         for q, qdur in check_prefixes(pts, interval, dur):
             res = await st.async_match_profile(q, qdur, in_progress=True)
+            # Full precision (``t`` since the first reading, ``at`` the stored
+            # offset the end check reads): a rounded tick could reach the rounded end.
             ticks.append({
-                "t": round(qdur, 1),
+                "t": qdur,
+                "at": q[-1][0],
                 "best": res.best_profile,
                 "c": [{k2: c.get(k2) for k2 in _CAND_KEYS if c.get(k2) is not None}
                       for c in (res.candidates or [])],
             })
         rows.append({
             "path": dev.key, "id": ids[i], "dev": mgr.device_type, "label": label,
-            "duration": round(dur, 1), "interval": interval, "durations": durations,
+            "duration": dur, "interval": interval, "durations": durations,
             "programs": programs,
             "families": match_rules.program_families(st.get_profile_groups()),
             # The manager never checks a pick the matcher cannot score.
@@ -205,7 +254,7 @@ def _device(path: str) -> Any:
 
 
 def _job_base(path: str) -> tuple[str, dict]:
-    return path, ev.run_coro(ev.rebuild_base(_device(path), {}))
+    return path, ev.run_coro(ev.rebuild_base(private_device(_device(path)), {}))
 
 
 def _job_folds(args: tuple[str, dict, list[int]]) -> list[dict]:
@@ -269,10 +318,12 @@ def _nearest_wrong(row: dict) -> str | None:
     return min(wrong, key=lambda s: (abs(math.log(row["durations"][s] / own)), s))
 
 
-def pick_sequence(row: dict, selected: str) -> list[tuple[float, Any, float]]:
-    """``(fraction of the pick's usual duration, selected_program_deficit, elapsed s)``
-    per tick: what ``match_rules.program_mismatch_tick`` reads, computed once. Empty
-    for a pick the manager does not check (no template, no learned duration)."""
+def pick_sequence(row: dict, selected: str) -> list[tuple[float, Any, float, float]]:
+    """``(fraction of the pick's usual duration, selected_program_deficit, elapsed s,
+    stored offset s)`` per tick: what ``match_rules.program_mismatch_tick`` reads,
+    computed once, and where the end check reads the tick (a row written before the
+    offset was kept: its elapsed time). Empty for a pick the manager does not check
+    (no template, no learned duration)."""
     if selected in (row.get("unmatchable") or ()) or not row["durations"].get(selected):
         return []
     expected = float(row["durations"][selected])
@@ -281,19 +332,19 @@ def pick_sequence(row: dict, selected: str) -> list[tuple[float, Any, float]]:
         (tick["t"] / expected,
          match_rules.selected_program_deficit(
              SimpleNamespace(best_profile=tick["best"], candidates=tick["c"]), selected, fam),
-         tick["t"])
+         tick["t"], tick.get("at", tick["t"]))
         for tick in row["ticks"]
     ]
 
 
-def fire_at(seq: list[tuple[float, Any, float]], margin: float, persistence: int,
+def fire_at(seq: list[tuple[float, Any, float, float]], margin: float, persistence: int,
             fraction: float, end: float | None = None) -> float | None:
     """Elapsed seconds at which the rule fires on ``seq`` strictly before ``end``
-    (the cycle's recorded end; None: no bound), or None
-    (``match_rules.program_mismatch_step``, the tick's own rule)."""
+    (the cycle's recorded end, against each tick's stored offset; None: no bound),
+    or None (``match_rules.program_mismatch_step``, the tick's own rule)."""
     state = match_rules.ProgramMismatchState()
-    for frac, hit, t in seq:
-        if end is not None and not t < end:
+    for frac, hit, t, at in seq:
+        if end is not None and not at < end:
             break
         if match_rules.program_mismatch_step(
             state, hit, frac, min_margin=margin, persistence=persistence, min_fraction=fraction

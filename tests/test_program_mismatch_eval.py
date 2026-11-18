@@ -6,12 +6,14 @@ pick never firing, a wrong pick firing, and the sweep.
 """
 from __future__ import annotations
 
+import copy
 import importlib.util
 import json
 import sys
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 _PATH = Path(__file__).resolve().parents[1] / "devtools" / "program_mismatch_eval.py"
 _spec = importlib.util.spec_from_file_location("wd_program_mismatch_eval", _PATH)
@@ -135,7 +137,7 @@ def test_a_check_needs_a_new_reading(tmp_path: Path) -> None:
     sparse = [p for p in dense if p[0] <= 300 or p[0] >= 1500]
     assert [t for _q, t in pme.check_prefixes(dense, 300.0, 2700.0)] == [
         300.0 * k for k in range(1, 9)]                       # never AT the end
-    checks = pme.check_prefixes(sparse, 300.0, 2700.0)
+    checks = list(pme.check_prefixes(sparse, 300.0, 2700.0))
     assert [t for _q, t in checks] == [300.0, 1500.0, 1800.0, 2100.0, 2400.0]
     assert [len(q) for q, _t in checks] == [11, 12, 22, 32, 42]
 
@@ -165,3 +167,132 @@ def test_the_device_cache_follows_the_corpus_root(tmp_path: Path) -> None:
     second = pme._device("synth/export.json")
     assert second is not first
     assert len(second.cycles) == 4 and len(first.cycles) == 8
+
+
+def _write(root: Path, doc: dict | str) -> str:
+    (root / "synth").mkdir(parents=True, exist_ok=True)
+    (root / "synth" / "export.json").write_text(doc if isinstance(doc, str) else json.dumps(doc))
+    return "synth/export.json"
+
+
+def test_the_checks_come_one_at_a_time() -> None:
+    dense = [[30.0 * k, 100.0] for k in range(91)]
+    checks = pme.check_prefixes(dense, 300.0, 2700.0)
+    assert iter(checks) is checks
+    prefix, elapsed = next(checks)
+    assert (len(prefix), elapsed) == (11, 300.0)
+
+
+def _behind(ticks: list[tuple[float, float]], duration: float) -> dict:
+    """A row whose label A trails B by 0.4 on every tick ``(t, at)``."""
+    return {
+        "path": "x/y.json", "id": "c1", "dev": "dryer", "label": "A", "duration": duration,
+        "interval": 300.0, "durations": {"A": 1800.0, "B": 1800.0}, "families": {},
+        "twins": [], "unmatchable": [],
+        "ticks": [{"t": t, "at": at, "best": "B",
+                   "c": [{"name": "B", "score": 0.9}, {"name": "A", "score": 0.5}]}
+                  for t, at in ticks],
+    }
+
+
+def test_the_end_check_reads_the_stored_offset() -> None:
+    """The recorded duration counts from the cycle start, so a trace whose first
+    reading is 60 s in ends at the same offset: its reading at 1860 s is past an
+    1820 s end though only 1800 s after the first reading. The cadence and the
+    rule still read the time since the first reading."""
+    pts = [[60.0 + 30.0 * k, 100.0] for k in range(61)]   # 60 .. 1860 s
+    checks = list(pme.check_prefixes(pts, 300.0, 1820.0))
+    assert [t for _q, t in checks] == [300.0, 600.0, 900.0, 1200.0, 1500.0]
+    assert [q[-1][0] for q, _t in checks] == [360.0, 660.0, 960.0, 1260.0, 1560.0]
+    # The scoring reads each tick's stored offset too.
+    row = _behind([(300.0 * k, 300.0 * k + 60.0) for k in range(1, 7)], 1820.0)
+    seq = pme.pick_sequence(row, "A")
+    assert pme.fire_at(seq, 0.18, 6, 0.0) == 1800.0
+    assert pme.fire_at(seq, 0.18, 6, 0.0, end=row["duration"]) is None
+    assert pme.fire_at(seq, 0.18, 5, 0.0, end=row["duration"]) == 1500.0
+    # A tick exactly at the end is past it.
+    assert pme.fire_at(seq, 0.18, 5, 0.0, end=1560.0) is None
+
+
+def test_the_saved_end_keeps_full_precision(tmp_path: Path) -> None:
+    """Every check the replay runs, strictly before the recorded end, is one the
+    saved rows keep before it: rounded to 0.1 s, a 2400.04 s cycle was saved as
+    2400.0 and its check at 2400 s read as past the end."""
+    doc = _export()
+    for cyc in doc["data"]["past_cycles"]:
+        cyc["duration"] += 0.04
+    _write(tmp_path, doc)
+    rows = pme.replay(tmp_path, jobs=1, log=lambda *a, **k: None)
+    assert len(rows) == 8
+    for row in rows:
+        assert row["duration"] == 2400.04
+        assert row["ticks"][-1]["at"] == 2400.0
+        assert all(at < row["duration"] for *_rest, at in pme.pick_sequence(row, row["label"]))
+
+
+@pytest.mark.filterwarnings("ignore:invalid value encountered:RuntimeWarning")
+def test_a_non_finite_recorded_duration_skips_its_fold(tmp_path: Path) -> None:
+    """An imported ``1e400`` parses as ``inf``: no check would reach its end and the
+    rows file would hold ``Infinity``, which is not JSON. That fold is skipped, the
+    rest are replayed. (Cotton's other folds train on it, so Cotton has no finite
+    usual duration there and the manager would not check it: no row, as for any
+    pick without one.)"""
+    doc = _export()
+    doc["data"]["past_cycles"][0]["duration"] = "__huge__"
+    _write(tmp_path, json.dumps(doc).replace('"__huge__"', "1e400"))
+    rows = pme.replay(tmp_path, jobs=1, log=lambda *a, **k: None)
+    assert "Cotton-0" not in {r["id"] for r in rows}
+    assert sorted(r["id"] for r in rows) == [f"Synthetics-{j}" for j in range(4)]
+    out = tmp_path / "o.json"
+    assert pme.main(["--corpus", str(tmp_path), "--jobs", "1", "--json", str(out)]) == 0
+
+    def strict(token: str) -> None:
+        raise ValueError(token)
+
+    doc_out = json.loads(out.read_text(), parse_constant=strict)
+    assert len(doc_out["rows"]) == len(rows)
+
+
+def test_a_fold_never_sees_another_folds_rebuild(tmp_path: Path, monkeypatch) -> None:
+    """A rebuild cuts imported dishwasher cycles in place (``meta.tail_cut_s``, #518),
+    stood in for here by one that cuts every cycle of the programme it rebuilds:
+    the loaded cycles stay as they were, and a fold's row is the same whichever
+    folds ran before it (and so whichever worker ran it)."""
+    from custom_components.ha_washdata.profile_store import ProfileStore
+
+    real = ProfileStore.async_rebuild_envelope
+
+    async def cutting(self, name):
+        for key in ("past_cycles", "reference_cycles", "backfill_cycles"):
+            for c in self._data.get(key) or []:
+                if c.get("profile_name") != name or (c.get("meta") or {}).get("tail_cut_s"):
+                    continue
+                keep = c["power_data"][: len(c["power_data"]) * 3 // 4]
+                c.setdefault("meta", {})["tail_cut_s"] = c["duration"] - keep[-1][0]
+                c["power_data"], c["duration"] = keep, keep[-1][0]
+        return await real(self, name)
+
+    monkeypatch.setattr(ProfileStore, "async_rebuild_envelope", cutting)
+    path = _write(tmp_path, _export())
+    pme._worker_init(str(tmp_path))
+    dev = pme._device(path)
+    loaded = copy.deepcopy([c for c, _ in dev.cycles])
+    _, base = pme._job_base(path)
+    idxs = pme.ev.scorable(dev)
+    assert len(idxs) == 8
+    together = pme._job_folds((path, base, idxs))
+    alone = [row for i in reversed(idxs) for row in pme._job_folds((path, base, [i]))]
+    assert [c for c, _ in dev.cycles] == loaded
+    assert len(together) == 8
+    assert sorted(alone, key=lambda r: r["id"]) == sorted(together, key=lambda r: r["id"])
+    # Each held-out cycle is replayed as recorded, uncut.
+    assert {r["duration"] for r in together} == {2400.0}
+
+
+@pytest.mark.parametrize("duration", [float("nan"), -5.0, 0.0])
+def test_a_recorded_duration_must_be_positive_and_finite(duration: float) -> None:
+    pts = [[0.0, 1.0], [60.0, 1.0]]
+    assert pme.recorded_duration({"duration": duration}, pts) in (None, 60.0)
+    assert pme.recorded_duration({"duration": float("inf")}, pts) is None
+    assert pme.recorded_duration({"duration": 10 ** 400}, pts) is None
+    assert pme.recorded_duration({"duration": 1234.56}, pts) == 1234.56
