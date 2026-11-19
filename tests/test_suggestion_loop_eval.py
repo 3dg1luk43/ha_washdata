@@ -364,8 +364,8 @@ def test_unmatched_end_lag_is_the_kept_cycles_not_a_discarded_pump_out(monkeypat
     src = {"id": "main", "start_time": "2026-10-01T08:00:00+00:00", "status": "completed",
            "power_data": [[t * 60.0, 1500.0 if t < 30 else 0.5] for t in range(40)]}
     dev = SimpleNamespace(
-        past=[src], s0=60.0, entry_data={}, recorded_stop=2.0,
-        detector_config=lambda _o: SimpleNamespace(min_power=1.0),
+        past=[src], s0=60.0, entry_data={}, recorded_stop=2.0, idle_hold=False,
+        detector_config=lambda _o: SimpleNamespace(min_power=1.0, stop_threshold_w=2.0),
         match_side=lambda _o: (SimpleNamespace(profile_store=None), None),
     )
     monkeypatch.setitem(loop._DEVICES, "dev", dev)  # noqa: SLF001
@@ -373,6 +373,64 @@ def test_unmatched_end_lag_is_the_kept_cycles_not_a_discarded_pump_out(monkeypat
     _path, _arm, _idx, row = loop._unmatched_task(("dev", "initial", {}, 0))  # noqa: SLF001
     assert row["lag"] == 600.0
     assert row["split"] is False
+
+
+class _TailSim:
+    """A replay that records how it was ended: a 0 W tail or a force end."""
+
+    calls: list[str] = []
+
+    def __init__(self, cyc, cfg, _view, store, options, _x, compute_series=False):
+        from datetime import datetime, timezone  # noqa: PLC0415
+
+        self.ready, self.n_readings = True, 1
+        self.cursor = {"t": 0.0}
+        self.readings = [(datetime(2026, 10, 1, 9, tzinfo=timezone.utc), 5.0)]
+        self.kept: list[dict] = []
+        sim = self
+
+        class _Det:
+            _on_cycle_end = None
+
+            def force_end(self, _ts) -> None:
+                sim.calls.append("force_end")
+
+        self.detector = _Det()
+
+    def step(self, _a, _b) -> None:
+        return None
+
+    def run_tail(self) -> None:
+        self.calls.append("tail")
+
+
+@pytest.mark.parametrize(
+    ("idle_hold", "tail_w", "expected"),
+    [
+        (True, 5.0, "force_end"),   # retained 5 W at or above the 2 W stop: held
+        (False, 5.0, "tail"),       # without --idle-hold: the 0 W tail, as before
+        (True, 1.0, "tail"),        # the retained level is below the stop: it can end
+    ],
+)
+def test_the_unmatched_replay_honours_idle_hold(monkeypatch, idle_hold, tail_w, expected):
+    """PR #529 review: the unmatched replay always appended a 0 W tail, so with
+    ``--idle-hold`` a retained 5 W standby above a 2 W stop still ended there,
+    where ``replay_one`` force-ends it."""
+    from types import SimpleNamespace
+
+    # Worked to 1740 s under a 10 W recorded stop, then kept ten minutes at tail_w.
+    src = {"id": "main", "start_time": "2026-10-01T08:00:00+00:00", "status": "completed",
+           "power_data": [[t * 60.0, 1500.0 if t < 30 else tail_w] for t in range(40)]}
+    dev = SimpleNamespace(
+        past=[src], s0=60.0, entry_data={}, recorded_stop=10.0, idle_hold=idle_hold,
+        detector_config=lambda _o: SimpleNamespace(min_power=1.0, stop_threshold_w=2.0),
+        match_side=lambda _o: (SimpleNamespace(profile_store=None), None),
+    )
+    monkeypatch.setitem(loop._DEVICES, "dev", dev)  # noqa: SLF001
+    monkeypatch.setattr(_TailSim, "calls", [])
+    monkeypatch.setattr(loop.playground, "_DetailSim", _TailSim)
+    loop._unmatched_task(("dev", "initial", {}, 0))  # noqa: SLF001
+    assert _TailSim.calls == [expected]
 
 
 def test_apply_all_judges_the_end_gate_on_the_values_as_written(monkeypatch):

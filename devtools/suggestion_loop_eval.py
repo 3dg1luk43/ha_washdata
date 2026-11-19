@@ -143,7 +143,7 @@ import warnings  # noqa: E402
 from concurrent.futures import ProcessPoolExecutor  # noqa: E402
 from datetime import datetime, timedelta, timezone  # noqa: E402
 from pathlib import Path  # noqa: E402
-from typing import Any, Iterator  # noqa: E402
+from typing import Any, Callable, Iterator  # noqa: E402
 from unittest.mock import MagicMock  # noqa: E402
 
 import numpy as np  # noqa: E402
@@ -601,6 +601,24 @@ def run_tail(sim: Any, cfg: Any) -> None:
         sim.detector.force_end(flush_ts)
 
 
+def finish_replay(sim: Any, cfg: Any, src: dict, recorded_stop: float, idle_hold: bool,
+                  tail: Callable[[], None]) -> bool:
+    """End a replay after the recorded trace; True when ``src`` kept a tail at or
+    above ``cfg``'s stop threshold (``idle_above_stop``).
+
+    With ``idle_hold`` such a cycle is force-ended at its last reading, as live
+    would once a watchdog gave up on it; anything else runs ``tail`` (the 0 W
+    quiet tail). The matched and the unmatched replays both end here.
+    """
+    level = post_cycle_level(_cycle_readings(src), recorded_stop)
+    idle_above = level is not None and level >= float(cfg.stop_threshold_w)
+    if idle_hold and idle_above:
+        sim.detector.force_end(sim.readings[-1][0] + timedelta(seconds=1))
+    else:
+        tail()
+    return idle_above
+
+
 def replay_one(src: dict, cfg: Any, match_store: Any, prebuilt: Any, options: dict,
                throttle_s: float | None, recorded_stop: float,
                idle_hold: bool = False) -> dict[str, Any] | None:
@@ -636,12 +654,7 @@ def replay_one(src: dict, cfg: Any, match_store: Any, prebuilt: Any, options: di
     sim.step(0, sim.n_readings)
     src_readings, _pts, src_base = playground._readings_from_cycle(src)  # noqa: SLF001
     work = [ts for ts, p in src_readings if p >= recorded_stop]
-    level = post_cycle_level(_cycle_readings(src), recorded_stop)
-    idle_above = level is not None and level >= float(cfg.stop_threshold_w)
-    if idle_hold and idle_above:
-        sim.detector.force_end(sim.readings[-1][0] + timedelta(seconds=1))
-    else:
-        run_tail(sim, cfg)
+    idle_above = finish_replay(sim, cfg, src, recorded_stop, idle_hold, lambda: run_tail(sim, cfg))
     return {
         "captured": copy.deepcopy(sim.captured), "ends": list(tap.ends),
         "committed": list(tap.committed), "base": sim.base, "idle_above_stop": idle_above,
@@ -1395,7 +1408,9 @@ def _unmatched_task(job: tuple[str, str, dict, int]) -> tuple[str, str, int, dic
 
         det._on_cycle_end = _end  # noqa: SLF001
         sim.step(0, sim.n_readings)
-        sim.run_tail()
+        # `--idle-hold` as the matched rounds take it (PR #529 review): a kept tail
+        # at or above the new stop is force-ended, not given an invented 0 W tail.
+        finish_replay(sim, cfg, src, dev.recorded_stop, dev.idle_hold, sim.run_tail)
         ended = list(sim.kept)
     stop = dev.recorded_stop
     # The end lag as `replay_one` measures it: detection time less the source's
