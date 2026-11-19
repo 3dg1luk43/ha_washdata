@@ -49,6 +49,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - **The recording widget could offer the wrong action**: after Stop it could still offer Stop, and after Discard it could offer Process for a recording that was gone. A failed read of the recording state after Start, Stop, Discard or Process was not retried, because the panel reads it only while recording. It is retried now until a read sent at or after the action succeeds.
 - **Status could show another program's or appliance's expected curve**: a slow answer for the previous program or appliance replaced the newer one, after which the curve was not fetched again. The curve and phases are now kept per appliance and program, and late answers are dropped.
 - **An older appliance list could replace a newer one**: list refreshes were applied in arrival order, so a slow reply could undo a change on screen (a program pick, a cleared badge). A reply older than the list already shown is dropped.
+- **Undo Import left removed settings out of the settings history**: a setting the import had set and the undo removed again (back to its default) was not recorded, so the history did not show the change. It is now recorded as a change to the unset value.
 
 ## 0.6.0 - 2026-11-12
 
