@@ -655,7 +655,7 @@
     },
     "program_mismatch": {
       "name": "Laufendes Programm weicht vom gewählten ab",
-      "description": "Wird einmal pro gewähltem Programm ausgelöst, wenn der laufende Zyklus nicht nach dem von Ihnen manuell gewählten Programm aussieht: Ein anderes Programm passt deutlich besser. Eine neue Auswahl während des Zyklus startet eine neue Prüfung.",
+      "description": "Wird einmal ausgelöst, wenn der Zyklus besser zu einem anderen Programm passt als zu dem von Ihnen gewählten. Eine neue Auswahl startet eine neue Prüfung.",
       "fields": {
         "program": {
           "name": "Programm",

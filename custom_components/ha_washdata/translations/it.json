@@ -655,7 +655,7 @@
     },
     "program_mismatch": {
       "name": "Il programma in corso è diverso da quello selezionato",
-      "description": "Si attiva una volta per programma scelto quando il programma che hai scelto a mano non somiglia al ciclo in corso: un altro programma corrisponde nettamente meglio. Una nuova scelta durante il ciclo avvia un nuovo controllo.",
+      "description": "Si attiva una volta quando il ciclo corrisponde meglio a un altro programma che a quello che hai scelto. Una nuova scelta avvia un nuovo controllo.",
       "fields": {
         "program": {
           "name": "Programma",

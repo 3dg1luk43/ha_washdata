@@ -655,7 +655,7 @@
     },
     "program_mismatch": {
       "name": "Běžící program se liší od vybraného",
-      "description": "Spustí se jednou pro každý vybraný program, když se ručně vybraný program nepodobá probíhajícímu cyklu: jiný program mu odpovídá zřetelně lépe. Nový výběr během cyklu spustí novou kontrolu.",
+      "description": "Spustí se jednou, když cyklu odpovídá jiný program lépe než ten, který jste vybrali. Nový výběr spustí novou kontrolu.",
       "fields": {
         "program": {
           "name": "Program",

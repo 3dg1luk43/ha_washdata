@@ -655,7 +655,7 @@
     },
     "program_mismatch": {
       "name": "Tekoči program se razlikuje od izbranega",
-      "description": "Sproži enkrat za vsak izbrani program, ko ročno izbrani program ni podoben tekočemu ciklu: drug program se z njim opazno bolje ujema. Nova izbira med ciklom začne novo preverjanje.",
+      "description": "Sproži enkrat, ko se cikel bolje ujema z drugim programom kot z izbranim. Nova izbira začne novo preverjanje.",
       "fields": {
         "program": {
           "name": "Program",

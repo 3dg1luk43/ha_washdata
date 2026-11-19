@@ -655,7 +655,7 @@
     },
     "program_mismatch": {
       "name": "Veikianti programa skiriasi nuo pasirinktos",
-      "description": "Suaktyvinamas vieną kartą kiekvienai pasirinktai programai, kai rankiniu būdu pasirinkta programa nepanaši į veikiantį ciklą: kita programa jam tinka aiškiai geriau. Naujas pasirinkimas ciklo metu pradeda naują patikrą.",
+      "description": "Suaktyvinamas vieną kartą, kai ciklas geriau atitinka kitą programą nei jūsų pasirinktąją. Naujas pasirinkimas pradeda naują patikrą.",
       "fields": {
         "program": {
           "name": "Programa",

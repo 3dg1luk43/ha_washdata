@@ -655,7 +655,7 @@
     },
     "program_mismatch": {
       "name": "Programi që po ekzekutohet ndryshon nga ai i zgjedhur",
-      "description": "Aktivizohet një herë për çdo program të zgjedhur kur programi që zgjodhët me dorë nuk i ngjan ciklit që po ekzekutohet: një program tjetër i përshtatet qartë më mirë. Një zgjedhje e re gjatë ciklit nis një kontroll të ri.",
+      "description": "Aktivizohet një herë kur cikli i përshtatet më mirë një programi tjetër sesa atij që zgjodhët. Një zgjedhje e re nis një kontroll të ri.",
       "fields": {
         "program": {
           "name": "Program",

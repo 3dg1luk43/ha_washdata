@@ -655,7 +655,7 @@
     },
     "program_mismatch": {
       "name": "Pågående program avviker fra det valgte",
-      "description": "Utløses én gang per valgt program, når den pågående syklusen ikke ligner programmet du har valgt manuelt: et annet program passer tydelig bedre. Et nytt valg under syklusen starter en ny kontroll.",
+      "description": "Utløses én gang når syklusen passer bedre til et annet program enn det du har valgt. Et nytt valg starter en ny kontroll.",
       "fields": {
         "program": {
           "name": "Program",

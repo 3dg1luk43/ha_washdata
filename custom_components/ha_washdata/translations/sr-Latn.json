@@ -655,7 +655,7 @@
     },
     "program_mismatch": {
       "name": "Program u toku se razlikuje od izabranog",
-      "description": "Aktivira se jednom po izabranom programu kada ručno izabrani program ne liči na ciklus u toku: drugi program mu jasno bolje odgovara. Novi izbor tokom ciklusa pokreće novu proveru.",
+      "description": "Aktivira se jednom kada ciklusu bolje odgovara drugi program od onog koji ste izabrali. Novi izbor pokreće novu proveru.",
       "fields": {
         "program": {
           "name": "Program",

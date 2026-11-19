@@ -655,7 +655,7 @@
     },
     "program_mismatch": {
       "name": "Działający program różni się od wybranego",
-      "description": "Wyzwala raz na każdy wybrany program, gdy wybrany ręcznie program nie przypomina trwającego cyklu: inny program pasuje do niego wyraźnie lepiej. Nowy wybór w trakcie cyklu rozpoczyna nowe sprawdzenie.",
+      "description": "Wyzwala raz, gdy cykl pasuje lepiej do innego programu niż do wybranego. Nowy wybór rozpoczyna nowe sprawdzenie.",
       "fields": {
         "program": {
           "name": "Program",

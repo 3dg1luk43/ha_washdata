@@ -655,7 +655,7 @@
     },
     "program_mismatch": {
       "name": "Forrit í gangi víkur frá völdu forriti",
-      "description": "Kveikir einu sinni fyrir hvert valið forrit þegar lotan í gangi líkist ekki forritinu sem þú valdir handvirkt: annað forrit passar greinilega betur. Nýtt val meðan á lotunni stendur hefur nýja athugun.",
+      "description": "Kveikir einu sinni þegar lotan passar betur við annað forrit en það sem þú valdir. Nýtt val hefur nýja athugun.",
       "fields": {
         "program": {
           "name": "Forrit",
