@@ -3,6 +3,11 @@
 * A manual analysis with no cadence withdrew the operational entries, then a
   later pass raised: nothing pushed the non-polling Suggested Settings sensor,
   so it kept showing the withdrawn entry.
+* A device type change to dishwasher reloads in place and never ran the
+  one-time #531 cut-short rebuild that setup skipped.
+* Foreign Stop rows a merge brought took the changelog's extra Stop slots.
+* The payload's reference_cycles import dropped ``manual_duration``.
+* The matcher converted a long trace on the event loop.
 """
 from __future__ import annotations
 
