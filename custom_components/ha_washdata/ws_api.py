@@ -4692,10 +4692,14 @@ async def ws_import_config(
         try:
             payload = await hass.async_add_executor_job(json.loads, msg["json_data"])
             pre_entry = _get_entry(hass, entry_id)
+            learning = getattr(manager, "learning_manager", None)
             config_updates = await manager.profile_store.async_import_data(
                 payload,
                 # Kept with the restore point so an undo puts them back (item 195).
                 entry_options=dict(pre_entry.options) if pre_entry else None,
+                # As the wipe and Undo Import: the intervals measured before it and
+                # any pass in flight go with the history it replaces (PR #529 review).
+                on_replace=getattr(learning, "reset_cadence_evidence", None),
             )
             result = {
                 "success": True,

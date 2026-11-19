@@ -12627,6 +12627,7 @@ class ProfileStore:
         *,
         entry_options: JSONDict | None = None,
         source: str = "import_config",
+        on_replace: Callable[[], Any] | None = None,
     ) -> dict[str, Any]:
         """Wholesale import: replace the entire store from a JSON payload.
 
@@ -12645,6 +12646,11 @@ class ProfileStore:
         The store as it was is saved as the device's restore point first (register
         item 195); ``entry_options`` (this device's, so the undo can put them back)
         and ``source`` only describe that snapshot and are never applied here.
+
+        ``on_replace`` is called once the payload has replaced the data in memory,
+        before the first await after it, as Undo Import's: state derived from the
+        replaced history goes with it, and a refused import keeps it (PR #529
+        review). Never raises from it.
         """
         data_dict, meta = unwrap_import_payload(payload)
         self._logger.info(
@@ -12684,6 +12690,11 @@ class ProfileStore:
             ]
         self._data = {**data_dict, **kept}
         self._data_generation = getattr(self, "_data_generation", 0) + 1
+        if on_replace is not None:
+            try:
+                on_replace()
+            except Exception:  # noqa: BLE001 - the import itself must complete
+                self._logger.debug("Import follow-up failed", exc_info=True)
         # The payload's envelopes were built without any cycle list kept above, so
         # rebuild the profiles those lists label. A list kept from the target also
         # means a profile kept from it can lack a payload envelope.

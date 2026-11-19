@@ -1625,6 +1625,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     payload,
                     entry_options=dict(entry.options),
                     source="import_config_service",
+                    # As the WS import: cadence evidence goes with the history.
+                    on_replace=getattr(
+                        getattr(manager, "learning_manager", None),
+                        "reset_cadence_evidence", None,
+                    ),
                 )
                 if config_updates:
                     await async_apply_imported_entry_options(
