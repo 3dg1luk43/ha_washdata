@@ -1705,10 +1705,9 @@ class WashDataManager:
         if not isinstance(program, str) or not program:
             return None
         # A profile may be named like a placeholder ("off"): picked, it is still
-        # a program to check (PR #529 review).
-        if not match_rules.program_is_committed(program) and program not in (
-            self._resolve_profiles()
-        ):
+        # a program to check (PR #529 review). A deleted one is not: the pin
+        # outlives it, and other profiles would keep scoring against its name.
+        if program not in self._resolve_profiles():
             return None
         token, start, _active = self._match_identity()
         return (token, start, program, getattr(self, "_program_pick_generation", 0))

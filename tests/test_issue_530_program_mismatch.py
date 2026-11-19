@@ -853,3 +853,21 @@ async def test_a_malformed_group_neither_drops_the_check_nor_fails_its_restore(
     with patch.object(match_rules, "program_families", side_effect=RuntimeError("boom")):
         manager._restore_program_mismatch(snap["program_mismatch"])  # noqa: SLF001
     assert manager.program_mismatch is None
+
+
+async def test_a_deleted_pick_is_not_checked(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """PR #529 review: deleting the picked profile left the pin (and the data
+    generation) as it was, so the check went on against a name no profile has and
+    could fire the trigger for it."""
+    _entry, manager, sent, _state = await _past_half(hass, setup_washdata_entry, freezer)
+    await manager.profile_store.delete_profile("Cotton")
+    assert manager._program_mismatch_key() is None  # noqa: SLF001
+    res = _result("Synthetics", {"Synthetics": 0.9, "Cotton": 0.5})
+    with patch.object(
+        manager.profile_store, "async_match_profile", AsyncMock(return_value=res)
+    ):
+        await _feed(hass, freezer, 200, 10 * 60)
+    assert _mismatches(sent) == []
+    assert manager.program_mismatch is None
