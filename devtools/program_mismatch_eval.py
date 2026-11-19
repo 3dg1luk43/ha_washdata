@@ -18,12 +18,14 @@ usual duration elapsed). This replays that on the corpus.
 **Replay** (leave-one-out, production code): each scorable labelled cycle of a
 device with >= 2 programmes (``devtools/eval.py``'s corpus rules: clone files and
 twin entries dropped, the label keeps another traced cycle) is removed from every
-list and its programme's envelope and usual duration rebuilt from the others (a
-fold whose rebuild learns no duration is left out), on a store a real
-``WashDataManager`` builds from the export's options (``eval.fresh_store``). A
-record whose stored duration is no finite number is left out of every list. A check runs where the
-manager schedules one (``check_prefixes``): on the first recorded reading at least
-one ``profile_match_interval`` (the device's own, 300 s by default) after the last
+list with every other stored copy of its trace (same content, any name), and the
+envelope and usual duration of each programme they were stored under rebuilt
+from the others (a fold whose rebuild learns no duration for the label is left
+out), on a store a real ``WashDataManager`` builds from the export's options
+(``eval.fresh_store``). A record whose stored duration is no finite number is left
+out of every list. A check runs where the manager schedules one
+(``check_prefixes``): on the first recorded reading at least one
+``profile_match_interval`` (the device's own, 300 s by default) after the last
 check, strictly before the recorded end. A stretch without a reading runs none, so
 a silent plug never feeds the persistence rule one unchanged prefix several times.
 The prefix through that reading is matched with
@@ -216,27 +218,51 @@ def private_device(dev: Any) -> Any:
         pickle.dumps(dev.data, protocol=pickle.HIGHEST_PROTOCOL)))
 
 
-def fold_store_data(dev: Any, base: dict, blob: bytes, pos: tuple[str, int]) -> dict:
-    """The store without the held-out cycle (``pos``: its list and index), on this
+def fold_store_data(dev: Any, base: dict, blob: bytes, pos: tuple[str, int],
+                    copies: Any = ()) -> dict:
+    """The store without the held-out cycle (``pos``: its list and index) or any
+    other stored copy of it (``copies``: more positions, ``stored_copies``), on this
     fold's own copy of every other cycle (``blob``: the lists as loaded, pickled),
     of the profiles and of the envelope map, so nothing a fold's rebuild changes
     reaches the next fold (``private_device``).
 
-    The base learned the held-out programme's usual duration from every cycle, the
-    held-out one included, so it is cleared: only what the fold's rebuild learns
-    from the others may size the gate (``device_folds`` skips a fold whose rebuild
-    learns none)."""
+    The base learned the usual duration of every programme holding a dropped copy
+    from it, so those are cleared: only what the fold's rebuild of them
+    (``held_programmes``) learns from the others may size the gate
+    (``device_folds`` skips a fold whose rebuild learns none for the label)."""
     d = ev.base_data(dev)
     lists = pickle.loads(blob)
-    key, j = pos
-    held = lists[key].pop(j)
+    drop = {pos, *copies}
+    held = held_programmes(lists, drop)
+    lists = {k: [c for m, c in enumerate(cs) if (k, m) not in drop] for k, cs in lists.items()}
     d.update(lists)
     d["profiles"] = pickle.loads(pickle.dumps(base["profiles"], protocol=pickle.HIGHEST_PROTOCOL))
-    prof = d["profiles"].get(held.get("profile_name")) if isinstance(held, dict) else None
-    if isinstance(prof, dict):
-        prof.pop("avg_duration", None)
+    for name in held:
+        prof = d["profiles"].get(name)
+        if isinstance(prof, dict):
+            prof.pop("avg_duration", None)
     d["envelopes"] = dict(base["envelopes"])
     return d
+
+
+def held_programmes(lists: dict[str, list], drop: Any) -> list[str]:
+    """The programmes the records at ``drop`` (list, index) are labelled with."""
+    names = {lists[k][m].get("profile_name") for k, m in drop if isinstance(lists[k][m], dict)}
+    return sorted(n for n in names if isinstance(n, str) and n)
+
+
+def stored_copies(lists: dict[str, list], known: dict[int, str | None]) -> dict[str, list[tuple[str, int]]]:
+    """Every list position per trace content (``eval.trace_hash``; ``known``: the
+    hashes the loader computed, by object id), so a fold drops each stored copy of
+    the held-out run, under any name and in any list (PR #529 review: a second copy
+    trained the rebuild on the trace it then scored)."""
+    out: dict[str, list[tuple[str, int]]] = defaultdict(list)
+    for key, cs in lists.items():
+        for m, c in enumerate(cs):
+            h = known[id(c)] if id(c) in known else (ev.trace_hash(c) if isinstance(c, dict) else None)
+            if h:
+                out[h].append((key, m))
+    return out
 
 
 async def device_folds(dev: Any, base: dict, idxs: list[int]) -> list[dict]:
@@ -248,6 +274,7 @@ async def device_folds(dev: Any, base: dict, idxs: list[int]) -> list[dict]:
     lists = {key: list(dev.data.get(key) or []) for key, _ in ev.LISTS}
     where = {id(c): (key, j) for key, cs in lists.items() for j, c in enumerate(cs)}
     blob = pickle.dumps(lists, protocol=pickle.HIGHEST_PROTOCOL)
+    copies = stored_copies(lists, {id(c): h for (c, _e), h in zip(dev.cycles, dev.hashes)})
     ids = ev.fold_ids(dev)
     aliases = ev.alias_classes(dev)
     rows: list[dict] = []
@@ -258,9 +285,12 @@ async def device_folds(dev: Any, base: dict, idxs: list[int]) -> list[dict]:
         dur = recorded_duration(cyc, pts)
         if len(pts) < ev.MIN_TRACE_POINTS or dur is None or id(cyc) not in where:
             continue
-        fd = fold_store_data(dev, base, blob, where[id(cyc)])
+        drop = {where[id(cyc)], *copies.get(dev.hashes[i] or "", ())}
+        fd = fold_store_data(dev, base, blob, where[id(cyc)], drop)
         st, mgr = ev.fresh_store(dev, fd, {})
-        await st.async_rebuild_envelope(label)
+        # The label, and any other programme a copy of the run was stored under.
+        for name in held_programmes(lists, drop):
+            await st.async_rebuild_envelope(name)
         interval = float(mgr._profile_match_interval or 300)  # noqa: SLF001
         # Every programme a user can pick, and the learned durations: a pick
         # without one, or without a template, is never checked (a miss). The

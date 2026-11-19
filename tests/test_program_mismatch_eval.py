@@ -360,3 +360,44 @@ def test_a_fold_never_reads_the_held_out_cycles_duration(tmp_path: Path) -> None
     assert "Cotton-0" not in ids
     assert {f"Cotton-{j}" for j in range(1, 4)} <= ids
     assert all(r["durations"]["Cotton"] == 2400.0 for r in rows if r["label"] == "Cotton")
+
+
+def test_a_fold_drops_every_stored_copy_of_the_held_out_run(tmp_path: Path, monkeypatch) -> None:
+    """PR #529 review: only the held-out position was removed, so a second copy of
+    the run (here Cotton-0 again in ``reference_cycles``, and Synthetics-0 under a
+    second name) trained the rebuild on the trace it then scored. Every copy is
+    dropped, and a programme that held one is rebuilt without it."""
+    doc = _export()
+    past = doc["data"]["past_cycles"]
+    by_id = {c["id"]: c for c in past}
+    doc["data"]["reference_cycles"] = [
+        dict(copy.deepcopy(by_id["Cotton-0"]), id="ref-cotton"),
+        dict(copy.deepcopy(by_id["Synthetics-0"]), id="ref-alias", profile_name="SynthAlias"),
+    ]
+    doc["data"]["profiles"]["SynthAlias"] = {"avg_duration": 2400.0, "sample_cycle_id": "ref-alias"}
+    path = _write(tmp_path, doc)
+    pme._worker_init(str(tmp_path))
+    dev = pme._device(path)
+    _, base = pme._job_base(path)
+    stores: list[dict] = []
+    real = pme.ev.fresh_store
+
+    def spy(dev_, data, override):
+        stores.append(data)
+        return real(dev_, data, override)
+
+    monkeypatch.setattr(pme.ev, "fresh_store", spy)
+    for held in ("Cotton-0", "Synthetics-0"):
+        i = next(k for k, (c, e) in enumerate(dev.cycles) if c["id"] == held and e == "past")
+        stores.clear()
+        (row,) = pme._job_folds((path, base, [i]))
+        (fold,) = stores
+        kept = {pme.ev.trace_hash(c) for key, _ in pme.ev.LISTS for c in fold.get(key) or []}
+        assert dev.hashes[i] not in kept
+        if held == "Synthetics-0":
+            # Its only run held out: no template, no learned duration in this fold.
+            assert "SynthAlias" not in row["durations"]
+            assert "SynthAlias" not in fold["envelopes"]
+    (row,) = pme._job_folds((path, base, [next(
+        k for k, (c, _e) in enumerate(dev.cycles) if c["id"] == "Synthetics-1")]))
+    assert row["durations"]["SynthAlias"] == 2400.0
