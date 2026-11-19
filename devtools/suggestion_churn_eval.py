@@ -270,9 +270,9 @@ def _job(args: tuple[str, str, str]) -> dict[str, Any] | None:
 
 
 def run(corpus: Path, arms: tuple[str, ...], devices: list[str] | None, jobs: int) -> list[dict]:
-    kept, _dropped = ev.load_corpus(corpus)
-    paths = [d.path for d in kept if not d.path.startswith("store/")
-             and (not devices or any(s in d.path for s in devices))]
+    # store/ left out before clone removal, so a package cannot drop a history.
+    kept, _dropped = ev.load_corpus(corpus, exclude=("store/",))
+    paths = [d.path for d in kept if not devices or any(s in d.path for s in devices)]
     tasks = [(str(corpus), p, arm) for arm in arms for p in paths]
     if jobs <= 1:
         out = [walk(*t) for t in tasks]

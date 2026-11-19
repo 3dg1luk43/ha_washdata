@@ -51,3 +51,38 @@ def test_a_run_reports_every_arm_and_restores_the_constants(tmp_path: Path) -> N
     assert set(row["standby"]) == set(evidence.TAIL_ARMS)
     assert row["standby"]["legacy"] == 3.4 and row["standby"]["0.25"] == 3.4
     assert (se._PROGRAMME_LENGTH_RATIO, se._TAIL_SETTLED_FRACTION) == shipped  # noqa: SLF001
+
+
+def _write(root: Path, rel: str, data: dict, options: dict | None = None) -> None:
+    doc = {"version": 16, "entry_data": {"device_type": "washing_machine", "name": "Synth"},
+           "entry_options": options or {}, "data": {"profiles": {}, "envelopes": {}, **data}}
+    (root / rel).parent.mkdir(parents=True, exist_ok=True)
+    (root / rel).write_text(json.dumps(doc))
+
+
+def test_each_tail_arm_computes_its_own_settled_level(tmp_path: Path) -> None:
+    """PR #529 review: the settled-tail cache is keyed by trace, not by the fraction,
+    so the 0.25 and 0.5 arms read the 0.1 arm's level. Two hand stops whose tails
+    hold 1 W for 20% of the time and 4 W for 80%, under a 2 W Stop Threshold."""
+    past = []
+    for i in range(2):
+        pts = [[60.0 * k, 500.0] for k in range(30)] + [[1800.0, 1.0]]
+        pts += [[1920.0 + 60.0 * k, 4.0] for k in range(9)]   # 1920 .. 2400 s
+        past.append({"id": f"tail-{i}", "status": "completed", "termination_reason": "user",
+                     "profile_name": "Wash", "start_time": f"2026-02-0{i + 1}T08:00:00+00:00",
+                     "duration": 2400.0, "power_data": pts})
+    _write(tmp_path, "tail/export.json", {"past_cycles": past}, {"stop_threshold_w": 2.0})
+    (row,) = evidence.run(tmp_path)
+    assert row["standby"] == {"legacy": 4.0, "0.1": None, "0.25": 4.0, "0.5": 4.0}
+
+
+def test_a_store_package_cannot_drop_a_history_as_its_clone(tmp_path: Path) -> None:
+    """PR #529 review: the clone rule kept the larger file, a store package holding
+    ten of a history's traces, and dropped the history; the later ``store/`` filter
+    then left neither."""
+    cycles = [_cycle(i, 0.0, reason="timeout") for i in range(11)]
+    for i, c in enumerate(cycles):
+        c["power_data"][5][1] = 100.0 + i   # eleven distinct traces
+    _write(tmp_path, "store/washing_machine/pkg.json", {"past_cycles": [], "reference_cycles": cycles})
+    _write(tmp_path, "hist/export.json", {"past_cycles": cycles[:10]})
+    assert [r["device"] for r in evidence.run(tmp_path)] == ["hist/export.json"]

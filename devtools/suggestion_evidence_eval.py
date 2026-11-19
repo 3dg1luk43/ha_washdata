@@ -70,10 +70,14 @@ RECENT = 8
 def _patched(name: str, value: Any) -> Iterator[None]:
     saved = getattr(se, name)
     setattr(se, name, value)
+    # The settled-tail cache is keyed by trace, not by _TAIL_SETTLED_FRACTION: an
+    # arm would read the level the previous arm computed (PR #529 review).
+    se._TAIL_SETTLED_CACHE.clear()  # noqa: SLF001
     try:
         yield
     finally:
         setattr(se, name, saved)
+        se._TAIL_SETTLED_CACHE.clear()  # noqa: SLF001
 
 
 def legacy_standby(cycles: list[dict[str, Any]], stop: float, recent: int = RECENT) -> float | None:
@@ -132,11 +136,10 @@ def device_row(dev: Any) -> dict[str, Any]:
 
 
 def run(corpus: Path, devices: list[str] | None = None) -> list[dict[str, Any]]:
-    kept, _dropped = ev.load_corpus(corpus)
-    return [
-        device_row(d) for d in kept
-        if not d.path.startswith("store/") and (not devices or any(s in d.path for s in devices))
-    ]
+    # store/ left out before clone removal: a package holding a history's traces
+    # would otherwise drop that history as its clone (PR #529 review).
+    kept, _dropped = ev.load_corpus(corpus, exclude=("store/",))
+    return [device_row(d) for d in kept if not devices or any(s in d.path for s in devices)]
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -89,6 +89,22 @@ def test_both_arms_walk_a_synthetic_device(tmp_path: Path) -> None:
     assert (learning.CADENCE_HOLD_REL, learning._SECONDS_SUFFIXES, suggestion_engine.STOP_HOLD_BAND) == shipped  # noqa: SLF001
 
 
+def test_a_store_package_cannot_drop_a_history_as_its_clone(tmp_path: Path) -> None:
+    """A store package holding every trace of a history (and one more) was kept by
+    the clone rule and the history dropped; the ``store/`` filter then left neither."""
+    doc = _export()
+    (tmp_path / "hist").mkdir()
+    (tmp_path / "hist" / "export.json").write_text(json.dumps(doc))
+    extra = dict(doc["data"]["past_cycles"][0], id="extra",
+                 power_data=[[t, w + 1.0] for t, w in doc["data"]["past_cycles"][0]["power_data"]])
+    pkg = dict(doc, data={"profiles": {}, "envelopes": {}, "past_cycles": [],
+                          "reference_cycles": [*doc["data"]["past_cycles"], extra]})
+    (tmp_path / "store").mkdir()
+    (tmp_path / "store" / "pkg.json").write_text(json.dumps(pkg))
+    rows = churn.run(tmp_path, ("shipped",), None, jobs=1)
+    assert [r["device"] for r in rows] == ["hist/export.json"]
+
+
 def test_the_start_threshold_corrective_runs_at_every_cycle_end(tmp_path: Path) -> None:
     """PR #529 review: Start 450 W, Stop 100 W and three 400 W steady loads; the
     shipped corrective pass offers Start 200 W at a cycle end with no cadence (too
