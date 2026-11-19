@@ -54,12 +54,15 @@ on the recorded ticks (no new matching) and prints every row with its false-alar
 and detection rates; the shipped constants are marked. ``--json`` writes the ticks
 and the summary; ``--from-rows`` reads such a file instead of matching again.
 
-**Last run** (2026-11-18, 946 folds of 86 devices, ~8 min on 7 workers), the
-shipped 0.18 / 6 / 0.5: false alarms 16 (1.7%), 5 of them on the 437 own-history
-cycles (1.1%); wrong picks caught 39.5% (1957 of 4957) at a median 0.62 of the
-cycle, the nearest-duration wrong pick 43.3% at 0.52. By type: washers 1.8% /
-42.2%, dishwashers 0.9% / 33.2%, washer-dryers 6.1% / 40.3%, dryers 1.0% / 14.4%
-(short programmes rarely hold six matches past half their length). The held-out
+**Last run** (2026-11-19, 946 folds of 86 devices, ~8 min on 7 workers), the
+shipped 0.18 / 6 / 0.5: false alarms 12 (1.3%), 5 of them on the 437 own-history
+cycles (1.1%); wrong picks caught 38.4% (1904 of 4957) at a median 0.62 of the
+cycle, the nearest-duration wrong pick 42.6% at 0.52. By type: washers 1.4% /
+40.7%, dishwashers 0.9% / 33.2%, washer-dryers 3.0% / 40.3%, dryers 1.0% / 14.4%
+(short programmes rarely hold six matches past half their length). Dropping every
+stored copy of the held-out run moved only store packages (one trace stored under
+two names): the run before kept them, 16 alarms (1.7%), 39.5% (1957) caught,
+43.3% nearest, the same folds. The held-out
 programme's usual duration cleared before its rebuild (the base learned it from
 the held-out cycle too) left out 12 own-history folds whose rebuild learns none;
 the run before, with them: 958 folds, 39.3% of 4981 caught, 42.8% nearest, the
