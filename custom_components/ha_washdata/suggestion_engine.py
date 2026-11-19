@@ -740,6 +740,10 @@ _TAIL_SETTLED_FRACTION = 0.25
 # (length, peak, and a hash of evenly spaced readings plus the last ones, where the
 # settled level lies): holding the lists themselves kept up to 512 replaced traces
 # alive, which on long dishwasher traces reached hundreds of MB (PR #529 review).
+# Filled in the executor before the first poll: at setup, an options reload and
+# each stored cycle, the learned standby level and the standby-floor pass read the
+# same last cycles (`learned_standby_level_w`, `standby_stop_floor`). Cold on the
+# loop, the worst corpus device (#445's Miele, 4 kept tails) costs 3.5 ms.
 _TAIL_SETTLED_CACHE: dict[tuple[Any, ...], tuple[int, float | None]] = {}
 _TAIL_SETTLED_CACHE_MAX = 512
 _TAIL_FINGERPRINT_SPREAD = 32

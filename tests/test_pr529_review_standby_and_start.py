@@ -133,3 +133,50 @@ def test_watt_levels_round_as_before() -> None:
     assert se._round_level(380.44) == 380.4  # noqa: SLF001
     assert se._round_level(12.36) == 12.4  # noqa: SLF001
     assert se._round_level(0.0834) == 0.083  # noqa: SLF001
+
+
+async def test_the_first_device_poll_after_a_restart_reads_the_warm_tail_cache(
+    hass: HomeAssistant, enable_custom_integrations: None,
+    hass_storage: dict[str, Any], monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Setup learns the standby level in the executor over the same cycles, which
+    fills the cache the poll reads: the poll itself computes no tail."""
+    from pytest_homeassistant_custom_component.common import MockConfigEntry  # noqa: PLC0415
+
+    from custom_components.ha_washdata.const import (  # noqa: PLC0415
+        CONFIG_ENTRY_MINOR_VERSION,
+        CONFIG_ENTRY_VERSION,
+    )
+
+    hass.states.async_set("sensor.washer_power", "0", {"unit_of_measurement": "W"})
+    entry = MockConfigEntry(
+        domain=DOMAIN, title="Washer",
+        data={"name": "Washer", "power_sensor": "sensor.washer_power",
+              "device_type": "washing_machine"},
+        options={CONF_STOP_THRESHOLD_W: 2.0, CONF_START_THRESHOLD_W: 10.0},
+        unique_id="washdata_pr529_tail_cache",
+        version=CONFIG_ENTRY_VERSION, minor_version=CONFIG_ENTRY_MINOR_VERSION,
+    )
+    entry.add_to_hass(hass)
+    hass_storage[f"{STORAGE_KEY}.{entry.entry_id}"] = {
+        "version": STORAGE_VERSION, "minor_version": 1,
+        "key": f"{STORAGE_KEY}.{entry.entry_id}",
+        "data": {"profiles": {}, "past_cycles": [_hand_stop(d, iso=False, hours=3.0) for d in range(8)]},
+    }
+    se._TAIL_SETTLED_CACHE.clear()  # noqa: SLF001
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    computed: list[int] = []
+    original = se._tail_settled_w_uncached  # noqa: SLF001
+
+    def _counting(cycle: dict[str, Any], raw: list[Any], peak: float) -> float | None:
+        computed.append(len(raw))
+        return original(cycle, raw, peak)
+
+    monkeypatch.setattr(se, "_tail_settled_w_uncached", _counting)
+    conn = MagicMock()
+    ws_api.ws_get_devices(hass, conn, {"id": 1, "type": "ha_washdata/get_devices"})
+    info = next(d for d in conn.send_result.call_args[0][1]["devices"] if d["entry_id"] == entry.entry_id)
+    assert info["standby_above_stop"] is not None and info["standby_above_stop"]["idle_w"] == 3.0
+    assert computed == []
