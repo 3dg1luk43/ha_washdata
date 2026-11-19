@@ -5287,9 +5287,9 @@ async def ws_apply_suggestions(
                     )
                     return
                 if updates:
-                    # Clear before updating the entry: async_update_entry schedules
-                    # a reload that rebuilds the store, so persist the cleared state
-                    # first. The odometer, like the cooldown check (audit
+                    # Clear before updating the entry: the reload async_update_entry
+                    # schedules refreshes the suggestions, so persist the cleared
+                    # state first. The odometer, like the cooldown check (audit
                     # SUGGEST-05): at the retention cap len(past_cycles) never grows
                     # past the stamp again.
                     cycle_count = manager.profile_store.get_lifetime_cycle_count()
