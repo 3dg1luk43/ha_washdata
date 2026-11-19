@@ -1962,7 +1962,7 @@
     },
     "reason": {
       "completion_min_seconds": "Puse no p05 tīro ciklu ilguma ({minutes} min) {cycles} ciklos; filtrē viltus ciklus.{excl}",
-      "completion_min_seconds_capped": "Ierobežots līdz {cap} min, lai tiktu ieskaitītas arī īsākās programmas; puse no p05 tīro ciklu ilguma ({minutes} min, ciklu skaits: {cycles}) būtu garāka.{excl}",
+      "completion_min_seconds_capped": "Ierobežots līdz {cap}, lai tiktu ieskaitītas arī īsākās programmas; puse no p05 tīro ciklu ilguma ({minutes} min, ciklu skaits: {cycles}) būtu garāka.{excl}",
       "match_interval": "Pamatots ar novēroto atjaunināšanas biežumu (mediāna={median}s) * 10.",
       "match_interval_capped": "Ierobežots tā, lai {persistence} secīgas atbilstības ietilptu {pct}% no īsākās programmas ({shortest}s); tikai atjaunināšanas biežums (mediāna={median}s) būtu ieteicis garāku intervālu.",
       "match_interval_floored": "Īsākā programma ({shortest}s) ierobežotu šo vērtību līdz {cap}s, kas ir zem {minimum}s minimuma, tāpēc tiek izmantots minimums: {persistence} secīgas atbilstības aizņem {budget}s, vairāk nekā {pct}% no šīs programmas. Saskaņošana notiek tikai tad, kad pienāk rādījums (mediāna={median}s), tāpēc tas neko nemaksā.",

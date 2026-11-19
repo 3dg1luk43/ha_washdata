@@ -1982,7 +1982,7 @@
     },
     "reason": {
       "completion_min_seconds": "Pusė p05 švarių ciklų trukmės ({minutes} min) iš {cycles} ciklų; atfiltruoja netikrus ciklus.{excl}",
-      "completion_min_seconds_capped": "Apribota iki {cap} min, kad būtų įskaitomos ir trumpiausios programos; pusė p05 švarių ciklų trukmės ({minutes} min, ciklų: {cycles}) būtų ilgesnė.{excl}",
+      "completion_min_seconds_capped": "Apribota iki {cap}, kad būtų įskaitomos ir trumpiausios programos; pusė p05 švarių ciklų trukmės ({minutes} min, ciklų: {cycles}) būtų ilgesnė.{excl}",
       "match_interval": "Pagrįsta stebimu atnaujinimo dažniu (mediana={median}s) * 10.",
       "match_interval_capped": "Apribota taip, kad {persistence} iš eilės einančios atitiktys tilptų į {pct}% trumpiausios programos ({shortest}s); vien atnaujinimo dažnis (mediana={median}s) būtų pasiūlęs ilgesnį intervalą.",
       "match_interval_floored": "Trumpiausia programa ({shortest}s) apribotų šią reikšmę iki {cap}s, o tai mažiau nei {minimum}s minimumas, todėl naudojamas minimumas: {persistence} atitiktys iš eilės užtrunka {budget}s, daugiau nei {pct}% tos programos. Atitikimas vykdomas tik gavus rodmenį (mediana={median}s), todėl tai nieko nekainuoja.",

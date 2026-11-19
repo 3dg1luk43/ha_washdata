@@ -1908,7 +1908,7 @@
     },
     "reason": {
       "completion_min_seconds": "Jumătate din durata p05 a ciclurilor curate ({minutes} min) pe {cycles} cicluri; filtrează ciclurile false.{excl}",
-      "completion_min_seconds_capped": "Limitat la {cap} min pentru ca și cele mai scurte programe să conteze; jumătate din durata p05 a ciclurilor curate ({minutes} min, {cycles} cicluri) ar fi mai lungă.{excl}",
+      "completion_min_seconds_capped": "Limitat la {cap} pentru ca și cele mai scurte programe să conteze; jumătate din durata p05 a ciclurilor curate ({minutes} min, {cycles} cicluri) ar fi mai lungă.{excl}",
       "match_interval": "Pe baza cadenței de actualizare observate (mediană={median}s) * 10.",
       "match_interval_capped": "Limitat astfel încât {persistence} potriviri consecutive să încapă în {pct}% din cel mai scurt program ({shortest}s); singură, cadența de actualizare (mediană={median}s) ar fi sugerat un interval mai lung.",
       "match_interval_floored": "Cel mai scurt program ({shortest}s) ar limita această valoare la {cap}s, sub minimul de {minimum}s, așa că se folosește minimul: {persistence} potriviri consecutive durează {budget}s, peste {pct}% din acel program. Potrivirea rulează doar când sosește o citire (mediana={median}s), deci nu costă nimic.",

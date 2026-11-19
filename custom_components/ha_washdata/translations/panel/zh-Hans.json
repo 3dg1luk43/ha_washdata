@@ -1941,7 +1941,7 @@
         },
         "reason": {
             "completion_min_seconds": "{cycles} 个周期中 p05 正常周期时长的一半（{minutes} min）；用于过滤误检周期。{excl}",
-            "completion_min_seconds_capped": "已限制为 {cap} min，以便最短的程序仍能计入；p05 正常周期时长的一半（{minutes} min，{cycles} 个周期）会更长。{excl}",
+            "completion_min_seconds_capped": "已限制为 {cap}，以便最短的程序仍能计入；p05 正常周期时长的一半（{minutes} min，{cycles} 个周期）会更长。{excl}",
             "match_interval": "基于观测到的更新频率（中位数={median}s） * 10。",
             "max_duration_ratio": "基于已标注的周期时长（p95={p95}）。",
             "min_off_gap": "基于观测到的 {gaps} 个周期间间隔（p05={p05}s）。设备下限：{floor}s。",

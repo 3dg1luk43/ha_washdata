@@ -1961,7 +1961,7 @@
         },
         "reason": {
             "completion_min_seconds": "{cycles} çevrim boyunca p05 temiz çevrim süresinin yarısı ({minutes} min); sahte çevrimleri filtreler.{excl}",
-            "completion_min_seconds_capped": "En kısa programlar da sayılsın diye {cap} min ile sınırlandı; p05 temiz çevrim süresinin yarısı ({minutes} min, {cycles} çevrim) daha uzun olurdu.{excl}",
+            "completion_min_seconds_capped": "En kısa programlar da sayılsın diye {cap} ile sınırlandı; p05 temiz çevrim süresinin yarısı ({minutes} min, {cycles} çevrim) daha uzun olurdu.{excl}",
             "match_interval": "Gözlemlenen güncelleme sıklığına dayalı (medyan={median}s) * 10.",
             "max_duration_ratio": "Etiketli çevrim sürelerine dayalı (p95={p95}).",
             "min_off_gap": "Gözlemlenen {gaps} çevrimler arası boşluğa dayalı (p05={p05}s). Cihaz alt sınırı: {floor}s.",

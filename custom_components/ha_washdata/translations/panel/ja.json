@@ -1941,7 +1941,7 @@
         },
         "reason": {
             "completion_min_seconds": "{cycles} サイクルにわたる p05 の正常サイクル時間の半分（{minutes} min）。誤検出サイクルを除外します。{excl}",
-            "completion_min_seconds_capped": "最短のプログラムも数えられるよう {cap} min に制限しました。p05 の正常サイクル時間の半分（{minutes} min、{cycles} サイクル）ではこれより長くなります。{excl}",
+            "completion_min_seconds_capped": "最短のプログラムも数えられるよう {cap} に制限しました。p05 の正常サイクル時間の半分（{minutes} min、{cycles} サイクル）ではこれより長くなります。{excl}",
             "match_interval": "観測された更新間隔に基づく（中央値={median}s）* 10。",
             "max_duration_ratio": "ラベル付きサイクル時間に基づく（p95={p95}）。",
             "min_off_gap": "観測された {gaps} 件のサイクル間の間隔に基づく（p05={p05}s）。機器の下限: {floor}s。",

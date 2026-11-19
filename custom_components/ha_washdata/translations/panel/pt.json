@@ -1927,7 +1927,7 @@
     },
     "reason": {
       "completion_min_seconds": "Metade da duração p05 dos ciclos limpos ({minutes} min) ao longo de {cycles} ciclos; filtra os ciclos fantasma.{excl}",
-      "completion_min_seconds_capped": "Limitado a {cap} min para que os programas mais curtos continuem a contar; metade da duração p05 dos ciclos limpos ({minutes} min, {cycles} ciclos) seria superior.{excl}",
+      "completion_min_seconds_capped": "Limitado a {cap} para que os programas mais curtos continuem a contar; metade da duração p05 dos ciclos limpos ({minutes} min, {cycles} ciclos) seria superior.{excl}",
       "match_interval": "Com base na cadência de atualização observada (mediana={median}s) * 10.",
       "match_interval_capped": "Limitado para que {persistence} correspondências consecutivas caibam em {pct}% do programa mais curto ({shortest}s); só a cadência de atualização (mediana={median}s) teria sugerido um intervalo mais longo.",
       "match_interval_floored": "O programa mais curto ({shortest}s) limitaria isto a {cap}s, abaixo do mínimo de {minimum}s, por isso usa-se o mínimo: {persistence} correspondências seguidas demoram {budget}s, mais de {pct}% desse programa. A correspondência só corre quando chega uma leitura (mediana={median}s), por isso não custa nada.",

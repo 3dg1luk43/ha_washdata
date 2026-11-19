@@ -1937,7 +1937,7 @@
         },
         "reason": {
             "completion_min_seconds": "Gjysma e kohëzgjatjes p05 të cikleve të pastra ({minutes} min) në {cycles} cikle; filtron ciklet e rreme.{excl}",
-            "completion_min_seconds_capped": "I kufizuar në {cap} min që edhe programet më të shkurtra të numërohen; gjysma e kohëzgjatjes p05 të cikleve të pastra ({minutes} min, {cycles} cikle) do të ishte më e gjatë.{excl}",
+            "completion_min_seconds_capped": "I kufizuar në {cap} që edhe programet më të shkurtra të numërohen; gjysma e kohëzgjatjes p05 të cikleve të pastra ({minutes} min, {cycles} cikle) do të ishte më e gjatë.{excl}",
             "match_interval": "Bazuar në ritmin e vëzhguar të përditësimit (mesatarja={median}s) * 10.",
             "match_interval_capped": "Kufizuar që {persistence} përputhje të njëpasnjëshme të hyjnë në {pct}% të programit më të shkurtër ({shortest}s); vetëm ritmi i përditësimit (mesatarja={median}s) do të kishte sugjeruar një interval më të gjatë.",
             "match_interval_floored": "Programi më i shkurtër ({shortest}s) do ta kufizonte këtë në {cap}s, nën minimumin prej {minimum}s, prandaj përdoret minimumi: {persistence} përputhje të njëpasnjëshme zgjasin {budget}s, mbi {pct}% të atij programi. Përputhja kryhet vetëm kur vjen një lexim (mediana={median}s), ndaj kjo nuk kushton asgjë.",

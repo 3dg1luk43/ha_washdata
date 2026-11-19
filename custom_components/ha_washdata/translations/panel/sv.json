@@ -1767,7 +1767,7 @@
     },
     "reason": {
       "completion_min_seconds": "Hälften av p05-varaktigheten för rena cykler ({minutes} min) över {cycles} cykler; filtrerar bort spökcykler.{excl}",
-      "completion_min_seconds_capped": "Begränsat till {cap} min så att de kortaste programmen fortfarande räknas; hälften av p05-varaktigheten för rena cykler ({minutes} min, {cycles} cykler) skulle vara längre.{excl}",
+      "completion_min_seconds_capped": "Begränsat till {cap} så att de kortaste programmen fortfarande räknas; hälften av p05-varaktigheten för rena cykler ({minutes} min, {cycles} cykler) skulle vara längre.{excl}",
       "match_interval": "Baserat på observerad uppdateringstakt (median={median}s) * 10.",
       "match_interval_capped": "Begränsad så att {persistence} matchningar i följd får plats inom {pct}% av det kortaste programmet ({shortest}s); enbart uppdateringstakten (median={median}s) hade föreslagit ett längre intervall.",
       "match_interval_floored": "Det kortaste programmet ({shortest}s) skulle begränsa detta till {cap}s, under minimivärdet {minimum}s, så minimivärdet används: {persistence} matchningar i följd tar {budget}s, över {pct}% av det programmet. Matchningen körs bara när ett mätvärde kommer (median={median}s), så det kostar inget.",

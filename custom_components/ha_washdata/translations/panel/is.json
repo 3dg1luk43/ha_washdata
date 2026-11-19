@@ -1767,7 +1767,7 @@
     },
     "reason": {
       "completion_min_seconds": "Helmingur af p05-lengd hreinna lota ({minutes} min) yfir {cycles} lotur; síar út draugalotur.{excl}",
-      "completion_min_seconds_capped": "Takmarkað við {cap} min svo stystu kerfin teljist enn með; helmingur af p05-lengd hreinna lota ({minutes} min, {cycles} lotur) væri lengri.{excl}",
+      "completion_min_seconds_capped": "Takmarkað við {cap} svo stystu kerfin teljist enn með; helmingur af p05-lengd hreinna lota ({minutes} min, {cycles} lotur) væri lengri.{excl}",
       "match_interval": "Byggt á mældri uppfærslutíðni (miðgildi={median}s) * 10.",
       "match_interval_capped": "Takmarkað þannig að {persistence} samfelldar samsvaranir rúmist innan {pct}% af stysta kerfinu ({shortest}s); uppfærslutíðnin ein og sér (miðgildi={median}s) hefði stungið upp á lengra bili.",
       "match_interval_floored": "Stysta kerfið ({shortest}s) myndi takmarka þetta við {cap}s, undir {minimum}s lágmarkinu, svo lágmarkið er notað: {persistence} samfelldar samsvaranir taka {budget}s, yfir {pct}% af því kerfi. Samsvörun keyrir aðeins þegar mæling berst (miðgildi={median}s), svo þetta kostar ekkert.",

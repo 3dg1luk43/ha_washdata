@@ -1927,7 +1927,7 @@
     },
     "reason": {
       "completion_min_seconds": "La moitié de la durée p05 des cycles propres ({minutes} min) sur {cycles} cycles ; filtre les cycles fantômes.{excl}",
-      "completion_min_seconds_capped": "Limité à {cap} min pour que les programmes les plus courts comptent encore ; la moitié de la durée p05 des cycles propres ({minutes} min, {cycles} cycles) serait plus longue.{excl}",
+      "completion_min_seconds_capped": "Limité à {cap} pour que les programmes les plus courts comptent encore ; la moitié de la durée p05 des cycles propres ({minutes} min, {cycles} cycles) serait plus longue.{excl}",
       "match_interval": "D'après la cadence de mise à jour observée (médiane={median}s) * 10.",
       "match_interval_capped": "Plafonné pour que {persistence} correspondances consécutives tiennent dans {pct} % du programme le plus court ({shortest}s) ; la cadence de mise à jour seule (médiane={median}s) aurait suggéré un intervalle plus long.",
       "match_interval_floored": "Le programme le plus court ({shortest}s) limiterait cette valeur à {cap}s, sous le minimum de {minimum}s, donc le minimum est utilisé : {persistence} correspondances consécutives prennent {budget}s, plus de {pct}% de ce programme. La correspondance ne tourne qu'à l'arrivée d'une mesure (médiane={median}s), cela ne coûte donc rien.",

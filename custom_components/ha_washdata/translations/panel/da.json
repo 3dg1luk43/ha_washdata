@@ -1767,7 +1767,7 @@
     },
     "reason": {
       "completion_min_seconds": "Halvdelen af p05-varigheden for rene cyklusser ({minutes} min) på tværs af {cycles} cyklusser; filtrerer spøgelsescyklusser fra.{excl}",
-      "completion_min_seconds_capped": "Begrænset til {cap} min, så de korteste programmer stadig tæller; halvdelen af p05-varigheden for rene cyklusser ({minutes} min, {cycles} cyklusser) ville være længere.{excl}",
+      "completion_min_seconds_capped": "Begrænset til {cap}, så de korteste programmer stadig tæller; halvdelen af p05-varigheden for rene cyklusser ({minutes} min, {cycles} cyklusser) ville være længere.{excl}",
       "match_interval": "Baseret på observeret opdateringskadence (median={median}s) * 10.",
       "match_interval_capped": "Begrænset, så {persistence} på hinanden følgende match kan være inden for {pct}% af det korteste program ({shortest}s); opdateringskadencen alene (median={median}s) ville have foreslået et længere interval.",
       "match_interval_floored": "Det korteste program ({shortest}s) ville begrænse dette til {cap}s, under minimummet på {minimum}s, så minimummet bruges: {persistence} match i træk tager {budget}s, over {pct}% af det program. Matchning kører kun, når en måling kommer (median={median}s), så det koster intet.",

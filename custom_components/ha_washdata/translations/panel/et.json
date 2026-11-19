@@ -1961,7 +1961,7 @@
     },
     "reason": {
       "completion_min_seconds": "Pool puhaste tsüklite p05 kestusest ({minutes} min) {cycles} tsükli lõikes; filtreerib välja kummitustsüklid.{excl}",
-      "completion_min_seconds_capped": "Piiratud väärtusega {cap} min, et ka lühimad programmid arvesse läheksid; pool puhaste tsüklite p05 kestusest ({minutes} min, {cycles} tsüklit) oleks pikem.{excl}",
+      "completion_min_seconds_capped": "Piiratud väärtusega {cap}, et ka lühimad programmid arvesse läheksid; pool puhaste tsüklite p05 kestusest ({minutes} min, {cycles} tsüklit) oleks pikem.{excl}",
       "match_interval": "Põhineb täheldatud uuendustempol (mediaan={median}s) * 10.",
       "match_interval_capped": "Piiratud nii, et {persistence} järjestikust vastet mahuks lühima programmi ({shortest}s) {pct}% sisse; ainuüksi uuendustempo (mediaan={median}s) oleks soovitanud pikemat intervalli.",
       "match_interval_floored": "Lühim programm ({shortest}s) piiraks selle väärtusega {cap}s, mis jääb alla {minimum}s miinimumi, seega kasutatakse miinimumi: {persistence} järjestikust vastet võtab {budget}s, üle {pct}% sellest programmist. Sobitamine käib ainult näidu saabudes (mediaan={median}s), seega see ei maksa midagi.",

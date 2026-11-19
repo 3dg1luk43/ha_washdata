@@ -1767,7 +1767,7 @@
     },
     "reason": {
       "completion_min_seconds": "Halvparten av p05-varigheten for rene sykluser ({minutes} min) på tvers av {cycles} sykluser; filtrerer bort spøkelsessykluser.{excl}",
-      "completion_min_seconds_capped": "Begrenset til {cap} min slik at de korteste programmene fortsatt teller; halvparten av p05-varigheten for rene sykluser ({minutes} min, {cycles} sykluser) ville vært lengre.{excl}",
+      "completion_min_seconds_capped": "Begrenset til {cap} slik at de korteste programmene fortsatt teller; halvparten av p05-varigheten for rene sykluser ({minutes} min, {cycles} sykluser) ville vært lengre.{excl}",
       "match_interval": "Basert på observert oppdateringskadens (median={median}s) * 10.",
       "match_interval_capped": "Begrenset slik at {persistence} påfølgende treff får plass innenfor {pct}% av det korteste programmet ({shortest}s); oppdateringskadensen alene (median={median}s) ville ha foreslått et lengre intervall.",
       "match_interval_floored": "Det korteste programmet ({shortest}s) ville begrense dette til {cap}s, under minimumet på {minimum}s, så minimumet brukes: {persistence} treff på rad tar {budget}s, over {pct}% av det programmet. Matching kjører bare når en måling kommer (median={median}s), så det koster ingenting.",

@@ -1927,7 +1927,7 @@
     },
     "reason": {
       "completion_min_seconds": "La mitad de la duración p05 de los ciclos limpios ({minutes} min) en {cycles} ciclos; filtra los ciclos fantasma.{excl}",
-      "completion_min_seconds_capped": "Limitado a {cap} min para que los programas más cortos sigan contando; la mitad de la duración p05 de los ciclos limpios ({minutes} min, {cycles} ciclos) sería mayor.{excl}",
+      "completion_min_seconds_capped": "Limitado a {cap} para que los programas más cortos sigan contando; la mitad de la duración p05 de los ciclos limpios ({minutes} min, {cycles} ciclos) sería mayor.{excl}",
       "match_interval": "Según la cadencia de actualización observada (mediana={median}s) * 10.",
       "match_interval_capped": "Limitado para que {persistence} coincidencias consecutivas quepan en el {pct}% del programa más corto ({shortest}s); la cadencia de actualización por sí sola (mediana={median}s) habría sugerido un intervalo más largo.",
       "match_interval_floored": "El programa más corto ({shortest}s) limitaría este valor a {cap}s, por debajo del mínimo de {minimum}s, así que se usa el mínimo: {persistence} coincidencias seguidas tardan {budget}s, más del {pct}% de ese programa. La coincidencia solo se ejecuta cuando llega una lectura (mediana={median}s), así que no cuesta nada.",

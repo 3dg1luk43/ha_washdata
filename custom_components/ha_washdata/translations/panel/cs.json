@@ -1784,7 +1784,7 @@
     },
     "reason": {
       "completion_min_seconds": "Polovina délky p05 čistého cyklu ({minutes} min) napříč {cycles} cykly; odfiltruje falešné cykly.{excl}",
-      "completion_min_seconds_capped": "Omezeno na {cap} min, aby se počítaly i nejkratší programy; polovina délky p05 čistého cyklu ({minutes} min, cyklů: {cycles}) by byla delší.{excl}",
+      "completion_min_seconds_capped": "Omezeno na {cap}, aby se počítaly i nejkratší programy; polovina délky p05 čistého cyklu ({minutes} min, cyklů: {cycles}) by byla delší.{excl}",
       "match_interval": "Na základě pozorované frekvence aktualizací (medián={median}s) * 10.",
       "match_interval_capped": "Omezeno tak, aby se {persistence} po sobě jdoucích shod vešlo do {pct}% nejkratšího programu ({shortest}s); samotná frekvence aktualizací (medián={median}s) by navrhla delší interval.",
       "match_interval_floored": "Nejkratší program ({shortest}s) by hodnotu omezil na {cap}s, pod minimum {minimum}s, takže se použije minimum: {persistence} po sobě jdoucích shod trvá {budget}s, přes {pct}% tohoto programu. Párování běží jen při příchodu hodnoty (medián={median}s), takže to nic nestojí.",

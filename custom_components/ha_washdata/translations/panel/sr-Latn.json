@@ -1766,7 +1766,7 @@
     },
     "reason": {
       "completion_min_seconds": "Polovina trajanja čistog ciklusa p05 ({minutes} min) kroz {cycles} ciklusa; filtrira lažne cikluse.{excl}",
-      "completion_min_seconds_capped": "Ograničeno na {cap} min kako bi se i najkraći programi računali; polovina trajanja čistog ciklusa p05 ({minutes} min, {cycles} ciklusa) bila bi duža.{excl}",
+      "completion_min_seconds_capped": "Ograničeno na {cap} kako bi se i najkraći programi računali; polovina trajanja čistog ciklusa p05 ({minutes} min, {cycles} ciklusa) bila bi duža.{excl}",
       "match_interval": "Na osnovu uočene učestalosti ažuriranja (medijana={median}s) * 10.",
       "match_interval_capped": "Ograničeno tako da {persistence} uzastopnih podudaranja stane u {pct}% najkraćeg programa ({shortest}s); sama učestalost ažuriranja (medijana={median}s) predložila bi duži interval.",
       "match_interval_floored": "Najkraći program ({shortest}s) ograničio bi ovo na {cap}s, ispod minimuma od {minimum}s, pa se koristi minimum: {persistence} uzastopnih podudaranja traje {budget}s, više od {pct}% tog programa. Podudaranje se izvodi samo kad stigne očitavanje (medijana={median}s), pa to ništa ne košta.",

@@ -1941,7 +1941,7 @@
         },
         "reason": {
             "completion_min_seconds": "{cycles} 사이클의 p05 정상 사이클 시간의 절반({minutes} min). 허위 사이클을 걸러냅니다.{excl}",
-            "completion_min_seconds_capped": "가장 짧은 프로그램도 집계되도록 {cap} min으로 제한했습니다. p05 정상 사이클 시간의 절반({minutes} min, {cycles} 사이클)은 이보다 깁니다.{excl}",
+            "completion_min_seconds_capped": "가장 짧은 프로그램도 집계되도록 {cap}(으)로 제한했습니다. p05 정상 사이클 시간의 절반({minutes} min, {cycles} 사이클)은 이보다 깁니다.{excl}",
             "match_interval": "관측된 업데이트 주기 기반(중앙값={median}s) * 10.",
             "max_duration_ratio": "라벨이 지정된 사이클 시간 기반(p95={p95}).",
             "min_off_gap": "관측된 {gaps}개 사이클 간 간격 기반(p05={p05}s). 기기 하한: {floor}s.",

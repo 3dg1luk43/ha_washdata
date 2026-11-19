@@ -1767,7 +1767,7 @@
     },
     "reason": {
       "completion_min_seconds": "Puolet puhtaiden jaksojen p05-kestosta ({minutes} min) {cycles} jakson joukossa; suodattaa haamujaksot pois.{excl}",
-      "completion_min_seconds_capped": "Rajattu arvoon {cap} min, jotta lyhimmätkin ohjelmat lasketaan; puolet puhtaiden jaksojen p05-kestosta ({minutes} min, {cycles} jaksoa) olisi pidempi.{excl}",
+      "completion_min_seconds_capped": "Rajattu arvoon {cap}, jotta lyhimmätkin ohjelmat lasketaan; puolet puhtaiden jaksojen p05-kestosta ({minutes} min, {cycles} jaksoa) olisi pidempi.{excl}",
       "match_interval": "Perustuu havaittuun päivitystahtiin (mediaani={median}s) * 10.",
       "match_interval_capped": "Rajoitettu niin, että {persistence} peräkkäistä täsmäystä mahtuu {pct} prosenttiin lyhimmästä ohjelmasta ({shortest}s); pelkkä päivitystahti (mediaani={median}s) olisi ehdottanut pidempää väliä.",
       "match_interval_floored": "Lyhin ohjelma ({shortest}s) rajaisi tämän arvoon {cap}s, alle {minimum}s vähimmäisarvon, joten käytetään vähimmäisarvoa: {persistence} peräkkäistä täsmäytystä kestää {budget}s, yli {pct} % kyseisestä ohjelmasta. Täsmäytys tehdään vain lukeman saapuessa (mediaani={median}s), joten tämä ei maksa mitään.",

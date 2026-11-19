@@ -1942,7 +1942,7 @@
         },
         "reason": {
             "completion_min_seconds": "A p05 tiszta ciklus időtartamának fele ({minutes} perc) {cycles} cikluson át; kiszűri a fantomciklusokat.{excl}",
-            "completion_min_seconds_capped": "{cap} percre korlátozva, hogy a legrövidebb programok is számítsanak; a p05 tiszta ciklus időtartamának fele ({minutes} perc, {cycles} ciklus) hosszabb lenne.{excl}",
+            "completion_min_seconds_capped": "{cap} értékre korlátozva, hogy a legrövidebb programok is számítsanak; a p05 tiszta ciklus időtartamának fele ({minutes} perc, {cycles} ciklus) hosszabb lenne.{excl}",
             "match_interval": "A megfigyelt frissítési ütem alapján (médián={median}s) * 10.",
             "max_duration_ratio": "A címkézett ciklusok időtartama alapján (p95={p95}).",
             "min_off_gap": "{gaps} megfigyelt ciklusközi szünet alapján (p05={p05}s). Készülék alsó korlátja: {floor}s.",

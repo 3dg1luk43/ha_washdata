@@ -1784,7 +1784,7 @@
     },
     "reason": {
       "completion_min_seconds": "Polovica trajanja čistega cikla p05 ({minutes} min) čez {cycles} ciklov; odfiltrira lažne cikle.{excl}",
-      "completion_min_seconds_capped": "Omejeno na {cap} min, da se upoštevajo tudi najkrajši programi; polovica trajanja čistega cikla p05 ({minutes} min, ciklov: {cycles}) bi bila daljša.{excl}",
+      "completion_min_seconds_capped": "Omejeno na {cap}, da se upoštevajo tudi najkrajši programi; polovica trajanja čistega cikla p05 ({minutes} min, ciklov: {cycles}) bi bila daljša.{excl}",
       "match_interval": "Na podlagi opažene frekvence posodobitev (mediana={median}s) * 10.",
       "match_interval_capped": "Omejeno tako, da {persistence} zaporednih ujemanj sodi v {pct}% najkrajšega programa ({shortest}s); sama frekvenca posodobitev (mediana={median}s) bi predlagala daljši interval.",
       "match_interval_floored": "Najkrajši program ({shortest}s) bi to omejil na {cap}s, pod minimum {minimum}s, zato se uporabi minimum: {persistence} zaporednih ujemanj traja {budget}s, več kot {pct}% tega programa. Ujemanje teče le ob prihodu odčitka (mediana={median}s), zato to nič ne stane.",

@@ -1767,7 +1767,7 @@
     },
     "reason": {
       "completion_min_seconds": "Die Hälfte der p05-Dauer sauberer Zyklen ({minutes} min) über {cycles} Zyklen; filtert Geisterzyklen heraus.{excl}",
-      "completion_min_seconds_capped": "Auf {cap} min begrenzt, damit auch die kürzesten Programme zählen; die Hälfte der p05-Dauer sauberer Zyklen ({minutes} min, {cycles} Zyklen) wäre länger.{excl}",
+      "completion_min_seconds_capped": "Auf {cap} begrenzt, damit auch die kürzesten Programme zählen; die Hälfte der p05-Dauer sauberer Zyklen ({minutes} min, {cycles} Zyklen) wäre länger.{excl}",
       "match_interval": "Basierend auf dem beobachteten Aktualisierungsrhythmus (Median={median}s) * 10.",
       "match_interval_capped": "Begrenzt, damit {persistence} aufeinanderfolgende Zuordnungen in {pct}% des kürzesten Programms ({shortest}s) passen; der Aktualisierungsrhythmus allein (Median={median}s) hätte ein längeres Intervall vorgeschlagen.",
       "match_interval_floored": "Das kürzeste Programm ({shortest}s) würde dies auf {cap}s begrenzen, unter dem Minimum von {minimum}s, daher gilt das Minimum: {persistence} aufeinanderfolgende Zuordnungen dauern {budget}s, über {pct}% dieses Programms. Der Abgleich läuft nur, wenn ein Messwert eintrifft (Median={median}s), das kostet also nichts.",
