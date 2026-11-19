@@ -98,3 +98,31 @@ def test_shipped_row_is_the_offered_value_when_the_guard_keeps_it(tmp_path: Path
     lines, totals = out
     assert "SHIPPED" in totals
     assert any("SHIPPED" in line and "470s" in line for line in lines), lines
+
+
+def test_shipped_row_is_evaluated_when_the_comparison_has_too_little_evidence(
+    tmp_path: Path,
+) -> None:
+    """PR #529 review: Min Power 10 W with Stop unset runs the detector at 6 W, where
+    an 8 W lead-in under a 12 W load reads as a high start, so this scan kept no
+    clean trace and returned before asking the model pass. The pass reads health
+    at 10 W, keeps all six and offers a value: SHIPPED is evaluated on its own."""
+    cycles = []
+    for i in range(6):
+        cyc = _cycle(10 + i, 400, lead_in=True)
+        cyc["power_data"] = [[t, 8.0 if p == 0.5 else (12.0 if p >= 1000.0 else p)]
+                             for t, p in cyc["power_data"]]
+        cycles.append(cyc)
+    path = tmp_path / "export.json"
+    path.write_text(json.dumps({
+        "device_fingerprint": {"device_type": "washing_machine"},
+        "entry_data": {},
+        "entry_options": {"min_power": 10.0, "min_off_gap": 480},
+        "data": {"past_cycles": cycles, "profiles": {"Cotton": {}}},
+    }), encoding="utf-8")
+    out = min_off_gap_eval._scan((str(path), False))  # noqa: SLF001
+    assert out is not None
+    lines, totals = out
+    assert set(totals) == {"SHIPPED"}
+    assert totals["SHIPPED"] == {"split": 0, "merge": 0, "cycles": 6}
+    assert any("SHIPPED" in line and "470s" in line for line in lines), lines
