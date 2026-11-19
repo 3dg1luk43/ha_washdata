@@ -228,3 +228,47 @@ async def test_a_manual_analysis_superseded_on_every_run_is_no_success(
     assert res["success"] is False
     assert res["error"]["code"] == "analysis_superseded"
     assert len(runs) == MANUAL_ANALYSIS_ATTEMPTS
+
+
+async def test_a_manual_analysis_whose_joint_check_fails_is_no_success(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """A pass stored an end-gate value, then the joint check of the stored set
+    could not run. Non-strict, that read as "nothing to withdraw" and the panel
+    got a count; Apply all checks the same set strictly and can refuse it. The
+    manual analysis checks strictly too and replies ``analysis_check_failed``;
+    what the pass stored stays. A background refresh still never raises, and an
+    empty drop list from a check that ran is a success."""
+    entry, manager, _pushes = await _boot(hass, setup_washdata_entry)
+    lm = manager.learning_manager
+    seen: list[bool] = []
+    broken = {"on": True}
+
+    def joint(_self: Any, _stored: Any, *, strict: bool = False) -> list[str]:
+        seen.append(strict)
+        if broken["on"] and strict:
+            raise RuntimeError("scan broke")
+        return []
+
+    client = await hass_ws_client(hass)
+    with patch.object(
+        SuggestionEngine, "generate_model_suggestions",
+        lambda _self: {CONF_OFF_DELAY: {"value": 600, "reason": "r"}},
+    ), patch.object(SuggestionEngine, "joint_end_gate_drops", joint):
+        await client.send_json_auto_id(
+            {"type": f"{DOMAIN}/run_suggestion_analysis", "entry_id": entry.entry_id}
+        )
+        res = await client.receive_json()
+        assert res["success"] is False
+        assert res["error"]["code"] == "analysis_check_failed"
+        assert seen and all(seen)
+        assert CONF_OFF_DELAY in (manager.profile_store.get_suggestions() or {})
+        seen.clear()
+        await lm.async_refresh_suggestions()  # never raises
+        assert seen and not any(seen)
+        broken["on"] = False
+        await client.send_json_auto_id(
+            {"type": f"{DOMAIN}/run_suggestion_analysis", "entry_id": entry.entry_id}
+        )
+        ok = await client.receive_json()
+    assert ok["success"] is True and ok["result"]["count"] >= 1

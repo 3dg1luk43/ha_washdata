@@ -1090,6 +1090,7 @@
         "invalid_threshold_pair": "停止阈值（{stop} W）必须低于启动阈值（{start} W）。未保存任何内容；请同时修改这两个值。",
         "end_gate_check_failed": "无法根据该设备的暂停情况检查建议的时间设置。未保存任何内容；请重试。",
         "analysis_superseded": "分析期间设置或周期数据已更改。请重新运行。",
+        "analysis_check_failed": "无法根据该设备的暂停情况检查建议的时间设置。请重新运行。",
         "bp_admin_only": "模板由管理员安装。",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "由 WashData 为 {device} 创建。添加您的动作（通知、灯光等）。",

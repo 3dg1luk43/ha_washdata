@@ -1141,6 +1141,7 @@
     "invalid_threshold_pair": "Práh zastavení ({stop} W) musí být nižší než Práh spuštění ({start} W). Nic nebylo uloženo; změňte obě hodnoty společně.",
     "end_gate_check_failed": "Navrhovaná nastavení časování se nepodařilo ověřit vůči pauzám tohoto spotřebiče. Nic nebylo uloženo; zkuste to znovu.",
     "analysis_superseded": "Během analýzy se změnilo nastavení nebo data cyklů. Spusťte ji znovu.",
+    "analysis_check_failed": "Navrhovaná nastavení časování se nepodařilo ověřit vůči pauzám tohoto spotřebiče. Spusťte ji znovu.",
     "bp_admin_only": "Šablony instaluje správce.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Vytvořeno WashData pro {device}. Přidejte své akce (oznámení, světla, ...).",

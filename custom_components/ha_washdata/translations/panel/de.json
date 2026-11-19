@@ -1104,6 +1104,7 @@
     "invalid_threshold_pair": "Der Stoppschwellenwert ({stop} W) muss unter dem Startschwellenwert ({start} W) liegen. Es wurde nichts gespeichert; ändern Sie beide Werte gemeinsam.",
     "end_gate_check_failed": "Die vorgeschlagenen Zeiteinstellungen konnten nicht mit den Pausen dieses Geräts abgeglichen werden. Es wurde nichts gespeichert; versuchen Sie es erneut.",
     "analysis_superseded": "Einstellungen oder Zyklusdaten wurden während der Analyse geändert. Starten Sie sie erneut.",
+    "analysis_check_failed": "Die vorgeschlagenen Zeiteinstellungen konnten nicht mit den Pausen dieses Geräts abgeglichen werden. Starten Sie sie erneut.",
     "import_undo_hint": "Ein Wiederherstellungspunkt von vor dem letzten Import ({when}) wird aufbewahrt: {profiles} Profil(e) und {cycles} Zyklus/Zyklen.",
     "replace_undo_hint": "Zuvor wird ein Wiederherstellungspunkt gespeichert, sodass Sie diesen Import unter „Exportieren / Importieren“ rückgängig machen können.",
     "pg_in_sample_note": "Diese Zyklen haben die Profile mitgebildet, mit denen sie abgeglichen werden, daher sind die Ergebnisse optimistisch: Bei neuen Zyklen ist mit etwas weniger richtigen Zuordnungen zu rechnen.",

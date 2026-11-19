@@ -19,6 +19,7 @@
 from __future__ import annotations
 
 import asyncio
+import functools
 import math
 import logging
 from collections import deque
@@ -108,6 +109,13 @@ class AnalysisSupersededError(RuntimeError):
     """A manual analysis whose every run was superseded: an options refresh or
     a replaced store discarded part of what it computed. The WS handler sends
     it as ``analysis_superseded``."""
+
+
+class EndGateCheckError(RuntimeError):
+    """A manual analysis whose joint end-gate check could not run (PR #529
+    review): the stored set is unjudged, so it is no complete analysis. What
+    earlier passes stored stays (Apply all judges it again). The WS handler
+    sends it as ``analysis_check_failed``."""
 
 
 def cycle_cadence(intervals: Any) -> tuple[float, float] | None:
@@ -374,12 +382,14 @@ class LearningManager:
         generation: int,
         *args: Any,
         data_generation: int | None = None,
+        strict: bool = False,
     ) -> dict[str, Any] | None:
         """Scan in the executor and apply on the loop, holding ``_pass_lock``.
 
         Then judge the stored set as a whole (``_enforce_joint_end_gate``): the
         gates and the reconcile after the pass's own guard can remove a pending
-        value another entry was judged with.
+        value another entry was judged with. ``strict`` (the manual analysis)
+        raises :class:`EndGateCheckError` when that check cannot run.
         """
         # Read before the lock wait, or where the inputs were taken (the batch pass
         # takes its cycles at spawn): a store Undo Import replaced meanwhile is not
@@ -395,7 +405,7 @@ class LearningManager:
             try:
                 self._apply_if_current(generation, found or {}, owner)
                 if generation == self._config_generation:
-                    await self._enforce_joint_end_gate()
+                    await self._enforce_joint_end_gate(strict=strict)
             finally:
                 self._announce_if_changed(before)
             return found or {}
@@ -438,11 +448,13 @@ class LearningManager:
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.debug("Joint end-gate check failed: %s", e)
 
-    async def _enforce_joint_end_gate(self) -> None:
+    async def _enforce_joint_end_gate(self, *, strict: bool = False) -> None:
         """Withdraw stored entries that, applied together, split own cycles.
 
         The trace scan runs in the executor against a snapshot; an entry is only
-        withdrawn if it is still the one that was judged.
+        withdrawn if it is still the one that was judged. A scan that fails reads
+        as nothing to withdraw, unless ``strict``: then it raises
+        :class:`EndGateCheckError` (the manual analysis, PR #529 review).
         """
         # A store replaced meanwhile (Undo Import, a restore) is judged again on
         # its own history; bounded, so a store that keeps changing cannot spin.
@@ -455,9 +467,17 @@ class LearningManager:
                 return
             generation = self._config_generation
             data_generation = getattr(self.profile_store, "_data_generation", 0)
-            drops = await self.hass.async_add_executor_job(
-                self.suggestion_engine.for_job().joint_end_gate_drops, stored
-            )
+            try:
+                drops = await self.hass.async_add_executor_job(
+                    functools.partial(
+                        self.suggestion_engine.for_job().joint_end_gate_drops,
+                        stored, strict=strict,
+                    )
+                )
+            except Exception as err:
+                if strict:
+                    raise EndGateCheckError(f"joint end-gate check failed: {err}") from err
+                raise
             # Judged against options a refresh has since replaced: the next check
             # judges the new set (PR #529 review).
             if generation != self._config_generation:
@@ -997,7 +1017,8 @@ class LearningManager:
         try:
             engine = self.suggestion_engine.for_job()
             new_suggestions = await self._run_pass(
-                engine.generate_detection_suggestions, OWNER_DETECTION, gen
+                engine.generate_detection_suggestions, OWNER_DETECTION, gen,
+                strict=raise_errors,
             )
             if new_suggestions:
                 self._logger.debug(
@@ -1017,7 +1038,8 @@ class LearningManager:
         what it owns and no longer proposes.
         Returns ``{"count": <actionable suggestions>}``. A pass that raises is
         raised to the caller (PR #529 review): the passes after it never ran, so
-        the count is no complete analysis and must not be reported as one.
+        the count is no complete analysis and must not be reported as one. So is
+        a joint end-gate check that could not run (:class:`EndGateCheckError`).
 
         A run that an options refresh or a replaced store superseded had results
         discarded (``_run_pass``), so it is no complete analysis either: it runs
@@ -1102,7 +1124,7 @@ class LearningManager:
                 p95, median = cad
                 await self._run_pass(
                     self.suggestion_engine.for_job().generate_operational_suggestions,
-                    OWNER_OPERATIONAL, gen, p95, median,
+                    OWNER_OPERATIONAL, gen, p95, median, strict=raise_errors,
                 )
             else:
                 # A power sensor with no cadence yet: entries measured on the old
@@ -1113,11 +1135,11 @@ class LearningManager:
                 (OWNER_START_THRESHOLD, self.suggestion_engine.for_job().generate_start_threshold_suggestions),
                 (OWNER_MODEL, self.suggestion_engine.for_job().generate_model_suggestions),
             ):
-                await self._run_pass(generate, owner, gen)
+                await self._run_pass(generate, owner, gen, strict=raise_errors)
             await self._async_run_detection_suggestions(gen, raise_errors=raise_errors)
             await self._run_pass(
                 self.suggestion_engine.for_job().run_batch_simulation,
-                OWNER_BATCH, gen, self._batch_cycles(),
+                OWNER_BATCH, gen, self._batch_cycles(), strict=raise_errors,
             )
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.error("Suggestion analysis failed: %s", e)

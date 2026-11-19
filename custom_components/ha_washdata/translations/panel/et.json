@@ -1107,6 +1107,7 @@
     "invalid_threshold_pair": "Peatumise Lävi ({stop} W) peab olema väiksem kui Käivitumise Lävi ({start} W). Midagi ei salvestatud; muutke mõlemat korraga.",
     "end_gate_check_failed": "Soovitatud ajastussätteid ei õnnestunud selle seadme pauside suhtes kontrollida. Midagi ei salvestatud; proovige uuesti.",
     "analysis_superseded": "Seaded või tsüklite andmed muutusid analüüsi ajal. Käivitage see uuesti.",
+    "analysis_check_failed": "Soovitatud ajastussätteid ei õnnestunud selle seadme pauside suhtes kontrollida. Käivitage see uuesti.",
     "bp_admin_only": "Malle installib administraator.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Loodud WashData poolt {device} jaoks. Lisa oma toimingud (teavitus, tuled, ...).",

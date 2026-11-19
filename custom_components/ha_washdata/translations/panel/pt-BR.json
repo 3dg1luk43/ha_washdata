@@ -1055,6 +1055,7 @@
     "invalid_threshold_pair": "O Limite de Parada ({stop} W) deve ficar abaixo do Limite de Início ({start} W). Nada foi salvo; altere os dois juntos.",
     "end_gate_check_failed": "Não foi possível verificar as configurações de tempo sugeridas em relação às pausas deste eletrodoméstico. Nada foi salvo; tente novamente.",
     "analysis_superseded": "As configurações ou os dados dos ciclos mudaram durante a análise. Execute-a novamente.",
+    "analysis_check_failed": "Não foi possível verificar as configurações de tempo sugeridas em relação às pausas deste eletrodoméstico. Execute-a novamente.",
     "hist_truncated": "parou no limite de {n} leituras, então o restante do histórico não foi analisado",
     "hist_warn_kw": "A leitura mais alta é de apenas {w}. Este sensor parece informar quilowatts; o WashData precisa de watts, então nenhum ciclo pode ser detectado.",
     "hist_warn_naive_time": "{n} carimbos de data/hora não têm fuso horário e foram lidos como UTC. Se o arquivo usar o horário local, os ciclos ficam deslocados pela sua diferença em relação ao UTC e leituras perto de uma mudança de horário de verão podem se perder.",

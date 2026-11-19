@@ -1107,6 +1107,7 @@
         "invalid_threshold_pair": "A Leállítási küszöbnek ({stop} W) kisebbnek kell lennie az Indítási küszöbnél ({start} W). Semmi sem lett mentve; a kettőt együtt módosítsa.",
         "end_gate_check_failed": "A javasolt időzítési beállításokat nem sikerült ellenőrizni a készülék szüneteihez képest. Semmi sem lett mentve; próbálja újra.",
         "analysis_superseded": "A beállítások vagy a ciklusadatok megváltoztak az elemzés közben. Futtassa újra.",
+        "analysis_check_failed": "A javasolt időzítési beállításokat nem sikerült ellenőrizni a készülék szüneteihez képest. Futtassa újra.",
         "bp_admin_only": "A sablonokat egy rendszergazda telepíti.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "A WashData hozta létre {device} számára. Adja hozzá a saját műveleteit (értesítés, világítás, ...).",

@@ -1104,6 +1104,7 @@
     "invalid_threshold_pair": "Stöðvunarþröskuldur ({stop} W) verður að vera undir Ræsingarþröskuldi ({start} W). Ekkert var vistað; breyttu báðum saman.",
     "end_gate_check_failed": "Ekki var hægt að bera tímastillingarnar sem lagðar voru til saman við hlé þessa tækis. Ekkert var vistað; reyndu aftur.",
     "analysis_superseded": "Stillingar eða gögn lotna breyttust meðan á greiningunni stóð. Keyrðu hana aftur.",
+    "analysis_check_failed": "Ekki var hægt að bera tímastillingarnar sem lagðar voru til saman við hlé þessa tækis. Keyrðu hana aftur.",
     "import_undo_hint": "Endurheimtarpunktur frá því fyrir síðasta innflutning ({when}) er geymdur með {profiles} prófíl(um) og {cycles} lotu(m).",
     "replace_undo_hint": "Endurheimtarpunktur er vistaður fyrst, svo þú getur afturkallað þennan innflutning undir Útflutningur / Innflutningur.",
     "pg_in_sample_note": "Þessar lotur hjálpuðu til við að byggja sniðin sem þær eru bornar saman við, svo niðurstöðurnar eru bjartsýnar: búast má við aðeins færri réttum samsvörunum á nýjum lotum.",

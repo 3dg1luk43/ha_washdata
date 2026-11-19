@@ -1107,6 +1107,7 @@
     "invalid_threshold_pair": "Pysäytyskynnyksen ({stop} W) on oltava pienempi kuin Käynnistyskynnys ({start} W). Mitään ei tallennettu; muuta molempia yhdessä.",
     "end_gate_check_failed": "Ehdotettuja ajoitusasetuksia ei voitu tarkistaa tämän laitteen taukoja vasten. Mitään ei tallennettu; yritä uudelleen.",
     "analysis_superseded": "Asetukset tai jaksojen tiedot muuttuivat analyysin aikana. Suorita se uudelleen.",
+    "analysis_check_failed": "Ehdotettuja ajoitusasetuksia ei voitu tarkistaa tämän laitteen taukoja vasten. Suorita se uudelleen.",
     "bp_admin_only": "Järjestelmänvalvoja asentaa mallit.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "WashDatan luoma automaatio laitteelle {device}. Lisää omat toimintosi (ilmoitus, valot, ...).",

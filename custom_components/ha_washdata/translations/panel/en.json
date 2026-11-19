@@ -1118,6 +1118,7 @@
     "invalid_threshold_pair": "Stop Threshold ({stop} W) must be below Start Threshold ({start} W). Nothing was saved; change both together.",
     "end_gate_check_failed": "The suggested timing settings could not be checked against this appliance's pauses. Nothing was saved; try again.",
     "analysis_superseded": "Settings or cycle data changed during the analysis. Run it again.",
+    "analysis_check_failed": "The suggested timing settings could not be checked against this appliance's pauses. Run it again.",
     "bp_admin_only": "An administrator installs templates.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Created by WashData for {device}. Add your actions (notify, lights, ...).",

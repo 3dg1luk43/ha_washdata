@@ -1141,6 +1141,7 @@
     "invalid_threshold_pair": "Sustabdymo slenkstis ({stop} W) turi būti mažesnis už Paleidimo slenkstį ({start} W). Niekas neišsaugota; keiskite abu kartu.",
     "end_gate_check_failed": "Nepavyko patikrinti siūlomų laiko nustatymų pagal šio prietaiso pauzes. Niekas neišsaugota; bandykite dar kartą.",
     "analysis_superseded": "Analizės metu pasikeitė nustatymai arba ciklų duomenys. Paleiskite ją dar kartą.",
+    "analysis_check_failed": "Nepavyko patikrinti siūlomų laiko nustatymų pagal šio prietaiso pauzes. Paleiskite ją dar kartą.",
     "bp_admin_only": "Šablonus diegia administratorius.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Sukurta WashData, skirta {device}. Pridėkite savo veiksmus (pranešimai, šviesos, ...).",

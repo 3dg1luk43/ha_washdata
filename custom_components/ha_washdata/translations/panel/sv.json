@@ -1104,6 +1104,7 @@
     "invalid_threshold_pair": "Stopptröskel ({stop} W) måste vara under Starttröskel ({start} W). Inget sparades; ändra båda tillsammans.",
     "end_gate_check_failed": "De föreslagna tidsinställningarna kunde inte kontrolleras mot den här apparatens pauser. Inget sparades; försök igen.",
     "analysis_superseded": "Inställningarna eller cykeldata ändrades under analysen. Kör den igen.",
+    "analysis_check_failed": "De föreslagna tidsinställningarna kunde inte kontrolleras mot den här apparatens pauser. Kör den igen.",
     "import_undo_hint": "En återställningspunkt från före den senaste importen ({when}) finns kvar: {profiles} profil(er) och {cycles} cykel/cykler.",
     "replace_undo_hint": "En återställningspunkt sparas först, så att du kan ångra den här importen under Exportera / Importera.",
     "pg_in_sample_note": "De här cyklerna var med och byggde de profiler de matchas mot, så resultaten är optimistiska: räkna med något färre korrekta matchningar på nya cykler.",

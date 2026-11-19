@@ -3314,6 +3314,12 @@ class HaWashdataPanel extends HTMLElement {
         // A manual analysis superseded on every run (options saved, data replaced).
         e.message = this._tText('msg.analysis_superseded', {},
           'Settings or cycle data changed during the analysis. Run it again.');
+      } else if (e && e.code === 'analysis_check_failed') {
+        // The manual analysis's joint timing check could not run (PR #529
+        // review). Unlike end_gate_check_failed, earlier passes may have stored
+        // suggestions, so this does not say nothing was saved.
+        e.message = this._tText('msg.analysis_check_failed', {},
+          'The suggested timing settings could not be checked against this appliance\'s pauses. Run it again.');
       }
       throw e;
     }
@@ -14990,7 +14996,11 @@ class HaWashdataPanel extends HTMLElement {
           const n = (r && r.count) || 0;
           this._showToast(n ? this._tText('toast.analysis_complete', {count: n}, `Analysis complete: ${n} suggestion(s)`) : this._t('toast.analysis_complete_none', {}, 'Analysis complete: no new suggestions'));
           await this._fetchSuggestions(eid);
-        } catch (e) { this._showToast(this._tText('toast.analysis_failed', {error: e.message || e}, 'Analysis failed: ' + (e.message || e)), 'error'); }
+        } catch (e) {
+          this._showToast(this._tText('toast.analysis_failed', {error: e.message || e}, 'Analysis failed: ' + (e.message || e)), 'error');
+          // Passes before the failure may have stored suggestions: show them.
+          await this._fetchSuggestions(eid);
+        }
       });
     }
   }

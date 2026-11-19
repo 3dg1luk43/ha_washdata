@@ -1107,6 +1107,7 @@
         "invalid_threshold_pair": "Durdurma Eşiği ({stop} W), Başlangıç Eşiği'nden ({start} W) düşük olmalı. Hiçbir şey kaydedilmedi; ikisini birlikte değiştirin.",
         "end_gate_check_failed": "Önerilen zamanlama ayarları bu cihazın duraklamalarına göre kontrol edilemedi. Hiçbir şey kaydedilmedi; tekrar deneyin.",
         "analysis_superseded": "Analiz sırasında ayarlar veya çevrim verileri değişti. Yeniden çalıştırın.",
+        "analysis_check_failed": "Önerilen zamanlama ayarları bu cihazın duraklamalarına göre kontrol edilemedi. Yeniden çalıştırın.",
         "bp_admin_only": "Şablonları bir yönetici yükler.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "{device} için WashData tarafından oluşturuldu. Eylemlerinizi ekleyin (bildir, ışıklar, ...).",

@@ -1102,6 +1102,7 @@
         "invalid_threshold_pair": "Pragu i ndalimit ({stop} W) duhet të jetë më i ulët se Pragu i nisjes ({start} W). Nuk u ruajt asgjë; ndryshojini të dy bashkë.",
         "end_gate_check_failed": "Cilësimet e sugjeruara të kohës nuk mund të kontrolloheshin kundrejt pauzave të kësaj pajisjeje. Nuk u ruajt asgjë; provoni përsëri.",
         "analysis_superseded": "Cilësimet ose të dhënat e cikleve ndryshuan gjatë analizës. Ekzekutojeni përsëri.",
+        "analysis_check_failed": "Cilësimet e sugjeruara të kohës nuk mund të kontrolloheshin kundrejt pauzave të kësaj pajisjeje. Ekzekutojeni përsëri.",
         "bp_admin_only": "Shabllonët i instalon një administrator.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "Krijuar nga WashData për {device}. Shtoni veprimet tuaja (njoftim, dritat, ...).",
