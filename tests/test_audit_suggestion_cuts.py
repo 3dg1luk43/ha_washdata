@@ -325,7 +325,7 @@ def test_a_capped_completion_minimum_says_so() -> None:
     with patch.object(SuggestionEngine, "_shortest_profile_duration", return_value=2870.0):
         out = eng.generate_detection_suggestions()[CONF_COMPLETION_MIN_SECONDS]
     assert out["reason_key"] == "suggestion.reason.completion_min_seconds_capped"
-    assert out["reason_params"]["cap"] == f"{out['value'] / 60:.0f}"
+    assert out["reason_params"]["cap"] == f"{out['value'] / 60:.0f} min"
     eng = _engine([_cycle(i, duration=600.0, name="Quick") for i in range(30)])
     with patch.object(SuggestionEngine, "_shortest_profile_duration", return_value=600.0):
         out = eng.generate_detection_suggestions()[CONF_COMPLETION_MIN_SECONDS]
