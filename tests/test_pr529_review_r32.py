@@ -8,6 +8,7 @@
   pick could not fire again.
 * A long match read the profile groups after its trace preparation, so a group
   edit made during it and undone during the scoring went unseen by the caller.
+* Last Cycle Start read ``0`` as unknown but ``"0"`` as 1970-01-01.
 """
 from __future__ import annotations
 
@@ -21,6 +22,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util
 
 from custom_components.ha_washdata import analysis, profile_store, ws_api
@@ -236,3 +238,42 @@ async def test_a_long_match_maps_the_groups_it_was_called_with(
         assert await run({}, copy.deepcopy(grouped)) == {
             "__group__Wash": ["Cotton", "Synthetics"]
         }
+
+
+# ── Last Cycle Start reads every form of one instant alike ───────────────────
+
+
+async def test_last_cycle_start_reads_a_quoted_zero_as_the_number(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """``0`` read unknown but ``"0"`` showed 1970-01-01, one instant to the store."""
+    entry = await setup_washdata_entry()
+    manager = hass.data[DOMAIN][entry.entry_id]
+    entity_id = er.async_get(hass).async_get_entity_id(
+        "sensor", DOMAIN, f"{entry.entry_id}_last_cycle_start"
+    )
+    start = (dt_util.utcnow() - timedelta(hours=2)).replace(microsecond=0)
+    await manager.profile_store.async_add_cycle({
+        "start_time": start.isoformat(),
+        "end_time": (start + timedelta(minutes=60)).isoformat(),
+        "duration": 3600.0, "status": "completed", "energy_wh": 500.0,
+        "power_data": [[0.0, 1200.0], [3600.0, 0.0]],
+    })
+    cycle = manager.profile_store.get_past_cycles()[-1]
+
+    async def shown(value: Any) -> str:
+        cycle["start_time"] = value
+        manager.notify_update()
+        await hass.async_block_till_done()
+        return hass.states.get(entity_id).state
+
+    for placeholder in (0, "0", 0.0, "0.0", -60, "-60", "1970-01-01T00:00:00+00:00",
+                        "1969-12-31T23:00:00+00:00", float("nan"), "nan", "inf", 10**400):
+        assert dt_util.parse_datetime(await shown(start.isoformat())) == start
+        assert await shown(placeholder) == "unknown", placeholder
+    # A positive legacy stamp, numeric or quoted, still reads.
+    assert dt_util.parse_datetime(await shown(start.timestamp())) == start
+    assert dt_util.parse_datetime(await shown(str(int(start.timestamp())))) == start
+    assert dt_util.parse_datetime(await shown("1970-01-01T00:00:01+00:00")) == (
+        dt_util.utc_from_timestamp(1)
+    )

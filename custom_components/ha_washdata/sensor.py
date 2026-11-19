@@ -19,6 +19,7 @@
 from __future__ import annotations
 
 from asyncio import Task
+from datetime import datetime
 import hashlib
 import logging
 import math
@@ -70,6 +71,9 @@ from .profile_store import _parse_start_dt, cycle_report_energy_wh
 from .trigger_rules import trigger_offered
 
 _LOGGER = logging.getLogger(__name__)
+
+# Last Cycle Start: no run starts at or before it (a 0 stamp is a placeholder).
+_EPOCH = datetime(1970, 1, 1, tzinfo=dt_util.UTC)
 
 # The per-profile count sensors' own signal (register item 456). They read only
 # the profile summaries and envelopes, which change at a cycle end or a profile
@@ -1298,25 +1302,22 @@ class WasherLastCycleStartSensor(WasherLastCycleSensor):
         super().__init__(manager, entry)
 
     def _figure(self, cycle: dict[str, Any]) -> Any:
-        raw = cycle.get("start_time")
-        if isinstance(raw, (int, float)) and not isinstance(raw, bool):
-            try:
-                if not (math.isfinite(float(raw)) and float(raw) > 0):
-                    return None
-            except OverflowError:
-                return None
         # The store's own reading (`last_finished_cycle` picked the cycle by it):
-        # quoted unix seconds too, and a naive stamp as UTC (PR #529 review).
-        parsed = _parse_start_dt(raw)
+        # quoted unix seconds too, and a naive stamp as UTC (PR #529 review). A
+        # non-finite or out-of-range number reads None there.
+        parsed = _parse_start_dt(cycle.get("start_time"))
         if parsed is None:
             return None
         try:
             if parsed.tzinfo is None:
                 parsed = parsed.replace(tzinfo=dt_util.UTC)
             # Inside the guard: 0001-01-01T00:00+01:00 parses, but is before year 1 in UTC.
-            return dt_util.as_utc(parsed)
+            start = dt_util.as_utc(parsed)
         except (OverflowError, ValueError):
             return None
+        # No start at or before the epoch, in whichever form it was stored: 0 and
+        # "0" are one instant to the store, so both read unknown (PR #529 review).
+        return start if start > _EPOCH else None
 
 
 class WasherLastCycleCostSensor(WasherLastCycleSensor):
