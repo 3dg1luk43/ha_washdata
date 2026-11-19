@@ -112,3 +112,59 @@ def test_the_start_threshold_corrective_runs_at_every_cycle_end(tmp_path: Path) 
     (row,) = churn.run(tmp_path, ("shipped",), None, jobs=1)
     assert row["cycle_ends"] == 0
     assert row["history"]["start_threshold_w"] == [[450.0, 200.0]]
+
+
+def _wash(cid: str, day: str, shape: tuple, name: str, seed: int) -> dict:
+    rng = np.random.default_rng(seed)
+    pts, t = [[0.0, 0.0]], 15.0
+    for minutes, watts in shape:
+        for _ in range(minutes * 2):
+            pts.append([round(t, 1), round(max(5.0, watts * (1 + 0.05 * rng.standard_normal())), 1)])
+            t += 30.0
+    pts.append([round(t, 1), 0.0])
+    return {
+        "id": cid, "profile_name": name, "label_source": "manual", "status": "completed",
+        "termination_reason": "timeout", "start_time": f"{day}T08:00:00+00:00",
+        "duration": pts[-1][0], "power_data": pts,
+    }
+
+
+def test_each_pass_sees_the_profiles_of_its_history_prefix(tmp_path: Path, monkeypatch) -> None:
+    """PR #529 review: the walk read the exported profiles, so a short programme
+    first run last capped Profile Match Interval from the first pass. A programme
+    now exists from its first stored run, with what the store derives from the runs
+    so far; a reference cycle counts from the start only when it was imported
+    before the walk."""
+    long_shape = ((15, 2000.0), (20, 150.0), (20, 500.0))
+    past = [_wash(f"l{j}", f"2026-01-{j + 1:02d}", long_shape, "Long", j) for j in range(6)]
+    past.append(_wash("q0", "2026-01-20", ((10, 1500.0),), "Quick", 99))
+    early = _wash("r0", "2025-12-01", ((40, 800.0),), "RefEarly", 5)
+    late = _wash("r1", "2026-01-10", ((5, 800.0),), "RefLate", 6)
+    doc = {
+        "version": 16, "entry_data": {"device_type": "washing_machine", "name": "Prefix"},
+        "entry_options": {"min_power": 2.0, "off_delay": 180},
+        "data": {
+            # As exported: every programme known, with its final duration.
+            "profiles": {n: {"avg_duration": d} for n, d in (
+                ("Long", 3300.0), ("Quick", 600.0), ("RefEarly", 2400.0), ("RefLate", 300.0))},
+            "past_cycles": past, "reference_cycles": [early, late], "envelopes": {},
+        },
+    }
+    (tmp_path / "prefix").mkdir()
+    (tmp_path / "prefix" / "export.json").write_text(json.dumps(doc))
+    seen: list[tuple[int, list[str], float | None]] = []
+    real = suggestion_engine.SuggestionEngine._shortest_profile_duration  # noqa: SLF001
+
+    def spy(self):
+        out = real(self)
+        seen.append((len(self.profile_store.get_past_cycles()),
+                     sorted(self.profile_store.get_profiles()), out))
+        return out
+
+    monkeypatch.setattr(suggestion_engine.SuggestionEngine, "_shortest_profile_duration", spy)
+    churn.run(tmp_path, ("shipped",), None, jobs=1)
+    before_quick = [s for s in seen if s[0] < len(past)]
+    assert before_quick and all(names == ["Long", "RefEarly"] for _n, names, _s in before_quick)
+    # Learned from the runs so far (Long 55 min, RefEarly 40 min), not Quick's 600 s.
+    assert all(s is not None and s > 2000.0 for _n, _names, s in before_quick)
+    assert all(names == ["Long", "Quick", "RefEarly"] for n, names, _s in seen if n == len(past))

@@ -30,7 +30,12 @@ cycle end at a time.
   ``LearningManager._run_pass`` does, on a manager built from the device's options as
   applied so far, with the history up to that cycle;
 * whatever is then stored for a counted key is applied at once and the post-apply
-  cooldown (``MIN_SUGGESTION_COOLDOWN_CYCLES`` on the odometer) runs from there.
+  cooldown (``MIN_SUGGESTION_COOLDOWN_CYCLES`` on the odometer) runs from there;
+* the profiles are the history prefix's (``prefix_profile``): a programme exists
+  from its first stored run (``ProfileStore.create_profile``) and each later run
+  rebuilds it (``async_rebuild_envelope``), so the shortest programme that caps
+  Profile Match Interval is one already run. Reference cycles count from the start
+  only when imported before the walk; backfill cycles not at all.
 
 Counted keys: the cadence keys (``learning.CADENCE_KEYS``) and Stop / Start Threshold.
 
@@ -145,6 +150,27 @@ def _labelled_own(cycle: dict[str, Any]) -> bool:
     )
 
 
+def prefix_profile(store: Any, name: str, cycle: dict[str, Any]) -> None:
+    """``cycle`` (now stored) reaches programme ``name`` the way the store puts it there.
+
+    The first run of a programme creates it (``ProfileStore.create_profile``); every
+    later one rebuilds it (``async_rebuild_envelope``), which re-derives its duration
+    stats, sample and envelope from the evidence stored so far. Only that programme's
+    evidence changed, so the other profiles are what a full rebuild would give.
+    """
+    if name in (store.get_profiles() or {}):
+        ev.run_coro(store.async_rebuild_envelope(name))
+        return
+    cid = cycle.get("id")
+    if cid and isinstance(cycle.get("duration"), (int, float)) \
+            and store.find_stored_cycle(cid)[0] is cycle:
+        ev.run_coro(store.create_profile(name, cid))
+        return
+    # No id to create it from (or a duplicate one): create_profile's own record.
+    store.get_profiles()[name] = {"avg_duration": cycle.get("duration")}
+    ev.run_coro(store.async_rebuild_envelope(name))
+
+
 def walk(corpus: str, path: str, arm: str) -> dict[str, Any] | None:
     """One device's history under one arm: applies per counted key."""
     sle._quiet()  # noqa: SLF001
@@ -156,6 +182,22 @@ def walk(corpus: str, path: str, arm: str) -> dict[str, Any] | None:
     past = sorted(
         (c for c in base.get("past_cycles") or [] if isinstance(c, dict)), key=_start_key
     )
+    # Profile state from the history prefix (PR #529 review): the exported profiles
+    # carry every later run, so a programme first run late was known (and capped
+    # Profile Match Interval) from the first pass. A programme exists from its first
+    # stored run; the exported set only says which labels are programmes. Evidence
+    # outside the walk is kept only when known to exist before it: a reference
+    # cycle is stamped when it was imported, a backfill cycle only with its run's
+    # own time (its import could be later), so backfill is left out.
+    known = {n for n, p in (base.get("profiles") or {}).items() if isinstance(p, dict)}
+    walk_start = _start_key(past[0]) if past else None
+    references = [
+        c for c in base.get("reference_cycles") or []
+        if isinstance(c, dict) and walk_start is not None
+        and _parse_start_dt(c.get("start_time")) is not None and _start_key(c) < walk_start
+    ]
+    profiles: dict[str, Any] = {}
+    envelopes: dict[str, Any] = {}
     applies: dict[str, list[list[float]]] = {k: [] for k in KEYS}
     per_cycle: list[list[float]] = []
     ends = labelled = last_batch = last_apply = 0
@@ -173,10 +215,16 @@ def walk(corpus: str, path: str, arm: str) -> dict[str, Any] | None:
             # No early exit: the threshold correctives run at every cycle end.
             data = dict(base)
             data.update(
-                past_cycles=past[: i + 1], suggestions={}, locked_suggestions=[],
+                past_cycles=past[: i + 1], reference_cycles=references, backfill_cycles=[],
+                profiles=profiles, envelopes=envelopes,
+                suggestions={}, locked_suggestions=[],
                 suggestion_apply_cycle_count=last_apply, lifetime_cycle_count=0,
             )
             mgr = sle._manager(entry_data, options, dev.path, data)  # noqa: SLF001
+            for stored in (references if i == 0 else []) + [cycle]:
+                name = stored.get("profile_name")
+                if isinstance(name, str) and name in known:
+                    prefix_profile(mgr.profile_store, name, stored)
             lm = mgr.learning_manager
             eng = lm.suggestion_engine
 
