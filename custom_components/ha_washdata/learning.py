@@ -119,6 +119,18 @@ class EndGateCheckError(RuntimeError):
     sends it as ``analysis_check_failed``."""
 
 
+def end_gate_evidence_token(store: Any) -> tuple[Any, ...]:
+    """What the joint end-gate scan reads (``SuggestionEngine._end_gate_evidence``):
+    the newest 200 stored cycles, each trace by identity (an edit replaces it), and
+    the store they come from. A verdict taken while it changed judged a cycle
+    stored meanwhile, or not, by chance (PR #529 review)."""
+    past = list(store.get_past_cycles() or [])[-200:]
+    return (
+        getattr(store, "_data_generation", 0), len(past),
+        tuple(id(c.get("power_data")) if isinstance(c, dict) else id(c) for c in past),
+    )
+
+
 def cycle_cadence(intervals: Any) -> tuple[float, float] | None:
     """``(p95, median)`` of one cycle's update intervals, or None below 20 of them."""
     try:
@@ -486,11 +498,12 @@ class LearningManager:
         as nothing to withdraw, unless ``strict``: then it raises
         :class:`EndGateCheckError` (the manual analysis, PR #529 review). So does
         a strict check whose set kept changing while it was judged (a mute, a
-        restore): the manual analysis must not report a set no check judged.
+        restore, a cycle stored meanwhile): the manual analysis must not report a
+        set no check judged.
         """
-        # A store replaced meanwhile (Undo Import, a restore), or a set a mute
-        # changed, is judged again as it now stands; bounded, so a store that keeps
-        # changing cannot spin.
+        # A store replaced meanwhile (Undo Import, a restore), a cycle stored or
+        # edited meanwhile, or a set a mute changed, is judged again as it now
+        # stands; bounded, so a store that keeps changing cannot spin.
         for _attempt in range(3):
             stored = {
                 k: dict(v) for k, v in (self.profile_store.get_suggestions() or {}).items()
@@ -499,7 +512,7 @@ class LearningManager:
             if not any(k in END_GATE_KEYS for k in stored):
                 return
             generation = self._config_generation
-            data_generation = getattr(self.profile_store, "_data_generation", 0)
+            evidence = end_gate_evidence_token(self.profile_store)
             check = self.suggestion_engine.for_job().joint_end_gate_drops
             if not strict:
                 drops = await self.hass.async_add_executor_job(check, stored)
@@ -514,7 +527,9 @@ class LearningManager:
             # judges the new set (PR #529 review).
             if generation != self._config_generation:
                 return
-            if getattr(self.profile_store, "_data_generation", 0) != data_generation:
+            # The pending values unchanged is not enough: a cycle that completed
+            # during the scan may split under the set it passed (PR #529 review).
+            if end_gate_evidence_token(self.profile_store) != evidence:
                 continue
             if self._withdraw_joint_drops(stored, drops or []):
                 return

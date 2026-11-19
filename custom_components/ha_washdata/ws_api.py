@@ -131,7 +131,12 @@ from .detector_config import (
     effective_option_values,
     inverted_threshold_pair,
 )
-from .learning import AnalysisSupersededError, EndGateCheckError, review_choices
+from .learning import (
+    AnalysisSupersededError,
+    EndGateCheckError,
+    end_gate_evidence_token,
+    review_choices,
+)
 from .maintenance import editor_types, effective_reminders
 from .options_utils import retire_device_type, strip_null_options
 from .setup_advisor import compute_setup_phase
@@ -336,16 +341,6 @@ async def _drop_unsafe_end_gate_updates(
     if not any(key in END_GATE_KEYS for key in updates):
         return True
     store = manager.profile_store
-
-    def _evidence() -> tuple[Any, ...]:
-        # What the scan reads (the newest 200 stored cycles, each trace by
-        # identity: an edit replaces it) and the store it reads them from.
-        past = list(store.get_past_cycles() or [])[-200:]
-        return (
-            getattr(store, "_data_generation", 0), len(past),
-            tuple(id(c.get("power_data")) if isinstance(c, dict) else id(c) for c in past),
-        )
-
     try:
         engine = manager.learning_manager.suggestion_engine.for_job()
         # As written: a cascade the selection carries is a value like any other
@@ -358,11 +353,11 @@ async def _drop_unsafe_end_gate_updates(
         # judge again on the evidence as it now stands (PR #529 review); a store
         # that keeps changing fails closed like a failed scan.
         for _attempt in range(3):
-            before = _evidence()
+            before = end_gate_evidence_token(store)
             drops = await hass.async_add_executor_job(
                 functools.partial(engine.joint_end_gate_drops, judged, strict=True)
             )
-            if _evidence() == before:
+            if end_gate_evidence_token(store) == before:
                 break
         else:
             _LOGGER.warning("Cycle evidence kept changing during the joint end-gate check")

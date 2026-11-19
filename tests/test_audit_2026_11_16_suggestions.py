@@ -1593,3 +1593,36 @@ def test_a_set_that_moves_a_split_to_another_cycle_is_withdrawn(mock_hass: Any) 
     eng._entry_options = lambda: {}  # noqa: SLF001
     stored = {CONF_STOP_THRESHOLD_W: {"value": 5.0}, CONF_MIN_OFF_GAP: {"value": 600}}
     assert eng.joint_end_gate_drops(stored)  # something is withdrawn
+
+
+async def test_the_manual_analysis_judges_again_when_a_cycle_lands_during_its_check(
+    hass: Any, setup_washdata_entry: Any
+) -> None:
+    """PR #529 review: a completed cycle stored while the joint check scanned the
+    traces changes neither the pending values nor the data generation. The
+    verdict taken without it must not stand: the check runs again on the evidence
+    as it then stands, and withdraws what splits the new cycle."""
+    from unittest.mock import patch  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(options={
+        CONF_STOP_THRESHOLD_W: 3.0, CONF_START_THRESHOLD_W: 5.0, CONF_OFF_DELAY: 60,
+        CONF_MIN_OFF_GAP: 60, CONF_END_ENERGY_THRESHOLD: 0.01,
+    })
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store = manager.profile_store
+    lm = manager.learning_manager
+    store.set_suggestion(CONF_END_ENERGY_THRESHOLD, 1.0, reason="r", flags={"owner": OWNER_BATCH})
+    engine_cls = type(lm.suggestion_engine)
+    calls: list[int] = []
+
+    def drops(self: Any, stored: Any, *, strict: bool = False) -> list[str]:
+        calls.append(len(store.get_past_cycles()))
+        if len(calls) == 1:
+            store._data["past_cycles"].append(_paused_cycle(99, pause_w=1.0))  # noqa: SLF001
+            return []  # judged without it
+        return [CONF_END_ENERGY_THRESHOLD]  # with it, the raise splits that cycle
+
+    with patch.object(engine_cls, "joint_end_gate_drops", drops):
+        await lm._enforce_joint_end_gate(strict=True)  # noqa: SLF001
+    assert calls == [0, 1]
+    assert CONF_END_ENERGY_THRESHOLD not in (store.get_suggestions() or {})
