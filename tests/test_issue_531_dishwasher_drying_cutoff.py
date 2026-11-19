@@ -745,3 +745,42 @@ async def test_a_superseded_rebuild_stays_pending_in_the_sweep(
         await store.async_rebuild_for_cut_short_rule()
     assert calls["n"] == 3  # retried each round
     assert store.cut_short_rebuild_pending()
+
+
+def _replay_with_keepalive(observed: bool) -> float | None:
+    """The ECO run with its last 106 s of drying before the beep closed by one
+    watchdog keepalive 10 s before it (the plug sent nothing meanwhile), then the
+    beep. Returns the end in minutes, or None."""
+    cfg = build_detector_config({"stop_threshold_w": 4.5, "start_threshold_w": 5.0},
+                                {"device_type": "dishwasher"}, "dishwasher")
+    ends: list[dict] = []
+    det = CycleDetector(cfg, lambda _o, _n: None, ends.append)
+    keepalive = BEEP_S - 10.0
+    pts = [(t, p, False) for t, p in _eco(hold_s=1800) if not (keepalive - 106 < t < BEEP_S)]
+    pts.append((keepalive, 3.3, True))
+    pts.sort()
+    matched = False
+    for t, p, synthetic in pts + [(pts[-1][0] + 10.0 * k, 3.3, False) for k in range(1, 400)]:
+        if synthetic:
+            det.process_reading(p, T0 + timedelta(seconds=t), synthetic=True, observed=observed)
+        else:
+            det.process_reading(p, T0 + timedelta(seconds=t))
+        if not matched and t >= 20 * 60:
+            det.update_match(("ECO", 0.8, 192.0 * 60, None, False, False))
+            det.set_match_committed(True)
+            matched = True
+        if ends:
+            return t / 60
+    return None
+
+
+def test_an_observed_keepalive_step_keeps_the_quiet_before_a_beep() -> None:
+    """PR #529 review: a keepalive 106 s after the last real reading on a 10 s plug
+    extends the gap-free quiet (the sensor was read), but the blip scan stopped at
+    that step (its own ceiling is 100 s) and found 10 s of quiet: the beep was no
+    end and the run waited the whole spike window. The scan reads the quiet the
+    tally counted; a keepalive that could not read the sensor still stops it."""
+    end_min = _replay_with_keepalive(observed=True)
+    assert end_min is not None and BEEP_S / 60 <= end_min <= BEEP_S / 60 + 5
+    unread = _replay_with_keepalive(observed=False)
+    assert unread is None or unread > BEEP_S / 60 + 10

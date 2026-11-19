@@ -6371,26 +6371,28 @@ class CycleDetector:
         stop = float(self._config.stop_threshold_w)
         quiet: list[float] = []
         quiet_start: datetime | None = None
-        newer = timestamp
-        # The level of the stretch that qualified: the walk stops at a step the
-        # cadence calls an outage, as the gap-free tally does (PR #529 review).
-        outage_ceiling = min(3600.0, max(60.0, 10.0 * self._prior_p95_dt))
-        # Nor further back than the gap-free tally reaches: it also restarts at an
-        # outage shorter than that ceiling (an unread keepalive, unobserved time),
-        # and older readings across it must not set the level (PR #529 review).
+        # The level of the stretch that qualified: no further back than the
+        # gap-free tally reaches. The tally restarts at every quiet step it does
+        # not count as observed (an outage-sized sensor step, an unread
+        # keepalive, recorded unobserved time), so older readings across one
+        # never set the level (PR #529 review). That is its record of which steps
+        # were observed: a keepalive that read the sensor is one whatever its
+        # length, so the walk takes no cadence ceiling of its own there (a 106 s
+        # keepalive step on a 10 s plug left 10 s of quiet, PR #529 review).
         since = timestamp - timedelta(seconds=self._gapfree_before_high + 0.001)
+        # The step this reading closes is the one the tally does not restart at
+        # (it is kept out of the quiet instead): a sensor step the cadence calls
+        # an outage is no quiet right before the blip.
+        outage_ceiling = min(3600.0, max(60.0, 10.0 * self._prior_p95_dt))
         for ts, pw in reversed(self._power_readings):
             if ts >= timestamp:
                 continue
-            if (
-                ts < since
-                or float(pw) >= stop
-                or (newer - ts).total_seconds() > outage_ceiling
-            ):
+            if ts < since or float(pw) >= stop:
+                break
+            if quiet_start is None and (timestamp - ts).total_seconds() > outage_ceiling:
                 break
             quiet.append(float(pw))
             quiet_start = ts
-            newer = ts
         if quiet_start is None or (timestamp - quiet_start).total_seconds() < TERMINAL_BLIP_QUIET_MIN_S:
             return False
         level = float(np.median(quiet))
