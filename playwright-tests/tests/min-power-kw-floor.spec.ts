@@ -131,3 +131,14 @@ test('a milliwatt sensor read raw with a stop under 1000 is not a conflict', asy
   const err = await minPowerError(page);
   await expect(err).toBeHidden();
 });
+
+test('a kW sensor read raw keeps its Min Power fix under 1', async ({ page }) => {
+  // Min Power 0.5 keeps a kW sensor raw (Stop 0.4, Start 1): a fix of 1 would switch
+  // it to watts while Start stayed 1, so 0.2 kW would read 200 W (review of PR #529).
+  await page.goto('/');
+  const opts = { ...options, min_power: 0.5, start_threshold_w: 1, stop_threshold_w: 0.4 };
+  await bootPanel(page, { 'ha_washdata/get_options': { options: opts } }, statesIn('kW'));
+  const err = await minPowerError(page);
+  await expect(err).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('.wd-conflict-fix[data-ckey="min_power"]')).toHaveAttribute('data-cval', '0.32');
+});

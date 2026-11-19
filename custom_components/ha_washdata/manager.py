@@ -1556,7 +1556,6 @@ class WashDataManager:
             self.detector.set_match_committed(
                 match_rules.program_is_committed(self._current_program)
             )
-            self._door_gate_awaits_match = False  # the detector holds this tick's match
             self.detector.update_match(MatchContext(
                 profile_name=profile_name,
                 confidence=gate.confidence,
@@ -1620,6 +1619,11 @@ class WashDataManager:
                     self.profile_store, profile_name, self.device_type
                 ),
             ))
+            # The wait a cleared pick set ends only once the detector holds what
+            # this tick named, or has revoked its match: a failed match (no profile,
+            # no revoke) or one the detector refused leaves the cleared pick and
+            # its length in place (review of PR #529).
+            self._settle_door_gate(profile_name, revoke)
 
             # --- LOGGING (Unified) ---
             self._logger.info(
@@ -4273,6 +4277,15 @@ class WashDataManager:
             if abs(held - float(self._matched_profile_duration)) > 1.0:
                 return False
         return bool(self.detector.door_end_due(utc_now()))
+
+    def _settle_door_gate(self, profile_name: str | None, revoke: bool) -> None:
+        """End the wait a cleared pick set once the detector holds the match this
+        tick named, or has revoked its own (see the call site)."""
+        if self._door_gate_awaits_match and (
+            (profile_name and self.detector.matched_profile == profile_name)
+            or (revoke and not self.detector.matched_profile)
+        ):
+            self._door_gate_awaits_match = False
 
     def _arm_door_end_dwell(self) -> None:
         """(Re)arm the auto-open door-end dwell timer (#342)."""

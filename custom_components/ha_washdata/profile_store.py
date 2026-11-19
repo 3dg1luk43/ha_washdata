@@ -567,7 +567,14 @@ def cut_short_mask(runs: list[tuple[list[float], list[float], float, bool, float
         need = max(CUT_SHORT_MIN_RUNS, math.ceil(CUT_SHORT_MIN_SHARE * n))
         if n <= need:
             return [False] * n
-        events = [_events_after_quiet(o, v, pk) for o, v, _d, _p, pk in runs]
+        # Terminal only after the run's last main activity: an event the heater
+        # restarts after is a pause, not the end (review of PR #529).
+        def _terminal(o: list[float], v: list[float], pk: float) -> list[tuple[float, float]]:
+            main = TERMINAL_EVENT_MAX_PEAK_FRAC * pk
+            last_main = max((t for t, w in zip(o, v, strict=False) if w > main), default=-math.inf)
+            return [ev for ev in _events_after_quiet(o, v, pk) if ev[1] > last_main]
+
+        events = [_terminal(o, v, pk) for o, v, _d, _p, pk in runs]
         mask: list[bool] = []
         for i, (_o, _v, d_i, pinned, _pk) in enumerate(runs):
             if pinned or any(t_e >= d_i - TERMINAL_BLIP_QUIET_MIN_S for _q0, t_e in events[i]):

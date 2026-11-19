@@ -562,6 +562,13 @@ function _minPowerMustStayAtOne(id, ctx) {
 // The milliwatt side of the same rule: a mW sensor is read raw while Min Power is
 // 1000 or more (const.power_unit_scale), so a fix under 1000 would switch it to
 // watts while the thresholds stayed in milliwatts (review of PR #529).
+// The kW side of keeping the scale: a kW sensor already read raw (Min Power under
+// 1) must keep a Min Power fix under 1, or the readings switch to watts while the
+// thresholds stay in kilowatts (review of PR #529).
+function _minPowerRawKilowatt(v, ctx) {
+  const scale = _powerSensorScale(v.power_sensor, ctx);
+  return scale != null && scale > 1 && v.min_power != null && v.min_power < 1;
+}
 function _minPowerRawMilliwatt(v, ctx) {
   const scale = _powerSensorScale(v.power_sensor, ctx);
   return scale != null && scale < 1 && v.min_power != null && v.min_power >= 1000;
@@ -624,6 +631,8 @@ const _SETTING_CONFLICTS = [
       min_power:        { msgKey: 'conflict.min_power.min_power', msgVars: {stop: v.stop_threshold_w}, msgFb: `Must be at or below Stop Threshold (${v.stop_threshold_w} W)`,
         fixVal: _minPowerRawMilliwatt(v, ctx)
           ? Math.max(1000, +(v.stop_threshold_w * 0.8).toFixed(1))
+          : _minPowerRawKilowatt(v, ctx)
+            ? Math.min(0.999, +(v.stop_threshold_w * 0.8).toFixed(3))
           : _minPowerMustStayAtOne(v.power_sensor, ctx)
             ? Math.max(1, +(v.stop_threshold_w * 0.8).toFixed(1)) : +(v.stop_threshold_w * 0.8).toFixed(1) },
       // Not a Stop fix that would reach Start: it would cascade into Start, and this

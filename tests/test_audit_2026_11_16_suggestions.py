@@ -1528,3 +1528,68 @@ async def test_a_set_a_mute_changed_is_judged_again_before_strict_returns(mock_h
     with pytest.raises(EndGateCheckError):
         await lm._enforce_joint_end_gate(strict=True)  # noqa: SLF001
     await lm._enforce_joint_end_gate()  # noqa: SLF001 - background: never raises
+
+
+def test_the_quiet_credit_uses_the_cadence_at_the_drop() -> None:
+    """Review of PR #529: reports every 90 s before a pause and every second inside
+    it. The whole trace's median capped the credit at 1-2 s; the detector's rolling
+    cadence at the drop is 90 s, so its quiet timer reaches the gap 90 s sooner: a
+    500 s gap splits the run, 700 s bridges it."""
+    from custom_components.ha_washdata.suggestion_engine import end_gate_would_split  # noqa: PLC0415
+
+    pts = [(float(-90 * k), 300.0) for k in range(12, 0, -1)]
+    pts += [(float(t), 0.0) for t in range(0, 451)]
+    pts += [(480.0, 300.0), (481.0, 300.0)]
+    assert end_gate_would_split(pts, 5.0, 180, 500, 0.05)
+    assert not end_gate_would_split(pts, 5.0, 180, 700, 0.05)
+
+
+def test_the_standby_floor_stays_in_a_raw_kw_sensor_s_units() -> None:
+    """Review of PR #529: a kW sensor read raw, running at 0.08 and idling at 0.0034
+    with Stop 0.002. The idle level rounded to 0 and the floor added 0.2 in raw units:
+    Stop 0.2 and Start 0.25, above the running level, so no run could start."""
+    from custom_components.ha_washdata.suggestion_engine import standby_stop_floor  # noqa: PLC0415
+
+    def stopped(i: int) -> dict[str, Any]:
+        pts = [[float(t), 0.08] for t in range(0, 1800, 10)] + [[1800.0 + t, 0.0034] for t in range(0, 1200, 10)]
+        return {"id": f"k{i}", "status": "completed", "termination_reason": "user",
+                "power_data": pts, "signature": {"max_power": 0.08}}
+
+    cycles = [stopped(i) for i in range(6)]
+    raw = standby_stop_floor(cycles, 0.002, 180.0, to_w=1000.0)
+    assert raw is not None and raw["floor_w"] < 0.08 * 0.1
+    assert abs(raw["floor_w"] - 0.0034 * 1.25) < 1e-4
+    # The same appliance in watts keeps the watt margin.
+    watts = standby_stop_floor(
+        [{**c, "power_data": [[t, p * 1000] for t, p in c["power_data"]],
+          "signature": {"max_power": 80.0}} for c in cycles], 2.0, 180.0,
+    )
+    assert watts is not None and watts["floor_w"] == round(max(3.4 * 1.25, 3.4 + 0.2), 2)
+
+
+def test_a_set_that_moves_a_split_to_another_cycle_is_withdrawn(mock_hass: Any) -> None:
+    """Review of PR #529: Stop 3 W / Min Off Gap 210 s splits a 300 s pause at 2 W;
+    Stop 5 W / 600 s bridges it but splits a 900 s pause at 4 W. One split either
+    way, so the count saw no change and Apply all would have written the set."""
+    from custom_components.ha_washdata.const import (  # noqa: PLC0415
+        CONF_END_ENERGY_THRESHOLD,
+        CONF_MIN_OFF_GAP,
+        CONF_OFF_DELAY,
+        CONF_STOP_THRESHOLD_W,
+    )
+    from custom_components.ha_washdata.suggestion_engine import SuggestionEngine  # noqa: PLC0415
+
+    def trace(pause_s: int, pause_w: float) -> list[tuple[float, float]]:
+        work = [(float(t), 300.0) for t in range(0, 600, 10)]
+        pause = [(600.0 + t, pause_w) for t in range(0, pause_s, 10)]
+        return work + pause + [(600.0 + pause_s + t, 300.0) for t in range(0, 300, 10)]
+
+    eng = SuggestionEngine(mock_hass, "e", _Store(), device_type="washing_machine")
+    eng._end_gate_evidence = lambda: [trace(300, 2.0), trace(900, 4.0)]  # noqa: SLF001
+    eng._effective_thresholds = lambda _o: {  # noqa: SLF001
+        CONF_STOP_THRESHOLD_W: 3.0, CONF_OFF_DELAY: 180, CONF_MIN_OFF_GAP: 210,
+        CONF_END_ENERGY_THRESHOLD: 1.0,
+    }
+    eng._entry_options = lambda: {}  # noqa: SLF001
+    stored = {CONF_STOP_THRESHOLD_W: {"value": 5.0}, CONF_MIN_OFF_GAP: {"value": 600}}
+    assert eng.joint_end_gate_drops(stored)  # something is withdrawn

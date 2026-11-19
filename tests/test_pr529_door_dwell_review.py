@@ -191,3 +191,23 @@ async def test_a_new_pick_after_a_cleared_one_reopens_the_paused_door_end(
     # Picked but not yet held at its length: still waits.
     manager._matched_profile_duration = held * 2  # noqa: SLF001
     assert manager._door_end_may_fire() is False  # noqa: SLF001
+
+
+async def test_a_failed_match_after_a_cleared_pick_keeps_the_door_waiting(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """Review of PR #529: the automatic match that should replace a cleared pick
+    failed (no profile, no revoke); the detector kept the cleared program and its
+    length, yet the wait ended, so the door could end the run by that length."""
+    manager, _ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    held = manager.detector.matched_profile
+    manager._manual_program_active = True  # noqa: SLF001
+    manager._current_program = held  # noqa: SLF001
+    manager._matched_profile_duration = float(manager.detector.expected_duration_seconds)  # noqa: SLF001
+    manager.clear_manual_program()
+    manager._settle_door_gate(None, False)  # noqa: SLF001 - the failed tick
+    assert manager._door_end_may_fire() is False  # noqa: SLF001
+    manager._settle_door_gate("Some other", False)  # noqa: SLF001 - named, but not held
+    assert manager._door_end_may_fire() is False  # noqa: SLF001
+    manager._settle_door_gate(held, False)  # noqa: SLF001 - the detector holds it
+    assert manager._door_end_may_fire()  # noqa: SLF001

@@ -74,7 +74,13 @@ from .const import (
     MATCH_INTERVAL_SUGGESTION_MIN_S,
 )
 from .options_utils import option_int
-from .signal_processing import energy_gap_threshold_s, integrate_wh, longest_resumed_pause_s
+from .signal_processing import (
+    energy_gap_threshold_s,
+    integrate_wh,
+    longest_resumed_pause_s,
+    median_fast,
+    percentile_linear,
+)
 from .time_utils import (
     SYNTHETIC_OFFSETS_KEY,
     offset_key,
@@ -171,7 +177,7 @@ def end_gate_pause_needs(
         # never get past it (PR #529 review); every finite one moves it on.
         points = [(t, p) for t, p in points if math.isfinite(t) and math.isfinite(p)]
         n = len(points)
-        cadence = _trace_gate_cadence([t for t, _p in points])
+        times_all = [t for t, _p in points]
         # From the first working reading: a leading quiet is the standby before the
         # cycle, not a pause it bridged (PR #529 review).
         i = next((k for k, (_t, p) in enumerate(points) if p >= stop), n)
@@ -197,7 +203,7 @@ def end_gate_pause_needs(
             if i > 0:
                 lead = points[i][0] - points[i - 1][0]
                 if 0 < lead <= max_gap_s:
-                    t0 -= lead if cadence is None else min(lead, cadence)
+                    t0 -= _quiet_credit(times_all, i, lead)
             t_resume = points[j][0]
             need = 0.0
             if not outage and t_resume - t0 > window:
@@ -245,15 +251,22 @@ def end_gate_pause_needs(
     return needs
 
 
-def _trace_gate_cadence(times: list[float]) -> float | None:
-    """The detector's gate cadence for a trace (``CycleDetector._gate_cadence``):
-    its p95 interval, capped at ``GATE_CADENCE_MEDIAN_FACTOR`` x the median; None
-    under five intervals, when the detector caps nothing either."""
-    dts = [b - a for a, b in zip(times, times[1:]) if b > a]
-    if len(dts) < 5:
-        return None
-    arr = np.asarray(dts, dtype=float)
-    return float(min(np.percentile(arr, 95), GATE_CADENCE_MEDIAN_FACTOR * np.median(arr)))
+def _quiet_credit(times: list[float], i: int, lead: float) -> float:
+    """How much of ``lead`` (the interval reading ``i`` closes, from the last one at
+    or above the stop) the detector's quiet timer credits: capped at its gate
+    cadence as it stands at that reading (``CycleDetector._gate_cadence``: the last
+    20 intervals, this one included, p95 capped at ``GATE_CADENCE_MEDIAN_FACTOR`` x
+    their median), uncapped while fewer than five came before. Rolling, as the
+    detector's, not the whole trace's (review of PR #529)."""
+    window = [b - a for a, b in zip(times[max(0, i - 21):i], times[max(1, i - 20):i + 1]) if b - a > 0.1]
+    prior = window[:-1] if lead > 0.1 else window
+    if len(prior) < 5:
+        return lead
+    window = window[-20:]
+    cadence = min(
+        percentile_linear(window, 95), GATE_CADENCE_MEDIAN_FACTOR * median_fast(window)
+    )
+    return min(lead, cadence)
 
 
 def _detector_gate_need(
@@ -1083,7 +1096,10 @@ def detect_standby_above_stop(
         return {
             "cycles_above": len(above),
             "cycles_checked": len(above) + below,
-            "idle_w": round(median, 2),
+            "idle_w": round(median, 2),  # for display
+            # For arithmetic: on a kW sensor read raw a 0.0034 standby rounds to 0
+            # (review of PR #529).
+            "idle_level": median,
             "stop_threshold_w": round(stop, 2),
         }
     except Exception:  # noqa: BLE001 - a statistic must never break the device list
@@ -1111,9 +1127,17 @@ STANDBY_FLOOR_MAX_PAUSE_FRAC = 0.5
 STANDBY_FLOOR_MIN_CLEAN_CYCLES = 5
 
 
+def _round_power(value: float) -> float:
+    """Two decimals, or two significant figures below 0.1 (a kW sensor read raw)."""
+    if not (math.isfinite(value) and 0 < value < 0.1):
+        return round(value, 2)
+    return round(value, 1 - math.floor(math.log10(value)))
+
+
 def standby_stop_floor(
     cycles: list[dict[str, Any]], stop_threshold_w: float, off_delay_s: float,
     *, stop_changes: list[tuple[datetime, float | None]] | None = None,
+    to_w: float = 1.0,
 ) -> dict[str, Any] | None:
     """The lowest stop threshold this appliance's standby allows, if it needs one.
 
@@ -1134,8 +1158,11 @@ def standby_stop_floor(
         adv = detect_standby_above_stop(cycles, stop_threshold_w, stop_changes=stop_changes)
         if adv is None:
             return None
-        idle = float(adv["idle_w"])
-        floor = round(max(idle * STANDBY_FLOOR_RATIO, idle + STANDBY_FLOOR_MIN_MARGIN_W), 2)
+        idle = float(adv.get("idle_level", adv["idle_w"]))
+        # The margin is watts; ``to_w`` is watts per unit of the readings (1000 on
+        # a kW sensor read raw), so it is added in the detector's own units.
+        margin = STANDBY_FLOOR_MIN_MARGIN_W / (to_w if to_w and to_w > 0 else 1.0)
+        floor = _round_power(max(idle * STANDBY_FLOOR_RATIO, idle + margin))
         clean, _excl = select_clean_cycles(cycles, stop_threshold_w=stop_threshold_w)
         # Plus the cycles stopped by hand or force-stopped, up to their last working
         # reading: on an appliance with this fault they are most of its cycles, and
@@ -1170,6 +1197,7 @@ def standby_stop_floor(
         )
         return {
             "idle_w": idle,
+            "to_w": to_w if to_w and to_w > 0 else 1.0,
             "floor_w": floor,
             "safe": bool(safe),
             "clean_cycles": checked,
@@ -1408,9 +1436,10 @@ def steady_load_threshold_suggestions(adv: dict[str, Any] | None) -> dict[str, A
 
 
 def _standby_floor_entry(value: float, floor: dict[str, Any]) -> dict[str, Any]:
-    idle = float(floor["idle_w"])
+    # The reason in watts, the value in the detector's units (review of PR #529).
+    idle = float(floor["idle_w"]) * float(floor.get("to_w") or 1.0)
     return {
-        "value": round(value, 2),
+        "value": _round_power(value),
         "reason": (
             f"Every recent cycle was still drawing {idle:.1f}W when it ended, so a "
             f"threshold below that can never see the appliance switch off. Kept above "
@@ -2260,15 +2289,20 @@ class SuggestionEngine:
     def _end_gate_splits(
         self, evidence: list[list[tuple[float, float]]], values: dict[str, Any],
         *, strict: bool = False,
-    ) -> int:
+    ) -> frozenset[int]:
+        """Which traces of ``evidence`` the end gate splits under ``values``.
+
+        Which, not how many (review of PR #529): a set that bridges one cycle's
+        pause and splits another's has the same count as the settings in force.
+        """
         stop = _num(values.get(CONF_STOP_THRESHOLD_W))
         off_delay = _num(values.get(CONF_OFF_DELAY))
         gap = _num(values.get(CONF_MIN_OFF_GAP))
         energy = _num(values.get(CONF_END_ENERGY_THRESHOLD))
         if stop is None or off_delay is None or energy is None:
-            return 0
-        return sum(
-            1 for points in evidence
+            return frozenset()
+        return frozenset(
+            i for i, points in enumerate(evidence)
             if end_gate_would_split(points, stop, off_delay, gap or 0.0, energy, strict=strict)
         )
 
@@ -2325,7 +2359,8 @@ class SuggestionEngine:
                 return values
 
             for key in proposed:
-                if self._end_gate_splits(evidence, with_proposal()) <= allowed:
+                # No cycle the settings in force keep whole may split.
+                if not self._end_gate_splits(evidence, with_proposal()) - allowed:
                     break
                 _LOGGER.debug(
                     "%s suggestion withheld: with it the end gate would close own "
@@ -2371,7 +2406,9 @@ class SuggestionEngine:
             base = dict(self._effective_thresholds(self._entry_options()))
             allowed = self._end_gate_splits(evidence, base, strict=strict)
             drops: list[str] = []
-            while self._end_gate_splits(evidence, {**base, **values}, strict=strict) > allowed:
+            # No cycle the settings in force keep whole may split (a set that
+            # fixes one split may stay; one that moves it to another may not).
+            while self._end_gate_splits(evidence, {**base, **values}, strict=strict) - allowed:
                 candidates = [k for k in values if not stored[k].get("cascade")]
                 if not candidates:
                     break
@@ -2379,7 +2416,7 @@ class SuggestionEngine:
                 def cost(key: str) -> tuple[int, bool, int]:
                     rest = {k: v for k, v in values.items() if k != key}
                     return (
-                        self._end_gate_splits(evidence, {**base, **rest}, strict=strict),
+                        len(self._end_gate_splits(evidence, {**base, **rest}, strict=strict) - allowed),
                         bool(stored[key].get("corrective")),
                         self._END_GATE_KEYS.index(key),
                     )
@@ -2396,6 +2433,16 @@ class SuggestionEngine:
             _LOGGER.debug("Joint end-gate check failed", exc_info=True)
             return []
 
+    def _reading_to_w(self, options: dict[str, Any]) -> float | None:
+        """Watts per unit of the detector's readings: 1 for readings converted to
+        watts, 1000 for a kW sensor read raw, 0.001 for a mW one
+        (``power_unit_scale``); None while the sensor's unit is unknown."""
+        known, unit = getattr(self, "_power_unit_snapshot", (False, None))
+        if not known:
+            return None
+        applied = power_unit_scale(unit, options.get(CONF_MIN_POWER, DEFAULT_MIN_POWER))
+        return power_unit_scale(unit, None) / applied if applied > 0 else None
+
     def _standby_floor(self, options: dict[str, Any]) -> dict[str, Any] | None:
         """``standby_stop_floor`` over this device's recent history (#458)."""
         eff = self._effective_thresholds(options)
@@ -2407,6 +2454,7 @@ class SuggestionEngine:
         return standby_stop_floor(
             list(cycles), stop, off_delay,
             stop_changes=recorded_stop_changes(self.profile_store),
+            to_w=self._reading_to_w(options) or 1.0,
         )
 
     def generate_standby_floor_suggestions(self) -> dict[str, Any]:
@@ -2426,8 +2474,19 @@ class SuggestionEngine:
         eff = self._effective_thresholds(options)
         if float(eff[CONF_STOP_THRESHOLD_W]) >= floor_w:
             return {}
+        start_min = _round_power(floor_w * STANDBY_FLOOR_RATIO)
+        # Never a start in the working band (over ``_STANDBY_PEAK_FRACTION`` of the
+        # cycles' median peak): a unit read wrongly would stop every run from
+        # starting (review of PR #529).
+        peaks = [
+            _cycle_peak_w(c, c.get("power_data") or [])
+            for c in self.profile_store.get_past_cycles()[-20:]
+            if isinstance(c, dict)
+        ]
+        peaks = [p for p in peaks if p > 0]
+        if peaks and start_min >= _STANDBY_PEAK_FRACTION * float(np.median(peaks)):
+            return {}
         out: dict[str, Any] = {CONF_STOP_THRESHOLD_W: _standby_floor_entry(floor_w, floor)}
-        start_min = round(floor_w * STANDBY_FLOOR_RATIO, 2)
         start = _num(eff[CONF_START_THRESHOLD_W])
         if start is None or start < start_min:
             out[CONF_START_THRESHOLD_W] = _standby_floor_entry(start_min, floor)
@@ -2448,14 +2507,10 @@ class SuggestionEngine:
             float(eff[CONF_STOP_THRESHOLD_W]),
         )
         if adv is not None:
-            # Watts per reading unit, from the sensor's unit and Min Power: 1 for
-            # readings converted to watts, 1000 for a kW sensor read raw, 0.001
-            # for a mW one (``power_unit_scale``). Unknown unit: left to the guess.
-            known, unit = getattr(self, "_power_unit_snapshot", (False, None))
-            if known:
-                applied = power_unit_scale(unit, options.get(CONF_MIN_POWER, DEFAULT_MIN_POWER))
-                if applied > 0:
-                    adv = {**adv, "to_w": power_unit_scale(unit, None) / applied}
+            # Watts per reading unit (``_reading_to_w``); unknown: left to the guess.
+            to_w = self._reading_to_w(options)
+            if to_w:
+                adv = {**adv, "to_w": to_w}
         return steady_load_threshold_suggestions(adv)
 
     def generate_detection_suggestions(self) -> dict[str, Any]:

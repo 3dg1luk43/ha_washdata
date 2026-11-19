@@ -753,7 +753,7 @@ def learned_standby_level_w(
         recent = [c for c in list(cycles or [])[-STANDBY_LEVEL_RECENT_CYCLES:] if isinstance(c, dict)]
         adv = detect_standby_above_stop(recent, stop, stop_changes=stop_changes)
         if adv is not None:
-            level: float | None = float(adv["idle_w"])
+            level: float | None = float(adv.get("idle_level", adv["idle_w"]))  # unrounded
         else:
             clean, _excluded = select_clean_cycles(recent, stop_threshold_w=stop)
             points = [p for p in (_cycle_readings(c) for c in clean) if len(p) >= 5]

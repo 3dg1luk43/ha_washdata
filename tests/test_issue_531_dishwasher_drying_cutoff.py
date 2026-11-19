@@ -784,3 +784,26 @@ def test_an_observed_keepalive_step_keeps_the_quiet_before_a_beep() -> None:
     assert end_min is not None and BEEP_S / 60 <= end_min <= BEEP_S / 60 + 5
     unread = _replay_with_keepalive(observed=False)
     assert unread is None or unread > BEEP_S / 60 + 10
+
+
+def test_a_reading_the_heater_restarts_after_is_no_terminal_event() -> None:
+    """Review of PR #529: a cut-off run with a 20 W reading after 650 s of quiet and
+    its heater back at 2 kW 30 s later kept itself as complete; that reading was a
+    pause, not the run's end, so the siblings' later terminal events vote it out."""
+    def run(total: float, quiet_from: float, event_at: float, heater_back: float | None) -> tuple:
+        pts = []
+        for t in range(0, int(total) + 1, 10):
+            if t < quiet_from:
+                p = 2000.0 if 600 <= t < 1200 else 30.0
+            elif heater_back is not None and t >= heater_back:
+                p = 2000.0
+            elif event_at <= t < event_at + 10:
+                p = 20.0
+            else:
+                p = 1.0
+            pts.append((float(t), p))
+        return _run(pts)
+
+    cut = run(3000, 1800, 2450, 2480)                     # heater back at 2480 s
+    siblings = [run(4000, 1800, 3900, None) for _ in range(4)]  # real ends at 3900 s
+    assert cut_short_mask([cut] + siblings)[0]
