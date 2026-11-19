@@ -78,6 +78,7 @@ from .const import (
 )
 from .options_utils import option_int
 from .signal_processing import (
+    cumulative_wh,
     energy_gap_threshold_s,
     integrate_wh,
     longest_resumed_pause_s,
@@ -287,7 +288,9 @@ def _detector_gate_need(
     if m < 1:
         return 0.0
     dt = np.diff(ts)
-    cum = np.concatenate(([0.0], np.cumsum((ps[:-1] + ps[1:]) * 0.5 * dt / 3600.0)))
+    # integrate_wh as running sums: the same energy for a window with no interval
+    # over 60 s, read per window in O(1) (signal_processing.cumulative_wh).
+    cum = cumulative_wh(ts, ps)
     # A segment over 60 s may be masked as an outage (the threshold is at least
     # 60 s), which needs the window's own threshold; shorter ones never are.
     slow = np.concatenate(([0], np.cumsum(dt > 60.0)))
@@ -330,6 +333,14 @@ def _flat_standby_split(
         ENDING_FLAT_STANDBY_SPREAD_FRAC,
     )
 
+    if not all(math.isfinite(v) for v in (stop, off_delay, gap)):
+        return False
+    # As the energy scan: a non-finite reading compares false both ways and would
+    # pin the run scan on it (review of PR #529: Analyse now hung on a NaN).
+    points = [
+        (float(t), float(p)) for t, p in points
+        if math.isfinite(float(t)) and math.isfinite(float(p))
+    ]
     base_wait = max(float(off_delay), float(gap))
     span = max(float(off_delay), STANDBY_BAND_WINDOW_S)
     loose = (
@@ -3309,6 +3320,9 @@ class SuggestionEngine:
                         "reason": reason_thr,
                         "reason_key": "suggestion.reason.thr_batch",
                         "reason_params": {"cycles": n, "p05": f"{p05_min:.1f}"},
+                        # Past the post-apply cooldown: runs that never reach the
+                        # start add no cycles to end it (review of PR #529).
+                        "corrective": True,
                     }
             elif is_steady_load(p05_min, working_w):
                 # #527: no quiet phase inside the cycles, so the anchor is the

@@ -101,6 +101,23 @@ def integrate_wh(
     return float(np.sum(avg_power[mask] * dt_hours[mask]))
 
 
+def cumulative_wh(timestamps: np.ndarray, power: np.ndarray) -> np.ndarray:
+    """Running :func:`integrate_wh` (no gap mask) at each reading, from the first.
+
+    ``out[k] - out[lo]`` equals ``integrate_wh(ts[lo:k + 1], p[lo:k + 1])`` and, when
+    no interval in it exceeds ``max_gap_s``, the masked form too; a scan over many
+    windows of one trace reads them in O(1) each instead of re-integrating.
+    """
+    ts = np.asarray(timestamps, dtype=float)
+    ps = np.asarray(power, dtype=float)
+    if ts.size < 2:
+        return np.zeros(ts.size, dtype=float)
+    dt = np.diff(ts)
+    # Non-positive intervals add nothing, as integrate_wh's mask leaves them out.
+    seg = np.where(dt > 0, (ps[:-1] + ps[1:]) * 0.5 * dt / 3600.0, 0.0)
+    return np.concatenate(([0.0], np.cumsum(seg)))
+
+
 #: A stored cycle's interval longer than this is an outage, not a held reading.
 #: The top of ``energy_gap_threshold_s``'s range; 0.2% of 1018 recorded cycles have
 #: one (``devtools/cycle_energy_eval.py``).

@@ -31,6 +31,7 @@ import asyncio
 from typing import Any
 from unittest.mock import MagicMock
 
+import pytest
 from homeassistant.core import HomeAssistant
 
 from custom_components.ha_washdata.const import (
@@ -1717,3 +1718,32 @@ async def test_apply_writes_nothing_after_a_native_reconfigure_it_waited_through
     await hass.async_block_till_done()
     opts = hass.config_entries.async_get_entry(entry.entry_id).options
     assert opts[CONF_END_ENERGY_THRESHOLD] == 0.01 and opts[CONF_OFF_DELAY] == 90
+
+
+def test_a_non_finite_reading_does_not_stall_the_flat_standby_scan() -> None:
+    """Review of PR #529: NaN compares false against the stop both ways, so the
+    flat-standby run scan never moved past it and Analyse now hung."""
+    nan = float("nan")
+    assert not end_gate_would_split([(0.0, 80.0), (10.0, nan), (400.0, 80.0)], 4.0, 180.0, 360.0, 0.05)
+    assert not end_gate_would_split([(0.0, 80.0), (10.0, 3.0), (400.0, 80.0)], nan, 180.0, 360.0, 0.05)
+
+
+def test_the_running_integral_is_integrate_wh_per_window() -> None:
+    """Review of PR #529: the end-gate scan reads window energies from the shared
+    running sum, which must equal integrate_wh on every window it reads."""
+    import numpy as np  # noqa: PLC0415
+
+    from custom_components.ha_washdata.signal_processing import (  # noqa: PLC0415
+        cumulative_wh,
+        integrate_wh,
+    )
+
+    rng = np.random.default_rng(7)
+    ts = np.cumsum(rng.choice([0.0, 2.0, 10.0, 45.0], size=300))
+    ps = rng.uniform(0.0, 2000.0, size=300)
+    cum = cumulative_wh(ts, ps)
+    for lo, k in [(0, 299), (5, 40), (100, 101), (250, 250), (17, 288)]:
+        seg = slice(lo, k + 1)
+        want = integrate_wh(ts[seg], ps[seg], max_gap_s=60.0)
+        assert cum[k] - cum[lo] == pytest.approx(want, rel=1e-9, abs=1e-12)
+        assert cum[k] - cum[lo] == pytest.approx(integrate_wh(ts[seg], ps[seg]), rel=1e-9, abs=1e-12)

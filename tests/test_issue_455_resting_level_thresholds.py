@@ -204,6 +204,8 @@ def test_the_hold_band_still_lowers_a_start_the_runs_never_reach() -> None:
     out = _batch(cycles, {**WASHER_OPTS, CONF_START_THRESHOLD_W: 120.0}, "washing_machine")
     assert CONF_STOP_THRESHOLD_W not in out
     assert out[CONF_START_THRESHOLD_W]["value"] == pytest.approx(6.3)
+    # Corrective: a cooldown would hold it until cycles that cannot start ran.
+    assert out[CONF_START_THRESHOLD_W]["corrective"] is True
     # Reachable: the hold keeps both.
     out = _batch(cycles, {**WASHER_OPTS, CONF_START_THRESHOLD_W: 80.0}, "washing_machine")
     assert CONF_START_THRESHOLD_W not in out
