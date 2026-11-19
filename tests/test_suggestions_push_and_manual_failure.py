@@ -26,6 +26,7 @@
 """
 from __future__ import annotations
 
+import threading
 from typing import Any
 from unittest.mock import patch
 
@@ -34,9 +35,20 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
-from custom_components.ha_washdata.const import CONF_OFF_DELAY, DOMAIN, SIGNAL_WASHER_UPDATE
+from custom_components.ha_washdata.const import (
+    CONF_OFF_DELAY,
+    CONF_START_THRESHOLD_W,
+    CONF_STOP_THRESHOLD_W,
+    DOMAIN,
+    SIGNAL_WASHER_UPDATE,
+)
 from custom_components.ha_washdata.learning import MANUAL_ANALYSIS_ATTEMPTS
-from custom_components.ha_washdata.suggestion_engine import OWNER_MODEL, SuggestionEngine
+from custom_components.ha_washdata.suggestion_engine import (
+    OWNER_MODEL,
+    OWNER_START_THRESHOLD,
+    SuggestionEngine,
+    steady_load_threshold_suggestions,
+)
 
 
 async def _boot(hass: HomeAssistant, setup_washdata_entry: Any) -> tuple[Any, Any, list[int]]:
@@ -319,3 +331,43 @@ async def test_a_manual_analysis_that_failed_after_it_was_superseded_runs_again(
     assert len(runs) == 2
     assert res["result"]["count"] == len(store.get_suggestions() or {})
     assert CONF_OFF_DELAY in (store.get_suggestions() or {})
+
+
+async def test_a_refresh_whose_store_was_replaced_runs_its_passes_again(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """PR #529 review: Undo Import replaced the store while the startup refresh's
+    Start Threshold pass scanned. Its result was discarded and, with the options
+    unchanged, nothing computed the #527 correction for the restored history: a
+    plug in that fault never ends the cycle that would."""
+    entry = await setup_washdata_entry(
+        options={CONF_START_THRESHOLD_W: 20.0, CONF_STOP_THRESHOLD_W: 2.0}
+    )
+    await hass.async_block_till_done()
+    manager = hass.data[DOMAIN][entry.entry_id]
+    lm, store = manager.learning_manager, manager.profile_store
+    assert await store.async_save_pre_import_snapshot("test")
+    entered, release = threading.Event(), threading.Event()
+    calls: list[int] = []
+    correction = steady_load_threshold_suggestions(
+        {"low_w": 8.0, "start_w": 20.0, "stop_w": 2.0}
+    )
+    assert CONF_START_THRESHOLD_W in correction
+
+    def start_pass(_self: Any) -> dict[str, Any]:
+        calls.append(1)
+        if len(calls) == 1:
+            entered.set()
+            release.wait(5)
+        return correction
+
+    with patch.object(SuggestionEngine, "generate_start_threshold_suggestions", start_pass):
+        refresh = hass.async_create_task(lm.async_refresh_suggestions())
+        assert await hass.async_add_executor_job(entered.wait, 5)
+        await store.async_restore_pre_import_snapshot(on_replace=lm.reset_cadence_evidence)
+        release.set()
+        await refresh
+    assert len(calls) == 2
+    stored = (store.get_suggestions() or {}).get(CONF_START_THRESHOLD_W)
+    assert isinstance(stored, dict) and stored.get("owner") == OWNER_START_THRESHOLD
+    assert stored["value"] == correction[CONF_START_THRESHOLD_W]["value"]

@@ -385,6 +385,8 @@ class LearningManager:
         # that started before it applies nothing, since its options snapshot
         # (``for_job``) is no longer the one in force.
         self._config_generation: int = 0
+        # Bumped by each refresh, so one can tell a newer refresh has started.
+        self._refresh_seq: int = 0
         # One suggestion pass at a time, from its scan to its store (PR #529
         # review): a cycle end spawns several, and each end-gate guard checks its
         # values against what the others have pending. Run side by side, two
@@ -1159,23 +1161,41 @@ class LearningManager:
         a threshold no cycle can start under never produces the cycle end that
         runs the passes. ``clear`` drops every stored entry first (a device type
         change); otherwise only entries no pass owns (stored before passes owned
-        their entries) are dropped. Never raises.
+        their entries) are dropped. A store replaced during the run (a wipe, an
+        import, Undo Import) discards what it computed, so it runs once more.
+        Never raises.
 
         Ends with an entity update whatever it changed: the options or device type
         it follows decide which stored entries the sensor shows (PR #529 review).
         """
         self._config_generation += 1
+        self._refresh_seq += 1
+        seq = self._refresh_seq
         try:
-            stored = self.profile_store.get_suggestions() or {}
-            stale = [
-                key for key, entry in stored.items()
-                if clear or not isinstance(entry, dict) or not entry.get("owner")
-            ]
-            for key in stale:
-                self.profile_store.delete_suggestion(key)
-            if stale:
-                self.suggestion_engine.apply_suggestions({}, changed=True)
-            await self._async_run_all_passes()
+            for _attempt in range(2):
+                data_generation = getattr(self.profile_store, "_data_generation", 0)
+                stored = self.profile_store.get_suggestions() or {}
+                stale = [
+                    key for key, entry in stored.items()
+                    if clear or not isinstance(entry, dict) or not entry.get("owner")
+                ]
+                for key in stale:
+                    self.profile_store.delete_suggestion(key)
+                if stale:
+                    self.suggestion_engine.apply_suggestions({}, changed=True)
+                await self._async_run_all_passes()
+                # A wipe, import or Undo Import that replaced the store during the
+                # run took what its passes computed with it, and with the options
+                # unchanged nothing else re-derives them for the replacement (PR #529
+                # review: the #527 Start Threshold correction, which a plug in that
+                # fault never ends the cycle to recompute). Once more, unless a newer
+                # refresh is already doing it.
+                if (
+                    getattr(self.profile_store, "_data_generation", 0) == data_generation
+                    or seq != self._refresh_seq
+                ):
+                    break
+                self._logger.debug("Store replaced during the suggestion refresh; running it again")
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.error("Suggestion refresh failed: %s", e)
         self._announce_suggestions()
