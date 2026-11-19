@@ -842,8 +842,21 @@ def _note_stop_in_force(
         })
 
 
+def _options_before(entry: Any) -> dict[str, Any] | None:
+    """The entry's merged options before a write, for ``_record_option_changes``."""
+    try:
+        return {**getattr(entry, "data", {}), **getattr(entry, "options", {})}
+    except Exception:  # pylint: disable=broad-exception-caught
+        return None
+
+
 async def _record_option_changes(
-    hass: HomeAssistant, entry: Any, updates: dict[str, Any], source: str
+    hass: HomeAssistant,
+    entry: Any,
+    updates: dict[str, Any],
+    source: str,
+    *,
+    before: dict[str, Any] | None = None,
 ) -> None:
     """Record an option write in the settings changelog (#442).
 
@@ -854,14 +867,24 @@ async def _record_option_changes(
     values were only recoverable because they happened to have an older
     diagnostics dump.
 
-    Must be awaited BEFORE ``async_update_entry``, which schedules a reload that
-    rebuilds the store. Never raises: a changelog failure must not cost the write
-    it is describing (same contract as the inline version).
+    Awaited right AFTER ``async_update_entry``, with ``before`` the merged options
+    read just before it (PR #529 review): each row is stamped when its value took
+    effect, so the standby advisory judges a cycle that ended while the writer
+    was still awaiting under the Stop it ran with (``stop_threshold_changes``),
+    and a writer that aborts before the update records nothing. The reload the
+    update schedules is in place (``async_reload_entry``) and keeps this store;
+    the rows are on it before that reload can run. Without ``before`` the entry's
+    options now are the old values (a caller that has not written yet). Never
+    raises: a changelog failure must not cost the write it is describing (same
+    contract as the inline version).
     """
     if not updates:
         return
     try:
-        old_effective = {**getattr(entry, "data", {}), **getattr(entry, "options", {})}
+        old_effective = (
+            dict(before) if before is not None
+            else {**getattr(entry, "data", {}), **getattr(entry, "options", {})}
+        )
         changes = _diff_option_changes(old_effective, updates)
         if not changes:
             return
@@ -1629,9 +1652,12 @@ async def _apply_store_settings(
                 filtered = _without_inverted_threshold_pair(
                     entry, filtered, "store_download"
                 )  # item 515
-                await _record_option_changes(hass, entry, filtered, "store_download")
+                before = _options_before(entry)
                 hass.config_entries.async_update_entry(
                     entry, options={**entry.options, **filtered}
+                )
+                await _record_option_changes(
+                    hass, entry, filtered, "store_download", before=before
                 )
             settings_applied = len(filtered)
     return settings_applied
@@ -2445,8 +2471,8 @@ async def ws_set_options(
 
         # Settings change history (D7): diff the pre-update effective options against
         # the post-normalization values, but only for keys the user actually
-        # submitted, and persist BEFORE async_update_entry (which schedules a reload
-        # that rebuilds the store). A changelog failure must never block the save.
+        # submitted, recorded right after async_update_entry so each row is stamped
+        # when it took effect. A changelog failure must never block the save.
         # Through the shared helper, not a second copy of it. The per-setting
         # Revert trusts this history, so the two writers have to follow one
         # contract - and `_record_option_changes`'s own docstring already says it
@@ -2458,7 +2484,6 @@ async def ws_set_options(
             for k in msg["options"]
             if k in new_options or k in dropped_null_keys
         }
-        await _record_option_changes(hass, entry, submitted_post, "set_options")
 
         # When online features are disabled, clear the persisted store account so the
         # user's identity isn't silently retained after they opt out.
@@ -2484,7 +2509,9 @@ async def ws_set_options(
                     exc_info=True,
                 )
 
+        before = _options_before(entry)
         hass.config_entries.async_update_entry(entry, **update_kwargs)
+        await _record_option_changes(hass, entry, submitted_post, "set_options", before=before)
         _send_result(connection, msg["id"], "set_options", {"success": True})
     finally:
         lock.release()
@@ -4626,8 +4653,9 @@ async def async_apply_imported_entry_options(
         new_options = strip_null_options({**entry.options, **entry_options_updates})
         # ...and a non-numeric numeric setting is dropped, same reason (PLATFORM-13).
         new_options, _ = drop_invalid_numeric_options(new_options)
-        await _record_option_changes(hass, entry, entry_options_updates, source)
+        before = _options_before(entry)
         hass.config_entries.async_update_entry(entry, options=new_options)
+        await _record_option_changes(hass, entry, entry_options_updates, source, before=before)
 
 
 @websocket_api.websocket_command(
@@ -4913,11 +4941,12 @@ async def ws_import_config_selective(
                         filtered = _without_inverted_threshold_pair(
                             entry, filtered, "store_device_package"
                         )  # item 515
-                        await _record_option_changes(
-                            hass, entry, filtered, "store_device_package"
-                        )
+                        before = _options_before(entry)
                         hass.config_entries.async_update_entry(
                             entry, options={**entry.options, **filtered}
+                        )
+                        await _record_option_changes(
+                            hass, entry, filtered, "store_device_package", before=before
                         )
                     settings_applied = len(filtered)
             summary = {**summary, "settings_applied": settings_applied}
@@ -4970,11 +4999,12 @@ async def _async_restore_entry_options(
         restored, _ = drop_invalid_numeric_options(restored)
         if restored == current:
             return
+        before = _options_before(entry)
+        hass.config_entries.async_update_entry(entry, options=restored)
         await _record_option_changes(
             hass, entry, {k: v for k, v in restored.items() if current.get(k) != v},
-            "undo_import",
+            "undo_import", before=before,
         )
-        hass.config_entries.async_update_entry(entry, options=restored)
 
 
 @websocket_api.websocket_command(
@@ -5264,20 +5294,11 @@ async def ws_apply_suggestions(
                     # past the stamp again.
                     cycle_count = manager.profile_store.get_lifetime_cycle_count()
                     manager.profile_store.set_suggestion_apply_cycle_count(cycle_count)
-                    # Record BEFORE clear_suggestions/async_update_entry: both
-                    # persist, and the reload the latter schedules rebuilds the
-                    # store (#442).
-                    await _record_option_changes(hass, entry, updates, "apply_suggestions")
                     # Each write is awaited: a reload in between leaves the rest
                     # unwritten, and the reply says what already was (PR #529 review).
-                    if not _still_current():
-                        connection.send_error(
-                            msg["id"], "entry_reloaded",
-                            "The appliance was reloaded or its data restored while the "
-                            "suggestions were applied. The change is in the settings "
-                            "history, but no setting was saved; try again.",
-                        )
-                        return
+                    # The settings history is written last, once the options are
+                    # (``_record_option_changes``): an Apply that stops before them
+                    # records no change it did not make.
                     await manager.profile_store.clear_suggestions()
                     if not _still_current():
                         connection.send_error(
@@ -5290,7 +5311,11 @@ async def ws_apply_suggestions(
                     # Suggested values are all tunables -> layer them onto the
                     # existing options; never spread entry.data into options.
                     new_options = {**entry.options, **updates}
+                    before = _options_before(entry)
                     hass.config_entries.async_update_entry(entry, options=new_options)
+                    await _record_option_changes(
+                        hass, entry, updates, "apply_suggestions", before=before
+                    )
             if updates:
                 manager.notify_update()
 

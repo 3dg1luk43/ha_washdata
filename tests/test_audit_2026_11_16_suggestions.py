@@ -871,48 +871,84 @@ async def test_cadence_is_filed_under_the_sensor_that_reported_it(
 async def test_apply_stops_at_a_reload_between_its_writes(
     hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
 ) -> None:
-    """PR #529 review: a reload while Apply awaited the settings history or the
-    suggestion clear left it writing on to the old manager's store, then saying
-    nothing about what it had already written."""
+    """PR #529 review: a reload while Apply awaited the suggestion clear left it
+    writing on to the old manager's store, then saying nothing about what it had
+    already written. The settings history is written after the options, so such
+    an Apply records no change it did not make."""
     from unittest.mock import MagicMock, patch  # noqa: PLC0415
 
     from custom_components.ha_washdata import ws_api  # noqa: PLC0415
 
-    for after in ("_record_option_changes", "clear_suggestions"):
-        entry = await setup_washdata_entry(options={CONF_END_ENERGY_THRESHOLD: 0.01, CONF_OFF_DELAY: 60})
-        manager = hass.data[DOMAIN][entry.entry_id]
-        store = manager.profile_store
-        store.set_suggestion(CONF_END_ENERGY_THRESHOLD, 0.02, reason="r", flags={"owner": OWNER_BATCH})
-        real_get = ws_api._get_manager  # noqa: SLF001
-        state = {"reloaded": False}
+    entry = await setup_washdata_entry(options={CONF_END_ENERGY_THRESHOLD: 0.01, CONF_OFF_DELAY: 60})
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store = manager.profile_store
+    store.set_suggestion(CONF_END_ENERGY_THRESHOLD, 0.02, reason="r", flags={"owner": OWNER_BATCH})
+    real_get = ws_api._get_manager  # noqa: SLF001
+    state = {"reloaded": False}
 
-        def current(h: Any, eid: str, _real=real_get) -> Any:
-            return MagicMock() if state["reloaded"] else _real(h, eid)
+    def current(h: Any, eid: str, _real=real_get) -> Any:
+        return MagicMock() if state["reloaded"] else _real(h, eid)
 
-        real_record, real_clear = ws_api._record_option_changes, store.clear_suggestions  # noqa: SLF001
+    real_clear = store.clear_suggestions
 
-        async def record(*a: Any, _which=after, _real=real_record) -> None:
-            await _real(*a)
-            state["reloaded"] = state["reloaded"] or _which == "_record_option_changes"
+    async def clear(*a: Any) -> None:
+        await real_clear(*a)
+        state["reloaded"] = True
 
-        async def clear(*a: Any, _which=after, _real=real_clear) -> None:
-            await _real(*a)
-            state["reloaded"] = state["reloaded"] or _which == "clear_suggestions"
+    cleared = MagicMock(side_effect=clear)
+    client = await hass_ws_client(hass)
+    with patch.object(ws_api, "_get_manager", side_effect=current), \
+            patch.object(store, "clear_suggestions", cleared):
+        await client.send_json_auto_id({
+            "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry.entry_id,
+            "keys": [CONF_END_ENERGY_THRESHOLD],
+        })
+        res = await client.receive_json()
+    assert res["success"] is False and res["error"]["code"] == "entry_reloaded"
+    assert "cleared" in res["error"]["message"]
+    assert cleared.called
+    assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_END_ENERGY_THRESHOLD] == 0.01
+    assert store.get_settings_changelog() == []
 
-        cleared = MagicMock(side_effect=clear)
-        client = await hass_ws_client(hass)
-        with patch.object(ws_api, "_get_manager", side_effect=current), \
-                patch.object(ws_api, "_record_option_changes", side_effect=record), \
-                patch.object(store, "clear_suggestions", cleared):
-            await client.send_json_auto_id({
-                "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry.entry_id,
-                "keys": [CONF_END_ENERGY_THRESHOLD],
-            })
-            res = await client.receive_json()
-        assert res["success"] is False and res["error"]["code"] == "entry_reloaded", after
-        assert ("history" if after == "_record_option_changes" else "cleared") in res["error"]["message"]
-        assert cleared.called is (after == "clear_suggestions")
-        assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_END_ENERGY_THRESHOLD] == 0.01
+
+async def test_a_stop_row_is_stamped_when_the_apply_wrote_it(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any, freezer: Any
+) -> None:
+    """PR #529 review: the Stop row was stamped before Apply's awaited writes, so a
+    cycle that ended meanwhile, under the old Stop, was judged under the new one."""
+    from datetime import timedelta  # noqa: PLC0415
+    from unittest.mock import patch  # noqa: PLC0415
+
+    from homeassistant.util import dt as dt_util  # noqa: PLC0415
+
+    from custom_components.ha_washdata import suggestion_engine as se  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(options={
+        CONF_MIN_POWER: 2.0, CONF_START_THRESHOLD_W: 10.0, CONF_STOP_THRESHOLD_W: 5.0,
+    })
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    store.set_suggestion(CONF_STOP_THRESHOLD_W, 4.0, reason="r", flags={"owner": OWNER_BATCH})
+    real_clear = store.clear_suggestions
+    ended: list[Any] = []
+
+    async def clear(*a: Any) -> None:
+        freezer.tick(timedelta(seconds=5))  # the write takes a while
+        ended.append(dt_util.utcnow())  # a cycle ends meanwhile, under 5 W
+        freezer.tick(timedelta(seconds=5))
+        await real_clear(*a)
+
+    client = await hass_ws_client(hass)
+    with patch.object(store, "clear_suggestions", side_effect=clear):
+        await client.send_json_auto_id({
+            "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry.entry_id,
+            "keys": [CONF_STOP_THRESHOLD_W],
+        })
+        res = await client.receive_json()
+    assert res["success"] and res["result"]["applied"] == [CONF_STOP_THRESHOLD_W], res
+    changes = se.stop_threshold_changes(store.get_settings_changelog())
+    assert [old for _when, old in changes] == [5.0]
+    cycle = {"end_time": ended[0].isoformat()}
+    assert se._stop_at_end(cycle, changes, 4.0) == 5.0  # noqa: SLF001
 
 
 async def test_a_pass_from_before_a_restore_applies_nothing(mock_hass: Any) -> None:
