@@ -715,3 +715,45 @@ async def test_a_streak_counted_before_an_import_restarts_at_the_next_check(
             await _check(hass, manager, state.key)
     assert len(_mismatches(sent)) == 1
 
+
+async def test_a_streak_counted_before_a_group_edit_restarts_at_the_next_check(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """PR #529 review: a group edit BETWEEN two checks changes the membership the
+    deficits are read against. The pending streak was counted under the old
+    groups, so the first deficit under the new ones starts a run; a run under
+    unchanged groups still establishes it, once."""
+    _entry, manager, sent, state = await _past_half(hass, setup_washdata_entry, freezer)
+    store = manager.profile_store
+    state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
+    assert await store.create_profile_group("Solo", ["Cotton"])
+    wrong = _result("Synthetics", {"Synthetics": 0.9, "Cotton": 0.5})
+    with patch.object(store, "async_match_profile", AsyncMock(return_value=wrong)):
+        await _check(hass, manager, state.key)
+        assert _mismatches(sent) == []
+        assert state.streak == 1 and not state.fired
+        for _ in range(PROGRAM_MISMATCH_PERSISTENCE):
+            await _check(hass, manager, state.key)
+    assert len(_mismatches(sent)) == 1
+
+
+async def test_a_restored_streak_is_counted_under_the_groups_at_the_restore(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """The snapshot brings a pending streak back without the groups it was counted
+    under: it is taken as counted under the groups at the restore, so a group edit
+    before the next check still restarts it."""
+    _entry, manager, sent, state = await _past_half(hass, setup_washdata_entry, freezer)
+    store = manager.profile_store
+    state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
+    snap = manager._augment_active_snapshot(manager.detector.get_state_snapshot())  # noqa: SLF001
+    manager._program_mismatch = match_rules.ProgramMismatchState()  # noqa: SLF001
+    manager._restore_program_mismatch(snap["program_mismatch"])  # noqa: SLF001
+    back = manager._program_mismatch_state()  # noqa: SLF001
+    assert back.streak == PROGRAM_MISMATCH_PERSISTENCE - 1
+    assert await store.create_profile_group("Solo", ["Cotton"])
+    wrong = _result("Synthetics", {"Synthetics": 0.9, "Cotton": 0.5})
+    with patch.object(store, "async_match_profile", AsyncMock(return_value=wrong)):
+        await _check(hass, manager, back.key)
+    assert _mismatches(sent) == []
+    assert back.streak == 1

@@ -1199,8 +1199,10 @@ class ProgramMismatchState:
     program); a different key starts it afresh. Once ``fired`` it stays set for
     that key: the trigger is sent once and the State sensor keeps showing it.
     ``data_generation`` is the caller's stored-data generation the pending
-    ``streak`` was counted on (in memory only, never in ``as_dict``): matches on
-    data an import or undo has since replaced are no run of evidence.
+    ``streak`` was counted on, and ``families`` the profile groups it was counted
+    under (:func:`program_families`); both in memory only, never in ``as_dict``:
+    matches on data an import or undo has since replaced, or read against groups
+    edited since, are no run of evidence.
     """
 
     key: Any = None
@@ -1209,6 +1211,7 @@ class ProgramMismatchState:
     looks_like: str | None = None
     margin: float | None = None
     data_generation: Any = None
+    families: dict[str, str] | None = None
 
     def as_dict(self) -> dict[str, Any]:
         return {

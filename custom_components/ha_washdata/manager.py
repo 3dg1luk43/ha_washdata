@@ -1724,6 +1724,7 @@ class WashDataManager:
             return
         state.restore(raw)
         state.data_generation = getattr(self.profile_store, "_data_generation", 0)
+        state.families = match_rules.program_families(self.profile_store.get_profile_groups())
         checked = raw.get("checked_s")
         try:
             # An unbounded JSON int (10**400) raises here rather than reading inf.
@@ -1908,10 +1909,17 @@ class WashDataManager:
                 return
             # The pending streak was counted on data an import or undo replaced
             # BETWEEN two checks: those matches scored profiles that are gone
-            # (PR #529 review), so the run restarts on this one.
+            # (PR #529 review), so the run restarts on this one. Likewise under
+            # profile groups edited between two checks: the deficits were read
+            # against another membership (the guard above only sees an edit
+            # during the match). ``_cohesion_cache_generation`` is no revision
+            # of the groups: every envelope rebuild bumps it too.
             if state.data_generation is not None and state.data_generation != generation:
                 state.streak = 0
             state.data_generation = generation
+            if state.families is not None and state.families != families:
+                state.streak = 0
+            state.families = families
             selected = key[2]
             fired = match_rules.program_mismatch_tick(
                 state,
