@@ -609,7 +609,7 @@ async def test_a_rebuild_asked_for_during_a_pass_runs_again_when_it_ends(
     gate = asyncio.Event()
     calls = 0
 
-    async def rebuild() -> int:
+    async def rebuild(**_kw: Any) -> int:
         nonlocal calls
         calls += 1
         if calls == 1:

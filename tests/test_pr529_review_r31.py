@@ -2,21 +2,25 @@
 
 * A cadence summary still in the executor when a wholesale import replaced the
   history was stored into the imported one.
+* A reconfigure away from dishwasher during the one-time #531 rebuild built the
+  rest without the rule and still set the marker, so switching back skipped it.
 """
 from __future__ import annotations
 
 import threading
+from datetime import datetime, timedelta, timezone
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
 
 from custom_components.ha_washdata import learning
-from custom_components.ha_washdata.const import DOMAIN
+from custom_components.ha_washdata.const import CUT_SHORT_REBUILD_KEY, DOMAIN
 
 POWER = "sensor.washer_power"
 _CLEAN_END = {"status": "completed", "termination_reason": "smart"}
+T0 = datetime(2026, 11, 10, 8, tzinfo=timezone.utc)
 
 
 def _hold_a_cycle(lm: Any, interval_s: float) -> None:
@@ -68,3 +72,49 @@ async def test_an_import_discards_a_summary_still_in_the_executor(
     assert lm.close_cycle_cadence(_CLEAN_END)
     await hass.async_block_till_done()
     assert store.get_cadence_summaries(POWER) == [[2.0, 2.0], [90.0, 90.0]]
+
+
+async def test_a_type_change_during_the_cut_short_rebuild_leaves_it_pending(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """Reconfigured to a washer while profile A rebuilt: B was built without the
+    #531 rule and the marker was set, so the switch back to dishwasher skipped the
+    repair. The pass is bound to the type it was dispatched for."""
+    entry = await setup_washdata_entry(device_type="dishwasher", options={"stop_threshold_w": 4.5})
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store = manager.profile_store
+    await hass.async_block_till_done()
+    store._data["profiles"] = {"A": {}, "B": {}}  # noqa: SLF001
+    store._data["past_cycles"] = [  # noqa: SLF001
+        {"id": f"{n}{i}", "profile_name": n, "status": "completed", "duration": 600.0,
+         "start_time": (T0 + timedelta(days=i)).isoformat(),
+         "power_data": [[float(t), 1000.0 if t < 500 else 1.0] for t in range(0, 601, 10)]}
+        for n in "AB" for i in range(3)
+    ]
+    store._data.pop(CUT_SHORT_REBUILD_KEY, None)  # noqa: SLF001
+    real = store.async_rebuild_envelope
+    rebuilt: list[tuple[str, Any]] = []
+
+    async def reconfigured_during_a(name: str) -> bool:
+        rebuilt.append((name, store.device_type))
+        out = await real(name)
+        if name == "A":  # what the reload of a reconfigure sets
+            store.device_type = manager.device_type = "washing_machine"
+        return out
+
+    with patch.object(store, "async_rebuild_envelope", side_effect=reconfigured_during_a):
+        manager.async_schedule_cut_short_rebuild()
+        await hass.async_block_till_done()
+    assert rebuilt == [("A", "dishwasher")]
+    assert store.cut_short_rebuild_pending()
+
+    # Back to dishwasher: the repair runs, under the rule, and completes.
+    store.device_type = manager.device_type = "dishwasher"
+    with patch.object(
+        store, "async_rebuild_for_cut_short_rule",
+        AsyncMock(side_effect=store.async_rebuild_for_cut_short_rule),
+    ) as rebuild:
+        manager.async_schedule_cut_short_rebuild()
+        await hass.async_block_till_done()
+    assert rebuild.await_args.kwargs == {"device_type": "dishwasher"}
+    assert not store.cut_short_rebuild_pending()

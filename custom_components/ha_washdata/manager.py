@@ -2657,15 +2657,19 @@ class WashDataManager:
         except Exception as exc:  # pylint: disable=broad-exception-caught
             self._logger.warning("Envelope rebuild after the energy fix failed: %s", exc)
 
-    async def _async_rebuild_for_cut_short_rule(self) -> None:
+    async def _async_rebuild_for_cut_short_rule(self, device_type: str) -> None:
         """Rebuild a dishwasher's profiles once under the #531 cut-off rule, so a
         programme that was ending inside its drying stops at the first run after
         the update. Runs again when a request arrived during the pass and the
-        marker is still unset (PR #529 review). Never raises."""
+        marker is still unset (PR #529 review). Bound to ``device_type``, the type
+        it was dispatched for: a pass the store finds reconfigured to another type
+        leaves the marker unset (PR #529 review). Never raises."""
         while True:
             self._cut_short_rebuild_again = False
             try:
-                count = await self.profile_store.async_rebuild_for_cut_short_rule()
+                count = await self.profile_store.async_rebuild_for_cut_short_rule(
+                    device_type=device_type
+                )
                 self._logger.info(
                     "Rebuilt %d profiles without runs cut inside their drying (#531)", count
                 )
@@ -2691,7 +2695,9 @@ class WashDataManager:
         if existing is not None and not existing.done():
             self._cut_short_rebuild_again = True
             return
-        self._cut_short_rebuild_task = self._spawn_tracked(self._async_rebuild_for_cut_short_rule())
+        self._cut_short_rebuild_task = self._spawn_tracked(
+            self._async_rebuild_for_cut_short_rule(self.device_type)
+        )
 
     def async_schedule_energy_rebuild(self) -> None:
         """Run the envelope rebuild armed by the v18 migration or an import of an

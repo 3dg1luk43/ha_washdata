@@ -8245,7 +8245,7 @@ class ProfileStore:
         rule (`CUT_SHORT_REBUILD_KEY` absent: a store from before it)."""
         return not self._data.get(CUT_SHORT_REBUILD_KEY)
 
-    async def async_rebuild_for_cut_short_rule(self) -> int:
+    async def async_rebuild_for_cut_short_rule(self, device_type: str | None = None) -> int:
         """Rebuild, once, every profile that has traced evidence cycles (#531).
 
         Only those: a profile known only by its saved envelope (an import without
@@ -8254,11 +8254,21 @@ class ProfileStore:
         an interrupted pass runs again at the next start, and so does one where a
         profile's rebuild raised or an import/undo replaced the data meanwhile (PR
         #529 review: the marker must not land on data the pass never rebuilt).
-        Returns how many envelopes were rebuilt. Never raises.
+        ``device_type`` is the type the pass was dispatched for (default: the
+        store's now): a reconfigure to another type meanwhile builds the rest
+        without the dishwasher rule, so the pass stops and the marker stays unset
+        (PR #529 review). Returns how many envelopes were rebuilt. Never raises.
         """
         count = 0
         try:
             data_generation = getattr(self, "_data_generation", 0)
+            bound_type = self.device_type if device_type is None else device_type
+
+            def _stale() -> bool:
+                return (
+                    getattr(self, "_data_generation", 0) != data_generation
+                    or self.device_type != bound_type
+                )
 
             def _names() -> set[str]:
                 profiles = set(self._data.get("profiles") or {})
@@ -8274,7 +8284,7 @@ class ProfileStore:
             # (no new data generation) moves an unrebuilt envelope to a name the
             # first list did not have (review of PR #529). Bounded.
             for _round in range(3):
-                if getattr(self, "_data_generation", 0) != data_generation:
+                if _stale():
                     break
                 pending = sorted(_names() - done - set(failed))
                 if not pending:
@@ -8284,7 +8294,7 @@ class ProfileStore:
                     # import or undo replaced it, a name may be an envelope-only
                     # profile of the new data, which a rebuild would delete (PR
                     # #529 review).
-                    if getattr(self, "_data_generation", 0) != data_generation:
+                    if _stale():
                         break
                     try:
                         # A newer build of the same profile started meanwhile: this
@@ -8295,16 +8305,12 @@ class ProfileStore:
                         taken = gens.get(name, 0) + 1
                         if await self.async_rebuild_envelope(name):
                             count += 1
-                        if gens.get(name, 0) <= taken:
+                        if gens.get(name, 0) <= taken and self.device_type == bound_type:
                             done.add(name)
                     except Exception as exc:  # noqa: BLE001 - keep the rest, retry later
                         failed.append(name)
                         self._logger.warning("Rebuild of %s under the #531 rule failed: %s", name, exc)
-            if (
-                failed
-                or getattr(self, "_data_generation", 0) != data_generation
-                or _names() - done
-            ):
+            if failed or _stale() or _names() - done:
                 return count  # still pending: the next start runs it again
             self._data[CUT_SHORT_REBUILD_KEY] = True
             await self.async_save()
