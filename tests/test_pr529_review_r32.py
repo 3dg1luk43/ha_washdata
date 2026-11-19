@@ -3,20 +3,35 @@
 * A wholesale import (panel or service) replaced the history but kept the
   update intervals measured before it: with no stored cadence for the sensor,
   the operational pass sized from the replaced history's plug.
+* #530: a device type changed in place while a program check matched let the
+  old type's result set the latch the new type never sends; switched back, the
+  pick could not fire again.
 """
 from __future__ import annotations
 
 import json
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 from homeassistant.util import dt as dt_util
 
 from custom_components.ha_washdata import ws_api
-from custom_components.ha_washdata.const import DOMAIN
+from custom_components.ha_washdata.const import (
+    DEVICE_TYPE_DRYER,
+    DEVICE_TYPE_OTHER,
+    DEVICE_TYPE_WASHING_MACHINE,
+    DOMAIN,
+    PROGRAM_MISMATCH_PERSISTENCE,
+)
+from tests.test_issue_530_program_mismatch import (
+    _check,
+    _mismatches,
+    _past_half,
+    _result,
+)
 
 POWER = "sensor.washer_power"
 _CLEAN_END = {"status": "completed", "termination_reason": "smart"}
@@ -93,3 +108,53 @@ async def test_the_import_service_forgets_them_too(
     await hass.async_block_till_done()
     assert manager.profile_store.get_profiles().keys() == {"Cotton"}
     assert manager.learning_manager.cadence() is None
+
+
+# ── #530: the program check is bound to the device type ──────────────────────
+
+
+async def test_a_device_type_change_during_the_match_discards_it(
+    hass: HomeAssistant, setup_washdata_entry: Any, freezer: Any
+) -> None:
+    """The panel turns the washer into a Threshold Device while the check
+    matches: the result neither fires (the type is not offered it) nor sets the
+    latch, so switched back the same pick still fires."""
+    _entry, manager, sent, state = await _past_half(hass, setup_washdata_entry, freezer)
+    store = manager.profile_store
+    wrong = _result("Synthetics", {"Synthetics": 0.9, "Cotton": 0.5})
+
+    async def match_and_retype(*_a: Any, **_k: Any) -> Any:
+        manager.device_type = DEVICE_TYPE_OTHER  # what async_reload_config assigns
+        return wrong
+
+    state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
+    with patch.object(store, "async_match_profile", new=match_and_retype):
+        await _check(hass, manager, state.key)
+    assert _mismatches(sent) == []
+    assert not state.fired and state.streak == 0
+    assert manager.program_mismatch is None
+    # Back to a washer: the pick is still checked, and fires on its own run.
+    manager.device_type = DEVICE_TYPE_WASHING_MACHINE
+    with patch.object(store, "async_match_profile", AsyncMock(return_value=wrong)):
+        for _ in range(PROGRAM_MISMATCH_PERSISTENCE):
+            await _check(hass, manager, state.key)
+    assert len(_mismatches(sent)) == 1
+    assert manager.program_mismatch is not None
+
+
+async def test_a_streak_counted_as_another_device_type_restarts(
+    hass: HomeAssistant, setup_washdata_entry: Any, freezer: Any
+) -> None:
+    """Washer -> dryer between two checks: the matches counted as a washer were
+    scored with the washer's matcher settings, so the run restarts."""
+    _entry, manager, sent, state = await _past_half(hass, setup_washdata_entry, freezer)
+    wrong = _result("Synthetics", {"Synthetics": 0.9, "Cotton": 0.5})
+    state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
+    state.device_type = DEVICE_TYPE_WASHING_MACHINE  # counted as a washer
+    manager.device_type = DEVICE_TYPE_DRYER
+    with patch.object(
+        manager.profile_store, "async_match_profile", AsyncMock(return_value=wrong)
+    ):
+        await _check(hass, manager, state.key)
+    assert _mismatches(sent) == []
+    assert state.streak == 1 and state.device_type == DEVICE_TYPE_DRYER

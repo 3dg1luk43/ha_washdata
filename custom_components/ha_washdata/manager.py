@@ -1875,6 +1875,7 @@ class WashDataManager:
                 self._async_check_program_mismatch(
                     list(readings), self._match_identity(), state.key,
                     paused_s=self._program_mismatch_open_pause_s(),
+                    device_type=self.device_type,
                 )
             )
         except Exception:  # pylint: disable=broad-exception-caught
@@ -1923,6 +1924,7 @@ class WashDataManager:
         key: tuple[Any, ...],
         *,
         paused_s: float | None = None,
+        device_type: str | None = None,
     ) -> None:
         """One background match of a hand-picked program (#530): the live tick's
         own ``async_match_profile`` call, read only by
@@ -1937,8 +1939,15 @@ class WashDataManager:
         with the trace; now when not given). Finished pauses are already cut
         out, the open one only once the resume banks it, and a pick paused at
         20 of its 100 minutes was past half after 30 minutes of pause (PR #529
-        review)."""
+        review).
+
+        ``device_type`` is the one the check was scheduled as (now when not
+        given): a device type changed in place (the panel, no reload) while the
+        match ran discards it, the streak restarted, before it can set the latch
+        the new type never sends (PR #529 review)."""
         try:
+            if device_type is None:
+                device_type = self.device_type
             if paused_s is None:
                 paused_s = self._program_mismatch_open_pause_s()
             duration = (readings[-1][0] - readings[0][0]).total_seconds()
@@ -1968,6 +1977,12 @@ class WashDataManager:
                 state.streak = 0
                 state.data_generation = getattr(self.profile_store, "_data_generation", 0)
                 return
+            if self.device_type != device_type:
+                # Scored as the old type (energy mode, rhythm term, members) and
+                # perhaps for a type the trigger is not offered for any more.
+                state.streak = 0
+                state.device_type = self.device_type
+                return
             if families != match_rules.program_families(self.profile_store.get_profile_groups()):
                 return
             expected = self._matched_profile_duration
@@ -1986,6 +2001,10 @@ class WashDataManager:
             if state.families is not None and state.families != families:
                 state.streak = 0
             state.families = families
+            # ...and as another device type BETWEEN two checks.
+            if state.device_type is not None and state.device_type != device_type:
+                state.streak = 0
+            state.device_type = device_type
             selected = key[2]
             fired = match_rules.program_mismatch_tick(
                 state,
