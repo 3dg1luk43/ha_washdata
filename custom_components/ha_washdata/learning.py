@@ -803,7 +803,10 @@ class LearningManager:
             self._store_finished_summaries()
             return
         self._summaries_in_flight += 1
-        coro = self._async_commit_cycle_summary(pending, slot, self._cadence_epoch)
+        coro = self._async_commit_cycle_summary(
+            pending, slot, self._cadence_epoch,
+            getattr(self.profile_store, "_data_generation", 0),
+        )
         task = self._spawn(coro)
         if not isinstance(task, asyncio.Future):
             # Nothing runs it (a mocked hass): inline, or the due pass would wait forever.
@@ -813,7 +816,11 @@ class LearningManager:
             self._store_finished_summaries()
 
     async def _async_commit_cycle_summary(
-        self, pending: deque[tuple[float, datetime]], slot: list[Any], epoch: int
+        self,
+        pending: deque[tuple[float, datetime]],
+        slot: list[Any],
+        epoch: int,
+        data_generation: int,
     ) -> None:
         """``_commit_cycle_summary``'s executor job; then the pass that waited for it."""
         summary: tuple[float, float] | None = None
@@ -824,6 +831,12 @@ class LearningManager:
         finally:
             if epoch == self._cadence_epoch:
                 self._summaries_in_flight = max(0, self._summaries_in_flight - 1)
+                if getattr(self.profile_store, "_data_generation", 0) != data_generation:
+                    # An import replaced the history (and its summaries) it was
+                    # measured into (PR #529 review): stored, an old 90 s cycle
+                    # joined an imported 2 s history. Dropped; a cycle that ends
+                    # against the replacement stores its own.
+                    summary = None
                 # Finished, even cancelled: a later cycle's summary never waits on it.
                 slot[1:] = [summary, True]
         if epoch != self._cadence_epoch:
