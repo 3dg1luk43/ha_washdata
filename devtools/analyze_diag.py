@@ -43,7 +43,7 @@ One input is approximated: the operational pass reads the cadence model the
 manager fills from live reading intervals of cycles that ended on their own
 (``LearningManager.close_cycle_cadence``). A file does not carry it, so it is
 rebuilt from the stored traces of completed cycles (intervals in (0.1, 1800) s
-from each real reading to the stored reading before it, a keepalive included).
+from each real reading to the real reading before it; keepalives are skipped).
 A trace stored with a throttle or a trim can differ from what the manager saw.
 It is not scoped to the power sensor either: the live model reads only the
 summaries measured on the current sensor (``ProfileStore.get_cadence_summaries``),
@@ -80,8 +80,8 @@ def _cadence_intervals(cycles: list[dict[str, Any]]) -> list[list[float]]:
 
     One list per cycle, as ``suggestion_loop_eval.cadence`` (and the live
     ``LearningManager.cadence``) summarises them per cycle (item 637), each timed
-    as the live model times it (``suggestion_loop_eval.stored_cycle_intervals``: a
-    keepalive moves the clock, only a real reading adds an interval), so a cycle
+    as the live model times it (``suggestion_loop_eval.stored_cycle_intervals``:
+    between real reports, a keepalive neither moves the clock nor adds one), so a cycle
     below ``CADENCE_MIN_INTERVALS`` real ones gets no summary, as live.
     """
     import suggestion_loop_eval as slo  # noqa: PLC0415

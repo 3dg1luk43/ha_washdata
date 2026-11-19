@@ -101,9 +101,10 @@ def test_analyze_diag_has_no_forked_heuristics() -> None:
 
 
 def test_analyze_diag_times_a_cycle_as_the_live_cadence_model() -> None:
-    """A keepalive moves the clock but adds no interval (PR #529 review): 20 real
-    readings with a keepalive between each pair are 19 intervals, below
-    ``CADENCE_MIN_INTERVALS``, so that cycle gets no summary, as live."""
+    """A keepalive neither moves the clock nor adds an interval (PR #529 review):
+    20 real readings with a keepalive between each pair are 19 intervals of the
+    real 10 s spacing, below ``CADENCE_MIN_INTERVALS``, so that cycle gets no
+    summary, as live."""
     diag = _module("analyze_diag")
     sle = _module("suggestion_loop_eval")
     steady = {"status": "completed",
@@ -113,7 +114,7 @@ def test_analyze_diag_times_a_cycle_as_the_live_cadence_model() -> None:
                   "synthetic_offsets": [p[0] for p in pts[1::2]]}
     per_cycle = diag._cadence_intervals([steady, kept_alive])  # noqa: SLF001
     assert [len(ivs) for ivs in per_cycle] == [24, 19]
-    assert set(per_cycle[1]) == {5.0}
+    assert set(per_cycle[1]) == {10.0}
     assert sle.cadence(per_cycle) == (60.0, 60.0)
 
 

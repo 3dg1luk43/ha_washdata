@@ -37,16 +37,16 @@ def test_the_legacy_cadence_reads_the_newest_200_intervals() -> None:
     assert (p95, median) == (30.0, 30.0)
 
 
-def test_a_keepalive_moves_the_cadence_clock_but_is_not_timed() -> None:
-    """The live cadence model times each real reading against the manager's last
-    reading, which a watchdog keepalive advances too (PR #529 review)."""
+def test_a_keepalive_neither_moves_the_cadence_clock_nor_is_timed() -> None:
+    """The live cadence model times each real reading against the sensor's previous
+    real report, which a watchdog keepalive does not move (PR #529 review)."""
     real_only = {"power_data": [[0.0, 500.0], [60.0, 500.0], [120.0, 500.0]]}
     assert churn._intervals(real_only) == [60.0, 60.0]  # noqa: SLF001
     kept_alive = {
         "power_data": [[0.0, 500.0], [30.0, 500.0], [60.0, 500.0], [120.0, 500.0]],
         "synthetic_offsets": [30.0],
     }
-    assert churn._intervals(kept_alive) == [30.0, 60.0]  # noqa: SLF001
+    assert churn._intervals(kept_alive) == [60.0, 60.0]  # noqa: SLF001
 
 
 def _export() -> dict:

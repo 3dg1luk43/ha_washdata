@@ -15,8 +15,8 @@ cycle end at a time.
 **Walk** (per corpus device, stored cycles in start order, all production code):
 
 * every cycle that ended on its own commits its update intervals (``0.1 < dt < 1800``
-  s from each real reading to the stored reading before it, a synthetic keepalive
-  included, as the live clock runs: ``suggestion_loop_eval.stored_cycle_intervals``;
+  s from each real reading to the real reading before it, keepalives skipped, as
+  the live clock runs: ``suggestion_loop_eval.stored_cycle_intervals``;
   the newest ``learning._CYCLE_MAX_INTERVALS``), as ``LearningManager.close_cycle_cadence`` does; then the operational pass runs on the
   cadence model (``suggestion_loop_eval.cadence``: one ``learning.cycle_cadence``
   summary per cycle, the median over the last ``CADENCE_RECENT_CYCLES``);
@@ -132,7 +132,7 @@ def legacy_cadence(per_cycle: list[list[float]]) -> tuple[float, float] | None:
 
 
 def _intervals(cycle: dict[str, Any]) -> list[float]:
-    """The intervals a cycle commits to the live cadence model (keepalives move the clock)."""
+    """The intervals a cycle commits to the live cadence model (between real reports)."""
     return sle.stored_cycle_intervals(cycle)
 
 

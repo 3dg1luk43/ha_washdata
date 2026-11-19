@@ -793,16 +793,18 @@ def stored_cycle_intervals(cycle: dict[str, Any]) -> list[float]:
     """A stored cycle's update intervals as the live cadence model takes them.
 
     ``LearningManager.process_power_reading`` times a real reading against the
-    manager's ``_last_reading_time``, which the watchdog's keepalives (the
-    ``synthetic_offsets`` rows) advance too: every reading moves the clock, only a
-    real one adds an interval (as ``_ManagerTap`` does on a replay). ``0.1 < dt <
-    1800`` s, oldest first.
+    sensor's previous real report (``manager._last_sensor_report``): the watchdog's
+    keepalives (the ``synthetic_offsets`` rows) neither add an interval nor move
+    that clock, so they are skipped. ``0.1 < dt < 1800`` s, oldest first. A trimmed
+    trace or a sensor swap mid-cycle is not visible here.
     """
     synthetic = synthetic_offset_keys(cycle) or set()
     out: list[float] = []
     prev: float | None = None
     for t, _p in _cycle_readings(cycle):
-        if prev is not None and offset_key(t) not in synthetic and 0.1 < t - prev < 1800:
+        if offset_key(t) in synthetic:
+            continue
+        if prev is not None and 0.1 < t - prev < 1800:
             out.append(t - prev)
         prev = t
     return out
