@@ -41,7 +41,11 @@ up as the matched run, over the recorded corpus, per device type:
   share of PAUSED intervals, and of cycles with any.
 
 Both are judged in programme time, as ``_gate_elapsed_s`` reads it: the replay's
-finished stalls up to that moment are left out.
+finished stalls up to that moment are left out. It runs from the stored cycle
+start (the trace's first reading), where the live detector that recorded the run
+started and from which the expected durations are measured; the replay's own
+start can come later (a false start it aborts and makes again, or a sparse trace
+it never holds), which the live run did not.
 
 Rows per ratio patch the constants to one ratio for every device type; the
 ``shipped`` row runs them as they are. What this does not replay: the matcher
@@ -69,7 +73,9 @@ sys.path.insert(0, str(_REPO_ROOT / "devtools"))
 
 RATIOS = (0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95)
 _T0 = datetime(2026, 1, 1, tzinfo=timezone.utc)
-_NATURAL = ("timeout", "smart", "terminal_drop", "door", None, "")
+# Ends the appliance reached: every stored reason but a hand stop and a force
+# stop (the External End Trigger is one, `TerminationReason.EXTERNAL`).
+_NATURAL = ("timeout", "smart", "terminal_drop", "door", "external", None, "")
 
 
 def _device(dev: Any) -> tuple[str, Any]:
