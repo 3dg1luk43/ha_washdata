@@ -42,10 +42,11 @@ up as the matched run, over the recorded corpus, per device type:
 
 Both are judged in programme time, as ``_gate_elapsed_s`` reads it: the replay's
 finished stalls up to that moment are left out. It runs from the stored cycle
-start (the trace's first reading), where the live detector that recorded the run
-started and from which the expected durations are measured; the replay's own
-start can come later (a false start it aborts and makes again, or a sparse trace
-it never holds), which the live run did not.
+start (offset 0 of the stored trace, which a trim can leave before its first
+reading), where the live detector that recorded the run started and from which
+the expected durations are measured; the replay's own start can come later (a
+false start it aborts and makes again, or a sparse trace it never holds), which
+the live run did not.
 
 Rows per ratio patch the constants to one ratio for every device type; the
 ``shipped`` row runs them as they are. What this does not replay: the matcher
@@ -206,10 +207,12 @@ def measure(root: Path, dwell: float) -> dict[str, Any]:
                 expected = (total - dur) / (len(members) - 1)
                 if expected <= 0:
                     continue
+                # The stored offsets, not re-based to the first reading: they and
+                # `dur` count from the stored start, the live gate's clock. A store
+                # trim keeps later readings at their offsets, so a re-based replay
+                # read every door moment early by the first offset (PR #529 review).
                 pts = ev.query_points(c)
-                t0 = pts[0][0] if pts else 0.0
-                rel = [[t - t0, p] for t, p in pts]
-                moments, programme_dur = _paused_door_moments(rel, cfg, stop, dwell, dur)
+                moments, programme_dur = _paused_door_moments(pts, cfg, stop, dwell, dur)
                 rows[device_type].append((expected, programme_dur, moments))
     report: dict[str, Any] = {}
     for device_type, items in sorted(rows.items()):

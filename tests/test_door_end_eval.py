@@ -61,3 +61,40 @@ def test_external_trigger_ends_are_measured(tmp_path: Path) -> None:
     (tmp_path / "export.json").write_text(json.dumps(doc), encoding="utf-8")
     report = dee.measure(tmp_path, 60.0)
     assert report["washing_machine"]["cycles"] == 3
+
+
+def test_door_moments_are_scored_on_the_stored_clock(tmp_path: Path) -> None:
+    """PR #529 review: a stored trace whose first reading sits after the stored
+    start (a trim keeps the later offsets) was re-based to 0, so every door
+    moment was scored that much earlier than the stored duration it is held
+    against. Here the trimmed run's PAUSED door moment is at 1660 s stored
+    (1540 s re-based) against a 0.75 x 2160 s = 1620 s bar."""
+    shift = 120.0
+
+    def cycle(i: int, duration: float, offset: float) -> dict:
+        return {
+            "id": f"c{i}",
+            "profile_name": "Cotton",
+            "status": "completed",
+            "termination_reason": "timeout",
+            "start_time": f"2026-01-0{i + 1}T08:00:00+00:00",
+            "duration": duration,
+            "power_data": [[t + offset, p] for t, p in _trace()],
+        }
+
+    doc = {
+        "data": {
+            "past_cycles": [
+                cycle(0, 2700.0 + shift, shift),
+                cycle(1, 2160.0, 0.0),
+                cycle(2, 2160.0, 0.0),
+            ],
+            "profiles": {},
+        },
+        "entry_data": {"device_type": "washing_machine"},
+        "entry_options": {},
+    }
+    (tmp_path / "export.json").write_text(json.dumps(doc), encoding="utf-8")
+    rep = dee.measure(tmp_path, 60.0)["washing_machine"]
+    assert rep["spells"] == 3
+    assert rep["ratios"]["0.75"]["spells_exposed"] == pytest.approx(100.0 / 3, abs=0.1)
