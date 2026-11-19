@@ -6795,6 +6795,13 @@ class CycleDetector:
             # does it show the power going there (`_idle_evidence_w`). Unrounded
             # for the same comparison.
             cycle_data["loose_plateau_w"] = float(loose_plateau_w)
+        stop_w = float(self._config.stop_threshold_w)
+        if math.isfinite(stop_w):
+            # The Stop Threshold the finish was decided under (PR #529 review). The
+            # stored end can be the last active reading, from before a change of it
+            # the finish followed, so the settings history at ``end_time`` can name
+            # another one (``suggestion_engine._stop_at_end``).
+            cycle_data["finish_stop_threshold_w"] = stop_w
 
         self._logger.info("Cycle Finished: %s, %.1f min", status, duration / 60)
         self._on_cycle_end(cycle_data)

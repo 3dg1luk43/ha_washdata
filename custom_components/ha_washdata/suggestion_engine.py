@@ -958,8 +958,14 @@ def recorded_stop_changes(store: Any) -> list[tuple[datetime, float | None]]:
 def _stop_at_end(
     cycle: dict[str, Any], changes: list[tuple[datetime, float | None]], current: float
 ) -> float | None:
-    """The Stop Threshold in force when ``cycle`` ended: the value the first recorded
-    change after its end replaced, else the current one. None when unknown."""
+    """The Stop Threshold in force when ``cycle`` ended: the one the detector decided
+    the finish under (``finish_stop_threshold_w``; the stored end can be the last
+    active reading, from before a change the finish followed, PR #529 review), else,
+    for a cycle stored before that, the value the first recorded change after its
+    end replaced, else the current one. None when unknown."""
+    recorded = _num(cycle.get("finish_stop_threshold_w"))
+    if recorded is not None and recorded > 0:
+        return recorded
     end = _instant(cycle.get("end_time"))
     if end is None:
         return None
@@ -1047,9 +1053,10 @@ def detect_standby_above_stop(
     recent cycle is judged by how it ended (:func:`_idle_evidence_w`):
 
     * the end saw the power below the threshold (timeout, Smart Termination,
-      terminal drop): it gets there, so it does not idle above it - unless
-      ``stop_changes`` (:func:`stop_threshold_changes`) shows a higher threshold
-      was in force then, which says nothing about the current one (item 646);
+      terminal drop): it gets there, so it does not idle above it - unless a
+      higher threshold was in force then, which says nothing about the current
+      one (item 646): the one the cycle recorded at its finish, else what
+      ``stop_changes`` (:func:`stop_threshold_changes`) shows (:func:`_stop_at_end`);
     * the standby-band finalize: idles above, at the plateau it recorded
       (``standby_band_w``; cycles stored before that mark read as the timeout
       they were stored as);
@@ -1079,9 +1086,7 @@ def detect_standby_above_stop(
         for cycle in list(cycles)[-recent:]:
             if not isinstance(cycle, dict):
                 continue
-            level = _idle_evidence_w(
-                cycle, stop, _stop_at_end(cycle, stop_changes, stop) if stop_changes else None
-            )
+            level = _idle_evidence_w(cycle, stop, _stop_at_end(cycle, stop_changes or [], stop))
             if level is None:
                 continue
             # At the threshold is not below it: the detector's quiet needs readings

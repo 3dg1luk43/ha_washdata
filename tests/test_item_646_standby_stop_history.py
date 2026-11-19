@@ -242,3 +242,58 @@ async def test_a_wholesale_import_of_history_without_cycles_marks_it_foreign(
     await store.async_import_data({"version": 19, "data": {"profiles": {"A": {}}, "settings_changelog": [row]}})
     rows = store.get_settings_changelog()
     assert rows and all(r.get(SETTINGS_CHANGELOG_IMPORTED_KEY) for r in rows if r.get("key") == "stop_threshold_w")
+
+
+def test_the_stop_a_finish_was_decided_under_beats_the_history_at_its_end() -> None:
+    """PR #529 review: Stop raised 2 -> 5 W during a run, then restored to 2 W. The
+    detector stores the last active reading, from before the raise, as the end, so
+    the history at that time reads 2 W, and six ends that only got below 5 W
+    outvoted the two hand stops showing the 3 W standby. The Stop the finish was
+    decided under is recorded on the cycle and read first; older cycles keep the
+    history lookup."""
+    natural = [_cycle(d, "timeout") for d in range(6)]
+    hand = [_cycle(7, "user", 3.0), _cycle(8, "user", 3.0)]
+    raised = CHANGED_AT - timedelta(days=1, hours=1)  # after the last natural end's stamp
+    log = [
+        {"key": CONF_STOP_THRESHOLD_W, "old": 2.0, "new": 5.0, "timestamp": raised.isoformat()},
+        {"key": CONF_STOP_THRESHOLD_W, "old": 5.0, "new": 2.0, "timestamp": CHANGED_AT.isoformat()},
+    ]
+    changes = stop_threshold_changes(log)
+    assert detect_standby_above_stop(natural + hand, 2.0, stop_changes=changes) is None
+    for cycle in natural:
+        cycle["finish_stop_threshold_w"] = 5.0
+    for stop_changes in (changes, None):
+        adv = detect_standby_above_stop(natural + hand, 2.0, stop_changes=stop_changes)
+        assert adv is not None and adv["idle_w"] == 3.0 and adv["cycles_checked"] == 2
+    # Finished under the current stop: still a cycle that gets below it.
+    for cycle in natural:
+        cycle["finish_stop_threshold_w"] = 2.0
+    assert detect_standby_above_stop(natural + hand, 2.0, stop_changes=changes) is None
+
+
+async def test_a_finished_cycle_records_the_stop_it_was_decided_under(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """The detector stamps the Stop Threshold in force at its finish decision."""
+    from homeassistant.util import dt as dt_util  # noqa: PLC0415
+    from pytest_homeassistant_custom_component.common import async_fire_time_changed  # noqa: PLC0415
+
+    power = "sensor.washer_power"
+    entry = await setup_washdata_entry(power_sensor=power, options={
+        "min_power": 2.0, "off_delay": 60, "min_off_gap": 60, "watchdog_interval": 30,
+        "completion_min_seconds": 300, CONF_STOP_THRESHOLD_W: 1.5,
+    })
+    manager = hass.data[DOMAIN][entry.entry_id]
+
+    async def feed(watts: float, seconds: int) -> None:
+        for _ in range(seconds // 30):
+            freezer.tick(timedelta(seconds=30))
+            hass.states.async_set(power, str(watts), {"unit_of_measurement": "W"},
+                                  force_update=True)
+            async_fire_time_changed(hass, dt_util.utcnow())
+            await hass.async_block_till_done()
+
+    await feed(200.0, 15 * 60)
+    await feed(0.0, 10 * 60)
+    cycles = manager.profile_store.get_past_cycles()
+    assert cycles and cycles[-1]["finish_stop_threshold_w"] == 1.5
