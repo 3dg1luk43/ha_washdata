@@ -1248,7 +1248,9 @@ def program_families(profile_groups: Any) -> dict[str, str]:
         return out
     for gname, group in profile_groups.items():
         members = group.get("members") if isinstance(group, dict) else None
-        for member in members or []:
+        if not isinstance(members, (list, tuple)):
+            continue  # a malformed group (``"members": 1``) is skipped, not fatal
+        for member in members:
             if isinstance(member, str):
                 out.setdefault(member, str(gname))
     return out

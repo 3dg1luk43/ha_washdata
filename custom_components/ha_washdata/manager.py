@@ -1732,7 +1732,16 @@ class WashDataManager:
         The pending streak comes back with the trace position it was last
         checked at, so the next check still waits a full match interval (PR
         #529 review). A snapshot without that position keeps ``fired`` and
-        drops the streak."""
+        drops the streak. Never raises: the check is optional, the cycle it
+        rides on is restored whatever it holds (a failure starts it afresh)."""
+        try:
+            self._restore_program_mismatch_state(raw)
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Could not restore the program check", exc_info=True)
+            self._program_mismatch = match_rules.ProgramMismatchState()
+            self._program_mismatch_last_s = None
+
+    def _restore_program_mismatch_state(self, raw: Any) -> None:
         if not isinstance(raw, dict) or raw.get("program") != self._current_program:
             return
         state = self._program_mismatch_state()

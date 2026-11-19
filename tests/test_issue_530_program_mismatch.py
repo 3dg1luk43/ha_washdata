@@ -829,3 +829,27 @@ async def test_a_streak_counted_on_replaced_data_is_not_saved(
     raw = saved()
     assert raw["streak"] == 0
     assert raw["fired"] is True and raw["looks_like"] == "Synthetics"
+
+
+def test_a_malformed_group_is_skipped_not_fatal() -> None:
+    """PR #529 review: a stored group with ``"members": 1`` raised TypeError here,
+    which failed the restore of the whole active cycle."""
+    groups = {"Bad": {"members": 1}, "Odd": "x", "Fam": {"members": ["Cotton", 3, "Eco"]}}
+    assert match_rules.program_families(groups) == {"Cotton": "Fam", "Eco": "Fam"}
+
+
+async def test_a_malformed_group_neither_drops_the_check_nor_fails_its_restore(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    _entry, manager, _sent, state = await _past_half(hass, setup_washdata_entry, freezer)
+    manager.profile_store._data["profile_groups"]["Bad"] = {"members": 1}  # noqa: SLF001
+    state.fired, state.looks_like = True, "Synthetics"
+    snap = manager._augment_active_snapshot(manager.detector.get_state_snapshot())  # noqa: SLF001
+    assert snap["program_mismatch"]["fired"] is True
+    manager._program_mismatch = match_rules.ProgramMismatchState()  # noqa: SLF001
+    manager._restore_program_mismatch(snap["program_mismatch"])  # noqa: SLF001
+    assert manager.program_mismatch["looks_like"] == "Synthetics"
+    # Whatever else fails in it, the cycle's restore goes on without the check.
+    with patch.object(match_rules, "program_families", side_effect=RuntimeError("boom")):
+        manager._restore_program_mismatch(snap["program_mismatch"])  # noqa: SLF001
+    assert manager.program_mismatch is None
