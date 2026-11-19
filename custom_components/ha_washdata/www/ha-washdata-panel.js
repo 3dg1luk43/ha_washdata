@@ -537,12 +537,13 @@ const _ENERGY_UNITS = new Set(['mwh', 'wh', 'kwh', 'gwh', 'twh', 'j', 'kj', 'mj'
 // cycle would start (PR #529). A sensor not in the states yet, or unavailable /
 // unknown without a unit, counts as one that could be kW, as
 // SuggestionEngine._min_power_floor does.
-function _minPowerMustStayAtOne(id, ctx) {
+function _powerSensorScale(id, ctx) {
+  // const.power_unit_scale's unit factor, or null when the unit is not known yet.
   const st = (id && ctx && ctx.stateOf) ? ctx.stateOf(id) : null;
-  if (!st) return true;
+  if (!st) return null;
   const attrs = st.attributes || {};
   const unit = String(attrs.unit_of_measurement == null ? '' : attrs.unit_of_measurement).trim();
-  if (!unit && (st.state === 'unavailable' || st.state === 'unknown')) return true;
+  if (!unit && (st.state === 'unavailable' || st.state === 'unknown')) return null;
   const own = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key) ? obj[key] : null;
   let scale = own({ mW: 0.001, W: 1, kW: 1000, MW: 1e6, GW: 1e9 }, unit);
   if (scale == null) scale = unit.toLowerCase() === 'kw' ? 1000 : 1;
@@ -552,7 +553,18 @@ function _minPowerMustStayAtOne(id, ctx) {
     const per = own({ s: 1 / 3600, min: 1 / 60, h: 1, d: 24 }, unit.slice(slash + 1).trim());
     if (energy != null && per != null) scale = energy / per;
   }
-  return scale > 1;
+  return scale;
+}
+function _minPowerMustStayAtOne(id, ctx) {
+  const scale = _powerSensorScale(id, ctx);
+  return scale == null || scale > 1;
+}
+// The milliwatt side of the same rule: a mW sensor is read raw while Min Power is
+// 1000 or more (const.power_unit_scale), so a fix under 1000 would switch it to
+// watts while the thresholds stayed in milliwatts (review of PR #529).
+function _minPowerRawMilliwatt(v, ctx) {
+  const scale = _powerSensorScale(v.power_sensor, ctx);
+  return scale != null && scale < 1 && v.min_power != null && v.min_power >= 1000;
 }
 
 // Why the chosen Power Sensor cannot be one: it counts energy (#481), or null. Only
@@ -606,11 +618,14 @@ const _SETTING_CONFLICTS = [
     // stop are set.
     keys: ['min_power', 'stop_threshold_w'],
     check: (v, ctx) => v.min_power != null && v.stop_threshold_w != null && v.min_power > v.stop_threshold_w
-      && !(v.min_power >= 1 && v.stop_threshold_w < 1 && _minPowerMustStayAtOne(v.power_sensor, ctx)),
+      && !(v.min_power >= 1 && v.stop_threshold_w < 1 && _minPowerMustStayAtOne(v.power_sensor, ctx))
+      && !(v.stop_threshold_w < 1000 && _minPowerRawMilliwatt(v, ctx)),
     fieldErrors: (v, ctx) => ({
       min_power:        { msgKey: 'conflict.min_power.min_power', msgVars: {stop: v.stop_threshold_w}, msgFb: `Must be at or below Stop Threshold (${v.stop_threshold_w} W)`,
-        fixVal: _minPowerMustStayAtOne(v.power_sensor, ctx)
-          ? Math.max(1, +(v.stop_threshold_w * 0.8).toFixed(1)) : +(v.stop_threshold_w * 0.8).toFixed(1) },
+        fixVal: _minPowerRawMilliwatt(v, ctx)
+          ? Math.max(1000, +(v.stop_threshold_w * 0.8).toFixed(1))
+          : _minPowerMustStayAtOne(v.power_sensor, ctx)
+            ? Math.max(1, +(v.stop_threshold_w * 0.8).toFixed(1)) : +(v.stop_threshold_w * 0.8).toFixed(1) },
       // Not a Stop fix that would reach Start: it would cascade into Start, and this
       // conflict is soft when both are set (PR #529 review).
       stop_threshold_w: { msgKey: 'conflict.min_power.stop',      msgVars: {min: v.min_power},  msgFb: `Must be at or above Min Power (${v.min_power} W)`,

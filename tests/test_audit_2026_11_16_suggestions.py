@@ -1435,3 +1435,12 @@ async def test_a_mute_schedules_no_check_on_a_manager_retired_by_its_write(
     assert scheduled == []
     manager._is_shutdown = False  # noqa: SLF001
     hass.data[DOMAIN][entry.entry_id] = manager
+
+
+def test_a_window_holding_one_reading_can_close_the_gate() -> None:
+    """Review of PR #529: a sparse pause whose window holds a single reading is
+    zero energy to the live gate, which then ends the cycle; the scan skipped it."""
+    from custom_components.ha_washdata.suggestion_engine import _detector_gate_need  # noqa: SLF001, PLC0415
+
+    # One reading 300 s into a pause, a 200 s window: only it is inside.
+    assert _detector_gate_need([300.0], [40.0], 0.0, 200.0, 0.01) == 300.0

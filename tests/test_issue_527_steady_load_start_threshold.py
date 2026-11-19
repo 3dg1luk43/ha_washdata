@@ -250,5 +250,47 @@ def test_a_raw_kw_load_keeps_its_exact_stop_and_speaks_in_watts() -> None:
     start = sug[CONF_START_THRESHOLD_W]["value"]
     assert start < 0.008
     assert sug[CONF_STOP_THRESHOLD_W]["value"] < start  # the stop moves under it
-    assert sug[CONF_START_THRESHOLD_W]["reason_params"]["low"] == "8"
-    assert "runs at 8 W" in sug[CONF_START_THRESHOLD_W]["reason"]
+    assert sug[CONF_START_THRESHOLD_W]["reason_params"]["low"] == "7.9"
+    assert "runs at 7.9 W" in sug[CONF_START_THRESHOLD_W]["reason"]
+
+
+def test_a_raw_kw_standby_is_compared_unrounded() -> None:
+    """Review of PR #529: running at 0.008, idling at 0.0035 (kW, read raw), Start
+    0.010 and Stop 0.0045. The standby rounded to 0 let a 0.0032 stop through,
+    under the standby, where the appliance could never go quiet."""
+    def cyc(day: int) -> dict[str, Any]:
+        c = _dryer_cycle(day, 0.0)
+        idle = [[10.0 * k, 0.0035] for k in range(30)]
+        run = [[300.0 + 30.0 * (i + 1), 0.008 + (0.0002 if i % 2 else -0.0001)] for i in range(120)]
+        c["power_data"] = idle + run + [[3960.0 + 10.0 * k, 0.0035] for k in range(1, 31)]
+        return c
+
+    adv = start_above_running([cyc(d) for d in range(8)], 0.010, 0.0045)
+    assert adv is not None and adv["standby_w"] == 0.0035
+    assert steady_load_threshold_suggestions(adv) == {}
+
+
+def test_the_reason_uses_the_sensor_s_own_unit(mock_hass: Any) -> None:
+    """Review of PR #529: a watt sensor measuring a 0.8 W steady load was read as a
+    kW sensor read raw and told the user it ran at 800 W."""
+    from unittest.mock import MagicMock  # noqa: PLC0415
+
+    from custom_components.ha_washdata.const import CONF_POWER_SENSOR  # noqa: PLC0415
+    from custom_components.ha_washdata.suggestion_engine import SuggestionEngine  # noqa: PLC0415
+
+    def cyc(day: int) -> dict[str, Any]:
+        c = _dryer_cycle(day, 0.0)
+        c["power_data"] = [[30.0 * (i + 1), 0.8 + (0.02 if i % 2 else -0.01)] for i in range(120)]
+        return c
+
+    opts = {CONF_START_THRESHOLD_W: 1.2, CONF_STOP_THRESHOLD_W: 0.5, CONF_POWER_SENSOR: "sensor.p"}
+    hass = mock_hass
+    state = MagicMock()
+    state.state, state.attributes = "0.8", {"unit_of_measurement": "W"}
+    hass.states.get = MagicMock(return_value=state)
+    store = MagicMock()
+    store.get_past_cycles.return_value = [cyc(d) for d in range(8)]
+    eng = SuggestionEngine(hass, "e", store, device_type="dryer")
+    sug = eng.for_job(opts).generate_start_threshold_suggestions()
+    reason = sug[CONF_START_THRESHOLD_W]["reason"]
+    assert "800 W" not in reason and "runs at 0.79 W" in reason

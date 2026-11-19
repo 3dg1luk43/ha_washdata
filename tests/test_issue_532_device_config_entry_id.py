@@ -102,3 +102,26 @@ def test_every_device_lookup_passes_the_registry() -> None:
     for path in (_SRC / "__init__.py", _SRC / "device_trigger.py"):
         calls += re.findall(r"device_entry_ids\(([^)]*)\)", path.read_text(encoding="utf-8"))
     assert calls and all("," in args for args in calls), calls
+
+
+class _Registry2026_8:
+    """Core 2026.8: `devices` iterates ids, the composite lookup is a method."""
+
+    def __init__(self, *devices: _Dev) -> None:
+        self._all = list(devices)
+        self.devices = [d.id for d in devices]
+
+    def async_get_devices_for_composite_device_id(self, composite_id: str) -> list[_Dev]:
+        return [d for d in self._all if d.composite_device_id == composite_id]
+
+
+def test_a_2026_8_registry_resolves_the_split_through_its_lookup() -> None:
+    """Review of PR #529: on Core 2026.8 iterating `registry.devices` yields ids, so
+    the scan matched nothing and a composite id with another primary entry lost
+    WashData's split; the registry's own lookup finds it."""
+    composite = _Dev("old-id", "plug-entry")
+    registry = _Registry2026_8(
+        _Dev("split-1", "plug-entry", composite="old-id"),
+        _Dev("split-2", "wd-entry", composite="old-id"),
+    )
+    assert device_entry_ids(composite, registry) == ["plug-entry", "wd-entry"]

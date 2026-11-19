@@ -112,3 +112,22 @@ test('a pending Stop suggestion under Start is still recommended', async ({ page
   await page.locator('button[data-sec="detection"]').first().click();
   await expect(page.locator('[data-cerr="stop_threshold_w"] .wd-conflict-sug-note')).toBeVisible({ timeout: 8_000 });
 });
+
+test('a milliwatt sensor read raw: the Min Power fix never drops under 1000', async ({ page }) => {
+  // Min Power 1000 or more keeps a mW sensor raw: 800 would switch it to watts
+  // while Start and Stop stayed in milliwatts (review of PR #529).
+  await page.goto('/');
+  const opts = { ...options, min_power: 1200, start_threshold_w: 2000, stop_threshold_w: 1000 };
+  await bootPanel(page, { 'ha_washdata/get_options': { options: opts } }, statesIn('mW', '1500'));
+  const err = await minPowerError(page);
+  await expect(err).toBeVisible({ timeout: 8_000 });
+  await expect(page.locator('.wd-conflict-fix[data-ckey="min_power"]')).toHaveAttribute('data-cval', '1000');
+});
+
+test('a milliwatt sensor read raw with a stop under 1000 is not a conflict', async ({ page }) => {
+  await page.goto('/');
+  const opts = { ...options, min_power: 1200, start_threshold_w: 2000, stop_threshold_w: 900 };
+  await bootPanel(page, { 'ha_washdata/get_options': { options: opts } }, statesIn('mW', '1500'));
+  const err = await minPowerError(page);
+  await expect(err).toBeHidden();
+});

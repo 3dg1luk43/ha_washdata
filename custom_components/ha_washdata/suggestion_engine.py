@@ -266,7 +266,9 @@ def _detector_gate_need(
     ts = np.asarray(times, dtype=float)
     ps = np.asarray(watts, dtype=float)
     m = ts.size
-    if m < 2:
+    # One reading in the window is zero energy to the live gate (``integrate_wh``
+    # of a single point), which passes: not skipped (review of PR #529).
+    if m < 1:
         return 0.0
     dt = np.diff(ts)
     cum = np.concatenate(([0.0], np.cumsum((ps[:-1] + ps[1:]) * 0.5 * dt / 3600.0)))
@@ -1347,7 +1349,9 @@ def start_above_running(
             # stop above the new start (review of PR #529).
             "start_w": start,
             "stop_w": stop,
-            "standby_w": round(float(np.median(idles)), 2) if len(idles) >= 2 else None,
+            # Unrounded: on a kW sensor read raw a 0.0035 standby rounded to 0 and
+            # let a stop under it through (review of PR #529).
+            "standby_w": float(np.median(idles)) if len(idles) >= 2 else None,
         }
     except Exception:  # noqa: BLE001 - a statistic must never break a suggestion pass
         return None
@@ -1373,15 +1377,17 @@ def steady_load_threshold_suggestions(adv: dict[str, Any] | None) -> dict[str, A
         else float(adv["stop_w"])
     )
     standby = _num(adv.get("standby_w"))
-    # The margin is in watts; a running level under 1 is a kW sensor read raw
-    # (``power_unit_scale``), whose values are kilowatts (review of PR #529).
-    margin = STANDBY_FLOOR_MIN_MARGIN_W if low >= 1.0 else STANDBY_FLOOR_MIN_MARGIN_W / 1000.0
+    # Watts per unit of the readings: the sensor's own unit and scaling mode when
+    # the pass knows it (``to_w``), else a running level under 1 read as a kW
+    # sensor read raw (review of PR #529). The margin is in watts.
+    to_w = _num(adv.get("to_w"))
+    if to_w is None or not to_w > 0:
+        to_w = 1.0 if low >= 1.0 else 1000.0
+    margin = STANDBY_FLOOR_MIN_MARGIN_W / to_w
     if standby is not None and stop_after < max(standby * STANDBY_FLOOR_RATIO, standby + margin):
         return {}
-    # The reason speaks in watts: a running level under 1 is a kW sensor read raw,
-    # shown as 0 W before (review of PR #529).
-    to_w = 1.0 if low >= 1.0 else 1000.0
-    low_txt = f"{low * to_w:.0f}"
+    # The reason speaks in watts (a kW sensor read raw showed 0 W before).
+    low_txt = f"{_round_level(low * to_w):g}"
     start_txt = f"{_round_level(float(adv['start_w']) * to_w):g}"
     params = {"low": low_txt, "start": start_txt}
     entry = {
@@ -2434,12 +2440,22 @@ class SuggestionEngine:
         state may never end a cycle again, so a cycle-end trigger alone would never
         reach it. Executor-safe.
         """
-        eff = self._effective_thresholds(self._entry_options())
+        options = self._entry_options()
+        eff = self._effective_thresholds(options)
         adv = start_above_running(
             list(self.profile_store.get_past_cycles()[-200:]),
             float(eff[CONF_START_THRESHOLD_W]),
             float(eff[CONF_STOP_THRESHOLD_W]),
         )
+        if adv is not None:
+            # Watts per reading unit, from the sensor's unit and Min Power: 1 for
+            # readings converted to watts, 1000 for a kW sensor read raw, 0.001
+            # for a mW one (``power_unit_scale``). Unknown unit: left to the guess.
+            known, unit = getattr(self, "_power_unit_snapshot", (False, None))
+            if known:
+                applied = power_unit_scale(unit, options.get(CONF_MIN_POWER, DEFAULT_MIN_POWER))
+                if applied > 0:
+                    adv = {**adv, "to_w": power_unit_scale(unit, None) / applied}
         return steady_load_threshold_suggestions(adv)
 
     def generate_detection_suggestions(self) -> dict[str, Any]:

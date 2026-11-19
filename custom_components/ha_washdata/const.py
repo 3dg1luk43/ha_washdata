@@ -223,11 +223,13 @@ DEFAULT_DOOR_END_DWELL_SECONDS = 60  # door must stay open this long to finalize
 # leave-one-out mean of the programme) over the PAUSED intervals of a replayed
 # detector (a door opened in one before activity resumes, held 60 s while
 # quiet). A miss falls back to the pre-0.6.1 pause; an exposed interval is new
-# behaviour, so the bar favours few exposures. Dishwashers at 0.95: 88.5% of 165
-# ends caught, 4.2% of 95 mid-cycle PAUSED intervals exposed (2.4% of cycles;
-# 0.9: 98.2% / 24.2%, 13.9% of cycles). A washer's door is locked while it runs,
-# so its bar sits lower: 0.75 catches 93.2% of 206 ends (0.9: 74.3%), 2 of 3
-# such intervals (1.0% of cycles). Past PAUSED a spell is in ENDING, where a held
+# behaviour, so the bar favours few exposures. The figures are gate checks (the
+# bar open at each stored end), not live ends, which also need the door held for
+# the dwell. Dishwashers at 0.95: the gate open at 88.5% of 165 ends, 4.2% of 95
+# mid-cycle PAUSED intervals exposed (2.4% of cycles; 0.9: 98.2% / 24.2%, 13.9%
+# of cycles). A washer's door is locked while it runs, so its bar sits lower: at
+# 0.75 the gate is open at 93.2% of 206 ends (0.9: 74.3%), 2 of 3 such intervals
+# exposed (1.0% of cycles). Past PAUSED a spell is in ENDING, where a held
 # door ended the cycle before 0.6.1 too.
 DOOR_END_PAUSED_MIN_RATIO = 0.95
 DOOR_END_PAUSED_MIN_RATIO_BY_TYPE: dict[str, float] = {
@@ -2810,11 +2812,19 @@ def device_entry_ids(device: Any, registry: Any = None) -> list[str]:
             )
         device_id = getattr(device, "id", None)
         if registry is not None and isinstance(entry_id, str) and isinstance(device_id, str):
-            # Iterated, not `.values()`: since 2026.9 the container yields the
-            # entries, and any mapping access logs a deprecation (PR #529 review).
-            for split in list(getattr(registry, "devices", None) or ()):
-                if getattr(split, "composite_device_id", None) != device_id:
-                    continue
+            # The registry's own lookup where it has one (it reads its index, and
+            # the shape of `registry.devices` changed between releases); else a scan
+            # of the entries, iterated, as any mapping access warns since 2026.9
+            # (review of PR #529).
+            lookup = getattr(registry, "async_get_devices_for_composite_device_id", None)
+            if callable(lookup):
+                splits = list(lookup(device_id) or ())
+            else:
+                splits = [
+                    split for split in list(getattr(registry, "devices", None) or ())
+                    if getattr(split, "composite_device_id", None) == device_id
+                ]
+            for split in splits:
                 split_entry = getattr(split, "config_entry_id", None)
                 if isinstance(split_entry, str) and split_entry and split_entry not in out:
                     out.append(split_entry)

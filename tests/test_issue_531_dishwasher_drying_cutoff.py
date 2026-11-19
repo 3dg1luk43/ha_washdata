@@ -711,3 +711,37 @@ async def test_a_rename_during_the_sweep_is_rebuilt_before_it_is_marked_done(
         await store.async_rebuild_for_cut_short_rule()
     assert "C" in rebuilt
     assert not store.cut_short_rebuild_pending()
+
+
+async def test_a_superseded_rebuild_stays_pending_in_the_sweep(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """Review of PR #529: a newer build of the same profile superseded the sweep's,
+    which returned False like a deliberate skip; the sweep counted it done and set
+    the marker although the newer build could still fail."""
+    from unittest.mock import patch  # noqa: PLC0415
+
+    from custom_components.ha_washdata.const import CUT_SHORT_REBUILD_KEY  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(device_type="dishwasher", options={"stop_threshold_w": 4.5})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    store._data["profiles"] = {"A": {}}  # noqa: SLF001
+    store._data["past_cycles"] = [  # noqa: SLF001
+        {"id": f"A{i}", "profile_name": "A", "status": "completed", "duration": 600.0,
+         "start_time": (T0 + timedelta(days=i)).isoformat(),
+         "power_data": [[float(t), 1000.0 if t < 500 else 1.0] for t in range(0, 601, 10)]}
+        for i in range(3)
+    ]
+    store._data.pop(CUT_SHORT_REBUILD_KEY, None)  # noqa: SLF001
+    calls = {"n": 0}
+
+    async def superseded_every_time(name: str) -> bool:
+        calls["n"] += 1
+        gens = store.__dict__.setdefault("_envelope_rebuild_generation", {})
+        gens[name] = gens.get(name, 0) + 2  # this build, then a newer one started
+        return False
+
+    with patch.object(store, "async_rebuild_envelope", side_effect=superseded_every_time):
+        await store.async_rebuild_for_cut_short_rule()
+    assert calls["n"] == 3  # retried each round
+    assert store.cut_short_rebuild_pending()

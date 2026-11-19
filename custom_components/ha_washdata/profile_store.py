@@ -8232,9 +8232,16 @@ class ProfileStore:
                     if getattr(self, "_data_generation", 0) != data_generation:
                         break
                     try:
+                        # A newer build of the same profile started meanwhile: this
+                        # one was discarded and that one's outcome is unknown here,
+                        # so the profile stays pending (the next round retries it)
+                        # rather than counting as rebuilt (review of PR #529).
+                        gens = self.__dict__.setdefault("_envelope_rebuild_generation", {})
+                        taken = gens.get(name, 0) + 1
                         if await self.async_rebuild_envelope(name):
                             count += 1
-                        done.add(name)
+                        if gens.get(name, 0) <= taken:
+                            done.add(name)
                     except Exception as exc:  # noqa: BLE001 - keep the rest, retry later
                         failed.append(name)
                         self._logger.warning("Rebuild of %s under the #531 rule failed: %s", name, exc)
