@@ -1671,3 +1671,49 @@ def test_a_shorter_gap_that_lets_the_flat_standby_bypass_close_a_pause_splits() 
     args = (points, 4.0, 180.0)
     assert end_gate_would_split(*args, 360.0, 0.05, device_type="washing_machine")
     assert not end_gate_would_split(*args, 900.0, 0.05, device_type="washing_machine")
+
+
+def test_a_later_burst_of_fast_reports_does_not_hide_the_flat_standby_bypass() -> None:
+    """The detector's outage ceiling is causal: 90 s reports through the pause
+    give 900 s, so a later 1 s burst must not drop it to 60 s and turn the pause's
+    own 90 s gaps into outages (review of PR #529)."""
+    points = [(float(t), 300.0) for t in range(0, 1890, 90)]
+    points += [(float(t), 3.8) for t in range(1890, 2700, 90)]
+    points += [(float(t), 300.0) for t in range(2700, 22700)]
+    points += [(22700.0 + t, 0.5) for t in range(0, 900, 10)]
+    assert end_gate_would_split(points, 4.0, 180.0, 360.0, 0.05, device_type="washing_machine")
+
+
+async def test_apply_writes_nothing_after_a_native_reconfigure_it_waited_through(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """Review of PR #529: a native options save takes no WS lock and reloads in
+    place, so Apply merged values judged against the old settings into the new."""
+    from unittest.mock import patch  # noqa: PLC0415
+
+    from custom_components.ha_washdata import ws_api  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(options={CONF_END_ENERGY_THRESHOLD: 0.01, CONF_OFF_DELAY: 60})
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store = manager.profile_store
+    store.set_suggestion(CONF_END_ENERGY_THRESHOLD, 0.02, reason="r", flags={"owner": OWNER_BATCH})
+    real = ws_api._drop_unsafe_end_gate_updates  # noqa: SLF001
+
+    async def reconfigured_meanwhile(*a: Any) -> bool:
+        ok = await real(*a)
+        hass.config_entries.async_update_entry(entry, options={**entry.options, CONF_OFF_DELAY: 90})
+        await hass.async_block_till_done()
+        return ok
+
+    client = await hass_ws_client(hass)
+    with patch.object(ws_api, "_drop_unsafe_end_gate_updates", side_effect=reconfigured_meanwhile):
+        await client.send_json_auto_id({
+            "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry.entry_id,
+            "keys": [CONF_END_ENERGY_THRESHOLD],
+        })
+        res = await client.receive_json()
+    assert hass.data[DOMAIN][entry.entry_id] is manager  # reloaded in place
+    assert res["success"] is False and res["error"]["code"] == "entry_reloaded"
+    await hass.async_block_till_done()
+    opts = hass.config_entries.async_get_entry(entry.entry_id).options
+    assert opts[CONF_END_ENERGY_THRESHOLD] == 0.01 and opts[CONF_OFF_DELAY] == 90

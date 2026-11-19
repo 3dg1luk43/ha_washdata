@@ -341,7 +341,7 @@ def _flat_standby_split(
     n = len(points)
     if n < 3:
         return False
-    outage = energy_gap_threshold_s(np.asarray(times, dtype=float))
+    stamps_all = np.asarray(times, dtype=float)
     i = next((k for k, p in enumerate(watts) if p >= stop), n)
     while i < n:
         if watts[i] >= stop:
@@ -376,6 +376,10 @@ def _flat_standby_split(
                 continue
             if low < ENDING_FLAT_STANDBY_NEAR_STOP_FRAC * stop and t - t0 < max(base_wait, loose):
                 continue
+            # The detector's ceiling is causal: only the readings it has seen
+            # (review of PR #529: a later 1 s burst lowered a whole-trace
+            # ceiling under this pause's 90 s reports and hid the bypass).
+            outage = energy_gap_threshold_s(stamps_all[:k + 1])
             stamps = times[lo - 1:k + 1]
             if any(b - a > outage for a, b in zip(stamps, stamps[1:])):
                 continue
@@ -3144,7 +3148,9 @@ class SuggestionEngine:
         stop_thr = self._current_stop_threshold(_batch_opts)
         # What the detector really ends cycles at (0.6 x min_power when the Stop
         # Threshold is unset, #450). stop_thr stays the clean-cycle check's level.
-        eff_stop = float(self._effective_thresholds(_batch_opts)[CONF_STOP_THRESHOLD_W])
+        _eff = self._effective_thresholds(_batch_opts)
+        eff_stop = float(_eff[CONF_STOP_THRESHOLD_W])
+        eff_start = _num(_eff.get(CONF_START_THRESHOLD_W))
         # Keep the unfiltered list: the min_off_gap merge ceiling must see the
         # user's real turnaround, which dropping a cycle would fuse away.
         raw_cycles = list(cycles)
@@ -3182,6 +3188,7 @@ class SuggestionEngine:
         lowest_active: list[float] = []
         working: list[float] = []             # per-cycle p90 active power (#527)
         main_cycles: list[list[tuple[float, float]]] = []
+        lead_w: list[float] = []              # each cycle's first reading over the stop
         cycle_energies: list[float] = []      # per-cycle total energy (Wh) for proportional floor
         false_end_energies: list[float] = []
         max_gap_s = _MAX_PAUSE_GAP_H * 3600
@@ -3193,6 +3200,9 @@ class SuggestionEngine:
             # threshold stat and the energy scan consume the same main-cycle data.
             main_readings = self._strip_anti_crease_readings(readings, options=_batch_opts)
             main_cycles.append(main_readings)
+            lead = next((p for _o, p in main_readings if p > eff_stop), None)
+            if lead is not None:
+                lead_w.append(float(lead))
             powers = np.array([p for _, p in main_readings])
             active = powers[powers > 0.5]
             if active.size > 0:
@@ -3278,10 +3288,28 @@ class SuggestionEngine:
                 # at or over the lowest running power, or far under the anchor, is
                 # still proposed.
                 _LOGGER.debug(
-                    "Stop/start suggestion withheld: stop %.2fW already sits between "
+                    "Stop suggestion withheld: stop %.2fW already sits between "
                     "%.2fW and the lowest running power (p05 %.2fW)",
                     eff_stop, STOP_HOLD_BAND * suggested_stop, p05_min,
                 )
+                # The hold is the stop's: a start over the level most recorded runs
+                # begin at misses their start, so it is still corrected (review of
+                # PR #529: a 120 W start over runs that begin at 100 W).
+                if (
+                    eff_start is not None and lead_w
+                    and eff_start > float(np.median(lead_w)) > suggested_start
+                ):
+                    reason_thr = (
+                        f"Just above the lowest active power (p05) across {n} cycles "
+                        f"({p05_min:.1f}W), so starts are caught early and the stop "
+                        f"threshold stays below the lowest running power."
+                    )
+                    suggestions[CONF_START_THRESHOLD_W] = {
+                        "value": suggested_start,
+                        "reason": reason_thr,
+                        "reason_key": "suggestion.reason.thr_batch",
+                        "reason_params": {"cycles": n, "p05": f"{p05_min:.1f}"},
+                    }
             elif is_steady_load(p05_min, working_w):
                 # #527: no quiet phase inside the cycles, so the anchor is the
                 # running level and 0.8x / 1.05x of it sit on the running power.

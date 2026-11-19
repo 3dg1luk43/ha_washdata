@@ -193,3 +193,17 @@ def test_resting_level_needs_five_cycles_and_never_raises() -> None:
     assert _level([pts] * 4, 1.5) is None
     assert _level([pts] * 5, 1.5) == pytest.approx(0.8)
     assert _level([[("x", "y"), (1, 2)]] * 5, 1.5) is None  # type: ignore[list-item]
+
+
+def test_the_hold_band_still_lowers_a_start_the_runs_never_reach() -> None:
+    """Review of PR #529: the stop hold withheld the start too, so a 120 W start
+    over runs that begin at 100 W was never corrected. The stop stays."""
+    phases = [(100.0, 10, 30.0), (2000.0, 30, 30.0)] + [(60.0, 1, 30.0), (0.0, 1, 30.0)] * 40
+    phases += [(6.0, 10, 30.0), (500.0, 10, 30.0)]
+    cycles = [_cycle(f"w{i}", _trace(0.0, phases)) for i in range(6)]
+    out = _batch(cycles, {**WASHER_OPTS, CONF_START_THRESHOLD_W: 120.0}, "washing_machine")
+    assert CONF_STOP_THRESHOLD_W not in out
+    assert out[CONF_START_THRESHOLD_W]["value"] == pytest.approx(6.3)
+    # Reachable: the hold keeps both.
+    out = _batch(cycles, {**WASHER_OPTS, CONF_START_THRESHOLD_W: 80.0}, "washing_machine")
+    assert CONF_START_THRESHOLD_W not in out

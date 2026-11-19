@@ -1492,16 +1492,6 @@ class WashDataManager:
                     is_confirmed, mapped_time, _ = (
                         await verify_alignment(current_matched, formatted)
                     )
-                    if not self._match_still_current(identity) or _selection_changed():
-                        # Same race as the matcher await above (audit LIVE-02): a
-                        # verified pause and the old match must not land on a
-                        # finished detector and carry into the next cycle, nor
-                        # over a program picked meanwhile.
-                        self._logger.debug(
-                            "Discarding a live match whose alignment check returned "
-                            "after its cycle ended"
-                        )
-                        return
                 except Exception as e: # pylint: disable=broad-exception-caught
                     self._logger.error(
                         "Alignment verification crashed for profile %s: %s",
@@ -1509,6 +1499,17 @@ class WashDataManager:
                     )
                     is_confirmed = False
                     mapped_time = 0.0
+                if not self._match_still_current(identity) or _selection_changed():
+                    # Same race as the matcher await above (audit LIVE-02): a
+                    # verified pause and the old match must not land on a
+                    # finished detector and carry into the next cycle, nor over
+                    # a program picked meanwhile; checked after a crashed check
+                    # too, whose fallback would carry the stale tick on.
+                    self._logger.debug(
+                        "Discarding a live match whose alignment check returned "
+                        "after its cycle ended or a program was picked"
+                    )
+                    return
                 alignment = (is_confirmed, mapped_time)
 
             # Confirmed alignment, the 95%-of-span release, the high-power clear,

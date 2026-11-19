@@ -5249,9 +5249,16 @@ async def ws_apply_suggestions(
                 data_generation = getattr(manager.profile_store, "_data_generation", 0)
 
                 def _still_current() -> bool:
-                    return _get_manager(hass, entry_id) is manager and getattr(
-                        manager.profile_store, "_data_generation", 0
-                    ) == data_generation
+                    # A native reconfigure saves without this lock and reloads in
+                    # place (same manager and store): options other than the ones
+                    # judged here are not the settings these values were checked
+                    # against (review of PR #529).
+                    return (
+                        _get_manager(hass, entry_id) is manager
+                        and getattr(manager.profile_store, "_data_generation", 0)
+                        == data_generation
+                        and {**entry.data, **entry.options} == fresh
+                    )
 
                 if not await _drop_unsafe_end_gate_updates(hass, manager, visible, updates):
                     connection.send_error(
@@ -5282,8 +5289,9 @@ async def ws_apply_suggestions(
                     # judged is gone, so nothing is written (PR #529 review).
                     connection.send_error(
                         msg["id"], "entry_reloaded",
-                        "The appliance was reloaded or its data restored while the "
-                        "suggestions were applied. Nothing was saved; try again.",
+                        "The appliance was reloaded, its settings changed or its data "
+                        "restored while the suggestions were applied. Nothing was "
+                        "saved; try again.",
                     )
                     return
                 if updates:
@@ -5303,9 +5311,10 @@ async def ws_apply_suggestions(
                     if not _still_current():
                         connection.send_error(
                             msg["id"], "entry_reloaded",
-                            "The appliance was reloaded or its data restored while the "
-                            "suggestions were applied. The suggestions were cleared, but "
-                            "no setting was saved; try again once they are offered again.",
+                            "The appliance was reloaded, its settings changed or its data "
+                            "restored while the suggestions were applied. The suggestions "
+                            "were cleared, but no setting was saved; try again once they "
+                            "are offered again.",
                         )
                         return
                     # Suggested values are all tunables -> layer them onto the
