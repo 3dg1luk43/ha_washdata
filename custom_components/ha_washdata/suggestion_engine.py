@@ -31,6 +31,8 @@ from homeassistant.core import HomeAssistant, callback
 
 from .const import (
     power_unit_scale,
+    QUIET_PULSE_DEVICE_TYPES,
+    STANDBY_BAND_WINDOW_S,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
@@ -304,6 +306,84 @@ def _detector_gate_need(
     return 0.0
 
 
+def _flat_standby_split(
+    points: list[tuple[float, float]], stop: float, off_delay: float, gap: float,
+    max_gap_s: float, device_type: str | None,
+) -> bool:
+    """Would the detector's flat-standby bypass close a pause the energy gate holds?
+
+    ``CycleDetector._flat_standby_tail`` (DETECT-08): once the quiet has lasted the
+    full wait, max(off_delay, min_off_gap), a sampled window of the last
+    max(off_delay, ``STANDBY_BAND_WINDOW_S``) seconds of positive readings within
+    the spread bar ends the cycle whatever its energy; near the stop at once,
+    otherwise only after the loose quiet. A pause at 3.8 W under a 4 W stop is too
+    much energy for both energy models, but a shorter wait lets this close it
+    (review of PR #529). Checked at each reading, as the detector is.
+    """
+    # Lazy: cycle_detector imports this module.
+    from .cycle_detector import (  # noqa: PLC0415
+        ENDING_FLAT_STANDBY_DRYER_QUIET_S,
+        ENDING_FLAT_STANDBY_LOOSE_QUIET_S,
+        ENDING_FLAT_STANDBY_MIN_READINGS,
+        ENDING_FLAT_STANDBY_NEAR_STOP_FRAC,
+        ENDING_FLAT_STANDBY_SPREAD_FLOOR_W,
+        ENDING_FLAT_STANDBY_SPREAD_FRAC,
+    )
+
+    base_wait = max(float(off_delay), float(gap))
+    span = max(float(off_delay), STANDBY_BAND_WINDOW_S)
+    loose = (
+        ENDING_FLAT_STANDBY_DRYER_QUIET_S
+        if device_type in QUIET_PULSE_DEVICE_TYPES else ENDING_FLAT_STANDBY_LOOSE_QUIET_S
+    )
+    times = [t for t, _p in points]
+    watts = [p for _t, p in points]
+    n = len(points)
+    if n < 3:
+        return False
+    outage = energy_gap_threshold_s(np.asarray(times, dtype=float))
+    i = next((k for k, p in enumerate(watts) if p >= stop), n)
+    while i < n:
+        if watts[i] >= stop:
+            i += 1
+            continue
+        j = i
+        while j < n and watts[j] < stop:
+            j += 1
+        if j >= n:
+            break  # the end itself
+        t0 = times[i]
+        if i > 0:
+            lead = times[i] - times[i - 1]
+            if 0 < lead <= max_gap_s:
+                t0 -= _quiet_credit(times, i, lead)
+        for k in range(i, j):
+            t = times[k]
+            if t - t0 < base_wait:
+                continue
+            lo = k
+            while lo > 0 and t - times[lo - 1] <= span:
+                lo -= 1
+            if lo == 0:
+                continue  # no reading before the window: not a sampled window
+            powers = watts[lo:k + 1]
+            if len(powers) < ENDING_FLAT_STANDBY_MIN_READINGS:
+                continue
+            low, high = min(powers), max(powers)
+            if low <= 0.0 or (high - low) > max(
+                ENDING_FLAT_STANDBY_SPREAD_FLOOR_W, ENDING_FLAT_STANDBY_SPREAD_FRAC * high
+            ):
+                continue
+            if low < ENDING_FLAT_STANDBY_NEAR_STOP_FRAC * stop and t - t0 < max(base_wait, loose):
+                continue
+            stamps = times[lo - 1:k + 1]
+            if any(b - a > outage for a, b in zip(stamps, stamps[1:])):
+                continue
+            return True
+        i = j
+    return False
+
+
 def end_gate_would_split(
     points: list[tuple[float, float]],
     stop_w: float,
@@ -313,6 +393,7 @@ def end_gate_would_split(
     max_gap_s: float = 3600.0,
     *,
     strict: bool = False,
+    device_type: str | None = None,
 ) -> bool:
     """Would the fallback end gate close this cycle inside one of its own pauses?
 
@@ -328,11 +409,16 @@ def end_gate_would_split(
         wait = max(float(off_delay_s), float(min_off_gap_s))
     except (TypeError, ValueError):
         return False
-    return any(
+    if any(
         need >= wait > 0
         for need in end_gate_pause_needs(
             points, stop_w, off_delay_s, end_energy_wh, max_gap_s, strict=strict
         )
+    ):
+        return True
+    return wait > 0 and _flat_standby_split(
+        points, float(stop_w), float(off_delay_s), float(min_off_gap_s), max_gap_s,
+        device_type,
     )
 
 
@@ -2322,7 +2408,10 @@ class SuggestionEngine:
             return frozenset()
         return frozenset(
             i for i, points in enumerate(evidence)
-            if end_gate_would_split(points, stop, off_delay, gap or 0.0, energy, strict=strict)
+            if end_gate_would_split(
+                points, stop, off_delay, gap or 0.0, energy, strict=strict,
+                device_type=self.device_type,
+            )
         )
 
     def _guard_end_gate(

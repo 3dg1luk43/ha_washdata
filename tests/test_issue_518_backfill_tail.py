@@ -538,3 +538,27 @@ async def test_a_real_boot_cuts_what_an_older_install_labelled(
     assert durations == {"bf0": PUMP_END_S, "bf1": PUMP_END_S, "bf2": IMPORT_S}
     assert "tail_cut_s" not in _bf(store, "bf2")["meta"]
     assert await hass.config_entries.async_unload(entry.entry_id)
+
+
+async def test_a_restored_tail_keeps_its_keepalive_markers(hass: HomeAssistant) -> None:
+    """Review of PR #529: a cut removed a tail with keepalive rows, and a restore put
+    the readings back without their markers, so the #531 cut-off vote read them as
+    real reports. Unmarked provenance stays unknown through a restore."""
+    from custom_components.ha_washdata.time_utils import SYNTHETIC_OFFSETS_KEY  # noqa: PLC0415
+
+    store = await _store(hass)
+    cycle = _imported(0)
+    keepalives = [float(t) for t in range(int(LIVE_S + 1200), int(IMPORT_S), 600)]
+    cycle[SYNTHETIC_OFFSETS_KEY] = list(keepalives)
+    store._data["backfill_cycles"].append(cycle)
+    store._apply_backfill_tail_cut(cycle, LIVE_S + 900.0)
+    assert not [o for o in cycle.get(SYNTHETIC_OFFSETS_KEY, []) if o > LIVE_S + 900.0]
+    assert store._restore_backfill_tail(cycle)
+    assert sorted(cycle[SYNTHETIC_OFFSETS_KEY]) == keepalives
+
+    unmarked = _imported(1)
+    store._data["backfill_cycles"].append(unmarked)
+    store._apply_backfill_tail_cut(unmarked, LIVE_S + 900.0)
+    unmarked[SYNTHETIC_OFFSETS_KEY] = []  # the kept part says "none", the tail never said
+    assert store._restore_backfill_tail(unmarked)
+    assert SYNTHETIC_OFFSETS_KEY not in unmarked

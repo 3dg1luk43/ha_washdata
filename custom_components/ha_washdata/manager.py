@@ -1371,6 +1371,20 @@ class WashDataManager:
         """Inner task to handle actual matching logic."""
         if identity is None:
             identity = self._match_identity()
+        # The selection this automatic match runs under: a program pinned while it
+        # waited makes its result stale, or a decisive one would overwrite the pick
+        # and its length (review of PR #529).
+        selection = (
+            getattr(self, "_manual_program_active", False),
+            getattr(self, "_program_pick_generation", 0),
+        )
+
+        def _selection_changed() -> bool:
+            return selection != (
+                getattr(self, "_manual_program_active", False),
+                getattr(self, "_program_pick_generation", 0),
+            )
+
         try:
             end_time = readings[-1][0]
             start_time = readings[0][0]
@@ -1412,6 +1426,9 @@ class WashDataManager:
                     "Discarding a live match that returned after its cycle ended "
                     "(detector %s)", self.detector.state,
                 )
+                return
+            if _selection_changed():
+                self._logger.debug("Discarding a live match: a program was picked meanwhile")
                 return
 
             # 2. UPDATE MANAGER STATE (Estimates, Program Name, etc.)
@@ -1475,10 +1492,11 @@ class WashDataManager:
                     is_confirmed, mapped_time, _ = (
                         await verify_alignment(current_matched, formatted)
                     )
-                    if not self._match_still_current(identity):
+                    if not self._match_still_current(identity) or _selection_changed():
                         # Same race as the matcher await above (audit LIVE-02): a
                         # verified pause and the old match must not land on a
-                        # finished detector and carry into the next cycle.
+                        # finished detector and carry into the next cycle, nor
+                        # over a program picked meanwhile.
                         self._logger.debug(
                             "Discarding a live match whose alignment check returned "
                             "after its cycle ended"

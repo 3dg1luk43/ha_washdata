@@ -8691,6 +8691,10 @@ class ProfileStore:
         old_duration = float(cycle.get("duration") or 0.0)
         old_end = cycle.get("end_time")
         before = cycle.get("power_data")
+        # Which removed rows were keepalives goes with them, or a restore would
+        # put them back as real reports (review of PR #529). None: unknown.
+        syn_before = cycle.get(SYNTHETIC_OFFSETS_KEY)
+        syn_before = list(syn_before) if isinstance(syn_before, list) else None
         self._apply_repaired_duration(cycle, new_duration)
         points = decompress_power_data(cycle)
         if len(points) > 1:
@@ -8704,6 +8708,7 @@ class ProfileStore:
         kept = self._backfill_kept_tail(
             cycle, before, old_duration, old_end,
             self.stop_threshold_w if stop_w is None else stop_w,
+            synthetic_before=syn_before,
         )
         if kept is None:
             cycle.pop(BACKFILL_TAIL_TRACE_KEY, None)
@@ -8712,7 +8717,8 @@ class ProfileStore:
 
     @staticmethod
     def _backfill_kept_tail(
-        cycle: CycleDict, before: Any, old_duration: float, old_end: Any, stop_w: Any
+        cycle: CycleDict, before: Any, old_duration: float, old_end: Any, stop_w: Any,
+        *, synthetic_before: list[Any] | None = None,
     ) -> dict[str, Any] | None:
         """What a tail cut removed from ``cycle``, as :meth:`_restore_backfill_tail`
         reads it, or None when the cut cannot be undone exactly.
@@ -8749,8 +8755,18 @@ class ProfileStore:
                 if off is None or _safe_offset(pt[1]) is None or off <= cut_s + 1e-6:
                     return None
                 tail.append([pt[0], pt[1]])
+            syn_keys = (
+                {offset_key(o) for o in synthetic_before}
+                if synthetic_before is not None else None
+            )
             return {
                 "points": tail,
+                # The removed rows that were keepalives; None when the cycle did
+                # not say (provenance stays unknown through a restore).
+                "synthetic": (
+                    [pt[0] for pt in tail if offset_key(pt[0]) in syn_keys]
+                    if syn_keys is not None else None
+                ),
                 "end_row": id(after[-1]) not in before_ids,
                 "duration": old_duration,
                 "end_time": old_end if isinstance(old_end, str) else None,
@@ -8821,6 +8837,15 @@ class ProfileStore:
         if cycle_id:
             self._drop_cached_sample_segments(cycle_id)
         cycle["power_data"] = restored
+        # The tail's keepalive markers come back with it; a tail whose rows were
+        # never marked (an older record, an unmarked cycle) leaves the whole
+        # cycle unknown rather than reading its keepalives as reports.
+        current_syn = cycle.get(SYNTHETIC_OFFSETS_KEY)
+        tail_syn = record.get("synthetic")
+        if isinstance(current_syn, list) and isinstance(tail_syn, list):
+            set_synthetic_offsets(cycle, [*current_syn, *tail_syn])
+        elif isinstance(current_syn, list):
+            set_synthetic_offsets(cycle, None)
         cycle["signature"] = signature
         cycle["energy_wh"] = energy
         cycle["duration"] = duration

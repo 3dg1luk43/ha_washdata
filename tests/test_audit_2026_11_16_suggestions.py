@@ -242,8 +242,11 @@ def test_the_drying_pause_is_bridged_only_by_the_settings_in_force() -> None:
 
 
 def test_the_guard_withholds_end_gate_values_that_split_own_cycles() -> None:
-    """Drying at 1.2 W: end_energy 0.75 Wh lets an 1800 s window (0.6 Wh) pass."""
-    store = _Store([_drying_cycle(i, drying_w=1.2) for i in range(6)])
+    """Drying at 1.1 W: end_energy 0.75 Wh lets an 1800 s window (0.55 Wh) pass.
+
+    Under 0.75 x the stop, so the flat-standby bypass waits the loose 2 h and the
+    settings in force hold it (at 1.2 W it would close it after 2000 s)."""
+    store = _Store([_drying_cycle(i, drying_w=1.1) for i in range(6)])
     engine = SuggestionEngine(MagicMock(), "e", store, device_type="dishwasher")
     options = {
         CONF_STOP_THRESHOLD_W: 1.5, CONF_START_THRESHOLD_W: 3.0, CONF_OFF_DELAY: 1800,
@@ -256,7 +259,7 @@ def test_the_guard_withholds_end_gate_values_that_split_own_cycles() -> None:
         drop_order=drop, owner=OWNER_BATCH,
     )
     assert set(out) == {CONF_MIN_OFF_GAP}  # the end_energy raise was the split
-    # A pending 180 s off_delay from another pass (harmless alone: 0.06 Wh over
+    # A pending 180 s off_delay from another pass (harmless alone: 0.055 Wh over
     # its window) is applied with them, and still only end_energy goes.
     store.suggestions[CONF_OFF_DELAY] = _sug(180)
     out = engine._guard_end_gate(
@@ -1654,3 +1657,17 @@ def test_a_sparse_change_only_trace_is_end_gate_evidence(mock_hass: Any) -> None
     }
     eng._entry_options = lambda: {}  # noqa: SLF001
     assert eng.joint_end_gate_drops({CONF_MIN_OFF_GAP: {"value": 600}}) == [CONF_MIN_OFF_GAP]
+
+
+def test_a_shorter_gap_that_lets_the_flat_standby_bypass_close_a_pause_splits() -> None:
+    """A 780 s pause at 3.8 W under a 4 W stop is too much energy for the gate,
+    but past max(off_delay, min_off_gap) the detector's flat-standby bypass
+    (DETECT-08) closes it whatever its energy: a 360 s gap split this cycle on
+    the shipped detector, 900 s kept it whole (review of PR #529)."""
+    points = [(float(t), 300.0) for t in range(0, 1200, 10)]
+    points += [(float(t), 3.8) for t in range(1200, 1980, 10)]
+    points += [(float(t), 300.0) for t in range(1980, 3180, 10)]
+    points += [(float(t), 0.5) for t in range(3180, 4000, 10)]
+    args = (points, 4.0, 180.0)
+    assert end_gate_would_split(*args, 360.0, 0.05, device_type="washing_machine")
+    assert not end_gate_would_split(*args, 900.0, 0.05, device_type="washing_machine")

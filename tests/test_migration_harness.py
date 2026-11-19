@@ -1024,12 +1024,13 @@ async def test_the_one_pass_legacy_migration_heals_the_min_ratio(hass: HomeAssis
         ("washer_dryer", 600.0, 300),
         ("washing_machine", 518, 518),   # set by hand or by an applied suggestion
         ("washing_machine", 2874, 2874),
+        (None, 600, 300),                # no type stored: the runtime default, a washer
         ("dishwasher", 600, 600),        # not a washer
         ("dryer", 600, 600),
     ],
 )
 async def test_migrate_3_13_to_3_14_lowers_a_washer_s_seeded_completion_floor(
-    hass: HomeAssistant, device_type: str, stored: float, expected: float
+    hass: HomeAssistant, device_type: str | None, stored: float, expected: float
 ) -> None:
     """0.6.1: a nominal 10 min quick wash records 9-10 min, under the 600 s every
     washer entry was seeded with, so it was stored interrupted. Only that exact
@@ -1039,7 +1040,10 @@ async def test_migrate_3_13_to_3_14_lowers_a_washer_s_seeded_completion_floor(
         CONF_DEVICE_TYPE,
     )
 
-    entry = _ratio_entry(13, **{CONF_DEVICE_TYPE: device_type, CONF_COMPLETION_MIN_SECONDS: stored})
+    opts = {CONF_COMPLETION_MIN_SECONDS: stored}
+    if device_type is not None:
+        opts[CONF_DEVICE_TYPE] = device_type
+    entry = _ratio_entry(13, **opts)
     hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
     assert await async_migrate_entry(hass, entry) is True
     assert entry.minor_version == 14 == CONFIG_ENTRY_MINOR_VERSION

@@ -335,7 +335,9 @@ def _lower_seeded_washer_completion(options: dict[str, Any], device_type: Any = 
     anything else was set by hand or by an applied suggestion and is kept. One
     helper for the 3.13 -> 3.14 step and the one-pass legacy path.
     """
-    dtype = str(device_type or options.get(CONF_DEVICE_TYPE) or "")
+    # An entry that names no type runs as the default (a washer), as the manager
+    # resolves it (review of PR #529).
+    dtype = str(device_type or options.get(CONF_DEVICE_TYPE) or DEFAULT_DEVICE_TYPE)
     if dtype not in (DEVICE_TYPE_WASHING_MACHINE, DEVICE_TYPE_WASHER_DRYER):
         return []
     current = coerce_numeric_option(options.get(CONF_COMPLETION_MIN_SECONDS), float)
