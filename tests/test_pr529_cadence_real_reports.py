@@ -100,9 +100,20 @@ async def test_the_cycle_summary_is_computed_off_the_loop(
         threads.append(threading.get_ident())
         return real(values)
 
+    real_held = learning._held_cadence  # noqa: SLF001
+    left: list[int] = []
+
+    def held(pending: Any) -> Any:
+        summary = real_held(pending)
+        left.append(len(pending))  # its rows are freed in the job, not on the loop
+        return summary
+
     ran: list[Any] = []
     _hold_a_long_cycle(lm)
+    # A plain function: the test hass runs a Mock executor target inline, on the loop.
     with patch.object(learning, "cycle_cadence", side_effect=spy), patch.object(
+        learning, "_held_cadence", held
+    ), patch.object(
         lm, "_update_operational_suggestions",
         side_effect=lambda: ran.append(store.get_cadence_summaries(POWER)),
     ):
@@ -112,6 +123,7 @@ async def test_the_cycle_summary_is_computed_off_the_loop(
         await hass.async_block_till_done()
         lm.run_due_operational_pass()  # once per cycle
     assert threads and loop_thread not in threads
+    assert left == [0]
     assert store.get_cadence_summaries(POWER) == [[2.0, 2.0]]
     assert ran == [[[2.0, 2.0]]]
 

@@ -132,9 +132,15 @@ def cycle_cadence(intervals: Any) -> tuple[float, float] | None:
     return float(np.percentile(arr, 95)), float(np.median(arr))
 
 
-def _held_cadence(pending: Any) -> tuple[float, float] | None:
-    """``cycle_cadence`` of held ``(interval, stamp)`` rows (an executor job)."""
-    return cycle_cadence(delta for delta, _ts in pending)
+def _held_cadence(pending: deque[tuple[float, datetime]]) -> tuple[float, float] | None:
+    """``cycle_cadence`` of held ``(interval, stamp)`` rows (an executor job).
+
+    Empties ``pending`` (handed over, no longer shared), so its rows are freed
+    in the job too rather than on the loop once the job returns.
+    """
+    summary = cycle_cadence(delta for delta, _ts in pending)
+    pending.clear()
+    return summary
 
 
 def recent_cadence(summaries: Any) -> tuple[float, float] | None:
