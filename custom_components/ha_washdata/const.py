@@ -1840,10 +1840,16 @@ DEVICE_SMOOTHING_THRESHOLDS = {
 }
 
 # Device specific completion thresholds (min run time to be considered a valid "completed" cycle)
+# Washers at 5 min: a 10-15 min quick wash, spin or drain programme is recorded
+# from its first to its last working reading, which put a nominal 10 min one at
+# 9-10 min, under the old 600 s floor (stored interrupted: no finish alert,
+# trigger or Clean state). The corpus holds 10.5-16 min washer programmes and an
+# 8.3 min one stored interrupted. A config migration (3.13 -> 3.14) moves an entry
+# still on the old seeded 600 s to it.
 DEVICE_COMPLETION_THRESHOLDS = {
-    DEVICE_TYPE_WASHING_MACHINE: 600,  # 10 min
+    DEVICE_TYPE_WASHING_MACHINE: 300,  # 5 min
     DEVICE_TYPE_DRYER: 600,  # 10 min
-    DEVICE_TYPE_WASHER_DRYER: 600,  # 10 min (same as washer)
+    DEVICE_TYPE_WASHER_DRYER: 300,  # 5 min (same as washer)
     DEVICE_TYPE_DISHWASHER: 900,  # 15 min
     DEVICE_TYPE_PUMP: 5,  # 5 s - pump cycles can be under 30 seconds
 }
@@ -2227,7 +2233,7 @@ FAILED_RESTORE_STORE_SUFFIX = "failed_restore"
 # leaves an entry a version short, which then re-migrates on every start - and repeating
 # the literals in three places is what made that easy to do.
 CONFIG_ENTRY_VERSION = 3
-CONFIG_ENTRY_MINOR_VERSION = 13
+CONFIG_ENTRY_MINOR_VERSION = 14
 
 # Notification events
 EVENT_CYCLE_STARTED = "ha_washdata_cycle_started"

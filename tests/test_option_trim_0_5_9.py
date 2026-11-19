@@ -127,7 +127,7 @@ async def test_every_retired_key_goes_from_options_and_data(hass: HomeAssistant)
 
     assert await async_migrate_entry(hass, entry) is True
 
-    assert (entry.version, entry.minor_version) == (3, 13) == (
+    assert (entry.version, entry.minor_version) == (3, 14) == (
         CONFIG_ENTRY_VERSION, CONFIG_ENTRY_MINOR_VERSION,
     )
     _no_retired_keys(entry)

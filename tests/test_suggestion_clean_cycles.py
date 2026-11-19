@@ -291,9 +291,9 @@ def test_detection_suggestions_basic_keys() -> None:
     assert CONF_MIN_POWER not in unset.generate_detection_suggestions()
 
     assert CONF_COMPLETION_MIN_SECONDS in out
-    # Half the 3600 s p05 would be 1800 s; capped at the washer default (600 s)
+    # Half the 3600 s p05 would be 1800 s; capped at the washer default (300 s)
     # so an unseen quick programme is not stored interrupted (audit 2026-11-16).
-    assert out[CONF_COMPLETION_MIN_SECONDS]["value"] == 600
+    assert out[CONF_COMPLETION_MIN_SECONDS]["value"] == 300
 
     # The detector never reads end_repeat_count (audit DETECT-11).
     assert CONF_END_REPEAT_COUNT not in out

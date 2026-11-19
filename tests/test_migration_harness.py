@@ -898,7 +898,7 @@ async def test_migrate_3_12_to_3_13_heals_a_raised_min_ratio(hass: HomeAssistant
     hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
 
     assert await async_migrate_entry(hass, entry) is True
-    assert entry.minor_version == 13 == CONFIG_ENTRY_MINOR_VERSION
+    assert entry.minor_version == 14 == CONFIG_ENTRY_MINOR_VERSION  # the 3.13 -> 3.14 step follows
     assert entry.options == {
         CONF_OFF_DELAY: 120,
         CONF_PROFILE_MATCH_MIN_DURATION_RATIO: DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
@@ -923,7 +923,7 @@ async def test_migrate_3_12_to_3_13_leaves_a_dishwasher_floor(hass: HomeAssistan
             entry.data = {CONF_DEVICE_TYPE: "dishwasher"}
         hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
         assert await async_migrate_entry(hass, entry) is True
-        assert entry.minor_version == 13
+        assert entry.minor_version == 14
         assert entry.options[CONF_PROFILE_MATCH_MIN_DURATION_RATIO] == 0.63
 
 
@@ -945,7 +945,7 @@ async def test_migrate_3_12_to_3_13_keeps_a_lower_floor_and_absent_keys(
     hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
     assert await async_migrate_entry(hass, entry) is True
     assert entry.options == {CONF_OFF_DELAY: 120}
-    assert entry.minor_version == 13
+    assert entry.minor_version == 14
 
 
 @pytest.mark.asyncio
@@ -1014,3 +1014,48 @@ async def test_the_one_pass_legacy_migration_heals_the_min_ratio(hass: HomeAssis
     assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
     assert entry.options[CONF_PROFILE_MATCH_MIN_DURATION_RATIO] == pytest.approx(0.1)
     assert entry.options[CONF_PROFILE_MATCH_MAX_DURATION_RATIO] == pytest.approx(1.2)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("device_type", "stored", "expected"),
+    [
+        ("washing_machine", 600, 300),   # the old seeded floor moves
+        ("washer_dryer", 600.0, 300),
+        ("washing_machine", 518, 518),   # set by hand or by an applied suggestion
+        ("washing_machine", 2874, 2874),
+        ("dishwasher", 600, 600),        # not a washer
+        ("dryer", 600, 600),
+    ],
+)
+async def test_migrate_3_13_to_3_14_lowers_a_washer_s_seeded_completion_floor(
+    hass: HomeAssistant, device_type: str, stored: float, expected: float
+) -> None:
+    """0.6.1: a nominal 10 min quick wash records 9-10 min, under the 600 s every
+    washer entry was seeded with, so it was stored interrupted. Only that exact
+    seeded value moves to the new 5 min default."""
+    from custom_components.ha_washdata.const import (  # noqa: PLC0415
+        CONF_COMPLETION_MIN_SECONDS,
+        CONF_DEVICE_TYPE,
+    )
+
+    entry = _ratio_entry(13, **{CONF_DEVICE_TYPE: device_type, CONF_COMPLETION_MIN_SECONDS: stored})
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
+    assert await async_migrate_entry(hass, entry) is True
+    assert entry.minor_version == 14 == CONFIG_ENTRY_MINOR_VERSION
+    assert entry.options[CONF_COMPLETION_MIN_SECONDS] == expected
+    # Idempotent: a second pass changes nothing.
+    assert await async_migrate_entry(hass, entry) is True
+    assert entry.options[CONF_COMPLETION_MIN_SECONDS] == expected
+
+
+@pytest.mark.asyncio
+async def test_the_legacy_one_pass_migration_lowers_the_seeded_washer_floor_too(
+    hass: HomeAssistant,
+) -> None:
+    from custom_components.ha_washdata import _lower_seeded_washer_completion  # noqa: PLC0415
+
+    opts = {"device_type": "washing_machine", "completion_min_seconds": 600}
+    assert _lower_seeded_washer_completion(opts) == ["completion_min_seconds"]
+    assert opts["completion_min_seconds"] == 300
+    assert _lower_seeded_washer_completion(opts) == []

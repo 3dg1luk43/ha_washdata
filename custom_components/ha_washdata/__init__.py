@@ -57,6 +57,8 @@ from .const import (
     CONF_OFF_DELAY,
     CONF_DEVICE_TYPE,
     DEVICE_TYPE_DISHWASHER,
+    DEVICE_TYPE_WASHER_DRYER,
+    DEVICE_TYPE_WASHING_MACHINE,
     CONF_POWER_SENSOR,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_EVENTS,
@@ -317,6 +319,31 @@ def _heal_raised_min_ratio(options: dict[str, Any], device_type: Any = None) -> 
         options[CONF_PROFILE_MATCH_MIN_DURATION_RATIO] = DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
         return [CONF_PROFILE_MATCH_MIN_DURATION_RATIO]
     return []
+
+#: The completion floor every washer and washer-dryer entry was seeded with until
+#: 0.6.1 (the one-pass legacy migration writes the device default into options).
+_OLD_SEEDED_WASHER_COMPLETION_S = 600
+
+
+def _lower_seeded_washer_completion(options: dict[str, Any], device_type: Any = None) -> list[str]:
+    """Move a washer's stored completion floor from the old seeded 600 s to the
+    device default (5 min), in place.
+
+    Not a choice the user made: the legacy migration seeded the device default,
+    and a nominal 10 min programme records 9-10 min, so it was stored interrupted
+    (no finish alert, trigger or Clean state). Only the exact old value moves;
+    anything else was set by hand or by an applied suggestion and is kept. One
+    helper for the 3.13 -> 3.14 step and the one-pass legacy path.
+    """
+    dtype = str(device_type or options.get(CONF_DEVICE_TYPE) or "")
+    if dtype not in (DEVICE_TYPE_WASHING_MACHINE, DEVICE_TYPE_WASHER_DRYER):
+        return []
+    current = coerce_numeric_option(options.get(CONF_COMPLETION_MIN_SECONDS), float)
+    if current is None or current != _OLD_SEEDED_WASHER_COMPLETION_S:
+        return []
+    options[CONF_COMPLETION_MIN_SECONDS] = DEVICE_COMPLETION_THRESHOLDS[dtype]
+    return [CONF_COMPLETION_MIN_SECONDS]
+
 
 def _convert_legacy_notify_service(options: dict[str, Any]) -> list[str]:
     """Convert the deprecated ``notify_service`` to per-event lists, in place (#472).
@@ -589,6 +616,23 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             healed_ratios or "none",
         )
 
+    # 3.13 -> 3.14: a washer's completion floor from the old seeded 600 s to 5 min,
+    # so a 10-15 min quick wash, spin or drain is a completed cycle (0.6.1).
+    if version == 3 and minor_version == 13:
+        new_opts = dict(entry.options)
+        lowered = _lower_seeded_washer_completion(
+            new_opts, entry.options.get(CONF_DEVICE_TYPE) or entry.data.get(CONF_DEVICE_TYPE)
+        )
+        hass.config_entries.async_update_entry(
+            entry, options=new_opts, minor_version=14
+        )
+        minor_version = 14
+        _log.debug(
+            "Migrated WashData entry from 3.13 to 3.14 (washer completion floor "
+            "lowered: %s)",
+            lowered or "none",
+        )
+
     if version == CONFIG_ENTRY_VERSION and minor_version >= CONFIG_ENTRY_MINOR_VERSION:
         return True
 
@@ -755,6 +799,8 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # And the 3.12 -> 3.13 heal (item 571), which the `setdefault` above would keep
     # a stored min ratio from.
     _heal_raised_min_ratio(options)
+    # And the 3.13 -> 3.14 one: the `setdefault` above keeps a stored 600 s.
+    _lower_seeded_washer_completion(options)
 
     # 3.6: coffee_machine / ev / heat_pump / oven device types were removed.
     # Remap any entry still on one of them to DEVICE_TYPE_OTHER (Threshold Device),
