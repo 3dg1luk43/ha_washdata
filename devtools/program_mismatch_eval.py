@@ -18,8 +18,8 @@ usual duration elapsed). This replays that on the corpus.
 **Replay** (leave-one-out, production code): each scorable labelled cycle of a
 device with >= 2 programmes (``devtools/eval.py``'s corpus rules: clone files and
 twin entries dropped, the label keeps another traced cycle) is removed from every
-list with every other stored copy of its trace (same content, any name, any stored
-format: ``run_hash``), and the envelope and usual duration of each programme they
+list with every other stored copy of its trace (same content at stored precision,
+any name, any stored format: ``run_hash``), and the envelope and usual duration of each programme they
 were stored under rebuilt from the others (a fold whose rebuild learns no duration
 for the label is left out), on a store a real ``WashDataManager`` builds from the
 export's options (``eval.fresh_store``). A record whose stored duration is no
@@ -92,6 +92,7 @@ for _var in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
 
 import argparse  # noqa: E402
 import dataclasses  # noqa: E402
+import hashlib  # noqa: E402
 import importlib.util  # noqa: E402
 import json  # noqa: E402
 import math  # noqa: E402
@@ -255,10 +256,20 @@ def held_programmes(lists: dict[str, list], drop: Any) -> list[str]:
 
 
 def run_hash(pts: list) -> str | None:
-    """A run's trace content from its ``eval.query_points`` (``eval.trace_hash``'s
-    1 s / 1 W rounding), so every stored format of one run agrees: ``trace_hash``
-    reads the stored rows and has none for legacy ``(iso_str, power)`` ones."""
-    return ev.trace_hash({"power_data": pts}) if pts else None
+    """A run's trace content from its ``eval.query_points``, at the precision a
+    stored cycle keeps: each offset to 0.1 s (what the detector stores and every
+    legacy format normalises to), each reading as stored. So every stored format
+    of one run agrees (``eval.trace_hash`` reads the stored rows and has none for
+    legacy ``(iso_str, power)`` ones), and two distinct runs on one sample grid
+    never do: ``trace_hash``'s 1 W rounding made a 0.08 kW and a 0.15 kW run one
+    trace, and holding out either dropped both (PR #529 review)."""
+    if not pts:
+        return None
+    try:
+        rows = [[round(float(t), 1) + 0.0, float(p) + 0.0] for t, p in pts]
+    except (TypeError, ValueError, OverflowError):
+        return None
+    return hashlib.sha1(json.dumps(rows).encode()).hexdigest()
 
 
 def stored_copies(lists: dict[str, list]) -> dict[str, list[tuple[str, int]]]:

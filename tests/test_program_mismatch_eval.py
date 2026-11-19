@@ -451,3 +451,50 @@ def test_a_fold_drops_a_stored_copy_in_any_format(
     (fold,) = stores
     kept = [c["id"] for key, _ in pme.ev.LISTS for c in fold.get(key) or [] if run(c) == held]
     assert kept == []
+
+
+def test_copies_are_matched_at_stored_precision() -> None:
+    """PR #529 review: copies were matched at 1 s / 1 W, so two distinct sub-watt
+    runs on one sample grid (a 0.08 and a 0.15 kW plug) read as one trace."""
+    grid = [30.0 * k for k in range(60)]
+    low = [[t, 0.08] for t in grid]
+    high = [[t, 0.15] for t in grid]
+    assert pme.run_hash(low) != pme.run_hash(high)
+    # The same run is one trace in any stored format (offsets at 0.1 s).
+    assert pme.run_hash(low) == pme.run_hash([[t + 0.04, p] for t, p in low])
+
+
+def test_a_fold_keeps_a_distinct_sub_watt_run_and_drops_a_legacy_copy(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """PR #529 review: holding out a run dropped every run whose trace rounded to
+    the same whole watts. An exact copy in legacy ``(iso_str, power)`` rows still
+    goes; a distinct run on the same sample grid, under a watt apart, stays."""
+    doc = _export()
+    past = doc["data"]["past_cycles"]
+    k = next(j for j, c in enumerate(past) if c["id"] == "Cotton-0")
+    past[k]["power_data"] = [[t, float(round(p))] for t, p in past[k]["power_data"]]
+    near = dict(copy.deepcopy(past[k]), id="ref-near",
+                power_data=[[t, p + 0.3] for t, p in past[k]["power_data"]])
+    doc["data"]["reference_cycles"] = [
+        _as_iso(dict(copy.deepcopy(past[k]), id="ref-iso")), near,
+    ]
+    path = _write(tmp_path, doc)
+    pme._worker_init(str(tmp_path))
+    dev = pme._device(path)
+    _, base = pme._job_base(path)
+    stores: list[dict] = []
+    real = pme.ev.fresh_store
+
+    def spy(dev_, data, override):
+        stores.append(data)
+        return real(dev_, data, override)
+
+    monkeypatch.setattr(pme.ev, "fresh_store", spy)
+    i = next(j for j, (c, e) in enumerate(dev.cycles) if c["id"] == "Cotton-0" and e == "past")
+    (row,) = pme._job_folds((path, base, [i]))
+    (fold,) = stores
+    ids = {c["id"] for key, _ in pme.ev.LISTS for c in fold.get(key) or []}
+    assert "ref-iso" not in ids and "Cotton-0" not in ids
+    assert "ref-near" in ids
+    assert row["label"] == "Cotton"
