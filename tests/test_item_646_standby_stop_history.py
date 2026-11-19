@@ -16,9 +16,14 @@ from unittest.mock import MagicMock
 from homeassistant.core import HomeAssistant
 
 from custom_components.ha_washdata import ws_api
-from custom_components.ha_washdata.const import CONF_STOP_THRESHOLD_W, DOMAIN
+from custom_components.ha_washdata.const import (
+    CONF_STOP_THRESHOLD_W,
+    DOMAIN,
+    SETTINGS_CHANGELOG_IMPORTED_KEY,
+)
 from custom_components.ha_washdata.suggestion_engine import (
     detect_standby_above_stop,
+    recorded_stop_changes,
     stop_threshold_changes,
 )
 
@@ -159,3 +164,63 @@ async def test_a_merged_newer_stop_row_survives_the_prune(
     store._data["settings_changelog"] = filler + old + [merged_in]  # noqa: SLF001 - as a merge leaves it
     await store.async_record_settings_changes([{"key": "off_delay", "old": 2, "new": 3}])
     assert any(r is merged_in or r == merged_in for r in store.get_settings_changelog())
+
+
+def _history_export(source_entry_id: str | None) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "version": 19,
+        "device_fingerprint": {"device_type": "washing_machine"},
+        "data": {"settings_changelog": _log(5.0, 2.0)},
+        "entry_data": {},
+        "entry_options": {},
+    }
+    if source_entry_id is not None:
+        payload["entry_id"] = source_entry_id
+    return payload
+
+
+def test_the_changelog_reader_skips_rows_imported_from_another_device() -> None:
+    imported = [{**row, SETTINGS_CHANGELOG_IMPORTED_KEY: True} for row in _log(5.0, 2.0)]
+    assert stop_threshold_changes(imported) == []
+    assert detect_standby_above_stop(
+        _history(), 2.0, stop_changes=stop_threshold_changes(imported)
+    ) is None
+
+
+async def test_another_appliance_s_history_does_not_classify_local_cycles(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """PR #529 review: History Logs imported from another device put its Stop
+    change into this device's changelog, and the advisory read the local natural
+    ends as ended under that device's 5 W Stop. The rows stay visible, marked,
+    and the advisory is what it was before the import. This device's own export
+    brought back is still read."""
+    entry = await setup_washdata_entry(
+        options={CONF_STOP_THRESHOLD_W: 2.0, "start_threshold_w": 10.0, "off_delay": 180}
+    )
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    store._data["past_cycles"] = _history()  # noqa: SLF001
+
+    def _advisory() -> Any:
+        return detect_standby_above_stop(
+            store.get_past_cycles(), 2.0, stop_changes=recorded_stop_changes(store)
+        )
+
+    assert _advisory() is None
+    for source in ("another-entry", None):
+        store._data["settings_changelog"] = []  # noqa: SLF001
+        await store.async_import_data_selective(
+            _history_export(source), selection={"categories": ["history_logs"]},
+            local_device_type="washing_machine",
+        )
+        log = store.get_settings_changelog()
+        assert len(log) == 1 and log[0][SETTINGS_CHANGELOG_IMPORTED_KEY] is True
+        assert _advisory() is None
+
+    store._data["settings_changelog"] = []  # noqa: SLF001
+    await store.async_import_data_selective(
+        _history_export(entry.entry_id), selection={"categories": ["history_logs"]},
+        local_device_type="washing_machine",
+    )
+    assert SETTINGS_CHANGELOG_IMPORTED_KEY not in store.get_settings_changelog()[0]
+    assert _advisory() is not None

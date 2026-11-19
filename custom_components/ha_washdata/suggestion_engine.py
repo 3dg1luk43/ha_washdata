@@ -72,6 +72,7 @@ from .const import (
     DEFAULT_MATCH_PERSISTENCE,
     MATCH_INTERVAL_SUGGESTION_DECISION_FRAC,
     MATCH_INTERVAL_SUGGESTION_MIN_S,
+    SETTINGS_CHANGELOG_IMPORTED_KEY,
 )
 from .options_utils import option_int
 from .signal_processing import (
@@ -923,13 +924,17 @@ def stop_threshold_changes(changelog: Any) -> list[tuple[datetime, float | None]
     newest 50 changes of any setting, newest first). The value before is the Stop
     the detector ran with (``old_effective``) where the row records it, so an unset
     Stop that followed Min Power still counts; else the option as stored (``old``).
-    Rows without a readable time are skipped. Never raises: [] when nothing usable
-    is recorded.
+    Rows without a readable time are skipped, and so are rows an import brought
+    from another device (``SETTINGS_CHANGELOG_IMPORTED_KEY``): its Stop says
+    nothing about how this appliance's cycles ended (PR #529 review). Never
+    raises: [] when nothing usable is recorded.
     """
     out: list[tuple[datetime, float | None]] = []
     try:
         for row in list(changelog or []):
             if not isinstance(row, dict) or row.get("key") != CONF_STOP_THRESHOLD_W:
+                continue
+            if row.get(SETTINGS_CHANGELOG_IMPORTED_KEY):
                 continue
             when = _instant(row.get("timestamp"))
             if when is not None:

@@ -105,6 +105,7 @@ from .const import (
     CONF_PROFILE_MIN_WARMUP_CYCLES,
     SMART_TERM_PREFIX_MIN_PAUSE_S,
     SMART_TERM_TAIL_WINDOW_FRAC,
+    SETTINGS_CHANGELOG_IMPORTED_KEY,
     STORAGE_KEY,
     STORAGE_VERSION,
     FAILED_RESTORE_STORE_SUFFIX,
@@ -2489,6 +2490,9 @@ def unwrap_import_payload(payload: Any) -> tuple[dict[str, Any], dict[str, Any]]
         "device_fingerprint": fingerprint if isinstance(fingerprint, dict) else {},
         "exported_at": payload.get("exported_at"),
         "supplied_keys": supplied_keys,
+        # The exporting device's config entry: a selective import tells this
+        # device's own settings history from another's by it.
+        "entry_id": payload.get("entry_id"),
     }
     return data_dict, meta
 
@@ -13155,6 +13159,21 @@ class ProfileStore:
                         for task_id, names in src_val.items()
                         if isinstance(names, list)
                     }
+                if (
+                    key == "settings_changelog"
+                    and isinstance(src_val, list)
+                    and str(meta.get("entry_id") or "") != str(self.entry_id)
+                ):
+                    # Another device's settings history stays visible, but a Stop
+                    # it records is not the one this appliance's cycles ended
+                    # under (PR #529 review); an export without an entry id
+                    # counts as another device's.
+                    src_val = [
+                        {**row, SETTINGS_CHANGELOG_IMPORTED_KEY: True}
+                        if isinstance(row, dict)
+                        else row
+                        for row in src_val
+                    ]
                 if mode == "replace":
                     self._data[key] = src_val
                     continue

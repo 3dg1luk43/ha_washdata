@@ -2206,6 +2206,11 @@ SELF_UNMATCHABLE_MIN_CYCLES = 3
 STORAGE_VERSION = 19
 STORAGE_KEY = "ha_washdata"
 
+# Marks a settings-changelog row a selective import brought from another device
+# (PR #529 review). Shown in the history like any row; never read as the Stop
+# Threshold this appliance's cycles ended under (the standby advisory, item 646).
+SETTINGS_CHANGELOG_IMPORTED_KEY = "imported"
+
 # Restore point for "Undo last import" (register item 195): the store as it was before
 # the last replace import, in its own file `ha_washdata.<entry_id>.pre_import` so the
 # main store's per-save rewrite never carries a second copy. One per device: the next
