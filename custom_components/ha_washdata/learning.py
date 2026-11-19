@@ -683,6 +683,17 @@ class LearningManager:
             filtered_suggestions, changed=any_deleted, owner=owner
         )
 
+    def _withdraw_operational(self) -> None:
+        """Withdraw every operational entry (no cadence to run that pass on).
+
+        Pushes the sensor itself when that changed the store (PR #529 review):
+        no ``_run_pass`` snapshot covers it, so a manual analysis whose next pass
+        raised left the withdrawn entry on the non-polling sensor.
+        """
+        before = self._stored_suggestions()
+        self._apply_suggestions_and_notify({}, owner=OWNER_OPERATIONAL)
+        self._announce_if_changed(before)
+
     def _apply_if_current(
         self, generation: int, suggestions: dict[str, Any], owner: str | None
     ) -> None:
@@ -1063,7 +1074,7 @@ class LearningManager:
         if cad is None:
             # No cadence for this sensor (a new one, a wipe): what the pass stored
             # was measured on another, so it goes (PR #529 review).
-            self._apply_suggestions_and_notify({}, owner=OWNER_OPERATIONAL)
+            self._withdraw_operational()
             return
         p95, median = cad
 
@@ -1293,7 +1304,7 @@ class LearningManager:
             else:
                 # A power sensor with no cadence yet: entries measured on the old
                 # one go rather than wait for a pass that will not run (PR #529 review).
-                self._apply_suggestions_and_notify({}, owner=OWNER_OPERATIONAL)
+                self._withdraw_operational()
             for owner, generate in (
                 (OWNER_STANDBY_FLOOR, self.suggestion_engine.for_job().generate_standby_floor_suggestions),
                 (OWNER_START_THRESHOLD, self.suggestion_engine.for_job().generate_start_threshold_suggestions),
