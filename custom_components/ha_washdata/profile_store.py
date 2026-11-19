@@ -391,6 +391,44 @@ def _parse_start_dt(value: Any) -> datetime | None:
     return None
 
 
+#: Readings a match converts on the loop (under a millisecond). Past this the
+#: conversion goes to the executor. Inline below it, a cycle's first matches,
+#: too short to score, return without yielding: landing a loop turn later, each
+#: cost an extra entity refresh (tests/test_perf_budgets.py).
+_MATCH_PREP_INLINE_READINGS = 512
+
+
+def _prepare_match_trace(
+    current_power_data: list[Any],
+) -> tuple[np.ndarray, np.ndarray, list[float], float] | None:
+    """A match's trace as ``(seconds, watts, resampled watts, grid step)``.
+
+    Pure and executor-safe (``ProfileStore.async_match_profile`` runs it off the
+    loop). Readings are ``(datetime | offset seconds | ISO string, watts)``. None
+    when the resampled trace is too short to match; raises on a malformed reading.
+    """
+    first_elem = current_power_data[0][0]
+    if isinstance(first_elem, datetime):
+        t_start = first_elem.timestamp()
+        ts_arr = np.array([(x[0].timestamp() - t_start) for x in current_power_data])
+    elif isinstance(first_elem, (int, float)):
+        # Already offset timestamps (from compressed format)
+        ts_arr = np.array([float(x[0]) for x in current_power_data])
+    else:
+        t_start = datetime.fromisoformat(first_elem).timestamp()
+        ts_arr = np.array(
+            [(datetime.fromisoformat(x[0]).timestamp() - t_start) for x in current_power_data]
+        )
+    p_arr = np.array([float(x[1]) for x in current_power_data])
+    segments, used_dt = resample_adaptive(ts_arr, p_arr, min_dt=5.0, gap_s=21600.0)
+    if not segments:
+        return None
+    current_seg = max(segments, key=lambda s: len(s.power))
+    if len(current_seg.power) < MATCH_MIN_RESAMPLED_POINTS:
+        return None
+    return ts_arr, p_arr, current_seg.power.tolist(), used_dt
+
+
 def _newest_cycle(candidates: list[Any]) -> Any:
     """The most recent candidate cycle, ordered by parsed instant (``None`` if empty).
 
@@ -10941,47 +10979,32 @@ class ProfileStore:
         that have never paused below it (#424, ``profile_pauses_below``). Omitted,
         the guard behaves as before.
         """
-        # 1. Prepare data in main thread (Access ProfileStore state safely)
         group_members: dict[str, list[str]] = {}
         member_snaps: dict[str, dict[str, Any]] = {}
 
-        # Convert to list of floats for current power (uniform resampling)
         if not current_power_data:
             return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
 
-        # Pre-process current data
+        # 1. The trace, converted and resampled: in the executor once it is long,
+        # where that is milliseconds per match (PR #529 review: a pinned 4 h cycle
+        # at 2 s), a copy so a caller's list that grows meanwhile is read as
+        # passed. A short one inline (``_MATCH_PREP_INLINE_READINGS``).
         try:
-            # Normalize input format
-            first_elem = current_power_data[0][0]
-            if isinstance(first_elem, datetime):
-                # datetime objects: compute relative timestamps
-                t_start = first_elem.timestamp()
-                ts_arr = np.array([(x[0].timestamp() - t_start) for x in cast(list[tuple[datetime, float]], current_power_data)])
-            elif isinstance(first_elem, (int, float)):
-                # Already offset timestamps (from compressed format)
-                ts_arr = np.array([float(x[0]) for x in cast(list[tuple[float, float]], current_power_data)])
+            if len(current_power_data) <= _MATCH_PREP_INLINE_READINGS:
+                prepared = _prepare_match_trace(current_power_data)
             else:
-                # ISO format strings
-                t_start = datetime.fromisoformat(first_elem).timestamp()
-                ts_arr = np.array(
-                    [
-                        (datetime.fromisoformat(x[0]).timestamp() - t_start)
-                        for x in cast(list[tuple[str, float]], current_power_data)
-                    ]
+                prepared = await self.hass.async_add_executor_job(
+                    _prepare_match_trace, list(current_power_data)
                 )
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            self._logger.error("Preparation for async match failed: %s", e)
+            return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
+        if prepared is None:
+            return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
+        ts_arr, p_arr, current_power_list, used_dt = prepared
 
-            p_arr = np.array([float(x[1]) for x in current_power_data])
-
-            # Resample current
-            segments, used_dt = resample_adaptive(ts_arr, p_arr, min_dt=5.0, gap_s=21600.0)
-            if not segments:
-                return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
-            current_seg = max(segments, key=lambda s: len(s.power))
-            if len(current_seg.power) < MATCH_MIN_RESAMPLED_POINTS:
-                return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
-
-            current_power_list = current_seg.power.tolist()
-
+        # 2. The candidates, on the loop (the store's state is read here only).
+        try:
             snapshots = self.build_match_snapshots(used_dt)
 
             # Stage 5: map cohesive near-duplicate groups to their members (loose
@@ -11015,7 +11038,7 @@ class ProfileStore:
             self._logger.error("Preparation for async match failed: %s", e)
             return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
 
-        # 2. Run Heavy Logic in Executor. Guarded like the preparation above: the
+        # 3. Run Heavy Logic in Executor. Guarded like the preparation above: the
         # cycle-end final match runs before the cycle is stored, so a raise here
         # must cost the match, never the cycle (audit MATCH-CORE-06).
         try:
@@ -11030,7 +11053,7 @@ class ProfileStore:
             self._logger.error("Profile matching failed: %s", e)
             return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
 
-        # 3. Process Result (Main Thread)
+        # 4. Process Result (Main Thread)
         if not candidates:
             profiles_count = len(self._data.get("profiles", {}))
             snapshots_count = len(snapshots) if 'snapshots' in dir() else 0

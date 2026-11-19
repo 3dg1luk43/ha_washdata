@@ -163,3 +163,35 @@ async def test_a_reimported_reference_copy_keeps_its_length_correction(
         local_device_type="dishwasher",
     )
     assert "manual_duration" not in store2.get_reference_cycles()[0]
+
+
+async def test_the_match_converts_the_trace_off_the_event_loop(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """The #530 check (and the live tick) handed a long cycle's readings to the
+    matcher, which converted every one to seconds and resampled them on the loop
+    before its executor job: ~3-4.5 ms a match on a 4 h cycle at 2 s."""
+    import threading  # noqa: PLC0415
+    from datetime import datetime, timezone  # noqa: PLC0415
+
+    on_loop: list[bool] = []
+    loop_thread = threading.current_thread()
+
+    class _Stamp(datetime):
+        def timestamp(self) -> float:
+            on_loop.append(threading.current_thread() is loop_thread)
+            return super().timestamp()
+
+    from custom_components.ha_washdata import profile_store  # noqa: PLC0415
+
+    entry = await setup_washdata_entry()
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    t0 = datetime(2026, 11, 1, 8, tzinfo=timezone.utc).timestamp()
+    n = profile_store._MATCH_PREP_INLINE_READINGS + 100  # noqa: SLF001 - a long trace
+    readings = [
+        (_Stamp.fromtimestamp(t0 + 2.0 * i, tz=timezone.utc), 1800.0 if i < n // 2 else 150.0)
+        for i in range(n)
+    ]
+    await store.async_match_profile(readings, 2.0 * (n - 1), in_progress=True, stop_threshold_w=2.0)
+    assert len(on_loop) >= len(readings)  # every reading was converted
+    assert not any(on_loop)
