@@ -1,6 +1,6 @@
 """devtools/duration_ratchet_eval.py on a synthetic ECO curve (#531).
 
-Replays through the real matcher, so it is in the slow tier. The corpus curve is
+The replay through the real matcher is in the slow tier. The corpus curve is
 local only; this keeps the harness from rotting in CI and pins its #531 verdict:
 from a store whose ECO runs were mostly closed inside the drying, the next run
 still ends at the programme's real end.
@@ -12,8 +12,6 @@ import sys
 from pathlib import Path
 
 import pytest
-
-pytestmark = pytest.mark.slow
 
 _PATH = Path(__file__).resolve().parents[1] / "devtools" / "duration_ratchet_eval.py"
 _spec = importlib.util.spec_from_file_location("wd_duration_ratchet_eval", _PATH)
@@ -42,6 +40,7 @@ def _curve() -> list[tuple[float, float]]:
     return pts
 
 
+@pytest.mark.slow
 def test_a_store_of_cut_off_runs_no_longer_ends_the_next_one_early() -> None:
     res = ratchet.run(_curve(), seed=4, cut=8, cut_min=131.0, cycles=2, hold_min=20.0)
     assert res["ended_early"] == 0 and res["no_completed_record"] == 0
@@ -61,3 +60,22 @@ def test_a_cut_that_does_not_shorten_the_curve_is_bad_input(tmp_path: Path) -> N
     curve = tmp_path / "c.csv"
     curve.write_text("minutes_since_start,power_w\n" + "".join(f"{m},{1900 if m < 60 else 3.3}\n" for m in range(90)))
     assert ratchet.main(["--curve", str(curve), "--cut", "3", "--cut-min", "131"]) == 2
+
+
+def test_an_end_the_manager_discards_is_never_learned_from(monkeypatch) -> None:
+    """PR #529 review: a replay whose only completed end is one the manager never
+    stores (here a dishwasher pump-out) was stored as the run and learned from."""
+
+    def replay(src, *_a, **_k):
+        pump = {"status": "completed", "termination_reason": "smart", "duration": 240.0,
+                "start_time": src["start_time"], "power_data": [[0.0, 30.0], [240.0, 0.0]]}
+        return {"captured": [pump], "ends": [300.0], "discarded": ["pump_out"],
+                "committed": [], "base": None, "idle_above_stop": False, "work_end": None}
+
+    monkeypatch.setattr(ratchet.sle, "replay_one", replay)
+    res = ratchet.run(_curve(), seed=3, cycles=2, hold_min=0.0)
+    assert res["no_completed_record"] == 2 and res["ended_early"] == 0
+    for row in res["rows"]:
+        assert "stored_min" not in row
+        assert row["learned_after_min"] == row["learned_before_min"]
+    assert res["learned_last_min"] == res["learned_first_min"]

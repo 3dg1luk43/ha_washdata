@@ -22,8 +22,10 @@ labelled (then ``--cut`` runs cut at ``--cut-min``, the reporter's store after t
 ratchet), the profile's envelope is built; then ``--cycles`` more runs, one at a
 time, each replayed through the Playground replay (real ``CycleDetector``, real
 matcher and the manager's detector inputs, ``suggestion_loop_eval.replay_one``)
-against the profile as learned so far, stored through ``ProfileStore._add_cycle_data``
-with the program's label, and the envelope rebuilt. Each run is the curve with
+against the profile as learned so far; its longest completed end the manager would
+store (not a ghost or a dishwasher pump-out, ``manager._on_cycle_end``) is stored
+through ``ProfileStore._add_cycle_data`` with the program's label, and the envelope
+rebuilt. A run with none counts under ``no_completed_record``. Each run is the curve with
 +-3% power noise (seeded), the same length: a dishwasher program does not vary.
 After the curve the appliance holds its standby level for ``--hold`` minutes (the
 door stays shut), then the replay's 0 W tail.
@@ -108,6 +110,19 @@ def _target_s(store: Any) -> float | None:
     return float(target) if target else None
 
 
+def stored_ends(rep: dict[str, Any] | None) -> list[int]:
+    """Indices of the replay's completed ends the manager would store: a ghost or a
+    dishwasher pump-out (``discarded``, ``manager._on_cycle_end``'s rules) is never
+    stored, so it is never learned from (PR #529 review)."""
+    if not rep:
+        return []
+    why = rep.get("discarded") or []
+    return [
+        i for i, c in enumerate(rep.get("captured") or [])
+        if c.get("status") == "completed" and (why[i] if i < len(why) else None) is None
+    ]
+
+
 def run(curve: list[tuple[float, float]], *, seed: int = 30, cycles: int = 60,
         stop: float = 4.5, start: float = 5.0, hold_min: float = 40.0, rng_seed: int = 531,
         cut: int = 0, cut_min: float = 131.0) -> dict[str, Any]:
@@ -132,10 +147,10 @@ def run(curve: list[tuple[float, float]], *, seed: int = 30, cycles: int = 60,
         rep = sle.replay_one(src, cfg, store, prebuilt, {**entry_data, **options}, None, stop)
         before = _learned_min(store)
         row: dict[str, Any] = {"run": k, "learned_before_min": before, "envelope_target_s": _target_s(store)}
-        kept = [c for c in (rep or {}).get("captured", []) if c.get("status") == "completed"]
+        kept = stored_ends(rep)
         if kept:
-            primary = max(kept, key=lambda c: float(c.get("duration") or 0.0))
-            idx = rep["captured"].index(primary)
+            idx = max(kept, key=lambda i: float(rep["captured"][i].get("duration") or 0.0))
+            primary = rep["captured"][idx]
             ends = rep.get("ends") or []
             end_at = float(ends[idx]) if idx < len(ends) else None
             # Judged on the seconds, rounded only for display: 301 s early is early.
@@ -151,7 +166,7 @@ def run(curve: list[tuple[float, float]], *, seed: int = 30, cycles: int = 60,
             store._add_cycle_data(cd)  # noqa: SLF001
             ev.run_coro(store.async_rebuild_envelope(PROGRAM))
         else:
-            unfinished += 1  # no completed record: neither on time nor early
+            unfinished += 1  # no completed record stored: neither on time nor early
         row["learned_after_min"] = _learned_min(store)
         rows.append(row)
     return {

@@ -635,10 +635,12 @@ def replay_one(src: dict, cfg: Any, match_store: Any, prebuilt: Any, options: di
     pessimistic reading and records the force-end instead.
 
     Returns what the detector emitted (``captured``), when each end was detected
-    (``ends``, seconds from ``base``), the cadence intervals the manager would have
-    committed, ``idle_above_stop`` and ``work_end`` (the source's last reading at or
-    above the recorded stop threshold, the anchor of the end lag); None when the
-    trace is too short to replay.
+    (``ends``, seconds from ``base``), why the manager would not store each end
+    (``discarded``: ``ghost_rules.DISCARD_*`` or None, the replay's own rule, which
+    knows no end before the replay's first), the cadence intervals the manager
+    would have committed, ``idle_above_stop`` and ``work_end`` (the source's last
+    reading at or above the recorded stop threshold, the anchor of the end lag);
+    None when the trace is too short to replay.
     """
     cyc = src
     if throttle_s:
@@ -658,7 +660,7 @@ def replay_one(src: dict, cfg: Any, match_store: Any, prebuilt: Any, options: di
     idle_above = finish_replay(sim, cfg, src, recorded_stop, idle_hold, lambda: run_tail(sim, cfg))
     return {
         "captured": copy.deepcopy(sim.captured), "ends": list(tap.ends),
-        "committed": list(tap.committed), "base": sim.base, "idle_above_stop": idle_above,
+        "discarded": list(sim.discarded), "committed": list(tap.committed), "base": sim.base, "idle_above_stop": idle_above,
         "work_end": (work[-1] - src_base).total_seconds() if work else None,
     }
 
