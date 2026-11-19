@@ -781,6 +781,27 @@ def _tail_settled_w(cycle: dict[str, Any], raw: list[Any], peak: float) -> float
     return value
 
 
+def _kept_tail(
+    rows: list[Any], work_w: float, synthetic: set[int]
+) -> list[tuple[float, float]] | None:
+    """The readings after the last one at or above ``work_w``, oldest first, rows
+    in ``synthetic`` left out. None at a row whose offset is not a number."""
+    tail: list[tuple[float, float]] = []
+    for pt in reversed(rows):
+        if not isinstance(pt, (list, tuple)) or len(pt) < 2:
+            continue
+        try:
+            offset, watts = float(pt[0]), float(pt[1])
+        except (TypeError, ValueError, OverflowError):
+            return None
+        if watts >= work_w:
+            break
+        if offset_key(offset) not in synthetic:
+            tail.append((offset, watts))
+    tail.reverse()
+    return tail
+
+
 def _tail_settled_w_uncached(cycle: dict[str, Any], raw: list[Any], peak: float) -> float | None:
     """Where a kept tail settled after the cycle's last working reading (#525).
 
@@ -790,24 +811,17 @@ def _tail_settled_w_uncached(cycle: dict[str, Any], raw: list[Any], peak: float)
     ``_TAIL_SETTLED_FRACTION`` of the tail. Rows listed in ``synthetic_offsets``
     are skipped: WashData wrote them, the plug did not. Scans back from the end
     only as far as the working reading, so it costs the tail, not the trace (the
-    caller runs on the event loop). None when the tail has fewer than two timed
-    readings.
+    caller runs on the event loop). A trace with ISO-stamped legacy rows is read
+    through :func:`_cycle_readings`, as every other reader of it does. None when the
+    tail has fewer than two timed readings.
     """
     synthetic = synthetic_offset_keys(cycle) or set()
     work_w = peak * _STANDBY_PEAK_FRACTION if peak > 0 else float("inf")
-    tail: list[tuple[float, float]] = []
-    for pt in reversed(raw):
-        if not isinstance(pt, (list, tuple)) or len(pt) < 2:
-            continue
-        try:
-            offset, watts = float(pt[0]), float(pt[1])
-        except (TypeError, ValueError, OverflowError):
-            return None  # an ISO-stamped legacy row: no clock to weight by
-        if watts >= work_w:
-            break
-        if offset_key(offset) not in synthetic:
-            tail.append((offset, watts))
-    tail.reverse()
+    tail = _kept_tail(raw, work_w, synthetic)
+    if tail is None:
+        # An ISO-stamped legacy row: normalised, its tail weighs the same as an
+        # offset trace's (PR #529 review), not the last sample alone.
+        tail = _kept_tail(_cycle_readings(cycle), work_w, synthetic) or []
     max_gap_s = _MAX_PAUSE_GAP_H * 3600
     vals: list[float] = []
     weights: list[float] = []
