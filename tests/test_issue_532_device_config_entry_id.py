@@ -1,8 +1,8 @@
-"""Issue #532: Home Assistant 2026.9 gave a device a single ``config_entry_id``.
+"""Issue #532: Home Assistant 2026.8 gave a device a single ``config_entry_id``.
 
-``DeviceEntry.config_entries`` became a deprecated shim that logs "Detected that
-custom integration 'ha_washdata' accesses DeviceEntry.config_entries" on every
-read and stops working in 2027.10. The integration reads a device's entries
+``DeviceEntry.config_entries`` became a compatibility shim, and 2026.10 began
+logging "Detected that custom integration 'ha_washdata' accesses
+DeviceEntry.config_entries" on every read; it stops working in 2027.10. The integration reads a device's entries
 through ``const.device_entry_ids``, which uses ``config_entry_id`` where it
 exists and ``config_entries`` only on releases without it (the test environment
 runs 2026.2.3, which has only ``config_entries``).
@@ -18,7 +18,7 @@ _SRC = Path(__file__).resolve().parents[1] / "custom_components" / "ha_washdata"
 
 
 class _NewDevice:
-    """A 2026.9+ device entry: reading the shim is the warning."""
+    """A 2026.8+ device entry: reading the shim is the warning (since 2026.10)."""
 
     config_entry_id = "entry-1"
 
@@ -83,7 +83,7 @@ class _Registry:
 
 
 def test_a_pre_split_device_id_still_finds_washdata_s_entry() -> None:
-    """PR #529 review: HA 2026.9 split a device shared by a plug's entry and
+    """PR #529 review: HA 2026.8 split a device shared by a plug's entry and
     WashData's into one per entry; the old id resolves to a composite whose
     ``config_entry_id`` is only the former primary (the plug's)."""
     composite = _Dev("old-id", "plug-entry")

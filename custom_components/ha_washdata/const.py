@@ -2796,10 +2796,11 @@ def drop_invalid_numeric_options(options: Any) -> tuple[dict[str, Any], list[str
 def device_entry_ids(device: Any, registry: Any = None) -> list[str]:
     """The config entry ids of a device registry entry (#532).
 
-    Home Assistant 2026.9 gave a device a single ``config_entry_id`` and turned
-    ``config_entries`` into a deprecated shim that logs a warning on every read
-    (removed in 2027.10); older releases only have ``config_entries``. It also
-    split every device shared by several entries into one device per entry, and
+    Home Assistant 2026.8 gave a device a single ``config_entry_id`` and turned
+    ``config_entries`` into a compatibility shim, which 2026.10 began logging a
+    warning for on every read (removed in 2027.10); older releases only have
+    ``config_entries``. It also split every device shared by several entries
+    into one device per entry, and
     ``async_get`` on the old id returns a read-only composite whose
     ``config_entry_id`` is only the former primary: with ``registry`` given, the
     entries of the devices split from ``device`` (``composite_device_id``) follow
