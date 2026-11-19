@@ -9648,7 +9648,7 @@ class ProfileStore:
             {
                 "points": [[offset_s, watts], ...],  # <= n samples
                 "duration_s": float,                 # profile target duration
-                "cycle_count": int,                  # cycles behind the average
+                "cycle_count": int,                  # traces behind the average
             }
 
         Offsets are absolute seconds from cycle start (0 .. ``duration_s``); a
@@ -9715,7 +9715,10 @@ class ProfileStore:
             return {
                 "points": points,
                 "duration_s": round(duration, 1),
-                "cycle_count": int(env.get("cycle_count") or 0),
+                # The traces behind the curve (PR #529 review), not the usage
+                # count: a run the #531 rule or the evidence choice keeps out of
+                # the curve is no part of it, and a reference-only curve has some.
+                "cycle_count": envelope_shape_count(env),
             }
         except Exception:  # pragma: no cover - defensive; never break the sensor
             return None

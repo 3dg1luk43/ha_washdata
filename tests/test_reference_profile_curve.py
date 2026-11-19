@@ -99,6 +99,16 @@ def test_reference_curve_none_for_missing_or_degenerate_envelope():
     assert _store_with_envelope({"avg": [1.0, 2.0, 3.0]}).reference_curve("Flat") is None
 
 
+def test_reference_curve_counts_the_traces_behind_the_curve():
+    """PR #529 review: ``cycle_count`` is the shape count, not the usage count.
+    Four real runs with one kept out by the #531 rule build a curve from three,
+    and a reference-only curve (no real run) still has traces behind it."""
+    cut = {**_envelope(n=50, cycle_count=4), "shape_cycle_count": 3}
+    assert _store_with_envelope(cut).reference_curve("Eco")["cycle_count"] == 3
+    reference_only = {**_envelope(n=50, cycle_count=0), "shape_cycle_count": 2}
+    assert _store_with_envelope(reference_only).reference_curve("Ref")["cycle_count"] == 2
+
+
 def _program_manager(current_program: str) -> MagicMock:
     manager = MagicMock()
     manager.current_program = current_program
