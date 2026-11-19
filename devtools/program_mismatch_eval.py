@@ -266,16 +266,21 @@ def held_programmes(lists: dict[str, list], drop: Any) -> list[str]:
 
 def run_hash(pts: list) -> str | None:
     """A run's trace content from its ``eval.query_points``, at the precision a
-    stored cycle keeps: each offset to 0.1 s (what the detector stores and every
-    legacy format normalises to), each reading as stored. So every stored format
-    of one run agrees (``eval.trace_hash`` reads the stored rows and has none for
-    legacy ``(iso_str, power)`` ones), and two distinct runs on one sample grid
-    never do: ``trace_hash``'s 1 W rounding made a 0.08 kW and a 0.15 kW run one
-    trace, and holding out either dropped both (PR #529 review)."""
+    stored cycle keeps: each offset from the first reading, to 0.1 s (what the
+    detector stores and every legacy format normalises to), each reading as
+    stored. From the first reading because the reference-cycle writer rebases
+    an imported trace to offset 0 (``ProfileStore._add_reference_cycle_nosave``):
+    a run stored from 30 s and its reference copy are one run (PR #529 review).
+    So every stored format of one run agrees (``eval.trace_hash`` reads the
+    stored rows and has none for legacy ``(iso_str, power)`` ones), and two
+    distinct runs on one sample grid never do: ``trace_hash``'s 1 W rounding made
+    a 0.08 kW and a 0.15 kW run one trace, and holding out either dropped both
+    (PR #529 review)."""
     if not pts:
         return None
     try:
-        rows = [[round(float(t), 1) + 0.0, float(p) + 0.0] for t, p in pts]
+        t0 = float(pts[0][0])
+        rows = [[round(float(t) - t0, 1) + 0.0, float(p) + 0.0] for t, p in pts]
     except (TypeError, ValueError, OverflowError):
         return None
     return hashlib.sha1(json.dumps(rows).encode()).hexdigest()

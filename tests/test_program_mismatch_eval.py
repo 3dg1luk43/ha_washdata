@@ -464,6 +464,42 @@ def test_copies_are_matched_at_stored_precision() -> None:
     assert pme.run_hash(low) == pme.run_hash([[t + 0.04, p] for t, p in low])
 
 
+def test_a_fold_drops_a_reference_copy_rebased_to_offset_zero(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """PR #529 review: the reference-cycle writer rebases an imported trace to
+    offset 0 (``ProfileStore._add_reference_cycle_nosave``). A held-out run stored
+    from 30 s hashed apart from its rebased copy, which stayed in the training
+    fold, so the run could match itself."""
+    doc = _export()
+    past = doc["data"]["past_cycles"]
+    k = next(j for j, c in enumerate(past) if c["id"] == "Cotton-0")
+    past[k]["power_data"] = [[t + 30.3, p] for t, p in past[k]["power_data"]]
+    origin = past[k]["power_data"][0][0]
+    doc["data"]["reference_cycles"] = [dict(
+        copy.deepcopy(past[k]), id="ref-rebased",
+        power_data=[[t - origin, p] for t, p in past[k]["power_data"]],
+    )]
+    path = _write(tmp_path, doc)
+    pme._worker_init(str(tmp_path))
+    dev = pme._device(path)
+    _, base = pme._job_base(path)
+    stores: list[dict] = []
+    real = pme.ev.fresh_store
+
+    def spy(dev_, data, override):
+        stores.append(data)
+        return real(dev_, data, override)
+
+    monkeypatch.setattr(pme.ev, "fresh_store", spy)
+    i = next(j for j, (c, e) in enumerate(dev.cycles) if c["id"] == "Cotton-0" and e == "past")
+    pme._job_folds((path, base, [i]))
+    (fold,) = stores
+    ids = {c["id"] for key, _ in pme.ev.LISTS for c in fold.get(key) or []}
+    assert "ref-rebased" not in ids and "Cotton-0" not in ids
+    assert "Cotton-1" in ids  # the other runs still train it
+
+
 def test_a_fold_keeps_a_distinct_sub_watt_run_and_drops_a_legacy_copy(
     tmp_path: Path, monkeypatch
 ) -> None:
