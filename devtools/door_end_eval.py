@@ -53,6 +53,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from bisect import bisect_right
 import sys
 from collections import defaultdict
@@ -224,12 +225,24 @@ def measure(root: Path, dwell: float) -> dict[str, Any]:
     return report
 
 
+def _dwell(text: str) -> float:
+    """``--dwell``: a finite number of seconds above 0. NaN would drop every door
+    moment (no comparison holds) and report zero exposure as if the ratio were safe."""
+    try:
+        value = float(text)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"not a number: {text!r}") from None
+    if not math.isfinite(value) or value <= 0:
+        raise argparse.ArgumentTypeError(f"must be a finite number of seconds above 0: {text!r}")
+    return value
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("--root", default=str(_REPO_ROOT / "cycle_data"))
-    parser.add_argument("--dwell", type=float, default=60.0,
+    parser.add_argument("--dwell", type=_dwell, default=60.0,
                         help="door-open dwell, s (default 60, the option's default)")
     parser.add_argument("--json", metavar="FILE")
     args = parser.parse_args(argv)
