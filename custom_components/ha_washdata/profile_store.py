@@ -11030,6 +11030,7 @@ class ProfileStore:
         # membership the caller never saw (the #530 check compares the groups it
         # read next to the call with those after it).
         call_groups = self._match_groups()
+        call_generation = getattr(self, "_data_generation", 0)
 
         # 1. The trace, converted and resampled: in the executor once it is long,
         # where that is milliseconds per match (PR #529 review: a pinned 4 h cycle
@@ -11048,6 +11049,12 @@ class ProfileStore:
         if prepared is None:
             return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
         ts_arr, p_arr, current_power_list, used_dt = prepared
+        # An import or Undo Import replaced the store during that preparation: the
+        # groups read at the call are the replaced data's, the templates read below
+        # the new data's. Mapped together they make a family the store never held
+        # (PR #529 review), so the groups are read again, with the templates.
+        if getattr(self, "_data_generation", 0) != call_generation:
+            call_groups = self._match_groups()
 
         # 2. The candidates, on the loop (the store's state is read here only).
         try:
