@@ -750,10 +750,11 @@ class LearningManager:
         """Store the ended cycle's ``(p95, median)`` cadence summary for ``sensor``.
 
         It reads every interval of the cycle, not the model's 200 (PR #529 review:
-        1.7 ms on the loop for a 4 h cycle at 2 s, 4.3 ms at the 20000 cap, on a
-        desktop core), so with a running loop it is computed in the executor and
-        stored back on the loop; the due operational pass waits for it
-        (``run_due_operational_pass``). Inline without a loop (sync callers, tests).
+        with it on the loop, the close took 1.7 ms for a 4 h cycle at 2 s and
+        4.3 ms at the 20000 cap, on a desktop core), so with a running loop it is
+        computed in the executor and stored back on the loop; the due operational
+        pass waits for it (``run_due_operational_pass``). Inline without a loop
+        (sync callers, tests).
         """
         try:
             asyncio.get_running_loop()
