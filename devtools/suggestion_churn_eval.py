@@ -23,6 +23,9 @@ cycle end at a time.
 * at every stored cycle end, whatever its status, the threshold correctives run
   (``LearningManager.run_threshold_correctives``: the standby floor, then the
   steady-load start threshold);
+* when the labelled cycles that ended on their own grew, the model and then the
+  detection pass run (``LearningManager.process_cycle_end``'s evidence rule), before
+  the batch, so what they leave pending is part of the set the batch is judged with;
 * each time 5 more labelled cycles have ended on their own, the batch pass runs
   (``_maybe_run_batch_simulation``'s own rule) on ``LearningManager._batch_cycles``;
 * each proposal goes through ``LearningManager._apply_suggestions_and_notify`` (noise
@@ -86,6 +89,8 @@ from custom_components.ha_washdata.const import (  # noqa: E402
 from custom_components.ha_washdata.profile_store import _parse_start_dt  # noqa: E402
 from custom_components.ha_washdata.suggestion_engine import (  # noqa: E402
     OWNER_BATCH,
+    OWNER_DETECTION,
+    OWNER_MODEL,
     OWNER_OPERATIONAL,
     OWNER_STANDBY_FLOOR,
     OWNER_START_THRESHOLD,
@@ -141,6 +146,15 @@ def _start_key(cycle: dict[str, Any]) -> datetime:
     if parsed is None:
         return datetime.min.replace(tzinfo=timezone.utc)
     return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+
+
+def _new_evidence(cycle: dict[str, Any]) -> bool:
+    """What ``LearningManager.process_cycle_end`` counts before the model and
+    detection passes: labelled (not noise) and ended on its own, traced or not."""
+    return (
+        isinstance(cycle, dict) and bool(cycle.get("profile_name"))
+        and cycle.get("profile_name") != "noise" and learning._ended_on_its_own(cycle)  # noqa: SLF001
+    )
 
 
 def _labelled_own(cycle: dict[str, Any]) -> bool:
@@ -200,7 +214,7 @@ def walk(corpus: str, path: str, arm: str) -> dict[str, Any] | None:
     envelopes: dict[str, Any] = {}
     applies: dict[str, list[list[float]]] = {k: [] for k in KEYS}
     per_cycle: list[list[float]] = []
-    ends = labelled = last_batch = last_apply = 0
+    ends = labelled = last_batch = last_apply = last_evidence = 0
     cadence_of = legacy_cadence if arm == "legacy" else sle.cadence
     with legacy_patch(arm == "legacy"):
         for i, cycle in enumerate(past):
@@ -212,6 +226,10 @@ def walk(corpus: str, path: str, arm: str) -> dict[str, Any] | None:
             if _labelled_own(cycle):
                 labelled += 1
             run_batch = labelled >= BATCH_MIN and labelled - last_batch >= BATCH_RERUN_DELTA
+            # LearningManager.process_cycle_end: the model and detection passes run
+            # when the labelled cycles that ended on their own grew (new evidence).
+            evidence = sum(1 for c in past[: i + 1] if _new_evidence(c))
+            run_model = evidence > last_evidence
             # No early exit: the threshold correctives run at every cycle end.
             data = dict(base)
             data.update(
@@ -242,6 +260,12 @@ def walk(corpus: str, path: str, arm: str) -> dict[str, Any] | None:
             # pass proposes Start Threshold with no cadence and no batch).
             gate(eng.for_job().generate_standby_floor_suggestions(), OWNER_STANDBY_FLOOR)
             gate(eng.for_job().generate_start_threshold_suggestions(), OWNER_START_THRESHOLD)
+            if run_model:
+                # Before the batch, as production spawns them: a value they leave
+                # pending is part of the set the batch's proposals are judged with.
+                last_evidence = evidence
+                gate(eng.for_job().generate_model_suggestions(), OWNER_MODEL)
+                gate(eng.for_job().generate_detection_suggestions(), OWNER_DETECTION)
             if run_batch:
                 last_batch = labelled
                 gate(eng.for_job().run_batch_simulation(lm._batch_cycles()), OWNER_BATCH)  # noqa: SLF001

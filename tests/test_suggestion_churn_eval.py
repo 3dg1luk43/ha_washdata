@@ -184,3 +184,39 @@ def test_each_pass_sees_the_profiles_of_its_history_prefix(tmp_path: Path, monke
     # Learned from the runs so far (Long 55 min, RefEarly 40 min), not Quick's 600 s.
     assert all(s is not None and s > 2000.0 for _n, _names, s in before_quick)
     assert all(names == ["Long", "Quick", "RefEarly"] for n, names, _s in seen if n == len(past))
+
+
+def test_the_model_and_detection_passes_run_on_new_evidence_before_the_batch(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """PR #529 review: the walk never ran the model and detection passes, which
+    production runs before the batch whenever the labelled cycles that ended on
+    their own grew; a Min Off Gap they leave pending is part of the set the
+    batch's Stop Threshold is judged with. A user-stopped or unlabelled end adds
+    no evidence and runs neither."""
+    doc = _export()
+    past = doc["data"]["past_cycles"]
+    past[2]["termination_reason"] = "user"
+    past[3]["profile_name"] = None
+    (tmp_path / "synth").mkdir()
+    (tmp_path / "synth" / "export.json").write_text(json.dumps(doc))
+    calls: list[tuple[str, int]] = []
+    eng_cls = suggestion_engine.SuggestionEngine
+    for name in ("generate_model_suggestions", "generate_detection_suggestions",
+                 "run_batch_simulation"):
+        real = getattr(eng_cls, name)
+
+        def spy(self, *a, _real=real, _name=name, **k):
+            calls.append((_name, len(self.profile_store.get_past_cycles())))
+            return _real(self, *a, **k)
+
+        monkeypatch.setattr(eng_cls, name, spy)
+    churn.run(tmp_path, ("shipped",), None, jobs=1)
+    model_at = [n for name, n in calls if name == "generate_model_suggestions"]
+    assert model_at == [1, 2, 5, 6, 7, 8]
+    assert [n for name, n in calls if name == "generate_detection_suggestions"] == model_at
+    # The fifth labelled own end (the seventh stored cycle) runs the batch; the
+    # evidence passes of that same end run first.
+    assert [name for name, _n in calls if name == "run_batch_simulation"] == ["run_batch_simulation"]
+    assert [name for name, n in calls if n == 7] == [
+        "generate_model_suggestions", "generate_detection_suggestions", "run_batch_simulation"]
