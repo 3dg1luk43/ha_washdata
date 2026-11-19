@@ -467,17 +467,16 @@ class LearningManager:
                 return
             generation = self._config_generation
             data_generation = getattr(self.profile_store, "_data_generation", 0)
-            try:
-                drops = await self.hass.async_add_executor_job(
-                    functools.partial(
-                        self.suggestion_engine.for_job().joint_end_gate_drops,
-                        stored, strict=strict,
+            check = self.suggestion_engine.for_job().joint_end_gate_drops
+            if not strict:
+                drops = await self.hass.async_add_executor_job(check, stored)
+            else:
+                try:
+                    drops = await self.hass.async_add_executor_job(
+                        functools.partial(check, stored, strict=True)
                     )
-                )
-            except Exception as err:
-                if strict:
+                except Exception as err:
                     raise EndGateCheckError(f"joint end-gate check failed: {err}") from err
-                raise
             # Judged against options a refresh has since replaced: the next check
             # judges the new set (PR #529 review).
             if generation != self._config_generation:
