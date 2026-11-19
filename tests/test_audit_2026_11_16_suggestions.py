@@ -860,6 +860,7 @@ async def test_cadence_is_filed_under_the_sensor_that_reported_it(
                 sensor="sensor.plug_a",
             )
         assert lm.close_cycle_cadence({"status": "completed", "termination_reason": "smart"})
+        await hass.async_block_till_done()  # the summary is computed in the executor
         assert store.get_cadence_summaries("sensor.plug_b") == []
         assert store.get_cadence_summaries("sensor.plug_a") != []
         assert lm.cadence() is None  # nothing measured on B yet

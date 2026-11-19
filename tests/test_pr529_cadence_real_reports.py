@@ -7,6 +7,7 @@ long low-power phase, kept alive every 30 s, learned a 30 s cadence.
 """
 from __future__ import annotations
 
+import threading
 from datetime import timedelta
 from typing import Any
 from unittest.mock import patch
@@ -15,6 +16,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
+from custom_components.ha_washdata import learning
 from custom_components.ha_washdata.const import DOMAIN
 
 POWER = "sensor.washer_power"
@@ -69,3 +71,84 @@ async def test_keepalives_do_not_shorten_the_learned_cadence(
     deltas = [d for d, _ts in pending]
     assert len(deltas) == 5
     assert all(abs(d - 120.0) < 1.0 for d in deltas), deltas
+
+
+_CLEAN_END = {"status": "completed", "termination_reason": "smart"}
+
+
+def _hold_a_long_cycle(lm: Any) -> None:
+    """A 4 h cycle at 2 s: 7200 held intervals."""
+    now = dt_util.utcnow()
+    lm._pending_sensor = POWER  # noqa: SLF001
+    lm._pending_intervals.extend((2.0, now) for _ in range(7200))  # noqa: SLF001
+
+
+async def test_the_cycle_summary_is_computed_off_the_loop(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """PR #529 review: the summary reads every interval of the cycle (up to 20000),
+    1.7 ms on the loop for this cycle on a desktop core. The due pass, asked for
+    once the cycle is stored, waits for it and then reads it."""
+    entry = await setup_washdata_entry(power_sensor=POWER, options=OPTIONS)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    lm, store = manager.learning_manager, manager.profile_store
+    loop_thread = threading.get_ident()
+    threads: list[int] = []
+    real = learning.cycle_cadence
+
+    def spy(values: Any) -> Any:
+        threads.append(threading.get_ident())
+        return real(values)
+
+    ran: list[Any] = []
+    _hold_a_long_cycle(lm)
+    with patch.object(learning, "cycle_cadence", side_effect=spy), patch.object(
+        lm, "_update_operational_suggestions",
+        side_effect=lambda: ran.append(store.get_cadence_summaries(POWER)),
+    ):
+        assert lm.close_cycle_cadence(_CLEAN_END)
+        lm.run_due_operational_pass()  # the cycle is stored before the summary is
+        assert ran == []
+        await hass.async_block_till_done()
+        lm.run_due_operational_pass()  # once per cycle
+    assert threads and loop_thread not in threads
+    assert store.get_cadence_summaries(POWER) == [[2.0, 2.0]]
+    assert ran == [[[2.0, 2.0]]]
+
+
+async def test_a_wipe_discards_a_summary_still_in_the_executor(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """The wipe forgets the cadence measured before it (``reset_cadence_evidence``):
+    a summary that lands after it must not refill the cleared store, nor run the
+    pass it left due."""
+    entry = await setup_washdata_entry(power_sensor=POWER, options=OPTIONS)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    lm, store = manager.learning_manager, manager.profile_store
+    started, release = threading.Event(), threading.Event()
+    real = learning.cycle_cadence
+
+    def slow(values: Any) -> Any:
+        started.set()
+        release.wait(2)
+        return real(values)
+
+    ran: list[int] = []
+    _hold_a_long_cycle(lm)
+    with patch.object(learning, "cycle_cadence", side_effect=slow), patch.object(
+        lm, "_update_operational_suggestions", side_effect=lambda: ran.append(1)
+    ):
+        assert lm.close_cycle_cadence(_CLEAN_END)
+        lm.run_due_operational_pass()
+        assert await hass.async_add_executor_job(started.wait, 5)
+        lm.reset_cadence_evidence()  # the history wipe
+        release.set()
+        await hass.async_block_till_done()
+        lm.run_due_operational_pass()
+    assert store.get_cadence_summaries(POWER) == []
+    assert ran == []
+    # The next cycle commits as before.
+    _hold_a_long_cycle(lm)
+    assert lm.close_cycle_cadence(_CLEAN_END)
+    await hass.async_block_till_done()
+    assert store.get_cadence_summaries(POWER) == [[2.0, 2.0]]

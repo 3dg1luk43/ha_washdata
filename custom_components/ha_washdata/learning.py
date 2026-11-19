@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import asyncio
 import functools
+import itertools
 import math
 import logging
 from collections import deque
@@ -129,6 +130,11 @@ def cycle_cadence(intervals: Any) -> tuple[float, float] | None:
         return None
     arr = np.asarray(values)
     return float(np.percentile(arr, 95)), float(np.median(arr))
+
+
+def _held_cadence(pending: Any) -> tuple[float, float] | None:
+    """``cycle_cadence`` of held ``(interval, stamp)`` rows (an executor job)."""
+    return cycle_cadence(delta for delta, _ts in pending)
 
 
 def recent_cadence(summaries: Any) -> tuple[float, float] | None:
@@ -294,6 +300,11 @@ class StatisticalModel:
         }
 
     @property
+    def max_samples(self) -> int:
+        """How many of the newest samples the stats are taken over."""
+        return self._max_samples
+
+    @property
     def median(self) -> float | None:
         """Return the median of samples."""
         return self._stats.get("median")
@@ -362,6 +373,12 @@ class LearningManager:
         # Set by a cadence commit, consumed by run_due_operational_pass once the
         # cycle is stored, so the pass's pause scan sees the cycle that just ended.
         self._operational_pass_due: bool = False
+        # A cycle's cadence summary is computed in the executor (PR #529 review):
+        # the jobs not yet stored, and whether the due pass waits for them. Bumped
+        # by a history wipe or restore, which discards a summary still in flight.
+        self._summaries_in_flight: int = 0
+        self._operational_pass_waiting: bool = False
+        self._cadence_epoch: int = 0
         self._last_batch_simulation_count: int = 0  # track when to re-run batch
         self._last_suggestions_labeled_count: int = 0  # gate model/detection passes
         # Bumped by every refresh (an options reload, a device type change): a pass
@@ -691,8 +708,9 @@ class LearningManager:
         end, persisted or not, so one cycle's intervals can never leak into the
         next. Returns whether anything was committed.
         """
-        pending = list(self._pending_intervals)
-        self._pending_intervals.clear()
+        # Handed over whole, not copied: a long cycle holds up to 20000 rows.
+        pending = self._pending_intervals
+        self._pending_intervals = deque(maxlen=_CYCLE_MAX_INTERVALS)
         if not pending or not isinstance(cycle_data, dict):
             return False
         if cycle_data.get("status") != "completed":
@@ -706,21 +724,69 @@ class LearningManager:
         if sensor != self._model_sensor:
             self._sample_interval_model = StatisticalModel(max_samples=200)
             self._model_sensor = sensor
+        # The model keeps its newest 200 samples: only those of the cycle reach it.
+        tail = list(itertools.islice(reversed(pending), self._sample_interval_model.max_samples))
+        tail.reverse()
         self._sample_interval_model.add_samples(
-            (delta for delta, _ts in pending), pending[-1][1]
+            (delta for delta, _ts in tail), pending[-1][1]
         )
-        summary = cycle_cadence(delta for delta, _ts in pending)
-        if summary is not None:
-            try:
-                self.profile_store.add_cadence_summary(*summary, sensor=sensor)
-            except Exception:  # pylint: disable=broad-exception-caught
-                self._logger.debug("Could not store the cycle cadence", exc_info=True)
         # The operational pass's one run per cycle: its cadence input changes only
         # here (process_power_reading runs none during the cycle). Not run here:
         # this commit comes before the cycle is stored, and the pass's pause scan
         # reads the stored cycles, so it would miss this one until the next end.
         self._operational_pass_due = True
+        self._commit_cycle_summary(pending, sensor)
         return True
+
+    def _commit_cycle_summary(self, pending: deque[tuple[float, datetime]], sensor: str | None) -> None:
+        """Store the ended cycle's ``(p95, median)`` cadence summary for ``sensor``.
+
+        It reads every interval of the cycle, not the model's 200 (PR #529 review:
+        1.7 ms on the loop for a 4 h cycle at 2 s, 4.3 ms at the 20000 cap, on a
+        desktop core), so with a running loop it is computed in the executor and
+        stored back on the loop; the due operational pass waits for it
+        (``run_due_operational_pass``). Inline without a loop (sync callers, tests).
+        """
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            self._store_cycle_summary(_held_cadence(pending), sensor)
+            return
+        self._summaries_in_flight += 1
+        coro = self._async_commit_cycle_summary(pending, sensor, self._cadence_epoch)
+        task = self._spawn(coro)
+        if not isinstance(task, asyncio.Future):
+            # Nothing runs it (a mocked hass): inline, or the due pass would wait forever.
+            coro.close()
+            self._summaries_in_flight -= 1
+            self._store_cycle_summary(_held_cadence(pending), sensor)
+
+    async def _async_commit_cycle_summary(
+        self, pending: deque[tuple[float, datetime]], sensor: str | None, epoch: int
+    ) -> None:
+        """``_commit_cycle_summary``'s executor job; then the pass that waited for it."""
+        summary: tuple[float, float] | None = None
+        try:
+            summary = await self.hass.async_add_executor_job(_held_cadence, pending)
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Could not summarise the cycle cadence", exc_info=True)
+        finally:
+            if epoch == self._cadence_epoch:
+                self._summaries_in_flight = max(0, self._summaries_in_flight - 1)
+        if epoch != self._cadence_epoch:
+            # A wipe or Undo Import replaced the history it was measured into.
+            return
+        self._store_cycle_summary(summary, sensor)
+        if not self._summaries_in_flight and self._operational_pass_waiting:
+            self.run_due_operational_pass()
+
+    def _store_cycle_summary(self, summary: tuple[float, float] | None, sensor: str | None) -> None:
+        if summary is None:
+            return
+        try:
+            self.profile_store.add_cadence_summary(*summary, sensor=sensor)
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Could not store the cycle cadence", exc_info=True)
 
     def cadence(self) -> tuple[float, float] | None:
         """``(p95, median)`` update interval the operational pass sizes from (item 637).
@@ -767,9 +833,12 @@ class LearningManager:
         self._last_batch_simulation_count = 0
         # A pass already in the executor read the old cadence: its result must not
         # refill the wiped store (PR #529 review). A new cadence commit schedules a
-        # pass in the new generation.
+        # pass in the new generation. A summary still in the executor goes too.
         self._config_generation += 1
         self._operational_pass_due = False
+        self._cadence_epoch += 1
+        self._summaries_in_flight = 0
+        self._operational_pass_waiting = False
 
     def run_due_operational_pass(self) -> None:
         """Run the operational pass a cadence commit left due, once.
@@ -780,7 +849,12 @@ class LearningManager:
         """
         if not self._operational_pass_due:
             return
+        if self._summaries_in_flight:
+            # The cycle's summary is still in the executor: its commit runs the pass.
+            self._operational_pass_waiting = True
+            return
         self._operational_pass_due = False
+        self._operational_pass_waiting = False
         self._update_operational_suggestions()
 
     def process_cycle_end(
