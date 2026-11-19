@@ -98,6 +98,16 @@ _CYCLE_MAX_INTERVALS = 20000
 #: change is noise too; the 5 s bar would block 7 -> 9 s on a short key.
 _SECONDS_SUFFIXES = ("_interval", "_timeout", "_delay", "_gap", "_duration", "_seconds")
 _SECONDS_MIN_ABS = 1.0
+#: Full runs a manual analysis makes before it reports that it was superseded.
+#: Each retry needs another options save, history wipe, import or undo during
+#: the run before it (a run takes about a second on 100 real cycles).
+MANUAL_ANALYSIS_ATTEMPTS = 3
+
+
+class AnalysisSupersededError(RuntimeError):
+    """A manual analysis whose every run was superseded: an options refresh or
+    a replaced store discarded part of what it computed. The WS handler sends
+    it as ``analysis_superseded``."""
 
 
 def cycle_cadence(intervals: Any) -> tuple[float, float] | None:
@@ -1003,12 +1013,31 @@ class LearningManager:
         Returns ``{"count": <actionable suggestions>}``. A pass that raises is
         raised to the caller (PR #529 review): the passes after it never ran, so
         the count is no complete analysis and must not be reported as one.
+
+        A run that an options refresh or a replaced store superseded had results
+        discarded (``_run_pass``), so it is no complete analysis either: it runs
+        again on the current options and data, and after
+        ``MANUAL_ANALYSIS_ATTEMPTS`` superseded runs raises
+        :class:`AnalysisSupersededError` (PR #529 review).
         """
         self._logger.info("Manual suggestion analysis requested")
-        await self._async_run_all_passes(raise_errors=True)
-        count = len(self.profile_store.get_suggestions() or {})
-        self._logger.info("Manual suggestion analysis complete: %d suggestion(s)", count)
-        return {"count": count}
+        for _attempt in range(MANUAL_ANALYSIS_ATTEMPTS):
+            generation = self._config_generation
+            data_generation = getattr(self.profile_store, "_data_generation", 0)
+            await self._async_run_all_passes(raise_errors=True)
+            if (
+                generation == self._config_generation
+                and data_generation == getattr(self.profile_store, "_data_generation", 0)
+            ):
+                count = len(self.profile_store.get_suggestions() or {})
+                self._logger.info(
+                    "Manual suggestion analysis complete: %d suggestion(s)", count
+                )
+                return {"count": count}
+            self._logger.debug("Manual suggestion analysis superseded; running it again")
+        raise AnalysisSupersededError(
+            "the options or the stored data changed during every run"
+        )
 
     async def async_refresh_suggestions(self, *, clear: bool = False) -> None:
         """Re-derive every stored suggestion with the current code and options.

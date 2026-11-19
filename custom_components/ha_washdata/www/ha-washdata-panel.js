@@ -3310,6 +3310,10 @@ class HaWashdataPanel extends HTMLElement {
           { stop: m ? m[1] : '?', start: m ? m[2] : '?' }, e.message);
       } else if (e && e.code === 'end_gate_check_failed') {
         e.message = this._tText('msg.end_gate_check_failed', {}, e.message);
+      } else if (e && e.code === 'analysis_superseded') {
+        // A manual analysis superseded on every run (options saved, data replaced).
+        e.message = this._tText('msg.analysis_superseded', {},
+          'Settings or cycle data changed during the analysis. Run it again.');
       }
       throw e;
     }

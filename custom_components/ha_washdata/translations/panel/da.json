@@ -1103,6 +1103,7 @@
     "hist_tail_trimmed": "{min} min ventetid efter cyklussens afslutning blev skåret fra, ligesom integrationen gør under drift",
     "invalid_threshold_pair": "Stoptærskel ({stop} W) skal være under Starttærskel ({start} W). Intet blev gemt; ændr begge sammen.",
     "end_gate_check_failed": "De foreslåede tidsindstillinger kunne ikke kontrolleres op mod dette apparats pauser. Intet blev gemt; prøv igen.",
+    "analysis_superseded": "Indstillingerne eller cyklusdataene blev ændret under analysen. Kør den igen.",
     "import_undo_hint": "Et gendannelsespunkt fra før den seneste import ({when}) er bevaret: {profiles} profil(er) og {cycles} cyklus(ser).",
     "replace_undo_hint": "Der gemmes først et gendannelsespunkt, så du kan fortryde denne import under Eksport/import.",
     "pg_in_sample_note": "Disse cyklusser var med til at bygge de profiler, de matches mod, så resultaterne er optimistiske: forvent lidt færre korrekte match på nye cyklusser.",

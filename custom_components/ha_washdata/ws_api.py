@@ -131,7 +131,7 @@ from .detector_config import (
     effective_option_values,
     inverted_threshold_pair,
 )
-from .learning import review_choices
+from .learning import AnalysisSupersededError, review_choices
 from .maintenance import editor_types, effective_reminders
 from .options_utils import retire_device_type, strip_null_options
 from .setup_advisor import compute_setup_phase
@@ -5325,6 +5325,9 @@ async def ws_run_suggestion_analysis(
         result = await learning.async_run_full_analysis()
         manager.notify_update()
         _send_result(connection, msg["id"], "run_suggestion_analysis", {"success": True, **(result or {})})
+    except AnalysisSupersededError as exc:
+        # Not complete: the panel shows msg.analysis_superseded (PR #529 review).
+        connection.send_error(msg["id"], "analysis_superseded", str(exc))
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 

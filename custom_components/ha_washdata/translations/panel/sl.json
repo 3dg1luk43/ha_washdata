@@ -1140,6 +1140,7 @@
     "cycle_context_tip": "Samo za prikaz: pokaže zgodovino senzorja moči iz recorderja okoli tega cikla, če je še shranjena. Če želite neuspele poskuse zagona dodati prihodnjim ciklom, uporabite Uvodne sekunde krivulje (Nastavitve > Zaznavanje > Začetek cikla), kar spremeni shranjena trajanja.",
     "invalid_threshold_pair": "Prag zaustavitve ({stop} W) mora biti pod Pragom zagona ({start} W). Nič ni bilo shranjeno; spremenite obe vrednosti hkrati.",
     "end_gate_check_failed": "Predlaganih nastavitev časovanja ni bilo mogoče preveriti glede na premore te naprave. Nič ni bilo shranjeno; poskusite znova.",
+    "analysis_superseded": "Med analizo so se spremenile nastavitve ali podatki ciklov. Zaženite jo znova.",
     "bp_admin_only": "Predloge namesti skrbnik.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Ustvaril WashData za {device}. Dodajte svoja dejanja (obvestilo, luči, ...).",

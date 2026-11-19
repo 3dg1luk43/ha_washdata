@@ -1103,6 +1103,7 @@
     "hist_tail_trimmed": "{min} min wachten na het einde van de cyclus is weggeknipt, zoals de integratie dat tijdens gebruik ook doet",
     "invalid_threshold_pair": "Stopdrempel ({stop} W) moet lager zijn dan Startdrempel ({start} W). Er is niets opgeslagen; wijzig beide samen.",
     "end_gate_check_failed": "De voorgestelde tijdinstellingen konden niet worden getoetst aan de pauzes van dit apparaat. Er is niets opgeslagen; probeer het opnieuw.",
+    "analysis_superseded": "Instellingen of cyclusgegevens zijn tijdens de analyse gewijzigd. Voer de analyse opnieuw uit.",
     "import_undo_hint": "Er wordt een herstelpunt van vóór de laatste import ({when}) bewaard: {profiles} profiel(en) en {cycles} cyclus(sen).",
     "replace_undo_hint": "Eerst wordt een herstelpunt opgeslagen, zodat deze import via Exporteren / importeren ongedaan kan worden gemaakt.",
     "pg_in_sample_note": "Deze cycli hebben de profielen helpen opbouwen waarmee ze worden vergeleken, dus de resultaten zijn optimistisch: verwacht bij nieuwe cycli iets minder juiste matches.",

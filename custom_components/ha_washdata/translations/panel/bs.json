@@ -1123,6 +1123,7 @@
         "cycle_context_tip": "Samo za prikaz: pokazuje historiju senzora snage iz recordera oko ovog ciklusa, ako je još sačuvana. Da biste neuspjele pokušaje pokretanja dodali budućim ciklusima, koristite Uvodne sekunde krivulje (Postavke > Detekcija > Početak ciklusa), što mijenja sačuvana trajanja.",
         "invalid_threshold_pair": "Prag zaustavljanja ({stop} W) mora biti ispod Praga pokretanja ({start} W). Ništa nije sačuvano; promijenite obje vrijednosti zajedno.",
         "end_gate_check_failed": "Predložene postavke vremena nije bilo moguće provjeriti u odnosu na pauze ovog uređaja. Ništa nije sačuvano; pokušajte ponovo.",
+        "analysis_superseded": "Postavke ili podaci o ciklusima promijenili su se tokom analize. Pokrenite je ponovo.",
         "bp_admin_only": "Predloške instalira administrator.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "Kreirao WashData za {device}. Dodajte svoje radnje (obavijest, svjetla, ...).",

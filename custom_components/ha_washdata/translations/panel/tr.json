@@ -1106,6 +1106,7 @@
         "cycle_context_tip": "Yalnızca görüntüleme: hâlâ saklanıyorsa güç sensörünün bu döngü çevresindeki kaydedici geçmişini gösterir. Başarısız başlatma denemelerini gelecekteki döngülere eklemek için Eğri Ön Kaydı'nı kullanın (Ayarlar > Algılama > Döngü Başlangıcı); bu, kaydedilen süreleri değiştirir.",
         "invalid_threshold_pair": "Durdurma Eşiği ({stop} W), Başlangıç Eşiği'nden ({start} W) düşük olmalı. Hiçbir şey kaydedilmedi; ikisini birlikte değiştirin.",
         "end_gate_check_failed": "Önerilen zamanlama ayarları bu cihazın duraklamalarına göre kontrol edilemedi. Hiçbir şey kaydedilmedi; tekrar deneyin.",
+        "analysis_superseded": "Analiz sırasında ayarlar veya çevrim verileri değişti. Yeniden çalıştırın.",
         "bp_admin_only": "Şablonları bir yönetici yükler.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "{device} için WashData tarafından oluşturuldu. Eylemlerinizi ekleyin (bildir, ışıklar, ...).",

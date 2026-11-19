@@ -1101,6 +1101,7 @@
         "cycle_context_tip": "Vetëm për shfaqje: tregon historikun e regjistruesit për sensorin e fuqisë rreth këtij cikli, nëse ruhet ende. Për të shtuar përpjekjet e dështuara të nisjes në ciklet e ardhshme, përdorni Sekondat hyrëse të kurbës (Cilësimet > Zbulim > Fillimi i ciklit), që ndryshon kohëzgjatjet e ruajtura.",
         "invalid_threshold_pair": "Pragu i ndalimit ({stop} W) duhet të jetë më i ulët se Pragu i nisjes ({start} W). Nuk u ruajt asgjë; ndryshojini të dy bashkë.",
         "end_gate_check_failed": "Cilësimet e sugjeruara të kohës nuk mund të kontrolloheshin kundrejt pauzave të kësaj pajisjeje. Nuk u ruajt asgjë; provoni përsëri.",
+        "analysis_superseded": "Cilësimet ose të dhënat e cikleve ndryshuan gjatë analizës. Ekzekutojeni përsëri.",
         "bp_admin_only": "Shabllonët i instalon një administrator.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "Krijuar nga WashData për {device}. Shtoni veprimet tuaja (njoftim, dritat, ...).",

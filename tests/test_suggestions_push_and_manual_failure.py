@@ -21,7 +21,8 @@
   suggestions sent no entity update, so on an idle appliance the sensor kept the
   old count until some unrelated update.
 * The manual "analyse now" reported success with the count of a partial run when
-  one of its passes raised.
+  one of its passes raised, or when an options refresh or a replaced store
+  superseded it and discarded what its passes computed.
 """
 from __future__ import annotations
 
@@ -34,6 +35,7 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
 from custom_components.ha_washdata.const import CONF_OFF_DELAY, DOMAIN, SIGNAL_WASHER_UPDATE
+from custom_components.ha_washdata.learning import MANUAL_ANALYSIS_ATTEMPTS
 from custom_components.ha_washdata.suggestion_engine import OWNER_MODEL, SuggestionEngine
 
 
@@ -153,3 +155,76 @@ async def test_a_manual_analysis_with_a_failed_pass_is_no_success(
     )
     ok = await client.receive_json()
     assert ok["success"] is True and "count" in ok["result"]
+
+
+def _count_manual_runs(lm: Any, before_run: Any = None) -> tuple[list[int], Any]:
+    """Wrap ``_async_run_all_passes``: count the manual analysis's runs (the
+    refresh calls it too, without ``raise_errors``)."""
+    runs: list[int] = []
+    orig = lm._async_run_all_passes  # noqa: SLF001
+
+    async def run(*args: Any, **kwargs: Any) -> None:
+        if kwargs.get("raise_errors"):
+            runs.append(1)
+            if before_run is not None:
+                before_run(len(runs))
+        await orig(*args, **kwargs)
+
+    return runs, patch.object(lm, "_async_run_all_passes", side_effect=run)
+
+
+async def test_a_manual_analysis_superseded_by_an_options_save_runs_again(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """An options save while Analyze now runs starts a refresh: the manual run's
+    later passes are discarded (other options), so it runs again on the new
+    options before it reports a count."""
+    entry, manager, _pushes = await _boot(hass, setup_washdata_entry)
+    lm = manager.learning_manager
+    passes = {"n": 0}
+    orig_pass = lm._run_pass  # noqa: SLF001
+
+    async def run_pass(*args: Any, **kwargs: Any) -> Any:
+        passes["n"] += 1
+        if passes["n"] == 2:  # the manual run's second pass: the user saves options
+            hass.config_entries.async_update_entry(
+                entry, options={**entry.options, CONF_OFF_DELAY: 150}
+            )
+            await hass.async_block_till_done()  # the refresh ran on the new options
+        return await orig_pass(*args, **kwargs)
+
+    generation = lm._config_generation  # noqa: SLF001
+    runs, wrapped = _count_manual_runs(lm)
+    with wrapped, patch.object(lm, "_run_pass", side_effect=run_pass):
+        res = await lm.async_run_full_analysis()
+    assert lm._config_generation > generation  # noqa: SLF001  (superseded once)
+    assert len(runs) == 2
+    assert res == {"count": len(manager.profile_store.get_suggestions() or {})}
+
+
+@pytest.mark.parametrize("supersede", ["options", "store"])
+async def test_a_manual_analysis_superseded_on_every_run_is_no_success(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_ws_client: Any, supersede: str
+) -> None:
+    """Superseded on every run (options refreshed, or the store replaced by an
+    import or undo): the panel gets ``analysis_superseded``, not a count."""
+    entry, manager, _pushes = await _boot(hass, setup_washdata_entry)
+    lm = manager.learning_manager
+    store = manager.profile_store
+
+    def bump(_n: int) -> None:
+        if supersede == "options":
+            lm._config_generation += 1  # noqa: SLF001  (a refresh started)
+        else:
+            store._data_generation += 1  # noqa: SLF001  (an import replaced it)
+
+    client = await hass_ws_client(hass)
+    runs, wrapped = _count_manual_runs(lm, bump)
+    with wrapped:
+        await client.send_json_auto_id(
+            {"type": f"{DOMAIN}/run_suggestion_analysis", "entry_id": entry.entry_id}
+        )
+        res = await client.receive_json()
+    assert res["success"] is False
+    assert res["error"]["code"] == "analysis_superseded"
+    assert len(runs) == MANUAL_ANALYSIS_ATTEMPTS

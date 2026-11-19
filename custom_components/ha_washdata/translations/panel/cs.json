@@ -1140,6 +1140,7 @@
     "cycle_context_tip": "Jen pro zobrazení: ukazuje historii snímače výkonu z recorderu kolem tohoto cyklu, pokud je ještě uložená. Chcete-li přidávat neúspěšné pokusy o spuštění do budoucích cyklů, použijte Náběh křivky (Nastavení > Detekce > Start cyklu), který mění uložené doby trvání.",
     "invalid_threshold_pair": "Práh zastavení ({stop} W) musí být nižší než Práh spuštění ({start} W). Nic nebylo uloženo; změňte obě hodnoty společně.",
     "end_gate_check_failed": "Navrhovaná nastavení časování se nepodařilo ověřit vůči pauzám tohoto spotřebiče. Nic nebylo uloženo; zkuste to znovu.",
+    "analysis_superseded": "Během analýzy se změnilo nastavení nebo data cyklů. Spusťte ji znovu.",
     "bp_admin_only": "Šablony instaluje správce.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Vytvořeno WashData pro {device}. Přidejte své akce (oznámení, světla, ...).",

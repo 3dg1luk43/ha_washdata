@@ -1140,6 +1140,7 @@
     "cycle_context_tip": "Tylko podgląd: pokazuje historię czujnika mocy z recordera wokół tego cyklu, jeśli jest jeszcze przechowywana. Aby dołączać nieudane próby startu do przyszłych cykli, użyj ustawienia Wstępny zapis krzywej (Ustawienia > Wykrywanie > Start Cyklu), które zmienia zapisane czasy trwania.",
     "invalid_threshold_pair": "Próg Zatrzymania ({stop} W) musi być niższy niż Próg Startu ({start} W). Nic nie zostało zapisane; zmień obie wartości razem.",
     "end_gate_check_failed": "Nie udało się sprawdzić sugerowanych ustawień czasowych względem przerw tego urządzenia. Nic nie zostało zapisane; spróbuj ponownie.",
+    "analysis_superseded": "Ustawienia lub dane cykli zmieniły się w trakcie analizy. Uruchom ją ponownie.",
     "bp_admin_only": "Szablony instaluje administrator.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Utworzone przez WashData dla {device}. Dodaj swoje akcje (powiadomienie, światła, ...).",

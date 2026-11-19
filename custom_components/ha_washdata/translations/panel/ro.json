@@ -1054,6 +1054,7 @@
     "hist_tail_trimmed": "Au fost eliminate {min} min de așteptare după sfârșitul ciclului, la fel cum face integrarea în timp real",
     "invalid_threshold_pair": "Pragul de Oprire ({stop} W) trebuie să fie sub Pragul de Pornire ({start} W). Nu s-a salvat nimic; modificați-le pe amândouă împreună.",
     "end_gate_check_failed": "Setările de temporizare sugerate nu au putut fi verificate în raport cu pauzele acestui aparat. Nu s-a salvat nimic; încercați din nou.",
+    "analysis_superseded": "Setările sau datele ciclurilor s-au schimbat în timpul analizei. Rulați-o din nou.",
     "hist_truncated": "oprit la limita de {n} citiri, așa că restul istoricului nu a fost analizat",
     "hist_warn_kw": "Cea mai mare citire este doar {w}. Acest senzor pare să raporteze kilowați; WashData are nevoie de wați, așa că nu se poate detecta niciun ciclu.",
     "hist_warn_naive_time": "{n} de marcaje temporale nu au fus orar și au fost citite ca UTC. Dacă fișierul folosește ora locală, ciclurile sunt decalate cu diferența dvs. față de UTC, iar citirile din jurul trecerii la ora de vară se pot pierde.",

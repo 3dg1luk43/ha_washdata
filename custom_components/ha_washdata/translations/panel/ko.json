@@ -1089,6 +1089,7 @@
         "cycle_context_tip": "표시 전용입니다. 이 사이클 전후의 전력 센서 레코더 이력을 아직 남아 있으면 보여 줍니다. 실패한 시작 시도를 이후 사이클에 포함하려면 곡선 프리롤(설정 > 감지 > 사이클 시작)을 사용하세요. 저장되는 소요 시간이 바뀝니다.",
         "invalid_threshold_pair": "중지 임계값({stop} W)은 시작 임계값({start} W)보다 낮아야 합니다. 아무것도 저장되지 않았습니다. 두 값을 함께 변경하세요.",
         "end_gate_check_failed": "제안된 타이밍 설정을 이 기기의 일시 정지와 대조해 확인할 수 없었습니다. 아무것도 저장되지 않았습니다. 다시 시도하세요.",
+        "analysis_superseded": "분석 중에 설정 또는 사이클 데이터가 변경되었습니다. 다시 실행하세요.",
         "bp_admin_only": "관리자가 템플릿을 설치합니다.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "WashData가 {device}를 위해 생성했습니다. 작업을 추가하세요(알림, 조명, ...).",

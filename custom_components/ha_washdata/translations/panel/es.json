@@ -1054,6 +1054,7 @@
     "hist_tail_trimmed": "Se recortaron {min} min de espera tras el fin del ciclo, como hace la integración en vivo",
     "invalid_threshold_pair": "El Umbral de parada ({stop} W) debe ser inferior al Umbral de inicio ({start} W). No se ha guardado nada; cambie ambos a la vez.",
     "end_gate_check_failed": "No se pudieron comprobar los ajustes de tiempo sugeridos con las pausas de este electrodoméstico. No se ha guardado nada; vuelva a intentarlo.",
+    "analysis_superseded": "Los ajustes o los datos de los ciclos cambiaron durante el análisis. Vuelva a ejecutarlo.",
     "hist_truncated": "se detuvo en el límite de {n} lecturas, así que el resto del historial no se analizó",
     "hist_warn_kw": "La lectura más alta es solo {w}. Parece que este sensor informa en kilovatios; WashData necesita vatios, así que no se puede detectar ningún ciclo.",
     "hist_warn_naive_time": "{n} marcas de tiempo no tienen zona horaria y se leyeron como UTC. Si el archivo usa hora local, los ciclos quedan desplazados según su diferencia con UTC y pueden perderse lecturas cerca de un cambio de horario de verano.",
