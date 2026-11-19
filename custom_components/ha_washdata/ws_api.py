@@ -4994,12 +4994,17 @@ async def _async_restore_entry_options(
         restored, _ = drop_invalid_numeric_options(restored)
         if restored == current:
             return
+        # Diffed on the resolved maps, removals included (PR #529 review): a key
+        # the import set that the restore point leaves unset goes back to its
+        # default, and the Stop Threshold history must see that, or the cycles
+        # that ended under an imported 3 W Stop read as ended under the default.
+        # A removed key is recorded as None, the unset value a Revert writes.
+        old = {**entry.data, **current}
+        new = {**entry.data, **restored}
+        changed = {k: new.get(k) for k in sorted(old.keys() | new.keys()) if old.get(k) != new.get(k)}
         before = _options_before(entry)
         hass.config_entries.async_update_entry(entry, options=restored)
-        await _record_option_changes(
-            hass, entry, {k: v for k, v in restored.items() if current.get(k) != v},
-            "undo_import", before=before,
-        )
+        await _record_option_changes(hass, entry, changed, "undo_import", before=before)
 
 
 @websocket_api.websocket_command(

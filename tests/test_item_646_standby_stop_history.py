@@ -297,3 +297,25 @@ async def test_a_finished_cycle_records_the_stop_it_was_decided_under(
     await feed(0.0, 10 * 60)
     cycles = manager.profile_store.get_past_cycles()
     assert cycles and cycles[-1]["finish_stop_threshold_w"] == 1.5
+
+
+async def test_undo_import_records_a_stop_it_removes(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """PR #529 review: an import set Stop to 3 W; the restore point has it unset, so
+    Undo Import removes the override and the Stop goes back to its default. Only
+    keys the restore wrote were recorded, so the history never saw the change,
+    and cycles that ended under 3 W read as ended under the lower default."""
+    entry = await setup_washdata_entry(options={
+        "min_power": 2.0, "start_threshold_w": 10.0, CONF_STOP_THRESHOLD_W: 3.0,
+    })
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    await ws_api._async_restore_entry_options(  # noqa: SLF001
+        hass, entry, {"min_power": 2.0, "start_threshold_w": 10.0},
+    )
+    assert CONF_STOP_THRESHOLD_W not in entry.options
+    rows = [r for r in store.get_settings_changelog() if r["key"] == CONF_STOP_THRESHOLD_W]
+    assert len(rows) == 1, rows
+    assert rows[0]["old"] == 3.0 and rows[0]["new"] is None
+    assert rows[0]["old_effective"] == 3.0
+    assert [old for _when, old in stop_threshold_changes(store.get_settings_changelog())] == [3.0]
