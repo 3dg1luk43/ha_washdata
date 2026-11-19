@@ -1776,7 +1776,6 @@
       "min_off_gap_bridge": "Stærðin valin til að brúa lengsta kyrrðartímabilið innan lotu: {span}s + 60s biðminni, úr {spans} brúuðum bilum yfir {cycles} hreinar lotur (helst undir stysta bilinu þínu, {ceiling}s, milli tveggja keyrslna).",
       "min_power": "40% af lægsta virka afli við p05 ({p05}W) yfir {cycles} hreinar lotur, sem heldur slökkviþröskuldinum undir raunverulegri notkun.{excl}",
       "no_update_timeout": "Byggt á mældri uppfærslutíðni (p95={p95}s) * 20 (lágm. 60s).",
-      "off_delay_cadence": "Byggt á mældri uppfærslutíðni (p95={p95}s) * 5",
       "off_delay_device_floor": "Notaði tækjasértækt öruggt lágmark fyrir {device} ({floor}s).",
       "off_delay_generic_floor": "Notaði almennt öruggt lágmark ({floor}s).",
       "off_delay_pauses": "Stærðin valin til að endast lengur en raunveruleg hlé: p95 fyrir hlé innan lotu {p95}s + 60s biðminni, úr {pauses} hléum yfir {cycles} hreinar lotur (lágmark {floor}s).",

@@ -1917,7 +1917,6 @@
       "min_off_gap_bridge": "Dimensionat pentru a acoperi cea mai lungă perioadă de liniște din interiorul unui ciclu: {span}s + 60s marjă, din {spans} intervale acoperite pe {cycles} cicluri curate (rămâne sub intervalul dvs. minim de {ceiling}s dintre două încărcături consecutive).",
       "min_power": "40% din cea mai mică putere activă p05 ({p05}W) pe {cycles} cicluri curate, menținând pragul de oprire sub consumul real.{excl}",
       "no_update_timeout": "Pe baza cadenței de actualizare observate (p95={p95}s) * 20 (min. 60s).",
-      "off_delay_cadence": "Pe baza cadenței de actualizare observate (p95={p95}s) * 5",
       "off_delay_device_floor": "S-a folosit minimul sigur specific dispozitivului pentru {device} ({floor}s).",
       "off_delay_generic_floor": "S-a folosit minimul sigur generic ({floor}s).",
       "off_delay_pauses": "Dimensionat pentru a depăși pauzele reale: pauza p95 din interiorul ciclului {p95}s + 60s marjă, din {pauses} pauze pe {cycles} cicluri curate (limită inferioară {floor}s).",

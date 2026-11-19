@@ -1776,7 +1776,6 @@
       "min_off_gap_bridge": "Zo gedimensioneerd dat de langste stille periode binnen een cyclus wordt overbrugd: {span}s + 60s buffer, uit {spans} overbrugde tussenpozen over {cycles} schone cycli (blijft onder uw kortste tussenpoos van {ceiling}s tussen twee opeenvolgende ladingen).",
       "min_power": "40% van het laagste actieve vermogen op p05 ({p05}W) over {cycles} schone cycli, zodat de uitschakeldrempel onder het werkelijke verbruik blijft.{excl}",
       "no_update_timeout": "Op basis van de waargenomen updatecadans (p95={p95}s) * 20 (min. 60s).",
-      "off_delay_cadence": "Op basis van de waargenomen updatecadans (p95={p95}s) * 5",
       "off_delay_device_floor": "Apparaatspecifiek veilig minimum gebruikt voor {device} ({floor}s).",
       "off_delay_generic_floor": "Generiek veilig minimum gebruikt ({floor}s).",
       "off_delay_pauses": "Zo gedimensioneerd dat echte pauzes worden overbrugd: p95 van de pauze binnen een cyclus {p95}s + 60s buffer, uit {pauses} pauzes over {cycles} schone cycli (ondergrens {floor}s).",

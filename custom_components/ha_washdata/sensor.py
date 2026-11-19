@@ -1062,11 +1062,16 @@ class WasherSuggestionsSensor(WasherBaseSensor):
 
     @property
     def native_value(self):  # type: ignore[override]
-        return len(self._visible())
+        # Kept for the attributes HA reads next in the same state write, so the
+        # shared filter runs once per write, not twice (review of PR #529).
+        self._visible_rows = self._visible()
+        return len(self._visible_rows)
 
     @property
     def extra_state_attributes(self):  # type: ignore[override]
-        visible = self._visible()
+        visible = self.__dict__.pop("_visible_rows", None)
+        if visible is None:
+            visible = self._visible()
         count = len(visible)
         applicable_keys = sorted(visible)
 

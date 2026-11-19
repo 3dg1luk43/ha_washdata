@@ -1776,7 +1776,6 @@
       "min_off_gap_bridge": "Dimensionerad för att överbrygga den längsta tysta perioden inom en cykel: {span}s + 60s buffert, från {spans} överbryggade mellanrum över {cycles} rena cykler (håller sig under ditt kortaste mellanrum på {ceiling}s mellan två körningar).",
       "min_power": "40% av den lägsta aktiva effekten vid p05 ({p05}W) över {cycles} rena cykler, vilket håller av-tröskeln under verklig förbrukning.{excl}",
       "no_update_timeout": "Baserat på observerad uppdateringstakt (p95={p95}s) * 20 (min 60s).",
-      "off_delay_cadence": "Baserat på observerad uppdateringstakt (p95={p95}s) * 5",
       "off_delay_device_floor": "Använde ett enhetsspecifikt säkert minimum för {device} ({floor}s).",
       "off_delay_generic_floor": "Använde ett generiskt säkert minimum ({floor}s).",
       "off_delay_pauses": "Dimensionerad för att vara längre än verkliga pauser: p95 för pauser inom cykeln {p95}s + 60s buffert, från {pauses} pauser över {cycles} rena cykler (golv {floor}s).",

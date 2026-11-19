@@ -3429,6 +3429,10 @@ class WashDataManager:
         if task is not None and hasattr(task, "add_done_callback"):
             self._background_tasks.add(task)
             task.add_done_callback(self._background_tasks.discard)
+        if not isinstance(task, asyncio.Future) and hasattr(coro, "close"):
+            # Nothing will run it (a mocked hass): close it rather than leave a
+            # coroutine that is never awaited (review of PR #529).
+            coro.close()
         return task
 
     async def async_shutdown(self) -> None:

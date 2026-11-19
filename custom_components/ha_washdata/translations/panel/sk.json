@@ -1793,7 +1793,6 @@
       "min_off_gap_bridge": "Nastavené tak, aby preklenulo najdlhší tichý úsek vnútri cyklu: {span}s + rezerva 60s, z {spans} preklenutých medzier naprieč {cycles} čistými cyklami (zostáva pod {ceiling}s, najkratšou medzerou, ktorú necháte medzi dvoma dávkami).",
       "min_power": "40% najnižšieho činného výkonu p05 ({p05}W) naprieč {cycles} čistými cyklami, aby prah vypnutia zostal pod skutočným odberom.{excl}",
       "no_update_timeout": "Na základe pozorovanej frekvencie aktualizácií (p95={p95}s) * 20 (min. 60s).",
-      "off_delay_cadence": "Na základe pozorovanej frekvencie aktualizácií (p95={p95}s) * 5",
       "off_delay_device_floor": "Použité bezpečné minimum špecifické pre zariadenie {device} ({floor}s).",
       "off_delay_generic_floor": "Použité všeobecné bezpečné minimum ({floor}s).",
       "off_delay_pauses": "Nastavené tak, aby prečkalo skutočné pauzy: pauza vnútri cyklu p95 {p95}s + rezerva 60s, z {pauses} páuz naprieč {cycles} čistými cyklami (minimum {floor}s).",

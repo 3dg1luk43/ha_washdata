@@ -1776,7 +1776,6 @@
       "min_off_gap_bridge": "Dimensjonert for å bygge bro over den lengste stille perioden i en syklus: {span}s + 60s buffer, fra {spans} dekkede mellomrom på tvers av {cycles} rene sykluser (holder seg under ditt korteste mellomrom på {ceiling}s mellom to kjøringer).",
       "min_power": "40% av den laveste aktive effekten ved p05 ({p05}W) på tvers av {cycles} rene sykluser, noe som holder av-terskelen under reelt forbruk.{excl}",
       "no_update_timeout": "Basert på observert oppdateringskadens (p95={p95}s) * 20 (min 60s).",
-      "off_delay_cadence": "Basert på observert oppdateringskadens (p95={p95}s) * 5",
       "off_delay_device_floor": "Brukte et enhetsspesifikt sikkert minimum for {device} ({floor}s).",
       "off_delay_generic_floor": "Brukte et generisk sikkert minimum ({floor}s).",
       "off_delay_pauses": "Dimensjonert for å vare lenger enn reelle pauser: p95 for pause i syklusen {p95}s + 60s buffer, fra {pauses} pauser på tvers av {cycles} rene sykluser (gulv {floor}s).",

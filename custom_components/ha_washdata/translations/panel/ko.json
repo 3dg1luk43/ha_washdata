@@ -1948,7 +1948,6 @@
             "min_off_gap_bridge": "사이클 내에서 전력이 거의 없는 가장 긴 구간을 넘기도록 설정: {span}s + 60s 버퍼. {cycles}개 정상 사이클에 걸친 {spans}건의 넘긴 간격에서 산출(연속 실행 사이에 두는 최소 간격 {ceiling}s 미만 유지).",
             "min_power": "{cycles}개 정상 사이클의 p05 최저 활성 전력({p05}W)의 40%. 꺼짐 게이트를 실제 소비 전력보다 낮게 유지합니다.{excl}",
             "no_update_timeout": "관측된 업데이트 주기 기반(p95={p95}s) * 20(최소 60s).",
-            "off_delay_cadence": "관측된 업데이트 주기 기반(p95={p95}s) * 5",
             "off_delay_device_floor": "{device}에 대한 기기별 안전 최소값을 사용({floor}s).",
             "off_delay_generic_floor": "일반 안전 최소값을 사용({floor}s).",
             "off_delay_pauses": "실제 일시정지보다 길도록 설정: p95 사이클 내 일시정지 {p95}s + 60s 버퍼. {cycles}개 정상 사이클에 걸친 {pauses}건의 일시정지에서 산출(하한 {floor}s).",

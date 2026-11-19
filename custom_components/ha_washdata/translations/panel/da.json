@@ -1776,7 +1776,6 @@
       "min_off_gap_bridge": "Dimensioneret til at bygge bro over den længste stille periode i en cyklus: {span}s + 60s buffer, fra {spans} dækkede mellemrum på tværs af {cycles} rene cyklusser (holder sig under dit korteste mellemrum på {ceiling}s mellem to kørsler).",
       "min_power": "40% af den laveste aktive effekt ved p05 ({p05}W) på tværs af {cycles} rene cyklusser, hvilket holder sluk-tærsklen under reelt forbrug.{excl}",
       "no_update_timeout": "Baseret på observeret opdateringskadence (p95={p95}s) * 20 (min 60s).",
-      "off_delay_cadence": "Baseret på observeret opdateringskadence (p95={p95}s) * 5",
       "off_delay_device_floor": "Brugte et enhedsspecifikt sikkert minimum for {device} ({floor}s).",
       "off_delay_generic_floor": "Brugte et generisk sikkert minimum ({floor}s).",
       "off_delay_pauses": "Dimensioneret til at vare længere end reelle pauser: p95 for pause i cyklussen {p95}s + 60s buffer, fra {pauses} pauser på tværs af {cycles} rene cyklusser (gulv {floor}s).",

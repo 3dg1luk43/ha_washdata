@@ -1968,7 +1968,6 @@
             "min_off_gap_bridge": "Çevrim içindeki en uzun sessiz aralığı köprülemek üzere boyutlandırıldı: {span}s + 60s tampon, {cycles} temiz çevrim boyunca köprülenen {spans} boşluktan (iki ardışık çalıştırma arasında bıraktığınız en kısa süre olan {ceiling}s'nin altında kalır).",
             "min_power": "{cycles} temiz çevrim boyunca p05 en düşük aktif gücün ({p05}W) %40'ı; kapalı eşiğini gerçek çekişin altında tutar.{excl}",
             "no_update_timeout": "Gözlemlenen güncelleme sıklığına dayalı (p95={p95}s) * 20 (en az 60s).",
-            "off_delay_cadence": "Gözlemlenen güncelleme sıklığına dayalı (p95={p95}s) * 5",
             "off_delay_device_floor": "{device} için cihaza özgü güvenli minimum kullanıldı ({floor}s).",
             "off_delay_generic_floor": "Genel güvenli minimum kullanıldı ({floor}s).",
             "off_delay_pauses": "Gerçek duraklamalardan uzun sürecek şekilde boyutlandırıldı: p95 çevrim içi duraklama {p95}s + 60s tampon, {cycles} temiz çevrim boyunca {pauses} duraklamadan (alt sınır {floor}s).",

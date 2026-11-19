@@ -696,28 +696,50 @@ _TAIL_SETTLED_FRACTION = 0.25
 
 # `_tail_settled_w` per stored cycle: the device-list callback asks on every poll,
 # and a cycle stopped by hand after hours of standby has thousands of tail readings
-# to walk and sort (23.6 ms a call over eight 3 h tails at 2 s, PR #529 review). A
-# stored cycle's trace is not changed in place: an edit or a restore replaces the
-# list, so the entry is keyed by the trace and synthetic-row lists themselves (held,
-# so an id is never reused while it is cached), plus their length and peak.
-_TAIL_SETTLED_CACHE: dict[tuple[Any, ...], tuple[Any, Any, float | None]] = {}
+# to walk and sort (23.6 ms a call over eight 3 h tails at 2 s, PR #529 review). An
+# edit or a restore replaces a trace's list rather than changing it, so an entry is
+# keyed by the list's identity and checked against a fingerprint of its content
+# (length, peak, and a hash of evenly spaced readings plus the last ones, where the
+# settled level lies): holding the lists themselves kept up to 512 replaced traces
+# alive, which on long dishwasher traces reached hundreds of MB (PR #529 review).
+_TAIL_SETTLED_CACHE: dict[tuple[Any, ...], tuple[int, float | None]] = {}
 _TAIL_SETTLED_CACHE_MAX = 512
+_TAIL_FINGERPRINT_SPREAD = 32
+_TAIL_FINGERPRINT_LAST = 32
+
+
+def _trace_fingerprint(raw: list[Any], syn: Any) -> int:
+    """A hash of what ``_tail_settled_w_uncached`` reads, in O(64) rows."""
+    n = len(raw)
+    step = max(1, n // _TAIL_FINGERPRINT_SPREAD)
+    picks = list(range(0, n, step)) + list(range(max(0, n - _TAIL_FINGERPRINT_LAST), n))
+
+    def row(i: int) -> Any:
+        r = raw[i]
+        return tuple(r) if isinstance(r, list) else r
+
+    syn_part: tuple[Any, ...] = (
+        (len(syn), tuple(syn[:4]), tuple(syn[-4:])) if isinstance(syn, list) else (None,)
+    )
+    return hash((n, tuple(row(i) for i in picks), syn_part))
 
 
 def _tail_settled_w(cycle: dict[str, Any], raw: list[Any], peak: float) -> float | None:
     """:func:`_tail_settled_w_uncached`, remembered per stored trace."""
     syn = cycle.get(SYNTHETIC_OFFSETS_KEY)
     try:
-        key = (id(raw), id(syn), len(raw), len(syn) if isinstance(syn, list) else -1, float(peak))
+        key = (id(raw), id(syn), float(peak))
+        fingerprint = _trace_fingerprint(raw, syn)
     except Exception:  # noqa: BLE001 - an odd row: just compute it
         return _tail_settled_w_uncached(cycle, raw, peak)
     hit = _TAIL_SETTLED_CACHE.get(key)
-    if hit is not None and hit[0] is raw and hit[1] is syn:
-        return hit[2]
+    if hit is not None and hit[0] == fingerprint:
+        return hit[1]
     value = _tail_settled_w_uncached(cycle, raw, peak)
+    _TAIL_SETTLED_CACHE.pop(key, None)
     if len(_TAIL_SETTLED_CACHE) >= _TAIL_SETTLED_CACHE_MAX:
         _TAIL_SETTLED_CACHE.pop(next(iter(_TAIL_SETTLED_CACHE)))
-    _TAIL_SETTLED_CACHE[key] = (raw, syn, value)
+    _TAIL_SETTLED_CACHE[key] = (fingerprint, value)
     return value
 
 

@@ -1991,7 +1991,6 @@
       "min_off_gap_bridge": "Nustatyta taip, kad perdengtų ilgiausią tylos tarpsnį ciklo viduje: {span}s + 60s buferis, iš {spans} perdengtų tarpų per {cycles} švarius ciklus (lieka žemiau trumpiausio jūsų tarpo tarp dviejų paleidimų iš eilės, kuris yra {ceiling}s).",
       "min_power": "40% p05 mažiausios aktyvios galios ({p05}W) per {cycles} švarius ciklus, išlaikant išjungimo slenkstį žemiau realaus suvartojimo.{excl}",
       "no_update_timeout": "Pagrįsta stebimu atnaujinimo dažniu (p95={p95}s) * 20 (min. 60s).",
-      "off_delay_cadence": "Pagrįsta stebimu atnaujinimo dažniu (p95={p95}s) * 5",
       "off_delay_device_floor": "Naudotas prietaisui {device} būdingas saugus minimumas ({floor}s).",
       "off_delay_generic_floor": "Naudotas bendrinis saugus minimumas ({floor}s).",
       "off_delay_pauses": "Nustatyta taip, kad viršytų realias pauzes: p95 ciklo vidinė pauzė {p95}s + 60s buferis, iš {pauses} pauzių per {cycles} švarius ciklus (apatinė riba {floor}s).",

@@ -1970,7 +1970,6 @@
       "min_off_gap_bridge": "Mõõdetud nii, et katab tsükli pikima vaikse lõigu: {span}s + 60s puhver, {spans} sillatud vahest {cycles} puhta tsükli lõikes (jääb alla teie lühima järjestikuste käivituste vahelise pausi, mis on {ceiling}s).",
       "min_power": "40% madalaimast aktiivvõimsusest p05 juures ({p05}W) {cycles} puhta tsükli lõikes, hoides väljalülituse läve alla tegeliku tarbimise.{excl}",
       "no_update_timeout": "Põhineb täheldatud uuendustempol (p95={p95}s) * 20 (min 60s).",
-      "off_delay_cadence": "Põhineb täheldatud uuendustempol (p95={p95}s) * 5",
       "off_delay_device_floor": "Kasutati seadmepõhist ohutut miinimumi seadmele {device} ({floor}s).",
       "off_delay_generic_floor": "Kasutati üldist ohutut miinimumi ({floor}s).",
       "off_delay_pauses": "Mõõdetud kestma kauem kui tegelikud pausid: p95 tsüklisisene paus {p95}s + 60s puhver, {pauses} pausist {cycles} puhta tsükli lõikes (alampiir {floor}s).",

@@ -741,6 +741,11 @@ class LearningManager:
         self._sample_interval_model = StatisticalModel(max_samples=200)
         self._model_sensor = None
         self._pending_intervals.clear()
+        # The labelled-cycle counts the model, detection and batch passes wait to
+        # exceed describe the history just replaced: kept, those passes stayed off
+        # until the new history outgrew the old one (review of PR #529).
+        self._last_suggestions_labeled_count = 0
+        self._last_batch_simulation_count = 0
         # A pass already in the executor read the old cadence: its result must not
         # refill the wiped store (PR #529 review). A new cadence commit schedules a
         # pass in the new generation.

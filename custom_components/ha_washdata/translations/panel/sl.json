@@ -1793,7 +1793,6 @@
       "min_off_gap_bridge": "Nastavljeno tako, da premosti najdaljši tihi odsek znotraj cikla: {span}s + 60s rezerve, iz {spans} premoščenih vrzeli čez {cycles} čistih ciklov (ostane pod vašo najkrajšo vrzeljo med zaporednima zagonoma, ki znaša {ceiling}s).",
       "min_power": "40 % najnižje delovne moči p05 ({p05}W) čez {cycles} čistih ciklov, da prag izklopa ostane pod dejansko porabo.{excl}",
       "no_update_timeout": "Na podlagi opažene frekvence posodobitev (p95={p95}s) * 20 (najmanj 60s).",
-      "off_delay_cadence": "Na podlagi opažene frekvence posodobitev (p95={p95}s) * 5",
       "off_delay_device_floor": "Uporabljen varni minimum, značilen za napravo {device} ({floor}s).",
       "off_delay_generic_floor": "Uporabljen splošni varni minimum ({floor}s).",
       "off_delay_pauses": "Nastavljeno tako, da preseže resnične premore: premor znotraj cikla p95 {p95}s + 60s rezerve, iz {pauses} premorov čez {cycles} čistih ciklov (spodnja meja {floor}s).",

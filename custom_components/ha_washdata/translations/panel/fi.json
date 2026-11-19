@@ -1776,7 +1776,6 @@
       "min_off_gap_bridge": "Mitoitettu siltaamaan jakson pisin hiljainen vaihe: {span}s + 60s puskuri, {spans} sillatusta katkosta {cycles} puhtaan jakson joukossa (pysyy alle {ceiling}s, joka on lyhin peräkkäisten käynnistysten välinen taukosi).",
       "min_power": "40% pienimmästä aktiivisesta tehosta p05:ssä ({p05}W) {cycles} puhtaan jakson joukossa, mikä pitää sammutuskynnyksen todellisen kulutuksen alapuolella.{excl}",
       "no_update_timeout": "Perustuu havaittuun päivitystahtiin (p95={p95}s) * 20 (väh. 60s).",
-      "off_delay_cadence": "Perustuu havaittuun päivitystahtiin (p95={p95}s) * 5",
       "off_delay_device_floor": "Käytettiin laitekohtaista turvallista vähimmäisarvoa laitteelle {device} ({floor}s).",
       "off_delay_generic_floor": "Käytettiin yleistä turvallista vähimmäisarvoa ({floor}s).",
       "off_delay_pauses": "Mitoitettu kestämään todellisia taukoja pidempään: p95 jakson sisäiselle tauolle {p95}s + 60s puskuri, {pauses} tauosta {cycles} puhtaan jakson joukossa (alaraja {floor}s).",

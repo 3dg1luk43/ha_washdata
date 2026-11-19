@@ -1793,7 +1793,6 @@
       "min_off_gap_bridge": "Dobrane tak, aby pokryć najdłuższy cichy odcinek wewnątrz cyklu: {span}s + zapas 60s, z {spans} pokrytych przerw w {cycles} poprawnych cyklach (pozostaje poniżej {ceiling}s, czyli najkrótszej przerwy, jaką zostawiasz między kolejnymi uruchomieniami).",
       "min_power": "40% najniższej mocy czynnej p05 ({p05}W) w {cycles} poprawnych cyklach, tak aby próg wyłączenia pozostał poniżej rzeczywistego poboru.{excl}",
       "no_update_timeout": "Na podstawie obserwowanej częstotliwości aktualizacji (p95={p95}s) * 20 (min. 60s).",
-      "off_delay_cadence": "Na podstawie obserwowanej częstotliwości aktualizacji (p95={p95}s) * 5",
       "off_delay_device_floor": "Użyto bezpiecznego minimum specyficznego dla urządzenia {device} ({floor}s).",
       "off_delay_generic_floor": "Użyto ogólnego bezpiecznego minimum ({floor}s).",
       "off_delay_pauses": "Dobrane tak, aby przetrwać rzeczywiste pauzy: pauza w cyklu p95 {p95}s + zapas 60s, z {pauses} pauz w {cycles} poprawnych cyklach (minimum {floor}s).",

@@ -1274,3 +1274,63 @@ def test_a_resolved_start_is_kept_when_the_stored_option_is_null(mock_hass: Any)
     start = sug.get(CONF_START_THRESHOLD_W, {}).get("value")
     # Either the pair is ordered in the stored set, or the stop is withdrawn.
     assert stop is None or (start is not None and start > stop)
+
+
+def test_the_tail_cache_keeps_no_trace_alive() -> None:
+    """Review of PR #529: the cache held each trace list so an id could not be
+    reused; every reload, import or edit left a replaced trace in it (up to 512,
+    hundreds of MB on long dishwasher traces). It keeps a fingerprint instead."""
+    import gc  # noqa: PLC0415
+    import weakref  # noqa: PLC0415
+
+    from custom_components.ha_washdata import suggestion_engine as se  # noqa: PLC0415
+
+    class _Trace(list):
+        pass
+
+    trace = _Trace([[float(t), 2000.0] for t in range(0, 600, 10)] + [[600.0 + t, 3.0] for t in range(0, 1800, 10)])
+    ref = weakref.ref(trace)
+    assert se._tail_settled_w({"id": "alive"}, trace, 2000.0) == 3.0  # noqa: SLF001
+    del trace
+    gc.collect()
+    assert ref() is None
+
+
+async def test_a_wipe_lets_the_labelled_passes_run_on_the_new_history(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """Review of PR #529: after a wipe the model, detection and batch passes waited
+    for the new labelled count to outgrow the count of the history just wiped."""
+    entry = await setup_washdata_entry()
+    lm = hass.data[DOMAIN][entry.entry_id].learning_manager
+    lm._last_suggestions_labeled_count = 120  # noqa: SLF001 - a mature install
+    lm._last_batch_simulation_count = 115  # noqa: SLF001
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({"type": f"{DOMAIN}/wipe_history", "entry_id": entry.entry_id})
+    assert (await client.receive_json())["success"]
+    assert lm._last_suggestions_labeled_count == 0  # noqa: SLF001
+    assert lm._last_batch_simulation_count == 0  # noqa: SLF001
+
+
+async def test_the_suggestions_sensor_filters_once_per_state_write(
+    hass: Any, setup_washdata_entry: Any
+) -> None:
+    """Review of PR #529: the count and the attributes each ran the shared filter."""
+    from unittest.mock import patch  # noqa: PLC0415
+
+    from homeassistant.helpers import entity_registry as er  # noqa: PLC0415
+
+    from custom_components.ha_washdata import ws_api  # noqa: PLC0415
+
+    entry = await setup_washdata_entry()
+    manager = hass.data[DOMAIN][entry.entry_id]
+    manager.profile_store.set_suggestion(CONF_START_THRESHOLD_W, 9.0, reason="r", flags={"owner": OWNER_BATCH})
+    entity_id = er.async_get(hass).async_get_entity_id("sensor", DOMAIN, f"{entry.entry_id}_suggestions")
+    assert entity_id
+    real = ws_api._visible_suggestions  # noqa: SLF001
+    with patch.object(ws_api, "_visible_suggestions", side_effect=real) as filt:
+        manager.notify_update()
+        await hass.async_block_till_done()
+    state = hass.states.get(entity_id)
+    assert filt.call_count == 1
+    assert state.state == "1" and state.attributes["suggestions_count"] == 1

@@ -1971,7 +1971,6 @@
       "min_off_gap_bridge": "Aprēķināts, lai pārsegtu garāko kluso posmu cikla iekšienē: {span}s + 60s buferis, no {spans} pārsegtiem intervāliem {cycles} tīros ciklos (paliek zem jūsu īsākā intervāla starp divām secīgām palaišanas reizēm, kas ir {ceiling}s).",
       "min_power": "40% no p05 zemākās aktīvās jaudas ({p05}W) {cycles} tīros ciklos, saglabājot izslēgšanas slieksni zem reālā patēriņa.{excl}",
       "no_update_timeout": "Pamatots ar novēroto atjaunināšanas biežumu (p95={p95}s) * 20 (min. 60s).",
-      "off_delay_cadence": "Pamatots ar novēroto atjaunināšanas biežumu (p95={p95}s) * 5",
       "off_delay_device_floor": "Izmantots ierīcei {device} raksturīgais drošais minimums ({floor}s).",
       "off_delay_generic_floor": "Izmantots vispārīgs drošais minimums ({floor}s).",
       "off_delay_pauses": "Aprēķināts, lai pārsniegtu reālās pauzes: p95 cikla iekšējā pauze {p95}s + 60s buferis, no {pauses} pauzēm {cycles} tīros ciklos (apakšējā robeža {floor}s).",

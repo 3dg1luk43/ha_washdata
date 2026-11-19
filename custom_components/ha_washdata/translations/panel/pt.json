@@ -1936,7 +1936,6 @@
       "min_off_gap_bridge": "Dimensionado para cobrir o período de silêncio mais longo dentro de um ciclo: {span}s + 60s de margem, a partir de {spans} intervalos cobertos ao longo de {cycles} ciclos limpos (mantém-se abaixo do seu intervalo mínimo de {ceiling}s entre cargas consecutivas).",
       "min_power": "40% da potência ativa mais baixa no p05 ({p05}W) ao longo de {cycles} ciclos limpos, mantendo o limiar de desligamento abaixo do consumo real.{excl}",
       "no_update_timeout": "Com base na cadência de atualização observada (p95={p95}s) * 20 (mín. 60s).",
-      "off_delay_cadence": "Com base na cadência de atualização observada (p95={p95}s) * 5",
       "off_delay_device_floor": "Utilizado o mínimo seguro específico do dispositivo para {device} ({floor}s).",
       "off_delay_generic_floor": "Utilizado o mínimo seguro genérico ({floor}s).",
       "off_delay_pauses": "Dimensionado para durar mais do que as pausas reais: pausa intraciclo p95 {p95}s + 60s de margem, a partir de {pauses} pausas ao longo de {cycles} ciclos limpos (mínimo {floor}s).",

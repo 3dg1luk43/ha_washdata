@@ -1775,7 +1775,6 @@
             "min_off_gap_bridge": "Postavljeno tako da premosti najduži tihi odsječak unutar ciklusa: {span}s + 60s rezerve, iz {spans} premoštenih razmaka kroz {cycles} čistih ciklusa (ostaje ispod vašeg najkraćeg razmaka između dva uzastopna pokretanja, koji iznosi {ceiling}s).",
             "min_power": "40 % najniže radne snage p05 ({p05}W) kroz {cycles} čistih ciklusa, čime prag isključenja ostaje ispod stvarne potrošnje.{excl}",
             "no_update_timeout": "Na osnovu uočene učestalosti ažuriranja (p95={p95}s) * 20 (najmanje 60s).",
-            "off_delay_cadence": "Na osnovu uočene učestalosti ažuriranja (p95={p95}s) * 5",
             "off_delay_device_floor": "Korišten siguran minimum specifičan za uređaj {device} ({floor}s).",
             "off_delay_generic_floor": "Korišten opći siguran minimum ({floor}s).",
             "off_delay_pauses": "Postavljeno tako da nadmaši stvarne pauze: pauza unutar ciklusa p95 {p95}s + 60s rezerve, iz {pauses} pauza kroz {cycles} čistih ciklusa (donja granica {floor}s).",
