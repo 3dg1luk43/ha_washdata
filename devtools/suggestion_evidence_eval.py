@@ -92,6 +92,8 @@ def legacy_standby(cycles: list[dict[str, Any]], stop: float, recent: int = RECE
             final_w = float(raw[-1][1])
         except (TypeError, ValueError, OverflowError, IndexError):
             continue
+        if not math.isfinite(final_w):  # "NaN" parses, and its median is NaN, not None
+            continue
         peak = se._cycle_peak_w(cycle, raw)  # noqa: SLF001 - unchanged since 0.6.0
         if peak > 0 and final_w > peak * se._STANDBY_PEAK_FRACTION:  # noqa: SLF001
             continue

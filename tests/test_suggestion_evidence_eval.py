@@ -34,6 +34,15 @@ def test_the_legacy_rule_needs_every_last_sample_above_the_stop() -> None:
     assert evidence.legacy_standby([_cycle(0, 3.4)], 2.5) is None  # fewer than two
 
 
+def test_a_non_finite_last_sample_is_no_reading() -> None:
+    """PR #529 review: two "NaN" last samples gave a NaN level, counted as flagged."""
+    assert evidence.legacy_standby([_cycle(i, "NaN") for i in range(2)], 2.5) is None
+    assert evidence.legacy_standby([_cycle(0, "inf"), _cycle(1, 3.4)], 2.5) is None
+    assert evidence.legacy_standby(
+        [_cycle(0, float("nan"))] + [_cycle(i, 3.4) for i in range(1, 3)], 2.5
+    ) == 3.4
+
+
 def test_a_run_reports_every_arm_and_restores_the_constants(tmp_path: Path) -> None:
     export = {
         "version": 16, "entry_data": {"device_type": "washing_machine", "name": "Synth"},
