@@ -6,6 +6,8 @@
   rest without the rule and still set the marker, so switching back skipped it.
 * Clearing a Min Power override read the unset Stop against the compiled
   default, not the entry's own Min Power, so the Stop it moved got no row.
+* Apply stamped the suggestion cooldown before its options write, so an Apply a
+  reload stopped kept the suggestions it never applied quiet afterwards.
 """
 from __future__ import annotations
 
@@ -19,11 +21,15 @@ from homeassistant.util import dt as dt_util
 
 from custom_components.ha_washdata import learning
 from custom_components.ha_washdata.const import (
+    CONF_END_ENERGY_THRESHOLD,
     CONF_MIN_POWER,
+    CONF_OFF_DELAY,
     CONF_STOP_THRESHOLD_W,
     CUT_SHORT_REBUILD_KEY,
     DOMAIN,
+    STORAGE_KEY,
 )
+from custom_components.ha_washdata.suggestion_engine import OWNER_BATCH
 
 POWER = "sensor.washer_power"
 _CLEAN_END = {"status": "completed", "termination_reason": "smart"}
@@ -152,3 +158,46 @@ async def test_clearing_min_power_records_the_stop_it_moves_from_entry_data(
     stop = rows[CONF_STOP_THRESHOLD_W]
     assert stop["old"] is None and stop["new"] is None  # Revert changes nothing
     assert stop["old_effective"] == 1.2
+
+
+async def test_an_apply_a_reload_stopped_does_not_start_the_cooldown(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_ws_client: Any,
+    hass_storage: dict[str, Any],
+) -> None:
+    """Apply cleared the suggestions, then found the store restored and wrote no
+    option; the cooldown stamp it had saved with the clear kept the same
+    suggestion quiet for the next cycles. Stamped only with the options write."""
+    entry = await setup_washdata_entry(options={CONF_END_ENERGY_THRESHOLD: 0.01, CONF_OFF_DELAY: 60})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    store._data["lifetime_cycle_count"] = 7  # noqa: SLF001
+    key = f"{STORAGE_KEY}.{entry.entry_id}"
+
+    def on_disk() -> Any:
+        return (hass_storage.get(key) or {}).get("data", {}).get("suggestion_apply_cycle_count")
+
+    real_clear = store.clear_suggestions
+
+    async def restored_meanwhile() -> None:
+        await real_clear()
+        store._data_generation = getattr(store, "_data_generation", 0) + 1  # noqa: SLF001
+
+    async def apply() -> dict[str, Any]:
+        store.set_suggestion(CONF_END_ENERGY_THRESHOLD, 0.02, reason="r", flags={"owner": OWNER_BATCH})
+        await client.send_json_auto_id({
+            "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry.entry_id,
+            "keys": [CONF_END_ENERGY_THRESHOLD],
+        })
+        return await client.receive_json()
+
+    client = await hass_ws_client(hass)
+    with patch.object(store, "clear_suggestions", side_effect=restored_meanwhile):
+        res = await apply()
+    assert res["success"] is False and res["error"]["code"] == "entry_reloaded"
+    assert store.get_suggestion_apply_cycle_count() == 0
+    assert on_disk() in (None, 0)
+
+    res = await apply()
+    assert res["success"] and res["result"]["applied"] == [CONF_END_ENERGY_THRESHOLD]
+    await hass.async_block_till_done()
+    assert store.get_suggestion_apply_cycle_count() == 7
+    assert on_disk() == 7

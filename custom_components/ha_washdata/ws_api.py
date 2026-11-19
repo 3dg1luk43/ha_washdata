@@ -5309,11 +5309,7 @@ async def ws_apply_suggestions(
                 if updates:
                     # Clear before updating the entry: the reload async_update_entry
                     # schedules refreshes the suggestions, so persist the cleared
-                    # state first. The odometer, like the cooldown check (audit
-                    # SUGGEST-05): at the retention cap len(past_cycles) never grows
-                    # past the stamp again.
-                    cycle_count = manager.profile_store.get_lifetime_cycle_count()
-                    manager.profile_store.set_suggestion_apply_cycle_count(cycle_count)
+                    # state first.
                     # Each write is awaited: a reload in between leaves the rest
                     # unwritten, and the reply says what already was (PR #529 review).
                     # The settings history is written last, once the options are
@@ -5334,6 +5330,16 @@ async def ws_apply_suggestions(
                     new_options = {**entry.options, **updates}
                     before = _options_before(entry)
                     hass.config_entries.async_update_entry(entry, options=new_options)
+                    # The cooldown only once the options are written (PR #529
+                    # review): stamped before, an Apply a reload stopped kept the
+                    # suggestions it never applied quiet after the reload. Before
+                    # any await, so the refresh the reload runs reads it, and
+                    # saved with the settings history below. The odometer, like
+                    # the cooldown check (audit SUGGEST-05): at the retention cap
+                    # len(past_cycles) never grows past the stamp again.
+                    manager.profile_store.set_suggestion_apply_cycle_count(
+                        manager.profile_store.get_lifetime_cycle_count()
+                    )
                     await _record_option_changes(
                         hass, entry, updates, "apply_suggestions", before=before
                     )
