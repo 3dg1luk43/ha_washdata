@@ -906,6 +906,11 @@ class WashDataManager:
         self._remove_power_off_timer: Any | None = None
         self._last_reading_time: datetime | None = None
         self._last_real_reading_time: datetime | None = None # Track last real sensor update
+        # ``(sensor, time)`` of the last report this manager processed, the start
+        # of the next cadence interval learning measures. ``_last_reading_time``
+        # also moves on the watchdog's keepalives and deferrals, which would
+        # measure a 120 s reporter at the watchdog's 30 s (PR #529 review).
+        self._last_sensor_report: tuple[str, datetime] | None = None
         # Register item 266, restart hazard. The silence clock and sensor value a
         # restored cycle's snapshot carried, consumed once by the setup read; and
         # the report that read took, which the resync must not mistake for a
@@ -4902,10 +4907,15 @@ class WashDataManager:
             STATE_PAUSED,
             STATE_ENDING,
         ):
+            # Measured from the sensor's previous report, not from a keepalive.
+            last = self._last_sensor_report
             self.learning_manager.process_power_reading(
-                power, now, self._last_reading_time, sensor=self.power_sensor_entity_id
+                power, now,
+                last[1] if last is not None and last[0] == self.power_sensor_entity_id else None,
+                sensor=self.power_sensor_entity_id,
             )
         self._last_reading_time = now
+        self._last_sensor_report = (self.power_sensor_entity_id, now)
         if self._restored_sensor_clock is not None:
             # The entity appeared only after setup, so this is its startup write
             # (register item 266): same rule as the setup read.
@@ -5617,6 +5627,8 @@ class WashDataManager:
             self.detector.process_reading(power, now)
             self._last_reading_time = now
             self._last_real_reading_time = report_ts
+            # A real report: the next cadence interval starts at it.
+            self._last_sensor_report = (self.power_sensor_entity_id, report_ts)
             self._check_pick_after_watchdog_reading()
         self._current_power = power
 
