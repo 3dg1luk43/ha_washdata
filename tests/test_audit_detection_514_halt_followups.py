@@ -450,6 +450,29 @@ def test_a_pause_survives_a_restart() -> None:
     assert det3._user_pause_spans == [] and det3._user_pause_since is None  # noqa: SLF001
 
 
+@pytest.mark.parametrize("level", [0.0, 4.5])
+def test_the_open_user_pause_the_live_trace_still_spans(level: float) -> None:
+    """#530 (PR #529 review): the live matcher's trace leaves a user pause out only
+    once the resume banks it. ``open_user_pause_s`` is what it still spans of the
+    open one, net of a stall shown and banked inside it (on the display level),
+    so the trace's span less it is the 30 min of programme time."""
+    det = _det(min_off_gap=3600)
+    _feed(det, 0, 1800, _wash)
+    _match(det, "Cotton", 5400.0)
+    det.set_user_paused(True, _at(1800))
+    det.set_verified_pause(True)
+    _feed(det, 1800, 3000, level)
+    _feed(det, 3000, 4500, 0.0)  # a stall shown on the display level ends here
+    assert bool(det._stall_spans) is (level > 0)  # noqa: SLF001
+    live = det._match_readings()  # noqa: SLF001
+    span = (live[-1][0] - live[0][0]).total_seconds()
+    assert span - det.open_user_pause_s() == pytest.approx(1800.0, abs=30.0)
+    with patch.object(cd_mod, "USER_PAUSE_EXCLUDED_FROM_GATES", False):
+        assert det.open_user_pause_s() == 0.0
+    det.set_user_paused(False, _at(4500))
+    assert det.open_user_pause_s() == 0.0
+
+
 # --- the harness ----------------------------------------------------------------
 
 

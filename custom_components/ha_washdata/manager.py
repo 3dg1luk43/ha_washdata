@@ -1854,7 +1854,8 @@ class WashDataManager:
                 return
             self._program_mismatch_task = self._spawn_tracked(
                 self._async_check_program_mismatch(
-                    list(readings), self._match_identity(), state.key
+                    list(readings), self._match_identity(), state.key,
+                    paused_s=self._program_mismatch_open_pause_s(),
                 )
             )
         except Exception:  # pylint: disable=broad-exception-caught
@@ -1887,11 +1888,22 @@ class WashDataManager:
         except Exception:  # pylint: disable=broad-exception-caught
             return None
 
+    def _program_mismatch_open_pause_s(self) -> float:
+        """The open user pause the #530 check's trace still spans
+        (``CycleDetector.open_user_pause_s``), read with the trace. 0.0 when the
+        detector cannot say. Never raises."""
+        try:
+            return max(0.0, float(self.detector.open_user_pause_s()))
+        except Exception:  # pylint: disable=broad-exception-caught
+            return 0.0
+
     async def _async_check_program_mismatch(
         self,
         readings: list[tuple[datetime, float]],
         identity: tuple[str, datetime | None, bool],
         key: tuple[Any, ...],
+        *,
+        paused_s: float | None = None,
     ) -> None:
         """One background match of a hand-picked program (#530): the live tick's
         own ``async_match_profile`` call, read only by
@@ -1901,9 +1913,17 @@ class WashDataManager:
 
         The fraction gate reads the pick's usual duration as it is when the match
         lands: picking the same program again keeps the check going (no new
-        generation) but can bring a new duration."""
+        generation) but can bring a new duration. It reads programme time: the
+        trace's span less ``paused_s``, the user pause still open in it (read
+        with the trace; now when not given). Finished pauses are already cut
+        out, the open one only once the resume banks it, and a pick paused at
+        20 of its 100 minutes was past half after 30 minutes of pause (PR #529
+        review)."""
         try:
+            if paused_s is None:
+                paused_s = self._program_mismatch_open_pause_s()
             duration = (readings[-1][0] - readings[0][0]).total_seconds()
+            elapsed = max(0.0, duration - paused_s)
             # The profile groups the ranking is built from: the matcher reads them
             # before it leaves the loop, so read here, next to the call. A group
             # edited while the match ran makes the ranking describe neither
@@ -1952,7 +1972,7 @@ class WashDataManager:
                 state,
                 result,
                 selected,
-                elapsed_s=duration,
+                elapsed_s=elapsed,
                 expected_s=float(expected),
                 families=families,
             )
@@ -1961,7 +1981,7 @@ class WashDataManager:
             self._logger.info(
                 "The running cycle does not look like the picked program %r: %r fits "
                 "better by %.3f after %.0f s",
-                selected, state.looks_like, state.margin or 0.0, duration,
+                selected, state.looks_like, state.margin or 0.0, elapsed,
             )
             self._fire_device_trigger(
                 TRIGGER_PROGRAM_MISMATCH,
@@ -1970,7 +1990,7 @@ class WashDataManager:
                 program=selected,
                 looks_like=state.looks_like,
                 margin=state.margin,
-                elapsed_seconds=round(duration),
+                elapsed_seconds=round(elapsed),
             )
             # A restart must not send it again (as the live trigger marks).
             if self._has_trigger_listeners():

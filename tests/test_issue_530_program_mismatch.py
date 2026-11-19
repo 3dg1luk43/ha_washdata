@@ -894,3 +894,27 @@ async def test_a_deleted_pick_is_not_checked(
         await _feed(hass, freezer, 200, 10 * 60)
     assert _mismatches(sent) == []
     assert manager.program_mismatch is None
+
+
+async def test_an_open_user_pause_is_not_programme_time(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """PR #529 review: the trace keeps an open user pause (it is banked only on
+    resume), so its span ran past half the pick's usual length while the
+    programme stood still, and six deficits in the pause fired the trigger. The
+    fraction reads programme time; past half of it after the resume, it fires
+    with the programme time it was reached at."""
+    _entry, manager, sent = await _picked_cycle(hass, setup_washdata_entry, freezer, "Cotton")
+    wrong = _result("Synthetics", {"Synthetics": 0.9, "Cotton": 0.5})
+    with patch.object(manager.profile_store, "async_match_profile", AsyncMock(return_value=wrong)):
+        await _feed(hass, freezer, 200, 4 * 60)
+        assert await manager.async_pause_cycle()
+        await _feed(hass, freezer, 0, 30 * 60)
+        state = manager._program_mismatch_state()  # noqa: SLF001
+        assert state.streak >= PROGRAM_MISMATCH_PERSISTENCE  # counted, but not past half
+        assert _mismatches(sent) == []
+        assert await manager.async_resume_cycle()
+        await _feed(hass, freezer, 200, 12 * 60)
+    fired = _mismatches(sent)
+    assert len(fired) == 1, sent
+    assert PROGRAM_MISMATCH_MIN_FRACTION * DURATION <= fired[0]["elapsed_seconds"] < 20 * 60

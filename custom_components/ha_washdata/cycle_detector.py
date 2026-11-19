@@ -1460,6 +1460,26 @@ class CycleDetector:
         of it. The stored trace keeps every reading."""
         return self._cut_readings(self._gate_spans())
 
+    def open_user_pause_s(self) -> float:
+        """Seconds of the user pause still open that :meth:`_match_readings` spans
+        (#530): it leaves out a pause only once the resume banks it, so up to the
+        last reading the open one is still in its span. Net of the finished spans
+        it overlaps, so the span less this is programme time as banking it there
+        would leave it. 0.0 without one, or when the gates keep user pauses."""
+        since, start = self._user_pause_since, self._current_cycle_start
+        if (
+            not USER_PAUSE_EXCLUDED_FROM_GATES or not self._user_paused
+            or since is None or start is None or not self._power_readings
+        ):
+            return 0.0
+        begin = max(since, start)
+        length = (self._power_readings[-1][0] - begin).total_seconds()
+        if length <= 0:
+            return 0.0
+        spans = self._gate_spans()
+        merged = _merge_spans([*spans, ((begin - start).total_seconds(), length)])
+        return max(0.0, sum(n for _at, n in merged) - sum(n for _at, n in spans))
+
     def _cut_readings(
         self, spans: list[tuple[float, float]]
     ) -> list[tuple[datetime, float]]:
