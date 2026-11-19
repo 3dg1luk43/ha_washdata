@@ -95,3 +95,25 @@ def test_a_store_package_cannot_drop_a_history_as_its_clone(tmp_path: Path) -> N
     _write(tmp_path, "store/washing_machine/pkg.json", {"past_cycles": [], "reference_cycles": cycles})
     _write(tmp_path, "hist/export.json", {"past_cycles": cycles[:10]})
     assert [r["device"] for r in evidence.run(tmp_path)] == ["hist/export.json"]
+
+
+def test_cycles_without_an_id_are_told_apart(tmp_path: Path) -> None:
+    """PR #529 review: the clean sets were keyed by ``str(id)``, so every id-less
+    cycle was one key "None": one kept with no exemption hid the two the shipped
+    band admits from their duration ratios."""
+
+    def run_(dead_s: float) -> dict:
+        pts = [[0.0, 0.0]]
+        for k in range(1, 60):   # 60 s steps over 3600 s; a dead run from 1200 s
+            t = 60.0 * k
+            pts.append([t, 0.0 if 1200.0 <= t < 1200.0 + dead_s or t >= 3360.0 else 2000.0])
+        pts.append([3600.0, 0.0])
+        return {"status": "completed", "termination_reason": "smart", "profile_name": "Wash",
+                "start_time": "2026-03-01T08:00:00+00:00", "duration": 3600.0, "power_data": pts}
+
+    past = [run_(900.0), run_(900.0), run_(0.0)]   # two merged-looking, one plain; no ids
+    _write(tmp_path, "noid/export.json", {"past_cycles": past}, {"stop_threshold_w": 2.0})
+    (row,) = evidence.run(tmp_path)
+    assert row["length"]["off"] == {"clean": 1, "mid_restart": 2}
+    assert row["length"]["0.8-1.25"] == {"clean": 3, "mid_restart": 0}
+    assert row["admitted_ratios"] == [1.0, 1.0]

@@ -113,18 +113,21 @@ def device_row(dev: Any) -> dict[str, Any]:
     past = [c for c in dev.data.get("past_cycles") or [] if isinstance(c, dict)]
     row: dict[str, Any] = {"device": ev.public_key(dev.path), "device_type": device_type,
                            "stop_w": stop, "cycles": len(past), "length": {}, "standby": {}}
-    clean_ids: dict[str, set[str]] = {}
+    # By the record itself (select_clean_cycles returns the objects it was given),
+    # not its stored id: two cycles without one, or a repeated id, are one key, so
+    # a cycle the band admits could vanish from the ratios (PR #529 review).
+    clean_ids: dict[str, set[int]] = {}
     for arm, ratio in LENGTH_ARMS.items():
         with _patched("_PROGRAMME_LENGTH_RATIO", ratio):
             clean, excluded = se.select_clean_cycles(past, stop_threshold_w=stop)
-        clean_ids[arm] = {str(c.get("id")) for c in clean}
+        clean_ids[arm] = {id(c) for c in clean}
         row["length"][arm] = {"clean": len(clean), "mid_restart": excluded.get("mid_restart", 0)}
     medians = se._label_median_durations(past)  # noqa: SLF001
     admitted = clean_ids["0.8-1.25"] - clean_ids["off"]
     row["admitted_ratios"] = sorted(
         round(float(c.get("duration") or 0.0) / medians[c.get("profile_name")], 2)
         for c in past
-        if str(c.get("id")) in admitted and medians.get(c.get("profile_name"))
+        if id(c) in admitted and medians.get(c.get("profile_name"))
     )
     changes = se.stop_threshold_changes(dev.data.get("settings_changelog"))
     for arm, frac in TAIL_ARMS.items():
