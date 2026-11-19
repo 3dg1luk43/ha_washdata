@@ -1241,6 +1241,18 @@ _STEADY_LOAD_LOW_PCT = 5.0
 _STEADY_LOAD_WORK_PCT = 90.0
 
 
+def _round_level(value: float) -> float:
+    """``value`` to one decimal, or to two significant figures below 1.
+
+    A kW sensor's steady load runs at a fraction of a unit: at 0.08 one decimal
+    made the running level 0.1 and the corrected start 0.1, above the load it was
+    meant to start on (PR #529 review). Two figures move a value by at most 5%.
+    """
+    if not (math.isfinite(value) and value > 0):
+        return round(value, 1)
+    return round(value, max(1, 1 - math.floor(math.log10(value))))
+
+
 def is_steady_load(low_w: float, work_w: float) -> bool:
     """True when a cycle's lowest running power is its working level (#527)."""
     return work_w > 0 and low_w >= STEADY_LOAD_ANCHOR_RATIO * work_w
@@ -1300,7 +1312,7 @@ def start_above_running(
         if start < low_w:
             return None
         return {
-            "low_w": round(low_w, 1),
+            "low_w": _round_level(low_w),
             "cycles": len(lows),
             "start_w": round(start, 2),
             "stop_w": round(stop, 2),
@@ -1324,9 +1336,9 @@ def steady_load_threshold_suggestions(adv: dict[str, Any] | None) -> dict[str, A
     if not adv:
         return {}
     low = float(adv["low_w"])
-    start = round(low * STEADY_LOAD_START_RATIO, 1)
+    start = _round_level(low * STEADY_LOAD_START_RATIO)
     stop_after = (
-        round(start * STEADY_LOAD_STOP_RATIO, 1) if float(adv["stop_w"]) >= start
+        _round_level(start * STEADY_LOAD_STOP_RATIO) if float(adv["stop_w"]) >= start
         else float(adv["stop_w"])
     )
     standby = _num(adv.get("standby_w"))

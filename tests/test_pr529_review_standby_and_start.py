@@ -59,3 +59,31 @@ def test_a_legacy_iso_trace_weighs_its_tail_like_an_offset_one(iso: bool) -> Non
     assert se._idle_evidence_w(cycles[0], 5.0) == 3.0  # noqa: SLF001
     # Settled at 3 W under a 5 W Stop: below it, so no "still drawing" advisory.
     assert se.detect_standby_above_stop(cycles, 5.0) is None
+
+
+def _steady_kw(day: int, level: float) -> dict[str, Any]:
+    """An hour at a steady ``level`` kW, 30 s readings, no idle readings kept."""
+    start = T0 + timedelta(days=day)
+    pts = [[30.0 * (i + 1), level] for i in range(120)]
+    return {"id": f"k{day}", "status": "completed", "start_time": start.isoformat(),
+            "duration": pts[-1][0], "power_data": pts}
+
+
+@pytest.mark.parametrize("level", [0.08, 0.04, 0.012, 0.15])
+def test_a_kw_steady_load_start_correction_stays_below_its_running_level(level: float) -> None:
+    cycles = [_steady_kw(d, level) for d in range(4)]
+    adv = se.start_above_running(cycles, 0.2, 0.01)
+    assert adv is not None
+    out = se.steady_load_threshold_suggestions(adv)
+    start = out[CONF_START_THRESHOLD_W]["value"]
+    assert 0 < start < level
+    stop = out.get(CONF_STOP_THRESHOLD_W, {}).get("value", 0.01)
+    assert 0 < stop < start
+    # Applied, the gate no longer fires: the pair is not offered again.
+    assert se.start_above_running(cycles, start, stop) is None
+
+
+def test_watt_levels_round_as_before() -> None:
+    assert se._round_level(380.44) == 380.4  # noqa: SLF001
+    assert se._round_level(12.36) == 12.4  # noqa: SLF001
+    assert se._round_level(0.0834) == 0.083  # noqa: SLF001
