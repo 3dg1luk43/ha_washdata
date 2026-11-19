@@ -16,10 +16,12 @@ matches in a row, with ``PROGRAM_MISMATCH_MIN_FRACTION`` of the picked program's
 usual duration elapsed). This replays that on the corpus.
 
 **Replay** (leave-one-out, production code): each scorable labelled cycle of a
-device with >= 2 programmes (``devtools/eval.py``'s corpus rules: clone files and
-twin entries dropped, the label keeps another traced cycle) is removed from every
-list with every other stored copy of its trace (same content at stored precision,
-any name, any stored format: ``run_hash``), and the envelope and usual duration of each programme they
+device with >= 2 programmes whose type the manager runs the check on
+(``trigger_rules.trigger_offered``: never a Threshold Device), by
+``devtools/eval.py``'s corpus rules (clone files and twin entries dropped, the
+label keeps another traced cycle) is removed from every list with every other
+stored copy of its trace (same content at stored precision, any name, any stored
+format: ``run_hash``), and the envelope and usual duration of each programme they
 were stored under rebuilt from the others (a fold whose rebuild learns no duration
 for the label is left out), on a store a real ``WashDataManager`` builds from the
 export's options (``eval.fresh_store``). A record whose stored duration is no
@@ -109,11 +111,12 @@ REPO = Path(__file__).resolve().parent.parent
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
-from custom_components.ha_washdata import match_rules  # noqa: E402
+from custom_components.ha_washdata import match_rules, trigger_rules  # noqa: E402
 from custom_components.ha_washdata.const import (  # noqa: E402
     PROGRAM_MISMATCH_MIN_FRACTION,
     PROGRAM_MISMATCH_MIN_MARGIN,
     PROGRAM_MISMATCH_PERSISTENCE,
+    TRIGGER_PROGRAM_MISMATCH,
 )
 
 _EVAL_PATH = REPO / "devtools" / "eval.py"
@@ -249,6 +252,12 @@ def fold_store_data(dev: Any, base: dict, blob: bytes, pos: tuple[str, int],
     return d
 
 
+def mismatch_offered(device_type: Any) -> bool:
+    """Whether the manager runs the check on this device type at all
+    (``manager._schedule_program_mismatch_check`` returns first otherwise)."""
+    return trigger_rules.trigger_offered(TRIGGER_PROGRAM_MISMATCH, device_type)
+
+
 def held_programmes(lists: dict[str, list], drop: Any) -> list[str]:
     """The programmes the records at ``drop`` (list, index) are labelled with."""
     names = {lists[k][m].get("profile_name") for k, m in drop if isinstance(lists[k][m], dict)}
@@ -309,6 +318,8 @@ async def device_folds(dev: Any, base: dict, idxs: list[int]) -> list[dict]:
         drop = {where[id(cyc)], *copies.get(run_hash(pts) or "", ())}
         fd = fold_store_data(dev, base, blob, where[id(cyc)], drop)
         st, mgr = ev.fresh_store(dev, fd, {})
+        if not mismatch_offered(mgr.device_type):
+            return []  # never checked on this type (``replay`` leaves such a device out)
         # The label, and any other programme a copy of the run was stored under.
         for name in held_programmes(lists, drop):
             await st.async_rebuild_envelope(name)
@@ -382,6 +393,9 @@ def replay(corpus: Path, device: str | None = None, max_per_device: int | None =
     # them), the same way the workers load each device (``_device``).
     devices = [usable_device(d) for d in devices]
     devices = [d for d in devices if len(d.labels) >= 2 and (not device or device in d.path)]
+    # Only a device type the manager runs the check on (a Threshold Device never
+    # does), before any fold: its picks are neither scored nor missed.
+    devices = [d for d in devices if mismatch_offered(ev.fresh_store(d, {}, {})[1].device_type)]
     twins = ev.twin_entries(devices)
     devices = [d for d in devices if d.path not in twins]
     targets: dict[str, list[int]] = {}

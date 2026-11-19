@@ -498,3 +498,16 @@ def test_a_fold_keeps_a_distinct_sub_watt_run_and_drops_a_legacy_copy(
     assert "ref-iso" not in ids and "Cotton-0" not in ids
     assert "ref-near" in ids
     assert row["label"] == "Cotton"
+
+
+def test_a_device_type_the_check_never_runs_on_is_left_out(tmp_path: Path) -> None:
+    """PR #529 review: the manager never runs the check on a Threshold Device
+    (``trigger_offered``), so its picks are neither scored nor missed."""
+    doc = _export()
+    doc["entry_data"]["device_type"] = "other"
+    _write(tmp_path, doc)
+    assert pme.replay(tmp_path, max_per_device=2, jobs=1, log=lambda *a, **k: None) == []
+    doc["entry_data"]["device_type"] = "generic"
+    _write(tmp_path, doc)
+    rows = pme.replay(tmp_path, max_per_device=2, jobs=1, log=lambda *a, **k: None)
+    assert [r["dev"] for r in rows] == ["generic", "generic"]
