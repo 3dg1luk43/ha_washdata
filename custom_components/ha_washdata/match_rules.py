@@ -1200,9 +1200,14 @@ class ProgramMismatchState:
     that key: the trigger is sent once and the State sensor keeps showing it.
     ``data_generation`` is the caller's stored-data generation the pending
     ``streak`` was counted on, and ``families`` the profile groups it was counted
-    under (:func:`program_families`); both in memory only, never in ``as_dict``:
-    matches on data an import or undo has since replaced, or read against groups
-    edited since, are no run of evidence.
+    under (:func:`program_families`): matches on data an import or undo has since
+    replaced, or read against groups edited since, are no run of evidence.
+
+    ``as_dict`` (the active-cycle snapshot) carries the outcome, not the pending
+    streak: the data generation is a counter that starts again at every start,
+    so a restored streak could not be shown to be counted on the data and groups
+    it finds, and a crash can follow an import, a group edit or a check in flight
+    that no snapshot saw (PR #529 review). A restart starts the run afresh.
     """
 
     key: Any = None
@@ -1215,19 +1220,19 @@ class ProgramMismatchState:
 
     def as_dict(self) -> dict[str, Any]:
         return {
-            "streak": self.streak,
             "fired": self.fired,
             "looks_like": self.looks_like,
             "margin": self.margin,
         }
 
     def restore(self, raw: Any) -> None:
-        """Take a snapshot's ``as_dict`` back. Malformed values are left at reset."""
+        """Take a snapshot's ``as_dict`` back. Malformed values are left at reset.
+        A pending streak (an older snapshot's ``streak``) is never taken back."""
+        self.streak = 0
+        self.data_generation = None
+        self.families = None
         if not isinstance(raw, dict):
             return
-        streak = raw.get("streak")
-        if isinstance(streak, int) and not isinstance(streak, bool) and streak >= 0:
-            self.streak = streak
         self.fired = raw.get("fired") is True
         looks_like = raw.get("looks_like")
         self.looks_like = looks_like if isinstance(looks_like, str) and looks_like else None

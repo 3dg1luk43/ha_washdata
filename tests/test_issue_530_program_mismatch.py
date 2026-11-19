@@ -152,7 +152,13 @@ def test_the_state_round_trips_a_snapshot() -> None:
     # JSON keeps an oversized integer unbounded: float() of it raises, not inf.
     huge = match_rules.ProgramMismatchState()
     huge.restore({"streak": 2, "fired": True, "looks_like": "Eco", "margin": 10**400})
-    assert huge.as_dict() == {"streak": 2, "fired": True, "looks_like": "Eco", "margin": None}
+    assert huge.as_dict() == {"fired": True, "looks_like": "Eco", "margin": None}
+    # PR #529 review: a pending streak is neither saved nor taken back (an older
+    # snapshot's included), nor the data or groups a live one was counted on.
+    assert "streak" not in state.as_dict()
+    live = match_rules.ProgramMismatchState(streak=4, data_generation=3, families={"A": "G"})
+    live.restore({"streak": 5, "fired": False})
+    assert (live.streak, live.data_generation, live.families) == (0, None, None)
 
 
 # ── The manager, on a real boot ──────────────────────────────────────────────
@@ -664,26 +670,49 @@ async def test_a_pick_that_cannot_be_matched_is_asked_once_per_interval(
         assert match.await_count >= 1
 
 
-async def test_the_snapshot_keeps_the_cadence_of_a_pending_streak(
+async def test_the_snapshot_keeps_the_cadence_not_the_pending_streak(
     hass: HomeAssistant, setup_washdata_entry, freezer
 ) -> None:
-    """A restart one count short of firing: the streak comes back with the trace
-    position of its last check, so the next one still waits a full interval. An
-    older snapshot without the position keeps ``fired`` and drops the streak."""
-    _entry, manager, _sent, state = await _past_half(hass, setup_washdata_entry, freezer)
+    """A restart one count short of firing, with the next check in flight (PR #529
+    review). The trace position of the last check comes back, so the next one
+    still waits a full interval. The streak does not: the check in flight may
+    have been a miss, and saved with its position it was skipped, so the next
+    deficit after the restart completed a run that check would have broken. It
+    starts a run instead. An older snapshot without the position keeps ``fired``."""
+    _entry, manager, sent, state = await _past_half(hass, setup_washdata_entry, freezer)
+    store = manager.profile_store
     state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
-    checked = manager._program_mismatch_last_s  # noqa: SLF001
-    assert checked is not None and checked > 0
-    snap = manager._augment_active_snapshot(manager.detector.get_state_snapshot())  # noqa: SLF001
+    wrong = _result("Synthetics", {"Synthetics": 0.9, "Cotton": 0.5})
+    gate = asyncio.Event()
+    with patch.object(store, "async_match_profile", new=_slow(gate, wrong)):
+        manager._program_mismatch_last_s = None  # noqa: SLF001  (a check is due)
+        manager._schedule_program_mismatch_check()  # noqa: SLF001
+        await asyncio.sleep(0)
+        task = manager._program_mismatch_task  # noqa: SLF001
+        assert task is not None and not task.done()
+        checked = manager._program_mismatch_last_s  # noqa: SLF001
+        assert checked is not None and checked > 0
+        snap = manager._augment_active_snapshot(manager.detector.get_state_snapshot())  # noqa: SLF001
+        task.cancel()  # the restart: the check in flight never lands
+        await hass.async_block_till_done()
     raw = snap["program_mismatch"]
-    assert raw["checked_s"] == checked
+    assert raw["checked_s"] == checked and "streak" not in raw
 
     manager._program_mismatch = match_rules.ProgramMismatchState()  # noqa: SLF001
     manager._program_mismatch_last_s = None  # noqa: SLF001
     manager._restore_program_mismatch(raw)  # noqa: SLF001
     back = manager._program_mismatch_state()  # noqa: SLF001
-    assert back.streak == PROGRAM_MISMATCH_PERSISTENCE - 1
+    assert back.streak == 0
     assert manager._program_mismatch_last_s == checked  # noqa: SLF001
+    # An older snapshot's streak is not taken back either.
+    manager._program_mismatch = match_rules.ProgramMismatchState()  # noqa: SLF001
+    manager._restore_program_mismatch({**raw, "streak": PROGRAM_MISMATCH_PERSISTENCE - 1})  # noqa: SLF001
+    back = manager._program_mismatch_state()  # noqa: SLF001
+    assert back.streak == 0
+    with patch.object(store, "async_match_profile", AsyncMock(return_value=wrong)):
+        await _check(hass, manager, back.key)
+    assert _mismatches(sent) == []
+    assert back.streak == 1 and not back.fired
 
     old = {k: v for k, v in raw.items() if k != "checked_s"}
     for legacy in (old, {**raw, "checked_s": "x"}, {**raw, "checked_s": 10**400}):
@@ -737,26 +766,31 @@ async def test_a_streak_counted_before_a_group_edit_restarts_at_the_next_check(
     assert len(_mismatches(sent)) == 1
 
 
-async def test_a_restored_streak_is_counted_under_the_groups_at_the_restore(
+async def test_a_restart_after_a_group_edit_or_import_starts_the_run_afresh(
     hass: HomeAssistant, setup_washdata_entry, freezer
 ) -> None:
-    """The snapshot brings a pending streak back without the groups it was counted
-    under: it is taken as counted under the groups at the restore, so a group edit
-    before the next check still restarts it."""
+    """PR #529 review: a group edit or an import after the last snapshot write and
+    before a crash. The restore stamped the groups and data it found onto the
+    restored streak, which was counted under the old ones, so one deficit after
+    the restart completed it and sent a false trigger. No streak is restored."""
     _entry, manager, sent, state = await _past_half(hass, setup_washdata_entry, freezer)
     store = manager.profile_store
-    state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
-    snap = manager._augment_active_snapshot(manager.detector.get_state_snapshot())  # noqa: SLF001
-    manager._program_mismatch = match_rules.ProgramMismatchState()  # noqa: SLF001
-    manager._restore_program_mismatch(snap["program_mismatch"])  # noqa: SLF001
-    back = manager._program_mismatch_state()  # noqa: SLF001
-    assert back.streak == PROGRAM_MISMATCH_PERSISTENCE - 1
-    assert await store.create_profile_group("Solo", ["Cotton"])
     wrong = _result("Synthetics", {"Synthetics": 0.9, "Cotton": 0.5})
-    with patch.object(store, "async_match_profile", AsyncMock(return_value=wrong)):
-        await _check(hass, manager, back.key)
-    assert _mismatches(sent) == []
-    assert back.streak == 1
+    for change in ("group", "import"):
+        state = manager._program_mismatch_state()  # noqa: SLF001
+        state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
+        snap = manager._augment_active_snapshot(manager.detector.get_state_snapshot())  # noqa: SLF001
+        if change == "group":
+            assert await store.create_profile_group("Solo", ["Cotton"])
+        else:
+            await store.async_import_data(store.export_data())  # same names and groups
+        manager._program_mismatch = match_rules.ProgramMismatchState()  # noqa: SLF001
+        manager._restore_program_mismatch(snap["program_mismatch"])  # noqa: SLF001
+        back = manager._program_mismatch_state()  # noqa: SLF001
+        with patch.object(store, "async_match_profile", AsyncMock(return_value=wrong)):
+            await _check(hass, manager, back.key)
+        assert _mismatches(sent) == [], change
+        assert back.streak == 1 and not back.fired, change
 
 
 async def test_a_pick_named_like_a_placeholder_is_still_checked(
@@ -798,37 +832,24 @@ async def test_a_pick_named_like_a_placeholder_is_still_checked(
     assert manager.program_mismatch["selected"] == "off"
 
 
-async def test_a_streak_counted_on_replaced_data_is_not_saved(
+async def test_a_restart_keeps_fired_whatever_changed_since(
     hass: HomeAssistant, setup_washdata_entry, freezer
 ) -> None:
-    """PR #529 review: a pending streak counted against profiles an Undo Import
-    or a group edit has since replaced is saved as no streak, or the restore
-    takes it as counted on the data it finds and one match fires the trigger.
-    ``fired`` is saved as it is, so a restart does not send it again."""
+    """``fired`` is saved as it is after an Undo Import or a group edit, so a
+    restart does not send it again; no pending streak is saved with it."""
     _entry, manager, _sent, state = await _past_half(hass, setup_washdata_entry, freezer)
     store = manager.profile_store
     state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
-
-    def saved() -> dict[str, Any]:
-        snap = manager._augment_active_snapshot(manager.detector.get_state_snapshot())  # noqa: SLF001
-        return snap["program_mismatch"]
-
-    assert saved()["streak"] == PROGRAM_MISMATCH_PERSISTENCE - 1
+    state.fired, state.looks_like = True, "Synthetics"
     await store.async_import_data(store.export_data())  # same names and groups
-    raw = saved()
-    assert raw["streak"] == 0
+    assert await store.create_profile_group("Solo", ["Cotton"])
+    snap = manager._augment_active_snapshot(manager.detector.get_state_snapshot())  # noqa: SLF001
+    raw = snap["program_mismatch"]
+    assert "streak" not in raw
+    assert raw["fired"] is True and raw["looks_like"] == "Synthetics"
     manager._program_mismatch = match_rules.ProgramMismatchState()  # noqa: SLF001
     manager._restore_program_mismatch(raw)  # noqa: SLF001
-    assert manager._program_mismatch_state().streak == 0  # noqa: SLF001
-
-    # Counted on the current data, but under groups edited since.
-    state = manager._program_mismatch_state()  # noqa: SLF001
-    state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
-    state.fired, state.looks_like = True, "Synthetics"
-    assert await store.create_profile_group("Solo", ["Cotton"])
-    raw = saved()
-    assert raw["streak"] == 0
-    assert raw["fired"] is True and raw["looks_like"] == "Synthetics"
+    assert manager.program_mismatch["looks_like"] == "Synthetics"
 
 
 def test_a_malformed_group_is_skipped_not_fatal() -> None:
@@ -850,7 +871,9 @@ async def test_a_malformed_group_neither_drops_the_check_nor_fails_its_restore(
     manager._restore_program_mismatch(snap["program_mismatch"])  # noqa: SLF001
     assert manager.program_mismatch["looks_like"] == "Synthetics"
     # Whatever else fails in it, the cycle's restore goes on without the check.
-    with patch.object(match_rules, "program_families", side_effect=RuntimeError("boom")):
+    with patch.object(
+        match_rules.ProgramMismatchState, "restore", side_effect=RuntimeError("boom")
+    ):
         manager._restore_program_mismatch(snap["program_mismatch"])  # noqa: SLF001
     assert manager.program_mismatch is None
 

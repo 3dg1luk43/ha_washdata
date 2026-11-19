@@ -1732,11 +1732,13 @@ class WashDataManager:
         """Take a snapshot's check back for the restored pick (#530), so a
         restart neither repeats the trigger nor forgets the mismatch.
 
-        The pending streak comes back with the trace position it was last
-        checked at, so the next check still waits a full match interval (PR
-        #529 review). A snapshot without that position keeps ``fired`` and
-        drops the streak. Never raises: the check is optional, the cycle it
-        rides on is restored whatever it holds (a failure starts it afresh)."""
+        A pending streak does not come back (``ProgramMismatchState.as_dict``):
+        nothing shows it was counted on the data and groups the restore finds,
+        nor that the check in flight at the snapshot would not have broken it
+        (PR #529 review). The trace position of the last check does, so the
+        next one waits a match interval as before. Never raises: the check is
+        optional, the cycle it rides on is restored whatever it holds (a
+        failure starts it afresh)."""
         try:
             self._restore_program_mismatch_state(raw)
         except Exception:  # pylint: disable=broad-exception-caught
@@ -1751,8 +1753,6 @@ class WashDataManager:
         if state is None:
             return
         state.restore(raw)
-        state.data_generation = getattr(self.profile_store, "_data_generation", 0)
-        state.families = match_rules.program_families(self.profile_store.get_profile_groups())
         checked = raw.get("checked_s")
         try:
             # An unbounded JSON int (10**400) raises here rather than reading inf.
@@ -1765,8 +1765,6 @@ class WashDataManager:
             position = math.nan
         if math.isfinite(position) and position >= 0:
             self._program_mismatch_last_s = position
-        else:
-            state.streak = 0
 
     def _program_mismatch_snapshot(self) -> dict[str, Any] | None:
         """The check for the active-cycle snapshot, or None. Never raises."""
@@ -1774,25 +1772,12 @@ class WashDataManager:
             state = getattr(self, "_program_mismatch", None)
             if state is None or state.key is None or state.key != self._program_mismatch_key():
                 return None
-            saved = state.as_dict()
-            # A pending streak counted on data an import or undo has since
-            # replaced, or under groups edited since, is no run of evidence; the
-            # restore would take it as counted on the data it finds (PR #529
-            # review). ``fired`` stays, so a restart does not send it again.
-            if (
-                state.data_generation is not None
-                and state.data_generation != getattr(self.profile_store, "_data_generation", 0)
-            ) or (
-                state.families is not None
-                and state.families
-                != match_rules.program_families(self.profile_store.get_profile_groups())
-            ):
-                saved["streak"] = 0
             return {
                 "program": state.key[2],
-                **saved,
-                # The stored trace's span at the last check: the cadence the
-                # streak was counted on (``_program_mismatch_last_s``).
+                # ``fired`` and what it found, so a restart does not send it again.
+                **state.as_dict(),
+                # The stored trace's span at the last check: the cadence
+                # (``_program_mismatch_last_s``).
                 "checked_s": self._program_mismatch_last_s,
             }
         except Exception:  # pylint: disable=broad-exception-caught
