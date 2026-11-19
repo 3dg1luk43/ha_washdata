@@ -224,3 +224,21 @@ async def test_another_appliance_s_history_does_not_classify_local_cycles(
     )
     assert SETTINGS_CHANGELOG_IMPORTED_KEY not in store.get_settings_changelog()[0]
     assert _advisory() is not None
+
+
+async def test_a_wholesale_import_of_history_without_cycles_marks_it_foreign(
+    hass: Any, setup_washdata_entry: Any
+) -> None:
+    """Review of PR #529: a wholesale import that brings a settings history but no
+    cycles keeps the local cycles; the payload's Stop rows are not what they ended
+    under, so they are marked like the selective import's."""
+    from custom_components.ha_washdata.const import DOMAIN, SETTINGS_CHANGELOG_IMPORTED_KEY  # noqa: PLC0415
+
+    entry = await setup_washdata_entry()
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    store._data["past_cycles"] = [{"id": "local", "profile_name": "A", "status": "completed",  # noqa: SLF001
+                                   "duration": 3600.0, "power_data": [[0, 100.0], [3600, 0.0]]}]
+    row = {"key": "stop_threshold_w", "old": 6.0, "new": 2.0, "timestamp": "2026-11-01T10:00:00+00:00"}
+    await store.async_import_data({"version": 19, "data": {"profiles": {"A": {}}, "settings_changelog": [row]}})
+    rows = store.get_settings_changelog()
+    assert rows and all(r.get(SETTINGS_CHANGELOG_IMPORTED_KEY) for r in rows if r.get("key") == "stop_threshold_w")

@@ -12610,6 +12610,18 @@ class ProfileStore:
             self._logger.info(
                 "Import payload lacks %s; keeping this device's", ", ".join(sorted(kept))
             )
+        # A settings history brought without the cycles it describes (the local
+        # ones are kept) is another appliance's to these cycles, as in the
+        # selective import: visible, but no Stop the standby advisory reads.
+        if (
+            "past_cycles" in kept
+            and isinstance(data_dict.get("settings_changelog"), list)
+            and str(meta.get("entry_id") or "") != str(self.entry_id)
+        ):
+            data_dict["settings_changelog"] = [
+                {**row, SETTINGS_CHANGELOG_IMPORTED_KEY: True} if isinstance(row, dict) else row
+                for row in data_dict["settings_changelog"]
+            ]
         self._data = {**data_dict, **kept}
         self._data_generation = getattr(self, "_data_generation", 0) + 1
         # The payload's envelopes were built without any cycle list kept above, so
