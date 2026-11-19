@@ -803,7 +803,14 @@ class LearningManager:
         if epoch != self._cadence_epoch:
             # A wipe or Undo Import replaced the history it was measured into.
             return
-        self._store_finished_summaries()
+        if self._store_finished_summaries():
+            # It may land after the cycle-end write: saved, or a restart with no
+            # later write loses it (PR #529 review). Inside the cycle-end burst
+            # this joins its one write (``coalesce_saves``).
+            try:
+                await self.profile_store.async_save()
+            except Exception:  # pylint: disable=broad-exception-caught
+                self._logger.debug("Could not save the cycle cadence", exc_info=True)
         if not self._summaries_in_flight and self._operational_pass_waiting:
             self.run_due_operational_pass()
 

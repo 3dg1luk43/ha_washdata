@@ -205,3 +205,32 @@ async def test_summaries_are_stored_in_cycle_order(
         await hass.async_block_till_done()
     assert store.get_cadence_summaries(new_sensor) == [[5.0, 5.0]]
     assert store.get_cadence_summaries(POWER) == []
+
+
+async def test_a_summary_that_lands_after_the_cycle_end_write_is_saved(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_storage: dict[str, Any]
+) -> None:
+    """PR #529 review: the summary was only kept in memory, written by whatever
+    save came next; with none before a restart it was lost. Outside the cycle-end
+    burst it is written at once, inside it with the burst's one write."""
+    from custom_components.ha_washdata.const import STORAGE_KEY  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(power_sensor=POWER, options=OPTIONS)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    lm, store = manager.learning_manager, manager.profile_store
+    key = f"{STORAGE_KEY}.{entry.entry_id}"
+
+    def on_disk() -> Any:
+        return (hass_storage.get(key) or {}).get("data", {}).get("cadence_summaries")
+
+    _hold_a_long_cycle(lm)
+    assert lm.close_cycle_cadence(_CLEAN_END)
+    await hass.async_block_till_done()
+    assert on_disk() == [[2.0, 2.0]]
+
+    store.coalesce_saves()  # a cycle end's burst: debounced, flushed once
+    _hold_a_long_cycle(lm)
+    assert lm.close_cycle_cadence(_CLEAN_END)
+    await hass.async_block_till_done()
+    await store.async_flush_saves()
+    assert on_disk() == [[2.0, 2.0], [2.0, 2.0]]
