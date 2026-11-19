@@ -222,3 +222,14 @@ def test_no_pair_under_the_standby_the_cycles_show() -> None:
     start = round(adv["low_w"] * STEADY_LOAD_START_RATIO, 1)  # ~50 W
     assert sug[CONF_START_THRESHOLD_W]["value"] == start
     assert sug[CONF_STOP_THRESHOLD_W]["value"] == round(start * STEADY_LOAD_STOP_RATIO, 1)
+
+
+def test_the_standby_margin_follows_a_kw_sensor_read_raw() -> None:
+    """Review of PR #529: the 0.2 W standby margin was added to kilowatt values, so
+    a kW steady load (0.1 kW running, 0.002 kW idle) never got its correction."""
+    adv = {"low_w": 0.1, "start_w": 0.12, "stop_w": 0.08, "cycles": 8, "standby_w": 0.002}
+    sug = steady_load_threshold_suggestions(adv)
+    assert sug and sug[CONF_START_THRESHOLD_W]["value"] < 0.1
+    # Watt values keep the watt margin.
+    assert steady_load_threshold_suggestions({**adv, "low_w": 100.0, "start_w": 120.0,
+                                              "stop_w": 80.0, "standby_w": 39.9}) == {}

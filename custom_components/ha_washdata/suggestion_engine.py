@@ -1350,9 +1350,10 @@ def steady_load_threshold_suggestions(adv: dict[str, Any] | None) -> dict[str, A
         else float(adv["stop_w"])
     )
     standby = _num(adv.get("standby_w"))
-    if standby is not None and stop_after < max(
-        standby * STANDBY_FLOOR_RATIO, standby + STANDBY_FLOOR_MIN_MARGIN_W
-    ):
+    # The margin is in watts; a running level under 1 is a kW sensor read raw
+    # (``power_unit_scale``), whose values are kilowatts (review of PR #529).
+    margin = STANDBY_FLOOR_MIN_MARGIN_W if low >= 1.0 else STANDBY_FLOOR_MIN_MARGIN_W / 1000.0
+    if standby is not None and stop_after < max(standby * STANDBY_FLOOR_RATIO, standby + margin):
         return {}
     params = {"low": f"{low:.0f}", "start": f"{float(adv['start_w']):g}"}
     entry = {
