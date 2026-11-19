@@ -3150,6 +3150,12 @@ class WashDataManager:
         # mean power elsewhere (see analysis.stage4_energy_mode).
         self.profile_store.energy_mode = analysis.stage4_energy_mode(self.device_type)
         self.profile_store.device_type = self.device_type
+        # An entry that becomes a dishwasher here skipped the one-time #531 rebuild
+        # at setup (not a dishwasher then): run it now, before its first cycle reads
+        # the old drying estimates (PR #529 review). A no-op for any other type, once
+        # the marker is set, or while one runs.
+        if previous_device_type != self.device_type and not self._is_shutdown:
+            self.async_schedule_cut_short_rebuild()
         if _stop_level_changed:
             # A new stop threshold can show where an imported dishwasher cycle's
             # activity really ended (#518: a 1.7 W standby above a 1.2 W stop hid it).

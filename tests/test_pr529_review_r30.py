@@ -50,3 +50,37 @@ async def test_a_failed_manual_analysis_still_pushes_its_withdrawal(
     assert res["success"] is False and res["error"]["code"] == "unknown_error"
     assert CONF_WATCHDOG_INTERVAL not in store.get_suggestions()
     assert hass.states.get(entity_id).state == "0"
+
+
+async def test_an_entry_that_becomes_a_dishwasher_runs_the_cut_short_rebuild(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """A washer entry skips the one-time #531 rebuild at setup; a later device type
+    change to dishwasher reloads in place and never ran it, so its first cycle read
+    the old drying estimates."""
+    from unittest.mock import AsyncMock  # noqa: PLC0415
+
+    entry = await setup_washdata_entry()
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store = manager.profile_store
+    await hass.async_block_till_done()
+    assert store.cut_short_rebuild_pending()  # skipped: not a dishwasher
+
+    real = store.async_rebuild_for_cut_short_rule
+    with patch.object(
+        store, "async_rebuild_for_cut_short_rule", AsyncMock(side_effect=real)
+    ) as rebuild:
+        hass.config_entries.async_update_entry(
+            entry, options={**entry.options, "device_type": "dishwasher"}
+        )
+        await hass.async_block_till_done()
+        assert manager.device_type == "dishwasher"
+        assert rebuild.await_count == 1
+        assert not store.cut_short_rebuild_pending()
+
+        # Another reload, same type: the marker is set, nothing runs again.
+        hass.config_entries.async_update_entry(
+            entry, options={**entry.options, "off_delay": 200}
+        )
+        await hass.async_block_till_done()
+    assert rebuild.await_count == 1
