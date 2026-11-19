@@ -479,10 +479,13 @@ class LearningManager:
         The trace scan runs in the executor against a snapshot; an entry is only
         withdrawn if it is still the one that was judged. A scan that fails reads
         as nothing to withdraw, unless ``strict``: then it raises
-        :class:`EndGateCheckError` (the manual analysis, PR #529 review).
+        :class:`EndGateCheckError` (the manual analysis, PR #529 review). So does
+        a strict check whose set kept changing while it was judged (a mute, a
+        restore): the manual analysis must not report a set no check judged.
         """
-        # A store replaced meanwhile (Undo Import, a restore) is judged again on
-        # its own history; bounded, so a store that keeps changing cannot spin.
+        # A store replaced meanwhile (Undo Import, a restore), or a set a mute
+        # changed, is judged again as it now stands; bounded, so a store that keeps
+        # changing cannot spin.
         for _attempt in range(3):
             stored = {
                 k: dict(v) for k, v in (self.profile_store.get_suggestions() or {}).items()
@@ -508,10 +511,13 @@ class LearningManager:
                 return
             if getattr(self.profile_store, "_data_generation", 0) != data_generation:
                 continue
-            self._withdraw_joint_drops(stored, drops or [])
-            return
+            if self._withdraw_joint_drops(stored, drops or []):
+                return
+        if strict:
+            raise EndGateCheckError("the stored set changed during every joint end-gate check")
 
-    def _withdraw_joint_drops(self, judged: dict[str, Any], drops: list[str]) -> None:
+    def _withdraw_joint_drops(self, judged: dict[str, Any], drops: list[str]) -> bool:
+        """Withdraw ``drops`` from the stored set; False when it is not the one judged."""
         current = self.profile_store.get_suggestions() or {}
         # The verdict holds only for the set it judged: if any pending end-gate
         # value moved meanwhile, leave everything for a check of the new set.
@@ -519,14 +525,14 @@ class LearningManager:
             was = judged.get(key, {}).get("value") if isinstance(judged.get(key), dict) else None
             now = current.get(key, {}).get("value") if isinstance(current.get(key), dict) else None
             if was != now:
-                return
+                return False
         gone = [
             key for key in drops
             if isinstance(current.get(key), dict)
             and current[key].get("value") == judged.get(key, {}).get("value")
         ]
         if not gone:
-            return
+            return True
         self._logger.info(
             "Suggestion(s) withdrawn: applied together with the rest they would end "
             "own cycles inside a pause the settings in force bridge: %s",
@@ -535,6 +541,7 @@ class LearningManager:
         for key in gone:
             self.profile_store.delete_suggestion(key)
         self.suggestion_engine.apply_suggestions({}, changed=True)
+        return True
 
     def _spawn(self, coro: Coroutine[Any, Any, Any]) -> Any:
         """Start a background task through the manager's tracked spawner."""

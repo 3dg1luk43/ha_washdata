@@ -1444,3 +1444,51 @@ def test_a_window_holding_one_reading_can_close_the_gate() -> None:
 
     # One reading 300 s into a pause, a 200 s window: only it is inside.
     assert _detector_gate_need([300.0], [40.0], 0.0, 200.0, 0.01) == 300.0
+
+
+async def test_a_set_a_mute_changed_is_judged_again_before_strict_returns(mock_hass: Any) -> None:
+    """PR #529 review: a mute during the manual analysis's joint check changed the
+    set without moving either generation; the stale verdict was discarded and the
+    check returned, so the analysis reported success for a set nothing judged. It is
+    judged again, and a set that keeps changing is reported as unchecked."""
+    from types import SimpleNamespace  # noqa: PLC0415
+    from unittest.mock import AsyncMock  # noqa: PLC0415
+
+    import pytest  # noqa: PLC0415
+
+    from custom_components.ha_washdata.learning import EndGateCheckError  # noqa: PLC0415
+
+    mock_hass.async_add_executor_job = AsyncMock(side_effect=lambda fn, *a, **k: fn(*a, **k))
+    store = _Store()
+    lm = _learning(mock_hass, store, {})
+    store.set_suggestion(CONF_END_ENERGY_THRESHOLD, 0.4, reason="r", flags={"owner": OWNER_BATCH})
+    store.set_suggestion(CONF_OFF_DELAY, 1800, reason="r", flags={"owner": OWNER_OPERATIONAL})
+    judged: list[set[str]] = []
+
+    def _drops(stored: dict[str, Any], strict: bool = False) -> list[str]:
+        judged.append(set(stored))
+        if len(judged) == 1:
+            store.delete_suggestion(CONF_OFF_DELAY)  # muted meanwhile
+            return []
+        return [CONF_END_ENERGY_THRESHOLD]  # the raise alone splits a pause
+
+    lm.suggestion_engine = SimpleNamespace(
+        for_job=lambda: SimpleNamespace(joint_end_gate_drops=_drops),
+        apply_suggestions=lambda *a, **k: None,
+    )
+    await lm._enforce_joint_end_gate(strict=True)  # noqa: SLF001
+    assert judged == [{CONF_END_ENERGY_THRESHOLD, CONF_OFF_DELAY}, {CONF_END_ENERGY_THRESHOLD}]
+    assert CONF_END_ENERGY_THRESHOLD not in store.get_suggestions()
+
+    # A set that changes during every check is no checked set.
+    store.set_suggestion(CONF_END_ENERGY_THRESHOLD, 0.4, reason="r", flags={"owner": OWNER_BATCH})
+
+    def _churn(stored: dict[str, Any], strict: bool = False) -> list[str]:
+        value = store.get_suggestions()[CONF_END_ENERGY_THRESHOLD]["value"]
+        store.set_suggestion(CONF_END_ENERGY_THRESHOLD, value + 0.1, reason="r")
+        return []
+
+    lm.suggestion_engine.for_job = lambda: SimpleNamespace(joint_end_gate_drops=_churn)
+    with pytest.raises(EndGateCheckError):
+        await lm._enforce_joint_end_gate(strict=True)  # noqa: SLF001
+    await lm._enforce_joint_end_gate()  # noqa: SLF001 - background: never raises
