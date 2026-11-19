@@ -2480,6 +2480,7 @@ class HaWashdataPanel extends HTMLElement {
     this._matchDebugAppliedSeq = 0;
     this._recStateReqSeq = 0;
     this._recStateAppliedSeq = 0;
+    this._recStatePending = null;  // {eid, seq}: a transition's read not yet landed
     this._cycles = [];
     this._refCycles = [];  // imported store recordings (shown alongside real cycles)
     this._shareableCycles = [];  // get_shareable_cycles result for the share-device tree
@@ -3420,8 +3421,10 @@ class HaWashdataPanel extends HTMLElement {
           // _recState, which is null on first load and would otherwise never be
           // populated -- leaving the widget showing "Start Recording" during an
           // active recording (#313).
+          // A Start/Stop/Discard/Process whose own read failed is read again too.
           const row = shownRow();
-          if (this._canEdit() && row && row.recording && await this._fetchRecState(dev.entry_id)) {
+          const recPending = !!(this._recStatePending && this._recStatePending.eid === dev.entry_id);
+          if (this._canEdit() && row && (row.recording || recPending) && await this._fetchRecState(dev.entry_id)) {
             liveApplied = true;
           }
           // The Overview's waiting review question, in the background so it never
@@ -4507,12 +4510,19 @@ class HaWashdataPanel extends HTMLElement {
   // ordered by its own requests: a slower answer to an older read (a poll's, sent
   // before Stop) never replaces a newer one, and none lands under another
   // appliance. True when this answer was applied; a failed read keeps the last.
-  async _fetchRecState(eid) {
+  // `transition` is the read after Start, Stop, Discard or Process: until a read
+  // sent at or after it lands, the poll retries it whatever dev.recording says
+  // (PR #529 review). Without that, a failed read after Stop kept offering Stop
+  // (the poll reads only while recording) and one after Discard kept Process.
+  async _fetchRecState(eid, transition = false) {
     const seq = ++this._recStateReqSeq;
+    if (transition) this._recStatePending = { eid, seq };
     try {
       const rs = await this._ws({ type: `${_DOMAIN}/get_recording_state`, entry_id: eid });
       if (!this._isActiveEntry(eid) || seq < this._recStateAppliedSeq) return false;
       this._recState = rs; this._recStateAppliedSeq = seq;
+      const p = this._recStatePending;
+      if (p && p.eid === eid && seq >= p.seq) this._recStatePending = null;
       return true;
     } catch (_) { return false; }
   }
@@ -14547,14 +14557,14 @@ class HaWashdataPanel extends HTMLElement {
       );
 
     } else if (a === 'rec-start') {
-      this._ws({ type: `${_DOMAIN}/start_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_started', {}, 'Recording started')); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast(this._tText('toast.start_failed', {error: e.message || e}, 'Start failed: ' + (e.message || e)), 'error'));
+      this._ws({ type: `${_DOMAIN}/start_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_started', {}, 'Recording started')); return this._fetchRecState(eid, true); }).then(() => this._render()).catch(e => this._showToast(this._tText('toast.start_failed', {error: e.message || e}, 'Start failed: ' + (e.message || e)), 'error'));
     } else if (a === 'rec-stop') {
-      this._ws({ type: `${_DOMAIN}/stop_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_stopped', {}, 'Recording stopped')); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast(this._tText('toast.stop_failed', {error: e.message || e}, 'Stop failed: ' + (e.message || e)), 'error'));
+      this._ws({ type: `${_DOMAIN}/stop_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_stopped', {}, 'Recording stopped')); return this._fetchRecState(eid, true); }).then(() => this._render()).catch(e => this._showToast(this._tText('toast.stop_failed', {error: e.message || e}, 'Stop failed: ' + (e.message || e)), 'error'));
     } else if (a === 'rec-process-open') {
       this._fetchProfiles(eid).then(() => { this._modal = { type: 'process-recording' }; this._render(); });
     } else if (a === 'rec-discard') {
       this._modal = { type: 'confirm', title: this._t('modal.discard_recording_title', {}, 'Discard Recording'), message: this._t('modal.discard_recording_msg', {}, 'Discard the saved recording? This cannot be undone.'), okLabel: this._t('btn.discard', {}, 'Discard'),
-        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/discard_recording`, entry_id: eid }); this._showToast(this._t('toast.recording_discarded', {}, 'Recording discarded')); await this._fetchRecState(eid); } catch (e) { this._showToast(this._tText('toast.discard_failed', {error: e.message || e}, 'Discard failed: ' + (e.message || e)), 'error'); } } };
+        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/discard_recording`, entry_id: eid }); this._showToast(this._t('toast.recording_discarded', {}, 'Recording discarded')); await this._fetchRecState(eid, true); } catch (e) { this._showToast(this._tText('toast.discard_failed', {error: e.message || e}, 'Discard failed: ' + (e.message || e)), 'error'); } } };
       this._render();
 
     } else if (a === 'fb-confirm' || a === 'fb-pick' || a === 'fb-ignore') {
@@ -15758,7 +15768,7 @@ class HaWashdataPanel extends HTMLElement {
       const tail = parseFloat(sr.getElementById('wd-pr-tail')?.value || 0);
       this._modal = null;
       if (!profileName) { this._showToast(this._t('msg.toast_profile_name_required', {}, 'Profile name is required'), 'error'); this._render(); return; }
-      try { await this._ws({ type: `${_DOMAIN}/process_recording`, entry_id: eid, profile_name: profileName, save_mode: mode, head_trim: head, tail_trim: tail }); this._showToast(this._t('toast.recording_saved', {}, 'Recording saved to profile')); await this._fetchRecState(eid); await this._fetchProfiles(eid); }
+      try { await this._ws({ type: `${_DOMAIN}/process_recording`, entry_id: eid, profile_name: profileName, save_mode: mode, head_trim: head, tail_trim: tail }); this._showToast(this._t('toast.recording_saved', {}, 'Recording saved to profile')); await this._fetchRecState(eid, true); await this._fetchProfiles(eid); }
       catch (e) { this._showToast(this._tText('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
       this._render();
     } else if (action === 'correct-fb-ok' && eid) {
