@@ -12939,6 +12939,15 @@ class ProfileStore:
                             "store_uploaded_at": src_meta.get("store_uploaded_at"),
                             "sampling_interval": c.get("sampling_interval"),
                             SYNTHETIC_OFFSETS_KEY: c.get(SYNTHETIC_OFFSETS_KEY),
+                            # A trim or edit carried by an exported reference copy,
+                            # under the real-cycles path's device gate (review of
+                            # PR #529): dropped, a re-import loses the pin that
+                            # keeps the #531 cut-off vote off the corrected length.
+                            **(
+                                {k: src_meta.get(k) for k in ("trim", "edited")}
+                                if device_type_match
+                                else {}
+                            ),
                         },
                         id_pool=ref_id_pool,
                     )
