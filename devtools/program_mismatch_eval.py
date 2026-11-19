@@ -18,13 +18,13 @@ usual duration elapsed). This replays that on the corpus.
 **Replay** (leave-one-out, production code): each scorable labelled cycle of a
 device with >= 2 programmes (``devtools/eval.py``'s corpus rules: clone files and
 twin entries dropped, the label keeps another traced cycle) is removed from every
-list with every other stored copy of its trace (same content, any name), and the
-envelope and usual duration of each programme they were stored under rebuilt
-from the others (a fold whose rebuild learns no duration for the label is left
-out), on a store a real ``WashDataManager`` builds from the export's options
-(``eval.fresh_store``). A record whose stored duration is no finite number is left
-out of every list. A check runs where the manager schedules one
-(``check_prefixes``): on the first recorded reading at least one
+list with every other stored copy of its trace (same content, any name, any stored
+format: ``run_hash``), and the envelope and usual duration of each programme they
+were stored under rebuilt from the others (a fold whose rebuild learns no duration
+for the label is left out), on a store a real ``WashDataManager`` builds from the
+export's options (``eval.fresh_store``). A record whose stored duration is no
+finite number is left out of every list. A check runs where the manager schedules
+one (``check_prefixes``): on the first recorded reading at least one
 ``profile_match_interval`` (the device's own, 300 s by default) after the last
 check, strictly before the recorded end. A stretch without a reading runs none, so
 a silent plug never feeds the persistence rule one unchanged prefix several times.
@@ -254,15 +254,22 @@ def held_programmes(lists: dict[str, list], drop: Any) -> list[str]:
     return sorted(n for n in names if isinstance(n, str) and n)
 
 
-def stored_copies(lists: dict[str, list], known: dict[int, str | None]) -> dict[str, list[tuple[str, int]]]:
-    """Every list position per trace content (``eval.trace_hash``; ``known``: the
-    hashes the loader computed, by object id), so a fold drops each stored copy of
-    the held-out run, under any name and in any list (PR #529 review: a second copy
-    trained the rebuild on the trace it then scored)."""
+def run_hash(pts: list) -> str | None:
+    """A run's trace content from its ``eval.query_points`` (``eval.trace_hash``'s
+    1 s / 1 W rounding), so every stored format of one run agrees: ``trace_hash``
+    reads the stored rows and has none for legacy ``(iso_str, power)`` ones."""
+    return ev.trace_hash({"power_data": pts}) if pts else None
+
+
+def stored_copies(lists: dict[str, list]) -> dict[str, list[tuple[str, int]]]:
+    """Every list position per trace content (``run_hash``), so a fold drops each
+    stored copy of the held-out run, under any name, in any list and any stored
+    format (PR #529 review: a second copy trained the rebuild on the trace it then
+    scored)."""
     out: dict[str, list[tuple[str, int]]] = defaultdict(list)
     for key, cs in lists.items():
         for m, c in enumerate(cs):
-            h = known[id(c)] if id(c) in known else (ev.trace_hash(c) if isinstance(c, dict) else None)
+            h = run_hash(ev.query_points(c)) if isinstance(c, dict) else None
             if h:
                 out[h].append((key, m))
     return out
@@ -277,7 +284,7 @@ async def device_folds(dev: Any, base: dict, idxs: list[int]) -> list[dict]:
     lists = {key: list(dev.data.get(key) or []) for key, _ in ev.LISTS}
     where = {id(c): (key, j) for key, cs in lists.items() for j, c in enumerate(cs)}
     blob = pickle.dumps(lists, protocol=pickle.HIGHEST_PROTOCOL)
-    copies = stored_copies(lists, {id(c): h for (c, _e), h in zip(dev.cycles, dev.hashes)})
+    copies = stored_copies(lists)
     ids = ev.fold_ids(dev)
     aliases = ev.alias_classes(dev)
     rows: list[dict] = []
@@ -288,7 +295,7 @@ async def device_folds(dev: Any, base: dict, idxs: list[int]) -> list[dict]:
         dur = recorded_duration(cyc, pts)
         if len(pts) < ev.MIN_TRACE_POINTS or dur is None or id(cyc) not in where:
             continue
-        drop = {where[id(cyc)], *copies.get(dev.hashes[i] or "", ())}
+        drop = {where[id(cyc)], *copies.get(run_hash(pts) or "", ())}
         fd = fold_store_data(dev, base, blob, where[id(cyc)], drop)
         st, mgr = ev.fresh_store(dev, fd, {})
         # The label, and any other programme a copy of the run was stored under.

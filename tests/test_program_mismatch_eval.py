@@ -401,3 +401,53 @@ def test_a_fold_drops_every_stored_copy_of_the_held_out_run(tmp_path: Path, monk
     (row,) = pme._job_folds((path, base, [next(
         k for k, (c, _e) in enumerate(dev.cycles) if c["id"] == "Synthetics-1")]))
     assert row["durations"]["SynthAlias"] == 2400.0
+
+
+def _as_iso(cyc: dict) -> dict:
+    """``cyc`` with its trace in the legacy ``(iso_str, power)`` rows."""
+    from datetime import datetime, timedelta
+
+    start = datetime.fromisoformat(cyc["start_time"])
+    rows = [[(start + timedelta(seconds=t)).isoformat(), p] for t, p in cyc["power_data"]]
+    return dict(cyc, power_data=rows)
+
+
+@pytest.mark.parametrize(
+    ("held_iso", "copy_iso"), [(True, False), (False, True), (True, True)],
+    ids=["iso-held-numeric-copy", "numeric-held-iso-copy", "both-iso"],
+)
+def test_a_fold_drops_a_stored_copy_in_any_format(
+    tmp_path: Path, monkeypatch, held_iso: bool, copy_iso: bool
+) -> None:
+    """PR #529 review: copies were matched on ``eval.trace_hash``, which has none for
+    legacy ``(iso_str, power)`` rows, so a copy in the other format (or two legacy
+    ones) stayed in the store the held-out run was scored against."""
+    doc = _export()
+    past = doc["data"]["past_cycles"]
+    k = next(j for j, c in enumerate(past) if c["id"] == "Cotton-0")
+    twin = dict(copy.deepcopy(past[k]), id="ref-cotton")
+    doc["data"]["reference_cycles"] = [_as_iso(twin) if copy_iso else twin]
+    if held_iso:
+        past[k] = _as_iso(past[k])
+    path = _write(tmp_path, doc)
+    pme._worker_init(str(tmp_path))
+    dev = pme._device(path)
+    _, base = pme._job_base(path)
+    stores: list[dict] = []
+    real = pme.ev.fresh_store
+
+    def spy(dev_, data, override):
+        stores.append(data)
+        return real(dev_, data, override)
+
+    def run(c: dict) -> list[list[float]]:
+        return [[round(t), round(p)] for t, p in pme.ev.query_points(c)]
+
+    monkeypatch.setattr(pme.ev, "fresh_store", spy)
+    i = next(j for j, (c, e) in enumerate(dev.cycles) if c["id"] == "Cotton-0" and e == "past")
+    held = run(dev.cycles[i][0])
+    assert held == run(twin)
+    pme._job_folds((path, base, [i]))
+    (fold,) = stores
+    kept = [c["id"] for key, _ in pme.ev.LISTS for c in fold.get(key) or [] if run(c) == held]
+    assert kept == []
