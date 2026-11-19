@@ -118,3 +118,48 @@ async def test_foreign_stop_rows_do_not_evict_the_last_local_one(
     log = store.get_settings_changelog()
     assert len(log) == store.SETTINGS_CHANGELOG_MAX + 1  # the newest 50, then the local row
     assert stop_threshold_changes(log) == [(t0, 5.0)]
+
+
+def _reference_export(device_type: str) -> dict[str, Any]:
+    """An export holding one reference copy of a 3,000 s run corrected to 3,300 s."""
+    trace = [[60.0 * i, 1800.0 if i < 10 else 120.0] for i in range(51)]
+    ref = {
+        "id": "r1", "profile_name": "ECO", "duration": 3000.0, "manual_duration": 3300.0,
+        "status": "completed", "start_time": "2026-01-01T10:00:00+00:00",
+        "power_data": trace, "meta": {"source": "store:abc"},
+    }
+    return {
+        "version": 19,
+        "device_fingerprint": {"device_type": device_type},
+        "data": {"profiles": {"ECO": {"avg_duration": 3300.0}}, "past_cycles": [],
+                 "reference_cycles": [ref]},
+        "entry_data": {}, "entry_options": {},
+    }
+
+
+async def test_a_reimported_reference_copy_keeps_its_length_correction(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """The payload's reference_cycles path dropped ``manual_duration`` (the real
+    cycles path carries it): the rebuild read 3,000 s and the run lost the pin
+    that keeps it out of the #531 cut-off vote. Another device type's correction
+    is not this device's, as for the trim and edit markers."""
+    entry = await setup_washdata_entry(device_type="dishwasher")
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    await store.async_import_data_selective(
+        _reference_export("dishwasher"),
+        selection={"categories": ["profiles", "reference_cycles"]},
+        local_device_type="dishwasher",
+    )
+    ref = store.get_reference_cycles()[0]
+    assert ref.get("manual_duration") == 3300.0
+    assert store.profile_trusted_min_duration("ECO") == 3300.0
+
+    other = await setup_washdata_entry("Dishwasher 2", device_type="dishwasher")
+    store2 = hass.data[DOMAIN][other.entry_id].profile_store
+    await store2.async_import_data_selective(
+        _reference_export("washing_machine"),
+        selection={"categories": ["profiles", "reference_cycles"]},
+        local_device_type="dishwasher",
+    )
+    assert "manual_duration" not in store2.get_reference_cycles()[0]
