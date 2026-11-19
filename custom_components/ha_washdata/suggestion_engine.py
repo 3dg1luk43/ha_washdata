@@ -1031,6 +1031,13 @@ def _tail_settled_w_uncached(cycle: dict[str, Any], raw: list[Any], peak: float)
         # An ISO-stamped legacy row: normalised, its tail weighs the same as an
         # offset trace's (PR #529 review), not the last sample alone.
         tail = _kept_tail(_cycle_readings(cycle), work_w, synthetic) or []
+    return _settled_level_w(tail)
+
+
+def _settled_level_w(tail: list[tuple[float, float]]) -> float | None:
+    """The level ``tail`` held for at least ``_TAIL_SETTLED_FRACTION`` of its time,
+    each reading held until the next (an outage-sized gap carries no weight).
+    None with fewer than two timed readings."""
     max_gap_s = _MAX_PAUSE_GAP_H * 3600
     vals: list[float] = []
     weights: list[float] = []
@@ -1515,8 +1522,15 @@ def start_above_running(
         start_w   the start threshold
         stop_w    the stop threshold
         standby_w the level those cycles idle at under the stop threshold (the
-                  median of each one's readings there, from at least two cycles
-                  with three such readings), None when they show none
+                  median over at least two cycles of each one's level: the
+                  median of its readings there, from three of them, or where
+                  its kept tail settled after its last running reading, from
+                  two and not on a power end, whichever is higher), None when
+                  they show none
+
+    The tail is read on its own because a lead-in outnumbers it: six 0 W
+    readings before the run put the median at 0 W under a 60 W standby the
+    cycle settled at after it (PR #529 review).
 
     Pure statistics, executor-safe, never raises.
     """
@@ -1536,8 +1550,18 @@ def start_above_running(
             readings = [(o, p) for o, p in _cycle_readings(cycle) if offset_key(o) not in synthetic]
             running = [p for _o, p in readings if p >= stop and p > 0]
             idle = [p for _o, p in readings if 0 <= p < stop]
-            if len(idle) >= 3:
-                idles.append(float(np.median(idle)))
+            levels = [float(np.median(idle))] if len(idle) >= 3 else []
+            # The readings after the last one counted as running: what a trace
+            # stopped by hand drew while it waited. A power end cut its trace at
+            # the last reading over the threshold in force then, so anything
+            # under the current one there is a wind-down it left, no standby.
+            if cycle.get("termination_reason") not in _BELOW_STOP_ENDS:
+                tail = [(o, p) for o, p in (_kept_tail(readings, stop, set()) or []) if p >= 0]
+                settled = _settled_level_w(tail)
+                if settled is not None:
+                    levels.append(settled)
+            if levels:
+                idles.append(max(levels))
             if len(running) < 5:
                 continue
             low = float(np.percentile(running, _STEADY_LOAD_LOW_PCT))
