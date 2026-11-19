@@ -972,6 +972,12 @@ async def test_device_trigger_options_filter(hass: HomeAssistant, setup_washdata
         ("program_recognised", {"program": " cotton "}, {"program": "Cotton"}, True),
         ("program_recognised", {"program": "Eco"}, {"program": "Cotton"}, False),
         ("cycle_finished", {"program": "Eco"}, {"program": None}, False),
+        # PR #529 review: the picked program by its exact name, "Eco" and "ECO" are
+        # two profiles; the other program filters stay case-insensitive.
+        ("program_mismatch", {"program": " Eco "}, {"program": "Eco"}, True),
+        ("program_mismatch", {"program": "Eco"}, {"program": "ECO"}, False),
+        ("program_mismatch", {}, {"program": "ECO"}, True),
+        ("cycle_finished", {"program": "Eco"}, {"program": "ECO"}, True),
         ("phase_started", {"phase": "rinse"}, {"phase": "Rinse"}, True),
         ("phase_started", {"phase": "Spin"}, {"phase": "Rinse"}, False),
         ("finishing_soon", {"minutes": 10}, {"_from_minute": None, "_to_minute": 3}, True),

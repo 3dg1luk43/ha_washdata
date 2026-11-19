@@ -114,8 +114,13 @@ def _minutes(default: int) -> Any:
     return vol.Optional(OPT_MINUTES, default=default)
 
 
-def _same_text(wanted: Any, actual: Any) -> bool:
-    return isinstance(actual, str) and str(wanted).strip().casefold() == actual.strip().casefold()
+def _same_text(wanted: Any, actual: Any, *, exact: bool = False) -> bool:
+    """Whether a filter's text names ``actual``: trimmed, case-folded unless ``exact``."""
+    if not isinstance(actual, str):
+        return False
+    if exact:
+        return str(wanted).strip() == actual.strip()
+    return str(wanted).strip().casefold() == actual.strip().casefold()
 
 
 class _CoerceInt(vol.Coerce):
@@ -204,7 +209,10 @@ def run_variables(  # noqa: C901 - one flat branch per trigger type
         TRIGGER_PROGRAM_RECOGNISED, TRIGGER_CYCLE_FINISHED, TRIGGER_PROGRAM_MISMATCH
     ):
         wanted = opts.get(OPT_PROGRAM)
-        if wanted and not _same_text(wanted, variables.get("program")):
+        # The picked program by its exact name (PR #529 review): "Eco" and "ECO"
+        # are two profiles, and the filter says it takes the exact name.
+        exact = trigger_type == TRIGGER_PROGRAM_MISMATCH
+        if wanted and not _same_text(wanted, variables.get("program"), exact=exact):
             return None
     elif trigger_type == TRIGGER_PHASE_STARTED:
         wanted = opts.get(OPT_PHASE)
