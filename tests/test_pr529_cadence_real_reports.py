@@ -234,3 +234,32 @@ async def test_a_summary_that_lands_after_the_cycle_end_write_is_saved(
     await hass.async_block_till_done()
     await store.async_flush_saves()
     assert on_disk() == [[2.0, 2.0], [2.0, 2.0]]
+
+
+async def test_both_ends_of_an_interval_are_read_on_the_report_clock(
+    hass: HomeAssistant, setup_washdata_entry: Any, freezer: Any
+) -> None:
+    """PR #529 review: the resync stores the report's own stamp as the start of
+    the next interval, while the listener measured its end at callback time, so a
+    report stamped 120 s after the resynced one but handled 5 s late read 125 s."""
+    from homeassistant.core import Event, State  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(power_sensor=POWER, options=OPTIONS)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    for _ in range(10):
+        await _tick(hass, freezer, 200)
+    assert manager.check_state() == "running"
+    pending = manager.learning_manager._pending_intervals  # noqa: SLF001
+    pending.clear()
+    resynced = dt_util.utcnow() + timedelta(seconds=120)
+    manager._last_sensor_report = (POWER, resynced)  # noqa: SLF001 - what the resync stores
+    stamped = resynced + timedelta(seconds=120)
+    freezer.move_to(stamped + timedelta(seconds=5))  # handled 5 s after its stamp
+    new = State(POWER, "200", {"unit_of_measurement": "W"}, last_reported=stamped,
+                last_updated=stamped, last_changed=stamped)
+    manager._async_power_changed(  # noqa: SLF001
+        Event("state_changed", {"entity_id": POWER, "old_state": hass.states.get(POWER),
+                                "new_state": new})
+    )
+    assert [d for d, _ts in pending] == [120.0]
+    assert manager._last_sensor_report == (POWER, stamped)  # noqa: SLF001
