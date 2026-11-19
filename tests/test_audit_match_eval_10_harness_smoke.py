@@ -118,6 +118,28 @@ def test_analyze_diag_times_a_cycle_as_the_live_cadence_model() -> None:
     assert sle.cadence(per_cycle) == (60.0, 60.0)
 
 
+def test_the_replay_tap_times_real_readings_against_the_previous_real_one() -> None:
+    """``suggestion_loop_eval._ManagerTap`` on a replay: a keepalive neither adds an
+    interval nor moves the clock (``manager._last_sensor_report``, PR #529 review).
+    Real readings every 120 s with keepalives every 30 s are 120 s intervals."""
+    from datetime import datetime, timedelta, timezone  # noqa: PLC0415
+    from types import SimpleNamespace  # noqa: PLC0415
+
+    from custom_components.ha_washdata.const import STATE_RUNNING  # noqa: PLC0415
+
+    sle = _module("suggestion_loop_eval")
+    t0 = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    det = SimpleNamespace(
+        state=STATE_RUNNING, process_reading=lambda *a: None,
+        _on_cycle_end=lambda data: None, _on_state_change=lambda old, new: None,
+    )
+    sim = SimpleNamespace(detector=det, readings=[(t0 + timedelta(hours=1), 0.0)], cursor={"t": 0.0})
+    tap = sle._ManagerTap(sim)  # noqa: SLF001
+    for k in range(13):
+        det.process_reading(5.0, t0 + timedelta(seconds=30 * k), k % 4 != 0)
+    assert tap.pending == [120.0, 120.0, 120.0]
+
+
 def test_harnesses_build_no_partial_matcher_config() -> None:
     prefix = (DEVTOOLS / "prefix_guard_eval.py").read_text(encoding="utf-8")
     assert "_BASE_CFG" not in prefix and "compute_matches_worker(" not in prefix

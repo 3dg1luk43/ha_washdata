@@ -495,9 +495,9 @@ def _replayable(c: Any) -> bool:
 class _ManagerTap:
     """What the manager does around the detector that the Playground replay does not.
 
-    * The cadence model: every reading the manager processes while the detector is
-      active is timed against the previous processed reading (a watchdog keepalive
-      counts as processed but is never itself timed), held per cycle, dropped on a
+    * The cadence model: every real reading the manager processes while the detector
+      is active is timed against the previous real one (``_last_sensor_report``: a
+      watchdog keepalive is neither timed nor moves that clock), held per cycle, dropped on a
       start from idle or a finished state (``CADENCE_RESET_FROM_STATES``), and committed at the cycle's end only when it ended on its
       own (``process_power_reading`` / ``discard_cycle_cadence`` /
       ``close_cycle_cadence``). Readings past the end of the recorded trace (the
@@ -526,7 +526,8 @@ class _ManagerTap:
                 delta = (timestamp - self._last).total_seconds()
                 if 0.1 < delta < 1800:
                     self.pending.append(delta)
-            self._last = timestamp
+            if not synthetic:
+                self._last = timestamp
             orig_pr(power, timestamp, synthetic, observed)
 
         def on_state_change(old: str, new: str) -> None:
