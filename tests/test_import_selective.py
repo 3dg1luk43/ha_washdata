@@ -667,3 +667,22 @@ async def test_a_replace_drops_the_review_requests_of_the_cycles_it_took(store):
     )
     assert [c["meta"]["imported_from"] for c in store.get_past_cycles()] == ["p1"]
     assert store.get_pending_feedback() == {}
+
+
+@pytest.mark.asyncio
+async def test_a_reference_copy_keeps_its_keepalive_rows(store):
+    """Review of PR #529: the default selective import (real cycles as references)
+    copied the readings but dropped their keepalive markers, so the quiet the
+    keepalives filled read as observed (e.g. a terminal event for the #531 vote)."""
+    pts = [[100.0 + 30.0 * i, 500.0 if i < 20 else 1.0] for i in range(61)]
+    syn = [p[0] for p in pts[30:50]]
+    cyc = {**_cyc("k1", "Cotton", 500.0), "power_data": pts, "synthetic_offsets": syn}
+    payload = _payload(profiles={"Cotton": {"avg_duration": 1800}}, past=[cyc])
+    await store.async_import_data_selective(
+        payload, selection={"categories": ["profiles", "real_cycles"]},
+        local_device_type="washing_machine",
+    )
+    refs = store.get_reference_cycles()
+    assert len(refs) == 1
+    assert refs[0]["power_data"][0][0] == 0.0
+    assert refs[0]["synthetic_offsets"] == [o - 100.0 for o in syn]

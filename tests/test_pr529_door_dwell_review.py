@@ -151,3 +151,20 @@ async def test_a_re_pick_at_a_new_length_waits_for_the_detector(
     assert manager._door_end_may_fire() is False  # noqa: SLF001
     manager._matched_profile_duration = held  # noqa: SLF001
     assert manager._door_end_may_fire()  # noqa: SLF001
+
+
+async def test_a_cleared_pick_waits_for_the_detector_before_a_paused_door_end(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """Review of PR #529: the pick was cleared in PAUSED; the detector still held the
+    cleared program's match and length until its next tick, so the door could end
+    the run by that length."""
+    manager, _ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    manager._manual_program_active = True  # noqa: SLF001
+    manager._current_program = manager.detector.matched_profile  # noqa: SLF001
+    manager._matched_profile_duration = float(manager.detector.expected_duration_seconds)  # noqa: SLF001
+    assert manager._door_end_may_fire()  # noqa: SLF001
+    manager.clear_manual_program()
+    assert manager._door_end_may_fire() is False  # noqa: SLF001
+    manager._door_gate_awaits_match = False  # noqa: SLF001 - what the next match tick does
+    assert manager._door_end_may_fire()  # noqa: SLF001

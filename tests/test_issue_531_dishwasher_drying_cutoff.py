@@ -673,3 +673,41 @@ async def test_the_sweep_stops_when_an_undo_replaces_the_store(
     assert rebuilt == ["A"]
     assert "B" in store._data["envelopes"]  # noqa: SLF001
     assert store.cut_short_rebuild_pending()
+
+
+async def test_a_rename_during_the_sweep_is_rebuilt_before_it_is_marked_done(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """Review of PR #529: B renamed to C while A rebuilt (no new data generation):
+    the sweep visited B, never C, and still marked the store rebuilt."""
+    from unittest.mock import patch  # noqa: PLC0415
+
+    from custom_components.ha_washdata.const import CUT_SHORT_REBUILD_KEY  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(device_type="dishwasher", options={"stop_threshold_w": 4.5})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    store._data["profiles"] = {"A": {}, "B": {}}  # noqa: SLF001
+    store._data["past_cycles"] = [  # noqa: SLF001
+        {"id": f"{n}{i}", "profile_name": n, "status": "completed", "duration": 600.0,
+         "start_time": (T0 + timedelta(days=i)).isoformat(),
+         "power_data": [[float(t), 1000.0 if t < 500 else 1.0] for t in range(0, 601, 10)]}
+        for n in "AB" for i in range(3)
+    ]
+    store._data.pop(CUT_SHORT_REBUILD_KEY, None)  # noqa: SLF001
+    real = store.async_rebuild_envelope
+    rebuilt: list[str] = []
+
+    async def rename_during_a(name: str) -> bool:
+        rebuilt.append(name)
+        out = await real(name)
+        if name == "A":  # the user renames B to C meanwhile
+            store._data["profiles"]["C"] = store._data["profiles"].pop("B")  # noqa: SLF001
+            for c in store._data["past_cycles"]:  # noqa: SLF001
+                if c["profile_name"] == "B":
+                    c["profile_name"] = "C"
+        return out
+
+    with patch.object(store, "async_rebuild_envelope", side_effect=rename_during_a):
+        await store.async_rebuild_for_cut_short_rule()
+    assert "C" in rebuilt
+    assert not store.cut_short_rebuild_pending()

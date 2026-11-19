@@ -5137,11 +5137,14 @@ async def ws_apply_suggestions(
                 # Min Power alone moves an unset Start or Stop Threshold, which
                 # follows it (#450), past every threshold check: not without that
                 # threshold in the same write (PR #529 review).
-                if CONF_MIN_POWER in updates and any(
-                    fresh.get(key) is None and key not in updates
-                    for key in (CONF_START_THRESHOLD_W, CONF_STOP_THRESHOLD_W)
-                ):
-                    updates.pop(CONF_MIN_POWER)
+                def _drop_min_power_alone() -> None:
+                    if CONF_MIN_POWER in updates and any(
+                        fresh.get(key) is None and key not in updates
+                        for key in (CONF_START_THRESHOLD_W, CONF_STOP_THRESHOLD_W)
+                    ):
+                        updates.pop(CONF_MIN_POWER)
+
+                _drop_min_power_alone()
                 # An Undo Import takes the write lock, not this one: a store it
                 # replaces meanwhile was not the one these values were judged on
                 # (PR #529 review).
@@ -5159,6 +5162,9 @@ async def ws_apply_suggestions(
                         "this appliance's pauses. Nothing was saved; try again.",
                     )
                     return
+                # Again on what is left: the check can withdraw the threshold the
+                # Min Power cascade was written with (review of PR #529).
+                _drop_min_power_alone()
                 # Item 515: the reconciler keeps a stored start/stop pair ordered,
                 # but applying one of the two alone (a subset, a muted cascade, or
                 # a pair reconciled against options that changed since) could

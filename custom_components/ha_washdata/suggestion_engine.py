@@ -73,7 +73,7 @@ from .const import (
     MATCH_INTERVAL_SUGGESTION_MIN_S,
 )
 from .options_utils import option_int
-from .signal_processing import longest_resumed_pause_s
+from .signal_processing import energy_gap_threshold_s, integrate_wh, longest_resumed_pause_s
 from .time_utils import (
     SYNTHETIC_OFFSETS_KEY,
     offset_key,
@@ -220,6 +220,12 @@ def end_gate_pause_needs(
                         t_next, w_next = points_t[k + 1], values[k + 1]
                         crossing = t + (limit - w_t) / (w_next - w_t) * (t_next - t)
                         need = max(need, crossing - t0)
+                # ...and as the detector computes it (review of PR #529): at a
+                # reading, the trapezoid over the readings inside the window, its
+                # outage gaps masked. That can be lower than the held energy above
+                # (the window's first reading is not at its start), so a pause the
+                # held model bridges can still end live. Either closing counts.
+                need = max(need, _detector_gate_need(times, watts, t0, window, limit))
             needs.append(need)
             i = j
     except Exception:  # noqa: BLE001 - a guard must never break a suggestion pass
@@ -227,6 +233,38 @@ def end_gate_pause_needs(
             raise  # Apply all's check: a failed scan is not "no pause" (PR #529 review)
         return []
     return needs
+
+
+def _detector_gate_need(
+    times: list[float], watts: list[float], t0: float, window: float, limit: float
+) -> float:
+    """The latest reading of a pause, at least ``window`` into it, at which the
+    detector's end-energy gate would pass (``CycleDetector``: ``integrate_wh`` over
+    the readings no older than ``window``, gaps over ``energy_gap_threshold_s`` of
+    those readings left out), as seconds into the pause; 0 when none would."""
+    ts = np.asarray(times, dtype=float)
+    ps = np.asarray(watts, dtype=float)
+    m = ts.size
+    if m < 2:
+        return 0.0
+    dt = np.diff(ts)
+    cum = np.concatenate(([0.0], np.cumsum((ps[:-1] + ps[1:]) * 0.5 * dt / 3600.0)))
+    # A segment over 60 s may be masked as an outage (the threshold is at least
+    # 60 s), which needs the window's own threshold; shorter ones never are.
+    slow = np.concatenate(([0], np.cumsum(dt > 60.0)))
+    first = np.searchsorted(ts, ts - window, side="left")
+    for k in range(m - 1, -1, -1):
+        if ts[k] - t0 < window:
+            break
+        lo = int(first[k])
+        if slow[k] - slow[lo] > 0:
+            seg = slice(lo, k + 1)
+            energy = integrate_wh(ts[seg], ps[seg], max_gap_s=energy_gap_threshold_s(ts[seg]))
+        else:
+            energy = float(cum[k] - cum[lo])
+        if energy <= limit:
+            return float(ts[k] - t0)
+    return 0.0
 
 
 def end_gate_would_split(

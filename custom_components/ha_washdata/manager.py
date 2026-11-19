@@ -1284,6 +1284,10 @@ class WashDataManager:
         self._pump_stuck: bool = False  # True once the stuck threshold has fired for this cycle
 
         self._manual_program_active: bool = False
+        # Set when a pick is cleared mid-cycle: the detector still holds the
+        # cleared program's match (and length) until its next match tick, so a
+        # PAUSED door end waits for that tick (review of PR #529).
+        self._door_gate_awaits_match: bool = False
         # The user's standing program choice for the current or next cycle (#411).
         # Rehydrated from the store during setup so arming survives a restart.
         self._armed_program: str | None = None
@@ -1547,6 +1551,7 @@ class WashDataManager:
             self.detector.set_match_committed(
                 match_rules.program_is_committed(self._current_program)
             )
+            self._door_gate_awaits_match = False  # the detector holds this tick's match
             self.detector.update_match(MatchContext(
                 profile_name=profile_name,
                 confidence=gate.confidence,
@@ -4219,6 +4224,9 @@ class WashDataManager:
         # (PR #529 review). Wait for the detector to hold the pick.
         if self._manual_program_active and self.detector.matched_profile != self._current_program:
             return False
+        # A pick cleared mid-cycle: the detector's match is still the cleared one.
+        if self._door_gate_awaits_match:
+            return False
         # Nor while it holds the pick at a length the pick no longer has: the same
         # program re-picked after its learned length changed (PR #529 review).
         if self._manual_program_active and self._matched_profile_duration:
@@ -6060,6 +6068,7 @@ class WashDataManager:
 
                 self._current_program = "detecting..."
                 self._manual_program_active = False
+                self._door_gate_awaits_match = False
                 # Confidence belongs to the match that produced it, so it cannot
                 # carry into the next cycle. It was only ever assigned by a real
                 # match update, never cleared, and the cycle-end tail stamps it onto
@@ -11297,6 +11306,7 @@ class WashDataManager:
             return
 
         self._manual_program_active = False
+        self._door_gate_awaits_match = self.detector.state in _DOOR_END_STATES
         # A live cycle goes back to auto-detection. PAUSED and ENDING are live too
         # (audit MANAGER-15): comparing against "running" alone showed "off" for a
         # cycle still under way. The refresh mirrors set_manual_program's.

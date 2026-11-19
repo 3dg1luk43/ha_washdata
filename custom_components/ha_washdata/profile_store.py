@@ -3827,8 +3827,8 @@ class ProfileStore:
                 known_hashes.add(h)
         duration = float(pairs[-1][0] - pairs[0][0])
         # Re-base to offset 0 so envelope reconstruction and DTW work correctly.
-        if pairs[0][0] != 0.0:
-            origin = pairs[0][0]
+        origin = pairs[0][0]
+        if origin != 0.0:
             pairs = [[p[0] - origin, p[1]] for p in pairs]
         now = dt_util.as_utc(dt_util.now())
         store_id = str(meta.get("store_cycle_id") or "")
@@ -3872,6 +3872,17 @@ class ProfileStore:
         profiles = self._data.setdefault("profiles", {})
         if profile_name not in profiles:
             profiles[profile_name] = {"avg_duration": duration}
+        # The source's keepalive rows, re-based with the trace: without them the
+        # quiet they filled reads as observed, e.g. as a terminal event for the
+        # #531 cut-off vote (review of PR #529). A source that does not say stays
+        # without the field.
+        syn = meta.get(SYNTHETIC_OFFSETS_KEY)
+        if isinstance(syn, list):
+            rebased: list[float] = []
+            for o in syn:
+                with contextlib.suppress(TypeError, ValueError, OverflowError):
+                    rebased.append(float(o) - origin)
+            set_synthetic_offsets(cycle, rebased)
         self._add_cycle_data(cycle, target=self._data.setdefault("reference_cycles", []), id_pool=id_pool)
         return str(cycle.get("id", ""))
 
@@ -8185,26 +8196,45 @@ class ProfileStore:
         count = 0
         try:
             data_generation = getattr(self, "_data_generation", 0)
-            profiles = set(self._data.get("profiles") or {})
-            names = sorted({
-                str(c.get("profile_name"))
-                for c in self.iter_evidence_cycles()
-                if isinstance(c, dict) and c.get("profile_name") and c.get("power_data")
-            } & profiles)
+
+            def _names() -> set[str]:
+                profiles = set(self._data.get("profiles") or {})
+                return {
+                    str(c.get("profile_name"))
+                    for c in self.iter_evidence_cycles()
+                    if isinstance(c, dict) and c.get("profile_name") and c.get("power_data")
+                } & profiles
+
             failed: list[str] = []
-            for name in names:
-                # The names came from the data this pass started on: once an import
-                # or undo replaced it, a name may be an envelope-only profile of the
-                # new data, which a rebuild would delete (PR #529 review).
+            done: set[str] = set()
+            # Until every name the store now holds is done: a rename during the pass
+            # (no new data generation) moves an unrebuilt envelope to a name the
+            # first list did not have (review of PR #529). Bounded.
+            for _round in range(3):
                 if getattr(self, "_data_generation", 0) != data_generation:
                     break
-                try:
-                    if await self.async_rebuild_envelope(name):
-                        count += 1
-                except Exception as exc:  # noqa: BLE001 - keep the rest, retry later
-                    failed.append(name)
-                    self._logger.warning("Rebuild of %s under the #531 rule failed: %s", name, exc)
-            if failed or getattr(self, "_data_generation", 0) != data_generation:
+                pending = sorted(_names() - done - set(failed))
+                if not pending:
+                    break
+                for name in pending:
+                    # The names came from the data this pass started on: once an
+                    # import or undo replaced it, a name may be an envelope-only
+                    # profile of the new data, which a rebuild would delete (PR
+                    # #529 review).
+                    if getattr(self, "_data_generation", 0) != data_generation:
+                        break
+                    try:
+                        if await self.async_rebuild_envelope(name):
+                            count += 1
+                        done.add(name)
+                    except Exception as exc:  # noqa: BLE001 - keep the rest, retry later
+                        failed.append(name)
+                        self._logger.warning("Rebuild of %s under the #531 rule failed: %s", name, exc)
+            if (
+                failed
+                or getattr(self, "_data_generation", 0) != data_generation
+                or _names() - done
+            ):
                 return count  # still pending: the next start runs it again
             self._data[CUT_SHORT_REBUILD_KEY] = True
             await self.async_save()
@@ -12883,6 +12913,7 @@ class ProfileStore:
                             "store_cycle_id": _bare_store_id(raw_sid),
                             "store_uploaded_at": src_meta.get("store_uploaded_at"),
                             "sampling_interval": c.get("sampling_interval"),
+                            SYNTHETIC_OFFSETS_KEY: c.get(SYNTHETIC_OFFSETS_KEY),
                         },
                         id_pool=ref_id_pool,
                     )
@@ -12919,6 +12950,7 @@ class ProfileStore:
                     cid = self._add_reference_cycle_nosave(
                         target or "(imported)", c.get("power_data") or [],
                         {
+                            SYNTHETIC_OFFSETS_KEY: c.get(SYNTHETIC_OFFSETS_KEY),
                             "store_cycle_id": _bare_store_id(raw_sid),
                             # Carried so the banked-tail repair can reach this
                             # cycle (item 353). A Smart-Terminated trace holds

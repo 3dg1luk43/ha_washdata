@@ -1334,3 +1334,53 @@ async def test_the_suggestions_sensor_filters_once_per_state_write(
     state = hass.states.get(entity_id)
     assert filt.call_count == 1
     assert state.state == "1" and state.attributes["suggestions_count"] == 1
+
+
+async def test_min_power_is_not_written_once_its_stop_is_withdrawn(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """Review of PR #529: Stop unset, a pending Stop and its Min Power cascade; the
+    joint check withdrew Stop, and Min Power was written alone, moving the Stop
+    that follows it."""
+    from unittest.mock import patch  # noqa: PLC0415
+
+    from custom_components.ha_washdata import ws_api  # noqa: PLC0415
+    from custom_components.ha_washdata.const import CONF_MIN_POWER  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(options={CONF_MIN_POWER: 5.0, CONF_START_THRESHOLD_W: 10.0})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    store.set_suggestion(CONF_STOP_THRESHOLD_W, 4.0, reason="r", flags={"owner": OWNER_BATCH})
+    store.set_suggestion(CONF_MIN_POWER, 3.2, reason="r", flags={"cascade": True})
+
+    async def withdraw_stop(_h: Any, _m: Any, _v: Any, updates: dict[str, Any]) -> bool:
+        updates.pop(CONF_STOP_THRESHOLD_W, None)
+        return True
+
+    client = await hass_ws_client(hass)
+    with patch.object(ws_api, "_drop_unsafe_end_gate_updates", side_effect=withdraw_stop):
+        await client.send_json_auto_id({
+            "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry.entry_id,
+            "keys": [CONF_STOP_THRESHOLD_W, CONF_MIN_POWER],
+        })
+        res = await client.receive_json()
+    assert res["success"] and res["result"]["applied"] == []
+    await hass.async_block_till_done()
+    assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_MIN_POWER] == 5.0
+
+
+def test_the_pause_scan_also_reads_energy_as_the_detector_does() -> None:
+    """Review of PR #529: a 1000 s pause at 2 W with a reading a minute and a 200 s
+    Off Delay. Held from the window's start it is 0.111 Wh, over a 0.105 Wh limit;
+    the detector integrates only the readings inside the window (180 s, 0.100 Wh)
+    and ends the cycle, so a 210 s Min Off Gap splits it."""
+    from custom_components.ha_washdata.suggestion_engine import (  # noqa: PLC0415
+        end_gate_pause_needs,
+        end_gate_would_split,
+    )
+
+    work = [(float(t), 300.0) for t in range(0, 600, 60)]
+    pause = [(600.0 + t, 2.0) for t in range(0, 1000, 60)]
+    pts = work + pause + [(1600.0, 300.0), (1660.0, 300.0)]
+    assert end_gate_pause_needs(pts, 5.0, 200, 0.105) == [960.0]
+    assert end_gate_would_split(pts, 5.0, 200, 210, 0.105)
+    assert not end_gate_would_split(pts, 5.0, 200, 1200, 0.105)
