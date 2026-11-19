@@ -878,7 +878,8 @@ class WashDataManager:
         self._restored_trigger_marks: Any = None
         # #530: the background check of a hand-picked program (keyed by the cycle
         # and the pick, see _program_mismatch_state), the in-flight check, the
-        # elapsed time of the last one (the profile_match_interval cadence), and
+        # stored trace's span at the last one (the profile_match_interval
+        # cadence, _program_mismatch_clock), and
         # the pick's generation: every new selection is a new key, so a check
         # still in flight for an earlier pick of the same program never counts.
         self._program_mismatch = match_rules.ProgramMismatchState()
@@ -1747,8 +1748,8 @@ class WashDataManager:
             return {
                 "program": state.key[2],
                 **state.as_dict(),
-                # Where the last check read the trace: the cadence the streak
-                # was counted on (``_program_mismatch_last_s``).
+                # The stored trace's span at the last check: the cadence the
+                # streak was counted on (``_program_mismatch_last_s``).
                 "checked_s": self._program_mismatch_last_s,
             }
         except Exception:  # pylint: disable=broad-exception-caught
@@ -1799,25 +1800,25 @@ class WashDataManager:
             interval = float(self._profile_match_interval or DEFAULT_PROFILE_MATCH_INTERVAL)
             last = self._program_mismatch_last_s
             due = interval if last is None else last + interval
+            # The cadence reads the stored trace, which only grows while the cycle
+            # runs. The cut trace the check matches moves back when a stall is
+            # banked on resume (item 511): a deadline on it waited out the stall
+            # again, and a cycle that ended within it was never checked (PR #529
+            # review). Read before the cut trace, which is a new list built from
+            # every reading after a stall.
+            position = self._program_mismatch_clock()
+            if position is None or position < due:
+                return
             if readings is None:
-                # Programme time first: after a stall the cut trace is a new list
-                # built from every reading, so the readings between two checks
-                # must not build it.
-                bound = self._match_trace_span_bound()
-                if bound is not None and bound < due:
-                    return
                 # What the detector hands its matcher (item 511's stall cut).
                 readings = self.detector._match_readings()  # pylint: disable=protected-access
             if not readings or len(readings) < 2:
-                return
-            elapsed = (readings[-1][0] - readings[0][0]).total_seconds()
-            if elapsed < due:
                 return
             # Paced before the eligibility scans, not only the match: both read
             # the evidence, and a pick that cannot be matched would otherwise
             # repeat them on every reading (PR #529 review). It is asked again
             # an interval later, so evidence that arrives still gets checked.
-            self._program_mismatch_last_s = elapsed
+            self._program_mismatch_last_s = position
             if not self.profile_store.has_real_profiles:
                 return
             # A pick with no template is never scored, which is no evidence.
@@ -1844,34 +1845,17 @@ class WashDataManager:
         ):
             self._schedule_program_mismatch_check()
 
-    def _match_trace_span_bound(self) -> float | None:
-        """At least the seconds the detector's match trace spans, read without
-        building it: the stored trace's span less the finished stalls and user
-        pauses wholly inside it. The cut trace leaves each of them out (item 511),
-        so it can only be shorter. None when the detector cannot be read (the
-        caller then builds the trace). Never raises."""
+    def _program_mismatch_clock(self) -> float | None:
+        """The #530 check's cadence clock: the seconds the detector's STORED trace
+        spans. It only grows while a cycle runs (readings are appended, a pre-roll
+        only moves the start earlier, trims happen at the end), unlike the cut
+        trace a check matches, which moves back when a stall is banked. None when
+        the detector cannot be read. Never raises."""
         try:
-            det = self.detector
-            raw = det._power_readings  # pylint: disable=protected-access
+            raw = self.detector._power_readings  # pylint: disable=protected-access
             if len(raw) < 2:
                 return 0.0
-            first, last = raw[0][0], raw[-1][0]
-            bound = (last - first).total_seconds()
-            start = det._current_cycle_start  # pylint: disable=protected-access
-            if start is None:
-                return bound  # nothing is cut without a cycle start
-            lo = (first - start).total_seconds()
-            hi = (last - start).total_seconds()
-            covered = lo
-            for at, length in sorted(det._gate_spans()):  # pylint: disable=protected-access
-                end = at + length
-                if at < lo or end > hi:
-                    continue
-                begin = max(at, covered)
-                if end > begin:
-                    bound -= end - begin
-                    covered = end
-            return bound
+            return float((raw[-1][0] - raw[0][0]).total_seconds())
         except Exception:  # pylint: disable=broad-exception-caught
             return None
 

@@ -536,7 +536,8 @@ async def test_the_readings_between_two_checks_never_build_the_cut_trace(
 ) -> None:
     """After a stall the detector's match trace is a new list built from every
     reading (item 511's cut). A reading before the next check is due is turned away
-    on programme time without building it; the check itself still reads it."""
+    on the stored trace's span without building it; the check itself matches the
+    cut trace, and the fraction gate reads its (programme-time) span."""
     _entry, manager, _sent, _state = await _past_half(hass, setup_washdata_entry, freezer)
     det = manager.detector
     raw = det._power_readings  # noqa: SLF001
@@ -546,25 +547,51 @@ async def test_the_readings_between_two_checks_never_build_the_cut_trace(
     assert cut is not raw and len(cut) < len(raw)
     exact = (cut[-1][0] - cut[0][0]).total_seconds()
     span = (raw[-1][0] - raw[0][0]).total_seconds()
-    bound = manager._match_trace_span_bound()  # noqa: SLF001
-    assert exact <= bound < span
+    assert exact < span
     interval = float(manager._profile_match_interval)  # noqa: SLF001
     quiet = _result("Cotton", {"Cotton": 0.9, "Synthetics": 0.5})
     with patch.object(det, "_match_readings", wraps=det._match_readings) as built, \
             patch.object(manager.profile_store, "async_match_profile",
                          AsyncMock(return_value=quiet)) as match:
-        # Due just past the programme time: the stored trace spans far more.
-        manager._program_mismatch_last_s = bound + 1.0 - interval  # noqa: SLF001
+        manager._program_mismatch_last_s = span + 1.0 - interval  # noqa: SLF001
         manager._schedule_program_mismatch_check()  # noqa: SLF001
         await hass.async_block_till_done()
         assert not built.called and match.await_count == 0
         # Due: the trace is built and the check runs on it.
-        manager._program_mismatch_last_s = exact - interval  # noqa: SLF001
+        manager._program_mismatch_last_s = span - interval  # noqa: SLF001
         manager._schedule_program_mismatch_check()  # noqa: SLF001
         await hass.async_block_till_done()
         assert built.call_count == 1 and match.await_count == 1
-    assert manager._program_mismatch_last_s == exact  # noqa: SLF001
+    assert manager._program_mismatch_last_s == span  # noqa: SLF001
     assert match.await_args.args[1] == exact
+
+
+async def test_a_stall_banked_after_a_check_does_not_push_the_next_one_back(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """PR #529 review: a check runs, then a 600 s stall is banked on resume and the
+    cut trace moves back by it. The next check is still due one interval later on
+    the stored trace, not once the cut trace has made up the stall: a cycle with
+    less than the stall left would otherwise end unchecked."""
+    _entry, manager, _sent, _state = await _past_half(hass, setup_washdata_entry, freezer)
+    det = manager.detector
+    interval = float(manager._profile_match_interval)  # noqa: SLF001
+    checked = manager._program_mismatch_last_s  # noqa: SLF001
+    assert checked is not None
+    raw = det._power_readings  # noqa: SLF001
+    start = det._current_cycle_start  # noqa: SLF001
+    det._stall_spans = [((raw[4][0] - start).total_seconds(), 600.0)]  # noqa: SLF001
+    cut = det._match_readings()  # noqa: SLF001
+    assert (cut[-1][0] - cut[0][0]).total_seconds() + interval < checked
+    quiet = _result("Cotton", {"Cotton": 0.9, "Synthetics": 0.5})
+    with patch.object(manager.profile_store, "async_match_profile",
+                      AsyncMock(return_value=quiet)) as match:
+        await _feed(hass, freezer, 200, int(2 * interval))
+        assert match.await_count >= 1
+        # The fraction gate still reads programme time: the cut trace's span.
+        cut = det._match_readings()  # noqa: SLF001
+        assert match.await_args.args[1] <= (cut[-1][0] - cut[0][0]).total_seconds()
+        assert match.await_args.args[1] < manager._program_mismatch_last_s - 500  # noqa: SLF001
 
 
 async def test_a_pick_in_a_silent_tail_is_checked_on_the_watchdog_keepalives(
@@ -687,3 +714,4 @@ async def test_a_streak_counted_before_an_import_restarts_at_the_next_check(
         for _ in range(PROGRAM_MISMATCH_PERSISTENCE - 1):
             await _check(hass, manager, state.key)
     assert len(_mismatches(sent)) == 1
+
