@@ -1204,7 +1204,7 @@ class ProgramMismatchState:
     replaced, or read against groups edited since, are no run of evidence.
 
     ``as_dict`` (the active-cycle snapshot) carries the outcome, not the pending
-    streak: the data generation is a counter that starts again at every start,
+    streak: the data generation is a counter that restarts with Home Assistant,
     so a restored streak could not be shown to be counted on the data and groups
     it finds, and a crash can follow an import, a group edit or a check in flight
     that no snapshot saw (PR #529 review). A restart starts the run afresh.
