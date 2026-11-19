@@ -1314,16 +1314,27 @@ def _drive(loops: list[DeviceLoop], jobs: int) -> None:
                             pending[pool.submit(_replay_task, *job)] = loop.path
 
 
-def _unmatched_split(ended: list[dict], points: list[tuple[float, float]], stop: float) -> bool:
+def _unmatched_split(ended: list[dict], points: list[tuple[float, float]], stop: float,
+                     base: datetime | None = None) -> bool:
     """Not ONE stored cycle covering ~all of the trace's active span.
 
     As ``min_off_gap_eval._is_split``: a fragment shorter than the completion
     minimum is dropped silently, so a count of records alone misses a truncation.
+    The record must last 90% of the active span and, when ``base`` (the replay's
+    offset 0) places it, start within the other 10% of its first active reading
+    (PR #529 review): a record reopened late in the activity can reach that length
+    on the synthetic quiet tail alone.
     """
     if len(ended) != 1:
         return True
-    span = _active_span(points, stop)
-    return span > 0 and float(ended[0].get("duration") or 0.0) < 0.9 * span
+    act = [t for t, p in points if p > stop]
+    span = (act[-1] - act[0]) if len(act) >= 2 else 0.0
+    if span <= 0:
+        return False
+    if float(ended[0].get("duration") or 0.0) < 0.9 * span:
+        return True
+    start = _parse_utc(ended[0].get("start_time")) if base is not None else None
+    return start is not None and (start - base).total_seconds() - act[0] > 0.1 * span
 
 
 class _NoProfiles:
@@ -1397,7 +1408,7 @@ def _unmatched_task(job: tuple[str, str, dict, int]) -> tuple[str, str, int, dic
     kept = {id(e) for e in ended}
     kept_ends = [t for t, data in ends if id(data) in kept]
     return path, arm, idx, {
-        "split": _unmatched_split(ended, pts, stop),
+        "split": _unmatched_split(ended, pts, stop, src_base),
         "interrupted": any(e.get("status") == "interrupted" for e in ended),
         "lag": (kept_ends[-1] - work_end) if kept_ends and work_end is not None else None,
     }

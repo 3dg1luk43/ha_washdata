@@ -106,6 +106,26 @@ def test_an_unmatched_split_needs_one_record_covering_the_active_span():
     assert loop._unmatched_split([{"duration": 1200.0}], pts, 2.0)  # truncated  # noqa: SLF001
 
 
+def test_an_unmatched_split_needs_the_record_to_start_with_the_activity():
+    """PR #529 review: activity 0-3600 s, the only record kept reopened at 3000 s and
+    ran 3600 s on the synthetic quiet tail. Its length passed; only 600 s of the
+    activity is in it."""
+    from datetime import datetime, timedelta, timezone
+
+    base = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    pts = [(float(t), 500.0) for t in range(0, 3601, 30)]
+
+    def rec(start_s: float) -> list[dict]:
+        return [{"duration": 3600.0, "start_time": (base + timedelta(seconds=start_s)).isoformat()}]
+
+    assert loop._unmatched_split(rec(3000.0), pts, 2.0, base)  # noqa: SLF001
+    assert not loop._unmatched_split(rec(0.0), pts, 2.0, base)  # noqa: SLF001
+    assert not loop._unmatched_split(rec(300.0), pts, 2.0, base)  # within 10% of the span  # noqa: SLF001
+    assert loop._unmatched_split(rec(400.0), pts, 2.0, base)  # noqa: SLF001
+    # A record the replay cannot place is judged on its length alone.
+    assert not loop._unmatched_split([{"duration": 3600.0}], pts, 2.0, base)  # noqa: SLF001
+
+
 def test_legacy_patch_restores_the_shipped_engine():
     gen, keys = SuggestionEngine.generate_detection_suggestions, ws_api._SUGGESTION_KEYS  # noqa: SLF001
     with loop.legacy_patch(("sampling_interval", "confidence")):
