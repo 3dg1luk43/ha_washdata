@@ -6,10 +6,15 @@
 * #530: a device type changed in place while a program check matched let the
   old type's result set the latch the new type never sends; switched back, the
   pick could not fire again.
+* A long match read the profile groups after its trace preparation, so a group
+  edit made during it and undone during the scoring went unseen by the caller.
 """
 from __future__ import annotations
 
+import copy
 import json
+import threading
+from datetime import timedelta
 from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -18,7 +23,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 from homeassistant.util import dt as dt_util
 
-from custom_components.ha_washdata import ws_api
+from custom_components.ha_washdata import analysis, profile_store, ws_api
 from custom_components.ha_washdata.const import (
     DEVICE_TYPE_DRYER,
     DEVICE_TYPE_OTHER,
@@ -31,6 +36,7 @@ from tests.test_issue_530_program_mismatch import (
     _mismatches,
     _past_half,
     _result,
+    _seed,
 )
 
 POWER = "sensor.washer_power"
@@ -158,3 +164,75 @@ async def test_a_streak_counted_as_another_device_type_restarts(
         await _check(hass, manager, state.key)
     assert _mismatches(sent) == []
     assert state.streak == 1 and state.device_type == DEVICE_TYPE_DRYER
+
+
+# ── The matcher's profile groups are the ones it was called with ─────────────
+
+
+async def test_a_long_match_maps_the_groups_it_was_called_with(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """Over ``_MATCH_PREP_INLINE_READINGS`` the trace is prepared in the executor.
+    The groups were read after it: Cotton grouped with Synthetics during the
+    preparation and ungrouped again during the scoring built the ranking from
+    the intermediate map, while the #530 check, comparing the groups it read
+    next to the call with those after it, saw no edit and kept it."""
+    entry = await setup_washdata_entry(power_sensor=POWER)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store = manager.profile_store
+    await _seed(manager)
+    start = dt_util.utcnow()
+    readings = [
+        (start + timedelta(seconds=3 * i), 1000.0 if 200 <= i < 400 else 200.0)
+        for i in range(600)
+    ]
+    assert len(readings) > profile_store._MATCH_PREP_INLINE_READINGS  # noqa: SLF001
+    grouped = {"Wash": {"members": ["Cotton", "Synthetics"]}}
+    prep_in, prep_out = threading.Event(), threading.Event()
+    score_in, score_out = threading.Event(), threading.Event()
+    real_prep = profile_store._prepare_match_trace  # noqa: SLF001
+    real_worker = analysis.compute_matches_worker
+    seen: list[dict] = []
+
+    def prep(*a: Any) -> Any:
+        prep_in.set()
+        prep_out.wait(5)
+        return real_prep(*a)
+
+    def worker(*a: Any) -> Any:
+        score_in.set()
+        score_out.wait(5)
+        return real_worker(*a)
+
+    def collapse(cands: Any, members: Any) -> Any:
+        seen.append(dict(members))
+        return profile_store._collapse_group_candidates(cands, members)  # noqa: SLF001
+
+    async def run(during_prep: dict, during_score: dict) -> dict:
+        for ev in (prep_in, prep_out, score_in, score_out):
+            ev.clear()
+        seen.clear()
+        task = hass.async_create_task(
+            store.async_match_profile(readings, 1800.0, in_progress=True)
+        )
+        assert await hass.async_add_executor_job(prep_in.wait, 5)
+        store._data["profile_groups"] = during_prep  # noqa: SLF001
+        prep_out.set()
+        assert await hass.async_add_executor_job(score_in.wait, 5)
+        store._data["profile_groups"] = during_score  # noqa: SLF001
+        score_out.set()
+        await task
+        return seen[0]
+
+    with patch.object(profile_store, "_prepare_match_trace", prep), \
+            patch.object(analysis, "compute_matches_worker", worker), \
+            patch.object(profile_store, "collapse_group_candidates", collapse), \
+            patch.object(store, "group_cohesion", lambda _members: 1.0):
+        # Ungrouped when called, grouped meanwhile, ungrouped again: none mapped.
+        store._data["profile_groups"] = {}  # noqa: SLF001
+        assert await run(copy.deepcopy(grouped), {}) == {}
+        # Grouped when called, ungrouped meanwhile, regrouped: the group mapped.
+        store._data["profile_groups"] = copy.deepcopy(grouped)  # noqa: SLF001
+        assert await run({}, copy.deepcopy(grouped)) == {
+            "__group__Wash": ["Cotton", "Synthetics"]
+        }

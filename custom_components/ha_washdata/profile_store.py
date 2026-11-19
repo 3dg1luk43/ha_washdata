@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import collections
 import contextlib
+import copy
 import dataclasses
 import functools
 import hashlib
@@ -4130,8 +4131,18 @@ class ProfileStore:
             self._cohesion_cache[key] = result
             return result
 
+    def _match_groups(self) -> dict[str, Any] | None:
+        """A copy of the profile groups for ``async_match_profile`` to map, taken
+        when it is called (edits mutate the stored mapping in place). None when
+        they cannot be read: ``_grouped_snapshots`` then reads them itself.
+        Never raises."""
+        try:
+            return copy.deepcopy(self.get_profile_groups())
+        except Exception:  # pylint: disable=broad-exception-caught
+            return None
+
     def _grouped_snapshots(
-        self, snapshots: list[dict[str, Any]]
+        self, snapshots: list[dict[str, Any]], groups: dict[str, Any] | None = None
     ) -> tuple[list[dict[str, Any]], dict[str, list[str]], dict[str, dict[str, Any]]]:
         """Map each *cohesive* group to its member snapshots for the Stage-5 pass.
 
@@ -4146,8 +4157,12 @@ class ProfileStore:
         family the averaged curve belongs to no member (it has a half-height
         heating block and an energy figure neither member reaches), which cost the
         family the program-level match before Stage 5 could pick between them.
+
+        ``groups``: the profile groups to map (``async_match_profile`` reads them
+        when called); the store's current ones when omitted.
         """
-        groups = self.get_profile_groups()
+        if groups is None:
+            groups = self.get_profile_groups()
         if not groups:
             return snapshots, {}, {}
         by_name = {s["name"]: s for s in snapshots}
@@ -10991,6 +11006,13 @@ class ProfileStore:
         if not current_power_data:
             return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
 
+        # The profile groups, as they are when called, before the first await
+        # (PR #529 review): read after the trace preparation below, a group edit
+        # made while it ran and undone during the scoring built the ranking from a
+        # membership the caller never saw (the #530 check compares the groups it
+        # read next to the call with those after it).
+        call_groups = self._match_groups()
+
         # 1. The trace, converted and resampled: in the executor once it is long,
         # where that is milliseconds per match (PR #529 review: a pinned 4 h cycle
         # at 2 s), a copy so a caller's list that grows meanwhile is read as
@@ -11016,7 +11038,9 @@ class ProfileStore:
             # Stage 5: map cohesive near-duplicate groups to their members (loose
             # groups stay individual). The members are scored individually and the
             # family is collapsed after the worker. No-op without groups.
-            snapshots, group_members, member_snaps = self._grouped_snapshots(snapshots)
+            snapshots, group_members, member_snaps = self._grouped_snapshots(
+                snapshots, call_groups
+            )
 
             config = {
                 "min_duration_ratio": self._min_duration_ratio,

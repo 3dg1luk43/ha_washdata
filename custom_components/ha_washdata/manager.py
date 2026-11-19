@@ -1953,7 +1953,8 @@ class WashDataManager:
             duration = (readings[-1][0] - readings[0][0]).total_seconds()
             elapsed = max(0.0, duration - paused_s)
             # The profile groups the ranking is built from: the matcher reads them
-            # before it leaves the loop, so read here, next to the call. A group
+            # when called, before its first await, so read here, next to the call
+            # (not after its trace preparation: PR #529 review). A group
             # edited while the match ran makes the ranking describe neither
             # membership (a ``__group__`` family no longer linked to the pick reads
             # as a deficit), so that result is discarded, the streak untouched.
