@@ -6764,12 +6764,15 @@ class CycleDetector:
             # draw above the stop threshold, and the plateau is trimmed off the
             # trace, so the level is kept here. It is the one TIMEOUT end that did
             # not see the power below stop (`detect_standby_above_stop`, #525).
-            cycle_data["standby_band_w"] = round(float(standby_band_w), 2)
+            # Unrounded: the advisory compares it with the threshold, and a 2.564 W
+            # median over a 2.561 W threshold rounded to 2.56 W read as below it.
+            cycle_data["standby_band_w"] = float(standby_band_w)
         if loose_plateau_w is not None and math.isfinite(float(loose_plateau_w)):
             # The same finalize on its loose tier (a flat plateau past twice the
             # expected duration): not a standby, and only below the threshold
-            # does it show the power going there (`_idle_evidence_w`).
-            cycle_data["loose_plateau_w"] = round(float(loose_plateau_w), 2)
+            # does it show the power going there (`_idle_evidence_w`). Unrounded
+            # for the same comparison.
+            cycle_data["loose_plateau_w"] = float(loose_plateau_w)
 
         self._logger.info("Cycle Finished: %s, %.1f min", status, duration / 60)
         self._on_cycle_end(cycle_data)

@@ -205,3 +205,15 @@ def test_constants_still_describe_a_finished_appliance() -> None:
     assert STANDBY_BAND_WINDOW_S >= 600.0
     assert STANDBY_BAND_MAX_FRACTION <= 0.10
     assert STANDBY_BAND_FLATNESS_FRACTION <= 0.03
+
+
+def test_the_stored_standby_level_keeps_full_precision() -> None:
+    """The near-stop tier accepts a plateau median at or above the threshold. Stored
+    rounded to 2 decimals, a 2.564 W median over a 2.561 W threshold read back as
+    2.56 W, below it, and the advisory counted the cycle as evidence the power gets
+    there (PR #529 review). The level is stored unrounded."""
+    stop = 2.561
+    idle_s, data = _run(_cfg(stop_threshold_w=stop), idle_w=2.564)
+    assert data is not None and idle_s is not None
+    assert data["standby_band_w"] >= stop
+    assert _idle_evidence_w(data, stop) == pytest.approx(2.564)
