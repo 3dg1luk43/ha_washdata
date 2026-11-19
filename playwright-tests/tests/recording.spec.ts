@@ -114,3 +114,33 @@ test('a failed read after Discard is retried, and the widget no longer offers Pr
   await expect(page.locator('[data-action="rec-start"]')).toBeVisible({ timeout: 5_000 });
   await expect(page.locator('[data-action="rec-process-open"]')).toHaveCount(0);
 });
+
+// PR #529 review: the retry mark was one for the whole panel. Another appliance's
+// Stop, acknowledged after the shown one's Discard read failed, replaced it; its own
+// read is not applied to the shown appliance, so nothing read the shown one again
+// and the widget kept offering Process for the discarded recording.
+test('another appliance\'s late Stop does not cancel the shown one\'s retry', async ({ page }) => {
+  const shown = { ...deviceIdle.devices[0], recording: false };
+  const other = { ...shown, entry_id: 'test-entry-002', title: 'Dryer' };
+  await bootPanel(page, {
+    'ha_washdata/get_devices': { devices: [shown, other] },
+    'ha_washdata/get_recording_state': { state: 'stopped', duration_s: 600, sample_count: 12 },
+    'ha_washdata/discard_recording': { success: true },
+  });
+  await page.evaluate(() => (document.querySelector('ha-washdata-panel') as any)._fetchTabData());
+  await expect(page.locator('[data-action="rec-discard"]')).toBeVisible({ timeout: 5_000 });
+  await failRecState(page, true);
+  await page.locator('[data-action="rec-discard"]').click();
+  await page.getByRole('dialog', { name: 'Discard Recording' }).getByRole('button', { name: 'Discard' }).click();
+  await expect(page.locator('.wd-toast')).toContainText('Recording discarded', { timeout: 5_000 });
+  await failRecState(page, false);
+  await setHandler(page, 'ha_washdata/get_recording_state', { state: 'idle', duration_s: 0, sample_count: 0 });
+  // The Dryer's Stop acknowledgement lands now: its read is for an appliance not shown.
+  const applied = await page.evaluate(
+    () => (document.querySelector('ha-washdata-panel') as any)._fetchRecState('test-entry-002', true),
+  );
+  expect(applied).toBe(false);
+  await poll(page);
+  await expect(page.locator('[data-action="rec-start"]')).toBeVisible({ timeout: 5_000 });
+  await expect(page.locator('[data-action="rec-process-open"]')).toHaveCount(0);
+});

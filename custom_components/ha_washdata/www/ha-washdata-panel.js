@@ -2504,7 +2504,7 @@ class HaWashdataPanel extends HTMLElement {
     this._matchDebugAppliedSeq = 0;
     this._recStateReqSeq = 0;
     this._recStateAppliedSeq = 0;
-    this._recStatePending = null;  // {eid, seq}: a transition's read not yet landed
+    this._recStatePending = new Map();  // eid -> seq: a transition's read not yet landed
     this._cycles = [];
     this._refCycles = [];  // imported store recordings (shown alongside real cycles)
     this._shareableCycles = [];  // get_shareable_cycles result for the share-device tree
@@ -3447,7 +3447,7 @@ class HaWashdataPanel extends HTMLElement {
           // active recording (#313).
           // A Start/Stop/Discard/Process whose own read failed is read again too.
           const row = shownRow();
-          const recPending = !!(this._recStatePending && this._recStatePending.eid === dev.entry_id);
+          const recPending = this._recStatePending.has(dev.entry_id);
           if (this._canEdit() && row && (row.recording || recPending) && await this._fetchRecState(dev.entry_id)) {
             liveApplied = true;
           }
@@ -4538,15 +4538,17 @@ class HaWashdataPanel extends HTMLElement {
   // sent at or after it lands, the poll retries it whatever dev.recording says
   // (PR #529 review). Without that, a failed read after Stop kept offering Stop
   // (the poll reads only while recording) and one after Discard kept Process.
+  // One mark per appliance: another appliance's late Stop must not replace the
+  // shown one's (its read is not applied there, and the mark it replaced is gone).
   async _fetchRecState(eid, transition = false) {
     const seq = ++this._recStateReqSeq;
-    if (transition) this._recStatePending = { eid, seq };
+    if (transition) this._recStatePending.set(eid, seq);
     try {
       const rs = await this._ws({ type: `${_DOMAIN}/get_recording_state`, entry_id: eid });
       if (!this._isActiveEntry(eid) || seq < this._recStateAppliedSeq) return false;
       this._recState = rs; this._recStateAppliedSeq = seq;
-      const p = this._recStatePending;
-      if (p && p.eid === eid && seq >= p.seq) this._recStatePending = null;
+      const p = this._recStatePending.get(eid);
+      if (p !== undefined && seq >= p) this._recStatePending.delete(eid);
       return true;
     } catch (_) { return false; }
   }
