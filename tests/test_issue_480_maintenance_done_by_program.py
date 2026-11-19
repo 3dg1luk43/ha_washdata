@@ -59,7 +59,7 @@ async def test_too_many_programs_are_refused(hass: HomeAssistant) -> None:
 async def test_a_finished_cycle_of_a_listed_program_logs_the_task(hass: HomeAssistant) -> None:
     store = _store(hass, "Cotton 90", "Eco")
     with patch.object(store, "async_save", AsyncMock()):
-        task = await store.async_add_maintenance_task("Hot wash", days=30)
+        task = await store.async_add_maintenance_task("Hot wash", days=3650)  # never due by the calendar: the cycle log is what is tested
         await store.async_set_maintenance_programs("drum_clean", ["Cotton 90"])
         await store.async_set_maintenance_programs(task["id"], ["Cotton 90"])
     store.set_lifetime_cycle_count(40, force=True)

@@ -5318,8 +5318,14 @@ async def ws_set_suggestion_lock(
                 _err_not_found(connection, msg["id"], entry_id)
                 return
             await manager.profile_store.set_suggestion_locked(key, bool(msg["locked"]))
-        learning = getattr(manager, "learning_manager", None)
-        if msg["locked"] and learning is not None:
+        # Looked up after the write: an unload during it retires `manager`, and a
+        # check spawned on it would save its retired store (review of PR #529).
+        current = _get_manager(hass, entry_id)
+        learning = getattr(current, "learning_manager", None) if current is not None else None
+        if (
+            msg["locked"] and learning is not None
+            and getattr(current, "_is_shutdown", False) is not True
+        ):
             # The muted entry may be what made another pending one safe (PR #529).
             learning.schedule_joint_end_gate_check()
         manager.notify_update()

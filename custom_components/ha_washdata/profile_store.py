@@ -3862,6 +3862,13 @@ class ProfileStore:
         _reason = meta.get("termination_reason")
         if isinstance(_reason, str) and _reason:
             cycle["termination_reason"] = _reason
+        # The user's trim or edit (register item 384's sibling): the envelope build
+        # treats either as a corrected length, which the #531 cut-off vote never
+        # overrules (review of PR #529). Not golden: a store import still shapes
+        # no profile that has runs of the user's own.
+        for _marker in ("trim", "edited"):
+            if meta.get(_marker):
+                cycle["meta"][_marker] = meta[_marker]
         _manual = meta.get("manual_duration")
         if _manual is not None and not isinstance(_manual, bool):
             with contextlib.suppress(TypeError, ValueError, OverflowError):
@@ -12995,6 +13002,15 @@ class ProfileStore:
                                 c.get("manual_duration")
                                 if device_type_match
                                 else None
+                            ),
+                            # Its trim or edit, under the same device gate.
+                            **(
+                                {
+                                    k: (c.get("meta") or {}).get(k)
+                                    for k in ("trim", "edited")
+                                }
+                                if device_type_match and isinstance(c.get("meta"), dict)
+                                else {}
                             ),
                         },
                         id_pool=ref_id_pool,

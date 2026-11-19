@@ -4251,8 +4251,12 @@ class WashDataManager:
         # (PR #529 review). Wait for the detector to hold the pick.
         if self._manual_program_active and self.detector.matched_profile != self._current_program:
             return False
-        # A pick cleared mid-cycle: the detector's match is still the cleared one.
-        if self._door_gate_awaits_match:
+        # A pick cleared mid-cycle: the detector's match is still the cleared one
+        # until an automatic match replaces it. A new pick is judged by the two
+        # checks above instead: it reaches the detector through its own matcher
+        # branch, never through the automatic match that clears this (review of
+        # PR #529).
+        if self._door_gate_awaits_match and not self._manual_program_active:
             return False
         # Nor while it holds the pick at a length the pick no longer has: the same
         # program re-picked after its learned length changed (PR #529 review).

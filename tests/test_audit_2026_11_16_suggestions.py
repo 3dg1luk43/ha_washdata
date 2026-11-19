@@ -528,13 +528,15 @@ async def test_the_sensor_counts_what_settings_shows(
 def test_the_latest_moment_is_found_between_two_grid_points() -> None:
     """PR #529 review: the window energy rises through the limit between two grid
     points, so the latest moment at or under it is that crossing. 0 W, then 5 W
-    from 1000 s into the pause: 180 s x 5 W passes 0.05 Wh at 1036 s, not 1000."""
+    from 1000 s into the pause: 180 s x 5 W passes 0.05 Wh at 1036 s, not 1000.
+    Plus the 100 s since the last high reading, which the quiet timer credits (too
+    few intervals to know a cadence: uncapped, as in the detector)."""
     from custom_components.ha_washdata.suggestion_engine import end_gate_pause_needs  # noqa: PLC0415
 
     pts = [(0.0, 100.0), (100.0, 0.0), (1100.0, 5.0), (2100.0, 50.0)]
-    assert end_gate_pause_needs(pts, 6.0, 180, 0.05) == [1036.0]
-    assert end_gate_would_split(pts, 6.0, 180, 1020, 0.05)
-    assert not end_gate_would_split(pts, 6.0, 180, 1040, 0.05)
+    assert end_gate_pause_needs(pts, 6.0, 180, 0.05) == [1136.0]
+    assert end_gate_would_split(pts, 6.0, 180, 1120, 0.05)
+    assert not end_gate_would_split(pts, 6.0, 180, 1140, 0.05)
 
 
 def test_a_non_finite_reading_does_not_stall_the_pause_scan() -> None:
@@ -546,8 +548,8 @@ def test_a_non_finite_reading_does_not_stall_the_pause_scan() -> None:
     nan = float("nan")
     pts = [(0.0, 100.0), (100.0, 0.0), (1100.0, 5.0), (2100.0, 50.0)]
     with_nan = [(0.0, nan), *pts[:2], (600.0, nan), (700.0, float("inf")), *pts[2:]]
-    assert end_gate_pause_needs(with_nan, 6.0, 180, 0.05) == [1036.0]
-    assert end_gate_would_split(with_nan, 6.0, 180, 1020, 0.05)
+    assert end_gate_pause_needs(with_nan, 6.0, 180, 0.05) == [1136.0]
+    assert end_gate_would_split(with_nan, 6.0, 180, 1120, 0.05)
     assert end_gate_pause_needs([(0.0, nan), (10.0, nan)], 6.0, 180, 0.05) == []
 
 
@@ -1381,6 +1383,54 @@ def test_the_pause_scan_also_reads_energy_as_the_detector_does() -> None:
     work = [(float(t), 300.0) for t in range(0, 600, 60)]
     pause = [(600.0 + t, 2.0) for t in range(0, 1000, 60)]
     pts = work + pause + [(1600.0, 300.0), (1660.0, 300.0)]
-    assert end_gate_pause_needs(pts, 5.0, 200, 0.105) == [960.0]
+    # 960 s from the first quiet reading, plus the 60 s the quiet timer credits.
+    assert end_gate_pause_needs(pts, 5.0, 200, 0.105) == [1020.0]
     assert end_gate_would_split(pts, 5.0, 200, 210, 0.105)
     assert not end_gate_would_split(pts, 5.0, 200, 1200, 0.105)
+
+
+def test_a_pause_is_measured_from_where_the_quiet_timer_starts() -> None:
+    """Review of PR #529: the live quiet timer credits the interval since the last
+    high reading (capped at the gate cadence), so with a 30 s cadence a pause from
+    1000 s to a resume at 1200 s is 210 s long at its last quiet reading: a 210 s
+    Min Off Gap splits it, 240 s bridges it."""
+    from custom_components.ha_washdata.suggestion_engine import end_gate_would_split  # noqa: PLC0415
+
+    pts = [(float(t), 300.0) for t in range(10, 971, 30)]
+    pts += [(float(t), 0.0) for t in range(1000, 1181, 30)]
+    pts += [(1200.0, 300.0), (1230.0, 300.0)]
+    assert end_gate_would_split(pts, 5.0, 180, 210, 0.05)
+    assert not end_gate_would_split(pts, 5.0, 180, 240, 0.05)
+
+
+async def test_a_mute_schedules_no_check_on_a_manager_retired_by_its_write(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """Review of PR #529: an unload during the mute's save retired the manager; the
+    joint check spawned on it would have saved its retired store."""
+    from unittest.mock import patch  # noqa: PLC0415
+
+    entry = await setup_washdata_entry()
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store = manager.profile_store
+    real = store.set_suggestion_locked
+    scheduled: list[Any] = []
+
+    async def retire_during(*a: Any, **k: Any) -> Any:
+        out = await real(*a, **k)
+        manager._is_shutdown = True  # noqa: SLF001 - the unload
+        hass.data[DOMAIN].pop(entry.entry_id, None)
+        return out
+
+    client = await hass_ws_client(hass)
+    with patch.object(store, "set_suggestion_locked", side_effect=retire_during), \
+            patch.object(type(manager.learning_manager), "schedule_joint_end_gate_check",
+                         lambda self: scheduled.append(self)):
+        await client.send_json_auto_id({
+            "type": f"{DOMAIN}/set_suggestion_lock", "entry_id": entry.entry_id,
+            "key": CONF_START_THRESHOLD_W, "locked": True,
+        })
+        await client.receive_json()
+    assert scheduled == []
+    manager._is_shutdown = False  # noqa: SLF001
+    hass.data[DOMAIN][entry.entry_id] = manager

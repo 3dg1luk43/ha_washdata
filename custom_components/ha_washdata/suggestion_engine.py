@@ -53,6 +53,7 @@ from .const import (
     CONF_MIN_POWER,
     CONF_POWER_SENSOR,
     DEFAULT_MIN_POWER,
+    GATE_CADENCE_MEDIAN_FACTOR,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_ANTI_WRINKLE_ENABLED,
@@ -170,6 +171,7 @@ def end_gate_pause_needs(
         # never get past it (PR #529 review); every finite one moves it on.
         points = [(t, p) for t, p in points if math.isfinite(t) and math.isfinite(p)]
         n = len(points)
+        cadence = _trace_gate_cadence([t for t, _p in points])
         # From the first working reading: a leading quiet is the standby before the
         # cycle, not a pause it bridged (PR #529 review).
         i = next((k for k, (_t, p) in enumerate(points) if p >= stop), n)
@@ -187,7 +189,15 @@ def end_gate_pause_needs(
                 break  # the trailing quiet: the end itself, not a pause
             if points[j][0] - points[j - 1][0] > max_gap_s:
                 outage = True
+            # Where the detector's quiet timer starts: it credits the interval since
+            # the last reading at or above the stop, capped at its gate cadence
+            # (review of PR #529), so the pause is that much longer than its
+            # first quiet reading says.
             t0 = points[i][0]
+            if i > 0:
+                lead = points[i][0] - points[i - 1][0]
+                if 0 < lead <= max_gap_s:
+                    t0 -= lead if cadence is None else min(lead, cadence)
             t_resume = points[j][0]
             need = 0.0
             if not outage and t_resume - t0 > window:
@@ -233,6 +243,17 @@ def end_gate_pause_needs(
             raise  # Apply all's check: a failed scan is not "no pause" (PR #529 review)
         return []
     return needs
+
+
+def _trace_gate_cadence(times: list[float]) -> float | None:
+    """The detector's gate cadence for a trace (``CycleDetector._gate_cadence``):
+    its p95 interval, capped at ``GATE_CADENCE_MEDIAN_FACTOR`` x the median; None
+    under five intervals, when the detector caps nothing either."""
+    dts = [b - a for a, b in zip(times, times[1:]) if b > a]
+    if len(dts) < 5:
+        return None
+    arr = np.asarray(dts, dtype=float)
+    return float(min(np.percentile(arr, 95), GATE_CADENCE_MEDIAN_FACTOR * np.median(arr)))
 
 
 def _detector_gate_need(
@@ -1322,8 +1343,10 @@ def start_above_running(
         return {
             "low_w": _round_level(low_w),
             "cycles": len(lows),
-            "start_w": round(start, 2),
-            "stop_w": round(stop, 2),
+            # As set: rounded, a kW sensor's 0.0045 stop read 0 and the pass kept a
+            # stop above the new start (review of PR #529).
+            "start_w": start,
+            "stop_w": stop,
             "standby_w": round(float(np.median(idles)), 2) if len(idles) >= 2 else None,
         }
     except Exception:  # noqa: BLE001 - a statistic must never break a suggestion pass
@@ -1355,11 +1378,16 @@ def steady_load_threshold_suggestions(adv: dict[str, Any] | None) -> dict[str, A
     margin = STANDBY_FLOOR_MIN_MARGIN_W if low >= 1.0 else STANDBY_FLOOR_MIN_MARGIN_W / 1000.0
     if standby is not None and stop_after < max(standby * STANDBY_FLOOR_RATIO, standby + margin):
         return {}
-    params = {"low": f"{low:.0f}", "start": f"{float(adv['start_w']):g}"}
+    # The reason speaks in watts: a running level under 1 is a kW sensor read raw,
+    # shown as 0 W before (review of PR #529).
+    to_w = 1.0 if low >= 1.0 else 1000.0
+    low_txt = f"{low * to_w:.0f}"
+    start_txt = f"{_round_level(float(adv['start_w']) * to_w):g}"
+    params = {"low": low_txt, "start": start_txt}
     entry = {
         "reason": (
-            f"This appliance runs at {low:.0f} W or more from start to end, but the "
-            f"start threshold is {float(adv['start_w']):g} W, so a run at its lower "
+            f"This appliance runs at {low_txt} W or more from start to end, but the "
+            f"start threshold is {start_txt} W, so a run at its lower "
             f"power never starts. Start set to half its lowest running level, stop "
             f"below that."
         ),

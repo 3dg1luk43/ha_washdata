@@ -75,7 +75,7 @@ def _export(path: Path, min_off_gap: int) -> None:
 
 
 def test_shipped_row_is_suppressed_when_the_guard_withholds_the_key(tmp_path: Path) -> None:
-    # 1200 s in force bridges the 1000 s pause; the sized 460 s would end it there,
+    # 1200 s in force bridges the 1000 s pause; the sized 470 s would end it there,
     # so the model pass withholds the key and the product offers nothing.
     path = tmp_path / "export.json"
     _export(path, 1200)
@@ -89,11 +89,12 @@ def test_shipped_row_is_suppressed_when_the_guard_withholds_the_key(tmp_path: Pa
 
 
 def test_shipped_row_is_the_offered_value_when_the_guard_keeps_it(tmp_path: Path) -> None:
-    # 480 s in force already ends the 1000 s pause, so 460 s splits nothing more.
+    # 480 s in force already ends the 1000 s pause, so 470 s splits nothing more
+    # (400 s pauses, the 10 s the quiet timer credits before each, a 60 s buffer).
     path = tmp_path / "export.json"
     _export(path, 480)
     out = min_off_gap_eval._scan((str(path), False))  # noqa: SLF001
     assert out is not None
     lines, totals = out
     assert "SHIPPED" in totals
-    assert any("SHIPPED" in line and "460s" in line for line in lines), lines
+    assert any("SHIPPED" in line and "470s" in line for line in lines), lines

@@ -233,3 +233,22 @@ def test_the_standby_margin_follows_a_kw_sensor_read_raw() -> None:
     # Watt values keep the watt margin.
     assert steady_load_threshold_suggestions({**adv, "low_w": 100.0, "start_w": 120.0,
                                               "stop_w": 80.0, "standby_w": 39.9}) == {}
+
+
+def test_a_raw_kw_load_keeps_its_exact_stop_and_speaks_in_watts() -> None:
+    """Review of PR #529: a kW sensor read raw, running at 0.008 with Start 0.010
+    and Stop 0.0045: the Stop rounded to 0 stayed above the new 0.004 Start, and
+    the reason said the load ran at 0 W."""
+    def cyc(day: int) -> dict[str, Any]:
+        c = _dryer_cycle(day, 0.0)
+        c["power_data"] = [[30.0 * (i + 1), 0.008 + (0.0002 if i % 2 else -0.0001)] for i in range(120)]
+        return c
+
+    adv = start_above_running([cyc(d) for d in range(8)], 0.010, 0.0045)
+    assert adv is not None and adv["stop_w"] == 0.0045
+    sug = steady_load_threshold_suggestions(adv)
+    start = sug[CONF_START_THRESHOLD_W]["value"]
+    assert start < 0.008
+    assert sug[CONF_STOP_THRESHOLD_W]["value"] < start  # the stop moves under it
+    assert sug[CONF_START_THRESHOLD_W]["reason_params"]["low"] == "8"
+    assert "runs at 8 W" in sug[CONF_START_THRESHOLD_W]["reason"]

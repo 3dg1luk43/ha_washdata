@@ -168,3 +168,26 @@ async def test_a_cleared_pick_waits_for_the_detector_before_a_paused_door_end(
     assert manager._door_end_may_fire() is False  # noqa: SLF001
     manager._door_gate_awaits_match = False  # noqa: SLF001 - what the next match tick does
     assert manager._door_end_may_fire()  # noqa: SLF001
+
+
+async def test_a_new_pick_after_a_cleared_one_reopens_the_paused_door_end(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """Review of PR #529: Eco cleared, then Cotton picked before any automatic
+    match. Cotton reaches the detector through the pin's own matcher branch, so the
+    wait set by the clear must not outlive it; the name and length checks decide."""
+    manager, _ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    held = float(manager.detector.expected_duration_seconds)
+    manager._manual_program_active = True  # noqa: SLF001
+    manager._current_program = manager.detector.matched_profile  # noqa: SLF001
+    manager._matched_profile_duration = held  # noqa: SLF001
+    manager.clear_manual_program()
+    assert manager._door_end_may_fire() is False  # noqa: SLF001 - auto-detect: wait
+    # The new pick, held by the detector at its own length.
+    manager._manual_program_active = True  # noqa: SLF001
+    manager._current_program = manager.detector.matched_profile  # noqa: SLF001
+    manager._matched_profile_duration = held  # noqa: SLF001
+    assert manager._door_end_may_fire()  # noqa: SLF001
+    # Picked but not yet held at its length: still waits.
+    manager._matched_profile_duration = held * 2  # noqa: SLF001
+    assert manager._door_end_may_fire() is False  # noqa: SLF001

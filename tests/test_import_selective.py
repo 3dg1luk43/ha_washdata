@@ -686,3 +686,25 @@ async def test_a_reference_copy_keeps_its_keepalive_rows(store):
     assert len(refs) == 1
     assert refs[0]["power_data"][0][0] == 0.0
     assert refs[0]["synthetic_offsets"] == [o - 100.0 for o in syn]
+
+
+@pytest.mark.asyncio
+async def test_a_reference_copy_keeps_the_user_s_trim(store):
+    """Review of PR #529: a trimmed run imported as a reference lost its trim and
+    edit markers, so the #531 cut-off vote could drop it beside longer runs."""
+    cyc = {**_cyc("t1", "Cotton", 500.0), "meta": {"trim": [0.0, 1800.0], "edited": True}}
+    payload = _payload(profiles={"Cotton": {"avg_duration": 1800}}, past=[cyc])
+    await store.async_import_data_selective(
+        payload, selection={"categories": ["profiles", "real_cycles"]},
+        local_device_type="washing_machine",
+    )
+    meta = store.get_reference_cycles()[0]["meta"]
+    assert meta["trim"] == [0.0, 1800.0] and meta["edited"] is True
+    assert not (store.get_reference_cycles()[0].get("ml_review") or {}).get("golden")
+    # Another appliance type's trim is not this device's correction.
+    other = _fresh_store(store.hass, "e2")
+    await other.async_import_data_selective(
+        _payload(profiles={"Cotton": {"avg_duration": 1800}}, past=[cyc], device_type="dishwasher"),
+        selection={"categories": ["profiles", "real_cycles"]}, local_device_type="washing_machine",
+    )
+    assert "trim" not in other.get_reference_cycles()[0]["meta"]
