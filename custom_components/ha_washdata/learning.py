@@ -385,6 +385,11 @@ class LearningManager:
         self._summaries_in_flight: int = 0
         self._operational_pass_waiting: bool = False
         self._cadence_epoch: int = 0
+        # ``[sensor, summary, done]`` per committed cycle, in cycle order: a
+        # summary is stored only once every earlier one is, so a late job cannot
+        # store an older cycle (or the old sensor's) over a newer one (PR #529
+        # review).
+        self._summary_queue: deque[list[Any]] = deque()
         self._last_batch_simulation_count: int = 0  # track when to re-run batch
         self._last_suggestions_labeled_count: int = 0  # gate model/detection passes
         # Bumped by every refresh (an options reload, a device type change): a pass
@@ -763,22 +768,26 @@ class LearningManager:
         pass waits for it (``run_due_operational_pass``). Inline without a loop
         (sync callers, tests).
         """
+        slot: list[Any] = [sensor, None, False]
+        self._summary_queue.append(slot)
         try:
             asyncio.get_running_loop()
         except RuntimeError:
-            self._store_cycle_summary(_held_cadence(pending), sensor)
+            slot[1:] = [_held_cadence(pending), True]
+            self._store_finished_summaries()
             return
         self._summaries_in_flight += 1
-        coro = self._async_commit_cycle_summary(pending, sensor, self._cadence_epoch)
+        coro = self._async_commit_cycle_summary(pending, slot, self._cadence_epoch)
         task = self._spawn(coro)
         if not isinstance(task, asyncio.Future):
             # Nothing runs it (a mocked hass): inline, or the due pass would wait forever.
             coro.close()
             self._summaries_in_flight -= 1
-            self._store_cycle_summary(_held_cadence(pending), sensor)
+            slot[1:] = [_held_cadence(pending), True]
+            self._store_finished_summaries()
 
     async def _async_commit_cycle_summary(
-        self, pending: deque[tuple[float, datetime]], sensor: str | None, epoch: int
+        self, pending: deque[tuple[float, datetime]], slot: list[Any], epoch: int
     ) -> None:
         """``_commit_cycle_summary``'s executor job; then the pass that waited for it."""
         summary: tuple[float, float] | None = None
@@ -789,20 +798,34 @@ class LearningManager:
         finally:
             if epoch == self._cadence_epoch:
                 self._summaries_in_flight = max(0, self._summaries_in_flight - 1)
+                # Finished, even cancelled: a later cycle's summary never waits on it.
+                slot[1:] = [summary, True]
         if epoch != self._cadence_epoch:
             # A wipe or Undo Import replaced the history it was measured into.
             return
-        self._store_cycle_summary(summary, sensor)
+        self._store_finished_summaries()
         if not self._summaries_in_flight and self._operational_pass_waiting:
             self.run_due_operational_pass()
 
-    def _store_cycle_summary(self, summary: tuple[float, float] | None, sensor: str | None) -> None:
+    def _store_finished_summaries(self) -> bool:
+        """Store the finished summaries at the head of the queue, in cycle order."""
+        stored = False
+        queue = self._summary_queue
+        while queue and queue[0][2]:
+            sensor, summary, _done = queue.popleft()
+            stored = self._store_cycle_summary(summary, sensor) or stored
+        return stored
+
+    def _store_cycle_summary(self, summary: tuple[float, float] | None, sensor: str | None) -> bool:
+        """Keep ``summary`` for ``sensor``; whether it was stored. Never raises."""
         if summary is None:
-            return
+            return False
         try:
             self.profile_store.add_cadence_summary(*summary, sensor=sensor)
         except Exception:  # pylint: disable=broad-exception-caught
             self._logger.debug("Could not store the cycle cadence", exc_info=True)
+            return False
+        return True
 
     def cadence(self) -> tuple[float, float] | None:
         """``(p95, median)`` update interval the operational pass sizes from (item 637).
@@ -854,6 +877,7 @@ class LearningManager:
         self._operational_pass_due = False
         self._cadence_epoch += 1
         self._summaries_in_flight = 0
+        self._summary_queue.clear()
         self._operational_pass_waiting = False
 
     def run_due_operational_pass(self) -> None:

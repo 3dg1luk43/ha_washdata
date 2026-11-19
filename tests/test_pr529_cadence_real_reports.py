@@ -7,6 +7,7 @@ long low-power phase, kept alive every 30 s, learned a 30 s cadence.
 """
 from __future__ import annotations
 
+import asyncio
 import threading
 from datetime import timedelta
 from typing import Any
@@ -164,3 +165,43 @@ async def test_a_wipe_discards_a_summary_still_in_the_executor(
     assert lm.close_cycle_cadence(_CLEAN_END)
     await hass.async_block_till_done()
     assert store.get_cadence_summaries(POWER) == [[2.0, 2.0]]
+
+
+async def test_summaries_are_stored_in_cycle_order(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """PR #529 review: the old sensor's last summary, still in the executor when the
+    first cycle on the replacement sensor ended, landed after it and replaced the
+    new sensor's rows. A summary is stored only after every earlier one."""
+    entry = await setup_washdata_entry(power_sensor=POWER, options=OPTIONS)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    lm, store = manager.learning_manager, manager.profile_store
+    started, release = threading.Event(), threading.Event()
+    real = learning._held_cadence  # noqa: SLF001
+    calls: list[int] = []
+
+    def held(pending: Any) -> Any:
+        calls.append(1)
+        if len(calls) == 1:  # the old sensor's cycle: slow
+            started.set()
+            release.wait(5)
+        return real(pending)
+
+    new_sensor = "sensor.new_plug"
+    with patch.object(learning, "_held_cadence", held):
+        _hold_a_long_cycle(lm)  # on POWER
+        assert lm.close_cycle_cadence(_CLEAN_END)
+        assert await hass.async_add_executor_job(started.wait, 5)
+        lm._pending_sensor = new_sensor  # noqa: SLF001 - the swap
+        lm._pending_intervals.extend((5.0, dt_util.utcnow()) for _ in range(100))  # noqa: SLF001
+        assert lm.close_cycle_cadence(_CLEAN_END)
+        for _ in range(200):  # the new sensor's summary is done first
+            await asyncio.sleep(0.01)
+            if len(calls) == 2:
+                break
+        await asyncio.sleep(0.05)  # ...and back on the loop
+        assert len(calls) == 2 and not release.is_set()
+        release.set()
+        await hass.async_block_till_done()
+    assert store.get_cadence_summaries(new_sensor) == [[5.0, 5.0]]
+    assert store.get_cadence_summaries(POWER) == []
