@@ -4856,13 +4856,16 @@ class WashDataManager:
         # it, so the detector stops crediting quiet until the next real reading
         # (register item 266, audit DETECT-13). Returning without a trace left
         # the watchdog's keepalives to run out the end gates during a dropout.
-        if new_state is None or new_state.state in (STATE_UNKNOWN, STATE_UNAVAILABLE):
+        power = (
+            None if new_state is None or new_state.state in (STATE_UNKNOWN, STATE_UNAVAILABLE)
+            else self._state_power(new_state)
+        )
+        if new_state is None or power is None:
             self.detector.mark_sensor_unavailable(utc_now())
-            return
-
-        power = self._state_power(new_state)
-        if power is None:
-            self.detector.mark_sensor_unavailable(utc_now())
+            # No cadence interval spans the outage: the first report after it
+            # starts a new one, or an 8 min dropout of a 30 s reporter was
+            # learned as one 480 s interval (PR #529 review).
+            self._last_sensor_report = None
             return
 
         # Capture every raw sensor reading before any throttling or processing.

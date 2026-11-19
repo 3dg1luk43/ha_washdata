@@ -263,3 +263,27 @@ async def test_both_ends_of_an_interval_are_read_on_the_report_clock(
     )
     assert [d for d, _ts in pending] == [120.0]
     assert manager._last_sensor_report == (POWER, stamped)  # noqa: SLF001
+
+
+async def test_no_interval_is_learned_across_an_outage(
+    hass: HomeAssistant, setup_washdata_entry: Any, freezer: Any
+) -> None:
+    """PR #529 review: a 30 s reporter unavailable for 8 min. Its first report
+    after the outage was measured from the one before it, and the 480 s interval
+    went into the cadence the watchdog and timeout suggestions are sized from.
+    The first report after it starts a new interval; reports go on at 30 s."""
+    entry = await setup_washdata_entry(power_sensor=POWER, options=OPTIONS)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    for _ in range(10):
+        await _tick(hass, freezer, 200)
+    assert manager.check_state() == "running"
+    pending = manager.learning_manager._pending_intervals  # noqa: SLF001
+    pending.clear()
+    hass.states.async_set(POWER, "unavailable")
+    await hass.async_block_till_done()
+    for _ in range(16):
+        await _tick(hass, freezer, None)
+    for _ in range(3):
+        await _tick(hass, freezer, 200)
+    assert manager.check_state() == "running"
+    assert [round(d) for d, _ts in pending] == [30, 30]
