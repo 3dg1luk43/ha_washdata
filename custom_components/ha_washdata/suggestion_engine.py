@@ -18,7 +18,6 @@
 
 from __future__ import annotations
 
-from bisect import bisect_right
 import copy
 import logging
 import math
@@ -32,6 +31,7 @@ from homeassistant.core import HomeAssistant, callback
 from .const import (
     power_unit_scale,
     QUIET_PULSE_DEVICE_TYPES,
+    QUIET_PULSE_MAX_S,
     STANDBY_BAND_WINDOW_S,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
@@ -78,8 +78,10 @@ from .const import (
 )
 from .options_utils import option_int
 from .signal_processing import (
+    cumulative_held_wh,
     cumulative_wh,
     energy_gap_threshold_s,
+    held_wh_until,
     integrate_wh,
     longest_resumed_pause_s,
     median_fast,
@@ -154,6 +156,7 @@ def end_gate_pause_needs(
     max_gap_s: float = 3600.0,
     *,
     strict: bool = False,
+    pulse_max_w: float | None = None,
 ) -> list[float]:
     """How long each pause of a stored cycle must be bridged to keep it whole, s.
 
@@ -167,8 +170,11 @@ def end_gate_pause_needs(
     ``max(off_delay, min_off_gap)``, must exceed it. 0 when the energy gate holds
     the whole pause (a dishwasher's drying draw over a long window), so
     ``min_off_gap`` need not cover it. Unmatched behaviour, the worst case: no
-    Smart Termination, no matched deferral. A run straddling an outage-sized gap
-    is skipped. Pure; never raises.
+    Smart Termination, no matched deferral. A run with an outage-sized gap is
+    judged on the quiet observed before it (the gate can close there; the hole is
+    not credited). ``pulse_max_w`` (dryers, #474): short pulses the detector's
+    quiet tallies ignore (:func:`_quiet_pulses`) neither end the run nor count as
+    quiet; the needs are quiet seconds. Pure; never raises.
     """
     needs: list[float] = []
     try:
@@ -180,6 +186,9 @@ def end_gate_pause_needs(
         # A NaN reading is neither at nor below the stop, so the scan below would
         # never get past it (PR #529 review); every finite one moves it on.
         points = [(t, p) for t, p in points if math.isfinite(t) and math.isfinite(p)]
+        spans: list[tuple[float, float]] = []
+        if pulse_max_w is not None and math.isfinite(pulse_max_w):
+            points, spans = _quiet_pulses(points, stop, pulse_max_w)
         n = len(points)
         times_all = [t for t, _p in points]
         # From the first working reading: a leading quiet is the standby before the
@@ -190,15 +199,17 @@ def end_gate_pause_needs(
                 i += 1
                 continue
             j = i
-            outage = False
             while j < n and points[j][1] < stop:
-                if j > i and points[j][0] - points[j - 1][0] > max_gap_s:
-                    outage = True
                 j += 1
             if j >= n:
                 break  # the trailing quiet: the end itself, not a pause
-            if points[j][0] - points[j - 1][0] > max_gap_s:
-                outage = True
+            # The observed run ends at an outage-sized hole: the gate can close in
+            # the quiet before it, never on the hole itself (review of PR #529:
+            # skipping the whole run passed a wait that quiet already reached).
+            end = next(
+                (k for k in range(i + 1, j + 1) if points[k][0] - points[k - 1][0] > max_gap_s),
+                None,
+            )
             # Where the detector's quiet timer starts: it credits the interval since
             # the last reading at or above the stop, capped at its gate cadence
             # (review of PR #529), so the pause is that much longer than its
@@ -208,19 +219,15 @@ def end_gate_pause_needs(
                 lead = points[i][0] - points[i - 1][0]
                 if 0 < lead <= max_gap_s:
                     t0 -= _quiet_credit(times_all, i, lead)
-            t_resume = points[j][0]
+            if end is None:
+                last, t_resume = j, points[j][0]
+            else:
+                last, t_resume = end, points[end - 1][0] + 1e-3
             need = 0.0
-            if not outage and t_resume - t0 > window:
-                times = [points[k][0] for k in range(i, j)]
-                watts = [points[k][1] for k in range(i, j)]
-                cum = [0.0]
-                for k in range(1, len(times)):
-                    cum.append(cum[-1] + watts[k - 1] * (times[k] - times[k - 1]) / 3600.0)
-
-                def energy_until(t: float) -> float:
-                    k = bisect_right(times, t) - 1
-                    k = max(0, min(k, len(times) - 1))
-                    return cum[k] + watts[k] * (t - times[k]) / 3600.0
+            if t_resume - t0 > window:
+                times = [points[k][0] for k in range(i, last)]
+                watts = [points[k][1] for k in range(i, last)]
+                cum = cumulative_held_wh(times, watts)
 
                 # The window energy W(t) = E(t) - E(t - off_delay) bends only at a
                 # reading time or a reading time + off_delay, so it is linear
@@ -231,21 +238,25 @@ def end_gate_pause_needs(
                 for t in times:
                     grid.update((t, t + window))
                 points_t = sorted(t for t in grid if t0 + window <= t < t_resume)
-                values = [energy_until(t) - energy_until(t - window) for t in points_t]
+                values = [
+                    held_wh_until(times, watts, cum, t)
+                    - held_wh_until(times, watts, cum, t - window)
+                    for t in points_t
+                ]
                 for k, (t, w_t) in enumerate(zip(points_t, values)):
                     if w_t > limit:
                         continue
-                    need = max(need, t - t0)
+                    need = max(need, _quiet_s(t0, t, spans))
                     if k + 1 < len(points_t) and values[k + 1] > limit:
                         t_next, w_next = points_t[k + 1], values[k + 1]
                         crossing = t + (limit - w_t) / (w_next - w_t) * (t_next - t)
-                        need = max(need, crossing - t0)
+                        need = max(need, _quiet_s(t0, crossing, spans))
                 # ...and as the detector computes it (review of PR #529): at a
                 # reading, the trapezoid over the readings inside the window, its
                 # outage gaps masked. That can be lower than the held energy above
                 # (the window's first reading is not at its start), so a pause the
                 # held model bridges can still end live. Either closing counts.
-                need = max(need, _detector_gate_need(times, watts, t0, window, limit))
+                need = max(need, _detector_gate_need(times, watts, t0, window, limit, spans))
             needs.append(need)
             i = j
     except Exception:  # noqa: BLE001 - a guard must never break a suggestion pass
@@ -253,6 +264,49 @@ def end_gate_pause_needs(
             raise  # Apply all's check: a failed scan is not "no pause" (PR #529 review)
         return []
     return needs
+
+
+def _quiet_pulses(
+    points: list[tuple[float, float]], stop: float, max_w: float
+) -> tuple[list[tuple[float, float]], list[tuple[float, float]]]:
+    """The trace without the pulses a dryer's quiet tallies ignore, and their spans.
+
+    ``CycleDetector`` (#474, ``QUIET_PULSE_DEVICE_TYPES``): once the cycle runs, an
+    excursion at or above the stop from a quiet reading, peaking at or below
+    ``anti_wrinkle_max_power`` and back below the stop within ``QUIET_PULSE_MAX_S``,
+    neither resets the quiet run nor counts as quiet, and the end gates' windows
+    skip it. Returns the readings left and each pulse's (first reading, first
+    reading back below) span (review of PR #529).
+    """
+    keep: list[tuple[float, float]] = []
+    spans: list[tuple[float, float]] = []
+    n = len(points)
+    running = False
+    i = 0
+    while i < n:
+        if points[i][1] < stop:
+            keep.append(points[i])
+            i += 1
+            continue
+        j = i
+        while j < n and points[j][1] >= stop:
+            j += 1
+        if (
+            running and i > 0 and j < n
+            and points[j][0] - points[i][0] <= QUIET_PULSE_MAX_S
+            and max(p for _t, p in points[i:j]) <= max_w
+        ):
+            spans.append((points[i][0], points[j][0]))
+        else:
+            keep.extend(points[i:j])
+            running = True
+        i = j
+    return keep, spans
+
+
+def _quiet_s(t0: float, t: float, spans: list[tuple[float, float]]) -> float:
+    """Quiet seconds from ``t0`` to ``t``: the time less the pulses' spans in it."""
+    return (t - t0) - sum(max(0.0, min(b, t) - max(a, t0)) for a, b in spans)
 
 
 def _quiet_credit(times: list[float], i: int, lead: float) -> float:
@@ -274,12 +328,15 @@ def _quiet_credit(times: list[float], i: int, lead: float) -> float:
 
 
 def _detector_gate_need(
-    times: list[float], watts: list[float], t0: float, window: float, limit: float
+    times: list[float], watts: list[float], t0: float, window: float, limit: float,
+    spans: list[tuple[float, float]] | None = None,
 ) -> float:
     """The latest reading of a pause, at least ``window`` into it, at which the
     detector's end-energy gate would pass (``CycleDetector``: ``integrate_wh`` over
     the readings no older than ``window``, gaps over ``energy_gap_threshold_s`` of
-    those readings left out), as seconds into the pause; 0 when none would."""
+    those readings left out), as quiet seconds into the pause (``spans``: dryer
+    pulses not counted, :func:`_quiet_pulses`); 0 when none would."""
+    spans = spans or []
     ts = np.asarray(times, dtype=float)
     ps = np.asarray(watts, dtype=float)
     m = ts.size
@@ -296,7 +353,7 @@ def _detector_gate_need(
     slow = np.concatenate(([0], np.cumsum(dt > 60.0)))
     first = np.searchsorted(ts, ts - window, side="left")
     for k in range(m - 1, -1, -1):
-        if ts[k] - t0 < window:
+        if _quiet_s(t0, float(ts[k]), spans) < window:
             break
         lo = int(first[k])
         if slow[k] - slow[lo] > 0:
@@ -305,13 +362,13 @@ def _detector_gate_need(
         else:
             energy = float(cum[k] - cum[lo])
         if energy <= limit:
-            return float(ts[k] - t0)
+            return _quiet_s(t0, float(ts[k]), spans)
     return 0.0
 
 
 def _flat_standby_split(
     points: list[tuple[float, float]], stop: float, off_delay: float, gap: float,
-    max_gap_s: float, device_type: str | None,
+    max_gap_s: float, device_type: str | None, pulse_max_w: float | None = None,
 ) -> bool:
     """Would the detector's flat-standby bypass close a pause the energy gate holds?
 
@@ -321,7 +378,9 @@ def _flat_standby_split(
     the spread bar ends the cycle whatever its energy; near the stop at once,
     otherwise only after the loose quiet. A pause at 3.8 W under a 4 W stop is too
     much energy for both energy models, but a shorter wait lets this close it
-    (review of PR #529). Checked at each reading, as the detector is.
+    (review of PR #529). Checked at each reading, as the detector is; with
+    ``pulse_max_w`` a dryer's ignored pulses (:func:`_quiet_pulses`) are not in the
+    window and not quiet, as live.
     """
     # Lazy: cycle_detector imports this module.
     from .cycle_detector import (  # noqa: PLC0415
@@ -341,6 +400,9 @@ def _flat_standby_split(
         (float(t), float(p)) for t, p in points
         if math.isfinite(float(t)) and math.isfinite(float(p))
     ]
+    spans: list[tuple[float, float]] = []
+    if pulse_max_w is not None and math.isfinite(pulse_max_w):
+        points, spans = _quiet_pulses(points, stop, pulse_max_w)
     base_wait = max(float(off_delay), float(gap))
     span = max(float(off_delay), STANDBY_BAND_WINDOW_S)
     loose = (
@@ -370,7 +432,8 @@ def _flat_standby_split(
                 t0 -= _quiet_credit(times, i, lead)
         for k in range(i, j):
             t = times[k]
-            if t - t0 < base_wait:
+            quiet = _quiet_s(t0, t, spans)
+            if quiet < base_wait:
                 continue
             lo = k
             while lo > 0 and t - times[lo - 1] <= span:
@@ -385,7 +448,7 @@ def _flat_standby_split(
                 ENDING_FLAT_STANDBY_SPREAD_FLOOR_W, ENDING_FLAT_STANDBY_SPREAD_FRAC * high
             ):
                 continue
-            if low < ENDING_FLAT_STANDBY_NEAR_STOP_FRAC * stop and t - t0 < max(base_wait, loose):
+            if low < ENDING_FLAT_STANDBY_NEAR_STOP_FRAC * stop and quiet < max(base_wait, loose):
                 continue
             # The detector's ceiling is causal: only the readings it has seen
             # (review of PR #529: a later 1 s burst lowered a whole-trace
@@ -409,6 +472,7 @@ def end_gate_would_split(
     *,
     strict: bool = False,
     device_type: str | None = None,
+    pulse_max_w: float | None = None,
 ) -> bool:
     """Would the fallback end gate close this cycle inside one of its own pauses?
 
@@ -424,16 +488,19 @@ def end_gate_would_split(
         wait = max(float(off_delay_s), float(min_off_gap_s))
     except (TypeError, ValueError):
         return False
+    # The dryer pulse rule is the detector's on QUIET_PULSE_DEVICE_TYPES only.
+    pulses = pulse_max_w if device_type in QUIET_PULSE_DEVICE_TYPES else None
     if any(
         need >= wait > 0
         for need in end_gate_pause_needs(
-            points, stop_w, off_delay_s, end_energy_wh, max_gap_s, strict=strict
+            points, stop_w, off_delay_s, end_energy_wh, max_gap_s, strict=strict,
+            pulse_max_w=pulses,
         )
     ):
         return True
     return wait > 0 and _flat_standby_split(
         points, float(stop_w), float(off_delay_s), float(min_off_gap_s), max_gap_s,
-        device_type,
+        device_type, pulses,
     )
 
 
@@ -2421,11 +2488,18 @@ class SuggestionEngine:
         energy = _num(values.get(CONF_END_ENERGY_THRESHOLD))
         if stop is None or off_delay is None or energy is None:
             return frozenset()
+        # The dryer pulse ceiling (#474) as the detector reads it: the proposed or
+        # stored option, else the default.
+        pulse_max_w = _num(values.get(CONF_ANTI_WRINKLE_MAX_POWER))
+        if pulse_max_w is None and self.device_type in QUIET_PULSE_DEVICE_TYPES:
+            pulse_max_w = _num(self._entry_options().get(CONF_ANTI_WRINKLE_MAX_POWER))
+        if pulse_max_w is None:
+            pulse_max_w = DEFAULT_ANTI_WRINKLE_MAX_POWER
         return frozenset(
             i for i, points in enumerate(evidence)
             if end_gate_would_split(
                 points, stop, off_delay, gap or 0.0, energy, strict=strict,
-                device_type=self.device_type,
+                device_type=self.device_type, pulse_max_w=pulse_max_w,
             )
         )
 
@@ -3053,6 +3127,12 @@ class SuggestionEngine:
         stop_thr = float(_num(eff.get(CONF_STOP_THRESHOLD_W)) or stop_thr)
         gate_off_delay = float(_num(eff.get(CONF_OFF_DELAY)) or DEFAULT_OFF_DELAY)
         gate_end_energy = float(_num(eff.get(CONF_END_ENERGY_THRESHOLD)) or 0.0)
+        # A dryer's short pulses are not quiet and do not end a pause (#474), as live.
+        pulse_max_w: float | None = None
+        if self.device_type in QUIET_PULSE_DEVICE_TYPES:
+            pulse_max_w = _num(self._entry_options().get(CONF_ANTI_WRINKLE_MAX_POWER))
+            if pulse_max_w is None:
+                pulse_max_w = DEFAULT_ANTI_WRINKLE_MAX_POWER
         spans: list[float] = []
         n_traced = 0
         for c in cycles:
@@ -3075,7 +3155,8 @@ class SuggestionEngine:
             # ended 23 min late).
             spans.extend(
                 need for need in end_gate_pause_needs(
-                    readings, stop_thr, gate_off_delay, gate_end_energy, max_gap_s
+                    readings, stop_thr, gate_off_delay, gate_end_energy, max_gap_s,
+                    pulse_max_w=pulse_max_w,
                 ) if need > 0
             )
 

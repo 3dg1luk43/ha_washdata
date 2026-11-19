@@ -713,7 +713,7 @@ def test_a_failed_pause_scan_raises_in_strict_mode_only() -> None:
     from custom_components.ha_washdata import suggestion_engine as se  # noqa: PLC0415
 
     pts = [(0.0, 100.0), (100.0, 0.0), (1100.0, 5.0), (2100.0, 50.0)]
-    with patch.object(se, "bisect_right", side_effect=RuntimeError("boom")):
+    with patch.object(se, "held_wh_until", side_effect=RuntimeError("boom")):
         assert se.end_gate_pause_needs(pts, 6.0, 180, 0.05) == []
         assert se.end_gate_would_split(pts, 6.0, 180, 200, 0.05) is False
         with pytest.raises(RuntimeError):
@@ -1747,3 +1747,59 @@ def test_the_running_integral_is_integrate_wh_per_window() -> None:
         want = integrate_wh(ts[seg], ps[seg], max_gap_s=60.0)
         assert cum[k] - cum[lo] == pytest.approx(want, rel=1e-9, abs=1e-12)
         assert cum[k] - cum[lo] == pytest.approx(integrate_wh(ts[seg], ps[seg]), rel=1e-9, abs=1e-12)
+
+
+def test_the_quiet_before_an_outage_is_judged() -> None:
+    """Review of PR #529: a pause with an outage-sized hole was skipped whole, so a
+    wait the 0 W quiet before the hole already reached passed. The hole itself is
+    not credited: 400 s observed splits at 210 s, not at 900 s."""
+    points = [(float(t), 300.0) for t in range(0, 1200, 10)]
+    points += [(float(t), 0.0) for t in range(1200, 1610, 10)]
+    points += [(float(t), 300.0) for t in range(5300, 6500, 10)]
+    points += [(6500.0 + t, 0.0) for t in range(0, 600, 10)]
+    assert end_gate_would_split(points, 4.0, 180.0, 210.0, 0.05)
+    assert not end_gate_would_split(points, 4.0, 180.0, 900.0, 0.05)
+
+
+def _pulsed_dryer_pause() -> list[tuple[float, float]]:
+    """300 W, an 800 s 3.8 W phase with a single 10 W reading every 90 s, 300 W."""
+    points = [(float(t), 300.0) for t in range(0, 1200, 10)]
+    points += [
+        (float(t), 10.0 if t > 1200 and (t - 1200) % 90 == 0 else 3.8)
+        for t in range(1200, 2000, 10)
+    ]
+    points += [(float(t), 300.0) for t in range(2000, 3200, 10)]
+    return points + [(3200.0 + t, 0.5) for t in range(0, 600, 10)]
+
+
+def test_a_dryer_s_ignored_pulses_do_not_hide_a_split() -> None:
+    """Review of PR #529: the detector keeps a dryer's quiet across short pulses
+    (#474) and leaves them out of its windows, so the flat-standby bypass closes
+    this pause at a 360 s Min Off Gap; 900 s stays whole (about 710 s of quiet).
+    A washer resets on every pulse, as live."""
+    points = _pulsed_dryer_pause()
+    args = (points, 4.0, 180.0)
+    assert end_gate_would_split(*args, 360.0, 0.05, device_type="dryer", pulse_max_w=400.0)
+    assert not end_gate_would_split(*args, 900.0, 0.05, device_type="dryer", pulse_max_w=400.0)
+    assert not end_gate_would_split(*args, 360.0, 0.05, device_type="washing_machine", pulse_max_w=400.0)
+    # Hotter than the anti-crease ceiling: not a pulse, the pause resets.
+    assert not end_gate_would_split(*args, 360.0, 0.05, device_type="dryer", pulse_max_w=5.0)
+
+
+def test_the_held_running_sum_is_the_stored_cycle_integral() -> None:
+    """Review of PR #529: the held model's running sums are shared code and equal
+    integrate_cycle_wh wherever no interval is an outage."""
+    import numpy as np  # noqa: PLC0415
+
+    from custom_components.ha_washdata.signal_processing import (  # noqa: PLC0415
+        cumulative_held_wh,
+        held_wh_until,
+        integrate_cycle_wh,
+    )
+
+    ts = [0.0, 5.0, 65.0, 66.0, 400.0, 401.5]
+    ps = [100.0, 0.0, 2000.0, 3.0, 50.0, 0.0]
+    cum = cumulative_held_wh(ts, ps)
+    assert cum[-1] == pytest.approx(integrate_cycle_wh(np.asarray(ts), np.asarray(ps)))
+    assert held_wh_until(ts, ps, cum, 35.0) == pytest.approx(100.0 * 5 / 3600)
+    assert held_wh_until(ts, ps, cum, 70.0) == pytest.approx((500 + 2000 * 1 + 3 * 4) / 3600)
