@@ -4,6 +4,8 @@
   history was stored into the imported one.
 * A reconfigure away from dishwasher during the one-time #531 rebuild built the
   rest without the rule and still set the marker, so switching back skipped it.
+* Clearing a Min Power override read the unset Stop against the compiled
+  default, not the entry's own Min Power, so the Stop it moved got no row.
 """
 from __future__ import annotations
 
@@ -16,7 +18,12 @@ from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
 
 from custom_components.ha_washdata import learning
-from custom_components.ha_washdata.const import CUT_SHORT_REBUILD_KEY, DOMAIN
+from custom_components.ha_washdata.const import (
+    CONF_MIN_POWER,
+    CONF_STOP_THRESHOLD_W,
+    CUT_SHORT_REBUILD_KEY,
+    DOMAIN,
+)
 
 POWER = "sensor.washer_power"
 _CLEAN_END = {"status": "completed", "termination_reason": "smart"}
@@ -118,3 +125,30 @@ async def test_a_type_change_during_the_cut_short_rebuild_leaves_it_pending(
         await hass.async_block_till_done()
     assert rebuild.await_args.kwargs == {"device_type": "dishwasher"}
     assert not store.cut_short_rebuild_pending()
+
+
+async def test_clearing_min_power_records_the_stop_it_moves_from_entry_data(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """Min Power 5 W in the entry's data, a 2 W override, Stop unset (1.2 W).
+    Clearing the override runs the data's 5 W, so Stop moves to 3 W: recorded for
+    the standby advisory with the 1.2 W the earlier cycles ended under."""
+    entry = await setup_washdata_entry(options={CONF_MIN_POWER: 2.0})
+    hass.config_entries.async_update_entry(entry, data={**entry.data, CONF_MIN_POWER: 5.0})
+    await hass.async_block_till_done()
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({
+        "type": f"{DOMAIN}/set_options", "entry_id": entry.entry_id,
+        "options": {CONF_MIN_POWER: None},
+    })
+    res = await client.receive_json()
+    assert res["success"], res
+    await hass.async_block_till_done()
+    assert CONF_MIN_POWER not in entry.options
+    assert hass.data[DOMAIN][entry.entry_id].detector.config.stop_threshold_w == 3.0
+    rows = {r["key"]: r for r in store.get_settings_changelog()}
+    assert rows[CONF_MIN_POWER]["old"] == 2.0 and rows[CONF_MIN_POWER]["new"] is None
+    stop = rows[CONF_STOP_THRESHOLD_W]
+    assert stop["old"] is None and stop["new"] is None  # Revert changes nothing
+    assert stop["old_effective"] == 1.2

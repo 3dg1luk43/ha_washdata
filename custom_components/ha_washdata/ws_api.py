@@ -883,7 +883,19 @@ async def _record_option_changes(
         changes = _diff_option_changes(old_effective, updates)
         if not changes:
             return
-        _note_stop_in_force(changes, old_effective, {**old_effective, **updates})
+        data = dict(getattr(entry, "data", {}) or {})
+        if before is not None:
+            # Written already: what the detector now runs with. ``updates`` holds
+            # a cleared key as None, which reads as the compiled default; the
+            # entry falls back to its data (Min Power 5 W there: clearing a 2 W
+            # override moved an unset Stop 1.2 W -> 3 W, PR #529 review).
+            new_effective = {**data, **getattr(entry, "options", {})}
+        else:
+            new_effective = {
+                **old_effective,
+                **{k: data.get(k) if v is None else v for k, v in updates.items()},
+            }
+        _note_stop_in_force(changes, old_effective, new_effective)
         manager = _get_manager(hass, entry.entry_id)
         store = getattr(manager, "profile_store", None) if manager else None
         if store is not None:
