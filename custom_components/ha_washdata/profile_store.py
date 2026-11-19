@@ -6488,6 +6488,24 @@ class ProfileStore:
         """Return (min_duration_ratio, max_duration_ratio) used for duration matching."""
         return (float(self._min_duration_ratio), float(self._max_duration_ratio))
 
+    def match_settings(self) -> tuple[Any, ...]:
+        """The entry settings ``async_match_profile`` scores with: the Stage-1
+        ratios, the DTW band, the Stage-4 energy mode, the device type (members,
+        the live rhythm term) and the evidence sources (the templates). For
+        comparison only: a caller holding a ranking across an options reload can
+        tell it was scored under other settings (the #530 check, PR #529 review).
+        Never raises."""
+        try:
+            return (
+                self.get_duration_ratio_limits(),
+                float(self.dtw_bandwidth),
+                self.energy_mode,
+                self.device_type,
+                tuple(self.evidence_sources),
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            return ()
+
     def set_duration_ratio_limits(self, *, min_ratio: float, max_ratio: float) -> None:
         """Update duration ratio bounds used for duration matching."""
         try:

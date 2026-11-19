@@ -1963,6 +1963,10 @@ class WashDataManager:
             # ranking then scored profiles that are gone, even under the same
             # names, so it is discarded and the run of counting matches restarts.
             generation = getattr(self.profile_store, "_data_generation", 0)
+            # The scoring settings (Stage-1 ratios, DTW band, evidence sources), as
+            # the device type below: changed by an options reload while the match
+            # ran, the ranking is the old settings' (PR #529 review).
+            settings = self.profile_store.match_settings()
             result = await self.profile_store.async_match_profile(
                 readings,
                 duration,
@@ -1983,6 +1987,13 @@ class WashDataManager:
                 # perhaps for a type the trigger is not offered for any more.
                 state.streak = 0
                 state.device_type = self.device_type
+                return
+            if self.profile_store.match_settings() != settings:
+                # Scored under settings since replaced (a Stage-1 ratio that now
+                # rejects the pick): discarded, the streak restarted. A fired
+                # mark stays, as for the device type.
+                state.streak = 0
+                state.match_settings = self.profile_store.match_settings()
                 return
             if families != match_rules.program_families(self.profile_store.get_profile_groups()):
                 return
@@ -2006,6 +2017,10 @@ class WashDataManager:
             if state.device_type is not None and state.device_type != device_type:
                 state.streak = 0
             state.device_type = device_type
+            # ...and under other scoring settings BETWEEN two checks.
+            if state.match_settings is not None and state.match_settings != settings:
+                state.streak = 0
+            state.match_settings = settings
             selected = key[2]
             fired = match_rules.program_mismatch_tick(
                 state,

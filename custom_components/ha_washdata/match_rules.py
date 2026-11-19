@@ -1200,10 +1200,12 @@ class ProgramMismatchState:
     that key: the trigger is sent once and the State sensor keeps showing it.
     ``data_generation`` is the caller's stored-data generation the pending
     ``streak`` was counted on, ``families`` the profile groups it was counted
-    under (:func:`program_families`) and ``device_type`` the device type it was
-    matched as: matches on data an import or undo has since replaced, read
-    against groups edited since, or scored as another device type (its matcher
-    settings and trigger offer differ), are no run of evidence.
+    under (:func:`program_families`), ``device_type`` the device type it was
+    matched as and ``match_settings`` the matcher settings it was scored with
+    (``ProfileStore.match_settings``): matches on data an import or undo has
+    since replaced, read against groups edited since, scored as another device
+    type (its matcher settings and trigger offer differ) or under scoring
+    settings changed since (a Stage-1 ratio), are no run of evidence.
 
     ``as_dict`` (the active-cycle snapshot) carries the outcome, not the pending
     streak: the data generation is a counter that restarts with Home Assistant,
@@ -1220,6 +1222,7 @@ class ProgramMismatchState:
     data_generation: Any = None
     families: dict[str, str] | None = None
     device_type: str | None = None
+    match_settings: Any = None
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -1235,6 +1238,7 @@ class ProgramMismatchState:
         self.data_generation = None
         self.families = None
         self.device_type = None
+        self.match_settings = None
         if not isinstance(raw, dict):
             return
         self.fired = raw.get("fired") is True
