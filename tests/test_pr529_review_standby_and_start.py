@@ -107,6 +107,48 @@ def test_a_row_without_the_effective_stop_still_reads_old() -> None:
     assert se.stop_threshold_changes(log)[0][1] == 5.0
 
 
+async def test_min_power_moving_an_unset_stop_is_recorded_as_a_stop_change(
+    hass: HomeAssistant, setup_washdata_entry, hass_ws_client
+) -> None:
+    """PR #529 review: with Stop unset it follows Min Power (#450), so a save of Min
+    Power 10 W -> 3 W moved Stop from 6 W to 1.8 W with no Stop row, and the six
+    ends under 6 W were judged as below 1.8 W, outvoting two 3 W hand stops. The
+    move is recorded for the advisory, not listed as a Stop change in the panel."""
+    entry = await setup_washdata_entry(options={CONF_MIN_POWER: 10.0})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({
+        "type": f"{DOMAIN}/set_options", "entry_id": entry.entry_id,
+        "options": {CONF_MIN_POWER: 3.0},
+    })
+    res = await client.receive_json()
+    assert res["success"], res
+    await hass.async_block_till_done()
+
+    rows = [r for r in store.get_settings_changelog() if r["key"] == CONF_STOP_THRESHOLD_W]
+    assert len(rows) == 1
+    assert rows[0]["old"] is None and rows[0]["new"] is None  # Revert changes nothing
+    assert rows[0]["old_effective"] == 6.0
+    changes = se.stop_threshold_changes(store.get_settings_changelog())
+    assert [old for _when, old in changes] == [6.0]
+
+    changed = changes[0][0]
+    history = [_timeout(d) for d in range(6)]
+    for d, c in enumerate(history):  # all six ended under the 6 W Stop
+        c["end_time"] = (changed - timedelta(days=7 - d)).isoformat()
+    hand = [_hand_stop(0, iso=False), _hand_stop(1, iso=False)]
+    for i, c in enumerate(hand):
+        c["end_time"] = (changed + timedelta(hours=1 + i)).isoformat()
+    adv = se.detect_standby_above_stop(history + hand, 1.8, stop_changes=changes)
+    assert adv is not None and adv["idle_w"] == 3.0
+
+    await client.send_json_auto_id({
+        "type": f"{DOMAIN}/get_settings_changelog", "entry_id": entry.entry_id,
+    })
+    listed = (await client.receive_json())["result"]["changelog"]
+    assert [r["key"] for r in listed] == [CONF_MIN_POWER]
+
+
 def _steady_kw(day: int, level: float) -> dict[str, Any]:
     """An hour at a steady ``level`` kW, 30 s readings, no idle readings kept."""
     start = T0 + timedelta(days=day)

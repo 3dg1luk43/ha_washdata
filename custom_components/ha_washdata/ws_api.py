@@ -780,7 +780,33 @@ def _diff_option_changes(
     return changes
 
 
-def _note_stop_in_force(changes: list[dict[str, Any]], old_merged: dict[str, Any]) -> None:
+def _effective_stop(merged: dict[str, Any]) -> float | None:
+    """The Stop Threshold the detector runs with under ``merged``; None if unknown.
+
+    A None value is an unset key, as the write boundary stores it (#389)."""
+    try:
+        opts = {k: v for k, v in merged.items() if v is not None}
+        device_type = opts.get(CONF_DEVICE_TYPE) or DEFAULT_DEVICE_TYPE
+        value = float(effective_option_values(opts, device_type)[CONF_STOP_THRESHOLD_W])
+    except Exception:  # pylint: disable=broad-exception-caught
+        return None
+    return value if math.isfinite(value) else None
+
+
+def _is_effective_stop_row(row: Any) -> bool:
+    """A row :func:`_note_stop_in_force` added for a Stop the option did not change."""
+    return (
+        isinstance(row, dict)
+        and row.get("key") == CONF_STOP_THRESHOLD_W
+        and row.get("old") == row.get("new")
+    )
+
+
+def _note_stop_in_force(
+    changes: list[dict[str, Any]],
+    old_merged: dict[str, Any],
+    new_merged: dict[str, Any] | None = None,
+) -> None:
     """Give a Stop Threshold row the Stop the detector ran with before the write.
 
     ``old`` is the stored option, None while it was unset and Stop followed Min
@@ -788,18 +814,32 @@ def _note_stop_in_force(changes: list[dict[str, Any]], old_merged: dict[str, Any
     the change ended under (``stop_threshold_changes``, PR #529 review). Recorded as
     ``old_effective``; Revert still restores ``old``. Left out when it cannot be
     resolved, and the reader then falls back to ``old``.
+
+    A write that moves that Stop without a Stop row (Min Power under an unset Stop,
+    #450) gets one, with ``old`` and ``new`` the stored option it left as it was, so
+    a Revert of it changes nothing (PR #529 review). The panel's history leaves
+    such a row out (:func:`_is_effective_stop_row`).
     """
+    if not changes:
+        return
+    before = _effective_stop(old_merged)
+    if before is None:
+        return
     rows = [ch for ch in changes if ch.get("key") == CONF_STOP_THRESHOLD_W]
-    if not rows:
+    for ch in rows:
+        ch["old_effective"] = before
+    if rows or new_merged is None:
         return
-    try:
-        device_type = old_merged.get(CONF_DEVICE_TYPE) or DEFAULT_DEVICE_TYPE
-        value = float(effective_option_values(old_merged, device_type)[CONF_STOP_THRESHOLD_W])
-    except Exception:  # pylint: disable=broad-exception-caught
-        return
-    if math.isfinite(value):
-        for ch in rows:
-            ch["old_effective"] = value
+    after = _effective_stop(new_merged)
+    if after is not None and after != before:
+        stored = _json_safe(old_merged.get(CONF_STOP_THRESHOLD_W))
+        changes.append({
+            "key": CONF_STOP_THRESHOLD_W,
+            "old": stored,
+            "new": stored,
+            "timestamp": changes[0].get("timestamp"),
+            "old_effective": before,
+        })
 
 
 async def _record_option_changes(
@@ -825,7 +865,7 @@ async def _record_option_changes(
         changes = _diff_option_changes(old_effective, updates)
         if not changes:
             return
-        _note_stop_in_force(changes, old_effective)
+        _note_stop_in_force(changes, old_effective, {**old_effective, **updates})
         manager = _get_manager(hass, entry.entry_id)
         store = getattr(manager, "profile_store", None) if manager else None
         if store is not None:
@@ -2473,7 +2513,12 @@ async def ws_get_settings_changelog(
     try:
         store = getattr(manager, "profile_store", None)
         if store is not None:
-            changelog = store.get_settings_changelog()
+            # A Stop moved by another setting is history for the standby advisory,
+            # not a change of the setting the panel lists (``_note_stop_in_force``).
+            changelog = [
+                row for row in store.get_settings_changelog()
+                if not _is_effective_stop_row(row)
+            ]
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug(
             "Error fetching settings changelog for entry %s: %s", entry_id, exc
