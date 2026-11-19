@@ -3308,11 +3308,17 @@ class ProfileStore:
 
         log.sort(key=_age, reverse=True)
 
-        # Keep only the newest entries (list is most-recent-first).
+        # Keep only the newest entries (list is most-recent-first). The slots past
+        # them go to the Stop rows the standby advisory can read
+        # (``stop_threshold_changes``: this device's own, with a readable time);
+        # a merge's foreign rows took them and evicted the last local change (PR
+        # #529 review).
         if len(log) > self.SETTINGS_CHANGELOG_MAX:
+            from .suggestion_engine import stop_threshold_changes  # noqa: PLC0415
+
             older_stops = [
                 row for row in log[self.SETTINGS_CHANGELOG_MAX:]
-                if isinstance(row, dict) and row.get("key") == CONF_STOP_THRESHOLD_W
+                if isinstance(row, dict) and stop_threshold_changes([row])
             ][: self.SETTINGS_CHANGELOG_KEEP_STOP]
             log[self.SETTINGS_CHANGELOG_MAX:] = older_stops
         self._data["settings_changelog"] = log

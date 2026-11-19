@@ -84,3 +84,37 @@ async def test_an_entry_that_becomes_a_dishwasher_runs_the_cut_short_rebuild(
         )
         await hass.async_block_till_done()
     assert rebuild.await_count == 1
+
+
+async def test_foreign_stop_rows_do_not_evict_the_last_local_one(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """A history merge brought 60 newer Stop rows from another device; the next
+    settings save gave them every slot past the newest 50, which the advisory
+    ignores, and dropped the local change it reads the threshold in force from."""
+    from datetime import datetime, timedelta, timezone  # noqa: PLC0415
+
+    from custom_components.ha_washdata.const import (  # noqa: PLC0415
+        CONF_STOP_THRESHOLD_W,
+        SETTINGS_CHANGELOG_IMPORTED_KEY,
+    )
+    from custom_components.ha_washdata.suggestion_engine import (  # noqa: PLC0415
+        stop_threshold_changes,
+    )
+
+    t0 = datetime(2026, 11, 1, 8, tzinfo=timezone.utc)
+    entry = await setup_washdata_entry()
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    await store.async_record_settings_changes(
+        [{"key": CONF_STOP_THRESHOLD_W, "old": 5.0, "new": 2.0, "timestamp": t0.isoformat()}]
+    )
+    store._data["settings_changelog"].extend(  # noqa: SLF001 - as a merge leaves it
+        {"key": CONF_STOP_THRESHOLD_W, "old": 9.0, "new": 8.0,
+         "timestamp": (t0 + timedelta(hours=1 + i)).isoformat(),
+         SETTINGS_CHANGELOG_IMPORTED_KEY: True}
+        for i in range(60)
+    )
+    await store.async_record_settings_changes([{"key": "off_delay", "old": 1, "new": 2}])
+    log = store.get_settings_changelog()
+    assert len(log) == store.SETTINGS_CHANGELOG_MAX + 1  # the newest 50, then the local row
+    assert stop_threshold_changes(log) == [(t0, 5.0)]
