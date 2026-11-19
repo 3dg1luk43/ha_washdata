@@ -272,3 +272,50 @@ async def test_a_manual_analysis_whose_joint_check_fails_is_no_success(
         )
         ok = await client.receive_json()
     assert ok["success"] is True and ok["result"]["count"] >= 1
+
+
+@pytest.mark.parametrize("supersede", ["options", "store"])
+@pytest.mark.parametrize("failing", ["pass", "joint_check"])
+async def test_a_manual_analysis_that_failed_after_it_was_superseded_runs_again(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_ws_client: Any,
+    supersede: str, failing: str,
+) -> None:
+    """PR #529 review: a pass that raised on options or a store replaced while it
+    ran answered ``unknown_error`` (or ``analysis_check_failed``), and nothing
+    analysed the replacement. Superseded, it runs again like a run that returned;
+    with nothing superseded the error still reaches the panel (tests above)."""
+    entry, manager, _pushes = await _boot(hass, setup_washdata_entry)
+    lm, store = manager.learning_manager, manager.profile_store
+    failed: list[int] = []
+
+    def supersede_and_fail() -> None:
+        failed.append(1)
+        if supersede == "options":
+            lm._config_generation += 1  # noqa: SLF001  (a refresh started)
+        else:
+            store._data_generation += 1  # noqa: SLF001  (Undo Import replaced it)
+        raise RuntimeError("read a store being replaced")
+
+    def model(_self: Any) -> dict[str, Any]:
+        if failing == "pass" and not failed:
+            supersede_and_fail()
+        return {CONF_OFF_DELAY: {"value": 600, "reason": "r"}}
+
+    def joint(_self: Any, _stored: Any, *, strict: bool = False) -> list[str]:
+        if failing == "joint_check" and strict and not failed:
+            supersede_and_fail()
+        return []
+
+    client = await hass_ws_client(hass)
+    runs, wrapped = _count_manual_runs(lm)
+    with wrapped, patch.object(SuggestionEngine, "generate_model_suggestions", model), \
+            patch.object(SuggestionEngine, "joint_end_gate_drops", joint):
+        await client.send_json_auto_id(
+            {"type": f"{DOMAIN}/run_suggestion_analysis", "entry_id": entry.entry_id}
+        )
+        res = await client.receive_json()
+    assert failed == [1]
+    assert res["success"] is True, res
+    assert len(runs) == 2
+    assert res["result"]["count"] == len(store.get_suggestions() or {})
+    assert CONF_OFF_DELAY in (store.get_suggestions() or {})

@@ -1102,6 +1102,10 @@ class LearningManager:
             if raise_errors:
                 raise
 
+    def _generations(self) -> tuple[int, int]:
+        """The options and stored-data generations a run's results belong to."""
+        return self._config_generation, getattr(self.profile_store, "_data_generation", 0)
+
     async def async_run_full_analysis(self) -> dict[str, int]:
         """Run every suggestion pass now (manual trigger from the panel).
 
@@ -1115,20 +1119,27 @@ class LearningManager:
         a joint end-gate check that could not run (:class:`EndGateCheckError`).
 
         A run that an options refresh or a replaced store superseded had results
-        discarded (``_run_pass``), so it is no complete analysis either: it runs
-        again on the current options and data, and after
+        discarded (``_run_pass``), so it is no complete analysis either, nor is its
+        error one about the current data: it runs again on the current options and
+        data, whether it returned or raised, and after
         ``MANUAL_ANALYSIS_ATTEMPTS`` superseded runs raises
         :class:`AnalysisSupersededError` (PR #529 review).
         """
         self._logger.info("Manual suggestion analysis requested")
         for _attempt in range(MANUAL_ANALYSIS_ATTEMPTS):
-            generation = self._config_generation
-            data_generation = getattr(self.profile_store, "_data_generation", 0)
-            await self._async_run_all_passes(raise_errors=True)
-            if (
-                generation == self._config_generation
-                and data_generation == getattr(self.profile_store, "_data_generation", 0)
-            ):
+            started = self._generations()
+            try:
+                await self._async_run_all_passes(raise_errors=True)
+            except Exception:
+                # A pass that failed on options or a store replaced under it is
+                # superseded like one that returned (PR #529 review): run again.
+                if self._generations() == started:
+                    raise
+                self._logger.debug(
+                    "Manual suggestion analysis failed after it was superseded", exc_info=True
+                )
+                continue
+            if self._generations() == started:
                 count = len(self.profile_store.get_suggestions() or {})
                 self._logger.info(
                     "Manual suggestion analysis complete: %d suggestion(s)", count
