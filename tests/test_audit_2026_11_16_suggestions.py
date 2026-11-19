@@ -1626,3 +1626,31 @@ async def test_the_manual_analysis_judges_again_when_a_cycle_lands_during_its_ch
         await lm._enforce_joint_end_gate(strict=True)  # noqa: SLF001
     assert calls == [0, 1]
     assert CONF_END_ENERGY_THRESHOLD not in (store.get_suggestions() or {})
+
+
+def test_a_sparse_change_only_trace_is_end_gate_evidence(mock_hass: Any) -> None:
+    """Review of PR #529 (remeasured): a plug that reports only on change records a
+    whole cycle in a handful of readings, its 1800 s pause in one. Under the old
+    10-reading minimum the guard never saw it and let a 600 s Min Off Gap split it."""
+    from custom_components.ha_washdata.const import (  # noqa: PLC0415
+        CONF_END_ENERGY_THRESHOLD,
+        CONF_MIN_OFF_GAP,
+        CONF_OFF_DELAY,
+        CONF_STOP_THRESHOLD_W,
+    )
+    from custom_components.ha_washdata.suggestion_engine import SuggestionEngine  # noqa: PLC0415
+
+    sparse = {
+        "id": "s1", "status": "completed", "termination_reason": "timeout",
+        "power_data": [[0.0, 2000.0], [600.0, 0.5], [2400.0, 2000.0], [3000.0, 0.4]],
+    }
+    store = _Store(cycles=[sparse])
+    store.get_past_cycles = lambda: store.cycles
+    eng = SuggestionEngine(mock_hass, "e", store, device_type="washing_machine")
+    assert len(eng._end_gate_evidence()) == 1  # noqa: SLF001
+    eng._effective_thresholds = lambda _o: {  # noqa: SLF001
+        CONF_STOP_THRESHOLD_W: 2.0, CONF_OFF_DELAY: 180, CONF_MIN_OFF_GAP: 3000,
+        CONF_END_ENERGY_THRESHOLD: 0.05,
+    }
+    eng._entry_options = lambda: {}  # noqa: SLF001
+    assert eng.joint_end_gate_drops({CONF_MIN_OFF_GAP: {"value": 600}}) == [CONF_MIN_OFF_GAP]

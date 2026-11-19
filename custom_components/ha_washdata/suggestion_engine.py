@@ -2272,6 +2272,15 @@ class SuggestionEngine:
     #: The settings the fallback end gate reads (`end_gate_would_split`).
     _END_GATE_KEYS = END_GATE_KEYS
 
+    # The fewest readings a trace may have and still be end-gate evidence: a pause
+    # needs one before it, one inside and one after. It was 10, which on a plug that
+    # reports only on change could leave out a whole cycle whose long pause is one
+    # or two readings, the case the held-energy check exists for. Measured on the
+    # corpus (599 natural-end cycles): 68 hold under 10 readings, 66 of them no trace
+    # at all (stripped by older exports) and 2 with 2-3 readings and no pause, so no
+    # guard decision there moves (review of PR #529).
+    END_GATE_EVIDENCE_MIN_READINGS = 3
+
     def _end_gate_evidence(self) -> list[list[tuple[float, float]]]:
         """Traces of the cycles that ended on their own, any health, filler dropped.
 
@@ -2292,7 +2301,7 @@ class SuggestionEngine:
             points = [
                 (o, p) for o, p in _cycle_readings(cycle) if offset_key(o) not in synthetic
             ]
-            if len(points) >= 10:
+            if len(points) >= self.END_GATE_EVIDENCE_MIN_READINGS:
                 out.append(points)
         return out
 
