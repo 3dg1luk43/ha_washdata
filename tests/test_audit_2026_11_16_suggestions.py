@@ -1033,7 +1033,9 @@ async def test_a_batch_taken_before_a_restore_is_discarded_and_rerun(mock_hass: 
     mock_hass.async_add_executor_job = AsyncMock(side_effect=lambda fn, *a: fn(*a))
     spawned: list[Any] = []
     lm._spawn = spawned.append  # noqa: SLF001
-    lm._batch_cycles = lambda: [{"status": "completed", "termination_reason": "timeout"}] * 6  # noqa: SLF001
+    lm._batch_cycles = lambda: [  # noqa: SLF001 - traced: only those count as new evidence
+        {"status": "completed", "termination_reason": "timeout", "power_data": [[0.0, 1.0]]}
+    ] * 6
     lm._maybe_run_batch_simulation()  # noqa: SLF001
     assert lm._last_batch_simulation_count == 6  # noqa: SLF001
     store._data_generation += 1  # noqa: SLF001 - Undo Import before the task first runs

@@ -1031,10 +1031,13 @@ class LearningManager:
         _BATCH_RERUN_DELTA = 5  # Re-run every 5 new labeled cycles
 
         labeled_cycles = self._batch_cycles()
-        # The list still carries force-stopped cycles - the min_off_gap merge
-        # ceiling needs the user's real turnaround - but only cycles that ended
-        # on their own are new evidence for the re-run cadence (#458).
-        current_count = sum(1 for c in labeled_cycles if _ended_on_its_own(c))
+        # The list still carries force-stopped and untraced cycles - the
+        # min_off_gap merge ceiling needs the user's real turnaround - but only
+        # traced cycles that ended on their own are new evidence for the re-run
+        # cadence (#458).
+        current_count = sum(
+            1 for c in labeled_cycles if c.get("power_data") and _ended_on_its_own(c)
+        )
 
         if current_count < _BATCH_MIN:
             return
@@ -1285,16 +1288,18 @@ class LearningManager:
         self._announce_suggestions()
 
     def _batch_cycles(self) -> list[dict[str, Any]]:
-        """The cycles the batch pass reads: labelled, traced, completed or force-stopped.
+        """The cycles the batch pass reads: labelled, completed or force-stopped.
 
-        Force-stopped ones stay in for the min_off_gap merge ceiling (#458).
+        Force-stopped ones stay in for the min_off_gap merge ceiling (#458), and
+        so do cycles with no trace (PR #529 review): their start and end are the
+        user's real turnaround, and dropped they fused two gaps into one. The
+        batch's own trace checks keep them out of every waveform statistic.
         """
         return [
             c for c in self.profile_store.get_past_cycles()
             if isinstance(c, dict)
             and c.get("profile_name")
             and c.get("profile_name") != "noise"
-            and c.get("power_data")
             and c.get("status") in ("completed", "force_stopped")
         ]
 
