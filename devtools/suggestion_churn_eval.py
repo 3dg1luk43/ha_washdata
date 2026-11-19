@@ -32,15 +32,20 @@ cycle end at a time.
   gates, cooldown, reconcile) and the stored set is judged as a whole, as
   ``LearningManager._run_pass`` does, on a manager built from the device's options as
   applied so far, with the history up to that cycle;
-* whatever is then stored for a counted key is applied at once and the post-apply
-  cooldown (``MIN_SUGGESTION_COOLDOWN_CYCLES`` on the odometer) runs from there;
+* Apply all then writes what ``ws_apply_suggestions`` writes
+  (``suggestion_loop_eval.apply_all``: every visible key, the handler's own end-gate
+  check, nothing on an inverted Stop / Start pair), every key, not only the counted
+  ones, so the next cycle runs on the settings Apply all left; the post-apply
+  cooldown (``MIN_SUGGESTION_COOLDOWN_CYCLES`` on the odometer) runs from there. An
+  Apply all that writes nothing leaves the stored set as it is, as the handler does;
 * the profiles are the history prefix's (``prefix_profile``): a programme exists
   from its first stored run (``ProfileStore.create_profile``) and each later run
   rebuilds it (``async_rebuild_envelope``), so the shortest programme that caps
   Profile Match Interval is one already run. Reference cycles count from the start
   only when imported before the walk; backfill cycles not at all.
 
-Counted keys: the cadence keys (``learning.CADENCE_KEYS``) and Stop / Start Threshold.
+Counted keys (the report): the cadence keys (``learning.CADENCE_KEYS``) and Stop /
+Start Threshold; the other keys applied are summed under ``applies_other``.
 
 **Legacy arm** (0.6.0, before item 637), the rest of the code as shipped: the cadence
 from the newest 200 committed intervals (0.6.0's ``StatisticalModel(max_samples=200)``),
@@ -213,8 +218,12 @@ def walk(corpus: str, path: str, arm: str) -> dict[str, Any] | None:
     profiles: dict[str, Any] = {}
     envelopes: dict[str, Any] = {}
     applies: dict[str, list[list[float]]] = {k: [] for k in KEYS}
+    applied_other: dict[str, int] = {}
     per_cycle: list[list[float]] = []
-    ends = labelled = last_batch = last_apply = last_evidence = 0
+    ends = labelled = last_batch = last_apply = last_evidence = refused = 0
+    # What the store still holds after an Apply all that wrote nothing (it clears
+    # the store only when it writes, ``ws_apply_suggestions``).
+    pending: dict[str, Any] = {}
     cadence_of = legacy_cadence if arm == "legacy" else sle.cadence
     with legacy_patch(arm == "legacy"):
         for i, cycle in enumerate(past):
@@ -235,7 +244,7 @@ def walk(corpus: str, path: str, arm: str) -> dict[str, Any] | None:
             data.update(
                 past_cycles=past[: i + 1], reference_cycles=references, backfill_cycles=[],
                 profiles=profiles, envelopes=envelopes,
-                suggestions={}, locked_suggestions=[],
+                suggestions=pending, locked_suggestions=[],
                 suggestion_apply_cycle_count=last_apply, lifetime_cycle_count=0,
             )
             mgr = sle._manager(entry_data, options, dev.path, data)  # noqa: SLF001
@@ -269,23 +278,29 @@ def walk(corpus: str, path: str, arm: str) -> dict[str, Any] | None:
             if run_batch:
                 last_batch = labelled
                 gate(eng.for_job().run_batch_simulation(lm._batch_cycles()), OWNER_BATCH)  # noqa: SLF001
-            stored = mgr.profile_store.get_suggestions() or {}
-            changed = False
-            for key in KEYS:
-                entry = stored.get(key)
-                value = entry.get("value") if isinstance(entry, dict) else None
-                if value is None:
-                    continue
+            # Apply all, as the handler writes it (every visible key, its own
+            # end-gate check and threshold-pair refusal): what is judged is what is
+            # carried forward. Only the counted keys are reported.
+            updates, inverted = sle.apply_all(mgr, {**entry_data, **options}, mgr.device_type)
+            refused += inverted is not None
+            for key, value in updates.items():
                 old = options.get(key)
-                applies[key].append([old if old is None else float(old), float(value)])
+                if key in applies:
+                    applies[key].append([old if old is None else float(old), float(value)])
+                else:
+                    applied_other[key] = applied_other.get(key, 0) + 1
                 options[key] = value
-                changed = True
-            if changed:
+            if updates:
                 last_apply = i + 1  # the odometer: one stored cycle per run here
+                pending = {}
+            else:
+                pending = {k: dict(v) for k, v in (mgr.profile_store.get_suggestions() or {}).items()
+                           if isinstance(v, dict)}
     return {
         "device": ev.public_key(dev.path), "device_type": options.get("device_type")
         or entry_data.get("device_type"), "arm": arm, "cycles": len(past), "cycle_ends": ends,
         "applies": {k: len(v) for k, v in applies.items()}, "history": applies,
+        "applies_other": applied_other, "refused": refused,
     }
 
 
@@ -331,6 +346,12 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"  {r['device'][:56]:56s} ends={r['cycle_ends']:4d} "
                       + " ".join(f"{k}={n}" for k, n in r["applies"].items() if n))
         print("  TOTAL " + " ".join(f"{k}={sum(r['applies'][k] for r in mine)}" for k in KEYS))
+        other: dict[str, int] = {}
+        for r in mine:
+            for k, n in (r.get("applies_other") or {}).items():
+                other[k] = other.get(k, 0) + n
+        print("  also applied " + (" ".join(f"{k}={n}" for k, n in sorted(other.items())) or "nothing")
+              + f"; Apply all refused (inverted Stop / Start) {sum(r.get('refused', 0) for r in mine)}")
     if a.json:
         Path(a.json).write_text(json.dumps(rows, indent=1, default=str))
     return 0

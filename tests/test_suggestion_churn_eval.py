@@ -220,3 +220,36 @@ def test_the_model_and_detection_passes_run_on_new_evidence_before_the_batch(
     assert [name for name, _n in calls if name == "run_batch_simulation"] == ["run_batch_simulation"]
     assert [name for name, n in calls if n == 7] == [
         "generate_model_suggestions", "generate_detection_suggestions", "run_batch_simulation"]
+
+
+def test_apply_all_carries_every_key_it_writes(tmp_path: Path, monkeypatch) -> None:
+    """PR #529 review: the walk applied only the counted keys, so a Stop Threshold
+    judged safe together with a pending Off Delay was carried forward alone. Every
+    key Apply all writes is in force for the next cycle; only the counted keys are
+    reported."""
+    (tmp_path / "synth").mkdir()
+    (tmp_path / "synth" / "export.json").write_text(json.dumps(_export()))
+    written: list[dict] = []
+    built: list[dict] = []
+    real_apply, real_manager = churn.sle.apply_all, churn.sle._manager  # noqa: SLF001
+
+    def apply_all(*a, **k):
+        updates, refused = real_apply(*a, **k)
+        written.append(dict(updates))
+        return updates, refused
+
+    def manager(entry_data, options, *a, **k):
+        built.append(dict(options))
+        return real_manager(entry_data, options, *a, **k)
+
+    monkeypatch.setattr(churn.sle, "apply_all", apply_all)
+    monkeypatch.setattr(churn.sle, "_manager", manager)
+    (row,) = churn.run(tmp_path, ("shipped",), None, jobs=1)
+    other = {k for w in written for k in w if k not in churn.KEYS}
+    assert "off_delay" in other
+    assert set(row["applies"]) == set(churn.KEYS)
+    assert sum(row["applies_other"].values()) == sum(
+        1 for w in written for k in w if k not in churn.KEYS)
+    for i, updates in enumerate(written[:-1]):
+        for key, value in updates.items():
+            assert built[i + 1][key] == value
