@@ -880,8 +880,11 @@ def stop_threshold_changes(changelog: Any) -> list[tuple[datetime, float | None]
     """The recorded Stop Threshold changes, oldest first: (when, the value before it).
 
     Read from the settings changelog (``ProfileStore.get_settings_changelog``: the
-    newest 50 changes of any setting, newest first). Rows without a readable time
-    are skipped. Never raises: [] when nothing usable is recorded.
+    newest 50 changes of any setting, newest first). The value before is the Stop
+    the detector ran with (``old_effective``) where the row records it, so an unset
+    Stop that followed Min Power still counts; else the option as stored (``old``).
+    Rows without a readable time are skipped. Never raises: [] when nothing usable
+    is recorded.
     """
     out: list[tuple[datetime, float | None]] = []
     try:
@@ -890,7 +893,8 @@ def stop_threshold_changes(changelog: Any) -> list[tuple[datetime, float | None]
                 continue
             when = _instant(row.get("timestamp"))
             if when is not None:
-                out.append((when, _num(row.get("old"))))
+                before = _num(row.get("old_effective"))
+                out.append((when, before if before is not None else _num(row.get("old"))))
         out.sort(key=lambda r: r[0])
     except Exception:  # noqa: BLE001 - a statistic input must never break its caller
         return []

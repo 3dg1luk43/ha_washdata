@@ -61,6 +61,52 @@ def test_a_legacy_iso_trace_weighs_its_tail_like_an_offset_one(iso: bool) -> Non
     assert se.detect_standby_above_stop(cycles, 5.0) is None
 
 
+def _timeout(day: int) -> dict[str, Any]:
+    start = T0 + timedelta(days=day)
+    pts = [[10.0 * i, 2000.0 if i < 60 else 40.0] for i in range(120)]
+    return {
+        "id": f"t{day}", "status": "completed", "termination_reason": "timeout",
+        "start_time": start.isoformat(),
+        "end_time": (start + timedelta(seconds=pts[-1][0])).isoformat(),
+        "duration": pts[-1][0], "power_data": pts, "signature": {"max_power": 2000.0},
+    }
+
+
+async def test_a_stop_row_records_the_stop_in_force_while_it_was_unset(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """Min Power 10 W, Stop unset (runs at 6 W): six ends timed out under 6 W. Stop
+    set to 2 W; two hand stops then show a 3 W standby. Revert keeps ``old``."""
+    entry = await setup_washdata_entry(options={CONF_MIN_POWER: 10.0})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    await ws_api._record_option_changes(  # noqa: SLF001
+        hass, entry, {CONF_STOP_THRESHOLD_W: 2.0}, "set_options"
+    )
+    row = store.get_settings_changelog()[0]
+    assert row["key"] == CONF_STOP_THRESHOLD_W
+    assert row["old"] is None  # what Revert restores
+    assert row["old_effective"] == 6.0
+
+    changed = datetime.fromisoformat(row["timestamp"])
+    history = [_timeout(d) for d in range(6)]
+    for d, c in enumerate(history):  # all six ended before the change
+        c["end_time"] = (changed - timedelta(days=7 - d)).isoformat()
+    hand = [_hand_stop(0, iso=False), _hand_stop(1, iso=False)]
+    for i, c in enumerate(hand):
+        c["end_time"] = (changed + timedelta(hours=1 + i)).isoformat()
+    changes = se.stop_threshold_changes(store.get_settings_changelog())
+    assert changes[0][1] == 6.0
+    adv = se.detect_standby_above_stop(history + hand, 2.0, stop_changes=changes)
+    assert adv is not None and adv["idle_w"] == 3.0
+
+
+def test_a_row_without_the_effective_stop_still_reads_old() -> None:
+    log = [{"key": CONF_STOP_THRESHOLD_W, "old": 5.0, "new": 2.0, "timestamp": T0.isoformat()}]
+    assert se.stop_threshold_changes(log)[0][1] == 5.0
+    log[0]["old_effective"] = "junk"
+    assert se.stop_threshold_changes(log)[0][1] == 5.0
+
+
 def _steady_kw(day: int, level: float) -> dict[str, Any]:
     """An hour at a steady ``level`` kW, 30 s readings, no idle readings kept."""
     start = T0 + timedelta(days=day)

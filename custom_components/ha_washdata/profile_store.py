@@ -3252,9 +3252,9 @@ class ProfileStore:
     async def async_record_settings_changes(self, changes: list[dict]) -> None:
         """Append settings-change entries and persist (capped at the newest 50).
 
-        Each entry is normalized to ``{"key", "old", "new", "timestamp"}`` and
-        prepended so the list stays most-recent-first. No-op on empty/invalid
-        input.
+        Each entry is normalized to ``{"key", "old", "new", "timestamp"}`` (plus a
+        Stop Threshold row's ``old_effective``) and prepended so the list stays
+        most-recent-first. No-op on empty/invalid input.
         """
         if not changes:
             return
@@ -3271,15 +3271,16 @@ class ProfileStore:
         for ch in changes:
             if not isinstance(ch, dict) or "key" not in ch:
                 continue
-            log.insert(
-                0,
-                {
-                    "key": str(ch.get("key")),
-                    "old": ch.get("old"),
-                    "new": ch.get("new"),
-                    "timestamp": ch.get("timestamp") or now_iso,
-                },
-            )
+            row = {
+                "key": str(ch.get("key")),
+                "old": ch.get("old"),
+                "new": ch.get("new"),
+                "timestamp": ch.get("timestamp") or now_iso,
+            }
+            # A Stop Threshold row's resolved previous value (ws_api._note_stop_in_force).
+            if ch.get("old_effective") is not None:
+                row["old_effective"] = ch.get("old_effective")
+            log.insert(0, row)
             added = True
 
         if not added:

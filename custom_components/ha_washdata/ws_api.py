@@ -780,6 +780,28 @@ def _diff_option_changes(
     return changes
 
 
+def _note_stop_in_force(changes: list[dict[str, Any]], old_merged: dict[str, Any]) -> None:
+    """Give a Stop Threshold row the Stop the detector ran with before the write.
+
+    ``old`` is the stored option, None while it was unset and Stop followed Min
+    Power, so the standby advisory could not tell which threshold the cycles before
+    the change ended under (``stop_threshold_changes``, PR #529 review). Recorded as
+    ``old_effective``; Revert still restores ``old``. Left out when it cannot be
+    resolved, and the reader then falls back to ``old``.
+    """
+    rows = [ch for ch in changes if ch.get("key") == CONF_STOP_THRESHOLD_W]
+    if not rows:
+        return
+    try:
+        device_type = old_merged.get(CONF_DEVICE_TYPE) or DEFAULT_DEVICE_TYPE
+        value = float(effective_option_values(old_merged, device_type)[CONF_STOP_THRESHOLD_W])
+    except Exception:  # pylint: disable=broad-exception-caught
+        return
+    if math.isfinite(value):
+        for ch in rows:
+            ch["old_effective"] = value
+
+
 async def _record_option_changes(
     hass: HomeAssistant, entry: Any, updates: dict[str, Any], source: str
 ) -> None:
@@ -803,6 +825,7 @@ async def _record_option_changes(
         changes = _diff_option_changes(old_effective, updates)
         if not changes:
             return
+        _note_stop_in_force(changes, old_effective)
         manager = _get_manager(hass, entry.entry_id)
         store = getattr(manager, "profile_store", None) if manager else None
         if store is not None:
