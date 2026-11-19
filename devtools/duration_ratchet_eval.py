@@ -34,7 +34,8 @@ Reported per run: when the end was detected and the stored length, against the
 curve's real end (its last reading at or above the Stop Threshold), and the
 profile's learned length after it.
 
-Exit codes: 0, 2 bad input.
+Exit codes: 0, 2 bad input (no curve file, a malformed or non-finite value, no
+reading at or above the Stop Threshold, a ``--cut-min`` that does not cut).
 """
 from __future__ import annotations
 
@@ -43,6 +44,7 @@ import copy
 import csv
 import importlib.util
 import json
+import math
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -68,10 +70,30 @@ PROGRAM = "ECO"
 T0 = datetime(2026, 2, 1, 8, tzinfo=timezone.utc)
 
 
+CURVE_FIELDS = ("minutes_since_start", "power_w")
+
+
 def read_curve(path: Path) -> list[tuple[float, float]]:
-    """``minutes_since_start,power_w`` rows as (seconds, watts)."""
-    with open(path, encoding="utf-8") as fh:
-        return [(float(r["minutes_since_start"]) * 60.0, float(r["power_w"])) for r in csv.DictReader(fh)]
+    """``minutes_since_start,power_w`` rows as (seconds, watts).
+
+    Raises ValueError naming the file, line and field of the first value that is
+    missing or no finite number (exit code 2 in ``main``)."""
+    out: list[tuple[float, float]] = []
+    with open(path, encoding="utf-8", newline="") as fh:
+        reader = csv.DictReader(fh)
+        for row in reader:
+            vals: list[float] = []
+            for field in CURVE_FIELDS:
+                raw = row.get(field)
+                try:
+                    val = float(raw)  # type: ignore[arg-type]
+                except (TypeError, ValueError, OverflowError):
+                    val = math.nan
+                if not math.isfinite(val):
+                    raise ValueError(f"{path}:{reader.line_num}: {field}={raw!r} is not a finite number")
+                vals.append(val)
+            out.append((vals[0] * 60.0, vals[1]))
+    return out
 
 
 def real_end_s(curve: list[tuple[float, float]], stop: float) -> float:
@@ -193,7 +215,11 @@ def main(argv: list[str] | None = None) -> int:
     if not path.is_file():
         print(f"no curve at {path}", file=sys.stderr)
         return 2
-    curve = read_curve(path)
+    try:
+        curve = read_curve(path)
+    except (OSError, UnicodeDecodeError, csv.Error, ValueError) as err:
+        print(f"bad curve: {err}", file=sys.stderr)
+        return 2
     if not any(p >= a.stop for _t, p in curve):
         print(f"no reading at or above the {a.stop:g} W Stop Threshold in {path}", file=sys.stderr)
         return 2

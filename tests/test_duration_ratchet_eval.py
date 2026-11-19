@@ -79,3 +79,19 @@ def test_an_end_the_manager_discards_is_never_learned_from(monkeypatch) -> None:
         assert "stored_min" not in row
         assert row["learned_after_min"] == row["learned_before_min"]
     assert res["learned_last_min"] == res["learned_first_min"]
+
+
+@pytest.mark.parametrize(
+    ("body", "field"),
+    [("0,3.3\n1,oops\n", "power_w"), ("0,3.3\nx,6.3\n", "minutes_since_start"),
+     ("0,3.3\n1\n", "power_w"), ("0,nan\n", "power_w")],
+    ids=["text-power", "text-minutes", "short-row", "nan"],
+)
+def test_a_malformed_curve_is_bad_input(tmp_path: Path, capsys, body: str, field: str) -> None:
+    """PR #529 review: a value that is no number raised ValueError (a traceback)
+    instead of exit 2; the message names the file and the field."""
+    bad = tmp_path / "bad.csv"
+    bad.write_text("minutes_since_start,power_w\n" + body)
+    assert ratchet.main(["--curve", str(bad)]) == 2
+    err = capsys.readouterr().err
+    assert str(bad) in err and field in err
