@@ -1697,7 +1697,13 @@ class WashDataManager:
         if not getattr(self, "_manual_program_active", False):
             return None
         program = self._current_program
-        if not match_rules.program_is_committed(program):
+        if not isinstance(program, str) or not program:
+            return None
+        # A profile may be named like a placeholder ("off"): picked, it is still
+        # a program to check (PR #529 review).
+        if not match_rules.program_is_committed(program) and program not in (
+            self._resolve_profiles()
+        ):
             return None
         token, start, _active = self._match_identity()
         return (token, start, program, getattr(self, "_program_pick_generation", 0))
@@ -1751,9 +1757,23 @@ class WashDataManager:
             state = getattr(self, "_program_mismatch", None)
             if state is None or state.key is None or state.key != self._program_mismatch_key():
                 return None
+            saved = state.as_dict()
+            # A pending streak counted on data an import or undo has since
+            # replaced, or under groups edited since, is no run of evidence; the
+            # restore would take it as counted on the data it finds (PR #529
+            # review). ``fired`` stays, so a restart does not send it again.
+            if (
+                state.data_generation is not None
+                and state.data_generation != getattr(self.profile_store, "_data_generation", 0)
+            ) or (
+                state.families is not None
+                and state.families
+                != match_rules.program_families(self.profile_store.get_profile_groups())
+            ):
+                saved["streak"] = 0
             return {
                 "program": state.key[2],
-                **state.as_dict(),
+                **saved,
                 # The stored trace's span at the last check: the cadence the
                 # streak was counted on (``_program_mismatch_last_s``).
                 "checked_s": self._program_mismatch_last_s,
@@ -1944,6 +1964,8 @@ class WashDataManager:
             self._fire_device_trigger(
                 TRIGGER_PROGRAM_MISMATCH,
                 selected,
+                # The pick's own name, also one that reads like a placeholder.
+                program=selected,
                 looks_like=state.looks_like,
                 margin=state.margin,
                 elapsed_seconds=round(duration),

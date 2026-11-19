@@ -757,3 +757,75 @@ async def test_a_restored_streak_is_counted_under_the_groups_at_the_restore(
         await _check(hass, manager, back.key)
     assert _mismatches(sent) == []
     assert back.streak == 1
+
+
+async def test_a_pick_named_like_a_placeholder_is_still_checked(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """PR #529 review: a matchable profile named ``off`` can be picked. The check
+    used to drop it as "nothing committed", so no mismatch automation, filtered
+    or not, could fire for it. The trigger carries the pick's own name."""
+    entry = await setup_washdata_entry(power_sensor=POWER, options=FAST)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    await _seed(manager)
+    store = manager.profile_store
+    pts = _trace(COTTON)
+    begin = dt_util.utcnow() - timedelta(days=2)
+    store._data["past_cycles"].append({  # noqa: SLF001
+        "id": "off-0", "profile_name": "off", "label_source": "manual",
+        "status": "completed", "start_time": begin.isoformat(),
+        "end_time": (begin + timedelta(seconds=pts[-1][0])).isoformat(),
+        "duration": pts[-1][0], "power_data": [list(p) for p in pts],
+    })
+    store._data["profiles"]["off"] = {  # noqa: SLF001
+        "avg_duration": pts[-1][0], "sample_cycle_id": "off-0",
+    }
+    await store.async_rebuild_envelope("off")
+    assert "off" not in store.unmatchable_profiles()
+    sent: list[tuple[str, dict]] = []
+    async_dispatcher_connect(
+        hass, SIGNAL_DEVICE_TRIGGER.format(entry.entry_id),
+        lambda kind, variables: sent.append((kind, variables)),
+    )
+    await _feed(hass, freezer, 200, 90)
+    assert manager.set_manual_program("off")
+    res = _result("Synthetics", {"Synthetics": 0.9, "off": 0.5})
+    with patch.object(store, "async_match_profile", AsyncMock(return_value=res)):
+        await _feed(hass, freezer, 200, 20 * 60)
+    fired = _mismatches(sent)
+    assert len(fired) == 1, sent
+    assert fired[0]["program"] == "off" and fired[0]["looks_like"] == "Synthetics"
+    assert manager.program_mismatch["selected"] == "off"
+
+
+async def test_a_streak_counted_on_replaced_data_is_not_saved(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """PR #529 review: a pending streak counted against profiles an Undo Import
+    or a group edit has since replaced is saved as no streak, or the restore
+    takes it as counted on the data it finds and one match fires the trigger.
+    ``fired`` is saved as it is, so a restart does not send it again."""
+    _entry, manager, _sent, state = await _past_half(hass, setup_washdata_entry, freezer)
+    store = manager.profile_store
+    state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
+
+    def saved() -> dict[str, Any]:
+        snap = manager._augment_active_snapshot(manager.detector.get_state_snapshot())  # noqa: SLF001
+        return snap["program_mismatch"]
+
+    assert saved()["streak"] == PROGRAM_MISMATCH_PERSISTENCE - 1
+    await store.async_import_data(store.export_data())  # same names and groups
+    raw = saved()
+    assert raw["streak"] == 0
+    manager._program_mismatch = match_rules.ProgramMismatchState()  # noqa: SLF001
+    manager._restore_program_mismatch(raw)  # noqa: SLF001
+    assert manager._program_mismatch_state().streak == 0  # noqa: SLF001
+
+    # Counted on the current data, but under groups edited since.
+    state = manager._program_mismatch_state()  # noqa: SLF001
+    state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
+    state.fired, state.looks_like = True, "Synthetics"
+    assert await store.create_profile_group("Solo", ["Cotton"])
+    raw = saved()
+    assert raw["streak"] == 0
+    assert raw["fired"] is True and raw["looks_like"] == "Synthetics"
