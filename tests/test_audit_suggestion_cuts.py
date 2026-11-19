@@ -330,3 +330,14 @@ def test_a_capped_completion_minimum_says_so() -> None:
     with patch.object(SuggestionEngine, "_shortest_profile_duration", return_value=600.0):
         out = eng.generate_detection_suggestions()[CONF_COMPLETION_MIN_SECONDS]
     assert out["reason_key"] == "suggestion.reason.completion_min_seconds"
+
+
+def test_a_capped_completion_minimum_names_its_unit() -> None:
+    """PR #529 review: a pump's 5 s cap read "Capped at 0 min"."""
+    cycles = [_cycle(i, duration=3600.0, name="Cotton") for i in range(30)]
+    eng = _engine(cycles)
+    with patch.object(SuggestionEngine, "_shortest_profile_duration", return_value=8.0), \
+            patch("custom_components.ha_washdata.suggestion_engine.DEVICE_COMPLETION_THRESHOLDS", {"washing_machine": 5}):
+        out = eng.generate_detection_suggestions()[CONF_COMPLETION_MIN_SECONDS]
+    assert out["value"] == 5 and out["reason_params"]["cap"] == "5 s"
+    assert "Capped at 5 s" in out["reason"]

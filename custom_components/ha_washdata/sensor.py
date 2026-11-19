@@ -66,7 +66,7 @@ from .const import (
     TRIGGER_PROGRAM_MISMATCH,
 )
 from .manager import WashDataManager
-from .profile_store import cycle_report_energy_wh
+from .profile_store import _parse_start_dt, cycle_report_energy_wh
 from .trigger_rules import trigger_offered
 
 _LOGGER = logging.getLogger(__name__)
@@ -1295,26 +1295,23 @@ class WasherLastCycleStartSensor(WasherLastCycleSensor):
     def _figure(self, cycle: dict[str, Any]) -> Any:
         raw = cycle.get("start_time")
         if isinstance(raw, (int, float)) and not isinstance(raw, bool):
-            # A legacy cycle can keep unix seconds; `last_finished_cycle` orders
-            # by them too (PR #529 review).
             try:
-                seconds = float(raw)
-                if not math.isfinite(seconds) or seconds <= 0:
+                if not (math.isfinite(float(raw)) and float(raw) > 0):
                     return None
-                return dt_util.utc_from_timestamp(seconds)
-            except (OverflowError, OSError, ValueError):
+            except OverflowError:
                 return None
-        if not isinstance(raw, str):
+        # The store's own reading (`last_finished_cycle` picked the cycle by it):
+        # quoted unix seconds too, and a naive stamp as UTC (PR #529 review).
+        parsed = _parse_start_dt(raw)
+        if parsed is None:
             return None
         try:
-            # Raises, rather than returning None, for a well-formed but impossible
-            # date such as month 13 (PR #529 review).
-            parsed = dt_util.parse_datetime(raw)
-        except (TypeError, ValueError, OverflowError):
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=dt_util.UTC)
+            # Inside the guard: 0001-01-01T00:00+01:00 parses, but is before year 1 in UTC.
+            return dt_util.as_utc(parsed)
+        except (OverflowError, ValueError):
             return None
-        if parsed is None or parsed.tzinfo is None:
-            return None
-        return dt_util.as_utc(parsed)
 
 
 class WasherLastCycleCostSensor(WasherLastCycleSensor):

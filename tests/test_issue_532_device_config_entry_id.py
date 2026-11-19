@@ -64,9 +64,22 @@ class _Dev:
         self.id, self.config_entry_id, self.composite_device_id = dev_id, entry_id, composite
 
 
+class _Devices:
+    """HA 2026.9's view: iterating yields the entries; any mapping use is deprecated."""
+
+    def __init__(self, devices: tuple[_Dev, ...]) -> None:
+        self._devices = list(devices)
+
+    def __iter__(self):  # noqa: ANN204
+        return iter(self._devices)
+
+    def __getattr__(self, name: str):  # noqa: ANN204
+        raise AssertionError(f"mapping access to registry.devices: {name}")
+
+
 class _Registry:
     def __init__(self, *devices: _Dev) -> None:
-        self.devices = {d.id: d for d in devices}
+        self.devices = _Devices(devices)
 
 
 def test_a_pre_split_device_id_still_finds_washdata_s_entry() -> None:

@@ -8193,6 +8193,11 @@ class ProfileStore:
             } & profiles)
             failed: list[str] = []
             for name in names:
+                # The names came from the data this pass started on: once an import
+                # or undo replaced it, a name may be an envelope-only profile of the
+                # new data, which a rebuild would delete (PR #529 review).
+                if getattr(self, "_data_generation", 0) != data_generation:
+                    break
                 try:
                     if await self.async_rebuild_envelope(name):
                         count += 1

@@ -2810,7 +2810,9 @@ def device_entry_ids(device: Any, registry: Any = None) -> list[str]:
             )
         device_id = getattr(device, "id", None)
         if registry is not None and isinstance(entry_id, str) and isinstance(device_id, str):
-            for split in list(getattr(registry, "devices", {}).values()):
+            # Iterated, not `.values()`: since 2026.9 the container yields the
+            # entries, and any mapping access logs a deprecation (PR #529 review).
+            for split in list(getattr(registry, "devices", None) or ()):
                 if getattr(split, "composite_device_id", None) != device_id:
                     continue
                 split_entry = getattr(split, "config_entry_id", None)

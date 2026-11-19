@@ -1231,3 +1231,46 @@ async def test_apply_writes_nothing_after_a_wipe_it_waited_through(
     assert res["success"] is False and res["error"]["code"] == "entry_reloaded"
     await hass.async_block_till_done()
     assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_END_ENERGY_THRESHOLD] == 0.01
+
+
+def test_standby_at_the_stop_threshold_is_not_below_it() -> None:
+    """PR #529 review: two hand stops settled at 3 W against a 3 W Stop counted as
+    below it, but the detector's quiet needs readings strictly under it."""
+    from custom_components.ha_washdata.suggestion_engine import detect_standby_above_stop  # noqa: PLC0415
+
+    pts = [[float(t), 2000.0] for t in range(0, 600, 10)] + [[600.0 + t, 3.0] for t in range(0, 1800, 10)]
+    cycles = [{"id": f"s{i}", "status": "completed", "termination_reason": "user",
+               "power_data": [list(p) for p in pts], "signature": {"max_power": 2000.0}} for i in range(2)]
+    assert detect_standby_above_stop(cycles, 3.0) is not None
+    assert detect_standby_above_stop(cycles, 3.5) is None
+
+
+def test_the_tail_cache_is_keyed_by_the_trace_itself() -> None:
+    """PR #529 review: a restore replaced a 3 W tail with a 1 W one under the same
+    id, length, last offset and peak; the cache kept answering 3 W."""
+    from custom_components.ha_washdata import suggestion_engine as se  # noqa: PLC0415
+
+    def cyc(level: float) -> dict[str, Any]:
+        pts = [[float(t), 2000.0] for t in range(0, 600, 10)] + [[600.0 + t, level] for t in range(0, 1800, 10)]
+        return {"id": "same", "status": "completed", "termination_reason": "user",
+                "power_data": pts, "signature": {"max_power": 2000.0}}
+
+    first, restored = cyc(3.0), cyc(1.0)
+    assert se._tail_settled_w(first, first["power_data"], 2000.0) == 3.0  # noqa: SLF001
+    assert se._tail_settled_w(restored, restored["power_data"], 2000.0) == 1.0  # noqa: SLF001
+
+
+def test_a_resolved_start_is_kept_when_the_stored_option_is_null(mock_hass: Any) -> None:
+    """PR #529 review: Start stored as null runs at what it resolves to; the raw null
+    overwrote that, so a Stop correction above it passed reconciliation alone."""
+    from custom_components.ha_washdata.const import CONF_MIN_POWER  # noqa: PLC0415
+
+    store = _Store()
+    lm = _learning(mock_hass, store, {CONF_MIN_POWER: 2.0, CONF_START_THRESHOLD_W: None, CONF_STOP_THRESHOLD_W: None})
+    store.set_suggestion(CONF_STOP_THRESHOLD_W, 4.0, reason="r", flags={"owner": OWNER_STANDBY_FLOOR})
+    lm.suggestion_engine._reconcile_stored_suggestions()  # noqa: SLF001
+    sug = store.get_suggestions()
+    stop = sug.get(CONF_STOP_THRESHOLD_W, {}).get("value")
+    start = sug.get(CONF_START_THRESHOLD_W, {}).get("value")
+    # Either the pair is ordered in the stored set, or the stop is withdrawn.
+    assert stop is None or (start is not None and start > stop)

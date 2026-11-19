@@ -634,3 +634,42 @@ async def test_a_rebuild_asked_for_during_a_pass_runs_again_when_it_ends(
         manager.async_schedule_cut_short_rebuild()
         await hass.async_block_till_done()
     assert once.await_count == 1
+
+
+async def test_the_sweep_stops_when_an_undo_replaces_the_store(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """PR #529 review: an undo replaced the store while profile A rebuilt; the loop
+    went on with B from the old list, and the restored store's envelope-only B
+    lost its envelope through the no-evidence branch."""
+    from unittest.mock import patch  # noqa: PLC0415
+
+    from custom_components.ha_washdata.const import CUT_SHORT_REBUILD_KEY  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(device_type="dishwasher", options={"stop_threshold_w": 4.5})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    store._data["profiles"] = {"A": {}, "B": {}}  # noqa: SLF001
+    store._data["past_cycles"] = [  # noqa: SLF001
+        {"id": f"{n}{i}", "profile_name": n, "status": "completed", "duration": 600.0,
+         "start_time": (T0 + timedelta(days=i)).isoformat(),
+         "power_data": [[float(t), 1000.0 if t < 500 else 1.0] for t in range(0, 601, 10)]}
+        for n in "AB" for i in range(3)
+    ]
+    store._data.pop(CUT_SHORT_REBUILD_KEY, None)  # noqa: SLF001
+    real = store.async_rebuild_envelope
+    rebuilt: list[str] = []
+
+    async def undo_during_a(name: str) -> bool:
+        rebuilt.append(name)
+        out = await real(name)
+        if name == "A":  # the undo lands: B is now known only by its envelope
+            store._data_generation = getattr(store, "_data_generation", 0) + 1  # noqa: SLF001
+            store._data["past_cycles"] = []  # noqa: SLF001
+            store._data["envelopes"]["B"] = {"target_duration": 600.0, "avg": [1.0]}  # noqa: SLF001
+        return out
+
+    with patch.object(store, "async_rebuild_envelope", side_effect=undo_during_a):
+        await store.async_rebuild_for_cut_short_rule()
+    assert rebuilt == ["A"]
+    assert "B" in store._data["envelopes"]  # noqa: SLF001
+    assert store.cut_short_rebuild_pending()

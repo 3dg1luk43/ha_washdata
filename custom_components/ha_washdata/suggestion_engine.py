@@ -697,29 +697,27 @@ _TAIL_SETTLED_FRACTION = 0.25
 # `_tail_settled_w` per stored cycle: the device-list callback asks on every poll,
 # and a cycle stopped by hand after hours of standby has thousands of tail readings
 # to walk and sort (23.6 ms a call over eight 3 h tails at 2 s, PR #529 review). A
-# stored cycle's trace does not change in place; an edit replaces it, so its
-# length or last offset moves with it.
-_TAIL_SETTLED_CACHE: dict[tuple[Any, ...], float | None] = {}
+# stored cycle's trace is not changed in place: an edit or a restore replaces the
+# list, so the entry is keyed by the trace and synthetic-row lists themselves (held,
+# so an id is never reused while it is cached), plus their length and peak.
+_TAIL_SETTLED_CACHE: dict[tuple[Any, ...], tuple[Any, Any, float | None]] = {}
 _TAIL_SETTLED_CACHE_MAX = 512
 
 
 def _tail_settled_w(cycle: dict[str, Any], raw: list[Any], peak: float) -> float | None:
-    """:func:`_tail_settled_w_uncached`, remembered per cycle trace."""
+    """:func:`_tail_settled_w_uncached`, remembered per stored trace."""
+    syn = cycle.get(SYNTHETIC_OFFSETS_KEY)
     try:
-        last = raw[-1][0] if raw and isinstance(raw[-1], (list, tuple)) else None
-        syn = cycle.get(SYNTHETIC_OFFSETS_KEY)
-        key = (cycle.get("id"), len(raw), last, peak, len(syn) if isinstance(syn, list) else -1)
-        hash(key)
+        key = (id(raw), id(syn), len(raw), len(syn) if isinstance(syn, list) else -1, float(peak))
     except Exception:  # noqa: BLE001 - an odd row: just compute it
         return _tail_settled_w_uncached(cycle, raw, peak)
-    if key[0] is None:
-        return _tail_settled_w_uncached(cycle, raw, peak)
-    if key in _TAIL_SETTLED_CACHE:
-        return _TAIL_SETTLED_CACHE[key]
+    hit = _TAIL_SETTLED_CACHE.get(key)
+    if hit is not None and hit[0] is raw and hit[1] is syn:
+        return hit[2]
     value = _tail_settled_w_uncached(cycle, raw, peak)
     if len(_TAIL_SETTLED_CACHE) >= _TAIL_SETTLED_CACHE_MAX:
         _TAIL_SETTLED_CACHE.pop(next(iter(_TAIL_SETTLED_CACHE)))
-    _TAIL_SETTLED_CACHE[key] = value
+    _TAIL_SETTLED_CACHE[key] = (raw, syn, value)
     return value
 
 
@@ -963,7 +961,9 @@ def detect_standby_above_stop(
             )
             if level is None:
                 continue
-            if level > stop:
+            # At the threshold is not below it: the detector's quiet needs readings
+            # strictly under it (PR #529 review).
+            if level >= stop and level > 0:
                 above.append(level)
             else:
                 below += 1
@@ -2445,10 +2445,15 @@ class SuggestionEngine:
             }
             if suggested_cms < uncapped_cms:
                 # A cap set it, not the p05 (PR #529 review).
-                reason_params["cap"] = f"{suggested_cms / 60:.0f}"
+                # With its unit: a pump's 5 s cap read "0 min" (PR #529 review).
+                cap = (
+                    f"{suggested_cms / 60:.0f} min" if suggested_cms >= 60
+                    else f"{suggested_cms} s"
+                )
+                reason_params["cap"] = cap
                 reason_key = "suggestion.reason.completion_min_seconds_capped"
                 reason = (
-                    f"Capped at {suggested_cms / 60:.0f} min so the shortest programs "
+                    f"Capped at {cap} so the shortest programs "
                     f"still count; half the p05 clean-cycle duration ({p05d / 60:.0f} min, "
                     f"{len(durations)} cycles) would be more.{excl_note}"
                 )
@@ -3160,7 +3165,9 @@ class SuggestionEngine:
         options = self._entry_options()
         from .detector_config import effective_option_values  # noqa: PLC0415
 
-        current = {**effective_option_values(options, self.device_type or ""), **options}
+        # Resolved values win for the keys they cover: a stored null Start would
+        # otherwise hide the 3 W it runs at from every rule (PR #529 review).
+        current = {**options, **effective_option_values(options, self.device_type or "")}
         try:
             locked = set(self.profile_store.get_locked_suggestions())
         except Exception:  # pylint: disable=broad-exception-caught

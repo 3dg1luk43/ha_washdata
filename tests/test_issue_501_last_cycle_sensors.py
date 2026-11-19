@@ -301,3 +301,29 @@ async def test_an_in_place_start_rewrite_reaches_the_cached_last_cycle(
     older["start_time"] = (t + timedelta(minutes=2)).isoformat()  # the rewrite
     store._start_edit_gen = getattr(store, "_start_edit_gen", 0) + 1  # noqa: SLF001
     assert store.last_finished_cycle() is older
+
+
+async def test_last_cycle_start_reads_the_stamp_as_the_store_orders_it(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """PR #529 review: the store orders a naive stamp as UTC and accepts quoted unix
+    seconds, which the sensor showed as unknown; and a year-1 instant with an offset
+    parsed, then overflowed converting to UTC and failed the update."""
+    entry = await setup_washdata_entry()
+    manager = hass.data[DOMAIN][entry.entry_id]
+    entity_id = er.async_get(hass).async_get_entity_id(
+        "sensor", DOMAIN, f"{entry.entry_id}_last_cycle_start"
+    )
+    start = (dt_util.utcnow() - timedelta(hours=2)).replace(microsecond=0)
+    await manager.profile_store.async_add_cycle(_cycle(start, 60.0))
+    cycle = manager.profile_store.get_past_cycles()[-1]
+
+    async def shown(value: Any) -> str:
+        cycle["start_time"] = value
+        manager.notify_update()
+        await hass.async_block_till_done()
+        return hass.states.get(entity_id).state
+
+    assert dt_util.parse_datetime(await shown(start.replace(tzinfo=None).isoformat())) == start
+    assert dt_util.parse_datetime(await shown(str(int(start.timestamp())))) == start
+    assert await shown("0001-01-01T00:00:00+01:00") == "unknown"
