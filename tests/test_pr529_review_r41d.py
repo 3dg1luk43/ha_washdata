@@ -3,16 +3,24 @@
 * A reload while Apply waited for the options lock left it judging the retired
   store: a suggestion the live list had replaced was refused as changed, and the
   list handed back was the retired one.
+* A stored negative Off Delay or Min Off Gap (an imported store) was written,
+  though the Settings form refuses one: -1 empties the end-energy window.
 """
 from __future__ import annotations
 
 import asyncio
 from typing import Any
 
+import pytest
 from homeassistant.core import HomeAssistant
 
 from custom_components.ha_washdata import ws_api
-from custom_components.ha_washdata.const import CONF_WATCHDOG_INTERVAL, DOMAIN
+from custom_components.ha_washdata.const import (
+    CONF_MIN_OFF_GAP,
+    CONF_OFF_DELAY,
+    CONF_WATCHDOG_INTERVAL,
+    DOMAIN,
+)
 from custom_components.ha_washdata.suggestion_engine import OWNER_BATCH
 
 
@@ -78,3 +86,38 @@ async def test_apply_after_a_reload_it_waited_through_reads_the_live_store(
     assert hass.config_entries.async_get_entry(entry.entry_id).options[
         CONF_WATCHDOG_INTERVAL
     ] == 50
+
+
+@pytest.mark.parametrize(("key", "value"), [(CONF_OFF_DELAY, -1), (CONF_MIN_OFF_GAP, -60)])
+async def test_a_negative_end_gate_time_is_refused(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_ws_client: Any,
+    key: str, value: int,
+) -> None:
+    """Nothing written, nothing cleared, the error says so."""
+    opts = {CONF_OFF_DELAY: 180, CONF_MIN_OFF_GAP: 600, CONF_WATCHDOG_INTERVAL: 30}
+    entry = await setup_washdata_entry(options=opts)
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    client = await hass_ws_client(hass)
+    _suggest(store, key, value)
+    _suggest(store, CONF_WATCHDOG_INTERVAL, 45)
+
+    res = await _apply(
+        hass, client, entry.entry_id, [key, CONF_WATCHDOG_INTERVAL],
+        {key: value, CONF_WATCHDOG_INTERVAL: 45},
+    )
+    assert res["success"] is False and res["error"]["code"] == "invalid_suggestion", res
+    assert dict(hass.config_entries.async_get_entry(entry.entry_id).options) == opts
+    assert {key, CONF_WATCHDOG_INTERVAL} <= set(store.get_suggestions())
+
+
+async def test_a_zero_off_delay_stays_valid(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    entry = await setup_washdata_entry(options={CONF_OFF_DELAY: 180, CONF_MIN_OFF_GAP: 600})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    client = await hass_ws_client(hass)
+    _suggest(store, CONF_OFF_DELAY, 0)
+
+    res = await _apply(hass, client, entry.entry_id, [CONF_OFF_DELAY], {CONF_OFF_DELAY: 0})
+    assert res["result"] == {"success": True, "applied": [CONF_OFF_DELAY]}, res
+    assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_OFF_DELAY] == 0

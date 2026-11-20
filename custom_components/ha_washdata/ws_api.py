@@ -5398,16 +5398,19 @@ async def ws_apply_suggestions(
                     continue
                 # A stored "Infinity" or NaN (an imported store) is no setting:
                 # written, the detector would run with it, and the joint checks
-                # skip a non-finite value. Refused before anything is cleared or
+                # skip a non-finite value. Nor is a negative one, which the
+                # Settings form refuses for every suggested key: an Off Delay of
+                # -1 empties the end-energy window and the joint check finds no
+                # pause it must bridge. Refused before anything is cleared or
                 # written (PR #529 review).
                 try:
                     val = float(item["value"])
                 except (TypeError, ValueError, OverflowError):
                     val = math.nan
-                if not math.isfinite(val):
+                if not math.isfinite(val) or val < 0:
                     connection.send_error(
                         msg["id"], "invalid_suggestion",
-                        f"The suggested value for {key} is not a number. Nothing "
+                        f"The suggested value for {key} is not a valid setting. Nothing "
                         "was saved; run the analysis again or dismiss the suggestions.",
                     )
                     return
