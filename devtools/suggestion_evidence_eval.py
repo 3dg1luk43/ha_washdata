@@ -106,6 +106,26 @@ def legacy_standby(cycles: list[dict[str, Any]], stop: float, recent: int = RECE
     return round(median, 2)
 
 
+def _label(cycle: dict[str, Any]) -> Any:
+    """The label ``select_clean_cycles`` reads the programme median for."""
+    return cycle.get("profile_name") or cycle.get("label")
+
+
+def _selection_duration(cycle: dict[str, Any]) -> float:
+    """The length ``select_clean_cycles`` weighs against that median: the stored
+    duration, or the trace span when it is missing or not positive (PR #529 review:
+    a cycle stored without one is admitted by its span, and reported 0.0)."""
+    try:
+        duration = float(cycle.get("duration") or 0.0)
+    except (TypeError, ValueError, OverflowError):
+        duration = 0.0
+    if duration <= 0:
+        readings = se._cycle_readings(cycle)  # noqa: SLF001
+        if readings:
+            duration = readings[-1][0] - readings[0][0]
+    return duration
+
+
 def device_row(dev: Any) -> dict[str, Any]:
     entry_data, options = ev.entry_dicts(dev, {})
     device_type = options.get("device_type") or entry_data.get("device_type") or "washing_machine"
@@ -125,9 +145,9 @@ def device_row(dev: Any) -> dict[str, Any]:
     medians = se._label_median_durations(past)  # noqa: SLF001
     admitted = clean_ids["0.8-1.25"] - clean_ids["off"]
     row["admitted_ratios"] = sorted(
-        round(float(c.get("duration") or 0.0) / medians[c.get("profile_name")], 2)
+        round(_selection_duration(c) / medians[_label(c)], 2)
         for c in past
-        if id(c) in admitted and medians.get(c.get("profile_name"))
+        if id(c) in admitted and medians.get(_label(c))
     )
     changes = se.stop_threshold_changes(dev.data.get("settings_changelog"))
     for arm, frac in TAIL_ARMS.items():

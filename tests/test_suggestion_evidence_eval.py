@@ -117,3 +117,30 @@ def test_cycles_without_an_id_are_told_apart(tmp_path: Path) -> None:
     assert row["length"]["off"] == {"clean": 1, "mid_restart": 2}
     assert row["length"]["0.8-1.25"] == {"clean": 3, "mid_restart": 0}
     assert row["admitted_ratios"] == [1.0, 1.0]
+
+
+def _dead_run(i: int, dead_s: float) -> dict:
+    """3600 s at 2 kW, 60 s readings, with a dead stretch from 1200 s."""
+    pts = [[0.0, 0.0]]
+    for k in range(1, 60):
+        t = 60.0 * k
+        pts.append([t, 0.0 if 1200.0 <= t < 1200.0 + dead_s or t >= 3360.0 else 2000.0])
+    pts.append([3600.0, 0.0])
+    return {"id": f"d{i}", "status": "completed", "termination_reason": "smart", "profile_name": "Wash",
+            "start_time": f"2026-03-0{i + 1}T08:00:00+00:00", "duration": 3600.0, "power_data": pts}
+
+
+def test_an_admitted_cycle_without_a_duration_is_timed_by_its_trace(tmp_path: Path) -> None:
+    """PR #529 review: selection times a cycle stored without a duration by its
+    trace span, and the band admits it, but its ratio read the missing duration as
+    0.0. A record labelled through ``label`` was likewise left out of the ratios."""
+    no_duration = _dead_run(3, 900.0)
+    del no_duration["duration"]
+    by_label = _dead_run(4, 900.0)
+    by_label["label"] = by_label.pop("profile_name")
+    past = [_dead_run(0, 900.0), _dead_run(1, 0.0), _dead_run(2, 0.0), no_duration, by_label]
+    _write(tmp_path, "span/export.json", {"past_cycles": past}, {"stop_threshold_w": 2.0})
+    (row,) = evidence.run(tmp_path)
+    assert row["length"]["off"] == {"clean": 2, "mid_restart": 3}
+    assert row["length"]["0.8-1.25"] == {"clean": 5, "mid_restart": 0}
+    assert row["admitted_ratios"] == [1.0, 1.0, 1.0]
