@@ -13,6 +13,10 @@
 * An import could leave a profile in two profile groups (the panel refuses
   that): the #530 check read it against the first group even when the second
   won. The wholesale and the selective import refuse it before any change.
+* #530: a selective import moved the data generation only once complete, so a
+  check landing while it rebuilt an envelope, scored on a rival programme the
+  import had overwritten under its name, passed both generation checks and
+  fired. The generation moves before the import's first change as well.
 """
 from __future__ import annotations
 
@@ -251,3 +255,59 @@ async def test_a_merge_keeps_a_local_group_of_the_same_name(
     await _import(store, "merge", {"G1": {"members": ["Cotton"]}, "G3": {"members": []}})
     groups = store.get_profile_groups()
     assert groups["G1"]["members"] == ["Cotton", "Synthetics"] and "G3" in groups
+
+
+# ── #530: a check landing in a selective import's rebuild is discarded ───────
+
+
+async def test_a_check_landing_while_a_selective_import_rebuilds_is_discarded(
+    hass: HomeAssistant, setup_washdata_entry: Any, freezer: Any
+) -> None:
+    """Five hits, then a check scoring when a selective import overwrites the
+    rival Synthetics under its name and rebuilds its envelope. The check lands in
+    that rebuild, scored on the replaced programme: it does not count, and the
+    run restarts."""
+    _entry, manager, sent, state = await _past_half(hass, setup_washdata_entry, freezer)
+    store = manager.profile_store
+    state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
+    wrong = _result(*WRONG)
+    entered, release = asyncio.Event(), asyncio.Event()
+
+    async def scoring(*_a: Any, **_k: Any) -> Any:
+        entered.set()
+        await release.wait()
+        return wrong
+
+    payload = store.export_data()
+    payload["data"]["profiles"]["Synthetics"]["from_file"] = True
+    with patch.object(store, "async_match_profile", new=scoring):
+        check = hass.async_create_task(
+            manager._async_check_program_mismatch(  # noqa: SLF001
+                list(manager.detector.get_power_trace()),
+                manager._match_identity(),  # noqa: SLF001
+                state.key,
+            )
+        )
+        await entered.wait()
+        real = store.async_rebuild_envelope
+        landed: list[bool] = []
+
+        async def rebuild(name: str, *args: Any, **kwargs: Any) -> Any:
+            if not landed:
+                release.set()
+                await check  # the check lands while the import rebuilds
+                landed.append(True)
+            return await real(name, *args, **kwargs)
+
+        with patch.object(store, "async_rebuild_envelope", new=rebuild):
+            await store.async_import_data_selective(
+                payload,
+                selection={"categories": ["profiles", "real_cycles"],
+                           "profiles": ["Synthetics"]},
+                mode="merge",
+                conflict_resolutions={"Synthetics": "overwrite"},
+                local_device_type="washing_machine",
+            )
+    assert landed
+    assert store.get_profiles()["Synthetics"].get("from_file") is True  # overwritten
+    assert _mismatches(sent) == [] and state.streak == 0 and not state.fired

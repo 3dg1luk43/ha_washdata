@@ -13348,6 +13348,11 @@ class ProfileStore:
                 f"import_selective_{mode}", entry_options
             )
 
+        # The data changes from here, and the envelope rebuilds below await: work
+        # taken from the data before (a #530 check scoring a programme this
+        # overwrites under its name) must not land on the new while they run
+        # (PR #529 review). Bumped again once the import is complete.
+        self._data_generation = getattr(self, "_data_generation", 0) + 1
         local_profiles = self._data.setdefault("profiles", {})
         name_remap: dict[str, str] = {}
         touched: set[str] = set()
