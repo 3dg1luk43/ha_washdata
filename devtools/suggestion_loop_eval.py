@@ -45,8 +45,9 @@ This harness closes that loop on the real corpus.
 **Unmatched arm** (register item 638; ``--no-unmatched`` skips it): once the loop has
 stopped, every replayable cycle is replayed again with nothing to match (no profile,
 no matcher: a new programme, a first run, an ambiguous match), under the export's
-options and under the last round's, and the run fails when the latter splits or
-stores as interrupted a cycle the former did not. The rounds above match in-sample,
+options and under the last round's, and the run fails when the latter splits,
+stores as interrupted or force-stops (``--idle-hold``: a kept tail at or above its
+stop) a cycle the former did not. The rounds above match in-sample,
 so they could not see that Apply all split dishwasher drying (audit 2026-11-16: 1 ->
 6 of 27 cycles on one device, 0 splits reported). A replayable cycle it cannot
 measure (fewer than ``MIN_ACTIVE_READINGS`` real readings above the recorded stop
@@ -1467,19 +1468,23 @@ def _unmatched_task(job: tuple[str, str, dict, int]) -> tuple[str, str, int, dic
     return path, arm, idx, {
         "split": _unmatched_split(ended, pts, stop, src_base),
         "interrupted": any(e.get("status") == "interrupted" for e in ended),
+        # `--idle-hold` force-ends a kept tail at or above the stop: one record over
+        # the whole span is no split, and no completion either (PR #529 review).
+        "force_stopped": any(e.get("status") == "force_stopped" for e in ended),
         "lag": (kept_ends[-1] - work_end) if kept_ends and work_end is not None else None,
     }
 
 
 def _unmatched_summary(rows: dict[int, dict]) -> dict[str, Any]:
-    """The measured cycles' splits, interruptions and end lag; the skipped ones by
-    index with their reason (``cycles`` counts only the measured)."""
+    """The measured cycles' splits, interruptions, force stops and end lag; the
+    skipped ones by index with their reason (``cycles`` counts only the measured)."""
     measured = {i: r for i, r in rows.items() if "skipped" not in r}
     lags = [r["lag"] for r in measured.values() if r["lag"] is not None]
     return {
         "cycles": len(measured),
         "splits": sorted(i for i, r in measured.items() if r["split"]),
         "interrupted": sorted(i for i, r in measured.items() if r["interrupted"]),
+        "force_stopped": sorted(i for i, r in measured.items() if r.get("force_stopped")),
         "lag_med": round(float(np.median(lags))) if lags else None,
         "skipped": sorted([i, r["skipped"]] for i, r in rows.items() if "skipped" in r),
     }
@@ -1528,6 +1533,9 @@ def _unmatched_arm(loops: list["DeviceLoop"], jobs: int) -> None:
             "initial": a, "final": b,
             "splits_added": [ids[i] for i in b["splits"] if i not in a["splits"]],
             "interrupted_added": [ids[i] for i in b["interrupted"] if i not in a["interrupted"]],
+            "force_stopped_added": [
+                ids[i] for i in b["force_stopped"] if i not in a["force_stopped"]
+            ],
             "skipped": skipped,
         }
 
@@ -1595,6 +1603,12 @@ def failures(results: list[dict]) -> list[str]:
                 f"{r['device']}: the fixed point stores {len(um['interrupted_added'])} cycle(s) "
                 f"replayed unmatched as interrupted {um['interrupted_added']}"
             )
+        if um.get("force_stopped_added"):
+            out.append(
+                f"{r['device']}: the fixed point force-stops {len(um['force_stopped_added'])}"
+                f" cycle(s) replayed unmatched (kept tail at or above its stop)"
+                f" {um['force_stopped_added']}"
+            )
         idle = [row["replay"]["idle_above_stop"] for row in r["rounds"]]
         if idle and idle[-1] > idle[0]:
             out.append(
@@ -1634,6 +1648,7 @@ def print_report(results: list[dict], rounds: int) -> None:
             a, b = um["initial"], um["final"]
             print(f"    unmatched export->fixed point: splits={len(a['splits'])}->{len(b['splits'])}"
                   f" interrupted={len(a['interrupted'])}->{len(b['interrupted'])}"
+                  f" force_stopped={len(a['force_stopped'])}->{len(b['force_stopped'])}"
                   f" lag_med={_fmt_s(a['lag_med'])}->{_fmt_s(b['lag_med'])}")
             for s in um.get("skipped") or []:
                 print(f"    unmatched skipped ({s['options']} options): {s['id']}: {s['reason']}")

@@ -433,6 +433,66 @@ def test_the_unmatched_replay_honours_idle_hold(monkeypatch, idle_hold, tail_w, 
     assert _TailSim.calls == [expected]
 
 
+class _ForceEndSim(_TailSim):
+    """A replay whose force end stores one record over the whole trace."""
+
+    def __init__(self, *a, **k):
+        super().__init__(*a, **k)
+        sim = self
+
+        class _Det:
+            def _on_cycle_end(self, data: dict) -> None:   # wrapped by the task
+                sim.kept.append(data)
+
+            def force_end(self, _ts) -> None:
+                self._on_cycle_end({"duration": 2400.0, "status": "force_stopped",
+                                    "start_time": "2026-10-01T08:00:00+00:00"})
+
+        self.detector = _Det()
+
+
+def test_an_unmatched_force_end_is_a_failed_completion(monkeypatch):
+    """PR #529 review: with ``--idle-hold`` a retained 5 W tail above a 2 W stop is
+    force-ended. One record over the whole span is no split, and only
+    ``interrupted`` was counted, so the forced end was in neither list."""
+    from types import SimpleNamespace
+
+    src = {"id": "main", "start_time": "2026-10-01T08:00:00+00:00", "status": "completed",
+           "termination_reason": "smart",
+           "power_data": [[t * 60.0, 1500.0 if t < 30 else 5.0] for t in range(40)]}
+    dev = SimpleNamespace(
+        past=[src], s0=60.0, entry_data={}, recorded_stop=10.0, idle_hold=True,
+        detector_config=lambda _o: SimpleNamespace(min_power=1.0, stop_threshold_w=2.0),
+        match_side=lambda _o: (SimpleNamespace(profile_store=None), None),
+    )
+    monkeypatch.setitem(loop._DEVICES, "dev", dev)  # noqa: SLF001
+    monkeypatch.setattr(loop.playground, "_DetailSim", _ForceEndSim)
+    _p, _a, _i, row = loop._unmatched_task(("dev", "final", {}, 0))  # noqa: SLF001
+    assert (row["split"], row["interrupted"], row["force_stopped"]) == (False, False, True)
+
+    def _task(job):
+        return job[0], job[1], job[3], {"split": False, "interrupted": False,
+                                        "force_stopped": job[1] == "final", "lag": 60.0}
+
+    monkeypatch.setattr(loop, "_unmatched_task", _task)
+    lp = SimpleNamespace(path="dev", options0={"a": 1}, options={"a": 2}, past=[src],
+                         unmatched=None)
+    loop._unmatched_arm([lp], jobs=1)  # noqa: SLF001
+    assert lp.unmatched["force_stopped_added"] == ["main"]
+    res = _result([0, 0])
+    res["unmatched"] = lp.unmatched
+    lines = loop.failures([res])
+    assert any("force-stops 1 cycle(s) replayed unmatched" in x for x in lines), lines
+    # A full-span completed record stays a success.
+    monkeypatch.setattr(loop, "_unmatched_task", lambda job: (
+        job[0], job[1], job[3], {"split": False, "interrupted": False,
+                                 "force_stopped": False, "lag": 60.0}))
+    loop._unmatched_arm([lp], jobs=1)  # noqa: SLF001
+    assert lp.unmatched["force_stopped_added"] == []
+    res["unmatched"] = lp.unmatched
+    assert loop.failures([res]) == []
+
+
 def test_apply_all_judges_the_end_gate_on_the_values_as_written(monkeypatch):
     """PR #529 review: Apply all wrote what the pass-time check judged on the stored
     set. The handler re-judges what it writes: here the off delay that made the
