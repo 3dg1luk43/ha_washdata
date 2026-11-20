@@ -5,6 +5,10 @@
   only the user pause, so a right pick stalled early reached half its duration
   on the stall's clock. The stall shown now leaves the elapsed time as well
   (``CycleDetector.open_halt_s``); finished stalls are cut from the trace already.
+* An envelope build was discarded on any match setting changed during its job,
+  a Stage-1 ratio included, which no build reads and after which nothing
+  rebuilds: a cycle deleted meanwhile stayed in the envelope. Only a setting the
+  build reads (``envelope_settings_revision``) discards it now.
 """
 from __future__ import annotations
 
@@ -16,10 +20,10 @@ import pytest
 from homeassistant.core import HomeAssistant
 
 from custom_components.ha_washdata import cycle_detector as cd_mod
-from custom_components.ha_washdata.const import PROGRAM_MISMATCH_PERSISTENCE
+from custom_components.ha_washdata.const import DOMAIN, PROGRAM_MISMATCH_PERSISTENCE
 
 from .test_audit_detection_514_halt_followups import _det, _feed, _halt, _match, _wash
-from .test_issue_530_program_mismatch import _check, _mismatches, _past_half, _result
+from .test_issue_530_program_mismatch import _check, _mismatches, _past_half, _result, _seed
 
 # ── #530: the stall shown now is no programme time ───────────────────────────
 
@@ -83,3 +87,64 @@ async def test_a_pick_stalled_early_is_not_past_half(
     with patch.object(manager.profile_store, "async_match_profile", AsyncMock(return_value=wrong)):
         await _check(hass, manager, state.key)
     assert len(_mismatches(sent)) == 1
+
+
+# ── An envelope build is not discarded on a Stage-1 ratio change ─────────────
+
+
+def _changing_during_the_job(store: Any, change: Any) -> Any:
+    real = store._rebuild_envelope_sync  # noqa: SLF001
+
+    def worker(cycles: Any) -> Any:
+        change()
+        return real(cycles)
+
+    return worker
+
+
+async def _seeded_store(hass: HomeAssistant, setup_washdata_entry: Any) -> Any:
+    entry = await setup_washdata_entry()
+    manager = hass.data[DOMAIN][entry.entry_id]
+    await _seed(manager)
+    store = manager.profile_store
+    assert store.get_envelope("Cotton")["cycle_count"] == 3
+    return store
+
+
+async def test_a_cycle_deleted_while_a_ratio_changes_leaves_the_envelope(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """One of Cotton's three cycles deleted while the min ratio changes under the
+    rebuild: the deletion is saved and the envelope is the two-cycle one."""
+    store = await _seeded_store(hass, setup_washdata_entry)
+    revision = store.match_settings_revision
+    ratio = _changing_during_the_job(
+        store, lambda: store.set_duration_ratio_limits(min_ratio=0.2, max_ratio=1.8)
+    )
+    with patch.object(store, "_rebuild_envelope_sync", side_effect=ratio):
+        assert await store.delete_cycle("Cotton-2")
+    assert store.match_settings_revision > revision
+    env = store.get_envelope("Cotton")
+    assert env["cycle_count"] == 2 and env["shape_cycle_count"] == 2
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        lambda s: setattr(s, "dtw_bandwidth", s.dtw_bandwidth + 0.05),
+        lambda s: setattr(s, "energy_mode", "integrated" if s.energy_mode != "integrated" else "mean"),
+        lambda s: setattr(s, "device_type", "dryer"),
+        lambda s: setattr(s, "evidence_sources", ["real_cycles", "reference_cycles"]),
+    ],
+)
+async def test_a_setting_the_build_reads_still_discards_it(
+    hass: HomeAssistant, setup_washdata_entry: Any, change: Any
+) -> None:
+    """The DTW band, the energy mode, the device type and the evidence sources
+    are read by the build: changed under it, the build is discarded as before."""
+    store = await _seeded_store(hass, setup_washdata_entry)
+    assert len(store.evidence_sources) == 3
+    worker = _changing_during_the_job(store, lambda: change(store))
+    with patch.object(store, "_rebuild_envelope_sync", side_effect=worker):
+        assert await store.delete_cycle("Cotton-2")
+    assert store.get_envelope("Cotton")["cycle_count"] == 3

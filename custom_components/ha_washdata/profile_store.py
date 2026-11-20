@@ -3139,6 +3139,9 @@ class ProfileStore:
         # holding a ranking across a match can tell a setting changed and changed
         # back meanwhile, which a comparison of the values cannot (PR #529 review).
         self._match_settings_revision: int = 0
+        # The same for the settings an envelope build reads (``_ENVELOPE_SETTINGS``):
+        # not the Stage-1 ratios, which no build reads (PR #529 review).
+        self._envelope_settings_revision: int = 0
         self._min_duration_ratio = min_duration_ratio
         self._max_duration_ratio = max_duration_ratio
         self._dtw_bandwidth: float = DEFAULT_DTW_BANDWIDTH
@@ -3804,11 +3807,24 @@ class ProfileStore:
             *self.get_backfill_cycles(),
         ]
 
+    # The settings an envelope build reads: the evidence sources pick its cycles
+    # on the loop, the worker reads the rest (the DTW band, the #531 dishwasher
+    # rule and the member programme ends by device type, the rhythm and tail
+    # references by energy mode). Not the Stage-1 duration ratios.
+    _ENVELOPE_SETTINGS = frozenset(
+        {"_dtw_bandwidth", "_energy_mode", "_device_type", "_evidence_sources"}
+    )
+
     def _set_match_setting(self, attr: str, value: Any) -> None:
         """Store one of the matcher's scoring settings (``match_settings``) in
-        ``attr``, bumping ``match_settings_revision`` when its value changes."""
+        ``attr``, bumping ``match_settings_revision`` when its value changes, and
+        ``envelope_settings_revision`` too when an envelope build reads it."""
         if getattr(self, attr, _MISSING) != value:
             self._match_settings_revision = getattr(self, "_match_settings_revision", 0) + 1
+            if attr in self._ENVELOPE_SETTINGS:
+                self._envelope_settings_revision = (
+                    getattr(self, "_envelope_settings_revision", 0) + 1
+                )
         setattr(self, attr, value)
 
     @property
@@ -3819,6 +3835,15 @@ class ProfileStore:
         preparation, so the ranking can be the intermediate settings' (the #530
         check, PR #529 review)."""
         return int(getattr(self, "_match_settings_revision", 0))
+
+    @property
+    def envelope_settings_revision(self) -> int:
+        """Bumped by every change of a setting an envelope build reads
+        (``_ENVELOPE_SETTINGS``). A build such a change straddled is discarded; a
+        Stage-1 ratio change is not one: no build reads it and nothing rebuilds
+        after it, so discarding left e.g. a deleted cycle in the envelope (PR #529
+        review)."""
+        return int(getattr(self, "_envelope_settings_revision", 0))
 
     @property
     def profile_set_revision(self) -> int:
@@ -8098,9 +8123,10 @@ class ProfileStore:
         # The executor job reads the device type and energy mode while it runs: a
         # type changed and changed back meanwhile (no new data generation) built
         # a dishwasher profile without the #531 rule, and the inputs compared
-        # equal again, so the build was memoised (PR #529 review). Any change of
-        # a match setting during the job discards it.
-        settings_revision = self.match_settings_revision
+        # equal again, so the build was memoised (PR #529 review). A change of a
+        # setting the build reads during the job discards it; a Stage-1 ratio
+        # change does not (nothing rebuilds after it, PR #529 review).
+        settings_revision = self.envelope_settings_revision
         existed = profile_name in (self._data.get("profiles") or {})
         # A rebuild changes this profile's curve, which feeds group cohesion, so
         # invalidate the cohesion cache (not only on group mutations) to avoid stale
@@ -8152,7 +8178,7 @@ class ProfileStore:
         if (
             generations.get(profile_name) != generation
             or getattr(self, "_data_generation", 0) != data_generation
-            or self.match_settings_revision != settings_revision
+            or self.envelope_settings_revision != settings_revision
             or (existed and profile_name not in (self._data.get("profiles") or {}))
         ):
             self._logger.debug(
@@ -8524,16 +8550,16 @@ class ProfileStore:
                         # rather than counting as rebuilt (review of PR #529).
                         gens = self.__dict__.setdefault("_envelope_rebuild_generation", {})
                         taken = gens.get(name, 0) + 1
-                        # Likewise a build a match setting changed under (a type
-                        # changed and back): discarded, so the profile stays
+                        # Likewise a build a setting it reads changed under (a
+                        # type changed and back): discarded, so the profile stays
                         # pending (PR #529 review).
-                        revision = self.match_settings_revision
+                        revision = self.envelope_settings_revision
                         if await self.async_rebuild_envelope(name):
                             count += 1
                         if (
                             gens.get(name, 0) <= taken
                             and self.device_type == bound_type
-                            and self.match_settings_revision == revision
+                            and self.envelope_settings_revision == revision
                         ):
                             done.add(name)
                     except Exception as exc:  # noqa: BLE001 - keep the rest, retry later
