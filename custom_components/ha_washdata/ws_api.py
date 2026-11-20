@@ -370,6 +370,20 @@ async def _drop_unsafe_end_gate_updates(
     return True
 
 
+def _end_gate_evidence(manager: Any, updates: dict[str, Any]) -> tuple[Any, ...] | None:
+    """The cycle evidence a write with a timing setting is judged on, else None.
+
+    Read right after ``_drop_unsafe_end_gate_updates`` accepted the write (no await
+    between), so it is the evidence the joint check judged; a cycle stored before
+    the write lands was not judged (PR #529 review).
+    """
+    from .suggestion_engine import END_GATE_KEYS  # pylint: disable=import-outside-toplevel
+
+    if not any(key in END_GATE_KEYS for key in updates):
+        return None
+    return end_gate_evidence_token(manager.profile_store)
+
+
 def _threshold_pair_message(start: float, stop: float) -> str:
     """The error a write that would invert the threshold pair is refused with (item 515)."""
     return (
@@ -5413,6 +5427,7 @@ async def ws_apply_suggestions(
                         "this appliance's pauses. Nothing was saved; try again.",
                     )
                     return
+                evidence = _end_gate_evidence(manager, updates)
                 # Again on what is left: the check can withdraw the threshold the
                 # Min Power cascade was written with (review of PR #529).
                 _drop_min_power_alone()
@@ -5467,6 +5482,20 @@ async def ws_apply_suggestions(
                             "restored while the suggestions were applied. The suggestions "
                             "were cleared, but no setting was saved; try again once they "
                             "are offered again.",
+                        )
+                        return
+                    if (
+                        evidence is not None
+                        and end_gate_evidence_token(manager.profile_store) != evidence
+                    ):
+                        # A cycle stored or edited while the clear was saved: the
+                        # timing settings were judged without it (PR #529 review).
+                        connection.send_error(
+                            msg["id"], "cycles_changed",
+                            "A cycle was stored while the suggestions were applied, so "
+                            "the timing settings were not checked against it. The "
+                            "suggestions were cleared, but no setting was saved; try "
+                            "again once they are offered again.",
                         )
                         return
                     # Suggested values are all tunables -> layer them onto the
