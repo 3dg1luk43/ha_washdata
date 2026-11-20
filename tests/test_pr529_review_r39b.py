@@ -5,12 +5,17 @@
   rows judged the imported cycles' ends.
 * A cadence summary still in the executor was dropped by any import, a
   profiles-only one included, which keeps the history and the cadence rows.
+* analyze_diag: a null power sensor option hid the entry's own sensor, so the
+  report read cadence rows another sensor measured.
 """
 from __future__ import annotations
 
+import importlib
 import json
+import sys
 import threading
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -277,3 +282,62 @@ async def test_every_replacement_still_drops_a_summary_in_the_executor(
         "wipe": [], "wholesale": [[2.0, 2.0]], "selective_replace": before, "undo": [[6.0, 5.0]],
     }[path]
     assert rows == expected
+
+
+# ── analyze_diag: a null power sensor option ─────────────────────────────────
+
+
+REPO = Path(__file__).resolve().parent.parent
+DEVTOOLS = REPO / "devtools"
+
+
+def _analyze_diag() -> Any:
+    sys.path.insert(0, str(DEVTOOLS))
+    try:
+        return importlib.import_module("analyze_diag")
+    finally:
+        sys.path.remove(str(DEVTOOLS))
+
+
+def _export(path: Path, options_sensor: Any) -> None:
+    """Six completed washer cycles on a 10 s plug, cadence rows from another plug."""
+    cycles = []
+    for i in range(6):
+        long = i % 2 == 0
+        n = 360 if long else 180
+        trace = [[t * 10.0, 0.5 if t > n - 6 else (1800.0 if t < 40 else 150.0)]
+                 for t in range(n)]
+        cycles.append({
+            "id": f"c{i}", "start_time": f"2026-09-{10 + i:02d}T08:00:00+00:00",
+            "duration": n * 10.0, "status": "completed", "termination_reason": "smart",
+            "profile_name": "Cotton" if long else "Quick", "label_source": "manual",
+            "power_data": trace,
+        })
+    options: dict[str, Any] = {"device_type": "washing_machine", "stop_threshold_w": 2.0}
+    if options_sensor != "absent":
+        options["power_sensor"] = options_sensor
+    doc = {
+        "device_fingerprint": {"device_type": "washing_machine"},
+        "entry_data": {"device_type": "washing_machine", "power_sensor": "sensor.plug"},
+        "entry_options": options,
+        "data": {"past_cycles": cycles, "profiles": {"Cotton": {}, "Quick": {}},
+                 "cadence_summaries": [[30.0, 15.0], [40.0, 20.0], [50.0, 25.0]],
+                 "cadence_sensor": "sensor.old_plug"},
+    }
+    path.write_text(json.dumps(doc), encoding="utf-8")
+
+
+@pytest.mark.parametrize(
+    ("options_sensor", "source"),
+    [
+        (None, "traces"),            # dropped like every null option: the entry's sensor
+        ("absent", "traces"),
+        ("**REDACTED**", "summaries"),  # cannot be compared, as before
+    ],
+)
+def test_analyze_diag_reads_the_sensor_a_null_option_leaves(
+    tmp_path: Path, options_sensor: Any, source: str
+) -> None:
+    export = tmp_path / "export.json"
+    _export(export, options_sensor)
+    assert _analyze_diag().analyse(export)["cadence"]["source"] == source

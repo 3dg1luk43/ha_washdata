@@ -145,8 +145,12 @@ def analyse(path: Path) -> dict[str, Any]:
     if unwrapped is None:
         raise SystemExit(f"{path}: not a WashData export or diagnostics dump")
     data, entry_data, entry_options, fmt = unwrapped
-    # The file's own sensor, before a missing one gets the placeholder below.
-    file_sensor = {**entry_data, **entry_options}.get("power_sensor")
+    # The file's own sensor, before a missing one gets the placeholder below. A
+    # null option is dropped as below, so the entry's data sensor stands, as in
+    # the manager (PR #529 review).
+    file_sensor = {
+        **entry_data, **{k: v for k, v in entry_options.items() if v is not None}
+    }.get("power_sensor")
     entry_data = {"power_sensor": "sensor.analyze_diag", "name": "analyze",
                   **{k: v for k, v in entry_data.items() if v is not None}}
     options = {k: v for k, v in entry_options.items() if v is not None}
