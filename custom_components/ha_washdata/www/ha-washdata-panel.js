@@ -3493,10 +3493,7 @@ class HaWashdataPanel extends HTMLElement {
           // D1: keep the matched profile's phase ranges for the Status timeline,
           // unless the appliance or program shown changed while the envelope was
           // awaited: the call would claim the phase slot for the old pair.
-          const shown = this._devices[this._selIdx];
-          if (shown && shown.entry_id === eid && shown.current_program === prog) {
-            await this._ensureStatusPhases(eid, prog);
-          }
+          if (this._isShownProgram(eid, prog)) await this._ensureStatusPhases(eid, prog);
         } else {
           this._statusEnvSeq++; this._statusEnvWant = null;
           this._statusEnv = null; this._statusEnvName = null; this._statusEnvEid = null;
@@ -3729,6 +3726,12 @@ class HaWashdataPanel extends HTMLElement {
   _isActiveEntry(eid) {
     const cur = this._devices[this._selIdx];
     return !!cur && cur.entry_id === eid;
+  }
+
+  // The appliance and the program the Status card shows now (the phase slot's key).
+  _isShownProgram(eid, program) {
+    const cur = this._devices[this._selIdx];
+    return !!cur && cur.entry_id === eid && cur.current_program === program;
   }
 
   // Fire all pending real deletes now (unload / device switch / timeout catch-up).
@@ -4267,8 +4270,12 @@ class HaWashdataPanel extends HTMLElement {
         // card can appear) and it hasn't been loaded for this device, so the
         // count is correct right after a device switch resets it.
         if (!this._profiles.length && !this._cycles.length) await this._fetchCycles(eid);
-        // D1: matched-profile phases for the compact Status phase timeline.
-        await this._ensureStatusPhases(eid, dev.current_program);
+        // D1: matched-profile phases for the compact Status phase timeline, unless
+        // the appliance or program shown changed during the awaits above, as in the
+        // overlay refresh: the call would claim the phase slot for the old pair.
+        if (this._isShownProgram(eid, dev.current_program)) {
+          await this._ensureStatusPhases(eid, dev.current_program);
+        }
         this._refreshReviewQuestion(dev);
         if (this._pref('show_debug', false)) await this._fetchMatchDebug(eid);
         if (this._canEdit()) await this._fetchRecState(eid);

@@ -524,3 +524,42 @@ test('a refresh whose appliance changed under it does not claim the phase slot',
   }, { two: twoRunning() });
   expect(calls).not.toContain('test-entry-001');
 });
+
+test('a tab load whose appliance changed under it does not claim the phase slot', async ({ page }) => {
+  // The Status tab load read the phases for the appliance it started on after
+  // awaiting the power history: switched meanwhile, it took the slot and showed
+  // the washer's timeline on the dryer until the next overlay refresh.
+  await bootPanel(page, { 'ha_washdata/get_devices': running({ manual_program: true }) });
+  await expect(page.locator('#wd-status-prog')).toHaveValue('Cotton 40°C', { timeout: 8_000 });
+  const got = await page.evaluate(async ({ two }) => {
+    const el = document.querySelector('ha-washdata-panel') as any;
+    const real = el._ws.bind(el);
+    let release: () => void = () => {};
+    const slow = new Promise<void>((r) => { release = r; });
+    let asked: () => void = () => {};
+    const historyAsked = new Promise<void>((r) => { asked = r; });
+    el._ws = (msg: any) => {
+      if (msg.type === 'ha_washdata/get_devices') return Promise.resolve(two);
+      if (msg.type === 'ha_washdata/get_power_history' && msg.entry_id === 'test-entry-001') {
+        asked();
+        return slow.then(() => real(msg));
+      }
+      if (msg.type === 'ha_washdata/get_profile_phases') {
+        return Promise.resolve({ phases: [{ name: msg.entry_id, start: 0, end: 60 }] });
+      }
+      return real(msg);
+    };
+    el._devices = two.devices;
+    el._selIdx = 0;
+    el._tab = 'status';
+    el._statusPhases = []; el._statusPhasesName = null; el._statusPhasesEid = null;
+    const older = el._fetchTabData();
+    await historyAsked;
+    el._selIdx = 1;                                                 // the user is on the dryer now
+    await el._ensureStatusPhases('test-entry-002', 'Cotton 40°C');  // the dryer's own lookup
+    release();
+    await older;
+    return { eid: el._statusPhasesEid, phase: el._statusPhases[0]?.name };
+  }, { two: twoRunning() });
+  expect(got).toEqual({ eid: 'test-entry-002', phase: 'test-entry-002' });
+});
