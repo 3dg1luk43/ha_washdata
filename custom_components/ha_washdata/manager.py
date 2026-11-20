@@ -4418,6 +4418,12 @@ class WashDataManager:
         live conditions here defensively — a close event could have been missed, or a
         user pause could have landed mid-dwell — before finalizing (#342)."""
         self._remove_door_end_dwell = None
+        if self._is_shutdown:
+            # Expired while the unload awaits its tasks, before it cancels the
+            # dwell: a cycle ended now skips its history write (``_on_cycle_end``)
+            # and is lost. Left running, the active-cycle snapshot keeps it for the
+            # next setup (review of PR #529).
+            return
         door_state = (
             self.hass.states.get(self._door_sensor_entity)
             if self._door_sensor_entity

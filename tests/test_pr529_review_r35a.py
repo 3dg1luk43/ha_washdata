@@ -7,6 +7,8 @@
   profile group's score (a sibling's), so a never-scored pick made a deficit.
 * A profile deleted while a #530 check matched moved no generation, so the
   trigger could fire naming the deleted profile.
+* A door-end dwell expiring while the unload awaited its tasks ended the cycle,
+  whose history write is skipped during shutdown: the cycle was lost.
 """
 from __future__ import annotations
 
@@ -257,3 +259,43 @@ async def test_the_winner_deleted_during_the_check_discards_it(
     with patch.object(store, "async_match_profile", AsyncMock(return_value=other)):
         await _check(hass, manager, state.key)
     assert len(_mismatches(sent)) == 1
+
+
+# ── The door-end dwell never ends a cycle while the device unloads ───────────
+
+
+async def test_a_dwell_expiring_during_the_unload_wait_keeps_the_cycle(
+    hass: Any, setup_washdata_entry: Any, freezer: Any
+) -> None:
+    """The unload awaits its tasks before it cancels the dwell. Expiring there,
+    the dwell ended the cycle, whose history write ``_on_cycle_end`` skips while
+    shutting down, and no active snapshot was saved for the OFF detector: the
+    cycle was lost. It stays open and is saved for the next setup."""
+    from datetime import timedelta  # noqa: PLC0415
+    from unittest.mock import patch  # noqa: PLC0415
+
+    from homeassistant.util import dt as dt_util  # noqa: PLC0415
+    from pytest_homeassistant_custom_component.common import (  # noqa: PLC0415
+        async_fire_time_changed,
+    )
+
+    from custom_components.ha_washdata.const import STATE_ENDING, STATE_PAUSED  # noqa: PLC0415
+
+    from .test_issue_524_door_ends_cycle import DOOR, OPTS, _paused_washer  # noqa: PLC0415
+
+    manager, ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    hass.states.async_set(DOOR, "on")
+    await hass.async_block_till_done()
+    assert manager._remove_door_end_dwell is not None  # noqa: SLF001
+    persist = manager._async_persist_notification_queues  # noqa: SLF001
+
+    async def dwell_expires_meanwhile() -> None:
+        freezer.tick(timedelta(seconds=90))
+        async_fire_time_changed(hass, dt_util.utcnow())
+        await persist()
+
+    with patch.object(manager, "_async_persist_notification_queues", dwell_expires_meanwhile):
+        assert await hass.config_entries.async_unload(manager.entry_id)
+    assert ends == []
+    assert manager.detector.state in (STATE_PAUSED, STATE_ENDING)
+    assert manager.profile_store.get_active_cycle() is not None
