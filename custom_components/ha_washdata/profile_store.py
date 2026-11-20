@@ -430,6 +430,61 @@ def _prepare_match_trace(
     return ts_arr, p_arr, current_seg.power.tolist(), used_dt
 
 
+#: Stored trace points a live match re-grids on the loop when its templates are
+#: not cached for the query's grid step (``ProfileStore._async_match_snapshots``),
+#: each trace counted as at least ``_MATCH_SEGMENT_TRACE_POINTS`` (its fixed
+#: cost). Past this the uncached ones go to the executor: on the largest corpus
+#: store (20 profiles, 70 member templates) a cold build took 15-22 ms on the
+#: loop, 12-13 ms of it this resampling (PR #529 review).
+_MATCH_SEGMENT_INLINE_POINTS = 4096
+_MATCH_SEGMENT_TRACE_POINTS = 256
+
+#: The miss list of a live match's first snapshot pass, per thread: set only on
+#: the loop around that pass, so the Playground's own builds (an executor thread)
+#: always resample inline.
+_SEGMENT_MISSES = threading.local()
+
+#: What a miss returns in that pass: a two-point stand-in, so the pass goes on to
+#: ask for every template a full build would (a golden profile's members follow
+#: its own template). That pass's snapshots are discarded whenever one was used.
+_SEGMENT_PLACEHOLDER = Segment(
+    timestamps=np.array([0.0, 1.0]), power=np.zeros(2), mask=np.ones(2, dtype=bool)
+)
+
+
+def _resample_sample_trace(sample_data: Any, dt: float) -> Segment | None:
+    """A stored trace (``[[offset, watts], ...]``) on a ``dt`` grid: its longest
+    gap-free segment, or None. Pure and executor-safe; raises on a malformed row."""
+    if not sample_data or not isinstance(sample_data[0], (list, tuple)):
+        return None
+    s_ts = np.array([x[0] for x in sample_data], dtype=float)
+    s_p = np.array([x[1] for x in sample_data], dtype=float)
+    # Imported data can carry NaN (json.loads accepts it); envelopes already drop
+    # non-finite rows, the sample template did not (audit MATCH-CORE-05).
+    finite = np.isfinite(s_ts) & np.isfinite(s_p)
+    if not finite.all():
+        s_ts, s_p = s_ts[finite], s_p[finite]
+    if s_ts.size < 2:
+        return None
+    s_segments = resample_uniform(s_ts, s_p, dt_s=dt, gap_s=21600.0)
+    if not s_segments:
+        return None
+    return max(s_segments, key=lambda s: len(s.power))
+
+
+def _resample_sample_traces(traces: list[Any], dt: float) -> list[Segment | None]:
+    """:func:`_resample_sample_trace` over several traces, for one executor job.
+    A trace that cannot be resampled is None (the caller's own lookup then
+    retries it and logs why)."""
+    out: list[Segment | None] = []
+    for trace in traces:
+        try:
+            out.append(_resample_sample_trace(trace, dt))
+        except Exception:  # pylint: disable=broad-exception-caught
+            out.append(None)
+    return out
+
+
 def _newest_cycle(candidates: list[Any]) -> Any:
     """The most recent candidate cycle, ordered by parsed instant (``None`` if empty).
 
@@ -11064,7 +11119,7 @@ class ProfileStore:
                 if mems:
                     snapshots[-1]["members"] = mems
 
-        if skipped_profiles:
+        if skipped_profiles and getattr(_SEGMENT_MISSES, "misses", None) is None:
             self._logger.debug(
                 "Profile matching skipped %d profiles: %s",
                 len(skipped_profiles),
@@ -11129,7 +11184,10 @@ class ProfileStore:
     def _get_cached_sample_segment(
         self, sample_cycle: dict[str, Any], dt: float
     ) -> Segment | None:
-        """Get or compute resampled segment for a sample cycle, using cache."""
+        """Get or compute resampled segment for a sample cycle, using cache.
+
+        In a live match's first snapshot pass (``_async_match_snapshots``) a miss
+        is recorded instead of computed, and a stand-in returned."""
         cycle_id = sample_cycle.get("id")
         if not cycle_id:
             return None
@@ -11149,43 +11207,82 @@ class ProfileStore:
         sample_data = sample_cycle.get("power_data")
         if not sample_data:
             return None
+        sink = getattr(_SEGMENT_MISSES, "misses", None)
+        if sink is not None:
+            sink.append((sample_cycle, sample_data))
+            return _SEGMENT_PLACEHOLDER
 
         try:
-            if len(sample_data) > 0 and isinstance(sample_data[0], (list, tuple)):
-                s_ts = np.array([x[0] for x in sample_data], dtype=float)
-                s_p = np.array([x[1] for x in sample_data], dtype=float)
-                # Imported data can carry NaN (json.loads accepts it); envelopes
-                # already drop non-finite rows, the sample template did not
-                # (audit MATCH-CORE-05).
-                finite = np.isfinite(s_ts) & np.isfinite(s_p)
-                if not finite.all():
-                    s_ts, s_p = s_ts[finite], s_p[finite]
-                if s_ts.size < 2:
-                    return None
-            else:
+            sample_seg = _resample_sample_trace(sample_data, dt)
+            if sample_seg is None:
                 return None
-
-            s_segments = resample_uniform(s_ts, s_p, dt_s=dt, gap_s=21600.0)
-            if not s_segments:
-                return None
-
-            sample_seg = max(s_segments, key=lambda s: len(s.power))
-
-            # Store, evicting the least recently used. Live matching's grid step
-            # drifts on change-only plugs (2.75 distinct steps per cycle, up to
-            # 22) and nothing dropped a deleted cycle's entries, so the cache
-            # grew for the life of the install (audit ML-12).
-            cap = self._sample_segment_cache_cap()
-            with self._segment_cache_lock():
-                cache = self._cached_sample_segments
-                cache.pop(key, None)
-                cache[key] = sample_seg
-                while len(cache) > cap:
-                    del cache[next(iter(cache))]
+            self._store_sample_segment(key, sample_seg)
             return sample_seg
         except Exception as e: # pylint: disable=broad-exception-caught
             self._logger.warning("Error caching sample segment %s: %s", cycle_id, e)
             return None
+
+    def _store_sample_segment(self, key: tuple[Any, float], segment: Segment) -> None:
+        """Cache ``segment`` under ``key``, evicting the least recently used. Live
+        matching's grid step drifts on change-only plugs (2.75 distinct steps per
+        cycle, up to 22) and nothing dropped a deleted cycle's entries, so the
+        cache grew for the life of the install (audit ML-12)."""
+        cap = self._sample_segment_cache_cap()
+        with self._segment_cache_lock():
+            cache = self._cached_sample_segments
+            cache.pop(key, None)
+            cache[key] = segment
+            while len(cache) > cap:
+                del cache[next(iter(cache))]
+
+    async def _async_match_snapshots(self, used_dt: float) -> list[dict[str, Any]]:
+        """:meth:`build_match_snapshots` for a live match, with the templates it
+        has not cached for ``used_dt`` resampled in the executor (PR #529 review).
+
+        A first pass on the loop records the misses instead of computing them;
+        with none (the usual case) its snapshots are the result. Otherwise, past
+        ``_MATCH_SEGMENT_INLINE_POINTS``, their traces are copied and resampled
+        in one executor job, cached on the loop if nothing changed them
+        meanwhile, and the snapshots built again: the same builder on a warm
+        cache, so the templates are the ones an inline build makes. The store is
+        read and the cache written only on the loop."""
+        misses: list[tuple[CycleDict, Any]] = []
+        _SEGMENT_MISSES.misses = misses
+        try:
+            snapshots = self.build_match_snapshots(used_dt)
+        finally:
+            _SEGMENT_MISSES.misses = None
+        if not misses:
+            return snapshots
+        dt_key = float(round(used_dt, 2))
+        jobs: dict[tuple[Any, float], tuple[CycleDict, Any]] = {}
+        for cycle, data in misses:
+            jobs.setdefault((cycle.get("id"), dt_key), (cycle, data))
+        points = sum(
+            max(len(data) if isinstance(data, list) else 0, _MATCH_SEGMENT_TRACE_POINTS)
+            for _c, data in jobs.values()
+        )
+        if points > _MATCH_SEGMENT_INLINE_POINTS:
+            cache = self._cached_sample_segments
+            epoch = getattr(self, "_segment_cache_epoch", 0)
+            copies = [list(data) for _c, data in jobs.values()]
+            try:
+                segments = await self.hass.async_add_executor_job(
+                    _resample_sample_traces, copies, used_dt
+                )
+            except Exception:  # pylint: disable=broad-exception-caught
+                segments = []
+            # A trace trimmed, repaired or replaced meanwhile (a new list, or its
+            # entries dropped), or the cache reset by an import or a wipe: not
+            # cached, the build below resamples what the store holds now.
+            if (
+                cache is self._cached_sample_segments
+                and getattr(self, "_segment_cache_epoch", 0) == epoch
+            ):
+                for (key, (cycle, data)), seg in zip(jobs.items(), segments):
+                    if seg is not None and cycle.get("power_data") is data:
+                        self._store_sample_segment(key, seg)
+        return self.build_match_snapshots(used_dt)
 
     def _segment_cache_lock(self) -> threading.Lock:
         """The sample-segment cache's lock (created on first use for bare fixtures)."""
@@ -11217,6 +11314,7 @@ class ProfileStore:
         iteration" (audit PLAYGROUND-22).
         """
         with self._segment_cache_lock():
+            self._segment_cache_epoch = getattr(self, "_segment_cache_epoch", 0) + 1
             cache = self._cached_sample_segments
             for key in [k for k in list(cache) if k[0] == cycle_id]:
                 cache.pop(key, None)
@@ -11272,22 +11370,24 @@ class ProfileStore:
         if prepared is None:
             return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
         ts_arr, p_arr, current_power_list, used_dt = prepared
-        # An import or Undo Import replaced the store during that preparation: the
-        # groups read at the call are the replaced data's, the templates read below
-        # the new data's. Mapped together they make a family the store never held
-        # (PR #529 review), so the groups are read again, with the templates. So
-        # does a profile renamed or deleted meanwhile (no new data generation): a
-        # member renamed A -> C left the groups naming A, the templates C, and
-        # the cohesive group was skipped (PR #529 review).
-        if (
-            getattr(self, "_data_generation", 0) != call_generation
-            or self.profile_set_revision != call_revision
-        ):
-            call_groups = self._match_groups()
 
-        # 2. The candidates, on the loop (the store's state is read here only).
+        # 2. The candidates, on the loop (the store's state is read here only;
+        # uncached template resampling goes to the executor).
         try:
-            snapshots = self.build_match_snapshots(used_dt)
+            snapshots = await self._async_match_snapshots(used_dt)
+            # An import or Undo Import replaced the store during the preparation
+            # or the template resampling: the groups read at the call are the
+            # replaced data's, the templates the new data's. Mapped together they
+            # make a family the store never held (PR #529 review), so the groups
+            # are read again, with the templates (no await between them). So does
+            # a profile renamed or deleted meanwhile (no new data generation): a
+            # member renamed A -> C left the groups naming A, the templates C, and
+            # the cohesive group was skipped (PR #529 review).
+            if (
+                getattr(self, "_data_generation", 0) != call_generation
+                or self.profile_set_revision != call_revision
+            ):
+                call_groups = self._match_groups()
 
             # Stage 5: map cohesive near-duplicate groups to their members (loose
             # groups stay individual). The members are scored individually and the

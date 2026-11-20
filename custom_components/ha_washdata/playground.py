@@ -565,6 +565,11 @@ class _SimStore:
         self._pending = hit
         return hit[0]
 
+    async def _async_match_snapshots(self, used_dt: float) -> list[dict[str, Any]]:
+        # The live match moves uncached template resampling to the executor; the
+        # replay already runs off the loop and keeps its templates per grid above.
+        return self.build_match_snapshots(used_dt)
+
     def _match_groups(self) -> None:
         # The groups come with the snapshots they were mapped on (``_pending``);
         # a replay in the executor never reads the live store's per match.

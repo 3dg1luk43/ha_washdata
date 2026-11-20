@@ -18,10 +18,16 @@
   refresh does not run again on an unchanged store, so a device that cannot
   start a cycle never got it. Each pass runs on its own now; the manual
   analysis still stops at a failed pass and reports it.
+* On a template cache miss (a new grid step) ``build_match_snapshots()``
+  resampled every uncached sample and member template on the loop: 15-22 ms on
+  the largest corpus store here, 12-13 ms of it that resampling. A live match
+  now resamples them in one executor job over copied traces and builds again on
+  the warm cache; the snapshots are the inline build's.
 """
 from __future__ import annotations
 
 import asyncio
+import threading
 from datetime import timedelta
 from typing import Any
 from unittest.mock import AsyncMock, patch
@@ -33,6 +39,7 @@ from homeassistant.util import dt as dt_util
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
 from custom_components.ha_washdata import cycle_detector as cd_mod
+from custom_components.ha_washdata import profile_store as ps_mod
 from custom_components.ha_washdata.const import (
     CONF_OFF_DELAY,
     DOMAIN,
@@ -288,3 +295,97 @@ async def test_the_manual_analysis_still_stops_at_a_failed_pass(
     ):
         await lm._async_run_all_passes(raise_errors=True)  # noqa: SLF001
     start.assert_not_called()
+
+
+# ── Uncached template resampling runs in the executor ────────────────────────
+
+N_PROFILES, N_POINTS, STEP = 5, 1500, 2.0
+
+
+def _trace_of(k: int) -> list[list[float]]:
+    """Profile ``k``: a heater block at its own position, then tumbling."""
+    return [
+        [i * STEP, 2000.0 if 100 * k <= i < 100 * k + 200 else 150.0 + 50.0 * ((i // 30) % 2)]
+        for i in range(N_POINTS)
+    ]
+
+
+def _single_cycle_store(hass: Any) -> Any:
+    """Five profiles of one cycle each: every template is a sample-backed one."""
+    with patch("custom_components.ha_washdata.profile_store.WashDataStore"):
+        store = ps_mod.ProfileStore(hass, "entry", min_duration_ratio=0.1, max_duration_ratio=1.8)
+    store.async_save = AsyncMock()
+    for k in range(N_PROFILES):
+        name = f"P{k}"
+        store._data["past_cycles"].append({  # noqa: SLF001
+            "id": f"c{k}", "profile_name": name, "status": "completed",
+            "start_time": f"2026-11-0{k + 1}T08:00:00+00:00",
+            "duration": N_POINTS * STEP, "power_data": _trace_of(k),
+        })
+        store._data["profiles"][name] = {  # noqa: SLF001
+            "avg_duration": N_POINTS * STEP, "sample_cycle_id": f"c{k}",
+        }
+    return store
+
+
+def _query() -> list[tuple[float, float]]:
+    return [(float(t), float(p)) for t, p in _trace_of(2)[:900]]
+
+
+def _ranking(result: Any) -> list[tuple[str, float]]:
+    return [(c["name"], round(float(c["score"]), 9)) for c in result.candidates]
+
+
+async def test_a_cold_match_resamples_its_templates_off_the_loop(hass: HomeAssistant) -> None:
+    """A match on a cache miss resampled every sample-backed template on the loop.
+    Now none on the loop, the ranking is the inline build's, and a second match
+    on the same grid resamples nothing."""
+    real = ps_mod.resample_uniform
+    threads: list[int] = []
+
+    def recording(*args: Any, **kwargs: Any) -> Any:
+        threads.append(threading.get_ident())
+        return real(*args, **kwargs)
+
+    loop_thread = threading.get_ident()
+    store = _single_cycle_store(hass)
+    query = _query()
+    with patch.object(ps_mod, "resample_uniform", side_effect=recording):
+        result = await store.async_match_profile(query, query[-1][0], in_progress=True)
+        assert threads and loop_thread not in threads
+        threads.clear()
+        again = await store.async_match_profile(query, query[-1][0], in_progress=True)
+        assert threads == []
+    assert _ranking(again) == _ranking(result)
+    # The same match with every template resampled inline on the loop, as before.
+    inline = _single_cycle_store(hass)
+    with patch.object(ps_mod, "_MATCH_SEGMENT_INLINE_POINTS", 10**9):
+        expected = await inline.async_match_profile(query, query[-1][0], in_progress=True)
+    assert result.best_profile == expected.best_profile == "P2"
+    assert _ranking(result) == _ranking(expected)
+
+
+async def test_a_trace_replaced_during_the_job_is_not_cached(mock_hass: Any) -> None:
+    """A trim (a new trace list, its cache entries dropped) while the templates
+    resample: the old trace's segment is not cached, the build uses the new one."""
+    store = _single_cycle_store(mock_hass)
+    cycle = store._data["past_cycles"][0]  # noqa: SLF001
+    trimmed = cycle["power_data"][:600]
+
+    async def trimming_job(target: Any, *args: Any) -> Any:
+        out = target(*args)
+        cycle["power_data"] = trimmed
+        store._drop_cached_sample_segments("c0")  # noqa: SLF001
+        return out
+
+    mock_hass.async_add_executor_job = trimming_job
+    snaps = await store._async_match_snapshots(STEP)  # noqa: SLF001
+    fresh = ps_mod._resample_sample_trace(trimmed, STEP)  # noqa: SLF001
+    assert fresh is not None
+    p0 = next(s for s in snaps if s["name"] == "P0")
+    assert p0["sample_power"] == fresh.power.tolist()
+    cached = store._cached_sample_segments[("c0", STEP)]  # noqa: SLF001
+    assert cached.power.tolist() == fresh.power.tolist()
+    # The others were resampled in the job and cached as the build used them.
+    p1 = next(s for s in snaps if s["name"] == "P1")
+    assert p1["sample_power"] == ps_mod._resample_sample_trace(_trace_of(1), STEP).power.tolist()  # noqa: SLF001
