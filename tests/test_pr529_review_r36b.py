@@ -148,3 +148,38 @@ async def test_undo_import_keeps_the_restored_stop_for_restored_cycles(
     assert not ws_api._is_effective_stop_row(row)  # noqa: SLF001
     legacy = {"end_time": (T0 - timedelta(days=1)).isoformat()}
     assert _stop_at_end(legacy, stop_threshold_changes(log), 1.0) == 1.0
+
+
+async def test_a_dismiss_during_the_check_stops_apply(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """Dismissed while Apply checked a selected Off Delay: nothing Apply re-reads
+    moved, so it wrote the dismissed value. An unchanged selection still applies."""
+    entry = await setup_washdata_entry(options={CONF_END_ENERGY_THRESHOLD: 0.01, CONF_OFF_DELAY: 60})
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store = manager.profile_store
+    real_check = ws_api._drop_unsafe_end_gate_updates  # noqa: SLF001
+
+    async def dismissed_meanwhile(*args: Any) -> bool:
+        ok = await real_check(*args)
+        await store.clear_suggestions()
+        return ok
+
+    async def apply() -> dict[str, Any]:
+        store.set_suggestion(CONF_OFF_DELAY, 120, reason="r", flags={"owner": OWNER_BATCH})
+        await client.send_json_auto_id({
+            "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry.entry_id,
+            "keys": [CONF_OFF_DELAY],
+        })
+        return await client.receive_json()
+
+    client = await hass_ws_client(hass)
+    with patch.object(ws_api, "_drop_unsafe_end_gate_updates", side_effect=dismissed_meanwhile):
+        res = await apply()
+    assert res["success"] is False and res["error"]["code"] == "entry_reloaded"
+    assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_OFF_DELAY] == 60
+
+    res = await apply()
+    assert res["success"] and res["result"]["applied"] == [CONF_OFF_DELAY]
+    await hass.async_block_till_done()
+    assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_OFF_DELAY] == 120

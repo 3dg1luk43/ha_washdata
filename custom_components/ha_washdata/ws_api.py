@@ -5304,6 +5304,24 @@ async def ws_apply_suggestions(
                         and {**entry.data, **entry.options} == fresh
                     )
 
+                selected = {key: visible[key].get("value") for key in updates}
+
+                def _selection_current() -> bool:
+                    # The values chosen above are still the ones the Settings list
+                    # shows; read before the clear, which empties it.
+                    now = {
+                        key: item
+                        for key, item, _s, _c in _visible_suggestions(
+                            manager.profile_store, {**entry.data, **entry.options},
+                            getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
+                        )
+                    }
+                    return all(
+                        isinstance(now.get(key), dict)
+                        and now[key].get("value") == selected[key]
+                        for key in updates
+                    )
+
                 if not await _drop_unsafe_end_gate_updates(hass, manager, visible, updates):
                     connection.send_error(
                         msg["id"], "end_gate_check_failed",
@@ -5336,6 +5354,16 @@ async def ws_apply_suggestions(
                         "The appliance was reloaded, its settings changed or its data "
                         "restored while the suggestions were applied. Nothing was "
                         "saved; try again.",
+                    )
+                    return
+                if updates and not _selection_current():
+                    # Dismissed or replaced while the check was awaited: a dismiss
+                    # clears the list without this lock and moves nothing else
+                    # ``_still_current`` reads (PR #529 review).
+                    connection.send_error(
+                        msg["id"], "entry_reloaded",
+                        "The suggestions changed or were dismissed while they were "
+                        "applied. Nothing was saved; try again.",
                     )
                     return
                 if updates:
