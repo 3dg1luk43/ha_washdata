@@ -1803,6 +1803,7 @@
     "settings_reverted": "Iestatījumi atjaunoti; integrācijas pārlādēšana",
     "settings_saved": "Iestatījumi saglabāti; integrācijas pārlādēšana",
     "suggestions_applied": "Ieteikumi piemēroti; integrācijas pārlādēšana",
+    "suggestions_none_applied": "Neviens iestatījums netika mainīts: atlasītie ieteikumi vairs nav spēkā",
     "suggestions_dismissed": "Ieteikumi noraidīti",
     "apply_failed": "Lietošana neizdevās: {error}",
     "delete_failed": "Dzēšana neizdevās: {error}",

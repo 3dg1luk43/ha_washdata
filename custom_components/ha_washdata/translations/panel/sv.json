@@ -1892,6 +1892,7 @@
     "settings_reverted": "Inställningar återställda; integration laddas om",
     "settings_saved": "Inställningar sparade; integration laddas om",
     "suggestions_applied": "Förslag tillämpade; integration laddas om",
+    "suggestions_none_applied": "Ingen inställning ändrad: de valda förslagen gäller inte längre",
     "suggestions_dismissed": "Förslag avfärdade",
     "apply_failed": "Tillämpning misslyckades: {error}",
     "delete_failed": "Borttagning misslyckades: {error}",

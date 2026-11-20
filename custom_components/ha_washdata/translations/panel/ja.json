@@ -1785,6 +1785,7 @@
         "settings_reverted": "設定が復元されました。統合のリロード",
         "settings_saved": "設定が保存されました。統合のリロード",
         "suggestions_applied": "提案が適用されました。統合のリロード",
+        "suggestions_none_applied": "設定は変更されませんでした。選択した提案はもう適用されません",
         "suggestions_dismissed": "提案は却下されました",
         "apply_failed": "適用に失敗しました: {error}",
         "delete_failed": "削除に失敗しました: {error}",

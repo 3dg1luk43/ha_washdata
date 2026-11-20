@@ -1892,6 +1892,7 @@
     "settings_reverted": "Innstillinger gjenopprettet; integrering omlasting",
     "settings_saved": "Innstillinger lagret; integrering omlasting",
     "suggestions_applied": "Forslag brukt; integrering omlasting",
+    "suggestions_none_applied": "Ingen innstilling endret: de valgte forslagene gjelder ikke lenger",
     "suggestions_dismissed": "Forslag avvist",
     "apply_failed": "Bruk mislyktes: {error}",
     "delete_failed": "Sletting mislyktes: {error}",

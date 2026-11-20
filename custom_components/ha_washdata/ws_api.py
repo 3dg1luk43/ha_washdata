@@ -5430,7 +5430,12 @@ async def ws_apply_suggestions(
             if updates:
                 manager.notify_update()
 
-        _send_result(connection, msg["id"], "apply_suggestions", {"success": True, "applied": list(updates.keys())}
+        # ``success`` False when nothing was written: every selected suggestion
+        # was withdrawn by the checks above or is no longer offered, so no reload
+        # follows and the panel must not say it applied any (PR #529 review).
+        _send_result(
+            connection, msg["id"], "apply_suggestions",
+            {"success": bool(updates), "applied": list(updates.keys())},
         )
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))

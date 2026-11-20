@@ -5,12 +5,16 @@
 * A wholesale import that replaced the stored cycles recorded this device's
   old Stop as the one in force before its Stop row, so an imported cycle read
   as ended under a Stop it never ran with.
+* Apply wrote a non-finite stored suggestion ("Infinity") as the setting.
+* An Apply whose checks withdrew every selected key wrote nothing but replied
+  as a success, and the panel said the suggestions were applied.
 """
 from __future__ import annotations
 
 import json
 from datetime import timedelta
 from typing import Any
+from unittest.mock import patch
 
 from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
@@ -18,6 +22,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.ha_washdata import ws_api
 from custom_components.ha_washdata.const import (
+    CONF_END_ENERGY_THRESHOLD,
     CONF_MIN_POWER,
     CONF_OFF_DELAY,
     CONF_START_THRESHOLD_W,
@@ -163,3 +168,34 @@ async def test_a_non_finite_suggestion_is_refused_before_anything_changes(
         assert res["success"] is False and res["error"]["code"] == "invalid_suggestion", res
         assert entry.options[CONF_STOP_THRESHOLD_W] == 3.0 and entry.options[CONF_OFF_DELAY] == 60
         assert set(store.get_suggestions()) == {CONF_STOP_THRESHOLD_W, CONF_OFF_DELAY}
+
+
+async def test_an_apply_that_writes_nothing_says_so(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """The joint check withdrew every selected key: nothing was written, yet the
+    reply was the success the panel reads as "applied, reloading". A selection
+    still written keeps it."""
+    entry = await setup_washdata_entry(options={CONF_END_ENERGY_THRESHOLD: 0.01, CONF_OFF_DELAY: 60})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    client = await hass_ws_client(hass)
+
+    async def withdraw_all(_hass: Any, _manager: Any, _visible: Any, updates: dict) -> bool:
+        updates.clear()
+        return True
+
+    store.set_suggestion(CONF_OFF_DELAY, 120, reason="r", flags={"owner": OWNER_BATCH})
+    with patch.object(ws_api, "_drop_unsafe_end_gate_updates", side_effect=withdraw_all):
+        res = await _apply(hass, client, entry.entry_id, [CONF_OFF_DELAY])
+    assert res["success"], res
+    assert res["result"] == {"success": False, "applied": []}
+    assert entry.options[CONF_OFF_DELAY] == 60
+    assert CONF_OFF_DELAY in store.get_suggestions()  # not cleared
+
+    # A key no longer offered (dismissed meanwhile) writes nothing either.
+    res = await _apply(hass, client, entry.entry_id, [CONF_MIN_POWER])
+    assert res["result"] == {"success": False, "applied": []}
+
+    res = await _apply(hass, client, entry.entry_id, [CONF_OFF_DELAY])
+    assert res["result"] == {"success": True, "applied": [CONF_OFF_DELAY]}
+    assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_OFF_DELAY] == 120

@@ -1909,6 +1909,7 @@
     "settings_reverted": "Nastavení bylo obnoveno; integrace se znovu načítá",
     "settings_saved": "Nastavení uloženo; znovunačtení integrace",
     "suggestions_applied": "Byly použity návrhy; znovunačtení integrace",
+    "suggestions_none_applied": "Žádné nastavení nebylo změněno: vybrané návrhy už neplatí",
     "suggestions_dismissed": "Návrhy zamítnuty",
     "apply_failed": "Použití selhalo: {error}",
     "delete_failed": "Smazání selhalo: {error}",

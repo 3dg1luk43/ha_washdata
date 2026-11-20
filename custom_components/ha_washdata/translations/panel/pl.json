@@ -1909,6 +1909,7 @@
     "settings_reverted": "Ustawienia przywrócono; integracja jest przeładowywana",
     "settings_saved": "Ustawienia zapisane; przeładowanie integracji",
     "suggestions_applied": "Zastosowano sugestie; przeładowanie integracji",
+    "suggestions_none_applied": "Nie zmieniono żadnego ustawienia: wybrane sugestie nie mają już zastosowania",
     "suggestions_dismissed": "Sugestie odrzucone",
     "apply_failed": "Zastosowanie nie powiodło się: {error}",
     "delete_failed": "Usuwanie nie powiodło się: {error}",

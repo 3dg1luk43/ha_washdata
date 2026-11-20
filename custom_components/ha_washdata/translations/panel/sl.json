@@ -1909,6 +1909,7 @@
     "settings_reverted": "Nastavitve obnovljene; integracija se znova nalaga",
     "settings_saved": "Nastavitve shranjene; integracija se znova nalaga",
     "suggestions_applied": "Predlogi uporabljeni; integracija se znova nalaga",
+    "suggestions_none_applied": "Nobena nastavitev ni bila spremenjena: izbrani predlogi ne veljajo več",
     "suggestions_dismissed": "Predlogi zavrnjeni",
     "apply_failed": "Uporaba ni uspela: {error}",
     "delete_failed": "Brisanje ni uspelo: {error}",

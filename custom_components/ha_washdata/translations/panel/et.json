@@ -1804,6 +1804,7 @@
     "settings_reverted": "Seaded taastatud; integratsiooni uuesti laadimine",
     "settings_saved": "Seaded salvestatud; integratsiooni uuesti laadimine",
     "suggestions_applied": "Soovitused rakendatud; integratsiooni uuesti laadimine",
+    "suggestions_none_applied": "Ühtegi sätet ei muudetud: valitud soovitused ei kehti enam",
     "suggestions_dismissed": "Soovitused lükati tagasi",
     "apply_failed": "Rakendamine ebaõnnestus: {error}",
     "delete_failed": "Kustutamine ebaõnnestus: {error}",

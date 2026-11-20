@@ -1892,6 +1892,7 @@
     "settings_reverted": "Einstellungen wiederhergestellt; Neuladen der Integration",
     "settings_saved": "Einstellungen gespeichert; Neuladen der Integration",
     "suggestions_applied": "Angewendete Vorschläge; Neuladen der Integration",
+    "suggestions_none_applied": "Keine Einstellung geändert: Die ausgewählten Vorschläge gelten nicht mehr",
     "suggestions_dismissed": "Vorschläge abgelehnt",
     "apply_failed": "Anwenden fehlgeschlagen: {error}",
     "delete_failed": "Löschen fehlgeschlagen: {error}",

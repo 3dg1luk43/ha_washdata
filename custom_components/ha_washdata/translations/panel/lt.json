@@ -1821,6 +1821,7 @@
     "settings_reverted": "Nustatymai atkurti; integracijos perkrovimas",
     "settings_saved": "Nustatymai išsaugoti; integracijos perkrovimas",
     "suggestions_applied": "Pasiūlymai pritaikyti; integracijos perkrovimas",
+    "suggestions_none_applied": "Joks nustatymas nepakeistas: pasirinkti pasiūlymai nebegalioja",
     "suggestions_dismissed": "Pasiūlymai atmesti",
     "apply_failed": "Nepavyko pritaikyti: {error}",
     "delete_failed": "Nepavyko ištrinti: {error}",

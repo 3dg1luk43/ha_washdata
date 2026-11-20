@@ -1771,6 +1771,7 @@
     "settings_reverted": "Impostazioni ripristinate; ricarica dell'integrazione",
     "settings_saved": "Impostazioni salvate; ricarica dell'integrazione",
     "suggestions_applied": "Suggerimenti applicati; ricarica dell'integrazione",
+    "suggestions_none_applied": "Nessuna impostazione modificata: i suggerimenti selezionati non sono più applicabili",
     "suggestions_dismissed": "Suggerimenti respinti",
     "apply_failed": "Applicazione non riuscita: {error}",
     "delete_failed": "Eliminazione non riuscita: {error}",

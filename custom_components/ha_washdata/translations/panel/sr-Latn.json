@@ -1891,6 +1891,7 @@
     "settings_reverted": "Podešavanja vraćena; integracija se ponovo učitava",
     "settings_saved": "Podešavanja sačuvana; integracija se ponovo učitava",
     "suggestions_applied": "Prijedlozi primenjeni; integracija se ponovo učitava",
+    "suggestions_none_applied": "Nijedno podešavanje nije promenjeno: izabrani prijedlozi više ne važe",
     "suggestions_dismissed": "Prijedlozi odbijeni",
     "apply_failed": "Primena nije uspela: {error}",
     "delete_failed": "Brisanje nije uspelo: {error}",

@@ -14982,7 +14982,14 @@ class HaWashdataPanel extends HTMLElement {
   _applyAllSuggestions(eid, keys) {
     this._busyRun('save-settings', async () => {
       try {
-        await this._ws({ type: `${_DOMAIN}/apply_suggestions`, entry_id: eid, keys });
+        const res = await this._ws({ type: `${_DOMAIN}/apply_suggestions`, entry_id: eid, keys });
+        if (res && res.success === false) {
+          // Nothing written (every selected suggestion withdrawn or no longer
+          // offered), so nothing reloads: say so and show the list as it stands.
+          this._showToast(this._t('toast.suggestions_none_applied', {}, 'No setting changed: the selected suggestions no longer apply'), 'info');
+          await this._fetchSuggestions(eid);
+          return;
+        }
         this._showToast(this._t('toast.suggestions_applied', {}, 'Suggestions applied; integration reloading'));
         await this._fetchSuggestions(eid);
         const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid });

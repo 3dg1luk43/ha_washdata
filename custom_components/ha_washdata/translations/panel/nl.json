@@ -1892,6 +1892,7 @@
     "settings_reverted": "Instellingen hersteld; integratie herladen",
     "settings_saved": "Instellingen opgeslagen; integratie herladen",
     "suggestions_applied": "Suggesties toegepast; integratie herladen",
+    "suggestions_none_applied": "Geen instelling gewijzigd: de geselecteerde suggesties zijn niet meer van toepassing",
     "suggestions_dismissed": "Suggesties afgewezen",
     "apply_failed": "Toepassen mislukt: {error}",
     "delete_failed": "Verwijderen mislukt: {error}",

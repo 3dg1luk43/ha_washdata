@@ -1804,6 +1804,7 @@
         "settings_reverted": "Ayarlar geri yüklendi; entegrasyon yeniden yükleniyor",
         "settings_saved": "Ayarlar kaydedildi; entegrasyon yeniden yükleniyor",
         "suggestions_applied": "Öneriler uygulandı; entegrasyon yeniden yükleniyor",
+        "suggestions_none_applied": "Hiçbir ayar değiştirilmedi: seçilen öneriler artık geçerli değil",
         "suggestions_dismissed": "Öneriler reddedildi",
         "apply_failed": "Uygulama başarısız: {error}",
         "delete_failed": "Silme başarısız: {error}",

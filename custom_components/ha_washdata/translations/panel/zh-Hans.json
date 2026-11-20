@@ -1785,6 +1785,7 @@
         "settings_reverted": "设置已恢复；集成正在重新加载",
         "settings_saved": "设置已保存；集成重载中",
         "suggestions_applied": "建议已应用；集成重载中",
+        "suggestions_none_applied": "未更改任何设置：所选建议已不再适用",
         "suggestions_dismissed": "建议已关闭",
         "apply_failed": "应用失败：{error}",
         "delete_failed": "删除失败：{error}",

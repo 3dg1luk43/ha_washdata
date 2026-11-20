@@ -384,6 +384,8 @@ class GetSuggestionsResponse(TypedDict):
 
 
 class ApplySuggestionsResponse(TypedDict):
+    """``success`` False, with ``applied`` empty, when nothing was written."""
+
     success: bool
     applied: list[str]
 

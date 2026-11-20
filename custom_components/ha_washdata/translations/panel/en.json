@@ -1996,6 +1996,7 @@
     "store_shared": "Shared to the community store - pending review.",
     "store_unavailable": "The community store is not available.",
     "suggestions_applied": "Suggestions applied; integration reloading",
+    "suggestions_none_applied": "No setting changed: the selected suggestions no longer apply",
     "suggestions_dismissed": "Suggestions dismissed",
     "task_cancelled": "Cancelled.",
     "thanks_confirming": "Thanks for confirming",

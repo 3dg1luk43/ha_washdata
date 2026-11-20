@@ -1752,6 +1752,7 @@
     "settings_reverted": "Configurações revertidas; a integração está recarregando",
     "settings_saved": "Configurações salvas; a integração está recarregando",
     "suggestions_applied": "Sugestões aplicadas; a integração está recarregando",
+    "suggestions_none_applied": "Nenhuma configuração alterada: as sugestões selecionadas não se aplicam mais",
     "suggestions_dismissed": "Sugestões dispensadas",
     "apply_failed": "Falha ao aplicar: {error}",
     "delete_failed": "Falha ao excluir: {error}",

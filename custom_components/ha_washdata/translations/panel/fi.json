@@ -1893,6 +1893,7 @@
     "settings_reverted": "Asetukset palautettu; integroinnin uudelleenlataus",
     "settings_saved": "Asetukset tallennettu; integroinnin uudelleenlataus",
     "suggestions_applied": "Ehdotuksia otettu käyttöön; integroinnin uudelleenlataus",
+    "suggestions_none_applied": "Asetuksia ei muutettu: valitut ehdotukset eivät ole enää voimassa",
     "suggestions_dismissed": "Ehdotukset hylätty",
     "apply_failed": "Käyttöönotto epäonnistui: {error}",
     "delete_failed": "Poisto epäonnistui: {error}",
