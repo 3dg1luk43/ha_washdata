@@ -530,8 +530,8 @@ async def test_migrate_3_9_to_3_10_heals_seeded_cadence_on_coarse_device(
 ) -> None:
     """3.9 -> 3.10 (#396): a coarse-sampling device whose seeded watchdog=30 /
     start_duration=5 violated the panel's own conflict rules got the device-resolved
-    defaults. Since 0.6.1 a dryer samples at 2 s too, so its resolved defaults are
-    30 / 5 and the seeded values are kept."""
+    defaults. Since 0.6.1 a dryer samples at 2 s too: its start debounce default is
+    5 (kept), its watchdog stays 61 (healed)."""
     entry = DummyEntry(
         version=3, minor_version=9, data={},
         options={
@@ -544,7 +544,7 @@ async def test_migrate_3_9_to_3_10_heals_seeded_cadence_on_coarse_device(
 
     assert await async_migrate_entry(hass, entry) is True
     assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
-    assert entry.options[CONF_WATCHDOG_INTERVAL] == 30
+    assert entry.options[CONF_WATCHDOG_INTERVAL] == 61
     assert entry.options[CONF_START_DURATION_THRESHOLD] == 5
 
 
@@ -665,9 +665,10 @@ async def test_migrate_3_9_to_3_10_only_heals_values_invalid_for_the_device(
     assert await async_migrate_entry(hass, coarse) is True
     assert await async_migrate_entry(hass, fast) is True
 
-    # Since 0.6.1 the dryer samples at 2 s as well: 30/5 clear its gates too.
+    # Since 0.6.1 the dryer samples at 2 s as well: a 5 s debounce clears its gate;
+    # its watchdog default stays 61 s.
     assert (coarse.options[CONF_WATCHDOG_INTERVAL],
-            coarse.options[CONF_START_DURATION_THRESHOLD]) == (30, 5)
+            coarse.options[CONF_START_DURATION_THRESHOLD]) == (61, 5)
     assert (fast.options[CONF_WATCHDOG_INTERVAL],
             fast.options[CONF_START_DURATION_THRESHOLD]) == (30, 5)
 
@@ -1073,7 +1074,7 @@ async def test_the_legacy_one_pass_migration_lowers_the_seeded_washer_floor_too(
     [
         # The values the old coarse sampling derived (the 3.9 -> 3.10 heal stored them).
         ("dryer", {CONF_START_DURATION_THRESHOLD: 30, CONF_WATCHDOG_INTERVAL: 61},
-         {CONF_START_DURATION_THRESHOLD: 5.0, CONF_WATCHDOG_INTERVAL: 30}),
+         {CONF_START_DURATION_THRESHOLD: 5.0, CONF_WATCHDOG_INTERVAL: 61}),
         ("pump", {CONF_START_DURATION_THRESHOLD: 10, CONF_WATCHDOG_INTERVAL: 30},
          {CONF_START_DURATION_THRESHOLD: 5.0, CONF_WATCHDOG_INTERVAL: 30}),
         # Anything else was set by hand and stays.
@@ -1088,9 +1089,9 @@ async def test_the_legacy_one_pass_migration_lowers_the_seeded_washer_floor_too(
 async def test_migrate_3_14_to_3_15_lowers_the_coarse_cadence_of_a_dryer_or_pump(
     hass: HomeAssistant, device_type: str, stored: dict, expected: dict
 ) -> None:
-    """0.6.1: every type samples at 2 s, so the start debounce (30 s dryer, 10 s
-    pump) and the dryer's 61 s watchdog the old coarse sampling derived move to the
-    2 s defaults; only those exact stored values."""
+    """0.6.1: every type samples at 2 s, so the start debounce the old coarse
+    sampling derived (30 s dryer, 10 s pump) moves to the 5 s default; only that
+    exact stored value. A dryer's 61 s watchdog stays (its default)."""
     entry = DummyEntry(
         version=3, minor_version=14, data={},
         options={CONF_DEVICE_TYPE: device_type, **stored},
@@ -1108,8 +1109,6 @@ def test_the_legacy_one_pass_migration_lowers_the_coarse_cadence_too() -> None:
     from custom_components.ha_washdata import _lower_seeded_coarse_cadence  # noqa: PLC0415
 
     opts = {CONF_DEVICE_TYPE: "dryer", CONF_START_DURATION_THRESHOLD: 30.0, CONF_WATCHDOG_INTERVAL: 61}
-    assert sorted(_lower_seeded_coarse_cadence(opts)) == sorted(
-        [CONF_START_DURATION_THRESHOLD, CONF_WATCHDOG_INTERVAL]
-    )
-    assert (opts[CONF_START_DURATION_THRESHOLD], opts[CONF_WATCHDOG_INTERVAL]) == (5.0, 30)
+    assert _lower_seeded_coarse_cadence(opts) == [CONF_START_DURATION_THRESHOLD]
+    assert (opts[CONF_START_DURATION_THRESHOLD], opts[CONF_WATCHDOG_INTERVAL]) == (5.0, 61)
     assert _lower_seeded_coarse_cadence(opts) == []

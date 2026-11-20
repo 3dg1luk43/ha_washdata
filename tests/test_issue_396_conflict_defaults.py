@@ -81,7 +81,8 @@ def test_every_type_samples_at_2_s():
 def test_watchdog_never_below_the_30s_floor():
     # A fast-sampling device must not get an over-aggressive watchdog tick.
     assert resolve_watchdog_interval_default("washing_machine") == 30
-    assert resolve_watchdog_interval_default("dryer") == 30
+    # A dryer keeps 61 s: 30 s keepalives split a recorded dryer cycle (0.6.1).
+    assert resolve_watchdog_interval_default("dryer") == 61
 
 
 # ---------------------------------------------------------------------------
@@ -149,9 +150,9 @@ def _run_get_options(device_type: str) -> dict:
 def test_ws_get_options_defaults_for_a_dryer():
     payload = _run_get_options("dryer")
     d = payload["defaults"]
-    # 2 s sampling since 0.6.1; the debounce and watchdog follow.
+    # 2 s sampling since 0.6.1; the debounce follows, the watchdog stays 61 s.
     assert d[CONF_SAMPLING_INTERVAL] == 2.0
-    assert d[CONF_WATCHDOG_INTERVAL] == 30
+    assert d[CONF_WATCHDOG_INTERVAL] == 61
     assert d[CONF_START_DURATION_THRESHOLD] == 5.0
     # #393: the Smart-Termination ratio field is pre-populated from here (0.98 non-dishwasher)
     assert d[CONF_SMART_TERMINATION_DURATION_RATIO] == 0.98

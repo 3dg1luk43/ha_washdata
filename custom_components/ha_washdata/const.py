@@ -1884,9 +1884,9 @@ DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE = {
 # pass). 2 s on every type since 0.6.1 (maintainer decision 2026-11-20): it captures
 # a washer's rapid 0<->150 W motor/heater oscillation, a dryer's short anti-crease
 # pulses (#474: at 30 s the throttle hid them) and a pump's sub-30 s runs, and keeps a
-# fast plug's readings on the catch-all types (#493). The start debounce and the
-# watchdog default follow (resolve_start_duration_default: 5 s,
-# resolve_watchdog_interval_default: 30 s on every type).
+# fast plug's readings on the catch-all types (#493). The start debounce follows
+# (resolve_start_duration_default: 5 s on every type); the watchdog does too, except
+# a dryer's (DEFAULT_WATCHDOG_INTERVAL_BY_DEVICE).
 DEFAULT_SAMPLING_INTERVAL_BY_DEVICE = {
     DEVICE_TYPE_WASHING_MACHINE: 2.0,
     DEVICE_TYPE_WASHER_DRYER: 2.0,
@@ -1980,18 +1980,25 @@ def resolve_sampling_interval_default(device_type: str) -> float:
     return DEFAULT_SAMPLING_INTERVAL_BY_DEVICE.get(device_type, DEFAULT_SAMPLING_INTERVAL)
 
 
+# A dryer keeps the 61 s watchdog its 30 s sampling derived until 0.6.1: at 30 s the
+# keepalives through its quiet anti-crease stretches split one #478 AEG cycle and cut
+# another 6 min short in `end_gate_eval.py --loo --all-formats` (dryer splits 3 -> 4).
+DEFAULT_WATCHDOG_INTERVAL_BY_DEVICE = {DEVICE_TYPE_DRYER: 61}
+
+
 def resolve_watchdog_interval_default(device_type: str) -> int:
     """Device-resolved watchdog tick default (#396).
 
     The panel enforces watchdog_interval >= 2*sampling_interval (a publish-on-change
     sensor can skip a sample, so the staleness tick must be coarser than the
-    sampling gap). Derived as max(DEFAULT_WATCHDOG_INTERVAL, 2*sampling+1): 30 on
-    every type at 2 s sampling (a dryer's 61 until 0.6.1, when it sampled at 30 s).
-    Never smaller than the 30 s floor so a fast-sampling device does not get an
-    over-aggressive watchdog.
+    sampling gap). Derived as max(DEFAULT_WATCHDOG_INTERVAL, 2*sampling+1): 30 at
+    2 s sampling, or the type's own value (``DEFAULT_WATCHDOG_INTERVAL_BY_DEVICE``:
+    a dryer's 61). Never smaller than the 30 s floor so a fast-sampling device does
+    not get an over-aggressive watchdog.
     """
     sampling = resolve_sampling_interval_default(device_type)
-    return int(max(DEFAULT_WATCHDOG_INTERVAL, 2.0 * sampling + 1.0))
+    derived = int(max(DEFAULT_WATCHDOG_INTERVAL, 2.0 * sampling + 1.0))
+    return max(derived, int(DEFAULT_WATCHDOG_INTERVAL_BY_DEVICE.get(device_type, 0)))
 
 
 def resolve_min_off_gap_default(device_type: str) -> int:
