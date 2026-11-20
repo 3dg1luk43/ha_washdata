@@ -28,6 +28,7 @@ from custom_components.ha_washdata.const import (
     STORAGE_VERSION,
 )
 from custom_components.ha_washdata.suggestion_engine import (
+    OWNER_BATCH,
     _stop_at_end,
     stop_threshold_changes,
 )
@@ -130,3 +131,35 @@ async def test_an_import_replacing_the_cycles_keeps_their_stop(
     log = hass.data[DOMAIN][entry.entry_id].profile_store.get_settings_changelog()
     local = {**imported, "id": "local1"}
     assert _stop_at_end(local, stop_threshold_changes(log), 1.0) == 3.0
+
+
+async def _apply(hass: HomeAssistant, client: Any, entry_id: str, keys: list[str]) -> dict:
+    await client.send_json_auto_id({
+        "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry_id, "keys": keys,
+    })
+    res = await client.receive_json()
+    await hass.async_block_till_done()
+    return res
+
+
+async def test_a_non_finite_suggestion_is_refused_before_anything_changes(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """A stored "Infinity" (an imported store) became inf in the write, past the
+    threshold-pair check that skips a non-finite value. Refused: nothing written,
+    nothing cleared."""
+    entry = await setup_washdata_entry(options={
+        CONF_MIN_POWER: 0.5, CONF_START_THRESHOLD_W: 10.0, CONF_STOP_THRESHOLD_W: 3.0,
+        CONF_OFF_DELAY: 60,
+    })
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    client = await hass_ws_client(hass)
+    for bad in ("Infinity", "NaN", "-inf"):
+        store.set_suggestion(CONF_STOP_THRESHOLD_W, bad, reason="r", flags={"owner": OWNER_BATCH})
+        store.set_suggestion(CONF_OFF_DELAY, 120, reason="r", flags={"owner": OWNER_BATCH})
+        res = await _apply(
+            hass, client, entry.entry_id, [CONF_STOP_THRESHOLD_W, CONF_OFF_DELAY],
+        )
+        assert res["success"] is False and res["error"]["code"] == "invalid_suggestion", res
+        assert entry.options[CONF_STOP_THRESHOLD_W] == 3.0 and entry.options[CONF_OFF_DELAY] == 60
+        assert set(store.get_suggestions()) == {CONF_STOP_THRESHOLD_W, CONF_OFF_DELAY}

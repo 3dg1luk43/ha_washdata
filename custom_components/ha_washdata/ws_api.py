@@ -5279,10 +5279,22 @@ async def ws_apply_suggestions(
                 item = visible.get(key)
                 if not isinstance(item, dict) or item.get("value") is None:
                     continue
-                val = item["value"]
-                updates[key] = (
-                    int(float(val)) if key in _SUGGESTION_INT_KEYS else float(val)
-                )
+                # A stored "Infinity" or NaN (an imported store) is no setting:
+                # written, the detector would run with it, and the joint checks
+                # skip a non-finite value. Refused before anything is cleared or
+                # written (PR #529 review).
+                try:
+                    val = float(item["value"])
+                except (TypeError, ValueError, OverflowError):
+                    val = math.nan
+                if not math.isfinite(val):
+                    connection.send_error(
+                        msg["id"], "invalid_suggestion",
+                        f"The suggested value for {key} is not a number. Nothing "
+                        "was saved; run the analysis again or dismiss the suggestions.",
+                    )
+                    return
+                updates[key] = int(val) if key in _SUGGESTION_INT_KEYS else val
             if updates:
                 # Both checks read the options as they are now, inside the lock: a
                 # settings save can land while it is awaited or during the
