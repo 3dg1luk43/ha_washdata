@@ -34,8 +34,9 @@ Reported per run: when the end was detected and the stored length, against the
 curve's real end (its last reading at or above the Stop Threshold), and the
 profile's learned length after it.
 
-Exit codes: 0, 2 bad input (no curve file, a malformed or non-finite value, no
-reading at or above the Stop Threshold, a ``--cut-min`` that does not cut).
+Exit codes: 0, 2 bad input (no curve file, a malformed or non-finite value, a
+time past a week, no reading at or above the Stop Threshold, a ``--cut-min`` that
+does not cut).
 """
 from __future__ import annotations
 
@@ -71,13 +72,17 @@ T0 = datetime(2026, 2, 1, 8, tzinfo=timezone.utc)
 
 
 CURVE_FIELDS = ("minutes_since_start", "power_w")
+#: A reading further in than a week is no programme's: the replay stamps every
+#: reading as a datetime, and 1e308 minutes is finite but infinite in seconds.
+MAX_CURVE_S = 7 * 86400.0
 
 
 def read_curve(path: Path) -> list[tuple[float, float]]:
     """``minutes_since_start,power_w`` rows as (seconds, watts).
 
     Raises ValueError naming the file, line and field of the first value that is
-    missing or no finite number (exit code 2 in ``main``)."""
+    missing or no finite number, or a time more than ``MAX_CURVE_S`` from the start
+    once in seconds (exit code 2 in ``main``)."""
     out: list[tuple[float, float]] = []
     with open(path, encoding="utf-8", newline="") as fh:
         reader = csv.DictReader(fh)
@@ -92,7 +97,13 @@ def read_curve(path: Path) -> list[tuple[float, float]]:
                 if not math.isfinite(val):
                     raise ValueError(f"{path}:{reader.line_num}: {field}={raw!r} is not a finite number")
                 vals.append(val)
-            out.append((vals[0] * 60.0, vals[1]))
+            seconds = vals[0] * 60.0
+            if not (math.isfinite(seconds) and abs(seconds) <= MAX_CURVE_S):
+                raise ValueError(
+                    f"{path}:{reader.line_num}: {CURVE_FIELDS[0]}={row.get(CURVE_FIELDS[0])!r} "
+                    f"is more than {MAX_CURVE_S / 86400:g} days from the start"
+                )
+            out.append((seconds, vals[1]))
     return out
 
 

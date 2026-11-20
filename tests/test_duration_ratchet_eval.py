@@ -95,3 +95,14 @@ def test_a_malformed_curve_is_bad_input(tmp_path: Path, capsys, body: str, field
     assert ratchet.main(["--curve", str(bad)]) == 2
     err = capsys.readouterr().err
     assert str(bad) in err and field in err
+
+
+@pytest.mark.parametrize("minutes", ["1e308", "1e200", "20000", "-20000"])
+def test_a_time_no_replay_can_stamp_is_bad_input(tmp_path: Path, capsys, minutes: str) -> None:
+    """PR #529 review: 1e308 minutes is finite but infinite in seconds, and the
+    replay raised OverflowError (a traceback) stamping it; checked in seconds."""
+    bad = tmp_path / "far.csv"
+    bad.write_text(f"minutes_since_start,power_w\n0,30\n1,1900\n{minutes},6.3\n")
+    assert ratchet.main(["--curve", str(bad), "--seed", "1", "--cycles", "1"]) == 2
+    err = capsys.readouterr().err
+    assert f"{bad}:4" in err and "minutes_since_start" in err
