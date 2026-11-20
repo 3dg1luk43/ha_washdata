@@ -7,9 +7,17 @@
   to a member of group G (Stage 5, the end gates' view, the hazard contenders):
   its own name left the ranking, so a pick of it read as a deficit. Only a row
   with the collapse's ``group_best_member`` provenance is a family now.
+* A group member renamed while the matcher prepared the trace left the groups it
+  read at the call naming the old name (a rename moves no data generation), so
+  the cohesive group was skipped. The profile set revision re-reads them too.
+* #531: an envelope build across a device type changed and back (no data
+  generation) kept a dishwasher's cut-off runs, was memoised, and the sweep
+  saved its marker. A build a match setting changed under is now discarded and
+  the sweep keeps the profile pending.
 """
 from __future__ import annotations
 
+from datetime import timedelta
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
@@ -17,10 +25,15 @@ import pytest
 from homeassistant.core import HomeAssistant
 
 from custom_components.ha_washdata import match_rules
-from custom_components.ha_washdata.const import PROGRAM_MISMATCH_PERSISTENCE
+from custom_components.ha_washdata.const import (
+    CUT_SHORT_REBUILD_KEY,
+    DOMAIN,
+    PROGRAM_MISMATCH_PERSISTENCE,
+)
 from custom_components.ha_washdata.profile_store import ProfileStore, _ambiguity_contenders
 
 from .test_issue_530_program_mismatch import _check, _mismatches, _past_half, _result
+from .test_issue_531_dishwasher_drying_cutoff import T0, _eco
 
 # ── #530: a check that lands in a user pause does not count ──────────────────
 
@@ -182,3 +195,85 @@ async def test_a_member_renamed_during_the_preparation_keeps_the_group(
     assert res.ranking[0].get("stage5_group") == "__group__G"
     assert res.best_profile in ("D35", "D40")
     assert not {"D35", "D40"} <= {c.get("name") for c in res.ranking}
+
+
+# ── #531: a device type changed and back during an envelope build ────────────
+
+
+async def _eco_store(hass: HomeAssistant, setup_washdata_entry: Any) -> Any:
+    """A dishwasher with five full ECO runs and twelve cut inside the drying,
+    from before the #531 rule (no marker, no envelope)."""
+    entry = await setup_washdata_entry(device_type="dishwasher", options={"stop_threshold_w": 4.5})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    await hass.async_block_till_done()
+    runs = [_eco(hold_s=30)] * 5 + [_eco(cut_s=131 * 60)] * 12
+    store._data["profiles"] = {"ECO": {}}  # noqa: SLF001
+    store._data["envelopes"] = {}  # noqa: SLF001
+    store._data["past_cycles"] = [  # noqa: SLF001
+        {"id": f"c{i}", "profile_name": "ECO", "status": "completed",
+         "termination_reason": "smart", "start_time": (T0 + timedelta(days=i)).isoformat(),
+         "duration": pts[-1][0], "power_data": [[t, p] for t, p in pts]}
+        for i, pts in enumerate(runs)
+    ]
+    store._data.pop(CUT_SHORT_REBUILD_KEY, None)  # noqa: SLF001
+    return store
+
+
+def _type_flips(store: Any, times: int) -> Any:
+    """The envelope worker, run while the device type reads washing_machine: a
+    reconfigure away and back in place (no data generation) over the job."""
+    real = store._rebuild_envelope_sync  # noqa: SLF001
+    calls = {"n": 0}
+
+    def flipped(cycles: Any) -> Any:
+        calls["n"] += 1
+        if calls["n"] > times:
+            return real(cycles)
+        store.device_type = "washing_machine"
+        try:
+            return real(cycles)
+        finally:
+            store.device_type = "dishwasher"
+
+    return flipped
+
+
+async def test_a_build_across_a_type_change_and_back_is_discarded(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """Built as a washer (the cut-offs kept) and finished as a dishwasher again:
+    not written, not memoised, so the next request builds under the rule."""
+    store = await _eco_store(hass, setup_washdata_entry)
+    with patch.object(store, "_rebuild_envelope_sync", side_effect=_type_flips(store, 1)):
+        assert await store.async_rebuild_envelope("ECO") is False
+        assert "ECO" not in store._data["envelopes"]  # noqa: SLF001
+        assert "ECO" not in store.__dict__.get("_envelope_built_from", {})
+        assert await store.async_rebuild_envelope("ECO") is True
+    assert store._data["envelopes"]["ECO"]["shape_cycle_count"] == 5  # noqa: SLF001
+
+
+async def test_the_cut_short_sweep_keeps_a_discarded_build_pending(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """The sweep counted the washer-built envelope done and saved the marker; it
+    now retries the profile, and saves the marker only once it is built under
+    the rule."""
+    store = await _eco_store(hass, setup_washdata_entry)
+    with patch.object(store, "_rebuild_envelope_sync", side_effect=_type_flips(store, 1)):
+        await store.async_rebuild_for_cut_short_rule(device_type="dishwasher")
+    assert not store.cut_short_rebuild_pending()
+    env = store._data["envelopes"]["ECO"]  # noqa: SLF001
+    assert env["shape_cycle_count"] == 5
+    full_min = _eco(hold_s=30)[-1][0] / 60
+    assert abs(store.get_profiles()["ECO"]["avg_duration"] / 60 - full_min) < 1
+
+
+async def test_the_cut_short_marker_waits_while_a_build_stays_discarded(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """Discarded on every round: nothing written, the marker not saved."""
+    store = await _eco_store(hass, setup_washdata_entry)
+    with patch.object(store, "_rebuild_envelope_sync", side_effect=_type_flips(store, 99)):
+        assert await store.async_rebuild_for_cut_short_rule(device_type="dishwasher") == 0
+    assert store.cut_short_rebuild_pending()
+    assert "ECO" not in store._data["envelopes"]  # noqa: SLF001

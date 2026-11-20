@@ -8066,6 +8066,12 @@ class ProfileStore:
         generation = generations.get(profile_name, 0) + 1
         generations[profile_name] = generation
         data_generation = getattr(self, "_data_generation", 0)
+        # The executor job reads the device type and energy mode while it runs: a
+        # type changed and changed back meanwhile (no new data generation) built
+        # a dishwasher profile without the #531 rule, and the inputs compared
+        # equal again, so the build was memoised (PR #529 review). Any change of
+        # a match setting during the job discards it.
+        settings_revision = self.match_settings_revision
         existed = profile_name in (self._data.get("profiles") or {})
         # A rebuild changes this profile's curve, which feeds group cohesion, so
         # invalidate the cohesion cache (not only on group mutations) to avoid stale
@@ -8117,6 +8123,7 @@ class ProfileStore:
         if (
             generations.get(profile_name) != generation
             or getattr(self, "_data_generation", 0) != data_generation
+            or self.match_settings_revision != settings_revision
             or (existed and profile_name not in (self._data.get("profiles") or {}))
         ):
             self._logger.debug(
@@ -8488,9 +8495,17 @@ class ProfileStore:
                         # rather than counting as rebuilt (review of PR #529).
                         gens = self.__dict__.setdefault("_envelope_rebuild_generation", {})
                         taken = gens.get(name, 0) + 1
+                        # Likewise a build a match setting changed under (a type
+                        # changed and back): discarded, so the profile stays
+                        # pending (PR #529 review).
+                        revision = self.match_settings_revision
                         if await self.async_rebuild_envelope(name):
                             count += 1
-                        if gens.get(name, 0) <= taken and self.device_type == bound_type:
+                        if (
+                            gens.get(name, 0) <= taken
+                            and self.device_type == bound_type
+                            and self.match_settings_revision == revision
+                        ):
                             done.add(name)
                     except Exception as exc:  # noqa: BLE001 - keep the rest, retry later
                         failed.append(name)
