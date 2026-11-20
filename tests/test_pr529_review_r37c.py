@@ -3,15 +3,22 @@
 * A hand-stopped trace ending on a synthetic 0 W row (a watchdog keepalive while
   the sensor was unavailable) read as idling below the Stop Threshold: the
   settled tail skipped the row, the final-sample check did not.
+* A Completion Minimum capped at 150 s (half a 300 s shortest programme) was
+  explained as "Capped at 2 min".
 """
 from __future__ import annotations
 
 from typing import Any
+from unittest.mock import patch
 
+from custom_components.ha_washdata.const import CONF_COMPLETION_MIN_SECONDS
 from custom_components.ha_washdata.suggestion_engine import (
+    SuggestionEngine,
     _idle_evidence_w,
     detect_standby_above_stop,
 )
+
+from .test_audit_suggestion_cuts import _cycle, _engine
 
 # ── A keepalive row is not the last sample ───────────────────────────────────
 
@@ -65,3 +72,24 @@ def test_a_legacy_iso_stamped_trace_reads_its_last_real_row() -> None:
         [(start + timedelta(seconds=t)).isoformat(), p] for t, p in cycle["power_data"]
     ]
     assert _idle_evidence_w(cycle, 2.56) == 3.4
+
+
+# ── A capped Completion Minimum names the value it applies ───────────────────
+
+
+def _capped(shortest_s: float) -> dict[str, Any]:
+    eng = _engine([_cycle(i, duration=3600.0, name="Cotton") for i in range(30)])
+    with patch.object(SuggestionEngine, "_shortest_profile_duration", return_value=shortest_s):
+        out = eng.generate_detection_suggestions()[CONF_COMPLETION_MIN_SECONDS]
+    assert out["reason_key"] == "suggestion.reason.completion_min_seconds_capped"
+    return out
+
+
+def test_a_capped_completion_minimum_names_the_exact_value() -> None:
+    out = _capped(300.0)
+    assert out["value"] == 150
+    assert out["reason_params"]["cap"] == "150 s"
+    assert "Capped at 150 s" in out["reason"]
+    # Whole minutes still read as minutes.
+    out = _capped(480.0)
+    assert out["value"] == 240 and out["reason_params"]["cap"] == "4 min"

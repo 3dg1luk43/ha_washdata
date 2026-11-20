@@ -3123,8 +3123,11 @@ class SuggestionEngine:
             if suggested_cms < uncapped_cms:
                 # A cap set it, not the p05 (PR #529 review).
                 # With its unit: a pump's 5 s cap read "0 min" (PR #529 review).
+                # Exact: a 150 s cap read "2 min" (PR #529 review), so minutes
+                # only when it is whole ones.
                 cap = (
-                    f"{suggested_cms / 60:.0f} min" if suggested_cms >= 60
+                    f"{suggested_cms // 60} min"
+                    if suggested_cms >= 60 and suggested_cms % 60 == 0
                     else f"{suggested_cms} s"
                 )
                 reason_params["cap"] = cap
