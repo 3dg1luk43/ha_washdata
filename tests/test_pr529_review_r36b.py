@@ -103,3 +103,24 @@ async def test_an_import_during_the_repair_runs_it_again(
         release.set()
         await asyncio.wait_for(manager._banked_tail_repair_task, 5)  # noqa: SLF001
     assert store.banked_tail_repair_pending() is False
+
+
+async def test_an_import_records_the_value_it_wrote(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """A non-numeric Min Power removed the 5 W override but was recorded as the
+    new value; a numeric string is recorded as the number written."""
+    entry = await setup_washdata_entry(options={
+        CONF_MIN_POWER: 5.0, CONF_START_THRESHOLD_W: 10.0, CONF_STOP_THRESHOLD_W: 3.0,
+        CONF_OFF_DELAY: 120,
+    })
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    await ws_api.async_apply_imported_entry_options(
+        hass, entry, {"entry_options": {CONF_MIN_POWER: "abc", CONF_OFF_DELAY: "180"}},
+        "import_config",
+    )
+    assert CONF_MIN_POWER not in entry.options
+    assert entry.options[CONF_OFF_DELAY] == 180
+    rows = {r["key"]: r for r in store.get_settings_changelog()}
+    assert rows[CONF_MIN_POWER]["old"] == 5.0 and rows[CONF_MIN_POWER]["new"] is None
+    assert rows[CONF_OFF_DELAY]["new"] == 180

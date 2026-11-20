@@ -4667,7 +4667,13 @@ async def async_apply_imported_entry_options(
         new_options, _ = drop_invalid_numeric_options(new_options)
         before = _options_before(entry)
         hass.config_entries.async_update_entry(entry, options=new_options)
-        await _record_option_changes(hass, entry, entry_options_updates, source, before=before)
+        # What was written, not what was submitted (PR #529 review): a rejected
+        # value removed the override and is recorded as what is left (None, the
+        # unset value a Revert writes, unless the entry's data holds the key, as
+        # Undo Import records a removal); a valid one as normalised.
+        written_merged = {**entry.data, **new_options}
+        written = {key: written_merged.get(key) for key in entry_options_updates}
+        await _record_option_changes(hass, entry, written, source, before=before)
 
 
 @websocket_api.websocket_command(
