@@ -1888,3 +1888,18 @@ def test_the_causal_outage_ceiling_matches_the_shared_rule_on_every_prefix() -> 
     ceiling = _CausalOutageCeiling(times)
     for k in range(len(times)):
         assert ceiling(k) == pytest.approx(energy_gap_threshold_s(np.asarray(times[:k + 1])))
+
+
+def test_a_pulse_reading_can_be_the_flat_standby_window_s_boundary() -> None:
+    """Review of PR #529: the detector's window boundary is the newest reading
+    older than the window, a pulse reading included; dropping the pulse first
+    measured the outage gap from the reading before it (66 s over a 60 s
+    ceiling) and missed a bypass the detector takes at 1740 s, before 1760 s."""
+    points = [(float(t), 300.0) for t in range(0, 1000, 5)]
+    points += [(float(t), 3.8) for t in range(1000, 1101, 5)]
+    points += [(1140.0, 10.0)]  # a 26 s pulse after 40 s of silence
+    points += [(float(t), 3.8) for t in range(1166, 1760, 5)]
+    points += [(float(t), 300.0) for t in range(1760, 2400, 5)]
+    points += [(2400.0 + t, 0.5) for t in range(0, 600, 5)]
+    args = (points, 4.0, 180.0, 360.0, 0.05)
+    assert end_gate_would_split(*args, device_type="dryer", pulse_max_w=400.0)

@@ -21,7 +21,7 @@ from __future__ import annotations
 import copy
 import logging
 import math
-from bisect import bisect_left, insort
+from bisect import bisect_left, bisect_right, insort
 from decimal import ROUND_CEILING, ROUND_FLOOR, Decimal
 from datetime import datetime, timezone
 from typing import Any, Callable, Coroutine, TYPE_CHECKING, cast
@@ -471,6 +471,10 @@ def _flat_standby_split(
         ),
         key=lambda row: row[0],
     )
+    # Every reading, pulses included: the detector's window boundary is the newest
+    # reading older than the window, a pulse reading or not, and its outage ceiling
+    # counts them all (review of PR #529).
+    all_times = [t for t, _p in points]
     spans: list[tuple[float, float]] = []
     if pulse_max_w is not None and math.isfinite(pulse_max_w):
         points, spans = _quiet_pulses(points, stop, pulse_max_w)
@@ -485,7 +489,7 @@ def _flat_standby_split(
     n = len(points)
     if n < 3:
         return False
-    outage_at = _CausalOutageCeiling(times)
+    outage_at = _CausalOutageCeiling(all_times)
     i = next((k for k, p in enumerate(watts) if p >= stop), n)
     while i < n:
         if watts[i] >= stop:
@@ -508,7 +512,8 @@ def _flat_standby_split(
                 continue
             # The window's first reading (times are in order): no walk back.
             lo = min(bisect_left(times, t - span), k)
-            if lo == 0:
+            boundary = bisect_left(all_times, t - span) - 1
+            if boundary < 0:
                 continue  # no reading before the window: not a sampled window
             powers = watts[lo:k + 1]
             if len(powers) < ENDING_FLAT_STANDBY_MIN_READINGS:
@@ -523,8 +528,8 @@ def _flat_standby_split(
             # The detector's ceiling is causal: only the readings it has seen
             # (review of PR #529: a later 1 s burst lowered a whole-trace
             # ceiling under this pause's 90 s reports and hid the bypass).
-            outage = outage_at(k)
-            stamps = times[lo - 1:k + 1]
+            outage = outage_at(bisect_right(all_times, t) - 1)
+            stamps = [all_times[boundary], *times[lo:k + 1]]
             if any(b - a > outage for a, b in zip(stamps, stamps[1:])):
                 continue
             return True
