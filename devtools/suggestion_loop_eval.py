@@ -886,12 +886,9 @@ def run_passes(mgr: Any, cad: tuple[float, float] | None) -> dict[str, Any]:
         gate(eng.for_job().generate_start_threshold_suggestions(), owner=OWNER_START_THRESHOLD)
         gate(eng.for_job().generate_model_suggestions(), owner=OWNER_MODEL)
         gate(eng.for_job().generate_detection_suggestions(), owner=OWNER_DETECTION)
-        labeled = [
-            c for c in mgr.profile_store.get_past_cycles()
-            if isinstance(c, dict) and c.get("profile_name") and c.get("profile_name") != "noise"
-            and c.get("power_data") and c.get("status") in ("completed", "force_stopped")
-        ]
-        gate(eng.for_job().run_batch_simulation(labeled), owner=OWNER_BATCH)
+        # The batch's own input (PR #529 review): untraced labelled cycles too, whose
+        # start and end bound the Min Off Gap merge ceiling.
+        gate(eng.for_job().run_batch_simulation(lm._batch_cycles()), owner=OWNER_BATCH)  # noqa: SLF001
     finally:
         eng.apply_suggestions = orig_apply
     return passed

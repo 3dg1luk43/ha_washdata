@@ -535,3 +535,40 @@ def test_an_unmeasurable_cycle_is_listed_as_skipped_not_dropped(monkeypatch):
     assert "above the recorded stop threshold" in um["skipped"][0]["reason"]
     assert um["splits_added"] == [] and um["interrupted_added"] == []
 
+
+def test_the_batch_reads_the_cycles_production_hands_it(monkeypatch):
+    """PR #529 review: the loop dropped labelled cycles without a trace before the
+    batch pass. ``LearningManager._batch_cycles`` keeps them: their start and end
+    bound the Min Off Gap merge ceiling (a run ending 100 s before the next load)."""
+    past = []
+    for j in range(6):
+        pts = _trace(j, 8, 20)
+        past.append({
+            "id": f"c{j}", "profile_name": "Quick", "label_source": "manual",
+            "status": "completed", "termination_reason": "timeout",
+            "start_time": f"2026-01-{j + 1:02d}T08:00:00+00:00",
+            "end_time": f"2026-01-{j + 1:02d}T09:30:00+00:00",
+            "duration": pts[-1][0], "power_data": pts,
+        })
+    past.insert(3, {
+        "id": "untraced", "profile_name": "Quick", "label_source": "manual",
+        "status": "completed", "termination_reason": "timeout", "duration": 3600.0,
+        "start_time": "2026-01-04T06:58:20+00:00", "end_time": "2026-01-04T07:58:20+00:00",
+        "power_data": [],
+    })
+    data = {"profiles": {}, "past_cycles": past, "envelopes": {}}
+    entry_data = {"device_type": "washing_machine", "name": "Synth"}
+    options = {"min_power": 2.0, "off_delay": 180}
+    mgr = loop._manager(entry_data, options, "Synth", data)  # noqa: SLF001
+    batched: list[list[str]] = []
+
+    def _spy(self, cycles):
+        batched.append([c.get("id") for c in cycles])
+        return {}
+
+    monkeypatch.setattr(SuggestionEngine, "run_batch_simulation", _spy)
+    loop.run_passes(mgr, None)
+    expected = [c["id"] for c in mgr.learning_manager._batch_cycles()]  # noqa: SLF001
+    assert batched == [expected]
+    assert "untraced" in batched[0]
+
