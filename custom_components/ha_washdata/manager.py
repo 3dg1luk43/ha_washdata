@@ -760,6 +760,10 @@ class WashDataManager:
 
         # Pause tracking (user-triggered)
         self._user_pause_start: datetime | None = None
+        # The pause the user-pause state belongs to: set by each Pause, cleared by
+        # a Resume (put back when the Resume rolls back). A Pause whose power cut
+        # fails rolls back only while it is still its own (PR #529 review).
+        self._user_pause_token: object | None = None
         self._total_user_paused_seconds: float = 0.0
         self._user_paused_flag: bool = False
         self._pause_cuts_power: bool = bool(
@@ -11419,6 +11423,8 @@ class WashDataManager:
         prev_verified = self.detector._verified_pause
         identity = self._match_identity()
         expiries = getattr(self, "_door_end_dwell_expiries", 0)
+        token = object()
+        self._user_pause_token = token
         self._is_user_paused = True
         self._user_pause_start = utc_now()
         self.detector.set_verified_pause(True)
@@ -11436,10 +11442,21 @@ class WashDataManager:
                         "switch", "turn_off", {"entity_id": switch_entity}, blocking=True
                     )
                 except HomeAssistantError as err:
+                    if getattr(self, "_user_pause_token", None) is not token:
+                        # A Resume (and perhaps a later Pause) since: the state is
+                        # theirs. Rolled back, a later Pause would be undone and
+                        # the open door re-armed under it (PR #529 review).
+                        self._logger.warning(
+                            "pause_cuts_power: failed to turn off %s: %s - a later "
+                            "pause or resume holds the state, leaving it",
+                            switch_entity, err,
+                        )
+                        return False
                     self._logger.warning(
                         "pause_cuts_power: failed to turn off %s: %s - rolling back pause state",
                         switch_entity, err,
                     )
+                    self._user_pause_token = None
                     self._is_user_paused = False
                     self._user_pause_start = None
                     self.detector.set_verified_pause(prev_verified)
@@ -11485,6 +11502,8 @@ class WashDataManager:
         )
 
         self._total_user_paused_seconds += accumulated
+        prev_token = getattr(self, "_user_pause_token", None)
+        self._user_pause_token = None
         self._user_pause_start = None
         self._is_user_paused = False
         self.detector.set_verified_pause(False)
@@ -11510,6 +11529,7 @@ class WashDataManager:
                         switch_entity, err,
                     )
                     self._total_user_paused_seconds -= accumulated
+                    self._user_pause_token = prev_token
                     self._user_pause_start = prev_pause_start
                     self._is_user_paused = True
                     self.detector.set_verified_pause(True)
