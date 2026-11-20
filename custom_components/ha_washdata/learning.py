@@ -95,6 +95,11 @@ def _suggestion_min_abs_delta(key: str) -> float:
 CADENCE_KEYS = (CONF_WATCHDOG_INTERVAL, CONF_NO_UPDATE_ACTIVE_TIMEOUT, CONF_PROFILE_MATCH_INTERVAL)
 #: Update intervals one cycle can hold (a 24 h cycle at 5 s); bounded, not 200.
 _CYCLE_MAX_INTERVALS = 20000
+#: The update intervals ``process_power_reading`` collects, exclusive: shorter is
+#: jitter, longer is downtime. A stored summary outside them, bounds included
+#: (the store rounds to two decimals), was never measured on this plug.
+_CADENCE_MIN_INTERVAL_S = 0.1
+_CADENCE_MAX_INTERVAL_S = 1800.0
 #: Keys the noise gate requires the relative bar for (item 637): on seconds the 5 s
 #: absolute bar alone let 2692 -> 2698 s and 480 -> 470 s through. A sub-second
 #: change is noise too; the 5 s bar would block 7 -> 9 s on a short key.
@@ -156,14 +161,22 @@ def _held_cadence(pending: deque[tuple[float, datetime]]) -> tuple[float, float]
 
 
 def recent_cadence(summaries: Any) -> tuple[float, float] | None:
-    """The median p95 and median over the last ``CADENCE_RECENT_CYCLES`` summaries."""
+    """The median p95 and median over the last ``CADENCE_RECENT_CYCLES`` summaries.
+
+    A row outside the collected interval range is skipped (PR #529 review): an
+    imported ``[1e308, 2]`` made the operational pass's ``int(p95 * 20)``
+    overflow, so every Analyse stopped before the Start Threshold correction.
+    """
     rows: list[tuple[float, float]] = []
     for row in list(summaries or [])[-CADENCE_RECENT_CYCLES:]:
         try:
             p95, median = float(row[0]), float(row[1])
         except (TypeError, ValueError, IndexError, OverflowError):
             continue
-        if math.isfinite(p95) and math.isfinite(median) and p95 > 0 and median > 0:
+        if (
+            _CADENCE_MIN_INTERVAL_S <= p95 <= _CADENCE_MAX_INTERVAL_S
+            and _CADENCE_MIN_INTERVAL_S <= median <= _CADENCE_MAX_INTERVAL_S
+        ):
             rows.append((p95, median))
     if not rows:
         return None
@@ -752,7 +765,7 @@ class LearningManager:
         if last_reading_time:
             delta = (now - last_reading_time).total_seconds()
             # Ignore ultra-small jitter (<0.1s) and massive gaps (>1800s - likely downtime)
-            if 0.1 < delta < 1800:
+            if _CADENCE_MIN_INTERVAL_S < delta < _CADENCE_MAX_INTERVAL_S:
                 # Held until the cycle's outcome is known (#458): see close_cycle_cadence.
                 self._pending_intervals.append((delta, now))
 
