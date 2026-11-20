@@ -556,6 +556,13 @@ class LearningManager:
             now = current.get(key, {}).get("value") if isinstance(current.get(key), dict) else None
             if was != now:
                 return False
+        # So for an entry withdrawn outside them (a start a cascade follows): a
+        # different one stored meanwhile is not the one judged (PR #529 review).
+        for key in drops:
+            was = judged.get(key, {}).get("value") if isinstance(judged.get(key), dict) else None
+            now = current.get(key, {}).get("value") if isinstance(current.get(key), dict) else None
+            if key not in END_GATE_KEYS and now is not None and was != now:
+                return False
         gone = [
             key for key in drops
             if isinstance(current.get(key), dict)

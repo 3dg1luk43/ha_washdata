@@ -2648,12 +2648,15 @@ class SuggestionEngine:
         that only the 1800 s wait made safe). This judges the stored set as Apply
         all writes it, against the settings in force, and withdraws one entry at a
         time, the one whose removal leaves the fewest splits (non-corrective first),
-        until it splits no more. Cascades are derived, so never withdrawn here; a
-        min_off_gap cascade is left out of the count, since the off delay it
-        follows already sets the wait and it goes with that off delay. A withdrawn
-        stop takes its start. Executor-safe; never raises unless ``strict``, where a
-        failed check raises instead of reading as "nothing to withdraw" (Apply all
-        must not write a set nobody judged, PR #529 review).
+        until it splits no more. Cascades are derived, so a cascade goes with the
+        entry it follows (a 20 W pulse ceiling with the 10 W start it doubles):
+        that entry is withdrawn, and only when that removes a split (review of
+        PR #529). A min_off_gap cascade is left out of the count, since the off
+        delay it follows already sets the wait and it goes with that off delay. A
+        withdrawn stop takes its start. Executor-safe; never raises unless
+        ``strict``, where a failed check, or a split no withdrawal removes, raises
+        instead of reading as "nothing to withdraw" (Apply all must not write a set
+        nobody judged, PR #529 review).
         """
         try:
             values = {
@@ -2669,26 +2672,66 @@ class SuggestionEngine:
                 return []
             base = dict(self._effective_thresholds(self._entry_options()))
             allowed = self._end_gate_splits(evidence, base, strict=strict)
+            cascades = frozenset(k for k in values if stored[k].get("cascade"))
+            plain = {k: v for k, v in values.items() if k not in cascades}
+            rederive = self._cascades_after_withdrawal(stored, cascades) if cascades else None
+            memo: dict[frozenset[str], frozenset[int]] = {}
+
+            def extra(gone: frozenset[str]) -> frozenset[int]:
+                """Splits the settings in force do not make, with ``gone`` withdrawn."""
+                if gone not in memo:
+                    judged = {k: v for k, v in plain.items() if k not in gone}
+                    if rederive is not None:
+                        judged.update(rederive(gone))
+                    memo[gone] = self._end_gate_splits(
+                        evidence, {**base, **judged}, strict=strict
+                    ) - allowed
+                return memo[gone]
+
+            def withdraw(gone: frozenset[str], key: str) -> frozenset[str]:
+                if key == CONF_STOP_THRESHOLD_W and isinstance(stored.get(CONF_START_THRESHOLD_W), dict):
+                    return gone | {key, CONF_START_THRESHOLD_W}
+                return gone | {key}
+
+            gone: frozenset[str] = frozenset()
             drops: list[str] = []
             # No cycle the settings in force keep whole may split (a set that
             # fixes one split may stay; one that moves it to another may not).
-            while self._end_gate_splits(evidence, {**base, **values}, strict=strict) - allowed:
-                candidates = [k for k in values if not stored[k].get("cascade")]
+            while split := extra(gone):
+                candidates = [k for k in plain if k not in gone]
+                if rederive is not None:
+                    held = rederive(gone)
+                    candidates += [
+                        k for k, e in stored.items()
+                        if k not in gone and k not in plain
+                        and isinstance(e, dict) and not e.get("cascade")
+                        and rederive(withdraw(gone, k)) != held
+                        and len(extra(withdraw(gone, k))) < len(split)
+                    ]
                 if not candidates:
                     break
 
                 def cost(key: str) -> tuple[int, bool, int]:
-                    rest = {k: v for k, v in values.items() if k != key}
                     return (
-                        len(self._end_gate_splits(evidence, {**base, **rest}, strict=strict) - allowed),
+                        len(extra(withdraw(gone, key))),
                         bool(stored[key].get("corrective")),
-                        self._END_GATE_KEYS.index(key),
+                        self._END_GATE_KEYS.index(key) if key in self._END_GATE_KEYS
+                        else len(self._END_GATE_KEYS),
                     )
 
                 key = min(candidates, key=cost)
-                values.pop(key)
+                gone = withdraw(gone, key)
                 drops.append(key)
-            if CONF_STOP_THRESHOLD_W in drops and isinstance(stored.get(CONF_START_THRESHOLD_W), dict):
+            if extra(gone):
+                # A cascade no stored entry derives (left from options since
+                # changed): nothing here removes it, so this set is not judged safe.
+                if strict:
+                    raise RuntimeError("a stored cascade no withdrawal removes splits own cycles")
+                _LOGGER.debug("Joint end-gate check: a cascade no withdrawal removes splits own cycles")
+            if (
+                CONF_STOP_THRESHOLD_W in drops and CONF_START_THRESHOLD_W not in drops
+                and isinstance(stored.get(CONF_START_THRESHOLD_W), dict)
+            ):
                 drops.append(CONF_START_THRESHOLD_W)
             return drops
         except Exception:  # pylint: disable=broad-exception-caught
@@ -2696,6 +2739,61 @@ class SuggestionEngine:
                 raise
             _LOGGER.debug("Joint end-gate check failed", exc_info=True)
             return []
+
+    def _cascades_after_withdrawal(
+        self, stored: dict[str, Any], keys: frozenset[str]
+    ) -> Callable[[frozenset[str]], dict[str, Any]]:
+        """The cascades ``keys`` of ``stored`` as withdrawing entries leaves them.
+
+        The returned function maps the withdrawn entries to the cascades' values
+        once ``_reconcile_stored_suggestions`` has re-derived them from the rest; a
+        cascade that goes is absent. One the withdrawal does not move keeps its
+        stored value, so a cascade no stored entry derives stays. Min Power's floor
+        is left out (loop-only): it bounds Min Power, which no end-gate cascade
+        follows. Executor-safe.
+        """
+        from .detector_config import effective_option_values  # noqa: PLC0415
+
+        options = self._entry_options()
+        current = {**options, **effective_option_values(options, self.device_type or "")}
+        try:
+            locked = set(self.profile_store.get_locked_suggestions() or [])
+        except Exception:  # pylint: disable=broad-exception-caught
+            locked = set()
+        explicit = frozenset(
+            k for k in (CONF_START_THRESHOLD_W, CONF_STOP_THRESHOLD_W)
+            if _num(options.get(k)) is not None
+        )
+        entries = {
+            k: v for k, v in stored.items()
+            if isinstance(v, dict) and not v.get("cascade") and k not in locked
+        }
+
+        def derive(gone: frozenset[str]) -> dict[str, Any]:
+            adjusted, _changed = reconcile_suggestions(
+                {k: dict(v) for k, v in entries.items() if k not in gone}, current,
+                explicit_thresholds=explicit,
+            )
+            adjusted = _drop_inverted_threshold_pair(adjusted, current)
+            return {
+                k: adjusted[k].get("value")
+                if k not in locked and isinstance(adjusted.get(k), dict) and adjusted[k].get("cascade")
+                else None
+                for k in keys
+            }
+
+        full = derive(frozenset())
+
+        def after(gone: frozenset[str]) -> dict[str, Any]:
+            now = derive(gone) if gone else full
+            out: dict[str, Any] = {}
+            for key in keys:
+                value = stored[key]["value"] if now[key] == full[key] else now[key]
+                if _num(value) is not None:
+                    out[key] = value
+            return out
+
+        return after
 
     def _reading_to_w(self, options: dict[str, Any]) -> float | None:
         """Watts per unit of the detector's readings: 1 for readings converted to
