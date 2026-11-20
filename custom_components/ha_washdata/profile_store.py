@@ -1304,6 +1304,14 @@ def compress_power_data(cycle: CycleDict) -> list[Any] | None:
         return None
 
 
+class StoreRetiredError(RuntimeError):
+    """A write the caller reports as done reached a store its entry unloaded.
+
+    Raised by ``ProfileStore.async_save(required=True)`` (an import, an undo):
+    the write is skipped, as every write of a retired store, and the caller must
+    not report success. Background work stays silent (PR #529 review)."""
+
+
 class WashDataStore(Store[JSONDict]):
     """Store implementation with migration support.
 
@@ -1319,6 +1327,15 @@ class WashDataStore(Store[JSONDict]):
 
     retired = False
 
+    def __init__(
+        self, *args: Any, logger: logging.Logger | logging.LoggerAdapter[Any] | None = None,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(*args, **kwargs)
+        # The device's adapter when a ProfileStore owns it, so a skipped write
+        # names the appliance (PR #529 review).
+        self._device_logger = logger if logger is not None else _LOGGER
+
     async def async_load(self) -> JSONDict | None:
         """Load (and migrate) the store, with every compact field decoded."""
         data = await super().async_load()
@@ -1331,7 +1348,9 @@ class WashDataStore(Store[JSONDict]):
     async def async_save(self, data: JSONDict) -> None:
         """Write ``data`` with its traces and envelopes compact; ``data`` is not changed."""
         if self.retired:
-            _LOGGER.debug("Write to %s from an unloaded entry's store skipped", self.key)
+            self._device_logger.debug(
+                "Write to %s from an unloaded entry's store skipped", self.key
+            )
             return
         if self.hass.state is CoreState.stopping:
             # HA defers this one to its final write, which serialised `data` as it
@@ -1346,7 +1365,9 @@ class WashDataStore(Store[JSONDict]):
     ) -> None:
         """Debounced write; encodes the store as it is when the write fires."""
         if self.retired:
-            _LOGGER.debug("Write to %s from an unloaded entry's store skipped", self.key)
+            self._device_logger.debug(
+                "Write to %s from an unloaded entry's store skipped", self.key
+            )
             return
         super().async_delay_save(lambda: encode_store_payload(data_func()), delay)
 
@@ -3284,7 +3305,7 @@ class ProfileStore:
         # Separate store for each entry to avoid giant files
         # Use WashDataStore to handle migration
         self._store: Store[JSONDict] = WashDataStore(
-            hass, STORAGE_VERSION, f"{STORAGE_KEY}.{entry_id}"
+            hass, STORAGE_VERSION, f"{STORAGE_KEY}.{entry_id}", logger=self._logger
         )
         # The in-flight cycle snapshot lives in its own small file (audit PERF-03 /
         # MANAGER-07): written every 60 s of every cycle, it used to rewrite the
