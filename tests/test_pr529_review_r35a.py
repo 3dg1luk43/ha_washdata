@@ -5,6 +5,8 @@
   strict check reported success.
 * A hand-picked program Stage 1's lower bound rejected was still read at its
   profile group's score (a sibling's), so a never-scored pick made a deficit.
+* A profile deleted while a #530 check matched moved no generation, so the
+  trigger could fire naming the deleted profile.
 """
 from __future__ import annotations
 
@@ -210,3 +212,48 @@ def test_a_rejected_pick_is_not_read_at_its_sibling_s_family_score() -> None:
     assert selected_program_deficit(_family_match(("Cotton 90",)), "Cotton 90", families) is None
     hit = selected_program_deficit(_family_match(()), "Cotton 90", families)
     assert hit is not None and hit[0] == "Eco" and hit[1] == pytest.approx(0.3)
+
+
+# ── A profile deleted while a #530 check matches discards that match ─────────
+
+
+async def test_the_winner_deleted_during_the_check_discards_it(
+    hass: Any, setup_washdata_entry: Any, freezer: Any
+) -> None:
+    """Synthetics is deleted while the check's match runs; the ranking names it as
+    what the cycle looks like. The data generation did not move, so the result
+    passed every guard and the trigger fired for a profile that no longer exists.
+    The narrower profile set revision discards it; the data generation stays (it
+    would discard unrelated envelope builds, suggestion passes and Apply all)."""
+    from unittest.mock import AsyncMock, patch  # noqa: PLC0415
+
+    from custom_components.ha_washdata.const import PROGRAM_MISMATCH_PERSISTENCE  # noqa: PLC0415
+
+    from .test_issue_530_program_mismatch import (  # noqa: PLC0415
+        _check,
+        _mismatches,
+        _past_half,
+        _result,
+    )
+
+    _entry, manager, sent, state = await _past_half(hass, setup_washdata_entry, freezer)
+    store = manager.profile_store
+    generation = store._data_generation  # noqa: SLF001
+    wrong = _result("Synthetics", {"Synthetics": 0.9, "Cotton": 0.5})
+
+    async def match_and_delete(*_a: Any, **_k: Any) -> Any:
+        await store.delete_profile("Synthetics")
+        return wrong
+
+    state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
+    with patch.object(store, "async_match_profile", new=match_and_delete):
+        await _check(hass, manager, state.key)
+    assert _mismatches(sent) == []
+    assert state.streak == 0 and not state.fired
+    assert store._data_generation == generation  # noqa: SLF001
+    # A check on the profile set as it now stands still counts.
+    state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
+    other = _result("Wool", {"Wool": 0.9, "Cotton": 0.5})
+    with patch.object(store, "async_match_profile", AsyncMock(return_value=other)):
+        await _check(hass, manager, state.key)
+    assert len(_mismatches(sent)) == 1

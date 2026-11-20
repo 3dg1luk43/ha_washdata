@@ -3127,6 +3127,10 @@ class ProfileStore:
         # Bumped whenever an import or an undo replaces the stored data: a build
         # that started before reads the old cycles and must not write into the new.
         self._data_generation: int = 0
+        # Bumped when a profile leaves the store under its name (deleted, renamed,
+        # cleaned up as an orphan): ``profile_set_revision``. Not the data
+        # generation, which discards every in-flight build, pass and Apply.
+        self._profile_set_revision: int = 0
         # group_cohesion runs in executor threads (live matching + Playground can
         # touch the same store concurrently); serialize the read-clear-compute-store
         # sequence so a concurrent call can't clear a half-populated cache or
@@ -3745,6 +3749,18 @@ class ProfileStore:
         preparation, so the ranking can be the intermediate settings' (the #530
         check, PR #529 review)."""
         return int(getattr(self, "_match_settings_revision", 0))
+
+    @property
+    def profile_set_revision(self) -> int:
+        """Bumped whenever a profile leaves the store under its name (deleted,
+        renamed, cleaned up as an orphan). A ranking taken across one can name a
+        profile that is gone (the #530 check, review of PR #529). Narrower than
+        ``_data_generation``, which also discards unrelated envelope builds,
+        suggestion passes and Apply all."""
+        return int(getattr(self, "_profile_set_revision", 0))
+
+    def _profile_left(self) -> None:
+        self._profile_set_revision = getattr(self, "_profile_set_revision", 0) + 1
 
     @property
     def dtw_bandwidth(self) -> float:
@@ -7110,6 +7126,7 @@ class ProfileStore:
 
         for name in orphaned:
             del self._data["profiles"][name]
+            self._profile_left()
             self._rename_maintenance_program(name, None)  # #480
             self._logger.info(
                 "Cleaned up orphaned profile '%s' (cycle no longer exists)", name
@@ -11843,6 +11860,7 @@ class ProfileStore:
 
             # Rename in profiles dict
             profiles[new_name] = profiles.pop(old_name)
+            self._profile_left()
 
             # Rename in envelopes
             if "envelopes" in self._data and old_name in self._data["envelopes"]:
@@ -11936,6 +11954,7 @@ class ProfileStore:
         # Delete profile, and its envelope with it: nothing else removed it, so the
         # orphan stayed in storage and in exports (audit ML-09).
         del self._data["profiles"][name]
+        self._profile_left()
         envelopes = self._data.get("envelopes")
         if isinstance(envelopes, dict):
             envelopes.pop(name, None)

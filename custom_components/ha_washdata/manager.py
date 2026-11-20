@@ -1908,6 +1908,16 @@ class WashDataManager:
         except Exception:  # pylint: disable=broad-exception-caught
             return None
 
+    def _program_mismatch_data_generation(self) -> tuple[int, int]:
+        """The stored data a #530 ranking was scored on: the store's data
+        generation (an import or undo replaced it) and its profile set revision
+        (a profile deleted or renamed since). Neither moves on anything else."""
+        store = self.profile_store
+        return (
+            getattr(store, "_data_generation", 0),
+            int(getattr(store, "profile_set_revision", 0) or 0),
+        )
+
     def _program_mismatch_open_pause_s(self) -> float:
         """The open user pause the #530 check's trace still spans
         (``CycleDetector.open_user_pause_s``), read with the trace. 0.0 when the
@@ -1962,7 +1972,9 @@ class WashDataManager:
             # An import or Undo Import replaces the store under the match: the
             # ranking then scored profiles that are gone, even under the same
             # names, so it is discarded and the run of counting matches restarts.
-            generation = getattr(self.profile_store, "_data_generation", 0)
+            # So does a profile deleted or renamed meanwhile: the ranking can name
+            # it as what the cycle looks like (review of PR #529).
+            generation = self._program_mismatch_data_generation()
             # The scoring settings (Stage-1 ratios, DTW band, evidence sources), as
             # the device type below: changed by an options reload while the match
             # ran, the ranking is the old settings' (PR #529 review). With their
@@ -1982,9 +1994,9 @@ class WashDataManager:
             state = self._program_mismatch_state()
             if state is None or state.key != key:
                 return  # the pick changed while the match ran
-            if getattr(self.profile_store, "_data_generation", 0) != generation:
+            if self._program_mismatch_data_generation() != generation:
                 state.streak = 0
-                state.data_generation = getattr(self.profile_store, "_data_generation", 0)
+                state.data_generation = self._program_mismatch_data_generation()
                 return
             if self.device_type != device_type:
                 # Scored as the old type (energy mode, rhythm term, members) and
@@ -2018,7 +2030,8 @@ class WashDataManager:
             if not expected:
                 return
             # The pending streak was counted on data an import or undo replaced
-            # BETWEEN two checks: those matches scored profiles that are gone
+            # (or with a profile deleted or renamed since) BETWEEN two checks:
+            # those matches scored profiles that are gone
             # (PR #529 review), so the run restarts on this one. Likewise under
             # profile groups edited between two checks: the deficits were read
             # against another membership (the guard above only sees an edit
