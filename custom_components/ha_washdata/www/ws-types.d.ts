@@ -28,6 +28,9 @@ export interface AnalyzeSplitResponse {
 export interface ApplySuggestionsResponse {
   success: boolean;
   applied: string[];
+  changed?: string[];
+  suggestions?: Record<string, unknown>[];
+  locked_suggestions?: string[];
 }
 
 export interface BlueprintInput {
@@ -883,6 +886,7 @@ export interface GetSuggestionsRequest {
 export interface ApplySuggestionsRequest {
   entry_id: string;
   keys: string[];
+  values?: Record<string, unknown>;
 }
 
 export interface ClearSuggestionsRequest {

@@ -1772,6 +1772,7 @@
     "settings_saved": "Paramètres enregistrés ; rechargement de l'intégration",
     "suggestions_applied": "Suggestions appliquées ; rechargement de l'intégration",
     "suggestions_none_applied": "Aucun paramètre modifié : les suggestions sélectionnées ne s'appliquent plus",
+    "suggestions_changed": "Les suggestions ont changé depuis que vous les avez consultées. Rien n'a été enregistré ; vérifiez-les et appliquez-les à nouveau.",
     "suggestions_dismissed": "Suggestions rejetées",
     "apply_failed": "Échec de l'application : {error}",
     "delete_failed": "Échec de la suppression : {error}",

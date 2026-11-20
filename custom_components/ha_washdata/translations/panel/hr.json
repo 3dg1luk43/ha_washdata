@@ -1892,6 +1892,7 @@
     "settings_saved": "Postavke spremljene; ponovno učitavanje integracije",
     "suggestions_applied": "Prijedlozi primijenjeni; ponovno učitavanje integracije",
     "suggestions_none_applied": "Nijedna postavka nije promijenjena: odabrani prijedlozi više ne vrijede",
+    "suggestions_changed": "Prijedlozi su se promijenili otkako ste ih pregledali. Ništa nije spremljeno; provjerite ih i ponovno primijenite.",
     "suggestions_dismissed": "Prijedlozi odbačeni",
     "apply_failed": "Primjena nije uspjela: {error}",
     "delete_failed": "Brisanje nije uspjelo: {error}",

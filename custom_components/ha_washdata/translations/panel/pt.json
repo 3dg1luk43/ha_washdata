@@ -1772,6 +1772,7 @@
     "settings_saved": "Definições guardadas; a integração está a recarregar",
     "suggestions_applied": "Sugestões aplicadas; a integração está a recarregar",
     "suggestions_none_applied": "Nenhuma definição alterada: as sugestões selecionadas já não se aplicam",
+    "suggestions_changed": "As sugestões mudaram desde que as reviu. Nada foi guardado; verifique-as e aplique novamente.",
     "suggestions_dismissed": "Sugestões dispensadas",
     "apply_failed": "Falha ao aplicar: {error}",
     "delete_failed": "Falha ao eliminar: {error}",

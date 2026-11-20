@@ -1822,6 +1822,7 @@
     "settings_saved": "Nustatymai išsaugoti; integracijos perkrovimas",
     "suggestions_applied": "Pasiūlymai pritaikyti; integracijos perkrovimas",
     "suggestions_none_applied": "Joks nustatymas nepakeistas: pasirinkti pasiūlymai nebegalioja",
+    "suggestions_changed": "Pasiūlymai pasikeitė po to, kai juos peržiūrėjote. Niekas neišsaugota; patikrinkite juos ir pritaikykite dar kartą.",
     "suggestions_dismissed": "Pasiūlymai atmesti",
     "apply_failed": "Nepavyko pritaikyti: {error}",
     "delete_failed": "Nepavyko ištrinti: {error}",

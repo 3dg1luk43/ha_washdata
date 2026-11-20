@@ -1786,6 +1786,7 @@
         "settings_saved": "설정이 저장되었습니다. 통합 다시 로드",
         "suggestions_applied": "제안이 적용되었습니다. 통합 다시 로드",
         "suggestions_none_applied": "변경된 설정이 없습니다. 선택한 제안은 더 이상 적용되지 않습니다",
+        "suggestions_changed": "검토한 후 제안이 변경되었습니다. 아무것도 저장되지 않았습니다. 확인한 후 다시 적용하세요.",
         "suggestions_dismissed": "제안이 무시되었습니다.",
         "apply_failed": "적용 실패: {error}",
         "delete_failed": "삭제 실패: {error}",

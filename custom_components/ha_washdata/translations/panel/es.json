@@ -1772,6 +1772,7 @@
     "settings_saved": "Configuración guardada; recarga de integración",
     "suggestions_applied": "Sugerencias aplicadas; recarga de integración",
     "suggestions_none_applied": "No se cambió ningún ajuste: las sugerencias seleccionadas ya no son aplicables",
+    "suggestions_changed": "Las sugerencias cambiaron desde que las revisó. No se guardó nada; revíselas y vuelva a aplicarlas.",
     "suggestions_dismissed": "Sugerencias descartadas",
     "apply_failed": "Error al aplicar: {error}",
     "delete_failed": "Error al eliminar: {error}",

@@ -1781,6 +1781,7 @@
         "settings_saved": "Cilësimet u ruajtën; integrimi po ringarkohet",
         "suggestions_applied": "Sugjerimet u zbatuan; integrimi po ringarkohet",
         "suggestions_none_applied": "Asnjë cilësim nuk u ndryshua: sugjerimet e zgjedhura nuk vlejnë më",
+        "suggestions_changed": "Sugjerimet ndryshuan që kur i rishikuat. Asgjë nuk u ruajt; kontrollojini dhe zbatojini përsëri.",
         "suggestions_dismissed": "Sugjerimet u injoruan",
         "apply_failed": "Aplikimi dështoi: {error}",
         "delete_failed": "Fshirja dështoi: {error}",

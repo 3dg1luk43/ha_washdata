@@ -1753,6 +1753,7 @@
     "settings_saved": "Setări salvate; integrarea se reîncarcă",
     "suggestions_applied": "Sugestii aplicate; integrarea se reîncarcă",
     "suggestions_none_applied": "Nicio setare nu a fost modificată: sugestiile selectate nu mai sunt valabile",
+    "suggestions_changed": "Sugestiile s-au schimbat de când le-ați verificat. Nu s-a salvat nimic; verificați-le și aplicați-le din nou.",
     "suggestions_dismissed": "Sugestii ignorate",
     "apply_failed": "Aplicarea a eșuat: {error}",
     "delete_failed": "Ștergerea a eșuat: {error}",

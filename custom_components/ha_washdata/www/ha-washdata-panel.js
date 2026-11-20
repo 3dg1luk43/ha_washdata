@@ -14990,10 +14990,19 @@ class HaWashdataPanel extends HTMLElement {
     }
   }
 
-  _applyAllSuggestions(eid, keys) {
+  _applyAllSuggestions(eid, keys, values) {
     this._busyRun('save-settings', async () => {
       try {
-        const res = await this._ws({ type: `${_DOMAIN}/apply_suggestions`, entry_id: eid, keys });
+        const res = await this._ws({ type: `${_DOMAIN}/apply_suggestions`, entry_id: eid, keys, values });
+        if (res && res.success === false && (res.changed || []).length) {
+          // A suggestion changed after the preview: nothing was written. Show the
+          // list as it now stands so the next Apply previews the new values.
+          if (!this._isActiveEntry(eid)) return;
+          this._suggestions = res.suggestions || [];
+          this._lockedSuggestions = res.locked_suggestions || [];
+          this._showToast(this._t('toast.suggestions_changed', {}, 'The suggestions changed since you reviewed them. Nothing was saved; check them and apply again.'), 'warning');
+          return;
+        }
         if (res && res.success === false) {
           // Nothing written (every selected suggestion withdrawn or no longer
           // offered), so nothing reloads: say so and show the list as it stands.
@@ -15016,6 +15025,8 @@ class HaWashdataPanel extends HTMLElement {
   _onActSuggestions(a, btn, dev, eid, sr) {
     if (a === 'sug-apply-all') {
       const keys = this._suggestions.map(s => s.key);
+      // The values the preview shows: Apply writes nothing if one changed since.
+      const values = Object.fromEntries(this._suggestions.map(s => [s.key, s.suggested]));
       // Preview first: up to 17 coupled changes used to land on one click.
       const items = this._suggestions.map(sg => {
         const f = _FIELD_BY_KEY[sg.key] || {};
@@ -15031,7 +15042,7 @@ class HaWashdataPanel extends HTMLElement {
         title: this._t('modal.apply_suggestions_title', {}, 'Apply suggestions'),
         message: this._tText('modal.apply_suggestions_msg', {n: items.length}, `Change these ${items.length} settings? The integration reloads after saving.`),
         okLabel: this._t('btn.apply_all', {}, 'Apply all'),
-        onOk: () => this._applyAllSuggestions(eid, keys),
+        onOk: () => this._applyAllSuggestions(eid, keys, values),
       };
       this._render();
 

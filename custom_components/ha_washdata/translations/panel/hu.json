@@ -1786,6 +1786,7 @@
         "settings_saved": "A beállítások elmentve; integráció újratöltése",
         "suggestions_applied": "Javaslatok alkalmazva; integráció újratöltése",
         "suggestions_none_applied": "Egy beállítás sem változott: a kiválasztott javaslatok már nem érvényesek",
+        "suggestions_changed": "A javaslatok megváltoztak, mióta átnézte őket. Semmi sem lett mentve; ellenőrizze őket, és alkalmazza újra.",
         "suggestions_dismissed": "Javaslatok elutasítva",
         "apply_failed": "Az alkalmazás sikertelen: {error}",
         "delete_failed": "A törlés sikertelen: {error}",

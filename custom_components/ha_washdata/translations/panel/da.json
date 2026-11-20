@@ -1893,6 +1893,7 @@
     "settings_saved": "Indstillinger gemt; integration genindlæsning",
     "suggestions_applied": "Forslag anvendt; integration genindlæsning",
     "suggestions_none_applied": "Ingen indstilling ændret: de valgte forslag gælder ikke længere",
+    "suggestions_changed": "Forslagene er ændret, siden du gennemgik dem. Intet blev gemt; tjek dem, og anvend dem igen.",
     "suggestions_dismissed": "Forslag afvist",
     "apply_failed": "Anvendelse mislykkedes: {error}",
     "delete_failed": "Sletning mislykkedes: {error}",

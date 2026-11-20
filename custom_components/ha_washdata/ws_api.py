@@ -5220,7 +5220,17 @@ def ws_get_suggestions(
 
     entry = _get_entry(hass, entry_id)
     merged: dict[str, Any] = {**entry.data, **entry.options} if entry else {}
+    _send_result(
+        connection, msg["id"], "get_suggestions", _suggestion_list(manager, merged, entry_id)
+    )
 
+
+def _suggestion_list(manager: Any, merged: dict[str, Any], entry_id: str) -> dict[str, Any]:
+    """``suggestions`` and ``locked_suggestions`` as the Settings list shows them.
+
+    The ``get_suggestions`` reply, and what a refused Apply hands back so the user
+    confirms the values as they now stand (PR #529 review).
+    """
     out: list[dict[str, Any]] = []
     try:
         for key, item, suggested, current in _visible_suggestions(
@@ -5250,10 +5260,7 @@ def ws_get_suggestions(
         locked = manager.profile_store.get_locked_suggestions()
     except Exception:  # pylint: disable=broad-exception-caught
         locked = []
-    _send_result(
-        connection, msg["id"], "get_suggestions",
-        {"suggestions": out, "locked_suggestions": locked},
-    )
+    return {"suggestions": out, "locked_suggestions": locked}
 
 
 @websocket_api.websocket_command(
@@ -5261,6 +5268,8 @@ def ws_get_suggestions(
         vol.Required("type"): "ha_washdata/apply_suggestions",
         vol.Required("entry_id"): str,
         vol.Required("keys"): [str],
+        # Each key's value as the user confirmed it; optional for older clients.
+        vol.Optional("values"): dict,
     }
 )
 @websocket_api.async_response
@@ -5269,7 +5278,12 @@ async def ws_apply_suggestions(
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
-    """Stage selected suggested values into options, then clear suggestions."""
+    """Stage selected suggested values into options, then clear suggestions.
+
+    ``values`` (optional) carries each key's value as the user confirmed it: a
+    suggestion that differs from it now writes nothing, and the reply is
+    ``success`` False with the ``changed`` keys and the list as it now stands.
+    """
     entry_id: str = msg["entry_id"]
     manager = _get_manager(hass, entry_id)
     if manager is None:
@@ -5298,6 +5312,29 @@ async def ws_apply_suggestions(
                     getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
                 )
             }
+            # What the user confirmed, against what the list shows now (PR #529
+            # review): a newer analysis may have replaced a value after the preview
+            # or while Apply waited for this lock. Refused before anything is
+            # cleared or written, with the list as it stands to confirm again. A
+            # key with no confirmed value (an older panel) is judged as before.
+            confirmed = msg.get("values") or {}
+            changed = [
+                key for key in msg["keys"]
+                if confirmed.get(key) is not None
+                and isinstance(visible.get(key), dict)
+                and not _suggestion_equivalent(
+                    confirmed[key], _coerce_suggested(key, visible[key].get("value"))
+                )
+            ]
+            if changed:
+                _send_result(
+                    connection, msg["id"], "apply_suggestions",
+                    {
+                        "success": False, "applied": [], "changed": changed,
+                        **_suggestion_list(manager, merged, entry_id),
+                    },
+                )
+                return
             for key in msg["keys"]:
                 item = visible.get(key)
                 if not isinstance(item, dict) or item.get("value") is None:

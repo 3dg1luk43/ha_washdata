@@ -1894,6 +1894,7 @@
     "settings_saved": "Asetukset tallennettu; integroinnin uudelleenlataus",
     "suggestions_applied": "Ehdotuksia otettu käyttöön; integroinnin uudelleenlataus",
     "suggestions_none_applied": "Asetuksia ei muutettu: valitut ehdotukset eivät ole enää voimassa",
+    "suggestions_changed": "Ehdotukset ovat muuttuneet tarkistuksesi jälkeen. Mitään ei tallennettu; tarkista ne ja ota ne uudelleen käyttöön.",
     "suggestions_dismissed": "Ehdotukset hylätty",
     "apply_failed": "Käyttöönotto epäonnistui: {error}",
     "delete_failed": "Poisto epäonnistui: {error}",

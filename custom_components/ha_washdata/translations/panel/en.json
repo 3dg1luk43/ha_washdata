@@ -1997,6 +1997,7 @@
     "store_unavailable": "The community store is not available.",
     "suggestions_applied": "Suggestions applied; integration reloading",
     "suggestions_none_applied": "No setting changed: the selected suggestions no longer apply",
+    "suggestions_changed": "The suggestions changed since you reviewed them. Nothing was saved; check them and apply again.",
     "suggestions_dismissed": "Suggestions dismissed",
     "task_cancelled": "Cancelled.",
     "thanks_confirming": "Thanks for confirming",

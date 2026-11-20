@@ -1910,6 +1910,7 @@
     "settings_saved": "Nastavení uloženo; znovunačtení integrace",
     "suggestions_applied": "Byly použity návrhy; znovunačtení integrace",
     "suggestions_none_applied": "Žádné nastavení nebylo změněno: vybrané návrhy už neplatí",
+    "suggestions_changed": "Návrhy se od vaší kontroly změnily. Nic nebylo uloženo; zkontrolujte je a použijte znovu.",
     "suggestions_dismissed": "Návrhy zamítnuty",
     "apply_failed": "Použití selhalo: {error}",
     "delete_failed": "Smazání selhalo: {error}",

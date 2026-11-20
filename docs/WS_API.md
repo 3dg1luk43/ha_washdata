@@ -61,7 +61,7 @@ This document is generated from `custom_components/ha_washdata/ws_schema.py`. Ev
 | `undo_import` | entry_id | `UndoImportResponse` |
 | `get_constants` | - | `GetConstantsResponse` |
 | `get_suggestions` | entry_id | `GetSuggestionsResponse` |
-| `apply_suggestions` | entry_id, keys | `ApplySuggestionsResponse` |
+| `apply_suggestions` | entry_id, keys, values? | `ApplySuggestionsResponse` |
 | `clear_suggestions` | entry_id | `SuccessResponse` |
 | `set_suggestion_lock` | entry_id, key, locked | `SetSuggestionLockResponse` |
 | `run_suggestion_analysis` | entry_id | `RunSuggestionAnalysisResponse` |
@@ -998,6 +998,7 @@ _None._
 | --- | --- | --- |
 | `entry_id` | yes | str |
 | `keys` | yes | list[str] |
+| `values` | no | dict |
 
 **Response** (`ApplySuggestionsResponse`)
 
@@ -1005,6 +1006,9 @@ _None._
 | --- | --- | --- |
 | `success` | yes | bool |
 | `applied` | yes | list[str] |
+| `changed` | no | list[str] |
+| `suggestions` | no | list[dict[str, any]] |
+| `locked_suggestions` | no | list[str] |
 
 ## `ha_washdata/clear_suggestions`
 

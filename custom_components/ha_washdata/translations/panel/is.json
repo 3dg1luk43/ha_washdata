@@ -1893,6 +1893,7 @@
     "settings_saved": "Stillingar vistaðar; endurhleðsla samþættingar",
     "suggestions_applied": "Tillögur beitt; endurhleðsla samþættingar",
     "suggestions_none_applied": "Engin stilling breyttist: valdar tillögur eiga ekki lengur við",
+    "suggestions_changed": "Tillögurnar breyttust eftir að þú fórst yfir þær. Ekkert var vistað; athugaðu þær og notaðu aftur.",
     "suggestions_dismissed": "Tillögum vísað frá",
     "apply_failed": "Beiting mistókst: {error}",
     "delete_failed": "Eyðing mistókst: {error}",

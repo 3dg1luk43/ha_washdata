@@ -383,11 +383,22 @@ class GetSuggestionsResponse(TypedDict):
     locked_suggestions: list[str]
 
 
-class ApplySuggestionsResponse(TypedDict):
-    """``success`` False, with ``applied`` empty, when nothing was written."""
-
+class _ApplySuggestionsBase(TypedDict):
     success: bool
     applied: list[str]
+
+
+class ApplySuggestionsResponse(_ApplySuggestionsBase, total=False):
+    """``success`` False, with ``applied`` empty, when nothing was written.
+
+    ``changed``: the keys whose suggestion differs from the confirmed ``values``;
+    the reply then carries ``suggestions`` and ``locked_suggestions`` as
+    ``get_suggestions`` does, for the user to confirm again.
+    """
+
+    changed: list[str]
+    suggestions: list[dict[str, Any]]
+    locked_suggestions: list[str]
 
 
 class _SetSuggestionLockBase(TypedDict):
@@ -1176,7 +1187,9 @@ WS_COMMANDS: dict[str, dict] = {
     "undo_import": {"params": [_entry()]},
     "get_constants": {"params": []},
     "get_suggestions": {"params": [_entry()]},
-    "apply_suggestions": {"params": [_entry(), _p("keys", "list[str]")]},
+    "apply_suggestions": {"params": [
+        _entry(), _p("keys", "list[str]"), _p("values", "dict", False),
+    ]},
     "clear_suggestions": {"params": [_entry()]},
     "set_suggestion_lock": {"params": [_entry(), _p("key", "str"), _p("locked", "bool")]},
     "run_suggestion_analysis": {"params": [_entry()]},
