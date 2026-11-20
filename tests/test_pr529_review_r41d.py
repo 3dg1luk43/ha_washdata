@@ -5,11 +5,15 @@
   list handed back was the retired one.
 * A stored negative Off Delay or Min Off Gap (an imported store) was written,
   though the Settings form refuses one: -1 empties the end-energy window.
+* A Min Power judged on a watt sensor was written after the sensor turned kW
+  during the awaits: every reading would then be read raw against thresholds
+  in watts.
 """
 from __future__ import annotations
 
 import asyncio
 from typing import Any
+from unittest.mock import patch
 
 import pytest
 from homeassistant.core import HomeAssistant
@@ -17,7 +21,10 @@ from homeassistant.core import HomeAssistant
 from custom_components.ha_washdata import ws_api
 from custom_components.ha_washdata.const import (
     CONF_MIN_OFF_GAP,
+    CONF_MIN_POWER,
     CONF_OFF_DELAY,
+    CONF_START_THRESHOLD_W,
+    CONF_STOP_THRESHOLD_W,
     CONF_WATCHDOG_INTERVAL,
     DOMAIN,
 )
@@ -121,3 +128,52 @@ async def test_a_zero_off_delay_stays_valid(
     res = await _apply(hass, client, entry.entry_id, [CONF_OFF_DELAY], {CONF_OFF_DELAY: 0})
     assert res["result"] == {"success": True, "applied": [CONF_OFF_DELAY]}, res
     assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_OFF_DELAY] == 0
+
+
+_SENSOR = "sensor.washer_power"
+_W_OPTS = {CONF_MIN_POWER: 2.0, CONF_START_THRESHOLD_W: 5.0, CONF_STOP_THRESHOLD_W: 2.0}
+
+
+async def test_a_unit_change_during_the_clear_writes_no_min_power(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """Watt sensor: Min Power 0.8 keeps the scale and passes. The sensor turns
+    kW while the cleared list is saved, where 0.8 keeps readings raw and 2 did
+    not. It was written; now nothing is, and the reply says to analyse again."""
+    entry = await setup_washdata_entry(options=_W_OPTS)
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    client = await hass_ws_client(hass)
+    _suggest(store, CONF_MIN_POWER, 0.8)
+    clear = store.clear_suggestions
+
+    async def clear_as_the_unit_changes() -> None:
+        hass.states.async_set(_SENSOR, "0", {"unit_of_measurement": "kW"})
+        await clear()
+
+    with patch.object(store, "clear_suggestions", clear_as_the_unit_changes):
+        res = await _apply(hass, client, entry.entry_id, [CONF_MIN_POWER], {CONF_MIN_POWER: 0.8})
+    assert res["success"] is False and res["error"]["code"] == "entry_reloaded", res
+    assert "cleared" in res["error"]["message"] and "analysis" in res["error"]["message"]
+    assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_MIN_POWER] == 2.0
+
+
+async def test_a_unit_change_during_the_end_gate_check_clears_nothing(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """The same change during the end-gate check, before the clear: refused with
+    the suggestions kept."""
+    entry = await setup_washdata_entry(options=_W_OPTS)
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    client = await hass_ws_client(hass)
+    _suggest(store, CONF_MIN_POWER, 0.8)
+    check = ws_api._drop_unsafe_end_gate_updates  # noqa: SLF001
+
+    async def check_as_the_unit_changes(*args: Any) -> bool:
+        hass.states.async_set(_SENSOR, "0", {"unit_of_measurement": "kW"})
+        return await check(*args)
+
+    with patch.object(ws_api, "_drop_unsafe_end_gate_updates", check_as_the_unit_changes):
+        res = await _apply(hass, client, entry.entry_id, [CONF_MIN_POWER], {CONF_MIN_POWER: 0.8})
+    assert res["success"] is False and res["error"]["code"] == "entry_reloaded", res
+    assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_MIN_POWER] == 2.0
+    assert CONF_MIN_POWER in store.get_suggestions()

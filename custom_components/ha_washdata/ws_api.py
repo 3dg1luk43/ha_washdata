@@ -5476,6 +5476,15 @@ async def ws_apply_suggestions(
                         for key in updates
                     )
 
+                def _scale_kept() -> bool:
+                    # The sensor's unit is no option, so ``_still_current`` cannot
+                    # see it change during an await below (PR #529 review).
+                    return CONF_MIN_POWER not in updates or _min_power_keeps_scale(
+                        hass, fresh,
+                        getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
+                        updates[CONF_MIN_POWER],
+                    )
+
                 if not await _drop_unsafe_end_gate_updates(hass, manager, visible, updates):
                     connection.send_error(
                         msg["id"], "end_gate_check_failed",
@@ -5521,6 +5530,13 @@ async def ws_apply_suggestions(
                         "applied. Nothing was saved; try again.",
                     )
                     return
+                if updates and not _scale_kept():
+                    connection.send_error(
+                        msg["id"], "entry_reloaded",
+                        "The power sensor's unit changed while the suggestions were "
+                        "applied. Nothing was saved; try again.",
+                    )
+                    return
                 if updates:
                     # Clear before updating the entry: the reload async_update_entry
                     # schedules refreshes the suggestions, so persist the cleared
@@ -5552,6 +5568,16 @@ async def ws_apply_suggestions(
                             "the timing settings were not checked against it. The "
                             "suggestions were cleared, but no setting was saved; try "
                             "again once they are offered again.",
+                        )
+                        return
+                    if not _scale_kept():
+                        # Last, with no await before the write: a Min Power across
+                        # the sensor's new unit line rescales every reading.
+                        connection.send_error(
+                            msg["id"], "entry_reloaded",
+                            "The power sensor's unit changed while the suggestions were "
+                            "applied. The suggestions were cleared, but no setting was "
+                            "saved; run the suggestion analysis again.",
                         )
                         return
                     # Suggested values are all tunables -> layer them onto the
