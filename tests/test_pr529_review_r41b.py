@@ -20,6 +20,10 @@
 * #531: a reference copy of a dishwasher run (imported from this device's own
   backup) was a vote of its own, so two runs and a copy excluded a shorter run
   without three independent runs. A copy votes as the run it copies now.
+* #531: the one-time rebuild marker stayed set once a rebuild ran while the
+  entry was a washer (the cut-off runs back in the envelope): switched back to
+  dishwasher, the scheduler returned at the marker. A build under another type
+  clears it now, so the switch back runs the rebuild again.
 """
 from __future__ import annotations
 
@@ -30,13 +34,15 @@ import logging
 from contextlib import asynccontextmanager
 from datetime import timedelta
 from typing import Any, AsyncIterator
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from homeassistant.core import HomeAssistant
 
 from custom_components.ha_washdata import profile_store as ps_mod
 from custom_components.ha_washdata.const import (
+    CONF_DEVICE_TYPE,
+    CUT_SHORT_REBUILD_KEY,
     DOMAIN,
     PRE_IMPORT_STORE_SUFFIX,
     STORAGE_KEY,
@@ -455,3 +461,74 @@ async def test_three_runs_still_exclude_the_cut_one(
     assert store.get_envelope("ECO")["shape_cycle_count"] == 3
     await _copy_of_c0(store, link)
     assert store.get_envelope("ECO")["shape_cycle_count"] == 4
+
+
+# ── #531: back to dishwasher after a rebuild as a washer runs the rule again ──
+
+
+async def _cut_short_pass(hass: HomeAssistant, entry: Any) -> Any:
+    manager = hass.data[DOMAIN][entry.entry_id]
+    await hass.async_block_till_done()
+    task = manager._cut_short_rebuild_task  # noqa: SLF001
+    if task is not None:
+        await task
+    return manager.profile_store
+
+
+async def _set_type(hass: HomeAssistant, entry: Any, device_type: str, how: str) -> Any:
+    hass.config_entries.async_update_entry(
+        entry, options={**entry.options, CONF_DEVICE_TYPE: device_type}
+    )
+    await hass.async_block_till_done()
+    if how == "reload":
+        assert await hass.config_entries.async_reload(entry.entry_id)
+    return await _cut_short_pass(hass, entry)
+
+
+@pytest.mark.parametrize("how", ["in_place", "reload"])
+async def test_back_to_dishwasher_after_a_washer_rebuild_runs_the_rule_again(
+    hass: HomeAssistant, setup_washdata_entry: Any, how: str
+) -> None:
+    entry = await setup_washdata_entry(device_type="dishwasher", options={"stop_threshold_w": 4.5})
+    store = await _cut_short_pass(hass, entry)
+    runs = [_eco(hold_s=30)] * 5 + [_eco(cut_s=131 * 60)] * 12
+    store._data["profiles"] = {"ECO": {}}  # noqa: SLF001
+    store._data["envelopes"] = {}  # noqa: SLF001
+    store._data["past_cycles"] = [  # noqa: SLF001
+        {"id": f"c{i}", "profile_name": "ECO", "status": "completed",
+         "termination_reason": "smart", "start_time": (T0 + timedelta(days=i)).isoformat(),
+         "duration": pts[-1][0], "power_data": [[t, p] for t, p in pts]}
+        for i, pts in enumerate(runs)
+    ]
+    store._data.pop(CUT_SHORT_REBUILD_KEY, None)  # noqa: SLF001
+    await store.async_save()
+    assert await hass.config_entries.async_reload(entry.entry_id)
+    store = await _cut_short_pass(hass, entry)
+    assert not store.cut_short_rebuild_pending()
+    assert store.get_envelope("ECO")["shape_cycle_count"] == 5
+
+    # A washer now: a rebuild (a label edit, a cycle end) keeps every run.
+    store = await _set_type(hass, entry, "washing_machine", how)
+    assert await store.async_rebuild_envelope("ECO")
+    await store.async_save()
+    assert store.get_envelope("ECO")["shape_cycle_count"] == 17
+
+    store = await _set_type(hass, entry, "dishwasher", how)
+    assert store.get_envelope("ECO")["shape_cycle_count"] == 5
+    assert not store.cut_short_rebuild_pending()
+
+
+async def test_a_type_switch_without_a_rebuild_keeps_the_marker(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """No build ran under the other type: nothing to redo, no pass."""
+    entry = await setup_washdata_entry(device_type="dishwasher")
+    store = await _cut_short_pass(hass, entry)
+    assert not store.cut_short_rebuild_pending()
+    await _set_type(hass, entry, "washing_machine", "in_place")
+    manager = hass.data[DOMAIN][entry.entry_id]
+    with patch.object(store, "async_rebuild_for_cut_short_rule", AsyncMock(return_value=0)) as ran:
+        await _set_type(hass, entry, "dishwasher", "in_place")
+    assert manager.profile_store is store
+    ran.assert_not_called()
+    assert not store.cut_short_rebuild_pending()

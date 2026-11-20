@@ -8422,6 +8422,11 @@ class ProfileStore:
                 "Discarding an envelope build of %s a setting changed under", profile_name
             )
             return None
+        if self.device_type != DEVICE_TYPE_DISHWASHER:
+            # Built without the #531 cut-off rule, so it keeps a dishwasher's
+            # cut-off runs: the one-time rebuild under the rule is due again once
+            # the entry is a dishwasher again (PR #529 review).
+            self._data.pop(CUT_SHORT_REBUILD_KEY, None)
 
         if not result_pkg:
             # Envelope shape couldn't be built (no power data / too few points).
@@ -8726,7 +8731,8 @@ class ProfileStore:
 
     def cut_short_rebuild_pending(self) -> bool:
         """Whether this store still has to be rebuilt once under the #531 cut-off
-        rule (`CUT_SHORT_REBUILD_KEY` absent: a store from before it)."""
+        rule (`CUT_SHORT_REBUILD_KEY` absent: a store from before it, or one an
+        envelope build under another device type has run on since)."""
         return not self._data.get(CUT_SHORT_REBUILD_KEY)
 
     async def async_rebuild_for_cut_short_rule(self, device_type: str | None = None) -> int:
