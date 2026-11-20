@@ -2970,8 +2970,11 @@ class SuggestionEngine:
         """``standby_stop_floor`` over this device's recent history (#458)."""
         eff = self._effective_thresholds(options)
         stop = float(eff[CONF_STOP_THRESHOLD_W])
-        off_delay = float(eff[CONF_OFF_DELAY])
-        if off_delay <= 0:
+        # An Off Delay of 0 stays 0: no window holds a pause, so no floor is safe
+        # (PR #529 review: the default stood in, and a pause a 60 s Min Off Gap
+        # ends passed as safe). The default only for a missing value.
+        off_delay = _num(eff.get(CONF_OFF_DELAY))
+        if off_delay is None:
             off_delay = float(resolve_off_delay_default(self.device_type or ""))
         cycles = self.profile_store.get_past_cycles()[-200:]
         return standby_stop_floor(
