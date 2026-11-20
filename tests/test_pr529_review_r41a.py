@@ -10,10 +10,14 @@
   had succeeded rolled back the later Pause and re-armed the open door's dwell,
   which then ended the paused cycle. A Pause rolls back only while the pause
   state is still its own; a failed Resume hands it back.
+* An import could leave a profile in two profile groups (the panel refuses
+  that): the #530 check read it against the first group even when the second
+  won. The wholesale and the selective import refuse it before any change.
 """
 from __future__ import annotations
 
 import asyncio
+import copy
 from datetime import timedelta
 from typing import Any
 from unittest.mock import AsyncMock, PropertyMock, patch
@@ -25,13 +29,14 @@ from homeassistant.util import dt as dt_util
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
 from custom_components.ha_washdata.const import (
+    DOMAIN,
     PROGRAM_MISMATCH_PERSISTENCE,
     TerminationReason,
 )
 from custom_components.ha_washdata.profile_store import ProfileStore
 
 from .test_issue_524_door_ends_cycle import DOOR, OPTS, _paused_washer, _tick
-from .test_issue_530_program_mismatch import _check, _mismatches, _past_half, _result
+from .test_issue_530_program_mismatch import _check, _mismatches, _past_half, _result, _seed
 
 WRONG = ("Synthetics", {"Synthetics": 0.9, "Cotton": 0.5})
 
@@ -185,3 +190,64 @@ async def test_a_failed_pause_after_a_failed_resume_still_rolls_back(
     assert manager._remove_door_end_dwell is not None  # noqa: SLF001
     await _tick(hass, freezer, 70, None)
     assert len(ends) == 1 and ends[0]["termination_reason"] == TerminationReason.DOOR
+
+
+# ── An import never puts a profile in two groups ─────────────────────────────
+
+
+async def _seeded(hass: HomeAssistant, setup_washdata_entry: Any) -> Any:
+    entry = await setup_washdata_entry()
+    manager = hass.data[DOMAIN][entry.entry_id]
+    await _seed(manager)
+    return manager.profile_store
+
+
+async def _import(store: Any, how: str, groups: dict[str, Any]) -> Any:
+    payload = store.export_data()
+    payload["data"]["profile_groups"] = copy.deepcopy(groups)
+    if how == "wholesale":
+        return await store.async_import_data(payload)
+    return await store.async_import_data_selective(
+        payload, selection={"categories": ["profile_groups"]}, mode=how,
+        local_device_type="washing_machine",
+    )
+
+
+TWO = {"G1": {"members": ["Cotton", "Synthetics"]}, "G2": {"members": ["Cotton"]}}
+
+
+@pytest.mark.parametrize(
+    ("how", "local", "groups"),
+    [
+        ("wholesale", None, TWO),
+        ("replace", None, TWO),
+        ("merge", ["Cotton", "Synthetics"], {"G2": {"members": ["Cotton"]}}),
+    ],
+)
+async def test_an_import_putting_a_profile_in_two_groups_is_refused(
+    hass: HomeAssistant, setup_washdata_entry: Any, how: str, local: Any, groups: Any
+) -> None:
+    """Refused before the restore point and the first change; the store keeps its
+    groups, profiles and data generation."""
+    store = await _seeded(hass, setup_washdata_entry)
+    if local:
+        assert await store.create_profile_group("G1", local)
+    before = copy.deepcopy((store._data["profile_groups"], store._data["profiles"]))  # noqa: SLF001
+    generation = store._data_generation  # noqa: SLF001
+    with pytest.raises(ValueError, match="only one group"):
+        await _import(store, how, groups)
+    assert (store._data["profile_groups"], store._data["profiles"]) == before  # noqa: SLF001
+    assert store._data_generation == generation  # noqa: SLF001
+    assert await store.async_get_pre_import_snapshot() is None
+
+
+async def test_a_merge_keeps_a_local_group_of_the_same_name(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """A file group under a local group's name is not taken (keep-mine), so it
+    puts nobody in two groups and the merge goes ahead."""
+    store = await _seeded(hass, setup_washdata_entry)
+    assert await store.create_profile_group("G1", ["Cotton", "Synthetics"])
+    await _import(store, "merge", {"G1": {"members": ["Cotton"]}, "G3": {"members": []}})
+    groups = store.get_profile_groups()
+    assert groups["G1"]["members"] == ["Cotton", "Synthetics"] and "G3" in groups

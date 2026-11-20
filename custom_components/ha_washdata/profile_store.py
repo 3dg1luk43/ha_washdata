@@ -2391,6 +2391,34 @@ def _selected_categories(selection: Any) -> set[str]:
     return out
 
 
+def _refuse_overlapping_groups(groups: Any, added: Any = None) -> None:
+    """Raise ``ValueError`` when an import would leave a profile in two profile
+    groups, as the panel refuses (``create_profile_group``): Stage 5 would map it
+    in each, and the #530 check reads it against the first (PR #529 review).
+
+    ``groups`` is the mapping the import leaves; ``added`` the names of the groups
+    it brings into it (None: all), so a merge is not refused over local groups
+    alone."""
+    if not isinstance(groups, dict):
+        return
+    owners: dict[str, list[str]] = {}
+    for gname, group in groups.items():
+        members = group.get("members") if isinstance(group, dict) else None
+        if not isinstance(members, (list, tuple)):
+            continue
+        for member in dict.fromkeys(m for m in members if isinstance(m, str)):
+            owners.setdefault(member, []).append(str(gname))
+    conflicts = {
+        m: gs for m, gs in owners.items()
+        if len(gs) > 1 and (added is None or any(g in added for g in gs))
+    }
+    if conflicts:
+        raise ValueError(
+            "A profile can be in only one group; the import puts "
+            + ", ".join(f"{m} in {' and '.join(gs)}" for m, gs in conflicts.items())
+        )
+
+
 def _cycles_by_profile(seq: Any) -> dict[str, list[dict[str, Any]]]:
     """Group a cycle list by ``profile_name`` (unlabeled cycles under ``""``)."""
     groups: dict[str, list[dict[str, Any]]] = {}
@@ -13051,7 +13079,10 @@ class ProfileStore:
             raise ValueError(
                 "Import payload contains no profiles or cycles — aborting to prevent data loss"
             )
-        # After the guard (a refused import must not burn the restore point), before
+        # The payload's groups replace this device's: refused like a panel edit
+        # that puts a profile in two of them.
+        _refuse_overlapping_groups(data_dict.get("profile_groups"))
+        # After the guards (a refused import must not burn the restore point), before
         # the first mutation.
         restore_point_saved = await self.async_save_pre_import_snapshot(source, entry_options)
         supplied = meta.get("supplied_keys") or frozenset()
@@ -13291,6 +13322,20 @@ class ProfileStore:
                     raise ValueError(
                         "Import payload contains no real cycles — aborting to prevent data loss"
                     )
+        # The groups the import leaves (Step 4: a replace takes the file's, a merge
+        # adds the file's under new names): refused like a panel edit that puts a
+        # profile in two of them.
+        src_groups = data_dict.get("profile_groups")
+        if "profile_groups" in cats and isinstance(src_groups, dict):
+            if mode == "replace":
+                _refuse_overlapping_groups(src_groups)
+            else:
+                local_groups = self._data.get("profile_groups")
+                local_groups = local_groups if isinstance(local_groups, dict) else {}
+                _refuse_overlapping_groups(
+                    {**src_groups, **local_groups},
+                    added={g for g in src_groups if g not in local_groups},
+                )
 
         # Restore point: after the wipe guards (a refused import must not burn it),
         # before the first mutation below.
