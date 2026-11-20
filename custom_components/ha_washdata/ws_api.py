@@ -4775,7 +4775,11 @@ async def ws_import_config(
             # entry - so an import that carries no options would otherwise leave
             # the imported tails inflating avg_duration until the next restart.
             _schedule_post_import_repairs(hass, entry_id)
-            manager.notify_update()
+            # Not from a manager a full reload retired while the settings history
+            # was written: its refresh can fire a device trigger for an entry it
+            # no longer runs (PR #529 review). The import itself stands.
+            if _get_manager(hass, entry_id) is manager:
+                manager.notify_update()
             _send_result(connection, msg["id"], "import_config", result)
         except json.JSONDecodeError as exc:
             connection.send_error(msg["id"], "invalid_json", str(exc))
