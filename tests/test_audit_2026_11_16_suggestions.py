@@ -1849,3 +1849,26 @@ def test_rows_stored_out_of_order_are_scanned_in_time_order() -> None:
     for points in (ordered, shuffled):
         assert end_gate_would_split(points, 4.0, 180.0, 210.0, 0.05)
         assert not end_gate_would_split(points, 4.0, 180.0, 900.0, 0.05)
+
+
+def test_the_quiet_after_an_outage_hole_is_judged_too() -> None:
+    """Review of PR #529: after a hole the scan jumped to the resume, so quiet
+    reported after it was never judged. The fallback's quiet tally carries across
+    the hole (credited up to the gate cadence): 100 s before it plus 450 s after
+    reach a 210 s Min Off Gap, not 900 s."""
+    points = [(float(t), 300.0) for t in range(-600, 0, 10)]
+    points += [(float(t), 0.0) for t in range(0, 101, 10)]
+    points += [(float(t), 0.0) for t in range(4000, 4451, 10)]
+    points += [(float(t), 300.0) for t in range(4460, 5000, 10)]
+    points += [(5000.0 + t, 0.0) for t in range(0, 600, 10)]
+    assert end_gate_would_split(points, 4.0, 180.0, 210.0, 0.05)
+    assert not end_gate_would_split(points, 4.0, 180.0, 900.0, 0.05)
+
+
+def test_the_detector_style_check_decides_at_the_limit_as_the_detector_does() -> None:
+    """Review of PR #529: 2, 3, 4, 2 W at 60 s integrate to exactly 0.05 Wh over
+    the last minute, which passes a 0.05 Wh gate live; the running sums' rounding
+    read 0.05000000000000002 and rejected it."""
+    from custom_components.ha_washdata.suggestion_engine import _detector_gate_need  # noqa: PLC0415
+
+    assert _detector_gate_need([0.0, 60.0, 120.0, 180.0], [2.0, 3.0, 4.0, 2.0], 0.0, 60.0, 0.05) == 180.0

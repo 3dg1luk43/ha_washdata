@@ -209,3 +209,17 @@ def test_the_hold_band_still_lowers_a_start_the_runs_never_reach() -> None:
     # Reachable: the hold keeps both.
     out = _batch(cycles, {**WASHER_OPTS, CONF_START_THRESHOLD_W: 80.0}, "washing_machine")
     assert CONF_START_THRESHOLD_W not in out
+
+
+def test_the_hold_band_leaves_a_steady_load_to_its_own_correction() -> None:
+    """Review of PR #529: on a pump running at 380-430 W the held-Stop Start
+    correction offered 399 W and replaced start_above_running's 190 W, so the
+    380 W runs still never started. A steady load is checked first."""
+    cycles = [
+        _cycle(f"p{i}", _trace(0.0, [(level, 30, 30.0), (0.0, 5, 30.0)]))
+        for i, level in enumerate((380.0, 380.0, 430.0, 430.0, 430.0))
+    ]
+    opts = {CONF_STOP_THRESHOLD_W: 160.0, CONF_START_THRESHOLD_W: 500.0, CONF_OFF_DELAY: 180}
+    out = _batch(cycles, opts, "pump")
+    assert CONF_START_THRESHOLD_W not in out, out.get(CONF_START_THRESHOLD_W)
+    assert CONF_STOP_THRESHOLD_W not in out

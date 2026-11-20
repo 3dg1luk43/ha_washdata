@@ -209,13 +209,6 @@ def end_gate_pause_needs(
                 j += 1
             if j >= n:
                 break  # the trailing quiet: the end itself, not a pause
-            # The observed run ends at an outage-sized hole: the gate can close in
-            # the quiet before it, never on the hole itself (review of PR #529:
-            # skipping the whole run passed a wait that quiet already reached).
-            end = next(
-                (k for k in range(i + 1, j + 1) if points[k][0] - points[k - 1][0] > max_gap_s),
-                None,
-            )
             # Where the detector's quiet timer starts: it credits the interval since
             # the last reading at or above the stop, capped at its gate cadence
             # (review of PR #529), so the pause is that much longer than its
@@ -225,44 +218,37 @@ def end_gate_pause_needs(
                 lead = points[i][0] - points[i - 1][0]
                 if 0 < lead <= max_gap_s:
                     t0 -= _quiet_credit(times_all, i, lead)
-            if end is None:
-                last, t_resume = j, points[j][0]
-            else:
-                last, t_resume = end, points[end - 1][0] + 1e-3
             need = 0.0
-            if t_resume - t0 > window:
-                times = [points[k][0] for k in range(i, last)]
-                watts = [points[k][1] for k in range(i, last)]
-                cum = cumulative_held_wh(times, watts)
-
-                # The window energy W(t) = E(t) - E(t - off_delay) bends only at a
-                # reading time or a reading time + off_delay, so it is linear
-                # between consecutive points of this grid; the latest moment it is
-                # at or under the limit is one of them or, where W rises through the
-                # limit between two, that crossing.
-                grid = {t0 + window, t_resume - 1e-3}
-                for t in times:
-                    grid.update((t, t + window))
-                points_t = sorted(t for t in grid if t0 + window <= t < t_resume)
-                values = [
-                    held_wh_until(times, watts, cum, t)
-                    - held_wh_until(times, watts, cum, t - window)
-                    for t in points_t
-                ]
-                for k, (t, w_t) in enumerate(zip(points_t, values)):
-                    if w_t > limit:
-                        continue
-                    need = max(need, _quiet_s(t0, t, spans))
-                    if k + 1 < len(points_t) and values[k + 1] > limit:
-                        t_next, w_next = points_t[k + 1], values[k + 1]
-                        crossing = t + (limit - w_t) / (w_next - w_t) * (t_next - t)
-                        need = max(need, _quiet_s(t0, crossing, spans))
-                # ...and as the detector computes it (review of PR #529): at a
-                # reading, the trapezoid over the readings inside the window, its
-                # outage gaps masked. That can be lower than the held energy above
-                # (the window's first reading is not at its start), so a pause the
-                # held model bridges can still end live. Either closing counts.
-                need = max(need, _detector_gate_need(times, watts, t0, window, limit, spans))
+            seg = i
+            seg_spans = spans
+            while True:
+                # An outage-sized hole splits the run into observed segments: the
+                # gate can close in the quiet before it, never on the hole itself,
+                # and the fallback's quiet tally carries across it with the hole
+                # credited only up to the gate cadence, so the quiet after it
+                # continues the count (review of PR #529: a run with a hole was
+                # skipped whole, then its readings after the hole were).
+                hole = next(
+                    (k for k in range(seg + 1, j + 1)
+                     if points[k][0] - points[k - 1][0] > max_gap_s),
+                    None,
+                )
+                if hole is None:
+                    last, t_resume = j, points[j][0]
+                else:
+                    last, t_resume = hole, points[hole - 1][0] + 1e-3
+                need = max(need, _segment_gate_need(
+                    times_all[seg:last], [p for _t, p in points[seg:last]],
+                    t0, t_resume, window, limit, seg_spans,
+                ))
+                if hole is None or hole >= j:
+                    break
+                carried = _quiet_s(t0, points[hole - 1][0], seg_spans) + _quiet_credit(
+                    times_all, hole, points[hole][0] - points[hole - 1][0]
+                )
+                seg = hole
+                t0 = points[hole][0] - carried
+                seg_spans = [sp for sp in spans if sp[0] >= points[hole][0]]
             needs.append(need)
             i = j
     except Exception:  # noqa: BLE001 - a guard must never break a suggestion pass
@@ -270,6 +256,49 @@ def end_gate_pause_needs(
             raise  # Apply all's check: a failed scan is not "no pause" (PR #529 review)
         return []
     return needs
+
+
+def _segment_gate_need(
+    times: list[float], watts: list[float], t0: float, t_resume: float,
+    window: float, limit: float, spans: list[tuple[float, float]],
+) -> float:
+    """The latest quiet second of one observed pause segment at which the fallback
+    end gate could close (:func:`end_gate_pause_needs`); 0 when it never could.
+
+    ``t0`` is where the segment's quiet count stands at zero (earlier than its first
+    reading by the credited lead or the quiet carried across a hole), ``t_resume``
+    the end of what was observed.
+    """
+    need = 0.0
+    if not times or t_resume - t0 <= window:
+        return need
+    cum = cumulative_held_wh(times, watts)
+    # The window energy W(t) = E(t) - E(t - off_delay) bends only at a reading time
+    # or a reading time + off_delay, so it is linear between consecutive points of
+    # this grid; the latest moment it is at or under the limit is one of them or,
+    # where W rises through the limit between two, that crossing.
+    grid = {t0 + window, t_resume - 1e-3}
+    for t in times:
+        grid.update((t, t + window))
+    points_t = sorted(t for t in grid if t0 + window <= t < t_resume)
+    values = [
+        held_wh_until(times, watts, cum, t) - held_wh_until(times, watts, cum, t - window)
+        for t in points_t
+    ]
+    for k, (t, w_t) in enumerate(zip(points_t, values)):
+        if w_t > limit:
+            continue
+        need = max(need, _quiet_s(t0, t, spans))
+        if k + 1 < len(points_t) and values[k + 1] > limit:
+            t_next, w_next = points_t[k + 1], values[k + 1]
+            crossing = t + (limit - w_t) / (w_next - w_t) * (t_next - t)
+            need = max(need, _quiet_s(t0, crossing, spans))
+    # ...and as the detector computes it (review of PR #529): at a reading, the
+    # trapezoid over the readings inside the window, its outage gaps masked. That
+    # can be lower than the held energy above (the window's first reading is not at
+    # its start), so a pause the held model bridges can still end live. Either
+    # closing counts.
+    return max(need, _detector_gate_need(times, watts, t0, window, limit, spans))
 
 
 def _quiet_pulses(
@@ -362,11 +391,13 @@ def _detector_gate_need(
         if _quiet_s(t0, float(ts[k]), spans) < window:
             break
         lo = int(first[k])
-        if slow[k] - slow[lo] > 0:
+        energy = float(cum[k] - cum[lo])
+        # Over 60 s a segment may be masked; at the limit itself the running sums'
+        # rounding can flip the comparison the detector makes on its own sum (review
+        # of PR #529: 0.05000000000000002 against 0.05). Both read integrate_wh.
+        if slow[k] - slow[lo] > 0 or abs(energy - limit) <= 1e-9 * max(1.0, abs(limit)):
             seg = slice(lo, k + 1)
             energy = integrate_wh(ts[seg], ps[seg], max_gap_s=energy_gap_threshold_s(ts[seg]))
-        else:
-            energy = float(cum[k] - cum[lo])
         if energy <= limit:
             return _quiet_s(t0, float(ts[k]), spans)
     return 0.0
@@ -3410,7 +3441,21 @@ class SuggestionEngine:
                 else None
             )
             working_w = float(np.median(working)) if working else 0.0
-            if STOP_HOLD_BAND * suggested_stop <= eff_stop < p05_min:
+            if is_steady_load(p05_min, working_w):
+                # First (review of PR #529): on a steady load the held-Stop Start
+                # correction below would replace start_above_running's own (a pump
+                # at 380-430 W: 190 W replaced by 399 W, under which 380 W runs
+                # still never start).
+                # #527: no quiet phase inside the cycles, so the anchor is the
+                # running level and 0.8x / 1.05x of it sit on the running power.
+                # The thresholds in force end and start these cycles; a start
+                # threshold at the running level is start_above_running's to fix.
+                _LOGGER.debug(
+                    "Stop/start suggestion withheld: p05 lowest active %.2fW is the "
+                    "running level (p90 working power %.2fW), not a standby boundary",
+                    p05_min, working_w,
+                )
+            elif STOP_HOLD_BAND * suggested_stop <= eff_stop < p05_min:
                 # Hold band (item 637): a stop between half the anchor's value and
                 # the lowest power the appliance runs at already keeps every running
                 # phase running, and re-deriving it walked it with each batch (p05 of
@@ -3444,16 +3489,6 @@ class SuggestionEngine:
                         # start add no cycles to end it (review of PR #529).
                         "corrective": True,
                     }
-            elif is_steady_load(p05_min, working_w):
-                # #527: no quiet phase inside the cycles, so the anchor is the
-                # running level and 0.8x / 1.05x of it sit on the running power.
-                # The thresholds in force end and start these cycles; a start
-                # threshold at the running level is start_above_running's to fix.
-                _LOGGER.debug(
-                    "Stop/start suggestion withheld: p05 lowest active %.2fW is the "
-                    "running level (p90 working power %.2fW), not a standby boundary",
-                    p05_min, working_w,
-                )
             elif resting_floor is not None and suggested_stop < resting_floor:
                 _LOGGER.debug(
                     "Stop/start suggestion withheld: p05 lowest active %.2fW is the "
