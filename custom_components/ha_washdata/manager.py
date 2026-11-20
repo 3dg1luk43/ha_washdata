@@ -1854,6 +1854,12 @@ class WashDataManager:
             # run is kept, and the resume's first reading is past due.
             if self._is_user_paused:
                 return
+            # ...and while a stall is shown: the trace keeps it until it is banked
+            # (``CycleDetector._match_readings``), so a long one carried the span
+            # past the pick's Stage-1 upper bound the same way (PR #529 review).
+            # The first reading after it is banked and cut out checks again.
+            if self.detector.stalled:
+                return
             task = self._program_mismatch_task
             if task is not None and not task.done():
                 return
