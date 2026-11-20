@@ -5,6 +5,9 @@
   Analyse stopped before the Start Threshold correction, on every retry.
 * A profiles-only wholesale import kept the history and the cadence rows but
   still reset the live cadence: the running cycle's intervals were lost.
+* A settings change already merged in as another device's copy stayed marked
+  when this device's own backup brought the original later: the standby
+  advisory kept ignoring it.
 """
 from __future__ import annotations
 
@@ -16,9 +19,12 @@ from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
 
 from custom_components.ha_washdata import ws_api
-from custom_components.ha_washdata.const import DOMAIN
+from custom_components.ha_washdata.const import DOMAIN, SETTINGS_CHANGELOG_IMPORTED_KEY
 from custom_components.ha_washdata.learning import recent_cadence
-from custom_components.ha_washdata.suggestion_engine import SuggestionEngine
+from custom_components.ha_washdata.suggestion_engine import (
+    SuggestionEngine,
+    stop_threshold_changes,
+)
 
 POWER = "sensor.washer_power"
 
@@ -105,3 +111,36 @@ async def test_an_import_that_replaces_the_history_still_resets_it(
         "profiles": {"Cotton": {"avg_duration": 3600.0}}, "past_cycles": [],
     }})
     assert len(manager.learning_manager._pending_intervals) == 0  # noqa: SLF001
+
+
+# ── The local copy of a settings change wins over an imported one ────────────
+
+
+async def test_this_device_s_own_backup_unmarks_an_imported_copy(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """The change came back from another device first (marked), then from this
+    device's own backup: the local row is kept, and the advisory reads it."""
+    entry = await setup_washdata_entry()
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    own = {"key": "stop_threshold_w", "old": 2.0, "new": 5.0,
+           "timestamp": "2026-11-01T10:00:00+00:00"}
+    store._data["settings_changelog"] = [  # noqa: SLF001
+        {**own, SETTINGS_CHANGELOG_IMPORTED_KEY: True},
+    ]
+    payload = {
+        "version": 19,
+        "entry_id": entry.entry_id,
+        "device_fingerprint": {"device_type": "washing_machine"},
+        "data": {"settings_changelog": [dict(own)]},
+        "entry_data": {},
+        "entry_options": {},
+    }
+    await store.async_import_data_selective(
+        payload, selection={"categories": ["history_logs"]},
+        local_device_type="washing_machine",
+    )
+    log = store.get_settings_changelog()
+    assert len(log) == 1
+    assert SETTINGS_CHANGELOG_IMPORTED_KEY not in log[0]
+    assert len(stop_threshold_changes(log)) == 1

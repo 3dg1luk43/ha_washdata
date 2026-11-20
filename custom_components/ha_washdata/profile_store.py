@@ -2726,20 +2726,27 @@ def _merge_list_dedup(
     re-importing the same log file is idempotent for id-less list entries.
     ``ignore_keys`` are left out of that signature: marks an import adds (a
     settings change merged back from another device is the local one, review of
-    PR #529); the item already in ``base`` is kept.
+    PR #529). Of two such matching items the unmarked one is kept, whichever
+    arrived first (PR #529 review); otherwise the one already in ``base``.
     """
     def _signature(item: Any) -> str:
         if ignore_keys and isinstance(item, dict):
             item = {k: v for k, v in item.items() if k not in ignore_keys}
         return json.dumps(item, sort_keys=True, default=str)
 
+    def _marked(item: Any) -> bool:
+        return isinstance(item, dict) and any(item.get(k) for k in ignore_keys)
+
     seen_ids = {str(x.get("id")) for x in base if isinstance(x, dict) and x.get("id") is not None}
-    seen_sigs: set[str] = set()
-    for x in base:
+    # Signature -> index in ``base`` of the item kept for it (an unmarked one first).
+    seen_sigs: dict[str, int] = {}
+    for idx, x in enumerate(base):
         try:
-            seen_sigs.add(_signature(x))
+            sig = _signature(x)
         except (TypeError, ValueError, OverflowError):
-            pass
+            continue
+        if sig not in seen_sigs or (_marked(base[seen_sigs[sig]]) and not _marked(x)):
+            seen_sigs[sig] = idx
     for item in incoming:
         if isinstance(item, dict) and item.get("id") is not None:
             key = str(item.get("id"))
@@ -2754,8 +2761,11 @@ def _merge_list_dedup(
             sig = None
         if sig is not None:
             if sig in seen_sigs:
+                kept = seen_sigs[sig]
+                if _marked(base[kept]) and not _marked(item):
+                    base[kept] = item  # this device's own row, back after its copy
                 continue
-            seen_sigs.add(sig)
+            seen_sigs[sig] = len(base)
         base.append(item)
 
 
