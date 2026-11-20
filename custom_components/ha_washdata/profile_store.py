@@ -651,7 +651,10 @@ def _events_after_quiet(offsets: list[float], values: list[float], peak: float) 
     return events
 
 
-def cut_short_mask(runs: list[tuple[list[float], list[float], float, bool, float]]) -> list[bool]:
+def cut_short_mask(
+    runs: list[tuple[list[float], list[float], float, bool, float]],
+    sources: list[Any] | None = None,
+) -> list[bool]:
     """Which of a dishwasher programme's runs were closed inside its quiet phase (#531).
 
     ``runs``: ``(offsets, values, duration_s, pinned, peak)`` per run, as the envelope
@@ -663,11 +666,19 @@ def cut_short_mask(runs: list[tuple[list[float], list[float], float, bool, float
     later than that long after its end, and then show one
     (:func:`_events_after_quiet`): its end came before the programme's. A pinned
     run (golden or a corrected length) never is. Pure; never raises.
+
+    ``sources`` (one hashable per run, :func:`_cut_short_sources`) names the run
+    each one records: runs and votes count once per source, so a stored copy of a
+    run is no independent evidence (PR #529 review). Omitted, every run is its own.
     """
     try:
         n = len(runs)
-        need = max(CUT_SHORT_MIN_RUNS, math.ceil(CUT_SHORT_MIN_SHARE * n))
-        if n <= need:
+        src: list[Any] = (
+            list(sources) if sources is not None and len(sources) == n else list(range(n))
+        )
+        distinct = len(set(src))
+        need = max(CUT_SHORT_MIN_RUNS, math.ceil(CUT_SHORT_MIN_SHARE * distinct))
+        if distinct <= need:
             return [False] * n
         # Terminal only after the run's last main activity: an event the heater
         # restarts after is a pause, not the end (review of PR #529).
@@ -684,15 +695,15 @@ def cut_short_mask(runs: list[tuple[list[float], list[float], float, bool, float
                 continue
             # A sibling's evidence ends where its accepted length does: a trace
             # kept past a corrected end shows what came after the run (PR #529 review).
-            later = sum(
-                1 for j, ev in enumerate(events)
-                if j != i and any(
+            later = len({
+                src[j] for j, ev in enumerate(events)
+                if src[j] != src[i] and any(
                     d_i < t_e <= runs[j][2]
                     and q0 <= d_i + TERMINAL_BLIP_QUIET_MIN_S
                     and t_e - max(q0, d_i) >= TERMINAL_BLIP_QUIET_MIN_S
                     for q0, t_e in ev
                 )
-            )
+            })
             mask.append(later >= need)
         return mask
     except Exception:  # noqa: BLE001 - a statistic must never break an envelope build
@@ -712,6 +723,47 @@ def _positive_duration(value: Any) -> float | None:
     if not math.isfinite(number) or number <= 0:
         return None
     return number
+
+
+def _cut_short_sources(runs: list[tuple[Any, Any]]) -> list[Any]:
+    """The run each ``(cycle, pairs)`` of a #531 vote records (:func:`cut_short_mask`).
+
+    A reference cycle (a store import) copying another run of the vote is that
+    run: its recorded source id (``meta.source`` ``store:<id>``) names the run's
+    id, or its trace content (:func:`trace_content_hash`) is the run's. A
+    reference import dedups against other references, not against the original
+    in the real history, so a copy of a run from this device's own backup was a
+    vote of its own (PR #529 review). Every other run is its own source: two
+    recorded runs are two observations. Stored copies stay; only the count
+    changes. Never raises; hashes only when the vote holds a store import.
+    """
+    own: list[Any] = [("run", k) for k in range(len(runs))]
+    try:
+        imports = {k for k, (cycle, _pairs) in enumerate(runs) if _is_store_import(cycle)}
+        if not imports:
+            return own
+        hashes = [trace_content_hash(pairs) for _cycle, pairs in runs]
+        by_hash: dict[str, Any] = {}
+        by_id: dict[str, Any] = {}
+        # The runs that are not imports first, so a copy finds the original.
+        for k in sorted(range(len(runs)), key=lambda i: i in imports):
+            cycle = runs[k][0]
+            if k in imports:
+                meta = cycle.get("meta")
+                origin = str(meta.get("source") or "") if isinstance(meta, dict) else ""
+                while origin.startswith("store:"):
+                    origin = origin[len("store:"):]
+                if origin and origin != "store" and origin in by_id:
+                    own[k] = by_id[origin]
+                elif hashes[k] and hashes[k] in by_hash:
+                    own[k] = by_hash[hashes[k]]
+            if hashes[k]:
+                by_hash.setdefault(hashes[k], own[k])
+            if cycle.get("id") is not None:
+                by_id.setdefault(str(cycle.get("id")), own[k])
+        return own
+    except Exception:  # noqa: BLE001 - a statistic must never break an envelope build
+        return [("run", k) for k in range(len(runs))]
 
 
 def filter_duration_outliers(durations: list[float]) -> list[float]:
@@ -7886,11 +7938,17 @@ class ProfileStore:
                 ]
                 return [t for t, _ in pairs], [v for _, v in pairs]
 
-            sub = cut_short_mask([
-                (*_observed(k), parsed[k][2],
-                 bool(parsed[k][3] or _corrected(decoded[k][0], parsed[k][0])), parsed[k][4])
-                for k in voters
-            ])
+            sub = cut_short_mask(
+                [
+                    (*_observed(k), parsed[k][2],
+                     bool(parsed[k][3] or _corrected(decoded[k][0], parsed[k][0])),
+                     parsed[k][4])
+                    for k in voters
+                ],
+                # A stored copy of a run (a reference imported from this
+                # device's own backup) votes as that run (PR #529 review).
+                _cut_short_sources([decoded[k] for k in voters]),
+            )
             for k, cut in zip(voters, sub, strict=True):
                 cut_short[k] = cut
 

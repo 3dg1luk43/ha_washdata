@@ -17,13 +17,18 @@
   was discarded, the deletion saved, and nothing rebuilds after a band change,
   so the envelope kept the deleted cycle. The build runs again under the
   current settings while the call still owns it.
+* #531: a reference copy of a dishwasher run (imported from this device's own
+  backup) was a vote of its own, so two runs and a copy excluded a shorter run
+  without three independent runs. A copy votes as the run it copies now.
 """
 from __future__ import annotations
 
 import asyncio
+import copy
 import json
 import logging
 from contextlib import asynccontextmanager
+from datetime import timedelta
 from typing import Any, AsyncIterator
 from unittest.mock import patch
 
@@ -38,6 +43,7 @@ from custom_components.ha_washdata.const import (
 )
 from custom_components.ha_washdata.profile_store import StoreRetiredError
 
+from .test_issue_531_dishwasher_drying_cutoff import T0, _eco
 from .test_pr529_review_r40a import (
     STEP,
     _query,
@@ -391,3 +397,61 @@ async def test_a_build_the_call_no_longer_owns_is_not_run_again(
     with patch.object(store, "_rebuild_envelope_sync", side_effect=worker):
         assert await store.async_rebuild_envelope("Cotton") is False
     assert calls["n"] == 1
+
+
+# ── #531: a stored copy of a run is no vote of its own ───────────────────────
+
+
+async def _dishwasher(hass: HomeAssistant, setup_washdata_entry: Any, full: int) -> Any:
+    """``full`` complete ECO runs and one closed inside the drying."""
+    entry = await setup_washdata_entry(device_type="dishwasher", options={"stop_threshold_w": 4.5})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    await hass.async_block_till_done()
+    runs = [_eco(hold_s=30)] * full + [_eco(cut_s=131 * 60)]
+    store._data["profiles"] = {"ECO": {}}  # noqa: SLF001
+    store._data["envelopes"] = {}  # noqa: SLF001
+    store._data["past_cycles"] = [  # noqa: SLF001
+        {"id": f"c{i}", "profile_name": "ECO", "status": "completed",
+         "termination_reason": "smart", "start_time": (T0 + timedelta(days=i)).isoformat(),
+         "duration": pts[-1][0], "power_data": [[t, p] for t, p in pts]}
+        for i, pts in enumerate(runs)
+    ]
+    assert await store.async_rebuild_envelope("ECO")
+    return store
+
+
+async def _copy_of_c0(store: Any, link: str) -> None:
+    """A reference copy of run c0: through the selective import of this
+    device's own export (it records c0's id), or with no recorded id."""
+    c0 = copy.deepcopy(store._data["past_cycles"][0])  # noqa: SLF001
+    if link == "source_id":
+        summary = await store.async_import_data_selective(
+            {"version": 19, "data": {"profiles": {"ECO": {}}, "past_cycles": [c0]}},
+            selection={"categories": ["real_cycles"]},
+            cycle_destination="reference", local_device_type="dishwasher",
+        )
+        assert summary["reference_cycles_imported"] == 1
+        assert store._data["reference_cycles"][0]["meta"]["source"] == "store:c0"  # noqa: SLF001
+    else:
+        assert store._add_reference_cycle_nosave("ECO", c0["power_data"], {})  # noqa: SLF001
+        assert await store.async_rebuild_envelope("ECO")
+
+
+@pytest.mark.parametrize("link", ["source_id", "content"])
+async def test_two_runs_and_a_copy_exclude_no_run(
+    hass: HomeAssistant, setup_washdata_entry: Any, link: str
+) -> None:
+    store = await _dishwasher(hass, setup_washdata_entry, full=2)
+    assert store.get_envelope("ECO")["shape_cycle_count"] == 3
+    await _copy_of_c0(store, link)
+    assert store.get_envelope("ECO")["shape_cycle_count"] == 4
+
+
+@pytest.mark.parametrize("link", ["source_id", "content"])
+async def test_three_runs_still_exclude_the_cut_one(
+    hass: HomeAssistant, setup_washdata_entry: Any, link: str
+) -> None:
+    store = await _dishwasher(hass, setup_washdata_entry, full=3)
+    assert store.get_envelope("ECO")["shape_cycle_count"] == 3
+    await _copy_of_c0(store, link)
+    assert store.get_envelope("ECO")["shape_cycle_count"] == 4
