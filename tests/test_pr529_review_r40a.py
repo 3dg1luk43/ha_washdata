@@ -13,6 +13,11 @@
   in the pause; when the switch call then failed, the rollback undid the pause
   but left no timer, so the open door never ended the cycle. The rollback now
   judges the open door again (a fresh dwell); a successful pause still cancels.
+* The startup suggestion refresh ran every pass under one try: an operational
+  scan that raised ended it before the #527 Start Threshold correction, and the
+  refresh does not run again on an unchanged store, so a device that cannot
+  start a cycle never got it. Each pass runs on its own now; the manual
+  analysis still stops at a failed pass and reports it.
 """
 from __future__ import annotations
 
@@ -29,10 +34,12 @@ from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
 from custom_components.ha_washdata import cycle_detector as cd_mod
 from custom_components.ha_washdata.const import (
+    CONF_OFF_DELAY,
     DOMAIN,
     PROGRAM_MISMATCH_PERSISTENCE,
     TerminationReason,
 )
+from custom_components.ha_washdata.suggestion_engine import SuggestionEngine
 
 from .test_audit_detection_514_halt_followups import _det, _feed, _halt, _match, _wash
 from .test_issue_524_door_ends_cycle import DOOR, OPTS, _paused_washer, _tick
@@ -219,3 +226,65 @@ async def test_a_successful_pause_still_cancels_the_dwell(
     assert manager._remove_door_end_dwell is None  # noqa: SLF001
     await _tick(hass, freezer, 120, None)
     assert ends == []
+
+
+# ── The startup refresh: a failed pass does not end it ───────────────────────
+
+PASSES = [
+    "generate_operational_suggestions",
+    "generate_standby_floor_suggestions",
+    "generate_start_threshold_suggestions",
+    "generate_model_suggestions",
+    "generate_detection_suggestions",
+    "run_batch_simulation",
+]
+
+
+@pytest.mark.parametrize("failing", PASSES[:-1])
+async def test_a_failed_pass_does_not_end_the_refresh(
+    hass: HomeAssistant, setup_washdata_entry: Any, failing: str
+) -> None:
+    """The operational scan (or any other pass) raises: every later pass still
+    runs, the Start Threshold correction included, and the refresh never raises."""
+    entry = await setup_washdata_entry(options={CONF_OFF_DELAY: 120})
+    await hass.async_block_till_done()
+    lm = hass.data[DOMAIN][entry.entry_id].learning_manager
+    ran: list[str] = []
+
+    def spy(name: str) -> Any:
+        real = getattr(SuggestionEngine, name)
+
+        def run(self: Any, *args: Any, **kwargs: Any) -> Any:
+            ran.append(name)
+            if name == failing:
+                raise RuntimeError("scan broke")
+            return real(self, *args, **kwargs)
+
+        return run
+
+    with (
+        patch.object(lm, "cadence", return_value=(60.0, 30.0)),
+        patch.multiple(SuggestionEngine, **{n: spy(n) for n in PASSES}),
+    ):
+        await lm.async_refresh_suggestions()
+    assert ran == PASSES
+
+
+async def test_the_manual_analysis_still_stops_at_a_failed_pass(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    entry = await setup_washdata_entry(options={CONF_OFF_DELAY: 120})
+    await hass.async_block_till_done()
+    lm = hass.data[DOMAIN][entry.entry_id].learning_manager
+    start = AsyncMock()
+    with (
+        patch.object(lm, "cadence", return_value=(60.0, 30.0)),
+        patch.object(
+            SuggestionEngine, "generate_operational_suggestions",
+            side_effect=RuntimeError("scan broke"),
+        ),
+        patch.object(SuggestionEngine, "generate_start_threshold_suggestions", new=start),
+        pytest.raises(RuntimeError, match="scan broke"),
+    ):
+        await lm._async_run_all_passes(raise_errors=True)  # noqa: SLF001
+    start.assert_not_called()

@@ -25,7 +25,7 @@ import math
 import logging
 from collections import deque
 from datetime import datetime
-from collections.abc import Callable, Coroutine
+from collections.abc import Awaitable, Callable, Coroutine
 from typing import Any, Optional, TYPE_CHECKING
 
 import numpy as np
@@ -1343,12 +1343,17 @@ class LearningManager:
         """Every suggestion pass, in cycle-end order, each with its owner.
 
         Stops as soon as a refresh (or a history wipe) supersedes the options it
-        started on: every later pass would be discarded (PR #529 review). A pass
-        that raises ends the run; ``raise_errors`` hands that to the caller (the
-        manual analysis), otherwise it is logged.
+        started on: every later pass would be discarded (PR #529 review). Each
+        pass runs on its own: one that raises is logged and the rest still run
+        (PR #529 review: an operational scan that raised at startup ended the
+        refresh before the #527 Start Threshold correction, and a device that
+        cannot start a cycle never reaches the cycle end that runs it again).
+        ``raise_errors`` (the manual analysis) instead ends the run and hands
+        the error to the caller.
         """
         gen = self._config_generation
-        try:
+
+        async def _operational() -> None:
             cad = self.cadence()
             if cad is not None:
                 p95, median = cad
@@ -1360,27 +1365,40 @@ class LearningManager:
                 # A power sensor with no cadence yet: entries measured on the old
                 # one go rather than wait for a pass that will not run (PR #529 review).
                 self._withdraw_operational()
-            for owner, generate in (
-                (OWNER_STANDBY_FLOOR, self.suggestion_engine.for_job().generate_standby_floor_suggestions),
-                (OWNER_START_THRESHOLD, self.suggestion_engine.for_job().generate_start_threshold_suggestions),
-                (OWNER_MODEL, self.suggestion_engine.for_job().generate_model_suggestions),
-            ):
-                if gen != self._config_generation:
-                    return
-                await self._run_pass(generate, owner, gen, strict=raise_errors)
-            if gen != self._config_generation:
-                return
+
+        async def _owned(owner: str, method: str) -> None:
+            generate = getattr(self.suggestion_engine.for_job(), method)
+            await self._run_pass(generate, owner, gen, strict=raise_errors)
+
+        async def _detection() -> None:
             await self._async_run_detection_suggestions(gen, raise_errors=raise_errors)
-            if gen != self._config_generation:
-                return
+
+        async def _batch() -> None:
             await self._run_pass(
                 self.suggestion_engine.for_job().run_batch_simulation,
                 OWNER_BATCH, gen, self._batch_cycles(), strict=raise_errors,
             )
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            self._logger.error("Suggestion analysis failed: %s", e)
-            if raise_errors:
-                raise
+
+        passes: tuple[tuple[str, Callable[[], Awaitable[None]]], ...] = (
+            (OWNER_OPERATIONAL, _operational),
+            (OWNER_STANDBY_FLOOR, functools.partial(
+                _owned, OWNER_STANDBY_FLOOR, "generate_standby_floor_suggestions")),
+            (OWNER_START_THRESHOLD, functools.partial(
+                _owned, OWNER_START_THRESHOLD, "generate_start_threshold_suggestions")),
+            (OWNER_MODEL, functools.partial(_owned, OWNER_MODEL, "generate_model_suggestions")),
+            (OWNER_DETECTION, _detection),
+            (OWNER_BATCH, _batch),
+        )
+        for name, run in passes:
+            if gen != self._config_generation:
+                return
+            try:
+                await run()
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                if raise_errors:
+                    self._logger.error("Suggestion analysis failed: %s", e)
+                    raise
+                self._logger.error("Suggestion pass %s failed: %s", name, e)
 
     def _maybe_request_feedback(
         self,
