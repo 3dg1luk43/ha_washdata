@@ -4995,7 +4995,10 @@ async def ws_import_config_selective(
                             entry, options={**entry.options, **filtered}
                         )
                         await _record_option_changes(
-                            hass, entry, filtered, "store_device_package", before=before
+                            hass, entry, filtered, "store_device_package", before=before,
+                            # Replaced cycles ran under the imported Stop (as the
+                            # wholesale import, review of PR #529).
+                            restores_cycles=bool(summary.get("replaced_past_cycles")),
                         )
                     settings_applied = len(filtered)
             summary = {**summary, "settings_applied": settings_applied}

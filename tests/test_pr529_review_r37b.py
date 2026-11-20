@@ -239,3 +239,46 @@ async def test_apply_does_not_refresh_a_retired_manager(
         res = await _apply(hass, client, entry.entry_id, [CONF_OFF_DELAY])
     assert res["result"] == {"success": True, "applied": [CONF_OFF_DELAY]}
     assert notify.call_count == 1
+
+
+async def test_a_selective_replace_of_the_real_history_keeps_their_stop(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """The selective import's replace of the real history has the same rule as the
+    wholesale one: its cycles ran under the imported Stop, so the Stop row it
+    writes must not point them at this device's old 3 W."""
+    import json  # noqa: PLC0415
+
+    opts = {CONF_MIN_POWER: 0.5, CONF_START_THRESHOLD_W: 10.0, CONF_STOP_THRESHOLD_W: 3.0}
+    imported = {
+        "id": "imp1", "profile_name": "Eco", "status": "completed", "duration": 3600.0,
+        "start_time": (dt_util.now() - timedelta(days=1, hours=1)).isoformat(),
+        "end_time": (dt_util.now() - timedelta(days=1)).isoformat(),
+        "termination_reason": "timeout",
+        "power_data": [[0.0, 500.0], [1800.0, 2000.0], [3600.0, 0.0]],
+    }
+    entry = await setup_washdata_entry("Selective", options=opts)
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    payload = {
+        "version": 19, "entry_id": "another",
+        "device_fingerprint": {"device_type": "washing_machine"},
+        "data": {"profiles": {"Eco": {"avg_duration": 3600.0}}, "past_cycles": [imported]},
+        "entry_options": {CONF_STOP_THRESHOLD_W: 1.0},
+    }
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({
+        "type": f"{DOMAIN}/import_config_selective", "entry_id": entry.entry_id,
+        "json_data": json.dumps(payload),
+        "selection": {"categories": ["profiles", "real_cycles", "settings"]},
+        "mode": "replace", "cycle_destination": "real_history", "apply_settings": True,
+    })
+    res = await client.receive_json()
+    assert res["success"], res
+    await hass.async_block_till_done()
+    stored = store.get_past_cycles()
+    assert len(stored) == 1  # the import gives the cycle its own id
+    assert entry.options[CONF_STOP_THRESHOLD_W] == 1.0
+    log = store.get_settings_changelog()
+    row = next(r for r in log if r["key"] == CONF_STOP_THRESHOLD_W)
+    assert row["old"] == 3.0 and row["new"] == 1.0
+    assert _stop_at_end(stored[0], stop_threshold_changes(log), 1.0) == 1.0

@@ -13114,6 +13114,7 @@ class ProfileStore:
         # routed to the default reference destination wipes reference_cycles too -- not just
         # when the reference_cycles category itself is ticked. The empty-payload guard above
         # already refused to run if the file had nothing to replace it with.
+        wipe_past = False
         if mode == "replace":
             wipe_reference = "reference_cycles" in cats or (
                 "real_cycles" in cats and cycle_destination == "reference"
@@ -13527,6 +13528,9 @@ class ProfileStore:
             "device_type_match": device_type_match,
             "settings": settings_out,
             "restore_point_saved": restore_point_saved,
+            # The real history was replaced: its cycles ran under the imported
+            # settings, not this device's (the settings-history Stop rows).
+            "replaced_past_cycles": wipe_past,
         }
 
     async def delete_cycle(self, cycle_id: str) -> bool:
