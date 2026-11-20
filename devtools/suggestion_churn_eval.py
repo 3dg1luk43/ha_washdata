@@ -17,8 +17,9 @@ cycle end at a time.
 * every cycle that ended on its own commits its update intervals (``0.1 < dt < 1800``
   s from each real reading to the real reading before it, keepalives skipped, as
   the live clock runs: ``suggestion_loop_eval.stored_cycle_intervals``;
-  the newest ``learning._CYCLE_MAX_INTERVALS``), as ``LearningManager.close_cycle_cadence`` does; then the operational pass runs on the
-  cadence model (``suggestion_loop_eval.cadence``: one ``learning.cycle_cadence``
+  the newest ``learning._CYCLE_MAX_INTERVALS``), as ``LearningManager.close_cycle_cadence`` does; then, when it
+  committed at least one (or its trace was pruned from the export: live it had
+  them), the operational pass runs on the cadence model (``suggestion_loop_eval.cadence``: one ``learning.cycle_cadence``
   summary per cycle, the median over the last ``CADENCE_RECENT_CYCLES``);
 * at every stored cycle end, whatever its status, the threshold correctives run
   (``LearningManager.run_threshold_correctives``: the standby floor, then the
@@ -230,8 +231,15 @@ def walk(corpus: str, path: str, arm: str) -> dict[str, Any] | None:
             cad = None
             if learning._ended_on_its_own(cycle):  # noqa: SLF001
                 # The newest _CYCLE_MAX_INTERVALS, as LearningManager._pending_intervals keeps.
-                per_cycle.append(_intervals(cycle)[-learning._CYCLE_MAX_INTERVALS:])  # noqa: SLF001
-                cad = cadence_of(per_cycle)
+                intervals = _intervals(cycle)[-learning._CYCLE_MAX_INTERVALS:]  # noqa: SLF001
+                per_cycle.append(intervals)
+                # close_cycle_cadence schedules the operational pass only when the
+                # cycle held intervals (PR #529 review): a trace that shows none had
+                # none live, so the older cadence is not run again. A cycle stored
+                # without its trace (pruned before 0.5.8) had them; they are only
+                # missing from the export, so its pass still runs.
+                if intervals or not suggestion_engine._cycle_readings(cycle):  # noqa: SLF001
+                    cad = cadence_of(per_cycle)
             if _labelled_own(cycle):
                 labelled += 1
             run_batch = labelled >= BATCH_MIN and labelled - last_batch >= BATCH_RERUN_DELTA

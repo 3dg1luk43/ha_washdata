@@ -253,3 +253,30 @@ def test_apply_all_carries_every_key_it_writes(tmp_path: Path, monkeypatch) -> N
     for i, updates in enumerate(written[:-1]):
         for key, value in updates.items():
             assert built[i + 1][key] == value
+
+
+def test_a_cycle_with_no_intervals_runs_no_operational_pass(tmp_path: Path, monkeypatch) -> None:
+    """PR #529 review: a cycle that ended on its own but committed no interval (its
+    readings 2000 s apart, past the 1800 s bound) re-ran the operational pass on the
+    older cadence; ``close_cycle_cadence`` schedules no pass with nothing pending.
+    A cycle whose trace was pruned from the export (the sixth here) had intervals
+    live, so its pass still runs."""
+    doc = _export()
+    past = doc["data"]["past_cycles"]
+    past[3]["power_data"] = [[0.0, 500.0], [2000.0, 500.0], [4000.0, 0.0]]
+    past[3]["duration"] = 4000.0
+    del past[5]["power_data"]
+    (tmp_path / "synth").mkdir()
+    (tmp_path / "synth" / "export.json").write_text(json.dumps(doc))
+    assert churn._intervals(past[3]) == []  # noqa: SLF001
+    seen: list[int] = []
+    real = suggestion_engine.SuggestionEngine.generate_operational_suggestions
+
+    def spy(self, *a, **k):
+        seen.append(len(self.profile_store.get_past_cycles()))
+        return real(self, *a, **k)
+
+    monkeypatch.setattr(suggestion_engine.SuggestionEngine, "generate_operational_suggestions", spy)
+    (row,) = churn.run(tmp_path, ("shipped",), None, jobs=1)
+    assert seen == [1, 2, 3, 5, 6, 7, 8]
+    assert row["cycle_ends"] == 7
