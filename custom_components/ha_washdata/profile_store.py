@@ -1307,9 +1307,19 @@ def compress_power_data(cycle: CycleDict) -> list[Any] | None:
 class StoreRetiredError(RuntimeError):
     """A write the caller reports as done reached a store its entry unloaded.
 
-    Raised by ``ProfileStore.async_save(required=True)`` (an import, an undo):
-    the write is skipped, as every write of a retired store, and the caller must
-    not report success. Background work stays silent (PR #529 review)."""
+    Raised by ``ProfileStore.async_save(required=True)`` (an import, an undo)
+    and by the restore-point write: the write is skipped, as every write of a
+    retired store, and the caller must not report success. Background work
+    stays silent (PR #529 review)."""
+
+    def __init__(
+        self,
+        message: str = (
+            "The appliance was reloaded during this operation, so nothing was "
+            "saved. Run it again."
+        ),
+    ) -> None:
+        super().__init__(message)
 
 
 class WashDataStore(Store[JSONDict]):
@@ -6973,10 +6983,7 @@ class ProfileStore:
         stays silent (PR #529 review).
         """
         if required and self.retired:
-            raise StoreRetiredError(
-                "The appliance was reloaded during this operation, so nothing was "
-                "saved. Run it again."
-            )
+            raise StoreRetiredError
         if time.monotonic() < getattr(self, "_coalesce_until", 0.0):
             self._delayed_save_pending = True
             self._store.async_delay_save(self._data_for_delayed_write, _BURST_SAVE_DELAY_S)
@@ -12939,7 +12946,14 @@ class ProfileStore:
 
         ``entry_options`` is this device's options at that moment, put back by the
         undo; ``None`` (a caller without an entry) leaves the options alone on undo.
+
+        Raises :class:`StoreRetiredError` once the entry has unloaded: an import
+        resumed after a reload is no longer current, and the slot may hold the
+        restore point a newer import on the replacement saved (PR #529 review).
+        Checked with no await before the write below.
         """
+        if self.retired:
+            raise StoreRetiredError
         # A save during shutdown is deferred to HA's final write, which would
         # serialise the store as it is AFTER the import mutated it.
         if getattr(self.hass, "state", None) is CoreState.stopping:
@@ -13001,9 +13015,14 @@ class ProfileStore:
         return dict(self._pre_import_meta) if self._pre_import_meta else None
 
     async def async_discard_pre_import_snapshot(self) -> None:
-        """Delete the restore point (never raises)."""
+        """Delete the restore point (never raises).
+
+        Not once the entry has unloaded: the file is the replacement's, and may
+        hold a newer import's restore point (PR #529 review)."""
         self._pre_import_meta = None
         self._pre_import_meta_loaded = True
+        if self.retired:
+            return
         try:
             await self._pre_import_store.async_remove()
         except Exception as err:  # noqa: BLE001

@@ -5,6 +5,8 @@
 * An import or an Undo Import the unload retired the store under (its final
   save skipped, debounced or not) reported success; Undo also deleted its
   restore point. The save they report raises now, before either.
+* An import resumed after a reload wrote its restore point over the one a newer
+  import on the replacement had saved, and Undo restored the older data.
 """
 from __future__ import annotations
 
@@ -172,3 +174,35 @@ async def test_an_undo_the_unload_retired_the_store_under_keeps_its_restore_poin
     new = hass.data[DOMAIN][entry.entry_id].profile_store
     snap = await new.async_get_pre_import_snapshot()
     assert snap is not None and snap["counts"]["real_cycles"] == 3
+
+
+# ── An import resumed after a reload keeps the newer restore point ───────────
+
+
+async def test_an_import_resumed_after_a_reload_keeps_the_newer_restore_point(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_storage: dict[str, Any]
+) -> None:
+    """Import A captured the store, the entry reloaded, import B on the
+    replacement saved its restore point; A then wrote its own over it. Now A is
+    refused before its write, and a retired store's discard leaves the slot."""
+    entry, old = await _seeded(hass, setup_washdata_entry)
+    assert await hass.config_entries.async_reload(entry.entry_id)
+    await hass.async_block_till_done()
+    new = hass.data[DOMAIN][entry.entry_id].profile_store
+    await new.async_import_data(
+        {"version": 19, "data": {"profiles": {"Eco": {}}, "past_cycles": [_cycle("x1", "Eco")]}},
+        source="newer",
+    )
+    point = f"{STORAGE_KEY}.{entry.entry_id}.{PRE_IMPORT_STORE_SUFFIX}"
+    assert hass_storage[point]["data"]["source"] == "newer"
+
+    with pytest.raises(StoreRetiredError):
+        await old.async_import_data(
+            {"version": 19, "data": {"profiles": {"Old": {}}, "past_cycles": [_cycle("y1", "Old")]}},
+            source="older",
+        )
+    assert hass_storage[point]["data"]["source"] == "newer"
+    await old.async_discard_pre_import_snapshot()
+    assert hass_storage[point]["data"]["source"] == "newer"
+    assert (await new.async_restore_pre_import_snapshot())["counts"]["real_cycles"] == 3
+    assert set(new.get_profiles()) == {"Cotton"}
