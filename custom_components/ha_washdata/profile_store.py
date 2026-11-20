@@ -3071,16 +3071,21 @@ class ProfileStore:
         self.hass = hass
         self.entry_id = entry_id
         self._logger = DeviceLoggerAdapter(_LOGGER, device_name)
+        # Bumped by every change of a setting ``match_settings`` reports (each one
+        # set through its property or ``set_duration_ratio_limits``): a caller
+        # holding a ranking across a match can tell a setting changed and changed
+        # back meanwhile, which a comparison of the values cannot (PR #529 review).
+        self._match_settings_revision: int = 0
         self._min_duration_ratio = min_duration_ratio
         self._max_duration_ratio = max_duration_ratio
-        self.dtw_bandwidth: float = DEFAULT_DTW_BANDWIDTH
+        self._dtw_bandwidth: float = DEFAULT_DTW_BANDWIDTH
         # Stage-4 energy-agreement mode ("mean"|"integrated"); the manager sets it
         # from the device type via analysis.stage4_energy_mode. Default "mean"
         # keeps behaviour byte-identical until wired.
-        self.energy_mode: str = "mean"
+        self._energy_mode: str = "mean"
         # The device type, pushed in by the manager like energy_mode. Scopes the
         # nearest-member templates (MATCH_MEMBER_DEVICE_TYPES, #486); None = off.
-        self.device_type: str | None = None
+        self._device_type: str | None = None
         # The detector's stop threshold, pushed in by the manager like device_type.
         # Where an imported dishwasher cycle's last activity sits is judged at it
         # (`_cut_backfill_tails_nosave`, #518); None = the store cannot judge, so
@@ -3719,6 +3724,49 @@ class ProfileStore:
             *self.get_backfill_cycles(),
         ]
 
+    def _set_match_setting(self, attr: str, value: Any) -> None:
+        """Store one of the matcher's scoring settings (``match_settings``) in
+        ``attr``, bumping ``match_settings_revision`` when its value changes."""
+        if getattr(self, attr, _MISSING) != value:
+            self._match_settings_revision = getattr(self, "_match_settings_revision", 0) + 1
+        setattr(self, attr, value)
+
+    @property
+    def match_settings_revision(self) -> int:
+        """Bumped by every change of a ``match_settings`` value. Comparing it
+        across a match tells a setting changed meanwhile even when it was changed
+        back before the end: the matcher reads its settings after its trace
+        preparation, so the ranking can be the intermediate settings' (the #530
+        check, PR #529 review)."""
+        return int(getattr(self, "_match_settings_revision", 0))
+
+    @property
+    def dtw_bandwidth(self) -> float:
+        """The Stage-3 Sakoe-Chiba band, pushed in by the manager."""
+        return self._dtw_bandwidth
+
+    @dtw_bandwidth.setter
+    def dtw_bandwidth(self, value: float) -> None:
+        self._set_match_setting("_dtw_bandwidth", value)
+
+    @property
+    def energy_mode(self) -> str:
+        """The Stage-4 energy-agreement mode (``analysis.stage4_energy_mode``)."""
+        return self._energy_mode
+
+    @energy_mode.setter
+    def energy_mode(self, value: str) -> None:
+        self._set_match_setting("_energy_mode", value)
+
+    @property
+    def device_type(self) -> str | None:
+        """The entry's device type, pushed in by the manager."""
+        return self._device_type
+
+    @device_type.setter
+    def device_type(self, value: str | None) -> None:
+        self._set_match_setting("_device_type", value)
+
     @property
     def evidence_sources(self) -> tuple[str, ...]:
         """Categories currently allowed to shape a profile."""
@@ -3743,7 +3791,7 @@ class ProfileStore:
                     "falling back to all", value,
                 )
             wanted = tuple(PROFILE_EVIDENCE_SOURCES)
-        self._evidence_sources = wanted
+        self._set_match_setting("_evidence_sources", wanted)
 
     @property
     def save_debug_traces(self) -> bool:
@@ -6512,10 +6560,11 @@ class ProfileStore:
     def set_duration_ratio_limits(self, *, min_ratio: float, max_ratio: float) -> None:
         """Update duration ratio bounds used for duration matching."""
         try:
-            self._min_duration_ratio = float(min_ratio)
-            self._max_duration_ratio = float(max_ratio)
+            low, high = float(min_ratio), float(max_ratio)
         except (TypeError, ValueError, OverflowError):
-            pass
+            return
+        self._set_match_setting("_min_duration_ratio", low)
+        self._set_match_setting("_max_duration_ratio", high)
 
     def _migrate_phase_ids(self) -> bool:
         """Assign ids to any custom phase missing one. Returns True if anything changed."""

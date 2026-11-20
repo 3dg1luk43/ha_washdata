@@ -1965,8 +1965,12 @@ class WashDataManager:
             generation = getattr(self.profile_store, "_data_generation", 0)
             # The scoring settings (Stage-1 ratios, DTW band, evidence sources), as
             # the device type below: changed by an options reload while the match
-            # ran, the ranking is the old settings' (PR #529 review).
+            # ran, the ranking is the old settings' (PR #529 review). With their
+            # revision: the matcher reads them after its trace preparation, so a
+            # change undone before the match lands scored it under settings the
+            # values no longer show (PR #529 review).
             settings = self.profile_store.match_settings()
+            settings_revision = getattr(self.profile_store, "match_settings_revision", 0)
             result = await self.profile_store.async_match_profile(
                 readings,
                 duration,
@@ -1988,10 +1992,15 @@ class WashDataManager:
                 state.streak = 0
                 state.device_type = self.device_type
                 return
-            if self.profile_store.match_settings() != settings:
+            if (
+                self.profile_store.match_settings() != settings
+                or getattr(self.profile_store, "match_settings_revision", 0) != settings_revision
+            ):
                 # Scored under settings since replaced (a Stage-1 ratio that now
-                # rejects the pick): discarded, the streak restarted. A fired
-                # mark stays, as for the device type.
+                # rejects the pick), or changed and changed back meanwhile:
+                # discarded, the streak restarted. A fired mark stays, as for the
+                # device type. Between two checks the values decide (below): the
+                # ranking of a check that lands here unchanged is its call's.
                 state.streak = 0
                 state.match_settings = self.profile_store.match_settings()
                 return
