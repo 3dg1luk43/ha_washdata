@@ -1126,6 +1126,7 @@
     "end_gate_check_failed": "Predložene postavke vremena nije bilo moguće provjeriti u odnosu na pauze ovog uređaja. Ništa nije spremljeno; pokušajte ponovno.",
     "analysis_superseded": "Postavke ili podaci o ciklusima promijenili su se tijekom analize. Pokrenite je ponovno.",
     "analysis_check_failed": "Predložene postavke vremena nije bilo moguće provjeriti u odnosu na pauze ovog uređaja. Pokrenite je ponovno.",
+    "apply_cycles_changed": "Ciklus je spremljen dok su se prijedlozi primjenjivali. Nijedna postavka nije promijenjena, a prijedlozi su obrisani. Ponovno pokrenite analizu prijedloga.",
     "bp_admin_only": "Predloške instalira administrator.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Stvorio WashData za {device}. Dodajte svoje radnje (obavijest, svjetla, ...).",

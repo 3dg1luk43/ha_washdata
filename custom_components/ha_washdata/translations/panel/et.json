@@ -1109,6 +1109,7 @@
     "end_gate_check_failed": "Soovitatud ajastussätteid ei õnnestunud selle seadme pauside suhtes kontrollida. Midagi ei salvestatud; proovige uuesti.",
     "analysis_superseded": "Seaded või tsüklite andmed muutusid analüüsi ajal. Käivitage see uuesti.",
     "analysis_check_failed": "Soovitatud ajastussätteid ei õnnestunud selle seadme pauside suhtes kontrollida. Käivitage see uuesti.",
+    "apply_cycles_changed": "Soovituste rakendamise ajal salvestati tsükkel. Ühtegi sätet ei muudetud ja soovitused tühjendati. Käivitage soovituste analüüs uuesti.",
     "bp_admin_only": "Malle installib administraator.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Loodud WashData poolt {device} jaoks. Lisa oma toimingud (teavitus, tuled, ...).",

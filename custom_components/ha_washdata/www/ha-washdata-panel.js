@@ -3346,6 +3346,11 @@ class HaWashdataPanel extends HTMLElement {
         // suggestions, so this does not say nothing was saved.
         e.message = this._tText('msg.analysis_check_failed', {},
           'The suggested timing settings could not be checked against this appliance\'s pauses. Run it again.');
+      } else if (e && e.code === 'cycles_changed') {
+        // Apply refused after it had cleared the suggestions (PR #529 review): the
+        // next Apply finds none, so the user has to analyse again.
+        e.message = this._tText('msg.apply_cycles_changed', {},
+          'A cycle was saved while the suggestions were being applied. No setting was changed and the suggestions were cleared. Run the suggestion analysis again.');
       }
       throw e;
     }
@@ -15018,7 +15023,12 @@ class HaWashdataPanel extends HTMLElement {
         this._prevOpts = null;
         this._cascadePending = {};
         this._preCascadeOpts = null;
-      } catch (e) { this._showToast(this._tText('toast.apply_failed', {error: e.message || e}, 'Apply failed: ' + (e.message || e)), 'error'); }
+      } catch (e) {
+        this._showToast(this._tText('toast.apply_failed', {error: e.message || e}, 'Apply failed: ' + (e.message || e)), 'error');
+        // A refusal can come after the suggestions were cleared (cycles_changed):
+        // show the list as it stands, not the one a second Apply finds empty.
+        await this._fetchSuggestions(eid);
+      }
     });
   }
 

@@ -1057,6 +1057,7 @@
     "end_gate_check_failed": "No se pudieron comprobar los ajustes de tiempo sugeridos con las pausas de este electrodoméstico. No se ha guardado nada; vuelva a intentarlo.",
     "analysis_superseded": "Los ajustes o los datos de los ciclos cambiaron durante el análisis. Vuelva a ejecutarlo.",
     "analysis_check_failed": "No se pudieron comprobar los ajustes de tiempo sugeridos con las pausas de este electrodoméstico. Vuelva a ejecutarlo.",
+    "apply_cycles_changed": "Se guardó un ciclo mientras se aplicaban las sugerencias. No se cambió ningún ajuste y las sugerencias se borraron. Vuelva a ejecutar el análisis de sugerencias.",
     "hist_truncated": "se detuvo en el límite de {n} lecturas, así que el resto del historial no se analizó",
     "hist_warn_kw": "La lectura más alta es solo {w}. Parece que este sensor informa en kilovatios; WashData necesita vatios, así que no se puede detectar ningún ciclo.",
     "hist_warn_naive_time": "{n} marcas de tiempo no tienen zona horaria y se leyeron como UTC. Si el archivo usa hora local, los ciclos quedan desplazados según su diferencia con UTC y pueden perderse lecturas cerca de un cambio de horario de verano.",

@@ -1106,6 +1106,7 @@
     "end_gate_check_failed": "De foreslåede tidsindstillinger kunne ikke kontrolleres op mod dette apparats pauser. Intet blev gemt; prøv igen.",
     "analysis_superseded": "Indstillingerne eller cyklusdataene blev ændret under analysen. Kør den igen.",
     "analysis_check_failed": "De foreslåede tidsindstillinger kunne ikke kontrolleres op mod dette apparats pauser. Kør den igen.",
+    "apply_cycles_changed": "En cyklus blev gemt, mens forslagene blev anvendt. Ingen indstilling blev ændret, og forslagene blev ryddet. Kør forslagsanalysen igen.",
     "import_undo_hint": "Et gendannelsespunkt fra før den seneste import ({when}) er bevaret: {profiles} profil(er) og {cycles} cyklus(ser).",
     "replace_undo_hint": "Der gemmes først et gendannelsespunkt, så du kan fortryde denne import under Eksport/import.",
     "pg_in_sample_note": "Disse cyklusser var med til at bygge de profiler, de matches mod, så resultaterne er optimistiske: forvent lidt færre korrekte match på nye cyklusser.",

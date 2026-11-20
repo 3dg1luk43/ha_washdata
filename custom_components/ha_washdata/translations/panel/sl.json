@@ -1143,6 +1143,7 @@
     "end_gate_check_failed": "Predlaganih nastavitev časovanja ni bilo mogoče preveriti glede na premore te naprave. Nič ni bilo shranjeno; poskusite znova.",
     "analysis_superseded": "Med analizo so se spremenile nastavitve ali podatki ciklov. Zaženite jo znova.",
     "analysis_check_failed": "Predlaganih nastavitev časovanja ni bilo mogoče preveriti glede na premore te naprave. Zaženite jo znova.",
+    "apply_cycles_changed": "Med uporabo predlogov je bil shranjen cikel. Nobena nastavitev ni bila spremenjena, predlogi pa so bili počiščeni. Znova zaženite analizo predlogov.",
     "bp_admin_only": "Predloge namesti skrbnik.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Ustvaril WashData za {device}. Dodajte svoja dejanja (obvestilo, luči, ...).",

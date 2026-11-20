@@ -1109,6 +1109,7 @@
         "end_gate_check_failed": "A javasolt időzítési beállításokat nem sikerült ellenőrizni a készülék szüneteihez képest. Semmi sem lett mentve; próbálja újra.",
         "analysis_superseded": "A beállítások vagy a ciklusadatok megváltoztak az elemzés közben. Futtassa újra.",
         "analysis_check_failed": "A javasolt időzítési beállításokat nem sikerült ellenőrizni a készülék szüneteihez képest. Futtassa újra.",
+        "apply_cycles_changed": "A javaslatok alkalmazása közben egy ciklus mentésre került. Egyetlen beállítás sem változott, és a javaslatok törlődtek. Futtassa újra a javaslatelemzést.",
         "bp_admin_only": "A sablonokat egy rendszergazda telepíti.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "A WashData hozta létre {device} számára. Adja hozzá a saját műveleteit (értesítés, világítás, ...).",

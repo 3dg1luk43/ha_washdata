@@ -1092,6 +1092,7 @@
         "end_gate_check_failed": "提案されたタイミング設定を、この家電の一時停止と照合できませんでした。何も保存されていません。もう一度お試しください。",
         "analysis_superseded": "分析中に設定またはサイクルのデータが変更されました。もう一度実行してください。",
         "analysis_check_failed": "提案されたタイミング設定を、この家電の一時停止と照合できませんでした。もう一度実行してください。",
+        "apply_cycles_changed": "提案の適用中にサイクルが保存されました。設定は変更されず、提案は消去されました。提案分析をもう一度実行してください。",
         "bp_admin_only": "テンプレートは管理者がインストールします。",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "{device}のためにWashDataで作成。アクションを追加してください（通知、ライト、...）。",

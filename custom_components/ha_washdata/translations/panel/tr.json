@@ -1109,6 +1109,7 @@
         "end_gate_check_failed": "Önerilen zamanlama ayarları bu cihazın duraklamalarına göre kontrol edilemedi. Hiçbir şey kaydedilmedi; tekrar deneyin.",
         "analysis_superseded": "Analiz sırasında ayarlar veya çevrim verileri değişti. Yeniden çalıştırın.",
         "analysis_check_failed": "Önerilen zamanlama ayarları bu cihazın duraklamalarına göre kontrol edilemedi. Yeniden çalıştırın.",
+        "apply_cycles_changed": "Öneriler uygulanırken bir çevrim kaydedildi. Hiçbir ayar değiştirilmedi ve öneriler temizlendi. Öneri analizini yeniden çalıştırın.",
         "bp_admin_only": "Şablonları bir yönetici yükler.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "{device} için WashData tarafından oluşturuldu. Eylemlerinizi ekleyin (bildir, ışıklar, ...).",

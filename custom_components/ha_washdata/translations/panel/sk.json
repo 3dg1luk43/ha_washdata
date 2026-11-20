@@ -1143,6 +1143,7 @@
     "end_gate_check_failed": "Navrhované nastavenia časovania sa nepodarilo overiť voči pauzám tohto spotrebiča. Nič sa neuložilo; skúste to znova.",
     "analysis_superseded": "Počas analýzy sa zmenili nastavenia alebo údaje cyklov. Spustite ju znova.",
     "analysis_check_failed": "Navrhované nastavenia časovania sa nepodarilo overiť voči pauzám tohto spotrebiča. Spustite ju znova.",
+    "apply_cycles_changed": "Počas použitia návrhov sa uložil cyklus. Žiadne nastavenie sa nezmenilo a návrhy sa vymazali. Spustite analýzu návrhov znova.",
     "bp_admin_only": "Šablóny inštaluje správca.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Vytvorené WashData pre {device}. Pridajte svoje akcie (upozornenie, svetlá, ...).",

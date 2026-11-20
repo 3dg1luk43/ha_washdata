@@ -1126,6 +1126,7 @@
     "end_gate_check_failed": "Ieteiktos laika iestatījumus neizdevās pārbaudīt pret šīs ierīces pauzēm. Nekas netika saglabāts; mēģiniet vēlreiz.",
     "analysis_superseded": "Analīzes laikā mainījās iestatījumi vai ciklu dati. Palaidiet to vēlreiz.",
     "analysis_check_failed": "Ieteiktos laika iestatījumus neizdevās pārbaudīt pret šīs ierīces pauzēm. Palaidiet to vēlreiz.",
+    "apply_cycles_changed": "Ieteikumu lietošanas laikā tika saglabāts cikls. Neviens iestatījums netika mainīts, un ieteikumi tika notīrīti. Palaidiet ieteikumu analīzi vēlreiz.",
     "bp_admin_only": "Veidnes instalē administrators.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Izveidojis WashData priekš {device}. Pievienojiet savas darbības (paziņojums, gaismas, ...).",

@@ -1057,6 +1057,7 @@
     "end_gate_check_failed": "Non è stato possibile verificare le impostazioni dei tempi suggerite rispetto alle pause di questo elettrodomestico. Non è stato salvato nulla; riprova.",
     "analysis_superseded": "Le impostazioni o i dati dei cicli sono cambiati durante l'analisi. Eseguila di nuovo.",
     "analysis_check_failed": "Non è stato possibile verificare le impostazioni dei tempi suggerite rispetto alle pause di questo elettrodomestico. Eseguila di nuovo.",
+    "apply_cycles_changed": "È stato salvato un ciclo mentre venivano applicati i suggerimenti. Nessuna impostazione è stata modificata e i suggerimenti sono stati cancellati. Esegui di nuovo l'analisi dei suggerimenti.",
     "hist_truncated": "interrotto al limite di {n} letture, quindi il resto dello storico non è stato analizzato",
     "hist_warn_kw": "La lettura più alta è solo {w}. Questo sensore sembra riportare kilowatt; WashData ha bisogno di watt, quindi non si può rilevare alcun ciclo.",
     "hist_warn_naive_time": "{n} marche temporali non hanno fuso orario e sono state lette come UTC. Se il file usa l'ora locale, i cicli risultano spostati del tuo scarto rispetto a UTC e le letture vicine a un cambio dell'ora legale possono andare perse.",

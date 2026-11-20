@@ -1057,6 +1057,7 @@
     "end_gate_check_failed": "Setările de temporizare sugerate nu au putut fi verificate în raport cu pauzele acestui aparat. Nu s-a salvat nimic; încercați din nou.",
     "analysis_superseded": "Setările sau datele ciclurilor s-au schimbat în timpul analizei. Rulați-o din nou.",
     "analysis_check_failed": "Setările de temporizare sugerate nu au putut fi verificate în raport cu pauzele acestui aparat. Rulați-o din nou.",
+    "apply_cycles_changed": "Un ciclu a fost salvat în timp ce se aplicau sugestiile. Nicio setare nu a fost modificată, iar sugestiile au fost șterse. Rulați din nou analiza sugestiilor.",
     "hist_truncated": "oprit la limita de {n} citiri, așa că restul istoricului nu a fost analizat",
     "hist_warn_kw": "Cea mai mare citire este doar {w}. Acest senzor pare să raporteze kilowați; WashData are nevoie de wați, așa că nu se poate detecta niciun ciclu.",
     "hist_warn_naive_time": "{n} de marcaje temporale nu au fus orar și au fost citite ca UTC. Dacă fișierul folosește ora locală, ciclurile sunt decalate cu diferența dvs. față de UTC, iar citirile din jurul trecerii la ora de vară se pot pierde.",

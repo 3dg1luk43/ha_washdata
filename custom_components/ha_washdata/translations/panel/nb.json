@@ -1106,6 +1106,7 @@
     "end_gate_check_failed": "De foreslåtte tidsinnstillingene kunne ikke kontrolleres mot pausene til dette apparatet. Ingenting ble lagret; prøv igjen.",
     "analysis_superseded": "Innstillingene eller syklusdataene ble endret under analysen. Kjør den på nytt.",
     "analysis_check_failed": "De foreslåtte tidsinnstillingene kunne ikke kontrolleres mot pausene til dette apparatet. Kjør den på nytt.",
+    "apply_cycles_changed": "En syklus ble lagret mens forslagene ble brukt. Ingen innstilling ble endret, og forslagene ble fjernet. Kjør forslagsanalysen på nytt.",
     "import_undo_hint": "Et gjenopprettingspunkt fra før siste import ({when}) er beholdt: {profiles} profil(er) og {cycles} syklus(er).",
     "replace_undo_hint": "Et gjenopprettingspunkt lagres først, så du kan angre denne importen fra Eksporter / Importer.",
     "pg_in_sample_note": "Disse syklusene var med på å bygge profilene de matches mot, så resultatene er optimistiske: forvent litt færre riktige match på nye sykluser.",

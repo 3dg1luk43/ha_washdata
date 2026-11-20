@@ -1092,6 +1092,7 @@
         "end_gate_check_failed": "제안된 타이밍 설정을 이 기기의 일시 정지와 대조해 확인할 수 없었습니다. 아무것도 저장되지 않았습니다. 다시 시도하세요.",
         "analysis_superseded": "분석 중에 설정 또는 사이클 데이터가 변경되었습니다. 다시 실행하세요.",
         "analysis_check_failed": "제안된 타이밍 설정을 이 기기의 일시 정지와 대조해 확인할 수 없었습니다. 다시 실행하세요.",
+        "apply_cycles_changed": "제안을 적용하는 동안 사이클이 저장되었습니다. 설정은 변경되지 않았고 제안은 지워졌습니다. 제안 분석을 다시 실행하세요.",
         "bp_admin_only": "관리자가 템플릿을 설치합니다.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "WashData가 {device}를 위해 생성했습니다. 작업을 추가하세요(알림, 조명, ...).",

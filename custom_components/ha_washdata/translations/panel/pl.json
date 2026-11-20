@@ -1143,6 +1143,7 @@
     "end_gate_check_failed": "Nie udało się sprawdzić sugerowanych ustawień czasowych względem przerw tego urządzenia. Nic nie zostało zapisane; spróbuj ponownie.",
     "analysis_superseded": "Ustawienia lub dane cykli zmieniły się w trakcie analizy. Uruchom ją ponownie.",
     "analysis_check_failed": "Nie udało się sprawdzić sugerowanych ustawień czasowych względem przerw tego urządzenia. Uruchom ją ponownie.",
+    "apply_cycles_changed": "Podczas stosowania sugestii zapisano cykl. Żadne ustawienie nie zostało zmienione, a sugestie zostały wyczyszczone. Uruchom ponownie analizę sugestii.",
     "bp_admin_only": "Szablony instaluje administrator.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Utworzone przez WashData dla {device}. Dodaj swoje akcje (powiadomienie, światła, ...).",

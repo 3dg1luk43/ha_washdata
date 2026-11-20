@@ -1092,6 +1092,7 @@
         "end_gate_check_failed": "无法根据该设备的暂停情况检查建议的时间设置。未保存任何内容；请重试。",
         "analysis_superseded": "分析期间设置或周期数据已更改。请重新运行。",
         "analysis_check_failed": "无法根据该设备的暂停情况检查建议的时间设置。请重新运行。",
+        "apply_cycles_changed": "应用建议期间保存了一个周期。未更改任何设置，建议已清除。请重新运行建议分析。",
         "bp_admin_only": "模板由管理员安装。",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "由 WashData 为 {device} 创建。添加您的动作（通知、灯光等）。",

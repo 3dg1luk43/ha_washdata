@@ -1109,6 +1109,7 @@
     "end_gate_check_failed": "Ehdotettuja ajoitusasetuksia ei voitu tarkistaa tämän laitteen taukoja vasten. Mitään ei tallennettu; yritä uudelleen.",
     "analysis_superseded": "Asetukset tai jaksojen tiedot muuttuivat analyysin aikana. Suorita se uudelleen.",
     "analysis_check_failed": "Ehdotettuja ajoitusasetuksia ei voitu tarkistaa tämän laitteen taukoja vasten. Suorita se uudelleen.",
+    "apply_cycles_changed": "Jakso tallennettiin, kun ehdotuksia otettiin käyttöön. Mitään asetusta ei muutettu, ja ehdotukset tyhjennettiin. Suorita ehdotusanalyysi uudelleen.",
     "bp_admin_only": "Järjestelmänvalvoja asentaa mallit.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "WashDatan luoma automaatio laitteelle {device}. Lisää omat toimintosi (ilmoitus, valot, ...).",
