@@ -72,3 +72,34 @@ async def test_hidden_stop_rows_take_no_slot_of_a_listed_change(
     assert [old for _when, old in stop_threshold_changes(store.get_settings_changelog())] == [
         2.0, 2.5,
     ]
+
+
+async def test_an_import_during_the_repair_runs_it_again(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """The store clears the marker, then rebuilds and saves; an import arming it
+    again in that window found the pass running and was dropped."""
+    entry = await setup_washdata_entry()
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store = manager.profile_store
+    real_save = store.async_save
+    saving, release = asyncio.Event(), asyncio.Event()
+    saves = {"n": 0}
+
+    async def gated_save(*args: Any, **kwargs: Any) -> Any:
+        saves["n"] += 1
+        if saves["n"] == 1:
+            saving.set()
+            await release.wait()
+        return await real_save(*args, **kwargs)
+
+    store._data[BANKED_TAIL_REPAIR_KEY] = True  # noqa: SLF001
+    with patch.object(store, "async_save", side_effect=gated_save):
+        manager.async_schedule_banked_tail_repair()
+        await asyncio.wait_for(saving.wait(), 5)
+        assert store.banked_tail_repair_pending() is False
+        store._data[BANKED_TAIL_REPAIR_KEY] = True  # an older import lands  # noqa: SLF001
+        manager.async_schedule_banked_tail_repair()
+        release.set()
+        await asyncio.wait_for(manager._banked_tail_repair_task, 5)  # noqa: SLF001
+    assert store.banked_tail_repair_pending() is False

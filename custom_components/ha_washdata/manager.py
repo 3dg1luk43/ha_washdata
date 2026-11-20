@@ -927,6 +927,9 @@ class WashDataManager:
         self._in_power_event = False
         self._cycle_end_task: Task[Any] | None = None
         self._banked_tail_repair_task: Task[Any] | None = None
+        # An import or undo armed the banked-tail repair while a pass ran: the
+        # pass cleared the marker before its rebuild, so it runs again.
+        self._banked_tail_repair_again = False
         self._energy_rebuild_task: Task[Any] | None = None
         self._cut_short_rebuild_task: Task[Any] | None = None
         # An import or undo asked for the #531 rebuild while a pass ran: the pass
@@ -2662,26 +2665,35 @@ class WashDataManager:
         """One-time repair of cycles that banked the end-of-cycle confirmation
         delay as cycle time (register item 297).
 
-        Runs in the background after setup. Never raises: the store method already
-        swallows its own failures and leaves the history untouched, and this
-        wrapper exists only so a scheduling error cannot surface as an unhandled
-        task exception.
+        Runs in the background after setup. Runs again when an import or undo
+        armed the marker during the pass (PR #529 review). Never raises: the store
+        method already swallows its own failures and leaves the history untouched,
+        and this wrapper exists only so a scheduling error cannot surface as an
+        unhandled task exception.
         """
-        try:
-            result = await self.profile_store.async_repair_banked_tails(
-                float(self.detector.config.stop_threshold_w), self.device_type
-            )
-            if result.get("repaired"):
-                self._logger.info(
-                    "Repaired %d of %d stored cycles that had banked the "
-                    "end-of-cycle confirmation delay (%.0f min reclaimed); profile "
-                    "averages and envelopes rebuilt.",
-                    result["repaired"],
-                    result["examined"],
-                    result["reclaimed_s"] / 60.0,
+        while True:
+            self._banked_tail_repair_again = False
+            try:
+                result = await self.profile_store.async_repair_banked_tails(
+                    float(self.detector.config.stop_threshold_w), self.device_type
                 )
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            self._logger.warning("Banked-tail repair could not run: %s", exc)
+                if result.get("repaired"):
+                    self._logger.info(
+                        "Repaired %d of %d stored cycles that had banked the "
+                        "end-of-cycle confirmation delay (%.0f min reclaimed); profile "
+                        "averages and envelopes rebuilt.",
+                        result["repaired"],
+                        result["examined"],
+                        result["reclaimed_s"] / 60.0,
+                    )
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                self._logger.warning("Banked-tail repair could not run: %s", exc)
+            if (
+                not self._banked_tail_repair_again
+                or self._is_shutdown
+                or not self.profile_store.banked_tail_repair_pending()
+            ):
+                return
 
     def async_schedule_banked_tail_repair(self) -> None:
         """Run the one-time banked-tail repair now if the marker is armed.
@@ -2697,15 +2709,18 @@ class WashDataManager:
         restart.
 
         Cheap when there is nothing to do - the marker is the whole test, and the
-        repair clears it. A second call while the first is still in flight is a
-        no-op rather than a second walk of the history: the repair only clears the
-        marker at the end, so the check alone would not stop two concurrent runs
-        from rebuilding the same envelopes.
+        repair clears it. A second call while the first is still in flight starts
+        no second walk of the history, which would rebuild the same envelopes
+        concurrently; it is remembered instead. The store clears the marker before
+        it rebuilds the envelopes and saves, so an import arming it again in that
+        window is seen only when the pass ends, which then runs once more (PR #529
+        review).
         """
         if self.profile_store.banked_tail_repair_pending() is not True:
             return
         existing = self._banked_tail_repair_task
         if existing is not None and not existing.done():
+            self._banked_tail_repair_again = True
             return
         self._banked_tail_repair_task = self._spawn_tracked(
             self._async_repair_banked_tails()
