@@ -8,6 +8,8 @@
 * A Min Power judged on a watt sensor was written after the sensor turned kW
   during the awaits: every reading would then be read raw against thresholds
   in watts.
+* Apply compared the rounded value the user confirmed but wrote the stored one
+  unrounded.
 """
 from __future__ import annotations
 
@@ -23,6 +25,7 @@ from custom_components.ha_washdata.const import (
     CONF_MIN_OFF_GAP,
     CONF_MIN_POWER,
     CONF_OFF_DELAY,
+    CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
     CONF_WATCHDOG_INTERVAL,
@@ -177,3 +180,25 @@ async def test_a_unit_change_during_the_end_gate_check_clears_nothing(
     assert res["success"] is False and res["error"]["code"] == "entry_reloaded", res
     assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_MIN_POWER] == 2.0
     assert CONF_MIN_POWER in store.get_suggestions()
+
+
+async def test_apply_writes_the_value_the_user_confirmed(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """The list shows 1.234567 as 1.2346, the user confirms 1.2346, and
+    1.234567 was saved. Now 1.2346 is."""
+    entry = await setup_washdata_entry()
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    client = await hass_ws_client(hass)
+    _suggest(store, CONF_PROFILE_MATCH_MAX_DURATION_RATIO, 1.234567)
+
+    res = await _apply(
+        hass, client, entry.entry_id, [CONF_PROFILE_MATCH_MAX_DURATION_RATIO],
+        {CONF_PROFILE_MATCH_MAX_DURATION_RATIO: 1.2346},
+    )
+    assert res["result"] == {
+        "success": True, "applied": [CONF_PROFILE_MATCH_MAX_DURATION_RATIO]
+    }, res
+    assert hass.config_entries.async_get_entry(entry.entry_id).options[
+        CONF_PROFILE_MATCH_MAX_DURATION_RATIO
+    ] == 1.2346

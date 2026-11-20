@@ -5414,7 +5414,10 @@ async def ws_apply_suggestions(
                         "was saved; run the analysis again or dismiss the suggestions.",
                     )
                     return
-                updates[key] = int(val) if key in _SUGGESTION_INT_KEYS else val
+                # The value the user confirmed: the list shows and compares it
+                # coerced (int keys whole, the rest 4 dp), so that is what every
+                # check below judges and what is saved (PR #529 review).
+                updates[key] = _coerce_suggested(key, val)
             if updates:
                 # Both checks read the options as they are now, inside the lock: a
                 # settings save can land while it is awaited or during the
