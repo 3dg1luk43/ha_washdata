@@ -141,8 +141,28 @@ def _is_split(ended: list[dict], points, stop: float) -> bool:
     return float(ended[0].get("duration") or 0.0) < 0.9 * span
 
 
+def _pulse_max_w(device_type: str, options: dict) -> float | None:
+    """The dryer pulse ceiling the engine measures with (#474), None elsewhere.
+
+    ``SuggestionEngine._measured_bridge_requirement``: on ``QUIET_PULSE_DEVICE_TYPES``
+    the entry's Anti-Wrinkle Max Power, else its default; no pulse rule on others.
+    """
+    from custom_components.ha_washdata.const import (  # noqa: PLC0415
+        CONF_ANTI_WRINKLE_MAX_POWER,
+        DEFAULT_ANTI_WRINKLE_MAX_POWER,
+        QUIET_PULSE_DEVICE_TYPES,
+    )
+    from custom_components.ha_washdata.suggestion_engine import _num  # noqa: PLC0415
+
+    if device_type not in QUIET_PULSE_DEVICE_TYPES:
+        return None
+    value = _num(options.get(CONF_ANTI_WRINKLE_MAX_POWER))
+    return DEFAULT_ANTI_WRINKLE_MAX_POWER if value is None else value
+
+
 def _bridged_spans(
-    clean: list[dict], stop: float, off_delay: float, end_energy: float
+    clean: list[dict], stop: float, off_delay: float, end_energy: float,
+    pulse_max_w: float | None = None,
 ) -> tuple[list[float], int]:
     """The pauses the end gate needs bridged, as the engine measures them.
 
@@ -151,6 +171,9 @@ def _bridged_spans(
     to the last moment the off_delay-window energy is at most end_energy; 0 (left
     out) when the energy gate holds it. Until 0.6.1 this measured at max(stop, 2%
     of the peak), where a dishwasher's terminal pump-out never ended its drying run.
+    ``pulse_max_w`` (:func:`_pulse_max_w`): a dryer's short pulses neither end a
+    run nor count as quiet, as the engine and the detector read them; without it
+    each pulse split one bridged run into two shorter ones (PR #529 review).
     """
     from custom_components.ha_washdata.suggestion_engine import (  # noqa: PLC0415
         _cycle_readings,
@@ -166,7 +189,11 @@ def _bridged_spans(
         if max((p for _, p in pts), default=0.0) <= 0:
             continue
         traced += 1
-        spans.extend(n for n in end_gate_pause_needs(pts, stop, off_delay, end_energy) if n > 0)
+        spans.extend(
+            n for n in end_gate_pause_needs(
+                pts, stop, off_delay, end_energy, pulse_max_w=pulse_max_w
+            ) if n > 0
+        )
     return spans, traced
 
 
@@ -264,7 +291,8 @@ def _scan(job: tuple[str, bool]) -> tuple[list[str], dict[str, dict[str, int]]] 
     clean, _ = select_clean_cycles(cycles, stop_threshold_w=stop)
     traces = [c for c in clean if len(_cycle_readings(c)) >= 10]
     spans, traced = _bridged_spans(
-        clean, stop, float(cfg0.off_delay), float(cfg0.end_energy_threshold)
+        clean, stop, float(cfg0.off_delay), float(cfg0.end_energy_threshold),
+        _pulse_max_w(device_type, replay_opts),
     )
     # The value the shipped model pass actually offers (sized, then judged by the
     # end-gate guard), evaluated alongside the raw candidates so the regression is

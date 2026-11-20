@@ -126,3 +126,48 @@ def test_shipped_row_is_evaluated_when_the_comparison_has_too_little_evidence(
     assert set(totals) == {"SHIPPED"}
     assert totals["SHIPPED"] == {"split": 0, "merge": 0, "cycles": 6}
     assert any("SHIPPED" in line and "470s" in line for line in lines), lines
+
+
+def _dryer_cycle(day: int) -> dict:
+    """A dryer run: 600 s at 1 kW, 1200 s quiet with a 10 s 100 W pulse every 150 s
+    (an anti-crease tumble under Anti-Wrinkle Max Power), 600 s more, a quiet tail."""
+    cyc = _cycle(day, 1200, lead_in=True)
+    quiet = [row for row in cyc["power_data"] if row[1] == 0.0][:-3]
+    for k, row in enumerate(quiet):
+        if k % 15 == 7:
+            row[1] = 100.0
+    return cyc
+
+
+def test_a_dryer_pulse_does_not_split_the_bridged_span(tmp_path: Path, monkeypatch) -> None:
+    """PR #529 review: the engine measures a dryer's pauses with its short pulses
+    left out (``pulse_max_w``, #474), as the detector reads them; the harness
+    measured each pulse as the end of one pause and the start of the next."""
+    assert min_off_gap_eval._pulse_max_w("dryer", {}) == 400.0  # noqa: SLF001
+    assert min_off_gap_eval._pulse_max_w(  # noqa: SLF001
+        "dryer", {"anti_wrinkle_max_power": 150}
+    ) == 150.0
+    assert min_off_gap_eval._pulse_max_w("washing_machine", {}) is None  # noqa: SLF001
+
+    seen: list[list[float]] = []
+    real = min_off_gap_eval._bridged_spans  # noqa: SLF001
+
+    def _capture(*args, **kwargs):
+        spans, traced = real(*args, **kwargs)
+        seen.append(spans)
+        return spans, traced
+
+    monkeypatch.setattr(min_off_gap_eval, "_bridged_spans", _capture)
+    path = tmp_path / "export.json"
+    path.write_text(json.dumps({
+        "device_fingerprint": {"device_type": "dryer"},
+        "entry_data": {},
+        "entry_options": {"stop_threshold_w": 2.0, "min_off_gap": 2400},
+        "data": {"past_cycles": [_dryer_cycle(10 + i) for i in range(6)],
+                 "profiles": {"Cotton": {}}},
+    }), encoding="utf-8")
+    min_off_gap_eval._scan((str(path), False))  # noqa: SLF001
+    assert seen and seen[0], seen
+    # One pause per run, as long as its quiet (1200 s less the pulses), not the
+    # 140 s stretches between two pulses.
+    assert min(seen[0]) > 1000.0, seen[0]
