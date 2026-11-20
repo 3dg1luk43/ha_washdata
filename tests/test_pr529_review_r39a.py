@@ -249,13 +249,17 @@ async def test_a_build_across_a_type_change_and_back_is_discarded(
     hass: HomeAssistant, setup_washdata_entry: Any
 ) -> None:
     """Built as a washer (the cut-offs kept) and finished as a dishwasher again:
-    not written, not memoised, so the next request builds under the rule."""
+    not written, not memoised; built again under the rule (round 41b), or, when
+    every build straddles a flip, nothing written."""
     store = await _eco_store(hass, setup_washdata_entry)
-    with patch.object(store, "_rebuild_envelope_sync", side_effect=_type_flips(store, 1)):
+    with patch.object(store, "_rebuild_envelope_sync", side_effect=_type_flips(store, 99)):
         assert await store.async_rebuild_envelope("ECO") is False
         assert "ECO" not in store._data["envelopes"]  # noqa: SLF001
         assert "ECO" not in store.__dict__.get("_envelope_built_from", {})
+    worker = _type_flips(store, 1)
+    with patch.object(store, "_rebuild_envelope_sync", side_effect=worker) as built:
         assert await store.async_rebuild_envelope("ECO") is True
+    assert built.call_count == 2
     assert store._data["envelopes"]["ECO"]["shape_cycle_count"] == 5  # noqa: SLF001
 
 

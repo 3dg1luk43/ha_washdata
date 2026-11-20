@@ -13,6 +13,10 @@
   the executor discarded the whole batch, and the build resampled every one of
   them on the loop. Only the changed cycle's result goes now; a cache reset
   collects the misses again under the same budget, a bounded number of times.
+* A cycle deleted while the DTW band changed: the build the change straddled
+  was discarded, the deletion saved, and nothing rebuilds after a band change,
+  so the envelope kept the deleted cycle. The build runs again under the
+  current settings while the call still owns it.
 """
 from __future__ import annotations
 
@@ -38,6 +42,7 @@ from .test_pr529_review_r40a import (
     STEP,
     _query,
     _ranking,
+    _seeded_store,
     _single_cycle_store,
     _trace_of,
 )
@@ -327,3 +332,62 @@ async def test_a_cache_reset_during_the_job_collects_the_misses_again(
         snaps = await store._async_match_snapshots(STEP)  # noqa: SLF001
     assert (seen["jobs"], seen["loop"]) == (jobs, loop)
     assert [s["name"] for s in snaps] == [f"P{k}" for k in range(5)]
+
+
+# ── A build a setting changed under runs again under the current settings ────
+
+_BUILD_SETTINGS = {
+    "dtw_bandwidth": lambda s: setattr(s, "dtw_bandwidth", s.dtw_bandwidth + 0.05),
+    "energy_mode": lambda s: setattr(
+        s, "energy_mode", "integrated" if s.energy_mode != "integrated" else "mean"
+    ),
+    "device_type": lambda s: setattr(s, "device_type", "dryer"),
+    "evidence": lambda s: setattr(s, "evidence_sources", ["real_cycles", "reference_cycles"]),
+}
+
+
+def _once_during_the_job(store: Any, change: Any, also: Any = None) -> tuple[Any, dict[str, int]]:
+    real = store._rebuild_envelope_sync  # noqa: SLF001
+    calls = {"n": 0}
+
+    def worker(cycles: Any) -> Any:
+        calls["n"] += 1
+        if calls["n"] == 1:
+            change(store)
+            if also is not None:
+                also(store)
+        return real(cycles)
+
+    return worker, calls
+
+
+@pytest.mark.parametrize("setting", sorted(_BUILD_SETTINGS))
+async def test_a_cycle_deleted_while_a_build_setting_changes_leaves_the_envelope(
+    hass: HomeAssistant, setup_washdata_entry: Any, setting: str
+) -> None:
+    store = await _seeded_store(hass, setup_washdata_entry)
+    worker, calls = _once_during_the_job(store, _BUILD_SETTINGS[setting])
+    with patch.object(store, "_rebuild_envelope_sync", side_effect=worker):
+        assert await store.delete_cycle("Cotton-2")
+    assert calls["n"] == 2
+    env = store.get_envelope("Cotton")
+    assert env["cycle_count"] == 2 and env["shape_cycle_count"] == 2
+
+
+@pytest.mark.parametrize("owner_gone", ["profile_removed", "store_replaced"])
+async def test_a_build_the_call_no_longer_owns_is_not_run_again(
+    hass: HomeAssistant, setup_washdata_entry: Any, owner_gone: str
+) -> None:
+    store = await _seeded_store(hass, setup_washdata_entry)
+
+    def gone(s: Any) -> None:
+        if owner_gone == "profile_removed":
+            s._data["profiles"].pop("Cotton")  # noqa: SLF001
+        else:
+            s._data_generation += 1  # noqa: SLF001
+
+    worker, calls = _once_during_the_job(store, _BUILD_SETTINGS["dtw_bandwidth"], gone)
+    store.__dict__["_envelope_built_from"].pop("Cotton")  # a build is due
+    with patch.object(store, "_rebuild_envelope_sync", side_effect=worker):
+        assert await store.async_rebuild_envelope("Cotton") is False
+    assert calls["n"] == 1

@@ -438,6 +438,9 @@ def _prepare_match_trace(
 #: loop, 12-13 ms of it this resampling (PR #529 review).
 _MATCH_SEGMENT_INLINE_POINTS = 4096
 _MATCH_SEGMENT_TRACE_POINTS = 256
+#: Builds one ``ProfileStore.async_rebuild_envelope`` call runs while a setting
+#: the build reads keeps changing under it (PR #529 review).
+_ENVELOPE_BUILD_ATTEMPTS = 3
 #: Executor jobs one such build may run: a job whose results the store's changes
 #: meanwhile invalidated collects the misses again (PR #529 review). Past it the
 #: build resamples what is left on the loop.
@@ -8244,7 +8247,30 @@ class ProfileStore:
         (:meth:`_cut_backfill_tails_nosave`, #518): every path that gives such a
         cycle a programme (a label, the bulk auto-label, a new profile from it, an
         import) rebuilds that programme here, so the build never learns the wait.
+
+        A build a setting it reads changed under (``envelope_settings_revision``)
+        is discarded and run again under the current settings, up to
+        ``_ENVELOPE_BUILD_ATTEMPTS`` builds, while this call still owns the
+        profile's build: nothing rebuilds after e.g. a DTW band change, so a
+        caller that saved its edit kept the edit out of the envelope (a deleted
+        cycle stayed in it, PR #529 review). A newer build of the profile, a
+        replaced store, a removed profile or an unloaded entry ends it as before.
         """
+        for _attempt in range(_ENVELOPE_BUILD_ATTEMPTS):
+            built = await self._async_build_envelope_once(profile_name)
+            if built is not None:
+                return built
+            if self.retired:
+                break
+            self._logger.debug(
+                "Building the envelope of %s again under the changed settings", profile_name
+            )
+        return False
+
+    async def _async_build_envelope_once(self, profile_name: str) -> bool | None:
+        """One build of :meth:`async_rebuild_envelope`: its result, or ``None``
+        when a setting the build reads changed during it (discarded, may run
+        again)."""
         await self.async_warm_trace_summaries((profile_name,))
         if self._cut_backfill_tails_nosave(profile_name)[0]:
             # The cut traces are new lists: summarise them off the loop too.
@@ -8327,13 +8353,17 @@ class ProfileStore:
         if (
             generations.get(profile_name) != generation
             or getattr(self, "_data_generation", 0) != data_generation
-            or self.envelope_settings_revision != settings_revision
             or (existed and profile_name not in (self._data.get("profiles") or {}))
         ):
             self._logger.debug(
                 "Discarding a superseded envelope build for %s", profile_name
             )
             return False
+        if self.envelope_settings_revision != settings_revision:
+            self._logger.debug(
+                "Discarding an envelope build of %s a setting changed under", profile_name
+            )
+            return None
 
         if not result_pkg:
             # Envelope shape couldn't be built (no power data / too few points).

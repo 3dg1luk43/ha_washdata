@@ -160,15 +160,20 @@ async def test_a_cycle_deleted_while_a_ratio_changes_leaves_the_envelope(
     [
         lambda s: setattr(s, "dtw_bandwidth", s.dtw_bandwidth + 0.05),
         lambda s: setattr(s, "energy_mode", "integrated" if s.energy_mode != "integrated" else "mean"),
-        lambda s: setattr(s, "device_type", "dryer"),
-        lambda s: setattr(s, "evidence_sources", ["real_cycles", "reference_cycles"]),
+        lambda s: setattr(s, "device_type", "dryer" if s.device_type != "dryer" else "washing_machine"),
+        lambda s: setattr(
+            s, "evidence_sources",
+            ["real_cycles", "reference_cycles"] if len(s.evidence_sources) == 3
+            else ["real_cycles", "reference_cycles", "backfill_cycles"],
+        ),
     ],
 )
 async def test_a_setting_the_build_reads_still_discards_it(
     hass: HomeAssistant, setup_washdata_entry: Any, change: Any
 ) -> None:
     """The DTW band, the energy mode, the device type and the evidence sources
-    are read by the build: changed under it, the build is discarded as before."""
+    are read by the build: changed under every build, each is discarded (one
+    changed once is built again, round 41b)."""
     store = await _seeded_store(hass, setup_washdata_entry)
     assert len(store.evidence_sources) == 3
     worker = _changing_during_the_job(store, lambda: change(store))
