@@ -2626,6 +2626,7 @@ class HaWashdataPanel extends HTMLElement {
     this._statusPhases = [];
     this._statusPhasesName = null;
     this._statusPhasesEid = null;   // the appliance the phases belong to
+    this._statusPhasesSeq = 0;      // the newest claim; only its answer writes
     // D3: cycle-list pagination. Imported (reference + backfill) cycles page on
     // their own cursor, outside the real-cycle offset/total (register item 129a).
     this._cycleOffset = 0;
@@ -3644,13 +3645,19 @@ class HaWashdataPanel extends HTMLElement {
 
   // D1: cache the matched profile's phase ranges (start/end in seconds) for the
   // Status-tab phase timeline. Cheap + cached per appliance and program, and only
-  // the request for the ones still wanted writes: a slower answer for a superseded
-  // program kept its phases on screen.
+  // the newest request, while its pair is still the one wanted, writes: a slower
+  // answer for a superseded program kept its phases on screen.
   async _ensureStatusPhases(entryId, program) {
     if (!program) { this._statusPhases = []; this._statusPhasesName = null; this._statusPhasesEid = null; return; }
     if (this._statusPhasesName === program && this._statusPhasesEid === entryId) return;
+    // A new pair shows no ranges until its own arrive (PR #529 review): a device
+    // list that put another appliance on the same program at the selected index
+    // kept the previous one's, and a poll while the read was out drew them.
+    const tok = ++this._statusPhasesSeq;
+    this._statusPhases = [];
     this._statusPhasesName = program; this._statusPhasesEid = entryId;
-    const current = () => this._statusPhasesName === program && this._statusPhasesEid === entryId;
+    const current = () => tok === this._statusPhasesSeq
+      && this._statusPhasesName === program && this._statusPhasesEid === entryId;
     try {
       const r = await this._ws({ type: `${_DOMAIN}/get_profile_phases`, entry_id: entryId, profile_name: program });
       if (!current()) return;
