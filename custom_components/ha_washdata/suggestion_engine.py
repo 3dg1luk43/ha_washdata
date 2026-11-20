@@ -854,6 +854,34 @@ def _classify_cycle_health(
     return None
 
 
+def _completion_exclusion(c: dict[str, Any]) -> str | None:
+    """Why ``select_clean_cycles`` drops ``c`` on its outcome alone, else None.
+
+    Completed is ``status`` or, on a legacy record, ``state``; force-stopped,
+    user-stopped and interrupted cycles are out.
+    """
+    status = c.get("status")
+    state = c.get("state")
+    if status == "force_stopped":
+        return "force_stopped"
+    # A cycle the user cut short with "Force cycle end" is stored
+    # status="completed", termination_reason="user" (CycleDetector.user_stop),
+    # so the force_stopped check above never sees it (#445). Its tail is
+    # whatever the appliance happened to be doing when the button was pressed
+    # - usually minutes of standby the user got tired of waiting through - so
+    # every statistic derived from it (sampling cadence, lowest active power,
+    # clean-cycle duration, intra-cycle pauses) describes the user's patience,
+    # not the appliance. Excluded under its own code so the UI can say which
+    # of the two it was.
+    if c.get("termination_reason") == TerminationReason.USER:
+        return "user_stopped"
+    if status == "interrupted" or state == "interrupted":
+        return "interrupted"
+    if not (status == "completed" or state == "completed"):
+        return "incomplete"
+    return None
+
+
 def select_clean_cycles(
     cycles: list[dict[str, Any]],
     *,
@@ -882,28 +910,9 @@ def select_clean_cycles(
         if not isinstance(c, dict):
             continue
 
-        status = c.get("status")
-        state = c.get("state")
-        if status == "force_stopped":
-            _bump("force_stopped")
-            continue
-        # A cycle the user cut short with "Force cycle end" is stored
-        # status="completed", termination_reason="user" (CycleDetector.user_stop),
-        # so the force_stopped check above never sees it (#445). Its tail is
-        # whatever the appliance happened to be doing when the button was pressed
-        # - usually minutes of standby the user got tired of waiting through - so
-        # every statistic derived from it (sampling cadence, lowest active power,
-        # clean-cycle duration, intra-cycle pauses) describes the user's patience,
-        # not the appliance. Excluded under its own code so the UI can say which
-        # of the two it was.
-        if c.get("termination_reason") == TerminationReason.USER:
-            _bump("user_stopped")
-            continue
-        if status == "interrupted" or state == "interrupted":
-            _bump("interrupted")
-            continue
-        if not (status == "completed" or state == "completed"):
-            _bump("incomplete")
+        outcome = _completion_exclusion(c)
+        if outcome is not None:
+            _bump(outcome)
             continue
 
         label = c.get("profile_name") or c.get("label")
@@ -962,15 +971,15 @@ _PROGRAMME_LENGTH_MIN_CYCLES = 3
 def _label_median_durations(cycles: list[dict[str, Any]]) -> dict[str, float]:
     """Median stored duration per label, over its completed cycles (>= 3 of them).
 
-    Not the ones the user cut short ("Force cycle end": stored completed with
-    ``termination_reason`` user): ``select_clean_cycles`` rejects them, so they must
-    not grant the programme-length exemption either (PR #529 review).
+    Completed as ``select_clean_cycles`` reads it (``_completion_exclusion``): a
+    legacy record completed by ``state`` alone counts (PR #529 review: the selector
+    kept it while the baseline left it out, so it failed ``mid_restart``), and the
+    ones the user cut short ("Force cycle end": stored completed with
+    ``termination_reason`` user) do not grant the exemption (PR #529 review).
     """
     by_label: dict[str, list[float]] = {}
     for c in cycles:
-        if not isinstance(c, dict) or c.get("status") != "completed":
-            continue
-        if c.get("termination_reason") == TerminationReason.USER:
+        if not isinstance(c, dict) or _completion_exclusion(c) is not None:
             continue
         label = c.get("profile_name") or c.get("label")
         duration = _num(c.get("duration"))

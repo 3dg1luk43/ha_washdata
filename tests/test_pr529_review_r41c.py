@@ -3,6 +3,8 @@
 * A meter reporting faster than the reading throttle was learned at the
   throttle's cadence: a throttled report never moved the sensor-report clock, so
   a 1 s meter under a 2 s sampling interval was learned as 2 s.
+* A legacy record completed by ``state`` alone passed ``select_clean_cycles`` but
+  set no programme length, so its own long pause failed it as ``mid_restart``.
 """
 from __future__ import annotations
 
@@ -13,6 +15,10 @@ from unittest.mock import patch
 from homeassistant.core import HomeAssistant
 
 from custom_components.ha_washdata.const import DOMAIN
+from custom_components.ha_washdata.suggestion_engine import (
+    _label_median_durations,
+    select_clean_cycles,
+)
 
 POWER = "sensor.washer_power"
 
@@ -47,3 +53,32 @@ async def test_a_meter_faster_than_the_throttle_is_learned_at_its_own_cadence(
     deltas = [d for d, _ts in pending]
     assert len(deltas) >= 18
     assert all(abs(d - 1.0) < 0.01 for d in deltas), deltas
+
+
+def _legacy_run(i: int) -> dict[str, Any]:
+    """A 90 min run stored with the legacy ``state`` and no ``status``: wash, a
+    15 min soak under the stop threshold, wash again, a quiet end."""
+    pts = [[0.0, 1.0]]
+    pts += [[float(t), 2000.0] for t in range(30, 1200, 30)]
+    pts += [[float(t), 0.5] for t in range(1200, 2100, 30)]
+    pts += [[float(t), 2000.0] for t in range(2100, 5100, 30)]
+    pts += [[float(t), 0.5] for t in range(5100, 5430, 30)]
+    return {
+        "id": f"legacy{i}", "profile_name": "Eco", "state": "completed",
+        "duration": 5400.0, "start_time": "2026-10-01T10:00:00+00:00", "power_data": pts,
+    }
+
+
+def test_a_legacy_completed_record_sets_its_programme_length() -> None:
+    """``select_clean_cycles`` takes ``state: completed`` as completed; the
+    programme-length baseline read ``status`` only, so these runs had no length to
+    match and their soak read as two loads merged (``mid_restart``)."""
+    runs = [_legacy_run(i) for i in range(3)]
+    assert _label_median_durations(runs) == {"Eco": 5400.0}
+    clean, excluded = select_clean_cycles(runs, stop_threshold_w=2.0)
+    assert [c["id"] for c in clean] == ["legacy0", "legacy1", "legacy2"], excluded
+    # Interrupted, force-stopped and user-stopped runs still set no length.
+    for extra in (
+        {"state": "interrupted"}, {"status": "force_stopped"}, {"termination_reason": "user"},
+    ):
+        assert _label_median_durations([{**r, **extra} for r in runs]) == {}
