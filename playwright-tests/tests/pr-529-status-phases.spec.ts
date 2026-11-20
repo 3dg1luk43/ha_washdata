@@ -64,3 +64,41 @@ test("another appliance on the same program never shows the last one's phases", 
   await poll(page);
   await expect(page.locator('.wd-ptl-cur')).toContainText('B wash', { timeout: 8_000 });
 });
+
+test('a failed phase read is asked again on the next refresh', async ({ page }) => {
+  await bootPanel(page, {
+    'ha_washdata/get_devices': running('entry-a', 'Washer A', 'Eco'),
+    'ha_washdata/get_profile_phases': phasesOf('Eco'),
+  });
+  await expect(page.locator('.wd-ptl-cur')).toContainText('Eco wash', { timeout: 8_000 });
+
+  // The program moves to Cotton while the entry reloads: its phase read fails.
+  await page.evaluate((devs) => {
+    const w: any = window;
+    w.__ws_handlers['ha_washdata/get_devices'] = devs;
+    w.__set_error('ha_washdata/get_profile_phases', { code: 'not_found', message: 'Entry not found' });
+  }, running('entry-a', 'Washer A', 'Cotton'));
+  await poll(page);
+  await expect(page.locator('.wd-ptl')).toHaveCount(0);
+
+  // The entry is back: the next refresh reads Cotton's phases again.
+  await page.evaluate((phases) => {
+    const w: any = window;
+    delete w.__ws_errors['ha_washdata/get_profile_phases'];
+    w.__ws_handlers['ha_washdata/get_profile_phases'] = phases;
+  }, phasesOf('Cotton'));
+  await poll(page);
+  await expect(page.locator('.wd-ptl-cur')).toContainText('Cotton wash', { timeout: 8_000 });
+});
+
+test('a program with no phases is cached, not asked again on every refresh', async ({ page }) => {
+  await bootPanel(page, {
+    'ha_washdata/get_devices': running('entry-a', 'Washer A', 'Eco'),
+    'ha_washdata/get_profile_phases': { phases: [] },
+  });
+  await poll(page);
+  await poll(page);
+  const asked = await page.evaluate(() => (window as any).__get_calls('ha_washdata/get_profile_phases').length);
+  expect(asked).toBe(1);
+  await expect(page.locator('.wd-ptl')).toHaveCount(0);
+});

@@ -3662,7 +3662,12 @@ class HaWashdataPanel extends HTMLElement {
       const r = await this._ws({ type: `${_DOMAIN}/get_profile_phases`, entry_id: entryId, profile_name: program });
       if (!current()) return;
       this._statusPhases = (r.phases || []).map(p => ({ name: p.name, start: p.start, end: p.end }));
-    } catch (_) { if (current()) this._statusPhases = []; }
+    } catch (_) {
+      // A failed read (an entry reload) caches nothing, so the next refresh asks
+      // again (PR #529 review: the kept pair stopped every later read). An answer
+      // with no phases is cached like one with them.
+      if (current()) { this._statusPhases = []; this._statusPhasesName = null; this._statusPhasesEid = null; }
+    }
   }
 
   // D7: fetch the per-setting changelog (most-recent-first) and index it by key
