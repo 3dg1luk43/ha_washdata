@@ -7,16 +7,19 @@
   set no programme length, so its own long pause failed it as ``mid_restart``.
 * An Off Delay of 0 was judged at the default by the standby floor's safety
   check, so a floor a short Min Off Gap would end a cycle under passed as safe.
+* The bridge estimate judged an Off Delay of 0 with the default window, so a
+  pause the live gate ends measured nothing to bridge and no Min Off Gap came.
 """
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from unittest.mock import MagicMock, patch
 
 from homeassistant.core import HomeAssistant
 
 from custom_components.ha_washdata.const import (
+    CONF_END_ENERGY_THRESHOLD,
     CONF_MIN_OFF_GAP,
     CONF_OFF_DELAY,
     CONF_START_THRESHOLD_W,
@@ -149,3 +152,36 @@ def test_a_zero_off_delay_makes_no_standby_floor_safe(mock_hass: Any) -> None:
     # The same history under the 180 s Off Delay the check assumed: safe, proposed.
     engine = _engine(mock_hass, history, {**options, CONF_OFF_DELAY: 180}, "washing_machine")
     assert engine.generate_standby_floor_suggestions()[CONF_STOP_THRESHOLD_W]["value"] == 2.75
+
+
+def _soak(i: int) -> dict[str, Any]:
+    """An hour's wash with a 300 s soak at 2 W under a 5 W stop, three hours apart."""
+    pts = [[0.0, 1.0]] + [[float(t), 500.0] for t in range(30, 1800, 30)]
+    pts += [[float(t), 2.0] for t in range(1800, 2100, 30)]
+    pts += [[float(t), 500.0] for t in range(2100, 3600, 30)]
+    pts += [[3600.0, 0.0], [3630.0, 0.0]]
+    start = datetime(2026, 10, 1, 8, tzinfo=timezone.utc) + timedelta(hours=3 * i)
+    return {
+        "id": f"s{i}", "profile_name": "Cotton", "status": "completed",
+        "termination_reason": "timeout", "duration": 3630.0,
+        "start_time": start.isoformat(),
+        "end_time": (start + timedelta(seconds=3630)).isoformat(), "power_data": pts,
+    }
+
+
+def test_a_zero_off_delay_measures_the_whole_pause_to_bridge(mock_hass: Any) -> None:
+    """Off Delay 0: the live gate ends the 300 s soak after Min Off Gap's 60 s.
+    The bridge estimate judged it with the 180 s default window, where the soak's
+    0.1 Wh holds the 0.05 Wh energy gate, so it measured nothing to bridge and the
+    model pass withheld a Min Off Gap."""
+    cycles = [_soak(i) for i in range(6)]
+    options = {
+        CONF_STOP_THRESHOLD_W: 5.0, CONF_START_THRESHOLD_W: 8.0, CONF_OFF_DELAY: 0,
+        CONF_MIN_OFF_GAP: 60, CONF_END_ENERGY_THRESHOLD: 0.05,
+    }
+    pts = [(float(t), float(p)) for t, p in cycles[0]["power_data"]]
+    assert end_gate_would_split(pts, 5.0, 0, 60, 0.05)  # split live as configured
+    engine = _engine(mock_hass, cycles, options, "washing_machine")
+    bridge = engine._measured_bridge_requirement(cycles)  # noqa: SLF001
+    assert bridge is not None and bridge[0] >= 300.0
+    assert engine.generate_model_suggestions()[CONF_MIN_OFF_GAP]["value"] >= 360

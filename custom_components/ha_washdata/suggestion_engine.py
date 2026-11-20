@@ -3458,7 +3458,12 @@ class SuggestionEngine:
         # back to for the clean-cycle check, and `_end_gate_evidence` already
         # judges against it.
         stop_thr = float(_num(eff.get(CONF_STOP_THRESHOLD_W)) or stop_thr)
-        gate_off_delay = float(_num(eff.get(CONF_OFF_DELAY)) or DEFAULT_OFF_DELAY)
+        # An Off Delay of 0 is a window of one reading that holds no pause, so each
+        # needs bridging whole (PR #529 review: the default window stood in and
+        # held it, and no Min Off Gap was proposed). The default only when missing.
+        gate_off_delay = _num(eff.get(CONF_OFF_DELAY))
+        if gate_off_delay is None:
+            gate_off_delay = float(DEFAULT_OFF_DELAY)
         gate_end_energy = float(_num(eff.get(CONF_END_ENERGY_THRESHOLD)) or 0.0)
         # A dryer's short pulses are not quiet and do not end a pause (#474), as live.
         pulse_max_w: float | None = None
