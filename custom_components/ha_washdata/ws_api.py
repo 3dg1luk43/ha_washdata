@@ -2498,11 +2498,14 @@ async def ws_set_options(
         # Revert trusts this history, so the two writers have to follow one
         # contract - and `_record_option_changes`'s own docstring already says it
         # replaces the inline version that used to live here. Keys dropped by the
-        # null-strip above are still recorded as a change to None ("reverted to
-        # unset"); a None -> None no-op is skipped inside `_diff_option_changes`.
-        # So are stored overrides the numeric check dropped.
+        # null-strip above are still recorded, and so are stored overrides the
+        # numeric check dropped, each as what is left once written, as the import
+        # records a removal: the entry's data value where it holds the key (a
+        # dropped 2 W Min Power override leaves its 5 W), else None ("reverted to
+        # unset", PR #529 review). A no-op is skipped inside `_diff_option_changes`.
+        written_merged = {**entry.data, **new_options}
         submitted_post = {
-            k: new_options.get(k)
+            k: written_merged.get(k)
             for k in msg["options"]
             if k in new_options or k in dropped_null_keys or k in dropped_invalid_keys
         }

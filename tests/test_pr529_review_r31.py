@@ -154,7 +154,8 @@ async def test_clearing_min_power_records_the_stop_it_moves_from_entry_data(
     assert CONF_MIN_POWER not in entry.options
     assert hass.data[DOMAIN][entry.entry_id].detector.config.stop_threshold_w == 3.0
     rows = {r["key"]: r for r in store.get_settings_changelog()}
-    assert rows[CONF_MIN_POWER]["old"] == 2.0 and rows[CONF_MIN_POWER]["new"] is None
+    # Recorded as what the detector now runs with (round 37b), not "(none)".
+    assert rows[CONF_MIN_POWER]["old"] == 2.0 and rows[CONF_MIN_POWER]["new"] == 5.0
     stop = rows[CONF_STOP_THRESHOLD_W]
     assert stop["old"] is None and stop["new"] is None  # Revert changes nothing
     assert stop["old_effective"] == 1.2
