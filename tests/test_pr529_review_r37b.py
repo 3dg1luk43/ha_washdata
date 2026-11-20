@@ -2,20 +2,34 @@
 
 * A Settings save that dropped an invalid Min Power override recorded the
   removal as None, though the detector fell back to the entry data's value.
+* A wholesale import that replaced the stored cycles recorded this device's
+  old Stop as the one in force before its Stop row, so an imported cycle read
+  as ended under a Stop it never ran with.
 """
 from __future__ import annotations
 
+import json
+from datetime import timedelta
 from typing import Any
 
 from homeassistant.core import HomeAssistant
+from homeassistant.util import dt as dt_util
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
+from custom_components.ha_washdata import ws_api
 from custom_components.ha_washdata.const import (
     CONF_MIN_POWER,
     CONF_OFF_DELAY,
+    CONF_START_THRESHOLD_W,
+    CONF_STOP_THRESHOLD_W,
     CONFIG_ENTRY_MINOR_VERSION,
     CONFIG_ENTRY_VERSION,
     DOMAIN,
+    STORAGE_VERSION,
+)
+from custom_components.ha_washdata.suggestion_engine import (
+    _stop_at_end,
+    stop_threshold_changes,
 )
 
 
@@ -64,3 +78,55 @@ async def test_a_dropped_override_is_recorded_as_what_is_left(
     rows = {r["key"]: r for r in store.get_settings_changelog()}
     assert rows[CONF_MIN_POWER]["old"] == 2.0 and rows[CONF_MIN_POWER]["new"] == 5.0
     assert rows[CONF_OFF_DELAY]["old"] == 120 and rows[CONF_OFF_DELAY]["new"] is None
+
+
+async def _import(hass: HomeAssistant, client: Any, entry_id: str, data: dict) -> None:
+    await client.send_json_auto_id({
+        "type": f"{DOMAIN}/import_config", "entry_id": entry_id,
+        "json_data": json.dumps({
+            "version": STORAGE_VERSION, "data": data,
+            "entry_options": {
+                CONF_MIN_POWER: 0.5, CONF_START_THRESHOLD_W: 10.0, CONF_STOP_THRESHOLD_W: 1.0,
+            },
+        }),
+    })
+    res = await client.receive_json()
+    assert res["success"], res
+    await hass.async_block_till_done()
+
+
+async def test_an_import_replacing_the_cycles_keeps_their_stop(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """This device ran Stop 3 W; an import brought cycles that ended under its
+    1 W and set it. The Stop row said 3 W was in force before it, so an imported
+    cycle with no recorded finish Stop read as ended under 3 W and its below-Stop
+    evidence was dropped. Listed as before; the Stop before it is the imported one."""
+    opts = {CONF_MIN_POWER: 0.5, CONF_START_THRESHOLD_W: 10.0, CONF_STOP_THRESHOLD_W: 3.0}
+    imported = {
+        "id": "imp1", "status": "completed", "duration": 3600.0,
+        "start_time": (dt_util.now() - timedelta(days=1, hours=1)).isoformat(),
+        "end_time": (dt_util.now() - timedelta(days=1)).isoformat(),
+        "termination_reason": "timeout",
+    }
+    client = await hass_ws_client(hass)
+
+    entry = await setup_washdata_entry("Replaced", options=opts)
+    await _import(hass, client, entry.entry_id, {
+        "profiles": {"Eco": {"avg_duration": 3600}}, "past_cycles": [imported],
+    })
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    assert [c["id"] for c in store.get_past_cycles()] == ["imp1"]
+    assert entry.options[CONF_STOP_THRESHOLD_W] == 1.0
+    log = store.get_settings_changelog()
+    row = next(r for r in log if r["key"] == CONF_STOP_THRESHOLD_W)
+    assert row["old"] == 3.0 and row["new"] == 1.0  # listed, Revert restores 3 W
+    assert not ws_api._is_effective_stop_row(row)  # noqa: SLF001
+    assert _stop_at_end(imported, stop_threshold_changes(log), 1.0) == 1.0
+
+    # A merge that keeps this device's cycles: they ended under its 3 W.
+    entry = await setup_washdata_entry("Kept", options=opts)
+    await _import(hass, client, entry.entry_id, {"profiles": {"Eco": {"avg_duration": 3600}}})
+    log = hass.data[DOMAIN][entry.entry_id].profile_store.get_settings_changelog()
+    local = {**imported, "id": "local1"}
+    assert _stop_at_end(local, stop_threshold_changes(log), 1.0) == 3.0

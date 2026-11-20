@@ -874,9 +874,10 @@ async def _record_option_changes(
 
     ``restores_cycles``: the write puts back the options the stored cycles ran
     under (Undo Import: the restored store holds only cycles from before the
-    import). A Stop row then records the restored Stop as the one in force
-    before it, not the imported one no stored cycle ended under, and no row is
-    added for a Stop another setting moved back (PR #529 review).
+    import; a wholesale import that replaced them: they are the payload's). A
+    Stop row then records the Stop written as the one in force before it, not
+    the one it replaced, which no stored cycle ended under, and no row is added
+    for a Stop another setting moved (PR #529 review).
     """
     if not updates:
         return
@@ -4686,7 +4687,15 @@ async def async_apply_imported_entry_options(
         # Undo Import records a removal); a valid one as normalised.
         written_merged = {**entry.data, **new_options}
         written = {key: written_merged.get(key) for key in entry_options_updates}
-        await _record_option_changes(hass, entry, written, source, before=before)
+        # An import that replaced the stored cycles puts in the options they ran
+        # under, as Undo Import does: its Stop row stays listed (Revert needs
+        # ``old``), but the Stop in force before it is the imported one, not this
+        # device's, which no stored cycle ended under (PR #529 review). A merge
+        # that kept the local cycles records as before.
+        await _record_option_changes(
+            hass, entry, written, source, before=before,
+            restores_cycles=bool(config_updates.get("replaced_past_cycles")),
+        )
 
 
 @websocket_api.websocket_command(

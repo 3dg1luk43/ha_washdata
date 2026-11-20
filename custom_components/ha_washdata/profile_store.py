@@ -12900,6 +12900,9 @@ class ProfileStore:
             "entry_data": meta.get("entry_data", {}),
             "entry_options": meta.get("entry_options", {}),
             "restore_point_saved": restore_point_saved,
+            # The stored cycles are now the payload's, run under its options: the
+            # options write records its Stop row as Undo Import's (PR #529 review).
+            "replaced_past_cycles": "past_cycles" in supplied,
         }
 
     async def async_import_data_selective(
