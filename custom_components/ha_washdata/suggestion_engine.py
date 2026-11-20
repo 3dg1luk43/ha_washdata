@@ -1162,6 +1162,17 @@ def _instant(value: Any) -> datetime | None:
     return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
 
 
+def is_effective_stop_row(row: Any) -> bool:
+    """A Stop Threshold row for a Stop another setting moved (``old`` == ``new``,
+    ``ws_api._note_stop_in_force``): history for :func:`stop_threshold_changes`,
+    not a change the panel's settings history lists."""
+    return (
+        isinstance(row, dict)
+        and row.get("key") == CONF_STOP_THRESHOLD_W
+        and row.get("old") == row.get("new")
+    )
+
+
 def stop_threshold_changes(changelog: Any) -> list[tuple[datetime, float | None]]:
     """The recorded Stop Threshold changes, oldest first: (when, the value before it).
 

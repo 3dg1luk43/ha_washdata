@@ -3379,15 +3379,28 @@ class ProfileStore:
         # them go to the Stop rows the standby advisory can read
         # (``stop_threshold_changes``: this device's own, with a readable time);
         # a merge's foreign rows took them and evicted the last local change (PR
-        # #529 review).
+        # #529 review). Only rows the settings history lists count: a Stop row
+        # for a Stop another setting moved is hidden there and took the slot of a
+        # real change (PR #529 review); among those newest ones it is kept, and
+        # past them it competes for the Stop slots.
         if len(log) > self.SETTINGS_CHANGELOG_MAX:
-            from .suggestion_engine import stop_threshold_changes  # noqa: PLC0415
+            from .suggestion_engine import (  # noqa: PLC0415
+                is_effective_stop_row,
+                stop_threshold_changes,
+            )
 
+            cut, listed = len(log), 0
+            for idx, row in enumerate(log):
+                if not is_effective_stop_row(row):
+                    listed += 1
+                    if listed == self.SETTINGS_CHANGELOG_MAX:
+                        cut = idx + 1
+                        break
             older_stops = [
-                row for row in log[self.SETTINGS_CHANGELOG_MAX:]
+                row for row in log[cut:]
                 if isinstance(row, dict) and stop_threshold_changes([row])
             ][: self.SETTINGS_CHANGELOG_KEEP_STOP]
-            log[self.SETTINGS_CHANGELOG_MAX:] = older_stops
+            log[cut:] = older_stops
         self._data["settings_changelog"] = log
         try:
             await self.async_save()

@@ -790,11 +790,9 @@ def _effective_stop(merged: dict[str, Any]) -> float | None:
 
 def _is_effective_stop_row(row: Any) -> bool:
     """A row :func:`_note_stop_in_force` added for a Stop the option did not change."""
-    return (
-        isinstance(row, dict)
-        and row.get("key") == CONF_STOP_THRESHOLD_W
-        and row.get("old") == row.get("new")
-    )
+    from .suggestion_engine import is_effective_stop_row  # pylint: disable=import-outside-toplevel
+
+    return is_effective_stop_row(row)
 
 
 def _note_stop_in_force(
