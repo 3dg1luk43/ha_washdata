@@ -2004,6 +2004,11 @@ class WashDataManager:
             state = self._program_mismatch_state()
             if state is None or state.key != key:
                 return  # the pick changed while the match ran
+            if self._is_user_paused:
+                # Paused while it scored (PR #529 review): no check counts in a
+                # user pause (the scheduler's guard covers only the dispatch). The
+                # run so far is kept; the resume's first reading checks again.
+                return
             if self._program_mismatch_data_generation() != generation:
                 state.streak = 0
                 state.data_generation = self._program_mismatch_data_generation()
