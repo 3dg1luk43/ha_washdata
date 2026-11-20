@@ -280,3 +280,49 @@ def test_a_cycle_with_no_intervals_runs_no_operational_pass(tmp_path: Path, monk
     (row,) = churn.run(tmp_path, ("shipped",), None, jobs=1)
     assert seen == [1, 2, 3, 5, 6, 7, 8]
     assert row["cycle_ends"] == 7
+
+
+def test_each_pass_reads_the_changelog_its_prefix_had(tmp_path: Path, monkeypatch) -> None:
+    """PR #529 review: every prefix read the export's whole settings changelog, so a
+    Stop change made after a prefix's last end moved the standby advisory's read of
+    that prefix's cycles (``recorded_stop_changes``). Rows count from their time."""
+    past = []
+    for j in range(3):
+        pts = [[k * 120.0, 400.0 + (k % 3)] for k in range(6)] + [[720.0, 0.0]]
+        past.append({
+            "id": f"s{j}", "status": "completed", "termination_reason": "smart",
+            "start_time": f"2026-02-{j + 1:02d}T08:00:00+00:00",
+            "duration": pts[-1][0], "power_data": pts,
+        })
+    past[2]["end_time"] = "2026-02-03T08:12:00+00:00"
+    log = [
+        {"key": "stop_threshold_w", "old": 50.0, "new": 100.0,
+         "timestamp": "2026-03-01T10:00:00+00:00"},
+        {"key": "stop_threshold_w", "old": 20.0, "new": 50.0,
+         "timestamp": "2026-02-02T12:00:00+00:00"},
+        {"key": "stop_threshold_w", "old": 10.0, "new": 20.0,
+         "timestamp": "2026-02-01T08:12:00+00:00"},
+    ]
+    doc = {
+        "version": 16, "entry_data": {"device_type": "dryer", "name": "Steady"},
+        "entry_options": {"start_threshold_w": 450.0, "stop_threshold_w": 100.0},
+        "data": {"profiles": {}, "past_cycles": past, "envelopes": {},
+                 "settings_changelog": log},
+    }
+    (tmp_path / "steady").mkdir()
+    (tmp_path / "steady" / "export.json").write_text(json.dumps(doc))
+    seen: list[tuple[int, list[str]]] = []
+    real = suggestion_engine.recorded_stop_changes
+
+    def spy(store):
+        seen.append((len(store.get_past_cycles()),
+                     [row["timestamp"][:10] for row in store.get_settings_changelog()]))
+        return real(store)
+
+    monkeypatch.setattr(suggestion_engine, "recorded_stop_changes", spy)
+    churn.run(tmp_path, ("shipped",), None, jobs=1)
+    # The first end (start + duration) is the first change's time: at or before
+    # counts. The third end (its stored end) follows the second; the last row
+    # follows every end.
+    assert seen == [(1, ["2026-02-01"]), (2, ["2026-02-01"]),
+                    (3, ["2026-02-02", "2026-02-01"])], seen

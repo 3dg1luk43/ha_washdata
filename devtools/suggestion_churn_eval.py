@@ -43,7 +43,10 @@ cycle end at a time.
   from its first stored run (``ProfileStore.create_profile``) and each later run
   rebuilds it (``async_rebuild_envelope``), so the shortest programme that caps
   Profile Match Interval is one already run. Reference cycles count from the start
-  only when imported before the walk; backfill cycles not at all.
+  only when imported before the walk; backfill cycles not at all;
+* the settings changelog is the export's rows recorded by the newest end so far
+  (``changelog_until``): the standby advisory reads Stop changes from it, and a
+  change made later is not one the store held yet.
 
 Counted keys (the report): the cadence keys (``learning.CADENCE_KEYS``) and Stop /
 Start Threshold; the other keys applied are summed under ``applies_other``.
@@ -76,7 +79,7 @@ import json  # noqa: E402
 import math  # noqa: E402
 import sys  # noqa: E402
 from concurrent.futures import ProcessPoolExecutor  # noqa: E402
-from datetime import datetime, timezone  # noqa: E402
+from datetime import datetime, timedelta, timezone  # noqa: E402
 from pathlib import Path  # noqa: E402
 from typing import Any, Iterator  # noqa: E402
 
@@ -170,6 +173,40 @@ def _labelled_own(cycle: dict[str, Any]) -> bool:
     )
 
 
+def _cycle_end(cycle: dict[str, Any]) -> datetime | None:
+    """When ``cycle`` ended: its stored end, else start + duration, else None."""
+    end = suggestion_engine._instant(cycle.get("end_time"))  # noqa: SLF001
+    if end is not None:
+        return end
+    start = suggestion_engine._instant(cycle.get("start_time"))  # noqa: SLF001
+    duration = suggestion_engine._num(cycle.get("duration"))  # noqa: SLF001
+    if start is None or duration is None or duration < 0:
+        return None
+    try:
+        return start + timedelta(seconds=duration)
+    except OverflowError:
+        return None
+
+
+def changelog_until(changelog: Any, cutoff: datetime | None) -> list[dict[str, Any]]:
+    """The settings changelog rows recorded at or before ``cutoff``, newest first.
+
+    What the store held when the prefix's last cycle ended (PR #529 review): the
+    export carries every later change too, and the standby advisory reads Stop
+    changes from it (``recorded_stop_changes``), so a change made after the prefix
+    altered an earlier prefix's verdict. A row without a readable time is left out
+    (``stop_threshold_changes`` skips it anyway); nothing is known before any end.
+    """
+    if cutoff is None:
+        return []
+    return [
+        row for row in changelog or []
+        if isinstance(row, dict)
+        and (when := suggestion_engine._instant(row.get("timestamp"))) is not None  # noqa: SLF001
+        and when <= cutoff
+    ]
+
+
 def prefix_profile(store: Any, name: str, cycle: dict[str, Any]) -> None:
     """``cycle`` (now stored) reaches programme ``name`` the way the store puts it there.
 
@@ -222,6 +259,9 @@ def walk(corpus: str, path: str, arm: str) -> dict[str, Any] | None:
     applied_other: dict[str, int] = {}
     per_cycle: list[list[float]] = []
     ends = labelled = last_batch = last_apply = last_evidence = refused = 0
+    # The newest end so far: the changelog rows recorded by then are the store's.
+    cutoff: datetime | None = None
+    changelog = base.get("settings_changelog")
     # What the store still holds after an Apply all that wrote nothing (it clears
     # the store only when it writes, ``ws_apply_suggestions``).
     pending: dict[str, Any] = {}
@@ -248,9 +288,13 @@ def walk(corpus: str, path: str, arm: str) -> dict[str, Any] | None:
             evidence = sum(1 for c in past[: i + 1] if _new_evidence(c))
             run_model = evidence > last_evidence
             # No early exit: the threshold correctives run at every cycle end.
+            end = _cycle_end(cycle)
+            if end is not None and (cutoff is None or end > cutoff):
+                cutoff = end
             data = dict(base)
             data.update(
                 past_cycles=past[: i + 1], reference_cycles=references, backfill_cycles=[],
+                settings_changelog=changelog_until(changelog, cutoff),
                 profiles=profiles, envelopes=envelopes,
                 suggestions=pending, locked_suggestions=[],
                 suggestion_apply_cycle_count=last_apply, lifetime_cycle_count=0,
