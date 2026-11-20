@@ -1480,6 +1480,39 @@ class CycleDetector:
         merged = _merge_spans([*spans, ((begin - start).total_seconds(), length)])
         return max(0.0, sum(n for _at, n in merged) - sum(n for _at, n in spans))
 
+    def open_halt_s(self) -> float:
+        """Seconds of programme time standing still that :meth:`_match_readings`
+        still spans (#530): the open user pause (:meth:`open_user_pause_s`) and
+        the stall shown now, which the trace keeps until it is banked but which
+        progress already leaves out from its first reading (item 514). Their
+        union, net of the finished spans the trace already cuts, so the span
+        less this is programme time. 0.0 without either. Never raises."""
+        try:
+            start = self._current_cycle_start
+            if start is None or not self._power_readings:
+                return 0.0
+            last = self._power_readings[-1][0]
+            opened: list[tuple[float, float]] = []
+            since = self._user_pause_since
+            if USER_PAUSE_EXCLUDED_FROM_GATES and self._user_paused and since is not None:
+                begin = max(since, start)
+                opened.append(((begin - start).total_seconds(), (last - begin).total_seconds()))
+            run = self._stall_run_start
+            if (
+                STALL_EXCLUDED_FROM_PROGRESS and STALL_CURRENT_EXCLUDED_FROM_PROGRESS
+                and self._stall_active and run is not None
+            ):
+                begin = max(run, start)
+                opened.append(((begin - start).total_seconds(), (last - begin).total_seconds()))
+            opened = [(at, n) for at, n in opened if n > 0]
+            if not opened:
+                return 0.0
+            spans = self._gate_spans()
+            merged = _merge_spans([*spans, *opened])
+            return max(0.0, sum(n for _at, n in merged) - sum(n for _at, n in spans))
+        except Exception:  # pylint: disable=broad-exception-caught
+            return 0.0
+
     def _cut_readings(
         self, spans: list[tuple[float, float]]
     ) -> list[tuple[datetime, float]]:

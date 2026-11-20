@@ -1929,11 +1929,11 @@ class WashDataManager:
         )
 
     def _program_mismatch_open_pause_s(self) -> float:
-        """The open user pause the #530 check's trace still spans
-        (``CycleDetector.open_user_pause_s``), read with the trace. 0.0 when the
-        detector cannot say. Never raises."""
+        """The open user pause and the stall shown now that the #530 check's trace
+        still spans (``CycleDetector.open_halt_s``), read with the trace. 0.0 when
+        the detector cannot say. Never raises."""
         try:
-            return max(0.0, float(self.detector.open_user_pause_s()))
+            return max(0.0, float(self.detector.open_halt_s()))
         except Exception:  # pylint: disable=broad-exception-caught
             return 0.0
 
@@ -1955,11 +1955,12 @@ class WashDataManager:
         The fraction gate reads the pick's usual duration as it is when the match
         lands: picking the same program again keeps the check going (no new
         generation) but can bring a new duration. It reads programme time: the
-        trace's span less ``paused_s``, the user pause still open in it (read
-        with the trace; now when not given). Finished pauses are already cut
-        out, the open one only once the resume banks it, and a pick paused at
-        20 of its 100 minutes was past half after 30 minutes of pause (PR #529
-        review).
+        trace's span less ``paused_s``, the user pause and the stall still open
+        in it (read with the trace; now when not given). Finished pauses and
+        stalls are already cut out, the open ones only once they are banked: a
+        pick paused at 20 of its 100 minutes was past half after 30 minutes of
+        pause, and a 60 min pick stalled at minute 20 after 30 minutes of the
+        stall (PR #529 review).
 
         ``device_type`` is the one the check was scheduled as (now when not
         given): a device type changed in place (the panel, no reload) while the
