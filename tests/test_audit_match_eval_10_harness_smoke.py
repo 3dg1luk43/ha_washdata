@@ -188,7 +188,7 @@ def test_devtools_holds_no_orphan_test_modules() -> None:
     assert offenders == []
 
 
-def _synthetic_export(path: Path) -> None:
+def _synthetic_export(path: Path, data: dict | None = None, entry_data: dict | None = None) -> None:
     """Six completed washer cycles, two programmes, a 10 s plug."""
     cycles = []
     for i in range(6):
@@ -206,10 +206,10 @@ def _synthetic_export(path: Path) -> None:
         })
     doc = {
         "device_fingerprint": {"device_type": "washing_machine"},
-        "entry_data": {"device_type": "washing_machine"},
+        "entry_data": {"device_type": "washing_machine", **(entry_data or {})},
         "entry_options": {"device_type": "washing_machine", "stop_threshold_w": 2.0},
         "data": {"past_cycles": cycles, "profiles": {"Cotton": {}, "Quick": {}},
-                 "suggestions": {"running_dead_zone": {"value": 60}}},
+                 "suggestions": {"running_dead_zone": {"value": 60}}, **(data or {})},
     }
     import json  # noqa: PLC0415
 
@@ -227,3 +227,30 @@ def test_analyze_diag_reports_only_what_the_engine_can_suggest(tmp_path: Path) -
     assert "running_dead_zone" not in keys
     assert rep["device_type"] == "washing_machine" and rep["cycles"] == 6
     assert set(rep["programmes"]) == {"Cotton", "Quick"}
+
+
+_ROWS = [[30.0, 15.0], [40.0, 20.0], [50.0, 25.0]]
+
+
+@pytest.mark.parametrize(
+    ("power_sensor", "cadence_sensor", "expected"),
+    [
+        ("sensor.plug", "sensor.plug", ((40.0, 20.0), "summaries")),
+        ("sensor.plug", None, ((40.0, 20.0), "summaries")),            # rows from before the sensor was kept
+        ("**REDACTED**", "sensor.plug", ((40.0, 20.0), "summaries")),  # a diagnostics dump: cannot compare
+        ("sensor.plug", "sensor.old_plug", ((10.0, 10.0), "traces")),  # another plug's rows
+    ],
+)
+def test_analyze_diag_reads_the_cadence_the_live_pass_reads(
+    tmp_path: Path, power_sensor: str, cadence_sensor: str | None, expected: tuple
+) -> None:
+    """PR #529 review: the live pass sizes from the stored per-cycle summaries of the
+    current power sensor (``LearningManager.cadence``); the report rebuilt them from
+    the traces (a 10 s plug here) even when the file carried them."""
+    data: dict = {"cadence_summaries": _ROWS}
+    if cadence_sensor is not None:
+        data["cadence_sensor"] = cadence_sensor
+    export = tmp_path / "export.json"
+    _synthetic_export(export, data=data, entry_data={"power_sensor": power_sensor})
+    cad = _module("analyze_diag").analyse(export)["cadence"]
+    assert ((cad["p95_s"], cad["median_s"]), cad.get("source")) == expected

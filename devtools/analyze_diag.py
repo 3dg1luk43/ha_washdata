@@ -39,17 +39,24 @@ operational, standby-floor, model, detection and batch passes, then
 through: the list the Settings tab would show, muted keys and values the device
 already runs with dropped.
 
-One input is approximated: the operational pass reads the cadence model the
-manager fills from live reading intervals of cycles that ended on their own
-(``LearningManager.close_cycle_cadence``). A file does not carry it, so it is
-rebuilt from the stored traces of completed cycles (intervals in (0.1, 1800) s
-from each real reading to the real reading before it; keepalives are skipped).
-A trace stored with a throttle or a trim can differ from what the manager saw.
-It is not scoped to the power sensor either: the live model reads only the
-summaries measured on the current sensor (``ProfileStore.get_cadence_summaries``),
-but a stored cycle does not record its sensor, so after a sensor swap this report
-also times the replaced sensor's cycles and can propose other values than the
-live pass.
+The operational pass's cadence is what the live pass reads
+(``LearningManager.cadence``): the file's stored per-cycle summaries
+(``cadence_summaries``), the median over the last ``CADENCE_RECENT_CYCLES``
+(``learning.recent_cadence``), when they were measured on the file's power sensor
+(``cadence_sensor``, as ``ProfileStore.get_cadence_summaries`` compares it) or do
+not name one. A diagnostics dump redacts the power sensor, so there the rows are
+read without the check, as live with no sensor configured; a swap since the last
+summary is not visible then.
+
+Without usable summaries (an older file, or rows another sensor measured) one input
+is approximated: live, the pass then reads the in-memory model filled from reading
+intervals of cycles that ended on their own (``LearningManager.close_cycle_cadence``).
+A file does not carry it, so it is rebuilt from the stored traces of completed
+cycles (intervals in (0.1, 1800) s from each real reading to the real reading before
+it; keepalives are skipped). A trace stored with a throttle or a trim can differ
+from what the manager saw, and a stored cycle does not record its sensor, so after a
+sensor swap this also times the replaced sensor's cycles and can propose other
+values than the live pass. The report names the source it used.
 
 ``--no-color`` is accepted for compatibility (the output has no colour).
 
@@ -96,6 +103,30 @@ def _cadence_intervals(cycles: list[dict[str, Any]]) -> list[list[float]]:
     return out
 
 
+#: What a diagnostics dump puts in place of the power sensor (``diagnostics._redact``).
+_REDACTED = "**REDACTED**"
+
+
+def _stored_cadence(data: dict[str, Any], power_sensor: Any) -> tuple[float, float] | None:
+    """The cadence the live pass reads from the file's stored summaries, or None.
+
+    As ``LearningManager.cadence``: ``learning.recent_cadence`` over the rows
+    ``ProfileStore.get_cadence_summaries`` returns for the power sensor, none when
+    ``cadence_sensor`` names another one. An absent or redacted power sensor
+    cannot be compared: the rows count, as live with no sensor.
+    """
+    from custom_components.ha_washdata.learning import recent_cadence  # noqa: PLC0415
+
+    rows = data.get("cadence_summaries")
+    if not isinstance(rows, list) or not rows:
+        return None
+    recorded = data.get("cadence_sensor")
+    known = power_sensor if power_sensor and power_sensor != _REDACTED else None
+    if known is not None and recorded is not None and recorded != known:
+        return None
+    return recent_cadence([r for r in rows if isinstance(r, (list, tuple))])
+
+
 def analyse(path: Path) -> dict[str, Any]:
     """The report for one file: settings, suggestions and a cycle summary."""
     import suggestion_loop_eval as slo  # noqa: PLC0415
@@ -114,6 +145,8 @@ def analyse(path: Path) -> dict[str, Any]:
     if unwrapped is None:
         raise SystemExit(f"{path}: not a WashData export or diagnostics dump")
     data, entry_data, entry_options, fmt = unwrapped
+    # The file's own sensor, before a missing one gets the placeholder below.
+    file_sensor = {**entry_data, **entry_options}.get("power_sensor")
     entry_data = {"power_sensor": "sensor.analyze_diag", "name": "analyze",
                   **{k: v for k, v in entry_data.items() if v is not None}}
     options = {k: v for k, v in entry_options.items() if v is not None}
@@ -135,7 +168,9 @@ def analyse(path: Path) -> dict[str, Any]:
             await mgr.profile_store.async_rebuild_envelope(name)
 
     ev.run_coro(_rebuild())
-    cad = slo.cadence(_cadence_intervals(base["past_cycles"]))
+    cad, cad_source = _stored_cadence(data, file_sensor), "summaries"
+    if cad is None:
+        cad, cad_source = slo.cadence(_cadence_intervals(base["past_cycles"])), "traces"
     slo.run_passes(mgr, cad)
 
     merged = {**entry_data, **options}
@@ -175,7 +210,7 @@ def analyse(path: Path) -> dict[str, Any]:
         "device_type": device_type,
         "cycles": len(base["past_cycles"]),
         "profiles": len(base["profiles"]),
-        "cadence": None if cad is None else {"p95_s": cad[0], "median_s": cad[1]},
+        "cadence": None if cad is None else {"p95_s": cad[0], "median_s": cad[1], "source": cad_source},
         "settings": rows,
         "programmes": {
             name: {
@@ -200,7 +235,8 @@ def print_report(rep: dict[str, Any]) -> None:
     print(f"\n{rep['file']}")
     cad = rep["cadence"]
     cad_txt = (
-        f"p95 {cad['p95_s']:.1f} s, median {cad['median_s']:.1f} s" if cad
+        f"p95 {cad['p95_s']:.1f} s, median {cad['median_s']:.1f} s (from the stored {cad['source']})"
+        if cad
         else "fewer than 20 intervals: operational pass skipped"
     )
     print(f"  format {rep['format']} | device {rep['device_type']} | "
