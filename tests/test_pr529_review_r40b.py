@@ -7,13 +7,18 @@
 * The kept standby tail stopped at a synthetic reading at working power, so a
   real 3 W tail behind a 20 W keepalive was cut and the 6 W after it read as the
   idle level: two such cycles raised "still drawing" at a 5 W stop.
+* The joint end-gate check withdrew a pending Start with every withdrawn Stop,
+  though a 50 W Start correction is valid against the 4 W Stop in force.
 """
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 from typing import Any
+from unittest.mock import MagicMock, patch
 
 from custom_components.ha_washdata.const import (
+    CONF_DEVICE_TYPE,
+    DOMAIN,
     CONF_END_ENERGY_THRESHOLD,
     CONF_MIN_OFF_GAP,
     CONF_OFF_DELAY,
@@ -22,11 +27,15 @@ from custom_components.ha_washdata.const import (
 )
 from custom_components.ha_washdata.cycle_detector import CycleDetector
 from custom_components.ha_washdata.detector_config import build_detector_config
+from custom_components.ha_washdata.learning import LearningManager
 from custom_components.ha_washdata.suggestion_engine import (
+    SuggestionEngine,
     detect_standby_above_stop,
     end_gate_would_split,
 )
 from custom_components.ha_washdata.time_utils import SYNTHETIC_OFFSETS_KEY
+
+from .test_pr529_review_r35a import _Store
 
 T0 = datetime(2026, 1, 1, tzinfo=timezone.utc)
 
@@ -126,3 +135,109 @@ def test_a_synthetic_reading_does_not_cut_the_standby_tail() -> None:
         cycle[SYNTHETIC_OFFSETS_KEY] = []
     found = detect_standby_above_stop(cycles, 5.0)
     assert found is not None and found["idle_w"] == 6.0
+
+
+# ── A withdrawn Stop leaves a Start valid against the Stop in force ──────────
+
+
+_PAIR_OPTS = {
+    CONF_DEVICE_TYPE: "washing_machine", CONF_STOP_THRESHOLD_W: 4.0,
+    CONF_START_THRESHOLD_W: 120.0, CONF_OFF_DELAY: 180, CONF_MIN_OFF_GAP: 300,
+    CONF_END_ENERGY_THRESHOLD: 0.25,
+}
+
+
+def _pair_engine(pause_w: float, pause_s: int, opts: dict[str, Any]) -> tuple[SuggestionEngine, _Store]:
+    pts = _paused_trace(pause_w, pause_s)
+    cycle = {
+        "id": "w1", "status": "completed", "termination_reason": "timeout",
+        "power_data": [[t, p] for t, p in pts],
+    }
+    store = _Store(cycles=[cycle])
+    eng = SuggestionEngine(MagicMock(), "e", store, device_type="washing_machine")
+    eng._entry_options = lambda: dict(opts)  # noqa: SLF001
+    return eng, store
+
+
+def test_a_withdrawn_stop_keeps_a_start_valid_against_the_stop_in_force() -> None:
+    """A 5 W Stop makes the 400 s pause at 4.5 W quiet and it splits (the 4 W in
+    force bridges it, live too); the 50 W Start correction stays above 4 W."""
+    pts = _paused_trace(4.5, 400)
+    assert len(_replay(_PAIR_OPTS, pts, "washing_machine")) == 1
+    assert len(_replay({**_PAIR_OPTS, CONF_STOP_THRESHOLD_W: 5.0}, pts, "washing_machine")) == 2
+    eng, _store = _pair_engine(4.5, 400, _PAIR_OPTS)
+    stored = {
+        CONF_STOP_THRESHOLD_W: {"value": 5.0, "reason": "r", "corrective": True},
+        CONF_START_THRESHOLD_W: {"value": 50.0, "reason": "r", "corrective": True},
+    }
+    assert eng.joint_end_gate_drops(stored) == [CONF_STOP_THRESHOLD_W]
+    assert eng.joint_end_gate_drops(stored, strict=True) == [CONF_STOP_THRESHOLD_W]
+
+
+def test_a_start_derived_from_the_withdrawn_stop_goes_with_it() -> None:
+    """A Start cascade exists only to sit above the Stop it follows."""
+    eng, _store = _pair_engine(4.5, 400, _PAIR_OPTS)
+    stored = {
+        CONF_STOP_THRESHOLD_W: {"value": 5.0, "reason": "r", "corrective": True},
+        CONF_START_THRESHOLD_W: {"value": 125.0, "reason": "r", "cascade": True},
+    }
+    assert eng.joint_end_gate_drops(stored) == [CONF_STOP_THRESHOLD_W, CONF_START_THRESHOLD_W]
+
+
+def test_a_start_the_stop_in_force_inverts_goes_with_the_stop() -> None:
+    """A 2 W Stop makes a 1200 s pause at 1.8 W near the stop, so the flat-standby
+    bypass splits it; the 3 W Start beside it would sit under the 4 W in force."""
+    opts = {**_PAIR_OPTS, CONF_END_ENERGY_THRESHOLD: 0.05}
+    eng, _store = _pair_engine(1.8, 1200, opts)
+    stored = {
+        CONF_STOP_THRESHOLD_W: {"value": 2.0, "reason": "r"},
+        CONF_START_THRESHOLD_W: {"value": 3.0, "reason": "r"},
+    }
+    assert eng.joint_end_gate_drops(stored) == [CONF_STOP_THRESHOLD_W, CONF_START_THRESHOLD_W]
+
+
+async def test_the_pass_check_leaves_the_start_stored(mock_hass: Any) -> None:
+    """After every pass: the Stop is withdrawn, the reconcile after it keeps the
+    Start."""
+    store = _Store(cycles=[{
+        "id": "w1", "status": "completed", "termination_reason": "timeout",
+        "power_data": [[t, p] for t, p in _paused_trace(4.5, 400)],
+    }])
+    entry = MagicMock()
+    entry.data = {}
+    entry.options = dict(_PAIR_OPTS)
+    mock_hass.config_entries.async_get_entry.return_value = entry
+    mock_hass.async_create_task = lambda coro, *_a: coro.close()
+    lm = LearningManager(mock_hass, "e", store, device_type="washing_machine")
+    store.set_suggestion(CONF_STOP_THRESHOLD_W, 5.0, reason="r", flags={"corrective": True})
+    store.set_suggestion(CONF_START_THRESHOLD_W, 50.0, reason="r", flags={"corrective": True})
+    await lm._enforce_joint_end_gate(strict=True)  # noqa: SLF001
+    assert CONF_STOP_THRESHOLD_W not in store.suggestions
+    assert store.suggestions[CONF_START_THRESHOLD_W]["value"] == 50.0
+
+
+async def test_apply_all_writes_the_start_its_withdrawn_stop_leaves_valid(
+    hass: Any, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """Apply all on a real entry: the 5 W Stop is withdrawn, the 50 W Start is
+    written, and the pair check passes against the 4 W Stop kept."""
+    opts = {k: v for k, v in _PAIR_OPTS.items() if k != CONF_DEVICE_TYPE}
+    entry = await setup_washdata_entry(options=opts)
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    store.set_suggestion(CONF_STOP_THRESHOLD_W, 5.0, reason="r", flags={"corrective": True})
+    store.set_suggestion(CONF_START_THRESHOLD_W, 50.0, reason="r", flags={"corrective": True})
+    client = await hass_ws_client(hass)
+    with patch.object(
+        SuggestionEngine, "_end_gate_evidence", return_value=[_paused_trace(4.5, 400)]
+    ):
+        await client.send_json_auto_id({
+            "type": f"{DOMAIN}/apply_suggestions", "entry_id": entry.entry_id,
+            "keys": [CONF_STOP_THRESHOLD_W, CONF_START_THRESHOLD_W],
+        })
+        res = await client.receive_json()
+    assert res["success"], res
+    assert res["result"]["applied"] == [CONF_START_THRESHOLD_W]
+    await hass.async_block_till_done()
+    options = hass.config_entries.async_get_entry(entry.entry_id).options
+    assert options[CONF_START_THRESHOLD_W] == 50.0
+    assert options[CONF_STOP_THRESHOLD_W] == 4.0

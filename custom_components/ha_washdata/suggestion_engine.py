@@ -2790,7 +2790,11 @@ class SuggestionEngine:
         that entry is withdrawn, and only when that removes a split (review of
         PR #529). A min_off_gap cascade is left out of the count, since the off
         delay it follows already sets the wait and it goes with that off delay. A
-        withdrawn stop takes its start. Executor-safe; never raises unless
+        withdrawn stop takes its start only when the start follows it: a cascade
+        derived from it, or one the stop in force would invert (review of PR #529:
+        a 50 W start correction went with a 5 W stop, valid against the 4 W in
+        force); a start kept is judged with the rest, its cascades included.
+        Executor-safe; never raises unless
         ``strict``, where a failed check, or a split no withdrawal removes, raises
         instead of reading as "nothing to withdraw" (Apply all must not write a set
         nobody judged, PR #529 review).
@@ -2807,8 +2811,20 @@ class SuggestionEngine:
             evidence = self._end_gate_evidence()
             if not evidence:
                 return []
-            base = dict(self._effective_thresholds(self._entry_options()))
+            from .detector_config import inverted_threshold_pair  # noqa: PLC0415
+
+            options = self._entry_options()
+            base = dict(self._effective_thresholds(options))
             allowed = self._end_gate_splits(evidence, base, strict=strict)
+            start = stored.get(CONF_START_THRESHOLD_W)
+            start_follows_stop = isinstance(start, dict) and (
+                bool(start.get("cascade"))
+                or _num(start.get("value")) is None
+                or inverted_threshold_pair(
+                    options, {**options, CONF_START_THRESHOLD_W: start.get("value")},
+                    self.device_type or "",
+                ) is not None
+            )
             cascades = frozenset(k for k in values if stored[k].get("cascade"))
             plain = {k: v for k, v in values.items() if k not in cascades}
             rederive = self._cascades_after_withdrawal(stored, cascades) if cascades else None
@@ -2826,7 +2842,7 @@ class SuggestionEngine:
                 return memo[gone]
 
             def withdraw(gone: frozenset[str], key: str) -> frozenset[str]:
-                if key == CONF_STOP_THRESHOLD_W and isinstance(stored.get(CONF_START_THRESHOLD_W), dict):
+                if key == CONF_STOP_THRESHOLD_W and start_follows_stop:
                     return gone | {key, CONF_START_THRESHOLD_W}
                 return gone | {key}
 
@@ -2867,7 +2883,7 @@ class SuggestionEngine:
                 _LOGGER.debug("Joint end-gate check: a cascade no withdrawal removes splits own cycles")
             if (
                 CONF_STOP_THRESHOLD_W in drops and CONF_START_THRESHOLD_W not in drops
-                and isinstance(stored.get(CONF_START_THRESHOLD_W), dict)
+                and start_follows_stop
             ):
                 drops.append(CONF_START_THRESHOLD_W)
             return drops
