@@ -1863,6 +1863,11 @@ class CycleDetector:
         PAUSED (#524): the pin's matcher branch answers synchronously."""
         self._try_profile_match(timestamp, force=True)
 
+    def match_frozen(self, timestamp: datetime) -> bool:
+        """Whether no match lands now, a pin's included: the anti-crease freeze
+        (#296), which ``_try_profile_match`` and ``update_match`` both honour."""
+        return bool(self._matched_profile and self._in_anticrease_freeze(timestamp))
+
     def _try_profile_match(self, timestamp: datetime, force: bool = False) -> None:
         """Attempt to invoke the profile matcher if conditions are met.
 
@@ -1922,7 +1927,7 @@ class CycleDetector:
         # pre-tail match instead.  Self-correcting: a new wash's heating burst above
         # anti_wrinkle_max_power leaves the tail regime, so this stops applying and
         # matching re-arms for the next cycle.
-        if self._matched_profile and self._in_anticrease_freeze(timestamp):
+        if self.match_frozen(timestamp):
             return
 
         # Rate limiting
@@ -2896,6 +2901,12 @@ class CycleDetector:
     def expected_duration_seconds(self) -> float:
         """Return the expected duration of the current cycle in seconds."""
         return self._expected_duration
+
+    @property
+    def match_ambiguous(self) -> bool:
+        """Whether the match the detector holds is ambiguous (top-1 vs top-2 within
+        ``MATCH_AMBIGUITY_MARGIN``). A program picked by hand never is."""
+        return bool(self._match_ambiguous)
 
     @staticmethod
     def _smart_term_block_reason(

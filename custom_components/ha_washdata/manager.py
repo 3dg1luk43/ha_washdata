@@ -4405,6 +4405,16 @@ class WashDataManager:
             held = float(self.detector.expected_duration_seconds or 0.0)
             if abs(held - float(self._matched_profile_duration)) > 1.0:
                 return True
+        # Nor while it holds an ambiguous automatic match under the pick, of the
+        # same program at the same length: a pick is never ambiguous, so it has
+        # not landed (PR #529 review). Inside the anti-crease freeze no match
+        # lands, the pick's included: the door is judged by the match kept there.
+        if (
+            self._manual_program_active
+            and self.detector.match_ambiguous
+            and not self.detector.match_frozen(utc_now())
+        ):
+            return True
         return False
 
     def _hand_pick_over_for_door(self) -> None:
