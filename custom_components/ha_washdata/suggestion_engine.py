@@ -1830,6 +1830,43 @@ def _drop_inverted_threshold_pair(
     return suggestions
 
 
+def _settle_stored_suggestions(
+    entries: dict[str, Any],
+    current: dict[str, Any],
+    locked: set[str],
+    *,
+    min_power_floor: float = 0.0,
+    explicit_thresholds: frozenset[str] | None = None,
+) -> dict[str, Any]:
+    """The stored suggestion set ``entries`` (no cascades, no locked key) derives:
+    :func:`reconcile_suggestions`, the locked keys left out, an inverted Start/Stop
+    pair withdrawn (:func:`_drop_inverted_threshold_pair`).
+
+    A withdrawn entry takes its cascades with it: they are derived again from the
+    entries left. Kept, a cascade could outlive the change that justified it (a
+    2 W Start under a locked 4 W Stop withdrawn, the 1.3 W Min Power its 1.6 W
+    Stop cascade derived stayed; PR #529 review). Cascades of the entries left
+    stay. Pure.
+    """
+    base = dict(entries)
+    adjusted: dict[str, Any] = {}
+    # Each round withdraws at least one entry or ends; Start and Stop go together,
+    # so a second round is the most the pair check can ask for.
+    for _round in range(3):
+        adjusted, _changed = reconcile_suggestions(
+            base, current,
+            min_power_floor=min_power_floor, explicit_thresholds=explicit_thresholds,
+        )
+        for key in locked:
+            adjusted.pop(key, None)
+        adjusted = _drop_inverted_threshold_pair(adjusted, current)
+        left = {k: v for k, v in base.items() if k in adjusted}
+        if len(left) == len(base):
+            break
+        base = left
+    return adjusted
+
+
 def reconcile_suggestions(
     suggestions: dict[str, Any],
     current: dict[str, Any],
@@ -2811,11 +2848,10 @@ class SuggestionEngine:
         }
 
         def derive(gone: frozenset[str]) -> dict[str, Any]:
-            adjusted, _changed = reconcile_suggestions(
-                {k: dict(v) for k, v in entries.items() if k not in gone}, current,
+            adjusted = _settle_stored_suggestions(
+                {k: v for k, v in entries.items() if k not in gone}, current, locked,
                 explicit_thresholds=explicit,
             )
-            adjusted = _drop_inverted_threshold_pair(adjusted, current)
             return {
                 k: adjusted[k].get("value")
                 if k not in locked and isinstance(adjusted.get(k), dict) and adjusted[k].get("cascade")
@@ -3813,16 +3849,13 @@ class SuggestionEngine:
             k: v for k, v in stored.items()
             if isinstance(v, dict) and not v.get("cascade") and k not in locked
         }
-        adjusted, _changed = reconcile_suggestions(
-            base, current, min_power_floor=self._min_power_floor(current),
+        adjusted = _settle_stored_suggestions(
+            base, current, locked, min_power_floor=self._min_power_floor(current),
             explicit_thresholds=frozenset(
                 k for k in (CONF_START_THRESHOLD_W, CONF_STOP_THRESHOLD_W)
                 if _num(options.get(k)) is not None
             ),
         )
-        for key in locked:
-            adjusted.pop(key, None)
-        adjusted = _drop_inverted_threshold_pair(adjusted, current)
         changed: list[str] = []
         for key in list(stored):
             if key not in adjusted:

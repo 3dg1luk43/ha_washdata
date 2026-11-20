@@ -9,16 +9,30 @@
 * A door opened in PAUSED after a program was picked by hand, before the
   detector's next match tick took it, paused the cycle; opened after the tick,
   the same door ended it.
+* A Start withdrawn as inverted against a locked Stop left the Min Power cascade
+  its derived Stop had made.
 """
 from __future__ import annotations
 
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from custom_components.ha_washdata import match_rules
-from custom_components.ha_washdata.const import DOMAIN, STATE_PAUSED
+from custom_components.ha_washdata.const import (
+    CONF_DEVICE_TYPE,
+    CONF_MIN_OFF_GAP,
+    CONF_MIN_POWER,
+    CONF_OFF_DELAY,
+    CONF_START_THRESHOLD_W,
+    CONF_STOP_THRESHOLD_W,
+    DOMAIN,
+    STATE_PAUSED,
+)
+from custom_components.ha_washdata.learning import OWNER_BATCH
+from custom_components.ha_washdata.suggestion_engine import SuggestionEngine
 
 from .test_issue_524_door_ends_cycle import DOOR, OPTS, WASH_S, _paused_washer, _tick
+from .test_pr529_review_r35a import _Store
 
 # ── An incomplete fired #530 record starts the check afresh ──────────────────
 
@@ -143,3 +157,38 @@ async def test_a_door_opened_after_a_cleared_pick_still_pauses(
     await hass.async_block_till_done()
     assert manager._is_user_paused is True  # noqa: SLF001
     assert ends == []
+
+
+# ── A withdrawn Start takes the cascades derived from it ─────────────────────
+
+
+class _LockedStore(_Store):
+    def __init__(self, locked: list[str]) -> None:
+        super().__init__()
+        self.locked = locked
+
+    def get_locked_suggestions(self) -> list[str]:
+        return list(self.locked)
+
+
+_WASHER_OPTS = {
+    CONF_DEVICE_TYPE: "washing_machine", CONF_START_THRESHOLD_W: 10.0,
+    CONF_STOP_THRESHOLD_W: 4.0, CONF_MIN_POWER: 5.0,
+    CONF_OFF_DELAY: 300, CONF_MIN_OFF_GAP: 300,
+}
+
+
+def test_a_start_inverted_against_a_locked_stop_leaves_no_cascade_of_its_own() -> None:
+    """Start 2 W proposed, Stop locked at 4 W: reconcile derived Stop 1.6 W and from
+    it Min Power 1.3 W; the lock dropped the Stop, the pair check the Start, and
+    the Min Power stayed without the change that justified it. An Off Delay
+    proposed beside it keeps its own Min Off Gap cascade."""
+    store = _LockedStore([CONF_STOP_THRESHOLD_W])
+    eng = SuggestionEngine(MagicMock(), "e", store, device_type="washing_machine")
+    eng._entry_options = lambda: dict(_WASHER_OPTS)  # noqa: SLF001
+    store.set_suggestion(CONF_START_THRESHOLD_W, 2.0, reason="r", flags={"owner": OWNER_BATCH})
+    store.set_suggestion(CONF_OFF_DELAY, 600, reason="r", flags={"owner": OWNER_BATCH})
+    eng._reconcile_stored_suggestions()  # noqa: SLF001
+    assert set(store.suggestions) == {CONF_OFF_DELAY, CONF_MIN_OFF_GAP}
+    assert store.suggestions[CONF_MIN_OFF_GAP]["cascade"] is True
+    assert store.suggestions[CONF_MIN_OFF_GAP]["value"] == 600
