@@ -3776,10 +3776,11 @@ class ProfileStore:
     @property
     def profile_set_revision(self) -> int:
         """Bumped whenever a profile leaves the store under its name (deleted,
-        renamed, cleaned up as an orphan). A ranking taken across one can name a
-        profile that is gone (the #530 check, review of PR #529). Narrower than
-        ``_data_generation``, which also discards unrelated envelope builds,
-        suggestion passes and Apply all."""
+        renamed, cleaned up as an orphan, or dropped with the last imported or
+        backfilled cycle relabelled or deleted out of it). A ranking taken across
+        one can name a profile that is gone (the #530 check, review of PR #529).
+        Narrower than ``_data_generation``, which also discards unrelated envelope
+        builds, suggestion passes and Apply all."""
         return int(getattr(self, "_profile_set_revision", 0))
 
     def _profile_left(self) -> None:
@@ -12138,7 +12139,8 @@ class ProfileStore:
             if old_has_cycles:
                 touched.add(old_profile)
             else:
-                self._data.get("profiles", {}).pop(old_profile, None)
+                if self._data.get("profiles", {}).pop(old_profile, None) is not None:
+                    self._profile_left()
                 self._data.get("envelopes", {}).pop(old_profile, None)
                 self._rename_maintenance_program(old_profile, None)  # #480
         if profile_name:
@@ -13589,7 +13591,8 @@ class ProfileStore:
             if remaining:
                 await self.async_rebuild_envelope(profile_name)
             else:
-                self._data.get("profiles", {}).pop(profile_name, None)
+                if self._data.get("profiles", {}).pop(profile_name, None) is not None:
+                    self._profile_left()
                 self._data.get("envelopes", {}).pop(profile_name, None)
                 self._rename_maintenance_program(profile_name, None)  # #480
         await self.async_save()
