@@ -149,10 +149,11 @@ def test_the_state_round_trips_a_snapshot() -> None:
     junk = match_rules.ProgramMismatchState()
     junk.restore({"streak": "x", "fired": "yes", "looks_like": 3, "margin": float("nan")})
     assert junk.as_dict() == match_rules.ProgramMismatchState().as_dict()
-    # JSON keeps an oversized integer unbounded: float() of it raises, not inf.
+    # JSON keeps an oversized integer unbounded: float() of it raises, not inf. A
+    # fired record without a usable margin is no result (PR #529 review).
     huge = match_rules.ProgramMismatchState()
     huge.restore({"streak": 2, "fired": True, "looks_like": "Eco", "margin": 10**400})
-    assert huge.as_dict() == {"fired": True, "looks_like": "Eco", "margin": None}
+    assert huge.as_dict() == match_rules.ProgramMismatchState().as_dict()
     # PR #529 review: a pending streak is neither saved nor taken back (an older
     # snapshot's included), nor the data or groups a live one was counted on.
     assert "streak" not in state.as_dict()
@@ -719,7 +720,7 @@ async def test_the_snapshot_keeps_the_cadence_not_the_pending_streak(
     for legacy in (old, {**raw, "checked_s": "x"}, {**raw, "checked_s": 10**400}):
         manager._program_mismatch = match_rules.ProgramMismatchState()  # noqa: SLF001
         manager._program_mismatch_last_s = None  # noqa: SLF001
-        manager._restore_program_mismatch({**legacy, "fired": True, "looks_like": "Eco"})  # noqa: SLF001
+        manager._restore_program_mismatch({**legacy, "fired": True, "looks_like": "Eco", "margin": 0.2})  # noqa: SLF001
         back = manager._program_mismatch_state()  # noqa: SLF001
         assert back.streak == 0 and back.fired and back.looks_like == "Eco"
         assert manager._program_mismatch_last_s is None  # noqa: SLF001
@@ -841,7 +842,7 @@ async def test_a_restart_keeps_fired_whatever_changed_since(
     _entry, manager, _sent, state = await _past_half(hass, setup_washdata_entry, freezer)
     store = manager.profile_store
     state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
-    state.fired, state.looks_like = True, "Synthetics"
+    state.fired, state.looks_like, state.margin = True, "Synthetics", 0.2
     await store.async_import_data(store.export_data())  # same names and groups
     assert await store.create_profile_group("Solo", ["Cotton"])
     snap = manager._augment_active_snapshot(manager.detector.get_state_snapshot())  # noqa: SLF001
@@ -865,7 +866,7 @@ async def test_a_malformed_group_neither_drops_the_check_nor_fails_its_restore(
 ) -> None:
     _entry, manager, _sent, state = await _past_half(hass, setup_washdata_entry, freezer)
     manager.profile_store._data["profile_groups"]["Bad"] = {"members": 1}  # noqa: SLF001
-    state.fired, state.looks_like = True, "Synthetics"
+    state.fired, state.looks_like, state.margin = True, "Synthetics", 0.2
     snap = manager._augment_active_snapshot(manager.detector.get_state_snapshot())  # noqa: SLF001
     assert snap["program_mismatch"]["fired"] is True
     manager._program_mismatch = match_rules.ProgramMismatchState()  # noqa: SLF001

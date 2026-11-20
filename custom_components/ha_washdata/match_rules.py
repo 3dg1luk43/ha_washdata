@@ -1233,25 +1233,35 @@ class ProgramMismatchState:
 
     def restore(self, raw: Any) -> None:
         """Take a snapshot's ``as_dict`` back. Malformed values are left at reset.
-        A pending streak (an older snapshot's ``streak``) is never taken back."""
+        A pending streak (an older snapshot's ``streak``) is never taken back.
+
+        A fired check comes back only with what it found, the programme and a
+        finite margin, as :func:`program_mismatch_step` always records them. A
+        record missing either is no result: latched, it showed a mismatch naming
+        nothing and skipped every later check of the pick (PR #529 review), so the
+        check starts afresh."""
         self.streak = 0
         self.data_generation = None
         self.families = None
         self.device_type = None
         self.match_settings = None
-        if not isinstance(raw, dict):
+        self.fired = False
+        self.looks_like = None
+        self.margin = None
+        if not isinstance(raw, dict) or raw.get("fired") is not True:
             return
-        self.fired = raw.get("fired") is True
         looks_like = raw.get("looks_like")
-        self.looks_like = looks_like if isinstance(looks_like, str) and looks_like else None
         margin = raw.get("margin")
-        if isinstance(margin, (int, float)) and not isinstance(margin, bool):
-            try:
-                value = float(margin)  # an unbounded JSON int (10**400) raises here
-            except (OverflowError, ValueError):
-                value = math.nan
-            if math.isfinite(value):
-                self.margin = value
+        if not isinstance(looks_like, str) or not looks_like:
+            return
+        if not isinstance(margin, (int, float)) or isinstance(margin, bool):
+            return
+        try:
+            value = float(margin)  # an unbounded JSON int (10**400) raises here
+        except (OverflowError, ValueError):
+            return
+        if math.isfinite(value):
+            self.fired, self.looks_like, self.margin = True, looks_like, value
 
 
 def program_families(profile_groups: Any) -> dict[str, str]:
