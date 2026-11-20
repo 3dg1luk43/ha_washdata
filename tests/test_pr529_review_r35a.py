@@ -3,6 +3,8 @@
 * The joint end-gate check never withdrew a cascade: a pending 10 W Start whose
   20 W pulse-ceiling cascade lets a dryer ignore its 10 W pulses stayed, and the
   strict check reported success.
+* A hand-picked program Stage 1's lower bound rejected was still read at its
+  profile group's score (a sibling's), so a never-scored pick made a deficit.
 """
 from __future__ import annotations
 
@@ -177,3 +179,34 @@ def test_a_different_start_stored_during_the_check_is_not_withdrawn(mock_hass: A
     assert store.suggestions[CONF_ANTI_WRINKLE_MAX_POWER]["value"] == 20.0
     assert lm._withdraw_joint_drops(judged, [CONF_START_THRESHOLD_W]) is False  # noqa: SLF001
     assert store.suggestions[CONF_START_THRESHOLD_W]["value"] == 10.01
+
+
+# ── A pick Stage 1's lower bound rejected is no evidence, family or not ──────
+
+
+def _family_match(rejected: tuple[str, ...]) -> Any:
+    from types import SimpleNamespace  # noqa: PLC0415
+
+    return SimpleNamespace(
+        best_profile="Eco",
+        candidates=[
+            {"name": "Eco", "score": 0.9},
+            {"name": "__group__Cotton", "group_best_member": "Cotton 40", "score": 0.6},
+            {"name": "Quick", "score": 0.5},
+            {"name": "Wool", "score": 0.45},
+            {"name": "Synthetics", "score": 0.4},
+        ],
+        min_ratio_rejected=rejected,
+    )
+
+
+def test_a_rejected_pick_is_not_read_at_its_sibling_s_family_score() -> None:
+    """Cotton 90 was never scored (the cycle is still under the min ratio of it);
+    the Cotton family's row is Cotton 40's score and bounds nothing of it, so it
+    must not make a 0.3 deficit. Scored, the family bound stands."""
+    from custom_components.ha_washdata.match_rules import selected_program_deficit  # noqa: PLC0415
+
+    families = {"Cotton 40": "Cotton", "Cotton 90": "Cotton"}
+    assert selected_program_deficit(_family_match(("Cotton 90",)), "Cotton 90", families) is None
+    hit = selected_program_deficit(_family_match(()), "Cotton 90", families)
+    assert hit is not None and hit[0] == "Eco" and hit[1] == pytest.approx(0.3)

@@ -1301,7 +1301,9 @@ def selected_program_deficit(
     (devtools/program_mismatch_eval.py, 1.6% -> 3.3%) for 3.8 points more caught
     wrong picks. Rejected by Stage 1's lower bound (``min_ratio_rejected``: the
     cycle is still too short a part of it to compare) it is missing from a full
-    list the same way, and is no evidence there either (PR #529 review). Past the
+    list the same way, and is no evidence there either (PR #529 review); nor is
+    its family's entry then, which is the best of the members that WERE scored
+    and bounds nothing of one that was not (review of PR #529). Past the
     upper bound (the cycle has outrun it) it still reads at the fifth score: no
     bound of a score there, but read as no evidence it lost 316 of 1904 caught
     wrong picks (38.4% -> 32.0%) for no false alarm fewer. Every bound makes the
@@ -1322,6 +1324,8 @@ def selected_program_deficit(
         winner_family = _candidate_family(candidates[0], "stage5_group") or fam.get(best)
         if own_family is not None and own_family == winner_family:
             return None
+        rejected = getattr(result, "min_ratio_rejected", None) or ()
+        unscored = isinstance(rejected, (list, tuple, set, frozenset)) and selected in rejected
         picked: float | None = None
         for cand in candidates:
             name = cand.get("name")
@@ -1329,15 +1333,13 @@ def selected_program_deficit(
             # that is another programme, so only the family branch reads the row.
             is_family_row = isinstance(cand.get("group_best_member"), str)
             if (name == selected and not is_family_row) or (
-                own_family is not None and _candidate_family(cand, "name") == own_family
+                own_family is not None and not unscored
+                and _candidate_family(cand, "name") == own_family
             ):
                 picked = float(cand.get("score", 0.0) or 0.0)
                 break
         if picked is None:
-            if len(candidates) < _LISTED_CANDIDATES:
-                return None
-            rejected = getattr(result, "min_ratio_rejected", None) or ()
-            if isinstance(rejected, (list, tuple, set, frozenset)) and selected in rejected:
+            if len(candidates) < _LISTED_CANDIDATES or unscored:
                 return None
             picked = float(candidates[-1].get("score", 0.0) or 0.0)
         deficit = top - picked
