@@ -7,6 +7,8 @@
   restore point. The save they report raises now, before either.
 * An import resumed after a reload wrote its restore point over the one a newer
   import on the replacement had saved, and Undo restored the older data.
+* A profile whose stored ``avg_duration`` was not a number (an import can carry
+  anything) raised in the matcher's candidate builder: no profile was scored.
 """
 from __future__ import annotations
 
@@ -26,6 +28,8 @@ from custom_components.ha_washdata.const import (
     STORAGE_KEY,
 )
 from custom_components.ha_washdata.profile_store import StoreRetiredError
+
+from .test_pr529_review_r40a import STEP, _query, _ranking, _single_cycle_store
 
 
 def _trace(scale: float = 1.0) -> list[list[float]]:
@@ -206,3 +210,36 @@ async def test_an_import_resumed_after_a_reload_keeps_the_newer_restore_point(
     assert hass_storage[point]["data"]["source"] == "newer"
     assert (await new.async_restore_pre_import_snapshot())["counts"]["real_cycles"] == 3
     assert set(new.get_profiles()) == {"Cotton"}
+
+
+# ── A non-numeric stored profile length costs no match ───────────────────────
+
+
+@pytest.mark.parametrize("bad", ["abc", [1], "nan", -5.0])
+async def test_a_non_numeric_profile_length_costs_no_match(
+    hass: HomeAssistant, bad: Any
+) -> None:
+    """P2's ``avg_duration`` unusable: it is absent, so its sample cycle's
+    length stands in (the same here) and the ranking is the clean store's."""
+    query = _query()
+    clean = await _single_cycle_store(hass).async_match_profile(
+        query, query[-1][0], in_progress=True
+    )
+    store = _single_cycle_store(hass)
+    store._data["profiles"]["P2"]["avg_duration"] = bad  # noqa: SLF001
+    result = await store.async_match_profile(query, query[-1][0], in_progress=True)
+    assert result.best_profile == "P2"
+    assert _ranking(result) == _ranking(clean)
+    assert store.resolve_profile_duration("P2") == clean.expected_duration
+
+
+def test_an_envelope_template_with_a_non_numeric_length_falls_back_to_its_span(
+    hass: HomeAssistant,
+) -> None:
+    store = _single_cycle_store(hass)
+    curve = [[i * 30.0, 150.0 + (i % 7) * 100.0] for i in range(101)]
+    store._data["envelopes"]["P0"] = {"avg": curve, "shape_cycle_count": 2}  # noqa: SLF001
+    store._data["profiles"]["P0"]["avg_duration"] = "abc"  # noqa: SLF001
+    snaps = {s["name"]: s for s in store.build_match_snapshots(STEP)}
+    assert set(snaps) == {f"P{k}" for k in range(5)}
+    assert snaps["P0"]["avg_duration"] == 3000.0

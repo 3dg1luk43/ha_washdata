@@ -692,6 +692,21 @@ def cut_short_mask(runs: list[tuple[list[float], list[float], float, bool, float
         return [False] * len(runs)
 
 
+def _positive_duration(value: Any) -> float | None:
+    """``value`` as a finite positive number of seconds, else None (never raises).
+
+    One rule for a stored duration, which an import can carry as anything: the
+    matcher's candidate builder and ``resolve_profile_duration`` read a profile's
+    length through it, and treat anything else as absent (PR #529 review)."""
+    try:
+        number = float(value or 0.0)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if not math.isfinite(number) or number <= 0:
+        return None
+    return number
+
+
 def filter_duration_outliers(durations: list[float]) -> list[float]:
     """Return a robust duration set with extreme outliers removed.
 
@@ -10314,16 +10329,7 @@ class ProfileStore:
             if not isinstance(profile, dict):
                 return None
 
-            def _positive(value: Any) -> float | None:
-                try:
-                    number = float(value or 0.0)
-                except (TypeError, ValueError, OverflowError):
-                    return None
-                if not math.isfinite(number) or number <= 0:
-                    return None
-                return number
-
-            direct = _positive(profile.get("avg_duration"))
+            direct = _positive_duration(profile.get("avg_duration"))
             if direct is not None:
                 return direct
 
@@ -10340,14 +10346,14 @@ class ProfileStore:
             if sample is None:
                 return None
 
-            stored = _positive(sample.get("duration"))
+            stored = _positive_duration(sample.get("duration"))
             if stored is not None:
                 return stored
 
             points = decompress_power_data(cast(Any, sample))
             if len(points) < 2:
                 return None
-            return _positive(points[-1][0] - points[0][0])
+            return _positive_duration(points[-1][0] - points[0][0])
         except Exception:  # noqa: BLE001 - a duration lookup must never raise
             return None
 
@@ -11093,11 +11099,13 @@ class ProfileStore:
                     float(_env_avg[-1][0]) - float(_env_avg[0][0])
                     if len(_env_avg) > 1 else 0.0
                 )
+                # Each source only as a finite positive number: an imported
+                # non-numeric one raised here and cost every profile its match
+                # (PR #529 review).
                 avg_duration = (
-                    envelope.get("target_duration") or
-                    profile.get("avg_duration") or
-                    _env_ts_duration or
-                    None
+                    _positive_duration(envelope.get("target_duration"))
+                    or _positive_duration(profile.get("avg_duration"))
+                    or _positive_duration(_env_ts_duration)
                 )
                 if not avg_duration:
                     skipped_profiles.append(
@@ -11151,10 +11159,11 @@ class ProfileStore:
                 float(sample_seg.timestamps[-1]) - float(sample_seg.timestamps[0])
                 if len(sample_seg.timestamps) > 1 else 0.0
             )
+            # Each only as a finite positive number, as above.
             avg_dur = (
-                profile.get("avg_duration") or
-                sample_cycle.get("duration") or
-                _seg_ts_duration
+                _positive_duration(profile.get("avg_duration"))
+                or _positive_duration(sample_cycle.get("duration"))
+                or _positive_duration(_seg_ts_duration)
             )
             if not avg_dur:
                 skipped_profiles.append(
