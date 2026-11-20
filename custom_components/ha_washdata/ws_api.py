@@ -5540,6 +5540,28 @@ async def ws_set_suggestion_lock(
         ):
             # The muted entry may be what made another pending one safe (PR #529).
             learning.schedule_joint_end_gate_check()
+        if current is not manager:
+            # A full reload replaced the manager during the write: the change went
+            # to the retired store, and whether the live one loaded it depends on
+            # when that save landed. No refresh from the retired manager (it can
+            # fire a device trigger for an entry it no longer runs) and no list
+            # from it: ``reloaded`` tells the client to re-read the live mute
+            # state; the write is not undone (PR #529 review).
+            live = (
+                current if current is not None
+                and getattr(current, "_is_shutdown", False) is not True else None
+            )
+            _send_result(
+                connection, msg["id"], "set_suggestion_lock",
+                {
+                    "success": True,
+                    "locked_suggestions": (
+                        live.profile_store.get_locked_suggestions() if live is not None else []
+                    ),
+                    "reloaded": True,
+                },
+            )
+            return
         manager.notify_update()
         _send_result(
             connection, msg["id"], "set_suggestion_lock",

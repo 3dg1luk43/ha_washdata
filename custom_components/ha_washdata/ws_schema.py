@@ -390,9 +390,16 @@ class ApplySuggestionsResponse(TypedDict):
     applied: list[str]
 
 
-class SetSuggestionLockResponse(TypedDict):
+class _SetSuggestionLockBase(TypedDict):
     success: bool
     locked_suggestions: list[str]
+
+
+class SetSuggestionLockResponse(_SetSuggestionLockBase, total=False):
+    """``reloaded`` True: a full reload replaced the device during the write, so
+    ``locked_suggestions`` is the live device's and the client re-reads it."""
+
+    reloaded: bool
 
 
 class RunSuggestionAnalysisResponse(TypedDict, total=False):

@@ -1036,6 +1036,7 @@ _None._
 | --- | --- | --- |
 | `success` | yes | bool |
 | `locked_suggestions` | yes | list[str] |
+| `reloaded` | no | bool |
 
 ## `ha_washdata/run_suggestion_analysis`
 

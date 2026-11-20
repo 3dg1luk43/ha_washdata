@@ -200,3 +200,52 @@ async def test_selective_import_does_not_refresh_a_retired_manager(
         res = await _send(hass, client, payload(2.0))
     assert res["success"], res
     assert notify.call_count == 1
+
+
+async def _mute(hass: HomeAssistant, client: Any, entry_id: str, key: str) -> dict:
+    return await _send(hass, client, {
+        "type": f"{DOMAIN}/set_suggestion_lock", "entry_id": entry_id,
+        "key": key, "locked": True,
+    })
+
+
+async def test_a_mute_across_a_full_reload_answers_from_the_live_device(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """A full reload replaced the manager during the mute's write: the retired one
+    still refreshed and its list was the reply. Now the reply is the live
+    device's, flagged ``reloaded`` so the panel re-reads it, and still a success
+    (the write is not undone). Without a reload the reply is as before."""
+    entry = await setup_washdata_entry()
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store = manager.profile_store
+    client = await hass_ws_client(hass)
+    real_lock = store.set_suggestion_locked
+
+    async def lock_then_reload(key: str, locked: bool) -> None:
+        await real_lock(key, locked)
+        assert await hass.config_entries.async_reload(entry.entry_id)
+
+    with (
+        patch.object(store, "set_suggestion_locked", side_effect=lock_then_reload),
+        patch.object(manager, "notify_update") as notify,
+    ):
+        res = await _mute(hass, client, entry.entry_id, CONF_OFF_DELAY)
+    live = hass.data[DOMAIN][entry.entry_id]
+    assert live is not manager
+    assert res["success"], res
+    assert res["result"] == {
+        "success": True,
+        "locked_suggestions": live.profile_store.get_locked_suggestions(),
+        "reloaded": True,
+    }
+    assert notify.call_count == 0
+
+    with patch.object(live, "notify_update") as notify:
+        res = await _mute(hass, client, entry.entry_id, CONF_MIN_POWER)
+    assert res["result"] == {
+        "success": True,
+        "locked_suggestions": live.profile_store.get_locked_suggestions(),
+    }
+    assert CONF_MIN_POWER in res["result"]["locked_suggestions"]
+    assert notify.call_count == 1

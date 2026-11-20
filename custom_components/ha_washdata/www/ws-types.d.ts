@@ -464,6 +464,7 @@ export interface SetMaintenanceProgramsResponse {
 export interface SetSuggestionLockResponse {
   success: boolean;
   locked_suggestions: string[];
+  reloaded?: boolean;
 }
 
 export interface StartTaskResponse {

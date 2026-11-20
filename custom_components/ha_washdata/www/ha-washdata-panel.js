@@ -14100,10 +14100,21 @@ class HaWashdataPanel extends HTMLElement {
       const eid = dev && dev.entry_id;
       if (!eid || !k) return;
       try {
-        await this._ws({ type: `${_DOMAIN}/set_suggestion_lock`, entry_id: eid, key: k, locked: true });
+        const res = await this._ws({ type: `${_DOMAIN}/set_suggestion_lock`, entry_id: eid, key: k, locked: true });
         if (!this._isActiveEntry(eid)) return;
-        this._suggestions = (this._suggestions || []).filter(s => s.key !== k);
-        if (!(this._lockedSuggestions || []).includes(k)) (this._lockedSuggestions = this._lockedSuggestions || []).push(k);
+        if (res && res.reloaded) {
+          // The device reloaded during the write: show what the live one holds.
+          await this._fetchSuggestions(eid);
+          if (!this._isActiveEntry(eid)) return;
+          if (!(this._lockedSuggestions || []).includes(k)) {
+            this._showToast(this._t('msg.sug_mute_failed', {}, 'Could not mute suggestion'), 'error');
+            this._render();
+            return;
+          }
+        } else {
+          this._suggestions = (this._suggestions || []).filter(s => s.key !== k);
+          if (!(this._lockedSuggestions || []).includes(k)) (this._lockedSuggestions = this._lockedSuggestions || []).push(k);
+        }
         this._showToast(this._t('msg.sug_muted', {}, "Won't suggest this setting again"), 'info');
         this._render();
       } catch (_) {
