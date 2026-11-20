@@ -773,8 +773,9 @@ async def test_apply_writes_nothing_after_a_reload_it_waited_through(
     calls = {"n": 0}
 
     def reloaded(h: Any, eid: str) -> Any:
+        # Before the options lock and again inside it; replaced after.
         calls["n"] += 1
-        return real(h, eid) if calls["n"] == 1 else MagicMock()
+        return real(h, eid) if calls["n"] <= 2 else MagicMock()
 
     client = await hass_ws_client(hass)
     with patch.object(ws_api, "_get_manager", side_effect=reloaded):

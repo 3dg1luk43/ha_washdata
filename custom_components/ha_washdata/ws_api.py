@@ -5346,6 +5346,14 @@ async def ws_apply_suggestions(
         # inside it too, and a mute takes the same lock, so a mute that completed
         # while Apply waited is seen (PR #529 review).
         async with _entry_options_lock(hass, entry_id):
+            # Resolved again inside the lock, as the mute handler does: a reload
+            # while Apply waited replaced the manager, and the list judged and
+            # returned below must be the live store's (PR #529 review).
+            manager = _get_manager(hass, entry_id)
+            entry = _get_entry(hass, entry_id)
+            if manager is None or not entry:
+                _err_not_found(connection, msg["id"], entry_id)
+                return
             merged = {**entry.data, **entry.options}
             # Only what the Settings list would show: a muted key re-created by the
             # reconcile cascade used to be applied here (audit SUGGEST-11).
