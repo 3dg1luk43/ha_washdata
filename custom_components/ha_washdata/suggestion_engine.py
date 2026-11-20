@@ -185,7 +185,13 @@ def end_gate_pause_needs(
             return needs
         # A NaN reading is neither at nor below the stop, so the scan below would
         # never get past it (PR #529 review); every finite one moves it on.
-        points = [(t, p) for t, p in points if math.isfinite(t) and math.isfinite(p)]
+        # In time order: an imported trace can store its rows out of order, and a
+        # pause is found by walking the list (review of PR #529). Timsort keeps an
+        # ordered trace at one pass.
+        points = sorted(
+            ((t, p) for t, p in points if math.isfinite(t) and math.isfinite(p)),
+            key=lambda row: row[0],
+        )
         spans: list[tuple[float, float]] = []
         if pulse_max_w is not None and math.isfinite(pulse_max_w):
             points, spans = _quiet_pulses(points, stop, pulse_max_w)
@@ -396,10 +402,13 @@ def _flat_standby_split(
         return False
     # As the energy scan: a non-finite reading compares false both ways and would
     # pin the run scan on it (review of PR #529: Analyse now hung on a NaN).
-    points = [
-        (float(t), float(p)) for t, p in points
-        if math.isfinite(float(t)) and math.isfinite(float(p))
-    ]
+    points = sorted(
+        (
+            (float(t), float(p)) for t, p in points
+            if math.isfinite(float(t)) and math.isfinite(float(p))
+        ),
+        key=lambda row: row[0],
+    )
     spans: list[tuple[float, float]] = []
     if pulse_max_w is not None and math.isfinite(pulse_max_w):
         points, spans = _quiet_pulses(points, stop, pulse_max_w)
@@ -1997,9 +2006,12 @@ OWNER_DETECTION = "detection"
 OWNER_BATCH = "batch"
 
 # The settings the fallback end gate reads; judged together (``_guard_end_gate``,
-# ``SuggestionEngine.joint_end_gate_drops``).
+# ``SuggestionEngine.joint_end_gate_drops``). The anti-crease ceiling is a dryer's
+# pulse bar (#474): raising it lets the quiet run on across hotter pulses (review
+# of PR #529), so Apply judges it with the rest; on other types it moves nothing.
 END_GATE_KEYS = (
     CONF_STOP_THRESHOLD_W, CONF_OFF_DELAY, CONF_MIN_OFF_GAP, CONF_END_ENERGY_THRESHOLD,
+    CONF_ANTI_WRINKLE_MAX_POWER,
 )
 
 
@@ -2512,8 +2524,9 @@ class SuggestionEngine:
         energy = _num(values.get(CONF_END_ENERGY_THRESHOLD))
         if stop is None or off_delay is None or energy is None:
             return frozenset()
-        # The dryer pulse ceiling (#474) as the detector reads it: the proposed or
-        # stored option, else the default.
+        # The dryer pulse ceiling (#474) as the detector reads it: the judged value
+        # (a proposal, or what Apply writes), else the stored option, else the
+        # default; the settings in force carry none, so they read the stored one.
         pulse_max_w = _num(values.get(CONF_ANTI_WRINKLE_MAX_POWER))
         if pulse_max_w is None and self.device_type in QUIET_PULSE_DEVICE_TYPES:
             pulse_max_w = _num(self._entry_options().get(CONF_ANTI_WRINKLE_MAX_POWER))
@@ -2908,13 +2921,13 @@ class SuggestionEngine:
         Collects every low-power segment that *resumed* (a proven pause, not the
         trailing wind-down) across clean cycles and sets off_delay to the p95
         pause length plus a 60 s buffer. Returns ``None`` when too few traces
-        exist, so the caller falls back to the update-cadence heuristic.
+        exist: no Off Delay is proposed then and the value in force stays
+        (audit 2026-11-16).
 
         The floor is :func:`_measured_off_delay_floor` (the *generic* minimum),
         not ``device_floor``: once real pauses have been measured the blind
         per-device prior is stale evidence and must not override the
-        measurement. ``device_floor`` still applies on the caller's no-data
-        fallback path.
+        measurement.
         """
         pause_durations: list[float] = []
         n_traced = 0
@@ -3019,8 +3032,9 @@ class SuggestionEngine:
         user's real turnaround. On a real washer export that is the difference
         between a 1748 s and a 181 s ceiling.
 
-        Falls back to the historical inter-cycle-gap heuristic when there are too
-        few traces to measure a bridge requirement.
+        Returns None when there are too few traces to measure a bridge
+        requirement: no Min Off Gap is proposed and the value in force stays
+        (audit 2026-11-16).
 
         Validated with ``devtools/min_off_gap_eval.py`` (production detector
         config, unmatched replay with watchdog keepalives; item 483): on the
@@ -3249,7 +3263,8 @@ class SuggestionEngine:
         - Power thresholds from the 5th-percentile minimum active power, withheld
           when that minimum is where the appliance rests (:func:`resting_level_w`).
         - End-energy threshold from the maximum false-end energy seen.
-        - Min-off-gap from the 5th-percentile inter-cycle gap.
+        - Min-off-gap from the measured pause bridge requirement, capped under the
+          shortest real turnaround (:meth:`_suggest_min_off_gap`); none without it.
 
         Returns an empty dict when fewer than ``_BATCH_MIN_CYCLES`` valid
         cycles are provided.

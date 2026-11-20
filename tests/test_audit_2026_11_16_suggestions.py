@@ -1805,3 +1805,47 @@ def test_the_held_running_sum_is_the_stored_cycle_integral() -> None:
     assert cum[-1] == pytest.approx(integrate_cycle_wh(np.asarray(ts), np.asarray(ps)))
     assert held_wh_until(ts, ps, cum, 35.0) == pytest.approx(100.0 * 5 / 3600)
     assert held_wh_until(ts, ps, cum, 70.0) == pytest.approx((500 + 2000 * 1 + 3 * 4) / 3600)
+    # Nothing holds before the first reading (review of PR #529: a 6 W reading at
+    # 30 s read -0.05 Wh at 0 s and inflated the window energy).
+    late = [30.0, 90.0]
+    assert held_wh_until(late, [6.0, 6.0], cumulative_held_wh(late, [6.0, 6.0]), 0.0) == 0.0
+    assert held_wh_until(late, [6.0, 6.0], cumulative_held_wh(late, [6.0, 6.0]), 30.0) == 0.0
+
+
+def test_apply_judges_a_raised_dryer_pulse_ceiling() -> None:
+    """Review of PR #529: at an 8 W anti-crease ceiling a dryer's 10 W pulses reset
+    the quiet and the pause stays whole; raised to 20 W they are ignored and the
+    flat-standby bypass closes it at a 360 s Min Off Gap. The ceiling was not an
+    end-gate key, so Apply wrote it unjudged."""
+    from custom_components.ha_washdata.const import (  # noqa: PLC0415
+        CONF_ANTI_WRINKLE_MAX_POWER,
+        CONF_MIN_OFF_GAP,
+    )
+
+    cycle = {
+        "id": "d1", "status": "completed", "termination_reason": "timeout",
+        "power_data": [[t, p] for t, p in _pulsed_dryer_pause()],
+    }
+    store = _Store(cycles=[cycle])
+    store.get_past_cycles = lambda: store.cycles
+    eng = SuggestionEngine(MagicMock(), "e", store, device_type="dryer")
+    opts = {
+        CONF_STOP_THRESHOLD_W: 4.0, CONF_OFF_DELAY: 180, CONF_MIN_OFF_GAP: 360,
+        CONF_END_ENERGY_THRESHOLD: 0.05, CONF_ANTI_WRINKLE_MAX_POWER: 8.0,
+    }
+    eng._entry_options = lambda: dict(opts)  # noqa: SLF001
+    raised = {CONF_ANTI_WRINKLE_MAX_POWER: {"value": 20.0}}
+    assert eng.joint_end_gate_drops(raised) == [CONF_ANTI_WRINKLE_MAX_POWER]
+    assert eng.joint_end_gate_drops({CONF_ANTI_WRINKLE_MAX_POWER: {"value": 9.0}}) == []
+
+
+def test_rows_stored_out_of_order_are_scanned_in_time_order() -> None:
+    """Review of PR #529: an imported trace can store rows out of order; walked by
+    index, its 0 W pause read as the trailing quiet and was never judged."""
+    ordered = [(float(t), 80.0) for t in range(0, 600, 10)]
+    ordered += [(float(t), 0.0) for t in range(600, 1000, 10)]
+    ordered += [(float(t), 80.0) for t in range(1000, 1600, 10)]
+    shuffled = ordered[:60] + ordered[100:] + ordered[60:100]  # the pause stored last
+    for points in (ordered, shuffled):
+        assert end_gate_would_split(points, 4.0, 180.0, 210.0, 0.05)
+        assert not end_gate_would_split(points, 4.0, 180.0, 900.0, 0.05)

@@ -134,8 +134,12 @@ def cumulative_held_wh(timestamps: Sequence[float], power: Sequence[float]) -> l
 def held_wh_until(
     timestamps: Sequence[float], power: Sequence[float], cumulative: list[float], t: float
 ) -> float:
-    """Held energy (Wh) from the first reading to instant ``t`` (clamped to the
-    trace's first reading), from :func:`cumulative_held_wh`'s running sums."""
+    """Held energy (Wh) from the first reading to instant ``t``, from
+    :func:`cumulative_held_wh`'s running sums; 0 at or before the first reading
+    (no reading holds there: review of PR #529, a window reaching back past the
+    pause's first reading read a negative term and looked fuller than it was)."""
+    if not timestamps or t <= float(timestamps[0]):
+        return 0.0
     k = bisect_right(timestamps, t) - 1
     k = max(0, min(k, len(timestamps) - 1))
     return cumulative[k] + float(power[k]) * (t - float(timestamps[k])) / 3600.0
