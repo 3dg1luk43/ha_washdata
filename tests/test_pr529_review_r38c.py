@@ -3,8 +3,8 @@
 * Clearing a stored Smart Termination ratio (or anti-crease ratio, curve
   pre-roll) to "" saved, but its reset removed the override before the
   null-strip, so the settings history had no row and it could not be reverted.
-* The import refreshed its manager after the settings-history await even when
-  a full reload had replaced it.
+* The wholesale and the selective import refreshed their manager after the
+  settings-history await even when a full reload had replaced it.
 """
 from __future__ import annotations
 
@@ -165,3 +165,38 @@ async def test_import_does_not_refresh_a_retired_manager(
     assert res["success"], res
     assert notify.call_count == 1
 
+
+async def test_selective_import_does_not_refresh_a_retired_manager(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """Same for the selective import's settings write."""
+    entry = await setup_washdata_entry(options=_PAIR)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    client = await hass_ws_client(hass)
+
+    def payload(stop: float) -> dict:
+        return {
+            "type": f"{DOMAIN}/import_config_selective", "entry_id": entry.entry_id,
+            "json_data": json.dumps({
+                "version": STORAGE_VERSION, "entry_id": "another",
+                "device_fingerprint": {"device_type": "washing_machine"},
+                "data": {"profiles": {}},
+                "entry_options": {CONF_STOP_THRESHOLD_W: stop},
+            }),
+            "selection": {"categories": ["settings"]}, "apply_settings": True,
+        }
+
+    with _reload_during_history_write(manager) as (replacement, notify):
+        res = await _send(hass, client, payload(1.0))
+    assert res["success"], res
+    assert res["result"]["success"] is True
+    assert res["result"]["summary"]["settings_applied"] == 1
+    assert entry.options[CONF_STOP_THRESHOLD_W] == 1.0
+    assert notify.call_count == 0
+    assert "async_schedule_banked_tail_repair" in replacement.calls
+    assert "notify_update" not in replacement.calls
+
+    with patch.object(manager, "notify_update") as notify:
+        res = await _send(hass, client, payload(2.0))
+    assert res["success"], res
+    assert notify.call_count == 1

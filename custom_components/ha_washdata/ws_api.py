@@ -5025,7 +5025,10 @@ async def ws_import_config_selective(
             # above, so nothing reloads the entry and the re-armed repair would
             # wait for a restart.
             _schedule_post_import_repairs(hass, entry_id)
-            manager.notify_update()
+            # Not from a manager a full reload retired during the settings write,
+            # as the wholesale import (PR #529 review). The import itself stands.
+            if _get_manager(hass, entry_id) is manager:
+                manager.notify_update()
             _send_result(
                 connection, msg["id"], "import_config_selective",
                 {"success": True, "summary": summary},
