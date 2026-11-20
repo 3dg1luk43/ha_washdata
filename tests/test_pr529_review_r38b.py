@@ -8,10 +8,13 @@
 * A settings change already merged in as another device's copy stayed marked
   when this device's own backup brought the original later: the standby
   advisory kept ignoring it.
+* A #531 cut-off left out of a dishwasher programme's length could still be
+  picked as its sample when its length sat nearest the new average.
 """
 from __future__ import annotations
 
 import json
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -27,6 +30,7 @@ from custom_components.ha_washdata.suggestion_engine import (
 )
 
 POWER = "sensor.washer_power"
+T0 = datetime(2026, 11, 10, 8, tzinfo=timezone.utc)
 
 
 # ── A stored cadence row outside the collected range is no cadence ──────────
@@ -144,3 +148,51 @@ async def test_this_device_s_own_backup_unmarks_an_imported_copy(
     assert len(log) == 1
     assert SETTINGS_CHANGELOG_IMPORTED_KEY not in log[0]
     assert len(stop_threshold_changes(log)) == 1
+
+
+# ── A cut-off run is not the programme's sample ──────────────────────────────
+
+
+def _dishwasher_run(total_s: float, *, quiet_from: float, beep_at: float) -> list[list[float]]:
+    """10 s readings: washing at 1950 W, then 3.3 W quiet, a 6.3 W beep at
+    ``beep_at`` (its terminal event), 3.3 W to ``total_s``."""
+    pts: list[list[float]] = []
+    t = 0.0
+    while t <= total_s:
+        if t < quiet_from:
+            p = 1950.0 if (t // 300) % 2 == 0 else 30.0
+        elif beep_at <= t < beep_at + 40:
+            p = 6.3
+        else:
+            p = 3.3
+        pts.append([t, p])
+        t += 10.0
+    return pts
+
+
+async def test_a_cut_off_run_is_not_picked_as_the_sample(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """Three 4200 s runs dry from 2400 s and beep at 4100 s, so a run closed at
+    3000 s inside that drying is a cut-off. Two complete 1200 s runs (they beep
+    at their own end) bring the kept average to exactly 3000 s, the cut-off's
+    length. Through the shipped rebuild."""
+    entry = await setup_washdata_entry(device_type="dishwasher", options={"stop_threshold_w": 4.5})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    full = _dishwasher_run(4200, quiet_from=2400, beep_at=4100)
+    cut = [p for p in full if p[0] <= 3000]
+    short = _dishwasher_run(1200, quiet_from=400, beep_at=1100)
+    runs = {"full0": full, "full1": full, "full2": full, "cut": cut, "short0": short, "short1": short}
+    store._data["profiles"]["ECO"] = {}  # noqa: SLF001
+    store._data["past_cycles"] = [  # noqa: SLF001
+        {"id": cid, "profile_name": "ECO", "status": "completed", "termination_reason": "smart",
+         "start_time": (T0 + timedelta(days=i)).isoformat(), "duration": pts[-1][0],
+         "power_data": [list(p) for p in pts]}
+        for i, (cid, pts) in enumerate(runs.items())
+    ]
+    assert await store.async_rebuild_envelope("ECO")
+    profile = store.get_profiles()["ECO"]
+    # The cut-off left the length: 3 x 4200 + 2 x 1200 over five.
+    assert abs(profile["avg_duration"] - 3000.0) < 1
+    assert store._data["envelopes"]["ECO"]["shape_cycle_count"] == 5  # noqa: SLF001
+    assert profile["sample_cycle_id"] in {"full0", "full1", "full2", "short0", "short1"}

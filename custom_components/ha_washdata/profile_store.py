@@ -34,7 +34,7 @@ import threading
 import time
 import uuid
 from array import array
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Collection, Mapping
 from datetime import datetime, timedelta
 from types import SimpleNamespace
 from typing import Any, TypeAlias, cast
@@ -1930,6 +1930,9 @@ class _EnvelopeBuild(tuple):  # type: ignore[type-arg]
     spin_ref: dict[str, Any] | None = None
     tail_ref: dict[str, Any] | None = None
     prog_ends: dict[str, float] | None = None
+    #: Ids of the runs the build left out as #531 cut-offs (empty when it fell
+    #: back to every run): never the profile's sample while another run can be.
+    cut_short_ids: frozenset[str] = frozenset()
 
 
 def _member_programme_ends(
@@ -7674,6 +7677,11 @@ class ProfileStore:
             raw_cycles_data.append((offsets, values, final_dur))
             durations.append(final_dur)
             golden_mask.append(is_golden)
+        cut_short_ids = frozenset(
+            str(decoded[k][0].get("id"))
+            for k, cut in enumerate(cut_short)
+            if cut and decoded[k][0].get("id") is not None
+        )
         if any(cut_short):
             self._logger.debug(
                 "Envelope rebuild: %d run(s) closed inside the programme's quiet phase "
@@ -7683,6 +7691,7 @@ class ProfileStore:
         # Never drop everything: if the filter removed all cycles (e.g. a truly
         # low-power profile misjudged), fall back to using them all.
         if not raw_cycles_data:
+            cut_short_ids = frozenset()
             for offsets, values, final_dur, is_golden, _peak in parsed:
                 raw_cycles_data.append((offsets, values, final_dur))
                 durations.append(final_dur)
@@ -7708,6 +7717,7 @@ class ProfileStore:
             return None
 
         built = _EnvelopeBuild((result, durations))
+        built.cut_short_ids = cut_short_ids
         # Audit item 2: each member's programme end (spin_rhythm.active_end_s, the
         # #486 definition) by cycle id, for the per-run end expectation.
         if self.device_type in MATCH_MEMBER_DEVICE_TYPES:
@@ -7745,7 +7755,10 @@ class ProfileStore:
         return peak
 
     def _select_reference_cycle_id(
-        self, profile_name: str, target_duration: float | None = None
+        self,
+        profile_name: str,
+        target_duration: float | None = None,
+        exclude: Collection[str] | None = None,
     ) -> str | None:
         """Choose the best reference cycle for a profile's matching template.
 
@@ -7753,7 +7766,10 @@ class ProfileStore:
         cycles (peak not a tiny fraction of the profile's median peak - this
         rejects mis-captured near-flat traces), and among those the one closest
         to the profile's representative duration (so a truncated half-cycle is
-        not chosen). Returns a cycle id, or None if there are no usable cycles.
+        not chosen). ``exclude``: ids the envelope build left out (#531 cut-offs),
+        passed over while the pool holds another cycle (PR #529 review: one whose
+        length sat nearest the new average became the sample). Returns a cycle
+        id, or None if there are no usable cycles.
         """
         cands = [
             c for c in self.iter_evidence_cycles()
@@ -7772,6 +7788,8 @@ class ProfileStore:
             pool = golden
         else:
             pool = [c for c in cands if peaks.get(c["id"], 0.0) >= degen_floor] or cands
+        if exclude:
+            pool = [c for c in pool if str(c.get("id")) not in exclude] or pool
 
         if target_duration and target_duration > 0:
             best = min(pool, key=lambda c: abs(float(c.get("duration") or 0.0) - target_duration))
@@ -8125,7 +8143,10 @@ class ProfileStore:
             # Re-point the matching reference to a golden / non-degenerate cycle
             # near the representative duration, so a mis-captured (flat) or
             # truncated cycle can never remain the profile's template.
-            ref_id = self._select_reference_cycle_id(profile_name, avg_duration)
+            ref_id = self._select_reference_cycle_id(
+                profile_name, avg_duration,
+                exclude=getattr(result_pkg, "cut_short_ids", None),
+            )
             if ref_id and self._data["profiles"][profile_name].get("sample_cycle_id") != ref_id:
                 old = self._data["profiles"][profile_name].get("sample_cycle_id")
                 self._data["profiles"][profile_name]["sample_cycle_id"] = ref_id
