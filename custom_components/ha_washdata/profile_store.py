@@ -745,6 +745,12 @@ class MatchResult:
     # (``analysis.nearest_member_duration``), for the end gates; None unless they
     # agree, and on every path without the live gate view.
     gate_run_expected: float | None = None
+    # The profiles Stage 1's lower bound rejected (``min_duration_ratio``,
+    # ``analysis.stage1_min_ratio_rejected``): the cycle is still too short a
+    # part of them to compare, so they are missing from the ranking whatever they
+    # would have scored. The #530 check reads a pick rejected here as no
+    # evidence, not as one ranked below the list (PR #529 review).
+    min_ratio_rejected: tuple[str, ...] = ()
 
     @property
     def label_confidence(self) -> float:
@@ -11370,6 +11376,9 @@ class ProfileStore:
             ),
             gate_contenders=gate.get("contenders") if gate else None,
             gate_run_expected=gate_run_expected,
+            min_ratio_rejected=analysis.stage1_min_ratio_rejected(
+                current_duration, snapshots, config
+            ),
         )
 
     @staticmethod

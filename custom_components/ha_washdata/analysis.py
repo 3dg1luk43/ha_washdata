@@ -755,6 +755,68 @@ def _tag_live_rhythm(
         return
 
 
+def stage1_duration_bounds(
+    current_duration: float, config: dict[str, Any]
+) -> tuple[Any, Any, bool]:
+    """Stage 1's duration-ratio bounds for one match of ``current_duration``:
+    ``(min ratio, max ratio, whether the min applies)``. The lower bound waits out
+    ``MATCH_MIN_RATIO_GRACE_S`` of a live match: early on it rejects every
+    programme longer than the cycle is old."""
+    in_progress = bool(config.get("in_progress"))
+    grace_s = float(config.get("min_ratio_grace_s", MATCH_MIN_RATIO_GRACE_S))
+    return (
+        config.get("min_duration_ratio", DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO),
+        config.get("max_duration_ratio", DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO),
+        not (in_progress and current_duration < grace_s),
+    )
+
+
+def stage1_min_ratio_rejects(
+    current_duration: float, profile_duration: Any, bounds: tuple[Any, Any, bool]
+) -> bool:
+    """Whether Stage 1's LOWER bound rejects a profile whose snapshot's
+    ``avg_duration`` is ``profile_duration``: the cycle is still too short a part
+    of it to compare (``bounds``: :func:`stage1_duration_bounds`)."""
+    if profile_duration > 0:
+        min_ratio, _max_ratio, lower_applies = bounds
+        return bool(lower_applies and current_duration / profile_duration < min_ratio)
+    return False
+
+
+def stage1_duration_rejects(
+    current_duration: float, profile_duration: Any, bounds: tuple[Any, Any, bool]
+) -> bool:
+    """Whether Stage 1 rejects a profile whose snapshot's ``avg_duration`` is
+    ``profile_duration``: the lower bound (:func:`stage1_min_ratio_rejects`) or
+    the cycle past ``max ratio`` of it. A member template keeps its profile's
+    ``avg_duration``, so this accepts or rejects the profile as a whole
+    (``_expand_member_templates``)."""
+    if profile_duration > 0:
+        return stage1_min_ratio_rejects(current_duration, profile_duration, bounds) or bool(
+            current_duration / profile_duration > bounds[1]
+        )
+    return False
+
+
+def stage1_min_ratio_rejected(
+    current_duration: float, snapshots: list[dict[str, Any]], config: dict[str, Any]
+) -> tuple[str, ...]:
+    """The profiles of ``snapshots`` Stage 1's lower bound rejects, sorted: never
+    scored because the cycle is still too short a part of them, so absent from
+    the ranking whatever they would have scored. ``MatchResult.min_ratio_rejected``
+    (#530: such a pick is no evidence). Never raises (empty)."""
+    try:
+        bounds = stage1_duration_bounds(current_duration, config)
+        return tuple(sorted({
+            str(snap.get("name"))
+            for snap in snapshots
+            if isinstance(snap, dict)
+            and stage1_min_ratio_rejects(current_duration, snap.get("avg_duration") or 0.0, bounds)
+        }))
+    except Exception:  # noqa: BLE001
+        return ()
+
+
 def compute_matches_worker(
     current_power: list[float],
     current_duration: float,
@@ -791,8 +853,7 @@ def _compute_matches(
     """
     candidates: list[dict[str, Any]] = []
 
-    min_duration_ratio = config.get("min_duration_ratio", DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO)
-    max_duration_ratio = config.get("max_duration_ratio", DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO)
+    stage1 = stage1_duration_bounds(current_duration, config)
     # Falls back to the OPTION default like every other key here. It used to be a
     # literal 0.1, which silently ran a weaker Stage 3 than production for any
     # caller that omitted the key - worth ~0.8pp of top-1, and it is what made
@@ -820,7 +881,6 @@ def _compute_matches(
     # match path only) so the final match at cycle end - where the whole-cycle
     # figures are the right comparison - is byte-identical.
     in_progress = bool(config.get("in_progress"))
-    min_ratio_grace_s = float(config.get("min_ratio_grace_s", MATCH_MIN_RATIO_GRACE_S))
     # ...and Stages 2/3 score the SHAPE against the same truncated stretch, while the
     # cycle is still clearly mid-run (MATCH_PREFIX_SHAPE_MAX_RATIO). On by default
     # for a live match; `prefix_shape: False` turns it off for the A/B harnesses.
@@ -884,15 +944,9 @@ def _compute_matches(
         profile_duration = item["avg_duration"]
         sample_power = item["sample_power"]
 
-        # Duration Check. The lower bound waits out MATCH_MIN_RATIO_GRACE_S of a live
-        # match: early on it rejects every programme longer than the cycle is old.
-        if profile_duration > 0:
-            ratio = current_duration / profile_duration
-            lower_applies = not (
-                in_progress and current_duration < min_ratio_grace_s
-            )
-            if (lower_applies and ratio < min_duration_ratio) or ratio > max_duration_ratio:
-                continue
+        # Duration Check (stage1_duration_rejects).
+        if stage1_duration_rejects(current_duration, profile_duration, stage1):
+            continue
 
         # Core Similarity. While the cycle is mid-run this compares it against the
         # candidate truncated to the elapsed time, on a shared grid (#400) - the

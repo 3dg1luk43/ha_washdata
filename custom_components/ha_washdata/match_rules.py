@@ -1293,13 +1293,19 @@ def selected_program_deficit(
     profile group (the user's own near-duplicates), or nothing bounds its score.
     The winner is ``best_profile`` (a Stage-5 family resolved to its member). The
     picked program's score is its own entry's, else its family's (the family's
-    best member: an upper bound), else, when it fell off a full list of five, the
-    fifth score (also an upper bound). Missing from a shorter list, it scored
-    below ``MATCH_KEEP_MIN_SCORE`` or Stage 1 rejected its duration, and that is
-    taken as no evidence: counted as a deficit to the keep score it doubled the
-    false alarms on the right pick (devtools/program_mismatch_eval.py, 1.6% ->
-    3.3%) for 3.8 points more caught wrong picks. Every bound makes the deficit
-    smaller, never larger.
+    best member: an upper bound), else, when the matcher ranked it below a full
+    list of five, the fifth score (also an upper bound). Missing from a shorter
+    list, it scored below ``MATCH_KEEP_MIN_SCORE`` or Stage 1 rejected its
+    duration, and that is taken as no evidence: counted as a deficit to the keep
+    score it doubled the false alarms on the right pick
+    (devtools/program_mismatch_eval.py, 1.6% -> 3.3%) for 3.8 points more caught
+    wrong picks. Rejected by Stage 1's lower bound (``min_ratio_rejected``: the
+    cycle is still too short a part of it to compare) it is missing from a full
+    list the same way, and is no evidence there either (PR #529 review). Past the
+    upper bound (the cycle has outrun it) it still reads at the fifth score: no
+    bound of a score there, but read as no evidence it lost 316 of 1904 caught
+    wrong picks (38.4% -> 32.0%) for no false alarm fewer. Every bound makes the
+    deficit smaller, never larger.
     """
     try:
         best = getattr(result, "best_profile", None) if result is not None else None
@@ -1329,6 +1335,9 @@ def selected_program_deficit(
                 break
         if picked is None:
             if len(candidates) < _LISTED_CANDIDATES:
+                return None
+            rejected = getattr(result, "min_ratio_rejected", None) or ()
+            if isinstance(rejected, (list, tuple, set, frozenset)) and selected in rejected:
                 return None
             picked = float(candidates[-1].get("score", 0.0) or 0.0)
         deficit = top - picked

@@ -83,7 +83,8 @@ the stall cut the detector applies to its match trace (``_match_readings``); a
 reading that arrives while a check is still matching; a restart.
 
 Exit codes: 0, 2 no corpus, 3 a ``--from-rows`` file whose ticks lack their stored
-offset (written before it was kept: match again).
+offset or the programmes Stage 1's lower bound rejected (written before they were
+kept: match again).
 """
 from __future__ import annotations
 
@@ -352,6 +353,10 @@ async def device_folds(dev: Any, base: dict, idxs: list[int]) -> list[dict]:
                 "best": res.best_profile,
                 "c": [{k2: c.get(k2) for k2 in _CAND_KEYS if c.get(k2) is not None}
                       for c in (res.candidates or [])],
+                # The programmes Stage 1's lower bound rejected (the cycle still
+                # too short a part of them): a pick among them is no evidence, even
+                # missing from a full list.
+                "rej": list(getattr(res, "min_ratio_rejected", None) or ()),
             })
         rows.append({
             "path": dev.key, "id": ids[i], "dev": mgr.device_type, "label": label,
@@ -466,7 +471,9 @@ def pick_sequence(row: dict, selected: str) -> list[tuple[float, Any, float, flo
     return [
         (tick["t"] / expected,
          match_rules.selected_program_deficit(
-             SimpleNamespace(best_profile=tick["best"], candidates=tick["c"]), selected, fam),
+             SimpleNamespace(best_profile=tick["best"], candidates=tick["c"],
+                             min_ratio_rejected=tuple(tick.get("rej") or ())),
+             selected, fam),
          tick["t"], tick["at"])
         for tick in row["ticks"]
     ]
@@ -478,6 +485,14 @@ def rows_have_offsets(rows: list[dict]) -> bool:
     trace that starts late, read as the offset it puts a tick past the cycle end
     inside it. Such a file is matched again, never rescored."""
     return all(isinstance(t, dict) and "at" in t for r in rows for t in r.get("ticks") or ())
+
+
+def rows_have_rejections(rows: list[dict]) -> bool:
+    """Whether every tick keeps the programmes Stage 1's lower bound rejected
+    (``rej``). A rows file written before they were kept scores such a pick
+    missing from a full list by the fifth score, which the rule no longer does:
+    matched again, never rescored."""
+    return all(isinstance(t, dict) and "rej" in t for r in rows for t in r.get("ticks") or ())
 
 
 def fire_at(seq: list[tuple[float, Any, float, float]], margin: float, persistence: int,
@@ -605,6 +620,11 @@ def main(argv: list[str] | None = None) -> int:
         if not rows_have_offsets(rows):
             print(f"{a.from_rows}: ticks without their stored offset (written before it "
                   "was kept): run the replay again", file=sys.stderr)
+            return 3
+        if not rows_have_rejections(rows):
+            print(f"{a.from_rows}: ticks without the programmes Stage 1's lower bound "
+                  "rejected (written before they were kept): run the replay again",
+                  file=sys.stderr)
             return 3
     else:
         if not a.corpus.is_dir():

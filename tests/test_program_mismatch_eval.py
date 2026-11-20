@@ -88,7 +88,7 @@ def test_the_rows_round_trip_through_the_json_file(tmp_path: Path) -> None:
         "twins": [], "unmatchable": [],
         "ticks": [
             {"t": 300.0 * k, "at": 300.0 * k, "best": "B",
-             "c": [{"name": "B", "score": 0.9}, {"name": "A", "score": 0.5}]}
+             "c": [{"name": "B", "score": 0.9}, {"name": "A", "score": 0.5}], "rej": []}
             for k in range(1, 5)
         ],
     }]

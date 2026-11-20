@@ -6,23 +6,31 @@
 * #530: a scoring setting changed during a check's trace preparation and changed
   back before it landed compared equal by value, though the ranking was scored
   under the intermediate setting.
+* #530: a pick Stage 1's lower bound rejected (the cycle still too short a part
+  of it) was read against the fifth score of a full list, a bound it never had.
 """
 from __future__ import annotations
 
+from datetime import timedelta
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
 from homeassistant.core import HomeAssistant
+from homeassistant.util import dt as dt_util
 
+from custom_components.ha_washdata import analysis, match_rules
 from custom_components.ha_washdata.const import (
     DOMAIN,
     PROGRAM_MISMATCH_PERSISTENCE,
 )
 from tests.test_issue_530_program_mismatch import (
+    COTTON,
     _check,
     _mismatches,
     _past_half,
     _result,
+    _seed,
+    _trace,
 )
 
 # ── #530: a group edit undone before the next check ─────────────────────────
@@ -120,3 +128,71 @@ async def test_the_settings_revision_moves_on_every_change_only(
         assert store.match_settings() != before
         assert store.match_settings_revision == rev + 1
         rev = store.match_settings_revision
+
+
+# ── #530: a pick Stage 1's lower bound rejected is no evidence ─────────────
+
+
+def test_a_min_ratio_rejected_pick_missing_from_a_full_list_is_no_evidence() -> None:
+    """Five listed, the pick missing: ranked below them it is bounded by the
+    fifth score; rejected by Stage 1's lower bound (the cycle still too short a
+    part of it) it was never scored. Past the upper bound it still reads at the
+    fifth score (measured: the overrun is what catches 316 wrong picks)."""
+    res = _result("Synthetics", {"Synthetics": 0.9, "A": 0.85, "B": 0.8, "C": 0.7, "D": 0.65})
+    hit = match_rules.selected_program_deficit(res, "Cotton")
+    assert hit is not None and abs(hit[1] - 0.25) < 1e-9
+    res.min_ratio_rejected = ("Cotton",)
+    assert match_rules.selected_program_deficit(res, "Cotton") is None
+    # Another programme's rejection leaves the bound to the pick.
+    res.min_ratio_rejected = ("Eco",)
+    assert match_rules.selected_program_deficit(res, "Cotton") == hit
+
+
+async def _add_programme(store: Any, name: str, shape: list[tuple[float, float]]) -> None:
+    pts = _trace(shape)
+    start = dt_util.utcnow() - timedelta(days=30)
+    for j in range(3):
+        store._data["past_cycles"].append({  # noqa: SLF001
+            "id": f"{name}-{j}", "profile_name": name, "label_source": "manual",
+            "status": "completed", "start_time": (start + timedelta(days=j)).isoformat(),
+            "end_time": (start + timedelta(days=j, seconds=pts[-1][0])).isoformat(),
+            "duration": pts[-1][0], "power_data": [list(p) for p in pts],
+        })
+    store._data["profiles"][name] = {  # noqa: SLF001
+        "avg_duration": pts[-1][0], "sample_cycle_id": f"{name}-0",
+    }
+    await store.async_rebuild_envelope(name)
+
+
+async def test_the_match_reports_the_programmes_the_min_ratio_rejected(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """``min_ratio_rejected`` is Stage 1's own lower-bound verdict on the
+    snapshots the match scored. 25 min into a run at a 0.5 min ratio: the 60 min
+    programme (0.42) is listed there; the 10 min one (2.5x, past the 1.8 upper
+    bound) is rejected too, but not there; the 30 min ones are scored."""
+    entry = await setup_washdata_entry()
+    manager = hass.data[DOMAIN][entry.entry_id]
+    await _seed(manager)
+    store = manager.profile_store
+    await _add_programme(store, "Quick", [(10, 2000.0)])
+    await _add_programme(store, "Long", [(20, 2000.0), (40, 200.0)])
+    _lo, hi = store.get_duration_ratio_limits()
+    store.set_duration_ratio_limits(min_ratio=0.5, max_ratio=hi)
+    t0 = dt_util.utcnow()
+    readings = [(t0 + timedelta(seconds=t), w) for t, w in _trace(COTTON)[:51]]
+    elapsed = (readings[-1][0] - readings[0][0]).total_seconds()
+    assert elapsed == 1500.0
+    res = await store.async_match_profile(readings, elapsed, in_progress=True)
+    listed = {c.get("name") for c in res.candidates}
+    assert listed and not listed & {"Quick", "Long"}
+    assert res.min_ratio_rejected == ("Long",)
+    # The shared rule, as the worker applies it.
+    bounds = analysis.stage1_duration_bounds(
+        1500.0, {"in_progress": True, "min_duration_ratio": 0.5}
+    )
+    assert analysis.stage1_duration_rejects(1500.0, 600.0, bounds)
+    assert analysis.stage1_duration_rejects(1500.0, 3600.0, bounds)
+    assert analysis.stage1_min_ratio_rejects(1500.0, 3600.0, bounds)
+    assert not analysis.stage1_min_ratio_rejects(1500.0, 600.0, bounds)
+    assert not analysis.stage1_duration_rejects(1500.0, 1800.0, bounds)
