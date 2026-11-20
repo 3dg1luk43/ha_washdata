@@ -1026,6 +1026,7 @@
         "sug_muted": "이 설정은 더 이상 제안되지 않습니다",
         "sug_mute_failed": "제안을 음소거할 수 없습니다",
         "sug_unmuted_all": "뮤트된 제안을 초기화했습니다",
+        "sug_unmute_incomplete": "초기화가 완료되지 않았습니다. 일부 제안이 아직 뮤트되어 있습니다. 다시 시도하세요.",
         "n_suggestions_muted": "제안 {count}개가 뮤트됨. 자동 튜너가 이 제안들을 다시 제안하지 않습니다.",
         "n_suggestions_muted_other": "제안 {count}개가 뮤트됨. 자동 튜너가 이 제안들을 다시 제안하지 않습니다.",
         "font_size_hint": "이 패널의 모든 내용을 크거나 작게 표시합니다. 이 기기의 내 계정에 적용됩니다.",

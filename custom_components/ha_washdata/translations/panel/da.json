@@ -1044,6 +1044,7 @@
     "sug_muted": "Vil ikke foreslå denne indstilling igen",
     "sug_mute_failed": "Kunne ikke undertrykke forslaget",
     "sug_unmuted_all": "Undertrykte forslag nulstillet",
+    "sug_unmute_incomplete": "Nulstillingen blev ikke fuldført: nogle forslag er stadig undertrykt. Prøv igen.",
     "n_suggestions_muted": "{count} forslag undertrykt; autotuneren vil ikke foreslå disse.",
     "n_suggestions_muted_one": "{count} forslag undertrykt; autotuneren vil ikke foreslå det.",
     "n_suggestions_muted_other": "{count} forslag undertrykt; autotuneren vil ikke foreslå disse.",

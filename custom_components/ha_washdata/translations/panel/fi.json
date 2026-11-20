@@ -1040,6 +1040,7 @@
     "sug_muted": "Tätä asetusta ei enää ehdoteta",
     "sug_mute_failed": "Ehdotuksen vaimennus epäonnistui",
     "sug_unmuted_all": "Vaiennetut ehdotukset palautettu",
+    "sug_unmute_incomplete": "Palautus ei valmistunut: osa ehdotuksista on yhä vaiennettu. Yritä uudelleen.",
     "n_suggestions_muted": "{count} ehdotusta vaimennettu; automaattinen virittäjä ei ehdota näitä.",
     "n_suggestions_muted_one": "{count} ehdotus vaimennettu; automaattinen virittäjä ei ehdota sitä.",
     "n_suggestions_muted_other": "{count} ehdotusta vaimennettu; automaattinen virittäjä ei ehdota näitä.",

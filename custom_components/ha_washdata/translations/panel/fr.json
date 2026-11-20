@@ -1001,6 +1001,7 @@
     "sug_muted": "Ce paramètre ne sera plus suggéré",
     "sug_mute_failed": "Impossible de masquer la suggestion",
     "sug_unmuted_all": "Les suggestions masquées ont été réinitialisées",
+    "sug_unmute_incomplete": "La réinitialisation n'a pas abouti : certaines suggestions sont toujours masquées. Réessayez.",
     "n_suggestions_muted": "{count} suggestions masquées ; le réglage automatique ne les proposera plus.",
     "n_suggestions_muted_one": "{count} suggestion masquée ; le réglage automatique ne la proposera plus.",
     "n_suggestions_muted_many": "{count} suggestions masquées ; le réglage automatique ne les proposera plus.",

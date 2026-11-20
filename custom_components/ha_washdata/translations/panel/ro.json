@@ -1001,6 +1001,7 @@
     "sug_muted": "Această setare nu va mai fi sugerată",
     "sug_mute_failed": "Nu s-a putut dezactiva sugestia",
     "sug_unmuted_all": "Sugestiile dezactivate au fost resetate",
+    "sug_unmute_incomplete": "Resetarea nu s-a finalizat: unele sugestii sunt încă dezactivate. Încercați din nou.",
     "n_suggestions_muted": "{count} de sugestii dezactivate; reglajul automat nu le va propune.",
     "n_suggestions_muted_one": "{count} sugestie dezactivată; reglajul automat nu o va propune.",
     "n_suggestions_muted_few": "{count} sugestii dezactivate; reglajul automat nu le va propune.",

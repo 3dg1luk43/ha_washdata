@@ -33,3 +33,32 @@ test('a mute the reloaded device does not hold is not reported as muted', async 
   await expect(page.locator('.wd-field[data-field="off_delay"] .wd-sug [data-suglock="off_delay"]').first())
     .toBeVisible();
 });
+
+// "Reset muted" across a full reload: the live device may have loaded the file
+// before an unlock landed, so success is said only when it holds none of them.
+async function resetMutedAfterReload(page: any, liveLocked: string[]) {
+  await page.goto('/');
+  await bootPanel(page, {
+    'ha_washdata/get_suggestions': { suggestions: [], locked_suggestions: ['off_delay', 'min_power'] },
+  });
+  await clickTab(page, 'settings');
+  const reset = page.locator('[data-action="sug-unmute-all"]').first();
+  await expect(reset).toBeVisible({ timeout: 8_000 });
+  await setHandler(page, 'ha_washdata/set_suggestion_lock', {
+    success: true, locked_suggestions: liveLocked, reloaded: true,
+  });
+  await setHandler(page, 'ha_washdata/get_suggestions', { suggestions: [], locked_suggestions: liveLocked });
+  await reset.click();
+}
+
+test('a reset the reloaded device did not take is not reported as done', async ({ page }) => {
+  await resetMutedAfterReload(page, ['off_delay']);
+  await expect(page.locator('.wd-toast')).toContainText('Reset did not complete', { timeout: 5_000 });
+  await expect(page.locator('[data-action="sug-unmute-all"]').first()).toBeVisible();
+});
+
+test('a reset the reloaded device holds says reset', async ({ page }) => {
+  await resetMutedAfterReload(page, []);
+  await expect(page.locator('.wd-toast')).toContainText('Muted suggestions reset', { timeout: 5_000 });
+  await expect(page.locator('[data-action="sug-unmute-all"]')).toHaveCount(0);
+});

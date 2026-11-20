@@ -1032,6 +1032,7 @@
         "sug_muted": "Ky cilësim nuk do të sugjerohet më",
         "sug_mute_failed": "Nuk mund të heshtte sugjerimi",
         "sug_unmuted_all": "Sugjerime të heshtura u rivendosën",
+        "sug_unmute_incomplete": "Rivendosja nuk përfundoi: disa sugjerime janë ende të heshtura. Provoni përsëri.",
         "n_suggestions_muted": "{count} sugjerime të heshtura; motori i sugjerimeve nuk do t'i propozojë këto.",
         "n_suggestions_muted_one": "{count} sugjerim i heshtur; motori i sugjerimeve nuk do ta propozojë.",
         "n_suggestions_muted_other": "{count} sugjerime të heshtura; motori i sugjerimeve nuk do t'i propozojë këto.",

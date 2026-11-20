@@ -1044,6 +1044,7 @@
     "sug_muted": "Kommer inte att föreslå den här inställningen igen",
     "sug_mute_failed": "Kunde inte tysta förslaget",
     "sug_unmuted_all": "Tysta förslag återställda",
+    "sug_unmute_incomplete": "Återställningen slutfördes inte: vissa förslag är fortfarande tystade. Försök igen.",
     "n_suggestions_muted": "{count} förslag tystade; auto-tunern föreslår inte dessa.",
     "n_suggestions_muted_one": "{count} förslag tystat; auto-tunern föreslår det inte.",
     "n_suggestions_muted_other": "{count} förslag tystade; auto-tunern föreslår inte dessa.",

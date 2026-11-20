@@ -1026,6 +1026,7 @@
         "sug_muted": "将不再建议此设置",
         "sug_mute_failed": "无法屏蔽建议",
         "sug_unmuted_all": "已重置屏蔽的建议",
+        "sug_unmute_incomplete": "重置未完成：部分建议仍被屏蔽。请重试。",
         "n_suggestions_muted": "已屏蔽 {count} 条建议，自动调整器将不再提议这些建议。",
         "n_suggestions_muted_other": "已屏蔽 {count} 条建议，自动调整器将不再提议这些建议。",
         "font_size_hint": "调整此面板所有内容的字体大小，仅对您在此设备上的账户生效。",

@@ -1044,6 +1044,7 @@
     "sug_muted": "Diese Einstellung wird nicht mehr vorgeschlagen",
     "sug_mute_failed": "Einstellung konnte nicht stummgeschaltet werden",
     "sug_unmuted_all": "Stummgeschaltete Vorschläge zurückgesetzt",
+    "sug_unmute_incomplete": "Zurücksetzen nicht abgeschlossen: Einige Vorschläge sind noch stummgeschaltet. Versuchen Sie es erneut.",
     "n_suggestions_muted": "{count} Vorschläge stummgeschaltet; der Autotuner schlägt diese nicht mehr vor.",
     "n_suggestions_muted_one": "{count} Vorschlag stummgeschaltet; der Autotuner schlägt ihn nicht mehr vor.",
     "n_suggestions_muted_other": "{count} Vorschläge stummgeschaltet; der Autotuner schlägt diese nicht mehr vor.",

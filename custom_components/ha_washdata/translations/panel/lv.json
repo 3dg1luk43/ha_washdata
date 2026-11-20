@@ -1054,6 +1054,7 @@
     "sug_muted": "Šis iestatījums vairs netiks ieteikts",
     "sug_mute_failed": "Neizdevās klusināt ieteikumu",
     "sug_unmuted_all": "Klusināto ieteikumu atiestatīšana pabeigta",
+    "sug_unmute_incomplete": "Atiestatīšana netika pabeigta: daži ieteikumi joprojām ir klusināti. Mēģiniet vēlreiz.",
     "n_suggestions_muted": "{count} ieteikumi klusināti; automātiskais regulētājs tos vairs nepiedāvās.",
     "n_suggestions_muted_zero": "{count} ieteikumi klusināti; automātiskais regulētājs tos vairs nepiedāvās.",
     "n_suggestions_muted_one": "{count} ieteikums klusināts; automātiskais regulētājs to vairs nepiedāvās.",

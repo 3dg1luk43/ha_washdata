@@ -1001,6 +1001,7 @@
     "sug_muted": "Non verrà più suggerita questa impostazione",
     "sug_mute_failed": "Impossibile silenziare il suggerimento",
     "sug_unmuted_all": "Suggerimenti silenziati ripristinati",
+    "sug_unmute_incomplete": "Ripristino non completato: alcuni suggerimenti sono ancora silenziati. Riprova.",
     "n_suggestions_muted": "{count} suggerimenti silenziati; il sistema di ottimizzazione automatica non li proporrà.",
     "n_suggestions_muted_one": "{count} suggerimento silenziato; il sistema di ottimizzazione automatica non lo proporrà.",
     "n_suggestions_muted_many": "{count} suggerimenti silenziati; il sistema di ottimizzazione automatica non li proporrà.",

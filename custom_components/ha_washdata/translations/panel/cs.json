@@ -976,6 +976,7 @@
     "sug_muted": "Toto nastavení již nebude navrhováno",
     "sug_mute_failed": "Skrytí návrhu se nezdařilo",
     "sug_unmuted_all": "Skryté návrhy obnoveny",
+    "sug_unmute_incomplete": "Obnovení se nedokončilo: některé návrhy jsou stále skryté. Zkuste to znovu.",
     "n_suggestions_muted": "{count} návrhů je skryto; automatický ladicí nástroj je nebude navrhovat.",
     "n_suggestions_muted_one": "{count} návrh je skrytý; automatický ladicí nástroj ho nebude navrhovat.",
     "n_suggestions_muted_few": "{count} návrhy jsou skryté; automatický ladicí nástroj je nebude navrhovat.",

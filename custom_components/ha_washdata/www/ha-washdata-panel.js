@@ -15069,8 +15069,14 @@ class HaWashdataPanel extends HTMLElement {
           const lastOk = results.slice().reverse().find(r => r.status === 'fulfilled');
           this._lockedSuggestions = (lastOk && lastOk.value && lastOk.value.locked_suggestions) || [];
           await this._fetchSuggestions(eid);
+          if (!this._isActiveEntry(eid)) return;
+          // A full reload during a write can leave the live device holding a key it
+          // answered for (`reloaded`): judged on the mute list as it now stands.
+          const stillMuted = keys.some(k => (this._lockedSuggestions || []).includes(k));
           if (failed) {
             this._showToast(this._tText('toast.error', {error: `${failed} suggestion(s) failed to unlock`}, `${failed} suggestion(s) failed to unlock`), 'error');
+          } else if (stillMuted) {
+            this._showToast(this._t('msg.sug_unmute_incomplete', {}, 'Reset did not complete: some suggestions are still muted. Try again.'), 'error');
           } else {
             this._showToast(this._t('msg.sug_unmuted_all', {}, 'Muted suggestions reset'), 'success');
           }

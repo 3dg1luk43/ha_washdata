@@ -1044,6 +1044,7 @@
     "sug_muted": "Mun ekki stinga upp á þessari stillingu aftur",
     "sug_mute_failed": "Gat ekki þaggað tillögu",
     "sug_unmuted_all": "Þaggaðar tillögur endurstilltar",
+    "sug_unmute_incomplete": "Endurstilling kláraðist ekki: sumar tillögur eru enn þaggaðar. Reyndu aftur.",
     "n_suggestions_muted": "{count} tillögur þaggaðar; sjálfvirki stillirinn leggur þær ekki til.",
     "n_suggestions_muted_one": "{count} tillaga þögguð; sjálfvirki stillirinn leggur hana ekki til.",
     "n_suggestions_muted_other": "{count} tillögur þaggaðar; sjálfvirki stillirinn leggur þær ekki til.",

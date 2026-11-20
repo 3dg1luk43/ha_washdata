@@ -1044,6 +1044,7 @@
     "sug_muted": "Vil ikke foreslå denne innstillingen igjen",
     "sug_mute_failed": "Kunne ikke dempe forslaget",
     "sug_unmuted_all": "Dempede forslag tilbakestilt",
+    "sug_unmute_incomplete": "Tilbakestillingen ble ikke fullført: noen forslag er fortsatt dempet. Prøv igjen.",
     "n_suggestions_muted": "{count} forslag dempet; autotuneren vil ikke foreslå disse.",
     "n_suggestions_muted_one": "{count} forslag dempet; autotuneren vil ikke foreslå det.",
     "n_suggestions_muted_other": "{count} forslag dempet; autotuneren vil ikke foreslå disse.",

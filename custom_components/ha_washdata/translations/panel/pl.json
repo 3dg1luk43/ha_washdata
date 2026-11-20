@@ -976,6 +976,7 @@
     "sug_muted": "To ustawienie nie będzie więcej sugerowane",
     "sug_mute_failed": "Nie udało się wyciszyć sugestii",
     "sug_unmuted_all": "Wyciszone sugestie przywrócone",
+    "sug_unmute_incomplete": "Przywracanie nie zostało zakończone: niektóre sugestie są nadal wyciszone. Spróbuj ponownie.",
     "n_suggestions_muted": "Wyciszono {count} sugestii; automatyczny tuner nie będzie ich proponować.",
     "n_suggestions_muted_one": "Wyciszono {count} sugestię; automatyczny tuner nie będzie jej proponować.",
     "n_suggestions_muted_few": "Wyciszono {count} sugestie; automatyczny tuner nie będzie ich proponować.",

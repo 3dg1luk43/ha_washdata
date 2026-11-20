@@ -1068,6 +1068,7 @@
     "sug_muted": "Šio nustatymo daugiau nebesiūlys",
     "sug_mute_failed": "Nepavyko nutildyti pasiūlymo",
     "sug_unmuted_all": "Nutildyti pasiūlymai atstatyti",
+    "sug_unmute_incomplete": "Atstatymas neužbaigtas: kai kurie pasiūlymai vis dar nutildyti. Bandykite dar kartą.",
     "n_suggestions_muted": "{count} pasiūlymų nutildyta; automatinis derintuvas jų nebesiūlys.",
     "n_suggestions_muted_one": "{count} pasiūlymas nutildytas; automatinis derintuvas jo nebesiūlys.",
     "n_suggestions_muted_few": "{count} pasiūlymai nutildyti; automatinis derintuvas jų nebesiūlys.",

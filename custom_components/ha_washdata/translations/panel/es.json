@@ -1001,6 +1001,7 @@
     "sug_muted": "Este ajuste no volverá a sugerirse",
     "sug_mute_failed": "No se pudo silenciar la sugerencia",
     "sug_unmuted_all": "Sugerencias silenciadas restablecidas",
+    "sug_unmute_incomplete": "El restablecimiento no se completó: algunas sugerencias siguen silenciadas. Inténtelo de nuevo.",
     "n_suggestions_muted": "{count} sugerencias silenciadas; el ajustador automático no las propondrá.",
     "n_suggestions_muted_one": "{count} sugerencia silenciada; el ajustador automático no la propondrá.",
     "n_suggestions_muted_many": "{count} sugerencias silenciadas; el ajustador automático no las propondrá.",

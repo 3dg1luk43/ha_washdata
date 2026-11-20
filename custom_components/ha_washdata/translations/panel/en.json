@@ -1053,6 +1053,7 @@
     "sug_muted": "Won't suggest this setting again",
     "sug_staged": "Set {key} = {val}. Save to apply.",
     "sug_unmuted_all": "Muted suggestions reset",
+    "sug_unmute_incomplete": "Reset did not complete: some suggestions are still muted. Try again.",
     "tail_trim_hint": "Remove this many seconds from the end",
     "toast_auto_detect_enabled": "Auto-detect enabled",
     "toast_auto_label_complete": "Auto-label complete",

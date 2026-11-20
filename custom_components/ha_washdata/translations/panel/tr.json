@@ -1040,6 +1040,7 @@
         "sug_muted": "Bu ayar bir daha önerilmeyecek",
         "sug_mute_failed": "Öneri susturulamadı",
         "sug_unmuted_all": "Susturulan öneriler sıfırlandı",
+        "sug_unmute_incomplete": "Sıfırlama tamamlanmadı: bazı öneriler hâlâ susturulmuş durumda. Tekrar deneyin.",
         "n_suggestions_muted": "{count} öneri susturuldu; öneri motoru bunları önermeyecek.",
         "n_suggestions_muted_one": "{count} öneri susturuldu; öneri motoru bunu önermeyecek.",
         "n_suggestions_muted_other": "{count} öneri susturuldu; öneri motoru bunları önermeyecek.",

@@ -1040,6 +1040,7 @@
     "sug_muted": "Seda seadet enam ei soovitata",
     "sug_mute_failed": "Soovituse vaigistamine ebaõnnestus",
     "sug_unmuted_all": "Vaigistatud soovitused lähtestatud",
+    "sug_unmute_incomplete": "Lähtestamine ei lõppenud: mõned soovitused on endiselt vaigistatud. Proovi uuesti.",
     "n_suggestions_muted": "{count} soovitust vaigistatud; automaatne häälestaja ei paku neid enam.",
     "n_suggestions_muted_one": "{count} soovitus vaigistatud; automaatne häälestaja ei paku seda enam.",
     "n_suggestions_muted_other": "{count} soovitust vaigistatud; automaatne häälestaja ei paku neid enam.",

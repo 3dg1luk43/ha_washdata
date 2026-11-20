@@ -976,6 +976,7 @@
     "sug_muted": "Toto nastavenie sa už nebude navrhovať",
     "sug_mute_failed": "Nastavenie sa nepodarilo stíšiť",
     "sug_unmuted_all": "Stíšené návrhy obnovené",
+    "sug_unmute_incomplete": "Obnovenie sa nedokončilo: niektoré návrhy sú stále stíšené. Skúste to znova.",
     "n_suggestions_muted": "{count} návrhov je stíšených; automatický ladiaci nástroj ich nebude navrhovať.",
     "n_suggestions_muted_one": "{count} návrh je stíšený; automatický ladiaci nástroj ho nebude navrhovať.",
     "n_suggestions_muted_few": "{count} návrhy sú stíšené; automatický ladiaci nástroj ich nebude navrhovať.",

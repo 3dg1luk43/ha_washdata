@@ -1040,6 +1040,7 @@
         "sug_muted": "Ezt a beállítást nem javasolja többé",
         "sug_mute_failed": "Nem sikerült elhallgattatni a javaslatot",
         "sug_unmuted_all": "Az elhallgattatott javaslatok visszaállítva",
+        "sug_unmute_incomplete": "A visszaállítás nem fejeződött be: néhány javaslat még mindig el van hallgattatva. Próbálja újra.",
         "n_suggestions_muted": "{count} javaslat elhallgattatva; az automatikus finomhangolás nem fogja javasolni ezeket.",
         "n_suggestions_muted_one": "{count} javaslat elhallgattatva; az automatikus finomhangolás nem fogja javasolni.",
         "n_suggestions_muted_other": "{count} javaslat elhallgattatva; az automatikus finomhangolás nem fogja javasolni ezeket.",

@@ -1001,6 +1001,7 @@
     "sug_muted": "Esta definição não será sugerida novamente",
     "sug_mute_failed": "Não foi possível silenciar a sugestão",
     "sug_unmuted_all": "Sugestões silenciadas repostas",
+    "sug_unmute_incomplete": "A reposição não foi concluída: algumas sugestões continuam silenciadas. Tente novamente.",
     "n_suggestions_muted": "{count} sugestões silenciadas; o ajustador automático não as proporá.",
     "n_suggestions_muted_one": "{count} sugestão silenciada; o ajustador automático não a proporá.",
     "n_suggestions_muted_many": "{count} sugestões silenciadas; o ajustador automático não as proporá.",

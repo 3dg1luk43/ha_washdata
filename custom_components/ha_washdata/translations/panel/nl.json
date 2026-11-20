@@ -1044,6 +1044,7 @@
     "sug_muted": "Deze instelling wordt niet meer voorgesteld",
     "sug_mute_failed": "Instelling kon niet worden gedempt",
     "sug_unmuted_all": "Gedempte suggesties hersteld",
+    "sug_unmute_incomplete": "Herstellen is niet voltooid: sommige suggesties zijn nog gedempt. Probeer het opnieuw.",
     "n_suggestions_muted": "{count} suggesties gedempt; de autotuner stelt deze niet meer voor.",
     "n_suggestions_muted_one": "{count} suggestie gedempt; de autotuner stelt deze niet meer voor.",
     "n_suggestions_muted_other": "{count} suggesties gedempt; de autotuner stelt deze niet meer voor.",

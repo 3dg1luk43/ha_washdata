@@ -976,6 +976,7 @@
     "sug_muted": "Te nastavitve ne bo več predlagalo",
     "sug_mute_failed": "Utišanje predloga ni uspelo",
     "sug_unmuted_all": "Utišani predlogi ponastavljeni",
+    "sug_unmute_incomplete": "Ponastavitev ni bila dokončana: nekateri predlogi so še vedno utišani. Poskusite znova.",
     "n_suggestions_muted": "{count} predlogov je utišanih; samodejni nastavljalnik jih ne bo predlagal.",
     "n_suggestions_muted_one": "{count} predlog je utišan; samodejni nastavljalnik ga ne bo predlagal.",
     "n_suggestions_muted_two": "{count} predloga sta utišana; samodejni nastavljalnik ju ne bo predlagal.",

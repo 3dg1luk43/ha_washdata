@@ -963,6 +963,7 @@
     "sug_muted": "Ovo podešavanje neće biti predlagano ponovo",
     "sug_mute_failed": "Predlog nije mogao biti utišan",
     "sug_unmuted_all": "Utišani predlozi su resetovani",
+    "sug_unmute_incomplete": "Resetovanje nije završeno: neki predlozi su i dalje utišani. Pokušajte ponovo.",
     "n_suggestions_muted": "{count} predloga je utišano; auto-podešivač ih neće predlagati.",
     "n_suggestions_muted_one": "{count} predlog je utišan; auto-podešivač ga neće predlagati.",
     "n_suggestions_muted_few": "{count} predloga su utišana; auto-podešivač ih neće predlagati.",
