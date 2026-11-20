@@ -6,13 +6,19 @@
 * A profile dropped with its last imported or backfilled cycle (relabelled away
   or deleted) left the store without moving the profile set revision, so a #530
   ranking naming it passed the guard da2ea73d added.
+* A door opened in PAUSED after a program was picked by hand, before the
+  detector's next match tick took it, paused the cycle; opened after the tick,
+  the same door ended it.
 """
 from __future__ import annotations
 
 from typing import Any
+from unittest.mock import patch
 
 from custom_components.ha_washdata import match_rules
-from custom_components.ha_washdata.const import DOMAIN
+from custom_components.ha_washdata.const import DOMAIN, STATE_PAUSED
+
+from .test_issue_524_door_ends_cycle import DOOR, OPTS, WASH_S, _paused_washer, _tick
 
 # ── An incomplete fired #530 record starts the check afresh ──────────────────
 
@@ -76,3 +82,64 @@ async def test_a_profile_dropped_with_its_last_imported_cycle_moves_the_profile_
     assert await store.delete_cycle("r1")
     assert "Store" not in store.get_profiles()
     assert store.profile_set_revision == before + 2
+
+
+# ── A door opened before the detector takes a pick is judged by the pick ─────
+
+
+async def test_a_door_opened_before_the_tick_takes_the_pick_ends_the_cycle(
+    hass: Any, setup_washdata_entry: Any, freezer: Any
+) -> None:
+    """Picked by hand in PAUSED at the programme's end; the door opens before the
+    detector's next match tick. The pick is handed over first, so the door is
+    judged as it is after that tick: the dwell, then the end. The detector is held
+    in PAUSED (no reading reaches it), as in the round-34a test of the reverse
+    order, so no ENDING transition arms a dwell on its own."""
+    manager, ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    manager._manual_program_active = True  # noqa: SLF001
+    manager._current_program = "Quick"  # noqa: SLF001 - picked, detector not told yet
+    manager._matched_profile_duration = float(WASH_S)  # noqa: SLF001
+    assert manager._door_end_may_fire() is False  # noqa: SLF001 - awaits the tick
+    with patch.object(manager.detector, "process_reading", lambda *_a, **_k: None):
+        hass.states.async_set(DOOR, "on")
+        await hass.async_block_till_done()
+        assert manager.detector.matched_profile == "Quick"
+        assert manager._is_user_paused is False  # noqa: SLF001 - not the sticky pause
+        assert manager._remove_door_end_dwell is not None  # noqa: SLF001
+        await _tick(hass, freezer, 70, None)
+    assert len(ends) == 1, ends
+
+
+async def test_a_door_opened_before_the_tick_mid_programme_still_pauses(
+    hass: Any, setup_washdata_entry: Any, freezer: Any
+) -> None:
+    """The pick handed over is three times as long: the run is mid-programme by it,
+    so the door pauses, as before 0.6.1, and ends nothing."""
+    manager, ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    manager._manual_program_active = True  # noqa: SLF001
+    manager._current_program = "Intensive"  # noqa: SLF001
+    manager._matched_profile_duration = float(3 * WASH_S)  # noqa: SLF001
+    with patch.object(manager.detector, "process_reading", lambda *_a, **_k: None):
+        hass.states.async_set(DOOR, "on")
+        await hass.async_block_till_done()
+        assert manager._is_user_paused is True  # noqa: SLF001
+        assert manager._remove_door_end_dwell is None  # noqa: SLF001
+        await _tick(hass, freezer, 120, None)
+    assert ends == []
+    assert manager.detector.state == STATE_PAUSED
+
+
+async def test_a_door_opened_after_a_cleared_pick_still_pauses(
+    hass: Any, setup_washdata_entry: Any, freezer: Any
+) -> None:
+    """A cleared pick waits for an automatic match, which no door hands over: the
+    door pauses, as before 0.6.1."""
+    manager, ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    manager._manual_program_active = True  # noqa: SLF001
+    manager._current_program = manager.detector.matched_profile  # noqa: SLF001
+    manager._matched_profile_duration = float(manager.detector.expected_duration_seconds)  # noqa: SLF001
+    manager.clear_manual_program()
+    hass.states.async_set(DOOR, "on")
+    await hass.async_block_till_done()
+    assert manager._is_user_paused is True  # noqa: SLF001
+    assert ends == []

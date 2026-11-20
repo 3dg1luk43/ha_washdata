@@ -1857,6 +1857,12 @@ class CycleDetector:
         else:
             self._p95_dt = max(dt, 1.0)
 
+    def refresh_match(self, timestamp: datetime) -> None:
+        """Run the match tick now, outside its interval. The manager hands a
+        program picked by hand over this way before it judges a door opened in
+        PAUSED (#524): the pin's matcher branch answers synchronously."""
+        self._try_profile_match(timestamp, force=True)
+
     def _try_profile_match(self, timestamp: datetime, force: bool = False) -> None:
         """Attempt to invoke the profile matcher if conditions are met.
 

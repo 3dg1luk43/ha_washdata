@@ -3945,6 +3945,9 @@ class WashDataManager:
             # running keeps its deadline (PR #529 review).
             return
 
+        if door_open and not self._is_clean_state:
+            self._hand_pick_over_for_door()
+
         if door_open:
             if self._is_clean_state:
                 # User opened the door after the cycle - laundry retrieved
@@ -4400,6 +4403,30 @@ class WashDataManager:
             if abs(held - float(self._matched_profile_duration)) > 1.0:
                 return True
         return False
+
+    def _hand_pick_over_for_door(self) -> None:
+        """Before a door opened in PAUSED is judged, hand the detector a program
+        picked by hand that it has not taken yet (#524, PR #529 review).
+
+        Its next match tick does the same (the pin's matcher branch answers
+        synchronously). Before it, the door paused the cycle, and that pause
+        outlived the tick that would have let the door end it. Handed over, the
+        door is judged as it is once that tick has run: by the pick's length
+        (``door_end_due``) and the dwell. A cleared pick waits for an automatic
+        match, which is asynchronous: that door still pauses, as before 0.6.1.
+        """
+        if not (
+            self._door_opens_at_end
+            and self._manual_program_active
+            and self.detector.state == STATE_PAUSED
+            and not self._is_user_paused
+            and self._door_end_awaits_match()
+        ):
+            return
+        try:
+            self.detector.refresh_match(utc_now())
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Could not hand the picked program to the detector", exc_info=True)
 
     def _settle_door_gate(self, profile_name: str | None, revoke: bool) -> None:
         """End the wait a cleared pick set once the detector holds the match this
