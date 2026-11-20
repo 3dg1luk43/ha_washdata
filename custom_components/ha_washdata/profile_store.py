@@ -11183,6 +11183,7 @@ class ProfileStore:
         # read next to the call with those after it).
         call_groups = self._match_groups()
         call_generation = getattr(self, "_data_generation", 0)
+        call_revision = self.profile_set_revision
 
         # 1. The trace, converted and resampled: in the executor once it is long,
         # where that is milliseconds per match (PR #529 review: a pinned 4 h cycle
@@ -11204,8 +11205,14 @@ class ProfileStore:
         # An import or Undo Import replaced the store during that preparation: the
         # groups read at the call are the replaced data's, the templates read below
         # the new data's. Mapped together they make a family the store never held
-        # (PR #529 review), so the groups are read again, with the templates.
-        if getattr(self, "_data_generation", 0) != call_generation:
+        # (PR #529 review), so the groups are read again, with the templates. So
+        # does a profile renamed or deleted meanwhile (no new data generation): a
+        # member renamed A -> C left the groups naming A, the templates C, and
+        # the cohesive group was skipped (PR #529 review).
+        if (
+            getattr(self, "_data_generation", 0) != call_generation
+            or self.profile_set_revision != call_revision
+        ):
             call_groups = self._match_groups()
 
         # 2. The candidates, on the loop (the store's state is read here only).

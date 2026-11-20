@@ -146,3 +146,39 @@ def test_the_hazard_contenders_do_not_expand_a_profile_named_like_a_group_key() 
     family = [{**ranking[0], "group_best_member": "D40"}, ranking[1]]
     out = _ambiguity_contenders(family, groups, durations, "D40", DUR_40, False)
     assert out == (("D40", DUR_40), ("D30", DUR_30), ("Other", 3000.0))
+
+
+# ── A member renamed during the trace preparation keeps its group ────────────
+
+
+async def test_a_member_renamed_during_the_preparation_keeps_the_group(
+    store: Any, mock_hass: Any
+) -> None:
+    """D30 renamed to D35 while the long trace is prepared in the executor: the
+    templates are built under D35 and D40, so the groups must be read again
+    (a rename moves no data generation, only ``profile_set_revision``)."""
+    del store._data["profiles"]["__group__G"], store._data["envelopes"]["__group__G"]  # noqa: SLF001
+    step = 5.0
+    live = [
+        [k * step, CURVE_30[min(N - 1, int(k * step / DUR_30 * N))]]
+        for k in range(int(0.6 * DUR_30 / step))
+    ]
+    assert len(live) > 512  # prepared in the executor (_MATCH_PREP_INLINE_READINGS)
+    run = mock_hass.async_add_executor_job.side_effect
+    renamed: list[bool] = []
+
+    async def rename_during_preparation(target: Any, *args: Any) -> Any:
+        if not renamed and getattr(target, "__name__", "") == "_prepare_match_trace":
+            renamed.append(True)
+            await store.update_profile("D30", "D35")
+        return await run(target, *args)
+
+    with patch.object(mock_hass, "async_add_executor_job", side_effect=rename_during_preparation):
+        res = await store.async_match_profile(live, live[-1][0], in_progress=True)
+    assert renamed
+    assert store.get_profile_groups()["G"]["members"] == ["D35", "D40"]
+    # The family was formed under the renamed membership: its winner carries the
+    # group, and its siblings do not stand side by side in the ranking.
+    assert res.ranking[0].get("stage5_group") == "__group__G"
+    assert res.best_profile in ("D35", "D40")
+    assert not {"D35", "D40"} <= {c.get("name") for c in res.ranking}
