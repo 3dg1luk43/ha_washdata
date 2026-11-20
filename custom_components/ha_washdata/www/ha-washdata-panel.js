@@ -3434,11 +3434,7 @@ class HaWashdataPanel extends HTMLElement {
             // Ordered against the newest history that landed, not the newest device
             // list: a read slower than the poll would otherwise be dropped on every
             // poll and the chart never move. Still only for the appliance shown.
-            const hseq = ++this._powerReqSeq;
-            const pd = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: dev.entry_id, with_raw: this._pref('show_raw_active', false) });
-            if (this._isActiveEntry(dev.entry_id) && hseq > this._powerAppliedSeq) {
-              this._powerData = pd; this._powerAppliedSeq = hseq; liveApplied = true;
-            }
+            if (await this._fetchPowerHistory(dev.entry_id)) liveApplied = true;
           } catch (_) { /* keep previous */ }
           if (!shownRow()) return;
           if (this._pref('show_debug', false) && await this._fetchMatchDebug(dev.entry_id)) {
@@ -3975,6 +3971,18 @@ class HaWashdataPanel extends HTMLElement {
     } catch (_) { /* overlay is optional */ }
   }
 
+  // The live chart's history: every read goes through here, so a slower reply to
+  // an older request (a poll) never replaces a newer one (the tab load, a raw
+  // toggle), and none lands under another appliance (PR #529 review). True when
+  // this read's history was applied.
+  async _fetchPowerHistory(entryId) {
+    const hseq = ++this._powerReqSeq;
+    const pd = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: entryId, with_raw: this._pref('show_raw_active', false) });
+    if (!this._isActiveEntry(entryId) || hseq <= this._powerAppliedSeq) return false;
+    this._powerData = pd; this._powerAppliedSeq = hseq;
+    return true;
+  }
+
   async _fetchSuggestions(entryId) {
     this._suggestionsError = false;
     try {
@@ -4280,7 +4288,7 @@ class HaWashdataPanel extends HTMLElement {
     this._render();
     try {
       if (this._tab === 'status') {
-        this._powerData = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: eid, with_raw: this._pref('show_raw_active', false) });
+        await this._fetchPowerHistory(eid);
         if (!this._profiles.length) await this._fetchProfiles(eid);
         // F1 onboarding: the getting-started card needs the real cycle count.
         // Load it only when there are no profiles yet (the sole state where the
@@ -13500,7 +13508,7 @@ class HaWashdataPanel extends HTMLElement {
       this._ws({ type: `${_DOMAIN}/set_user_prefs`, prefs: { [key]: val } }).catch(() => {});
       const dev = this._devices[this._selIdx];
       if (dev && this._tab === 'status') {
-        try { this._powerData = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: dev.entry_id, with_raw: this._pref('show_raw_active', false) }); } catch (_) { /* keep */ }
+        try { await this._fetchPowerHistory(dev.entry_id); } catch (_) { /* keep */ }
       }
       this._render();
     }));
