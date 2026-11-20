@@ -2297,12 +2297,18 @@ async def ws_set_options(
         # again. A bad value drops the key so its default applies - the contract
         # the per-key blocks below already follow; None / "" reach their reset path.
         _numeric = numeric_option_keys()
+        # A stored override such a drop removes is a change like a cleared one,
+        # recorded below: with Stop unset it can move the Stop the standby
+        # advisory reads (PR #529 review).
+        dropped_invalid_keys: set[str] = set()
         for _key, _val in msg["options"].items():
             if _key not in _numeric or _val is None or _val == "":
                 continue
             _num = coerce_numeric_option(_val, _numeric[_key])
             if _num is None:
                 new_options.pop(_key, None)
+                if _key in entry.options:
+                    dropped_invalid_keys.add(_key)
             else:
                 new_options[_key] = _num
 
@@ -2486,10 +2492,11 @@ async def ws_set_options(
         # replaces the inline version that used to live here. Keys dropped by the
         # null-strip above are still recorded as a change to None ("reverted to
         # unset"); a None -> None no-op is skipped inside `_diff_option_changes`.
+        # So are stored overrides the numeric check dropped.
         submitted_post = {
             k: new_options.get(k)
             for k in msg["options"]
-            if k in new_options or k in dropped_null_keys
+            if k in new_options or k in dropped_null_keys or k in dropped_invalid_keys
         }
 
         # When online features are disabled, clear the persisted store account so the

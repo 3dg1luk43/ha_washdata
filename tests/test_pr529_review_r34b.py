@@ -2,6 +2,8 @@
 
 * A wholesale import of a payload carrying the cadence rows without their sensor
   (or the sensor without its rows) paired one device's half with the other's.
+* A non-numeric Min Power dropped the stored override and moved an unset Stop
+  with no settings-history row, so the standby advisory read the wrong Stop.
 """
 from __future__ import annotations
 
@@ -10,7 +12,12 @@ from typing import Any
 import pytest
 from homeassistant.core import HomeAssistant
 
-from custom_components.ha_washdata.const import DOMAIN
+from custom_components.ha_washdata import suggestion_engine as se
+from custom_components.ha_washdata.const import (
+    CONF_MIN_POWER,
+    CONF_STOP_THRESHOLD_W,
+    DOMAIN,
+)
 
 POWER = "sensor.washer_power"
 OTHER = "sensor.other_plug"
@@ -60,3 +67,47 @@ async def test_a_whole_cadence_pair_is_taken_from_the_file(
     )
     assert store.get_cadence_summaries(OTHER) == [[2.0, 2.0]]
     assert store.get_cadence_summaries(POWER) == []  # another plug's rows
+
+
+# ── A dropped non-numeric Min Power records the Stop it moved ─────────────────
+
+
+async def test_a_non_numeric_min_power_records_the_stop_it_moves(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """Min Power 10 W, Stop unset (6 W). "abc" drops the override (its default
+    applies), so Stop moved with nothing recorded: the earlier cycles were judged
+    against the new Stop. Recorded as a clear, with the Stop it moved from."""
+    entry = await setup_washdata_entry(options={CONF_MIN_POWER: 10.0})
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({
+        "type": f"{DOMAIN}/set_options", "entry_id": entry.entry_id,
+        "options": {CONF_MIN_POWER: "abc"},
+    })
+    res = await client.receive_json()
+    assert res["success"], res
+    await hass.async_block_till_done()
+    assert CONF_MIN_POWER not in entry.options
+    rows = {r["key"]: r for r in store.get_settings_changelog()}
+    assert rows[CONF_MIN_POWER]["old"] == 10.0 and rows[CONF_MIN_POWER]["new"] is None
+    stop = rows[CONF_STOP_THRESHOLD_W]
+    assert stop["old"] is None and stop["new"] is None  # Revert changes nothing
+    assert stop["old_effective"] == 6.0
+    assert [old for _when, old in se.stop_threshold_changes(store.get_settings_changelog())] == [6.0]
+
+
+async def test_a_non_numeric_value_for_an_unstored_key_records_nothing(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """Nothing was stored, so the drop changed nothing."""
+    entry = await setup_washdata_entry()
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({
+        "type": f"{DOMAIN}/set_options", "entry_id": entry.entry_id,
+        "options": {CONF_MIN_POWER: "abc"},
+    })
+    assert (await client.receive_json())["success"]
+    await hass.async_block_till_done()
+    assert store.get_settings_changelog() == []
