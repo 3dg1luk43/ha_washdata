@@ -3925,17 +3925,20 @@ class WashDataManager:
                 return
         # Ignore unavailability transitions, except that a door reported open when
         # the sensor comes back may start a fresh end dwell (a lost one was
-        # cancelled above), through the same eligibility check.
+        # cancelled above), through the same hand-over and eligibility check as an
+        # ordinary open: nothing arms it later in PAUSED once the detector takes a
+        # pick with the door still open (PR #529 review).
         if old_val in ("unavailable", "unknown"):
             if (
                 new_val == "on"
                 and not self._is_clean_state
                 and self._remove_door_end_dwell is None
-                and self._door_end_may_fire()
             ):
-                self._logger.debug("Door open after the sensor came back: arming a fresh end dwell")
-                self._arm_door_end_dwell()
-                self._notify_update()
+                self._hand_pick_over_for_door()
+                if self._door_end_may_fire():
+                    self._logger.debug("Door open after the sensor came back: arming a fresh end dwell")
+                    self._arm_door_end_dwell()
+                    self._notify_update()
             return
 
         door_open = new_val == "on"  # binary_sensor: on = open
