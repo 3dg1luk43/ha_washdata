@@ -1881,20 +1881,23 @@ DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE = {
 }
 # Default sampling interval by device type: the manager's reading throttle drops a
 # reading that comes sooner than this after the last one kept (low readings always
-# pass). 2 s on every type since 0.6.1 (maintainer decision 2026-11-20): it captures
-# a washer's rapid 0<->150 W motor/heater oscillation, a dryer's short anti-crease
-# pulses (#474: at 30 s the throttle hid them) and a pump's sub-30 s runs, and keeps a
-# fast plug's readings on the catch-all types (#493). The start debounce follows
-# (resolve_start_duration_default: 5 s on every type); the watchdog does too, except
-# a dryer's (DEFAULT_WATCHDOG_INTERVAL_BY_DEVICE).
+# pass). 2 s captures a washer's rapid 0<->150 W motor/heater oscillation and, since
+# 0.6.1, a dryer's short anti-crease pulses (#474: at 30 s the throttle hid them;
+# start_gate_eval: dryer starts unchanged, confirmed 63 -> 23 s median). The start
+# debounce follows (resolve_start_duration_default); a dryer keeps its watchdog
+# (DEFAULT_WATCHDOG_INTERVAL_BY_DEVICE). Pump and the catch-all types keep their
+# values: the corpus holds no raw history of them to measure a change on.
 DEFAULT_SAMPLING_INTERVAL_BY_DEVICE = {
     DEVICE_TYPE_WASHING_MACHINE: 2.0,
     DEVICE_TYPE_WASHER_DRYER: 2.0,
     DEVICE_TYPE_DISHWASHER: 2.0,
     DEVICE_TYPE_DRYER: 2.0,
-    DEVICE_TYPE_PUMP: 2.0,
-    DEVICE_TYPE_GENERIC: 2.0,
-    DEVICE_TYPE_OTHER: 2.0,
+    DEVICE_TYPE_PUMP: 10.0,  # 10s - pump cycles can be <30 s; 30s default would miss them
+    # The catch-all types run anything from a 60 s coffee to a 3 h oven, so they must
+    # not drop a 3 s plug's readings for 30 s at a time (#493: 5 s gaps between short
+    # runs were invisible).
+    DEVICE_TYPE_GENERIC: 5.0,
+    DEVICE_TYPE_OTHER: 5.0,
 }
 
 
@@ -1973,9 +1976,9 @@ def resolve_sampling_interval_default(device_type: str) -> float:
     """Device-resolved default sampling interval (#396).
 
     Single source of truth for the sampling default, so the manager, the panel
-    (via ws_get_options) and the config migration all agree. Every device type
-    samples at 2 s since 0.6.1; the 30 s scalar is only a fallback for an unknown
-    type.
+    (via ws_get_options) and the config migration all agree. Wet appliances and,
+    since 0.6.1, dryers sample at 2 s; a pump at 10 s, the catch-all types at 5 s;
+    the 30 s scalar is only a fallback for an unknown type.
     """
     return DEFAULT_SAMPLING_INTERVAL_BY_DEVICE.get(device_type, DEFAULT_SAMPLING_INTERVAL)
 
@@ -1992,7 +1995,7 @@ def resolve_watchdog_interval_default(device_type: str) -> int:
     The panel enforces watchdog_interval >= 2*sampling_interval (a publish-on-change
     sensor can skip a sample, so the staleness tick must be coarser than the
     sampling gap). Derived as max(DEFAULT_WATCHDOG_INTERVAL, 2*sampling+1): 30 at
-    2 s sampling, or the type's own value (``DEFAULT_WATCHDOG_INTERVAL_BY_DEVICE``:
+    2, 5 or 10 s sampling, or the type's own value (``DEFAULT_WATCHDOG_INTERVAL_BY_DEVICE``:
     a dryer's 61). Never smaller than the 30 s floor so a fast-sampling device does
     not get an over-aggressive watchdog.
     """
@@ -2042,9 +2045,8 @@ def resolve_start_duration_default(device_type: str) -> float:
 
     The panel enforces start_duration_threshold >= sampling_interval (a debounce
     shorter than one sample lets a single spike open a cycle). Derived as
-    max(DEFAULT_START_DURATION_THRESHOLD, sampling): 5 s on every type at 2 s
-    sampling (until 0.6.1 a dryer's 30 s and a pump's 10 s followed their coarser
-    sampling).
+    max(DEFAULT_START_DURATION_THRESHOLD, sampling): 5 s at 2 or 5 s sampling, a
+    pump's 10 s (until 0.6.1 a dryer's 30 s followed its 30 s sampling).
     """
     sampling = resolve_sampling_interval_default(device_type)
     return max(DEFAULT_START_DURATION_THRESHOLD, sampling)

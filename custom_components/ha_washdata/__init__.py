@@ -58,7 +58,6 @@ from .const import (
     CONF_DEVICE_TYPE,
     DEVICE_TYPE_DISHWASHER,
     DEVICE_TYPE_DRYER,
-    DEVICE_TYPE_PUMP,
     DEVICE_TYPE_WASHER_DRYER,
     DEVICE_TYPE_WASHING_MACHINE,
     CONF_POWER_SENSOR,
@@ -349,18 +348,17 @@ def _lower_seeded_washer_completion(options: dict[str, Any], device_type: Any = 
     return [CONF_COMPLETION_MIN_SECONDS]
 
 
-# The start debounce the coarse sampling derived, per device type, until every type
-# moved to 2 s sampling in 0.6.1 (the 3.9 -> 3.10 heal stored them). A dryer keeps
-# its 61 s watchdog (const.DEFAULT_WATCHDOG_INTERVAL_BY_DEVICE).
+# The start debounce the coarse sampling derived, per device type, until a dryer
+# moved to 2 s sampling in 0.6.1 (the 3.9 -> 3.10 heal stored it). A dryer keeps its
+# 61 s watchdog (const.DEFAULT_WATCHDOG_INTERVAL_BY_DEVICE).
 _OLD_DERIVED_CADENCE: dict[str, dict[str, float]] = {
     DEVICE_TYPE_DRYER: {CONF_START_DURATION_THRESHOLD: 30.0},
-    DEVICE_TYPE_PUMP: {CONF_START_DURATION_THRESHOLD: 10.0},
 }
 
 
 def _lower_seeded_coarse_cadence(options: dict[str, Any], device_type: Any = None) -> list[str]:
-    """Move a dryer's or pump's stored start debounce from the value its old coarse
-    sampling derived to the 2 s default, in place (0.6.1).
+    """Move a dryer's stored start debounce from the value its old 30 s sampling
+    derived to the 5 s default of its 2 s sampling, in place (0.6.1).
 
     Not a choice the user made: the migration stored the device default, and the
     panel would not take a start debounce under the sampling interval. Only the
@@ -666,8 +664,8 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             lowered or "none",
         )
 
-    # 3.14 -> 3.15: a dryer's or pump's start debounce from the value its old coarse
-    # sampling derived to the 2 s default (0.6.1).
+    # 3.14 -> 3.15: a dryer's start debounce from the value its old 30 s sampling
+    # derived to the 5 s default of its 2 s sampling (0.6.1).
     if version == 3 and minor_version == 14:
         new_opts = dict(entry.options)
         moved = _lower_seeded_coarse_cadence(
@@ -850,7 +848,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     _heal_raised_min_ratio(options)
     # And the 3.13 -> 3.14 one: the `setdefault` above keeps a stored 600 s.
     _lower_seeded_washer_completion(options)
-    # And the 3.14 -> 3.15 one: a stored 30 s dryer or 10 s pump start debounce.
+    # And the 3.14 -> 3.15 one: a stored 30 s dryer start debounce.
     _lower_seeded_coarse_cadence(options)
 
     # 3.6: coffee_machine / ev / heat_pump / oven device types were removed.

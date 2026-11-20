@@ -1075,8 +1075,9 @@ async def test_the_legacy_one_pass_migration_lowers_the_seeded_washer_floor_too(
         # The values the old coarse sampling derived (the 3.9 -> 3.10 heal stored them).
         ("dryer", {CONF_START_DURATION_THRESHOLD: 30, CONF_WATCHDOG_INTERVAL: 61},
          {CONF_START_DURATION_THRESHOLD: 5.0, CONF_WATCHDOG_INTERVAL: 61}),
+        # A pump keeps 10 s sampling and so its 10 s debounce.
         ("pump", {CONF_START_DURATION_THRESHOLD: 10, CONF_WATCHDOG_INTERVAL: 30},
-         {CONF_START_DURATION_THRESHOLD: 5.0, CONF_WATCHDOG_INTERVAL: 30}),
+         {CONF_START_DURATION_THRESHOLD: 10, CONF_WATCHDOG_INTERVAL: 30}),
         # Anything else was set by hand and stays.
         ("dryer", {CONF_START_DURATION_THRESHOLD: 45, CONF_WATCHDOG_INTERVAL: 90},
          {CONF_START_DURATION_THRESHOLD: 45, CONF_WATCHDOG_INTERVAL: 90}),
@@ -1086,12 +1087,12 @@ async def test_the_legacy_one_pass_migration_lowers_the_seeded_washer_floor_too(
         ("dryer", {}, {}),
     ],
 )
-async def test_migrate_3_14_to_3_15_lowers_the_coarse_cadence_of_a_dryer_or_pump(
+async def test_migrate_3_14_to_3_15_lowers_a_dryer_s_coarse_debounce(
     hass: HomeAssistant, device_type: str, stored: dict, expected: dict
 ) -> None:
-    """0.6.1: every type samples at 2 s, so the start debounce the old coarse
-    sampling derived (30 s dryer, 10 s pump) moves to the 5 s default; only that
-    exact stored value. A dryer's 61 s watchdog stays (its default)."""
+    """0.6.1: a dryer samples at 2 s, so the 30 s start debounce its old sampling
+    derived moves to the 5 s default; only that exact stored value. Its 61 s
+    watchdog stays (its default)."""
     entry = DummyEntry(
         version=3, minor_version=14, data={},
         options={CONF_DEVICE_TYPE: device_type, **stored},

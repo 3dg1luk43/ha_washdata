@@ -71,11 +71,13 @@ def test_resolved_cadence_defaults_satisfy_conflict_rules_for_every_device_type(
         assert sd >= s, f"{dt}: start_duration {sd} < sampling {s}"
 
 
-def test_every_type_samples_at_2_s():
-    # 0.6.1 (maintainer decision 2026-11-20): the dryer's 30 s and the pump's 10 s
-    # throttles hid short pulses and runs.
-    for dt in ("washing_machine", "washer_dryer", "dishwasher", "dryer", "pump", "generic", "other"):
+def test_wet_appliances_and_dryers_sample_fast():
+    # 0.6.1: the dryer's 30 s throttle hid its short anti-crease pulses (measured
+    # with start_gate_eval). Pump and the catch-all types keep 10 s / 5 s.
+    for dt in ("washing_machine", "washer_dryer", "dishwasher", "dryer"):
         assert resolve_sampling_interval_default(dt) == 2.0
+    assert resolve_sampling_interval_default("pump") == 10.0
+    assert resolve_sampling_interval_default("generic") == 5.0
 
 
 def test_watchdog_never_below_the_30s_floor():
