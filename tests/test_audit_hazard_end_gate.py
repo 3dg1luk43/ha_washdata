@@ -190,7 +190,9 @@ def test_the_frontier_answers_every_later_than_query_exactly() -> None:
 def test_contenders_are_the_candidates_within_the_margin() -> None:
     ranking = [
         {"name": "A", "score": 0.70, "profile_duration": 3600.0},
-        {"name": "__group__G", "score": 0.67, "profile_duration": 4000.0},
+        # A family's own entry, with the collapse's provenance.
+        {"name": "__group__G", "score": 0.67, "profile_duration": 4000.0,
+         "group_best_member": "G1"},
         {"name": "B", "score": 0.655, "profile_duration": 5000.0},
         {"name": "C", "score": 0.60, "profile_duration": 9000.0},
     ]

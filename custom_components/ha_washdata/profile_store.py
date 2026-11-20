@@ -2022,6 +2022,18 @@ def _ambiguity_from_candidates(candidates: list[dict]) -> tuple[float, bool]:
     return margin, margin < MATCH_AMBIGUITY_MARGIN
 
 
+def _is_family_row(cand: Any, group_members: dict[str, list[str]]) -> bool:
+    """Whether ``cand`` is a Stage-5 family's own entry: named by a cohesive
+    group's key and carrying the collapse's ``group_best_member`` provenance
+    (:func:`collapse_group_candidates`). A real profile merely NAMED like a group
+    key (``__group__G``) is an ordinary programme (PR #529 review)."""
+    return (
+        isinstance(cand, dict)
+        and str(cand.get("name")) in group_members
+        and isinstance(cand.get("group_best_member"), str)
+    )
+
+
 def _ambiguity_contenders(
     ranking: list[dict],
     group_members: dict[str, list[str]],
@@ -2062,7 +2074,7 @@ def _ambiguity_contenders(
             if float(cand.get("score") or 0.0) < floor:
                 break
             name = str(cand.get("name"))
-            if name in group_members:
+            if _is_family_row(cand, group_members):
                 for member in group_members[name]:
                     _add(member, durations.get(member))
             else:
@@ -4340,7 +4352,7 @@ class ProfileStore:
             expected = float(top.get("profile_duration") or 0.0)
             ambiguous = _ambiguity_from_candidates(single_view)[1]
             doubt = False
-            if name in group_members:
+            if _is_family_row(top, group_members):
                 chosen, fit, member_dur = self._stage5_pick_member(
                     current_power, current_duration, group_members[name], member_snaps,
                     in_progress=True, preferred=top.get("group_best_member"),
@@ -11308,8 +11320,9 @@ class ProfileStore:
         best_duration = best["profile_duration"]
         member_confidence: float | None = None
         stage5_doubt = False
-        # Stage 5: if a group won, pick the best-fitting member.
-        if best_name in group_members:
+        # Stage 5: if a group won, pick the best-fitting member. Only a family's
+        # own entry: a real profile named like its key is no group (PR #529 review).
+        if _is_family_row(best, group_members):
             chosen, member_fit, member_dur = self._stage5_pick_member(
                 current_power_list, current_duration, group_members[best_name], member_snaps,
                 in_progress=in_progress,
