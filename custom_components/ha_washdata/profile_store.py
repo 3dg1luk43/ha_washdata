@@ -2439,6 +2439,9 @@ _IMPORT_CORE_KEY_TYPES: dict[str, type] = {
 _WHOLESALE_IMPORT_PAYLOAD_OWNED_KEYS = frozenset(
     {"envelopes", "active_cycle", "last_active_save", CUT_SHORT_REBUILD_KEY}
 )
+#: Per-cycle cadence rows and the power sensor they were measured on: a wholesale
+#: import takes both from the payload or neither.
+_CADENCE_PAIR_KEYS = frozenset({"cadence_summaries", "cadence_sensor"})
 
 
 def unwrap_import_payload(payload: Any) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -12690,7 +12693,8 @@ class ProfileStore:
         ``backfill_cycles``, ``matching_config``, ``ml_training_history`` or lifetime
         counters, and assigning the payload wholesale set those to nothing, including
         state earned on-device over weeks that no re-import can rebuild. Only
-        ``_WHOLESALE_IMPORT_PAYLOAD_OWNED_KEYS`` always come from the payload.
+        ``_WHOLESALE_IMPORT_PAYLOAD_OWNED_KEYS`` always come from the payload;
+        ``_CADENCE_PAIR_KEYS`` come from it only together.
 
         The store as it was is saved as the device's restore point first (register
         item 195); ``entry_options`` (this device's, so the undo can put them back)
@@ -12716,6 +12720,14 @@ class ProfileStore:
         # the first mutation.
         restore_point_saved = await self.async_save_pre_import_snapshot(source, entry_options)
         supplied = meta.get("supplied_keys") or frozenset()
+        if len(_CADENCE_PAIR_KEYS & supplied) == 1:
+            # The cadence rows and the sensor they were measured on are one record
+            # (PR #529 review): half of it would pair the file's rows with this
+            # device's sensor, or this device's rows with the file's. Taken only
+            # whole; this device keeps its own pair otherwise.
+            supplied = supplied - _CADENCE_PAIR_KEYS
+            for key in _CADENCE_PAIR_KEYS:
+                data_dict.pop(key, None)
         kept = {
             key: value
             for key, value in self._data.items()
