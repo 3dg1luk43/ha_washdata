@@ -21,6 +21,7 @@ from __future__ import annotations
 import copy
 import logging
 import math
+from bisect import bisect_left, insort
 from decimal import ROUND_CEILING, ROUND_FLOOR, Decimal
 from datetime import datetime, timezone
 from typing import Any, Callable, Coroutine, TYPE_CHECKING, cast
@@ -403,6 +404,36 @@ def _detector_gate_need(
     return 0.0
 
 
+class _CausalOutageCeiling:
+    """``energy_gap_threshold_s`` of the first ``k + 1`` of time-ordered readings,
+    for ``k`` that only grows: the positive intervals are kept sorted as the scan
+    advances, so each call costs an insertion, not a sort of the whole prefix
+    (review of PR #529: a long gapped pause re-sorted the prefix at most readings).
+    """
+
+    def __init__(self, times: list[float]) -> None:
+        self._times = times
+        self._upto = 0  # intervals of readings [0, _upto] are in _gaps
+        self._gaps: list[float] = []
+
+    def __call__(self, k: int) -> float:
+        if k < 1:
+            return 3600.0  # one reading: energy_gap_threshold_s's no-interval value
+        while self._upto < k:
+            self._upto += 1
+            gap = self._times[self._upto] - self._times[self._upto - 1]
+            if gap > 0:
+                insort(self._gaps, gap)
+        n = len(self._gaps)
+        if n == 0:
+            median = 0.0
+        elif n % 2:
+            median = self._gaps[n // 2]
+        else:
+            median = 0.5 * (self._gaps[n // 2 - 1] + self._gaps[n // 2])
+        return float(min(3600.0, max(60.0, 10.0 * median)))
+
+
 def _flat_standby_split(
     points: list[tuple[float, float]], stop: float, off_delay: float, gap: float,
     max_gap_s: float, device_type: str | None, pulse_max_w: float | None = None,
@@ -454,7 +485,7 @@ def _flat_standby_split(
     n = len(points)
     if n < 3:
         return False
-    stamps_all = np.asarray(times, dtype=float)
+    outage_at = _CausalOutageCeiling(times)
     i = next((k for k, p in enumerate(watts) if p >= stop), n)
     while i < n:
         if watts[i] >= stop:
@@ -475,9 +506,8 @@ def _flat_standby_split(
             quiet = _quiet_s(t0, t, spans)
             if quiet < base_wait:
                 continue
-            lo = k
-            while lo > 0 and t - times[lo - 1] <= span:
-                lo -= 1
+            # The window's first reading (times are in order): no walk back.
+            lo = min(bisect_left(times, t - span), k)
             if lo == 0:
                 continue  # no reading before the window: not a sampled window
             powers = watts[lo:k + 1]
@@ -493,7 +523,7 @@ def _flat_standby_split(
             # The detector's ceiling is causal: only the readings it has seen
             # (review of PR #529: a later 1 s burst lowered a whole-trace
             # ceiling under this pause's 90 s reports and hid the bypass).
-            outage = energy_gap_threshold_s(stamps_all[:k + 1])
+            outage = outage_at(k)
             stamps = times[lo - 1:k + 1]
             if any(b - a > outage for a, b in zip(stamps, stamps[1:])):
                 continue

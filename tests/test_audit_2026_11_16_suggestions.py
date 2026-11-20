@@ -1872,3 +1872,19 @@ def test_the_detector_style_check_decides_at_the_limit_as_the_detector_does() ->
     from custom_components.ha_washdata.suggestion_engine import _detector_gate_need  # noqa: PLC0415
 
     assert _detector_gate_need([0.0, 60.0, 120.0, 180.0], [2.0, 3.0, 4.0, 2.0], 0.0, 60.0, 0.05) == 180.0
+
+
+def test_the_causal_outage_ceiling_matches_the_shared_rule_on_every_prefix() -> None:
+    """Review of PR #529: the flat-standby scan keeps the prefix's intervals sorted
+    instead of re-sorting the prefix at each reading; it must still equal
+    energy_gap_threshold_s on every prefix (repeated stamps, gaps, bursts)."""
+    import numpy as np  # noqa: PLC0415
+
+    from custom_components.ha_washdata.signal_processing import energy_gap_threshold_s  # noqa: PLC0415
+    from custom_components.ha_washdata.suggestion_engine import _CausalOutageCeiling  # noqa: PLC0415
+
+    rng = np.random.default_rng(11)
+    times = list(np.cumsum(rng.choice([0.0, 1.0, 2.0, 75.0, 300.0, 4000.0], size=400)))
+    ceiling = _CausalOutageCeiling(times)
+    for k in range(len(times)):
+        assert ceiling(k) == pytest.approx(energy_gap_threshold_s(np.asarray(times[:k + 1])))
