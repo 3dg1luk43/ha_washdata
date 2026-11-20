@@ -126,6 +126,25 @@ def test_an_unmatched_split_needs_the_record_to_start_with_the_activity():
     assert not loop._unmatched_split([{"duration": 3600.0}], pts, 2.0, base)  # noqa: SLF001
 
 
+def test_an_unmatched_split_needs_the_record_to_cover_the_activity():
+    """PR #529 review: activity 600-3600 s, the only record opened at 0 s and ran
+    2700 s. Its length is 90% of the span and it did not open late, but it covers
+    2100 of the 3000 active seconds."""
+    from datetime import datetime, timedelta, timezone
+
+    base = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    pts = [(float(t), 0.5) for t in range(0, 600, 30)]
+    pts += [(float(t), 500.0) for t in range(600, 3601, 30)]
+
+    def rec(start_s: float, duration: float) -> list[dict]:
+        return [{"duration": duration, "start_time": (base + timedelta(seconds=start_s)).isoformat()}]
+
+    assert loop._unmatched_split(rec(0.0, 2700.0), pts, 2.0, base)  # noqa: SLF001
+    assert not loop._unmatched_split(rec(600.0, 3000.0), pts, 2.0, base)  # the span  # noqa: SLF001
+    assert not loop._unmatched_split(rec(0.0, 3600.0), pts, 2.0, base)  # and the lead-in  # noqa: SLF001
+    assert not loop._unmatched_split(rec(0.0, 3300.0), pts, 2.0, base)  # 90% of it  # noqa: SLF001
+
+
 def test_legacy_patch_restores_the_shipped_engine():
     gen, keys = SuggestionEngine.generate_detection_suggestions, ws_api._SUGGESTION_KEYS  # noqa: SLF001
     with loop.legacy_patch(("sampling_interval", "confidence")):

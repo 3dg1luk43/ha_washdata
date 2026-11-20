@@ -1367,9 +1367,9 @@ def _unmatched_split(ended: list[dict], points: list[tuple[float, float]], stop:
     As ``min_off_gap_eval._is_split``: a fragment shorter than the completion
     minimum is dropped silently, so a count of records alone misses a truncation.
     The record must last 90% of the active span and, when ``base`` (the replay's
-    offset 0) places it, start within the other 10% of its first active reading
-    (PR #529 review): a record reopened late in the activity can reach that length
-    on the synthetic quiet tail alone.
+    offset 0) places it, cover 90% of it (PR #529 review): a record reopened late in
+    the activity can reach that length on the synthetic quiet tail alone, and one
+    opened before the activity on a lead-in can end short of it.
 
     None when the trace has no active span (``_unmatched_span``): nothing was
     measured, which is neither a split nor a pass (PR #529 review).
@@ -1380,10 +1380,15 @@ def _unmatched_split(ended: list[dict], points: list[tuple[float, float]], stop:
     first, span = active
     if len(ended) != 1:
         return True
-    if float(ended[0].get("duration") or 0.0) < 0.9 * span:
+    duration = float(ended[0].get("duration") or 0.0)
+    if duration < 0.9 * span:
         return True
     start = _parse_utc(ended[0].get("start_time")) if base is not None else None
-    return start is not None and (start - base).total_seconds() - first > 0.1 * span
+    if start is None:
+        return False
+    opened = (start - base).total_seconds()
+    covered = min(opened + duration, first + span) - max(opened, first)
+    return covered < 0.9 * span
 
 
 class _NoProfiles:
