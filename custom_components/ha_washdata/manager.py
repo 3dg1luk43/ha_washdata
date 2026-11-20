@@ -5107,6 +5107,11 @@ class WashDataManager:
         now = utc_now()
         # The cadence clock (``_last_sensor_report``); the detector keeps ``now``.
         report_clock = report_ts if isinstance(report_ts, datetime) else now
+        # Advanced by every report, the throttled ones too: moved only on processed
+        # readings, a 1 s meter under a 2 s throttle was learned as 2 s (PR #529
+        # review). ``_last_reading_time`` stays the throttle's processed clock.
+        prev_report = self._last_sensor_report
+        self._last_sensor_report = (self.power_sensor_entity_id, report_clock)
 
         # still_tumbling (#478) sees every reading, before the throttle: a short
         # tumble may be a single report. Passive, detection never sees it.
@@ -5164,14 +5169,14 @@ class WashDataManager:
             # Measured from the sensor's previous report, not from a keepalive,
             # and on the report clock at both ends: the resync stores the report's
             # own stamp, so callback time here mixed clocks (PR #529 review).
-            last = self._last_sensor_report
             self.learning_manager.process_power_reading(
                 power, report_clock,
-                last[1] if last is not None and last[0] == self.power_sensor_entity_id else None,
+                prev_report[1]
+                if prev_report is not None and prev_report[0] == self.power_sensor_entity_id
+                else None,
                 sensor=self.power_sensor_entity_id,
             )
         self._last_reading_time = now
-        self._last_sensor_report = (self.power_sensor_entity_id, report_clock)
         if self._restored_sensor_clock is not None:
             # The entity appeared only after setup, so this is its startup write
             # (register item 266): same rule as the setup read.
