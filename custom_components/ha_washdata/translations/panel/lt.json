@@ -2001,7 +2001,7 @@
       "end_energy_floor": "Padidinta iki minimumo, kurį lemia sustabdymo slenkstis ({stop} W) per išjungimo delsimą ({off_delay} s); žemiau jo ciklas gali baigtis tik atsarginiu būdu.",
       "max_duration_ratio_default": "Grąžinta numatytoji reikšmė: žemesnė viršutinė riba atmeta teisingą programą kiekvieną kartą, kai ciklas trunka ilgiau nei įprastai.",
       "min_duration_ratio_default": "Grąžinta numatytoji reikšmė: aukštesnė apatinė riba neleidžia atpažinti vykstančio ciklo, kol jis gerokai neįsibėgėja.",
-      "start_above_running": "Šis prietaisas nuo pradžios iki pabaigos veikia {low} W ar didesne galia, bet paleidimo slenkstis yra {start} W, todėl mažesne galia veikiantis ciklas niekada neprasideda. Paleidimo slenkstis nustatomas ties puse mažiausios veikimo galios, sustabdymo slenkstis žemiau jo."
+      "start_above_running": "Įprasta žema šio prietaiso veikimo galia yra {low} W, bet paleidimo slenkstis yra {start} W, todėl tokiu lygiu veikiantis ciklas niekada neprasideda. Paleidimo slenkstis nustatomas ties puse šio lygio, sustabdymo slenkstis žemiau jo."
     },
     "exclusions": {
       "summary": "Neįtraukta {total} klaidingai aptiktų ciklų: {parts}.",

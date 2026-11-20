@@ -1803,7 +1803,7 @@
       "end_energy_floor": "Zvišano na minimum, ki izhaja iz praga zaustavitve ({stop} W) v času zamude izklopa ({off_delay} s); pod njim se cikel lahko konča le po nadomestni poti.",
       "max_duration_ratio_default": "Vrnjeno na privzeto vrednost: nižja zgornja meja zavrne pravi program vsakič, ko cikel traja dlje kot običajno.",
       "min_duration_ratio_default": "Vrnjeno na privzeto vrednost: višja spodnja meja prepreči prepoznavanje cikla, ki teče, dokler ne napreduje precej daleč.",
-      "start_above_running": "Ta naprava od začetka do konca porablja {low} W ali več, vendar je prag zagona {start} W, zato se cikel pri njeni nižji moči nikoli ne zažene. Prag zagona je nastavljen na polovico najnižje delovne ravni, prag zaustavitve pod njo."
+      "start_above_running": "Tipična nizka delovna moč te naprave je {low} W, vendar je prag zagona {start} W, zato se cikel na tej ravni nikoli ne zažene. Prag zagona je nastavljen na polovico te ravni, prag zaustavitve pod njo."
     },
     "exclusions": {
       "summary": "Izključeno {total} napačno zaznanih ciklov: {parts}.",

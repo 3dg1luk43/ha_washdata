@@ -1927,7 +1927,7 @@
       "end_energy_floor": "Elevado ao mínimo implicado pelo limite de parada ({stop} W) durante o atraso de desligamento ({off_delay} s); abaixo dele, o ciclo só pode terminar por um mecanismo alternativo.",
       "max_duration_ratio_default": "De volta ao padrão: um teto mais baixo rejeita o programa certo sempre que um ciclo dura mais que o normal.",
       "min_duration_ratio_default": "De volta ao padrão: um piso mais alto impede que um ciclo em andamento seja reconhecido até que esteja bem adiantado.",
-      "start_above_running": "Este eletrodoméstico consome {low} W ou mais do início ao fim, mas o limite de início é {start} W, então um ciclo na sua menor potência nunca inicia. Limite de início definido na metade do seu menor nível de funcionamento, limite de parada abaixo disso."
+      "start_above_running": "A potência de funcionamento baixa típica deste eletrodoméstico é {low} W, mas o limite de início é {start} W, então um ciclo nesse nível nunca inicia. Limite de início definido na metade desse nível, limite de parada abaixo disso."
     },
     "exclusions": {
       "summary": "Excluído(s) {total} ciclo(s) mal detectado(s): {parts}.",

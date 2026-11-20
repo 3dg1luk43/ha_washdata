@@ -1927,7 +1927,7 @@
       "end_energy_floor": "Ridicat la minimul implicat de pragul de oprire ({stop} W) pe durata întârzierii la oprire ({off_delay} s); sub acesta, ciclul se poate încheia doar printr-o cale de rezervă.",
       "max_duration_ratio_default": "Revenire la valoarea implicită: o limită superioară mai mică respinge programul corect ori de câte ori un ciclu durează mai mult decât de obicei.",
       "min_duration_ratio_default": "Revenire la valoarea implicită: o limită inferioară mai mare împiedică recunoașterea unui ciclu în desfășurare până când acesta este bine avansat.",
-      "start_above_running": "Acest aparat consumă {low} W sau mai mult de la început până la final, dar pragul de pornire este {start} W, deci un ciclu la puterea lui cea mai mică nu pornește niciodată. Pragul de pornire setat la jumătate din cel mai mic nivel de funcționare, pragul de oprire sub acesta."
+      "start_above_running": "Puterea de funcționare scăzută tipică a acestui aparat este {low} W, dar pragul de pornire este {start} W, deci un ciclu la acest nivel nu pornește niciodată. Pragul de pornire setat la jumătate din acest nivel, pragul de oprire sub acesta."
     },
     "exclusions": {
       "summary": "Excluse {total} cicluri detectate greșit: {parts}.",

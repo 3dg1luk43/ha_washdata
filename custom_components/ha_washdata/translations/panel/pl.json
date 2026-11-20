@@ -1803,7 +1803,7 @@
       "end_energy_floor": "Podniesiono do minimum wynikającego z progu zatrzymania ({stop} W) w czasie opóźnienia wyłączenia ({off_delay} s); poniżej niego cykl może się zakończyć tylko ścieżką awaryjną.",
       "max_duration_ratio_default": "Przywrócono wartość domyślną: niższy górny limit odrzuca właściwy program za każdym razem, gdy cykl trwa dłużej niż zwykle.",
       "min_duration_ratio_default": "Przywrócono wartość domyślną: wyższy dolny limit uniemożliwia rozpoznanie trwającego cyklu, dopóki nie jest on mocno zaawansowany.",
-      "start_above_running": "To urządzenie pobiera od startu do końca {low} W lub więcej, ale próg startu wynosi {start} W, więc cykl przy jego niższej mocy nigdy się nie rozpocznie. Próg startu ustawiony na połowę najniższego poziomu pracy, próg zatrzymania poniżej niego."
+      "start_above_running": "Typowa niska moc pracy tego urządzenia to {low} W, ale próg startu wynosi {start} W, więc cykl na tym poziomie nigdy się nie rozpocznie. Próg startu ustawiony na połowę tego poziomu, próg zatrzymania poniżej niego."
     },
     "exclusions": {
       "summary": "Wykluczono {total} błędnie wykrytych cykli: {parts}.",

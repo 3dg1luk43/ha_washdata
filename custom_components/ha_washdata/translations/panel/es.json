@@ -1946,7 +1946,7 @@
       "end_energy_floor": "Elevado al mínimo que implican el umbral de parada ({stop} W) durante el retardo de apagado ({off_delay} s); por debajo, el ciclo solo puede terminar mediante una vía de respaldo.",
       "max_duration_ratio_default": "Vuelta al valor predeterminado: un techo más bajo rechaza el programa correcto siempre que un ciclo dura más de lo habitual.",
       "min_duration_ratio_default": "Vuelta al valor predeterminado: un mínimo más alto impide reconocer un ciclo en marcha hasta que está bien avanzado.",
-      "start_above_running": "Este electrodoméstico consume {low} W o más de principio a fin, pero el umbral de inicio es {start} W, así que un ciclo a su potencia más baja nunca arranca. Umbral de inicio fijado en la mitad de su nivel de funcionamiento más bajo, umbral de parada por debajo."
+      "start_above_running": "La potencia de funcionamiento baja típica de este electrodoméstico es {low} W, pero el umbral de inicio es {start} W, así que un ciclo a ese nivel nunca arranca. Umbral de inicio fijado en la mitad de ese nivel, umbral de parada por debajo."
     },
     "exclusions": {
       "summary": "Excluido(s) {total} ciclo(s) mal detectado(s): {parts}.",

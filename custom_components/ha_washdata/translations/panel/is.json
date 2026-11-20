@@ -1786,7 +1786,7 @@
       "end_energy_floor": "Hækkað upp í lágmarkið sem Stöðvunarþröskuldur ({stop} W) yfir Slökkvitöf ({off_delay} s) felur í sér; fyrir neðan það getur lotan aðeins endað eftir varaleið.",
       "max_duration_ratio_default": "Aftur í sjálfgefið gildi: lægra hámark hafnar réttu kerfi í hvert sinn sem keyrsla er lengri en venjulega.",
       "min_duration_ratio_default": "Aftur í sjálfgefið gildi: hærra lágmark kemur í veg fyrir að lota í gangi þekkist fyrr en hún er vel á veg komin.",
-      "start_above_running": "Þetta tæki gengur á {low} W eða meira frá upphafi til enda, en ræsingarþröskuldurinn er {start} W, svo keyrsla á lægra aflinu greinist aldrei. Ræsing stillt á helming lægsta gangafls, stöðvun undir því."
+      "start_above_running": "Dæmigert lágt gangafl þessa tækis er {low} W, en ræsingarþröskuldurinn er {start} W, svo keyrsla á því stigi greinist aldrei. Ræsing stillt á helming þess stigs, stöðvun undir því."
     },
     "exclusions": {
       "summary": "Útilokaði {total} ranggreindar lotur: {parts}.",

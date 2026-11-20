@@ -1785,7 +1785,7 @@
       "end_energy_floor": "Povećano na minimum koji proizlazi iz praga zaustavljanja ({stop} W) tokom kašnjenja isklopa ({off_delay} s); ispod toga ciklus može da se završi samo rezervnim putem.",
       "max_duration_ratio_default": "Vraćeno na podrazumevanu vrednost: niža gornja granica odbacuje pravi program kad god ciklus traje duže nego obično.",
       "min_duration_ratio_default": "Vraćeno na podrazumevanu vrednost: viša donja granica sprečava prepoznavanje ciklusa u toku sve dok dobro ne odmakne.",
-      "start_above_running": "Ovaj uređaj troši {low} W ili više od početka do kraja, ali prag pokretanja je {start} W, pa se ciklus pri njegovoj nižoj snazi nikada ne pokrene. Prag pokretanja je postavljen na polovinu najnižeg radnog nivoa, prag zaustavljanja ispod toga."
+      "start_above_running": "Tipična niska radna snaga ovog uređaja je {low} W, ali prag pokretanja je {start} W, pa se ciklus na tom nivou nikada ne pokrene. Prag pokretanja je postavljen na polovinu tog nivoa, prag zaustavljanja ispod toga."
     },
     "exclusions": {
       "summary": "Isključeno {total} pogrešno detektovanih ciklusa: {parts}.",

@@ -1980,7 +1980,7 @@
             "end_energy_floor": "Kapatma gecikmesi ({off_delay} s) boyunca durdurma eşiğinin ({stop} W) gerektirdiği alt sınıra yükseltildi; bunun altında döngü yalnızca bir yedek yoldan bitebilir.",
             "max_duration_ratio_default": "Varsayılana döndürüldü: daha düşük bir üst sınır, bir döngü her zamankinden uzun sürdüğünde doğru programı reddeder.",
             "min_duration_ratio_default": "Varsayılana döndürüldü: daha yüksek bir alt sınır, çalışan bir döngünün iyice ilerleyene kadar tanınmasını engeller.",
-            "start_above_running": "Bu cihaz baştan sona {low} W veya daha yüksek güçte çalışıyor, ancak başlangıç eşiği {start} W; bu yüzden daha düşük güçteki bir döngü hiç başlamaz. Başlangıç eşiği en düşük çalışma seviyesinin yarısına, durdurma eşiği bunun altına ayarlandı."
+            "start_above_running": "Bu cihazın tipik düşük çalışma gücü {low} W, ancak başlangıç eşiği {start} W; bu yüzden bu seviyedeki bir döngü hiç başlamaz. Başlangıç eşiği bu seviyenin yarısına, durdurma eşiği bunun altına ayarlandı."
         },
         "exclusions": {
             "summary": "{total} yanlış algılanan döngü hariç tutuldu: {parts}.",

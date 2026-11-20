@@ -1956,7 +1956,7 @@
             "end_energy_floor": "U ngrit në minimumin që nënkuptojnë pragu i ndalimit ({stop} W) gjatë vonesës së fikjes ({off_delay} s); nën të, cikli mund të përfundojë vetëm përmes një rruge rezervë.",
             "max_duration_ratio_default": "Kthim te vlera e parazgjedhur: një kufi i sipërm më i ulët refuzon programin e duhur sa herë që një cikël zgjat më shumë se zakonisht.",
             "min_duration_ratio_default": "Kthim te vlera e parazgjedhur: një kufi i poshtëm më i lartë pengon njohjen e një cikli në zhvillim derisa të ketë përparuar mjaft.",
-            "start_above_running": "Kjo pajisje punon me {low} W ose më shumë nga fillimi në fund, por pragu i nisjes është {start} W, kështu që një cikël me fuqinë e saj më të ulët nuk niset kurrë. Pragu i nisjes vendoset në gjysmën e nivelit të saj më të ulët të punës, pragu i ndalimit nën të."
+            "start_above_running": "Fuqia e ulët tipike e punës e kësaj pajisjeje është {low} W, por pragu i nisjes është {start} W, kështu që një cikël në këtë nivel nuk niset kurrë. Pragu i nisjes vendoset në gjysmën e këtij niveli, pragu i ndalimit nën të."
         },
         "exclusions": {
             "summary": "U përjashtuan {total} cikle të zbuluar gabimisht: {parts}.",

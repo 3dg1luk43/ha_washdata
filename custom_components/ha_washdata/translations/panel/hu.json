@@ -1961,7 +1961,7 @@
             "end_energy_floor": "Megemelve arra az alsó határra, amelyet a Leállítási küszöb ({stop} W) a Kikapcsolási késleltetés ({off_delay} s) alatt megkövetel; ez alatt a ciklus csak tartalék úton érhet véget.",
             "max_duration_ratio_default": "Vissza az alapértékre: egy alacsonyabb felső határ elveti a helyes programot, ha egy futás a szokásosnál tovább tart.",
             "min_duration_ratio_default": "Vissza az alapértékre: egy magasabb alsó határ miatt a futó ciklus csak akkor ismerhető fel, amikor már jócskán előrehaladt.",
-            "start_above_running": "Ez a készülék az elejétől a végéig legalább {low} W-tal működik, de az indítási küszöb {start} W, így az alacsonyabb teljesítményű futás soha nem indul el. Az indítási küszöb a legalacsonyabb üzemi szint felére, a leállítási küszöb ez alá kerül."
+            "start_above_running": "A készülék jellemző alacsony üzemi teljesítménye {low} W, de az indítási küszöb {start} W, így az ezen a szinten futó ciklus soha nem indul el. Az indítási küszöb ennek a szintnek a felére, a leállítási küszöb ez alá kerül."
         },
         "exclusions": {
             "summary": "{total} tévesen észlelt ciklus kizárva: {parts}.",

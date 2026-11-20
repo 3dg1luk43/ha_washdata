@@ -1960,7 +1960,7 @@
             "end_energy_floor": "已提高到停止阈值（{stop} W）和关闭延迟（{off_delay} s）所决定的下限；低于该值，周期只能通过备用路径结束。",
             "max_duration_ratio_default": "已恢复默认值：上限较低时，只要某次运行比平时长，就会排除正确的程序。",
             "min_duration_ratio_default": "已恢复默认值：下限较高时，运行中的周期要进行到相当程度后才会被识别。",
-            "start_above_running": "该设备从开始到结束都以 {low} W 或更高功率运行，但启动阈值为 {start} W，因此以较低功率运行的周期永远不会开始。启动阈值设为其最低运行水平的一半，停止阈值低于该值。"
+            "start_above_running": "该设备典型的低运行功率为 {low} W，但启动阈值为 {start} W，因此在该水平运行的周期永远不会开始。启动阈值设为该水平的一半，停止阈值低于该值。"
         },
         "exclusions": {
             "summary": "已排除 {total} 个误检测周期：{parts}。",

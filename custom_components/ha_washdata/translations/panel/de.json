@@ -1786,7 +1786,7 @@
       "end_energy_floor": "Auf die Untergrenze angehoben, die sich aus dem Stoppschwellenwert ({stop} W) während der Abschaltverzögerung ({off_delay} s) ergibt; darunter kann der Zyklus nur über einen Ausweichpfad enden.",
       "max_duration_ratio_default": "Zurück auf den Standardwert: Eine niedrigere Obergrenze verwirft das richtige Programm, sobald ein Durchlauf länger als üblich dauert.",
       "min_duration_ratio_default": "Zurück auf den Standardwert: Eine höhere Untergrenze verhindert, dass ein laufender Zyklus erkannt wird, bevor er weit fortgeschritten ist.",
-      "start_above_running": "Dieses Gerät läuft vom Start bis zum Ende mit {low} W oder mehr, aber der Startschwellenwert liegt bei {start} W, sodass ein Lauf mit der niedrigeren Leistung nie erkannt wird. Start auf die Hälfte der niedrigsten Betriebsleistung gesetzt, Stopp darunter."
+      "start_above_running": "Die typische niedrige Betriebsleistung dieses Geräts liegt bei {low} W, aber der Startschwellenwert liegt bei {start} W, sodass ein Lauf auf diesem Niveau nie erkannt wird. Start auf die Hälfte dieses Niveaus gesetzt, Stopp darunter."
     },
     "exclusions": {
       "summary": "{total} falsch erkannte Zyklen ausgeschlossen: {parts}.",

@@ -1803,7 +1803,7 @@
       "end_energy_floor": "Zvýšené na minimum, ktoré vyplýva z prahu zastavenia ({stop} W) počas oneskorenia vypnutia ({off_delay} s); pod ním môže cyklus skončiť len záložnou cestou.",
       "max_duration_ratio_default": "Vrátené na predvolenú hodnotu: nižšia horná hranica odmietne správny program vždy, keď cyklus trvá dlhšie než zvyčajne.",
       "min_duration_ratio_default": "Vrátené na predvolenú hodnotu: vyššia dolná hranica bráni rozpoznaniu bežiaceho cyklu, kým nie je v plnom prúde.",
-      "start_above_running": "Tento spotrebič odoberá od začiatku do konca {low} W alebo viac, ale prah spustenia je {start} W, takže cyklus s jeho nižším výkonom sa nikdy nespustí. Prah spustenia nastavený na polovicu najnižšej prevádzkovej úrovne, prah zastavenia pod ňou."
+      "start_above_running": "Typický nízky prevádzkový príkon tohto spotrebiča je {low} W, ale prah spustenia je {start} W, takže cyklus na tejto úrovni sa nikdy nespustí. Prah spustenia nastavený na polovicu tejto úrovne, prah zastavenia pod ňou."
     },
     "exclusions": {
       "summary": "Vylúčených {total} chybne zistených cyklov: {parts}.",

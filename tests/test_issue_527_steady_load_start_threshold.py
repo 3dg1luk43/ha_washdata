@@ -294,3 +294,29 @@ def test_the_reason_uses_the_sensor_s_own_unit(mock_hass: Any) -> None:
     sug = eng.for_job(opts).generate_start_threshold_suggestions()
     reason = sug[CONF_START_THRESHOLD_W]["reason"]
     assert "800 W" not in reason and "runs at 0.79 W" in reason
+
+
+def test_the_panel_reads_low_as_a_typical_level_not_a_floor() -> None:
+    """Review of PR #529: ``low_w`` is the p05 over the cycles of each one's p05
+    running reading, a typical low level, not a floor. Runs with one 100 W reading
+    among nineteen at 200 W report 195 W, and the panel told the user the appliance
+    "runs at 195 W or more from start to end". Every language keeps both values."""
+    import json  # noqa: PLC0415
+    from pathlib import Path  # noqa: PLC0415
+
+    def cyc(day: int) -> dict[str, Any]:
+        c = _dryer_cycle(day, 0.0)
+        c["power_data"] = [[30.0 * (i + 1), 100.0 if i == 7 else 200.0] for i in range(20)]
+        return c
+
+    adv = start_above_running([cyc(d) for d in range(4)], 250.0, 2.0)
+    assert adv is not None and adv["low_w"] == 195.0  # a 100 W reading in every run
+
+    panel = Path(__file__).resolve().parents[1] / "custom_components" / "ha_washdata" / "translations" / "panel"
+    english = json.loads((panel / "en.json").read_text(encoding="utf-8"))
+    text = english["suggestion"]["reason"]["start_above_running"]
+    assert "or more" not in text and "at least" not in text and "lowest" not in text
+    assert "typical low running power is {low} W" in text
+    for path in sorted(panel.glob("*.json")):
+        other = json.loads(path.read_text(encoding="utf-8"))["suggestion"]["reason"]["start_above_running"]
+        assert "{low}" in other and "{start}" in other, path.name

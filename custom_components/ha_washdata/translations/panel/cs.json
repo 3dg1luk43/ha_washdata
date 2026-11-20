@@ -1803,7 +1803,7 @@
       "end_energy_floor": "Zvýšeno na minimum, které vyplývá z prahu zastavení ({stop} W) po dobu zpoždění vypnutí ({off_delay} s); pod ním může cyklus skončit jen záložní cestou.",
       "max_duration_ratio_default": "Vráceno na výchozí hodnotu: nižší horní mez odmítne správný program pokaždé, když běh trvá déle než obvykle.",
       "min_duration_ratio_default": "Vráceno na výchozí hodnotu: vyšší dolní mez brání rozpoznání běžícího cyklu, dokud není v plném proudu.",
-      "start_above_running": "Tento spotřebič odebírá od začátku do konce {low} W nebo více, ale práh spuštění je {start} W, takže cyklus s jeho nižším výkonem se nikdy nespustí. Práh spuštění nastaven na polovinu nejnižší provozní úrovně, práh zastavení pod ní."
+      "start_above_running": "Typický nízký provozní příkon tohoto spotřebiče je {low} W, ale práh spuštění je {start} W, takže cyklus na této úrovni se nikdy nespustí. Práh spuštění nastaven na polovinu této úrovně, práh zastavení pod ní."
     },
     "exclusions": {
       "summary": "Vyloučeno {total} chybně detekovaných cyklů: {parts}.",

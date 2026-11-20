@@ -1786,7 +1786,7 @@
       "end_energy_floor": "Verhoogd tot de ondergrens die volgt uit de stopdrempel ({stop} W) gedurende de uitschakelvertraging ({off_delay} s); daaronder kan de cyclus alleen via een terugvalpad eindigen.",
       "max_duration_ratio_default": "Terug naar de standaardwaarde: een lager plafond wijst het juiste programma af zodra een cyclus langer duurt dan gebruikelijk.",
       "min_duration_ratio_default": "Terug naar de standaardwaarde: een hogere ondergrens zorgt ervoor dat een lopende cyclus pas wordt herkend als hij al ver gevorderd is.",
-      "start_above_running": "Dit apparaat draait van start tot einde op {low} W of meer, maar de startdrempel is {start} W, dus een cyclus op het lagere vermogen wordt nooit opgemerkt. Start ingesteld op de helft van het laagste draaivermogen, stop daaronder."
+      "start_above_running": "Het typische lage draaivermogen van dit apparaat is {low} W, maar de startdrempel is {start} W, dus een cyclus op dat niveau wordt nooit opgemerkt. Start ingesteld op de helft van dat niveau, stop daaronder."
     },
     "exclusions": {
       "summary": "{total} verkeerd gedetecteerde cyclus(sen) uitgesloten: {parts}.",

@@ -1786,7 +1786,7 @@
       "end_energy_floor": "Hævet til den nedre grænse, som stoptærsklen ({stop} W) i løbet af slukkeforsinkelsen ({off_delay} s) giver; under den kan cyklussen kun afsluttes via en reservevej.",
       "max_duration_ratio_default": "Tilbage til standardværdien: et lavere loft afviser det rigtige program, når en kørsel varer længere end normalt.",
       "min_duration_ratio_default": "Tilbage til standardværdien: en højere bundgrænse forhindrer en igangværende cyklus i at blive genkendt, før den er godt i gang.",
-      "start_above_running": "Dette apparat kører med {low} W eller mere fra start til slut, men starttærsklen er {start} W, så en kørsel ved den lavere effekt registreres aldrig. Start sat til halvdelen af den laveste køreeffekt, stop derunder."
+      "start_above_running": "Dette apparats typiske lave køreeffekt er {low} W, men starttærsklen er {start} W, så en kørsel på det niveau registreres aldrig. Start sat til halvdelen af det niveau, stop derunder."
     },
     "exclusions": {
       "summary": "{total} fejldetekterede cyklus(ser) udelukket: {parts}.",

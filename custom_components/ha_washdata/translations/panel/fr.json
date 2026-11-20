@@ -1946,7 +1946,7 @@
       "end_energy_floor": "Relevé au plancher qu'impliquent le seuil d'arrêt ({stop} W) sur le délai d'arrêt ({off_delay} s) ; en dessous, le cycle ne peut se terminer que par une voie de secours.",
       "max_duration_ratio_default": "Retour à la valeur par défaut : un plafond plus bas rejette le bon programme chaque fois qu'un cycle dure plus longtemps que d'habitude.",
       "min_duration_ratio_default": "Retour à la valeur par défaut : un plancher plus haut empêche de reconnaître un cycle en cours tant qu'il n'est pas bien avancé.",
-      "start_above_running": "Cet appareil consomme {low} W ou plus du début à la fin, mais le seuil de démarrage est de {start} W : un cycle à sa puissance la plus basse ne démarre donc jamais. Seuil de démarrage réglé à la moitié de son niveau de fonctionnement le plus bas, seuil d'arrêt en dessous."
+      "start_above_running": "La puissance de fonctionnement basse typique de cet appareil est de {low} W, mais le seuil de démarrage est de {start} W : un cycle à ce niveau ne démarre donc jamais. Seuil de démarrage réglé à la moitié de ce niveau, seuil d'arrêt en dessous."
     },
     "exclusions": {
       "summary": "{total} cycle(s) mal détecté(s) exclu(s) : {parts}.",

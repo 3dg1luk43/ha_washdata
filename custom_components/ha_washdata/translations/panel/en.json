@@ -1793,7 +1793,7 @@
       "min_off_gap": "Based on {gaps} observed inter-cycle gaps (p05={p05}s). Device floor: {floor}s.",
       "min_off_gap_bridge": "Sized to bridge the longest quiet stretch inside a cycle: {span}s + 60s buffer, from {spans} bridged gaps across {cycles} clean cycles (stays under your {ceiling}s back-to-back headroom).",
       "standby_floor": "Every recent cycle was still drawing {idle}W when it ended, so a threshold below that can never see the appliance switch off. Kept above it; the {cycles} clean cycles on record never paused under it for more than {pause}s.",
-      "start_above_running": "This appliance runs at {low} W or more from start to end, but the start threshold is {start} W, so a run at its lower power never starts. Start set to half its lowest running level, stop below that.",
+      "start_above_running": "This appliance's typical low running power is {low} W, but the start threshold is {start} W, so a run at that level never starts. Start set to half that level, stop below that.",
       "thr_batch": "Just above the lowest active power (p05) across {cycles} cycles ({p05}W), so starts are caught early and the stop threshold stays below the lowest running power.",
       "max_duration_ratio_default": "Back to the default: a lower ceiling rejects the right programme whenever a run is longer than usual.",
       "min_duration_ratio_default": "Back to the default: a higher floor stops a running cycle from being recognised until it is well under way.",

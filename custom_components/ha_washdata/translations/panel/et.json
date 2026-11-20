@@ -1980,7 +1980,7 @@
       "end_energy_floor": "Tõstetud miinimumini, mis tuleneb peatumise lävest ({stop} W) väljalülitumise viivituse ({off_delay} s) jooksul; sellest madalamal saab tsükkel lõppeda ainult varumehhanismi kaudu.",
       "max_duration_ratio_default": "Taastatud vaikeväärtus: madalam ülempiir lükkab õige programmi tagasi alati, kui tsükkel kestab tavalisest kauem.",
       "min_duration_ratio_default": "Taastatud vaikeväärtus: kõrgem alampiir takistab käimasoleva tsükli tuvastamist, kuni see on juba hästi käima läinud.",
-      "start_above_running": "See seade töötab algusest lõpuni vähemalt {low} W võimsusega, kuid käivitumise lävi on {start} W, seega madalamal võimsusel töötav tsükkel ei käivitu kunagi. Käivitumise lävi seatakse poolele madalaimast töötasemest, peatumise lävi sellest allapoole."
+      "start_above_running": "Selle seadme tüüpiline madal töövõimsus on {low} W, kuid käivitumise lävi on {start} W, seega sellel tasemel töötav tsükkel ei käivitu kunagi. Käivitumise lävi seatakse poolele sellest tasemest, peatumise lävi sellest allapoole."
     },
     "exclusions": {
       "summary": "Välja jäetud {total} valesti tuvastatud tsüklit: {parts}.",

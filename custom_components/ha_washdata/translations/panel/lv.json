@@ -1981,7 +1981,7 @@
       "end_energy_floor": "Paaugstināts līdz minimumam, ko nosaka apstāšanās slieksnis ({stop} W) izslēgšanas aizkaves laikā ({off_delay} s); zem tā cikls var beigties tikai ar rezerves mehānismu.",
       "max_duration_ratio_default": "Atjaunota noklusējuma vērtība: zemāka augšējā robeža noraida pareizo programmu ikreiz, kad cikls ilgst ilgāk nekā parasti.",
       "min_duration_ratio_default": "Atjaunota noklusējuma vērtība: augstāka apakšējā robeža neļauj atpazīt notiekošu ciklu, līdz tas ir krietni pavirzījies uz priekšu.",
-      "start_above_running": "Šī iekārta no sākuma līdz beigām darbojas ar {low} W vai vairāk, bet starta slieksnis ir {start} W, tāpēc cikls ar zemāku jaudu nekad nesākas. Starta slieksnis iestatīts uz pusi no zemākā darbības līmeņa, apstāšanās slieksnis zem tā."
+      "start_above_running": "Šīs iekārtas tipiskā zemā darbības jauda ir {low} W, bet starta slieksnis ir {start} W, tāpēc cikls šajā līmenī nekad nesākas. Starta slieksnis iestatīts uz pusi no šī līmeņa, apstāšanās slieksnis zem tā."
     },
     "exclusions": {
       "summary": "Izslēgti {total} kļūdaini atpazīti cikli: {parts}.",

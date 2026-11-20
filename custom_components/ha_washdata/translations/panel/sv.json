@@ -1786,7 +1786,7 @@
       "end_energy_floor": "Höjd till den nedre gräns som stopptröskeln ({stop} W) under avfördröjningen ({off_delay} s) ger; lägre än så kan cykeln bara avslutas via en reservväg.",
       "max_duration_ratio_default": "Tillbaka till standardvärdet: ett lägre tak avvisar rätt program så fort en körning tar längre tid än vanligt.",
       "min_duration_ratio_default": "Tillbaka till standardvärdet: ett högre golv gör att en pågående cykel inte känns igen förrän den har kommit en bra bit.",
-      "start_above_running": "Den här apparaten går på {low} W eller mer från start till slut, men starttröskeln är {start} W, så en körning på den lägre effekten registreras aldrig. Start satt till hälften av den lägsta drifteffekten, stopp under det."
+      "start_above_running": "Den här apparatens typiska låga drifteffekt är {low} W, men starttröskeln är {start} W, så en körning på den nivån registreras aldrig. Start satt till hälften av den nivån, stopp under det."
     },
     "exclusions": {
       "summary": "Uteslöt {total} feldetekterade cykler: {parts}.",

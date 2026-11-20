@@ -1786,7 +1786,7 @@
       "end_energy_floor": "Hevet til den nedre grensen som stoppterskelen ({stop} W) i løpet av av-forsinkelsen ({off_delay} s) gir; under den kan syklusen bare avsluttes via en reservevei.",
       "max_duration_ratio_default": "Tilbake til standardverdien: et lavere tak avviser riktig program hver gang en kjøring varer lenger enn vanlig.",
       "min_duration_ratio_default": "Tilbake til standardverdien: et høyere gulv hindrer at en pågående syklus gjenkjennes før den er godt i gang.",
-      "start_above_running": "Dette apparatet går på {low} W eller mer fra start til slutt, men startterskelen er {start} W, så en kjøring med den lavere effekten registreres aldri. Start satt til halvparten av den laveste driftseffekten, stopp under det."
+      "start_above_running": "Den typiske lave driftseffekten til dette apparatet er {low} W, men startterskelen er {start} W, så en kjøring på det nivået registreres aldri. Start satt til halvparten av det nivået, stopp under det."
     },
     "exclusions": {
       "summary": "Ekskluderte {total} feildetekterte syklus(er): {parts}.",

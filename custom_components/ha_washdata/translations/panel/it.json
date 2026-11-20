@@ -1946,7 +1946,7 @@
       "end_energy_floor": "Portato al minimo implicato dalla soglia di arresto ({stop} W) nell'arco del ritardo spegnimento ({off_delay} s); al di sotto, il ciclo può terminare solo tramite un percorso di riserva.",
       "max_duration_ratio_default": "Ripristinato il valore predefinito: un limite superiore più basso scarta il programma giusto ogni volta che un ciclo dura più del solito.",
       "min_duration_ratio_default": "Ripristinato il valore predefinito: un limite inferiore più alto impedisce di riconoscere un ciclo in corso finché non è ben avviato.",
-      "start_above_running": "Questo elettrodomestico assorbe {low} W o più dall'inizio alla fine, ma la soglia di avvio è {start} W, quindi un ciclo alla sua potenza più bassa non si avvia mai. Soglia di avvio impostata alla metà del suo livello di funzionamento più basso, soglia di arresto al di sotto."
+      "start_above_running": "La potenza di funzionamento bassa tipica di questo elettrodomestico è {low} W, ma la soglia di avvio è {start} W, quindi un ciclo a quel livello non si avvia mai. Soglia di avvio impostata alla metà di quel livello, soglia di arresto al di sotto."
     },
     "exclusions": {
       "summary": "Esclusi {total} cicli rilevati male: {parts}.",

@@ -1786,7 +1786,7 @@
       "end_energy_floor": "Nostettu alarajaan, jonka pysäytyskynnys ({stop} W) sammutusviiveen ({off_delay} s) aikana edellyttää; sen alapuolella sykli voi päättyä vain varapolun kautta.",
       "max_duration_ratio_default": "Takaisin oletusarvoon: matalampi yläraja hylkää oikean ohjelman aina, kun ajo kestää tavallista pidempään.",
       "min_duration_ratio_default": "Takaisin oletusarvoon: korkeampi alaraja estää käynnissä olevan syklin tunnistamisen, kunnes se on jo pitkällä.",
-      "start_above_running": "Tämä laite käy alusta loppuun vähintään {low} W:n teholla, mutta käynnistyskynnys on {start} W, joten pienemmällä teholla käyvä sykli ei koskaan käynnisty. Käynnistyskynnys asetetaan puoleen pienimmästä käyntitehosta, pysäytyskynnys sen alle."
+      "start_above_running": "Tämän laitteen tyypillinen matala käyntiteho on {low} W, mutta käynnistyskynnys on {start} W, joten sillä tasolla käyvä sykli ei koskaan käynnisty. Käynnistyskynnys asetetaan puoleen tästä tasosta, pysäytyskynnys sen alle."
     },
     "exclusions": {
       "summary": "Suljettu pois {total} väärin tunnistettua sykliä: {parts}.",
