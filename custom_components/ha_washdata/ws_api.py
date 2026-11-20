@@ -5295,8 +5295,9 @@ async def ws_apply_suggestions(
     """Stage selected suggested values into options, then clear suggestions.
 
     ``values`` (optional) carries each key's value as the user confirmed it: a
-    suggestion that differs from it now writes nothing, and the reply is
-    ``success`` False with the ``changed`` keys and the list as it now stands.
+    suggestion that differs from it now, or is no longer offered, writes
+    nothing, and the reply is ``success`` False with the ``changed`` keys and
+    the list as it now stands.
     """
     entry_id: str = msg["entry_id"]
     manager = _get_manager(hass, entry_id)
@@ -5330,14 +5331,19 @@ async def ws_apply_suggestions(
             # review): a newer analysis may have replaced a value after the preview
             # or while Apply waited for this lock. Refused before anything is
             # cleared or written, with the list as it stands to confirm again. A
-            # key with no confirmed value (an older panel) is judged as before.
+            # confirmed key no longer offered (dismissed, muted or applied by
+            # another client) changed too: skipped, the rest was saved and
+            # reported as applied (PR #529 review). A key with no confirmed value
+            # (an older panel) is judged as before.
             confirmed = msg.get("values") or {}
             changed = [
                 key for key in msg["keys"]
                 if confirmed.get(key) is not None
-                and isinstance(visible.get(key), dict)
-                and not _suggestion_equivalent(
-                    confirmed[key], _coerce_suggested(key, visible[key].get("value"))
+                and (
+                    not isinstance(visible.get(key), dict)
+                    or not _suggestion_equivalent(
+                        confirmed[key], _coerce_suggested(key, visible[key].get("value"))
+                    )
                 )
             ]
             if changed:

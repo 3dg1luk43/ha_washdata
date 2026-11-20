@@ -54,8 +54,8 @@ async def test_a_suggestion_changed_since_the_preview_is_not_applied(
 ) -> None:
     """The preview showed Off Delay 120 s; a newer analysis stored 150 s. Apply
     wrote 150 s. Refused: nothing written or cleared, the list as it stands is
-    returned. Confirming 150 s applies it; a confirmed key no longer offered is
-    skipped as before."""
+    returned. Confirming 150 s applies it. (A confirmed key no longer offered is
+    refused too since round 40c: tests/test_pr529_review_r40c.py.)"""
     entry = await setup_washdata_entry(options=_OPTS)
     store = hass.data[DOMAIN][entry.entry_id].profile_store
     client = await hass_ws_client(hass)
@@ -72,8 +72,7 @@ async def test_a_suggestion_changed_since_the_preview_is_not_applied(
     assert CONF_OFF_DELAY in store.get_suggestions()
 
     res = await _apply(
-        hass, client, entry.entry_id, [CONF_OFF_DELAY, CONF_MIN_POWER],
-        {CONF_OFF_DELAY: 150.0, CONF_MIN_POWER: 3},
+        hass, client, entry.entry_id, [CONF_OFF_DELAY], {CONF_OFF_DELAY: 150.0},
     )
     assert res["result"] == {"success": True, "applied": [CONF_OFF_DELAY]}, res
     assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_OFF_DELAY] == 150
