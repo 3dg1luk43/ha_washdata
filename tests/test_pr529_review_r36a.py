@@ -9,6 +9,8 @@
 * A door opened in PAUSED after a program was picked by hand, before the
   detector's next match tick took it, paused the cycle; opened after the tick,
   the same door ended it.
+* A stopped cycle whose last sample is NaN (a wholesale import keeps one) read
+  as idling below the Stop Threshold and offset the cycles idling above it.
 * A Start withdrawn as inverted against a locked Stop left the Min Power cascade
   its derived Stop had made.
 """
@@ -29,7 +31,11 @@ from custom_components.ha_washdata.const import (
     STATE_PAUSED,
 )
 from custom_components.ha_washdata.learning import OWNER_BATCH
-from custom_components.ha_washdata.suggestion_engine import SuggestionEngine
+from custom_components.ha_washdata.suggestion_engine import (
+    SuggestionEngine,
+    _idle_evidence_w,
+    detect_standby_above_stop,
+)
 
 from .test_issue_524_door_ends_cycle import DOOR, OPTS, WASH_S, _paused_washer, _tick
 from .test_pr529_review_r35a import _Store
@@ -157,6 +163,32 @@ async def test_a_door_opened_after_a_cleared_pick_still_pauses(
     await hass.async_block_till_done()
     assert manager._is_user_paused is True  # noqa: SLF001
     assert ends == []
+
+
+# ── A NaN idle level is no evidence ──────────────────────────────────────────
+
+
+def _hand_stopped(tail: list[float]) -> dict[str, Any]:
+    """Ten minutes at 500 W, then ``tail`` at 10 s steps; stopped by hand."""
+    pts = [[float(t), 500.0] for t in range(0, 600, 10)]
+    pts += [[600.0 + 10.0 * i, p] for i, p in enumerate(tail)]
+    return {"status": "completed", "termination_reason": "user", "power_data": pts,
+            "signature": {"max_power": 500.0}}
+
+
+def test_a_nan_last_sample_does_not_hide_a_standby_above_stop() -> None:
+    above = _hand_stopped([3.4] * 30)
+    nan = _hand_stopped([float("nan")])
+    assert _idle_evidence_w(nan, 2.5) is None
+    found = detect_standby_above_stop([above, above, nan, nan], 2.5)
+    assert found is not None
+    assert (found["cycles_above"], found["cycles_checked"]) == (2, 2)
+    # A NaN sample under a settled tail: the tail is the reading.
+    assert _idle_evidence_w(_hand_stopped([3.4] * 30 + [float("nan")]), 2.5) == 3.4
+    # A measured 0 W is still a stop below the threshold.
+    zero = _hand_stopped([0.0] * 30)
+    assert _idle_evidence_w(zero, 2.5) == 0.0
+    assert detect_standby_above_stop([above, above, zero, zero], 2.5) is None
 
 
 # ── A withdrawn Start takes the cascades derived from it ─────────────────────

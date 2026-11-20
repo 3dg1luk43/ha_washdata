@@ -1279,7 +1279,10 @@ def _idle_evidence_w(
     # (#445: stopped 10 s after a 15 W drain reached 3.4 W; #525: a pulse over a
     # 3.2 W base).
     settled = _tail_settled_w(cycle, raw, peak)
-    return final_w if settled is None else min(final_w, settled)
+    # A non-finite level is no reading (a wholesale import keeps a NaN sample):
+    # read as one, NaN counted as below the threshold (PR #529 review).
+    levels = [v for v in (final_w, settled) if v is not None and math.isfinite(v)]
+    return min(levels) if levels else None
 
 
 def detect_standby_above_stop(
