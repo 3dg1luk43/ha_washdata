@@ -14,10 +14,15 @@
   generation) kept a dishwasher's cut-off runs, was memoised, and the sweep
   saved its marker. A build a match setting changed under is now discarded and
   the sweep keeps the profile pending.
+* devtools/program_mismatch_eval.py: alias twins came from ``eval.trace_hash``
+  (1 s / 1 W), so two programmes' runs a sub-watt apart were twins and a valid
+  wrong pick was dropped. They come from trace content (``run_hash``) now.
 """
 from __future__ import annotations
 
+import json
 from datetime import timedelta
+from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
@@ -34,6 +39,8 @@ from custom_components.ha_washdata.profile_store import ProfileStore, _ambiguity
 
 from .test_issue_530_program_mismatch import _check, _mismatches, _past_half, _result
 from .test_issue_531_dishwasher_drying_cutoff import T0, _eco
+from .test_program_mismatch_eval import _export as _pme_export
+from .test_program_mismatch_eval import pme
 
 # ── #530: a check that lands in a user pause does not count ──────────────────
 
@@ -277,3 +284,44 @@ async def test_the_cut_short_marker_waits_while_a_build_stays_discarded(
         assert await store.async_rebuild_for_cut_short_rule(device_type="dishwasher") == 0
     assert store.cut_short_rebuild_pending()
     assert "ECO" not in store._data["envelopes"]  # noqa: SLF001
+
+
+# ── devtools/program_mismatch_eval.py: alias twins by trace content ──────────
+
+
+def _sub_watt_export() -> dict[str, Any]:
+    """Cotton-0 and Synthetics-0 are two runs on one sample grid whose readings
+    differ by 0.2 W: one trace at ``eval.trace_hash``'s 1 W, two by content."""
+    doc = _pme_export()
+    past = doc["data"]["past_cycles"]
+    cotton = next(c for c in past if c["id"] == "Cotton-0")
+    synth = next(c for c in past if c["id"] == "Synthetics-0")
+    cotton["power_data"] = [[t, float(int(p)) + 0.1] for t, p in cotton["power_data"]]
+    synth["power_data"] = [[t, p + 0.2] for t, p in cotton["power_data"]]
+    synth["duration"] = cotton["duration"]
+    return doc
+
+
+def test_alias_twins_are_the_same_trace_content_not_a_sub_watt_neighbour(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "synth").mkdir()
+    (tmp_path / "synth" / "export.json").write_text(json.dumps(_sub_watt_export()))
+    dev = pme.ev.load_device(tmp_path, "synth/export.json")
+    assert pme.ev.alias_classes(dev)  # the coarse hash calls them one trace...
+    assert pme.alias_classes(dev) == {}  # ...the content hash does not
+    rows = pme.replay(tmp_path, jobs=1, log=lambda *a, **k: None)
+    cotton = next(r for r in rows if r["label"] == "Cotton")
+    assert cotton["twins"] == []
+    assert "Synthetics" in pme._wrong_picks(cotton)  # noqa: SLF001
+    # The same trace content under two names is still one run.
+    doc = _sub_watt_export()
+    past = doc["data"]["past_cycles"]
+    synth = next(c for c in past if c["id"] == "Synthetics-0")
+    synth["power_data"] = [list(p) for p in next(c for c in past if c["id"] == "Cotton-0")["power_data"]]
+    (tmp_path / "synth" / "export.json").write_text(json.dumps(doc))
+    dev = pme.ev.load_device(tmp_path, "synth/export.json")
+    assert pme.alias_classes(dev) == {
+        "Cotton": frozenset({"Cotton", "Synthetics"}),
+        "Synthetics": frozenset({"Cotton", "Synthetics"}),
+    }

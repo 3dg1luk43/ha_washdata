@@ -38,7 +38,8 @@ against the picked program, so each tick is judged for
 * **(a) the right pick**: the cycle's own label is selected. A fire is a false
   alarm (``false_alarm``, per cycle: the trigger fires at most once);
 * **(b) a wrong pick**: each other programme of the device, alias twins of the
-  label excluded (the same trace stored under two names, ``eval.alias_classes``).
+  label excluded (the same trace content stored under two names, ``run_hash``:
+  ``alias_classes``).
   ``detect`` is the share of (cycle, wrong pick) pairs that fire strictly before
   the cycle ends, ``elapsed_frac`` the median fraction of the cycle's own duration
   at the fire. ``nearest`` repeats it for the wrong pick whose usual duration is
@@ -71,7 +72,9 @@ the run before, with them: 958 folds, 39.3% of 4981 caught, 42.8% nearest, the
 same 16 alarms. Reading the fire fraction from the cycle start moved no median.
 Each fold on its own copy of the cycles, the end check on the stored offset and
 full-precision rows left every figure as it was (one pair of 4981 moved at
-0.12 / 3 / 0.25).
+0.12 / 3 / 0.25). Alias twins by trace content (``run_hash``, not
+``eval.trace_hash``) changed no row's twins (51 rows have some) and no figure
+(2026-11-20).
 The replay before it matched at fixed interval marks (an unchanged prefix again on a silent
 plug) and left out picks with no trace: 15 (1.6%), 3 own-history, 41.6% of 4855
 at 0.62. Per tick (that replay) the deficit separates a wrong pick from the right
@@ -301,6 +304,14 @@ def stored_copies(lists: dict[str, list]) -> dict[str, list[tuple[str, int]]]:
     return out
 
 
+def alias_classes(dev: Any) -> dict[str, frozenset[str]]:
+    """``eval.alias_classes`` on trace content (``run_hash``), not ``trace_hash``:
+    its 1 s / 1 W rounding made two programmes whose readings differ by under 1 W
+    alias twins, and a valid wrong pick was dropped (PR #529 review)."""
+    hashes = [run_hash(ev.query_points(c)) for c, _ in dev.cycles]
+    return ev.alias_classes(dataclasses.replace(dev, hashes=hashes))
+
+
 async def device_folds(dev: Any, base: dict, idxs: list[int]) -> list[dict]:
     """One row per held-out cycle: its label, durations and the tick rankings.
 
@@ -312,7 +323,7 @@ async def device_folds(dev: Any, base: dict, idxs: list[int]) -> list[dict]:
     blob = pickle.dumps(lists, protocol=pickle.HIGHEST_PROTOCOL)
     copies = stored_copies(lists)
     ids = ev.fold_ids(dev)
-    aliases = ev.alias_classes(dev)
+    aliases = alias_classes(dev)
     rows: list[dict] = []
     for i in idxs:
         cyc, _evidence = dev.cycles[i]
