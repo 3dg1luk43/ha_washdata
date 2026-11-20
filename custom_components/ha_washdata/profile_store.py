@@ -438,6 +438,10 @@ def _prepare_match_trace(
 #: loop, 12-13 ms of it this resampling (PR #529 review).
 _MATCH_SEGMENT_INLINE_POINTS = 4096
 _MATCH_SEGMENT_TRACE_POINTS = 256
+#: Executor jobs one such build may run: a job whose results the store's changes
+#: meanwhile invalidated collects the misses again (PR #529 review). Past it the
+#: build resamples what is left on the loop.
+_MATCH_SEGMENT_ATTEMPTS = 3
 
 #: The miss list of a live match's first snapshot pass, per thread: set only on
 #: the loop around that pass, so the Playground's own builds (an executor thread)
@@ -11329,44 +11333,72 @@ class ProfileStore:
         in one executor job, cached on the loop if nothing changed them
         meanwhile, and the snapshots built again: the same builder on a warm
         cache, so the templates are the ones an inline build makes. The store is
-        read and the cache written only on the loop."""
-        misses: list[tuple[CycleDict, Any]] = []
-        _SEGMENT_MISSES.misses = misses
-        try:
-            snapshots = self.build_match_snapshots(used_dt)
-        finally:
-            _SEGMENT_MISSES.misses = None
-        if not misses:
-            return snapshots
+        read and the cache written only on the loop.
+
+        A cycle whose trace changed during the job (trimmed, repaired, replaced)
+        loses only its own result; a cache an import or a wipe reset loses all
+        of them. Either way the misses are collected again under the same budget
+        (``_MATCH_SEGMENT_ATTEMPTS`` jobs at most), so a trim of one cycle no
+        longer sends every other template to the loop (PR #529 review)."""
         dt_key = float(round(used_dt, 2))
-        jobs: dict[tuple[Any, float], tuple[CycleDict, Any]] = {}
-        for cycle, data in misses:
-            jobs.setdefault((cycle.get("id"), dt_key), (cycle, data))
-        points = sum(
-            max(len(data) if isinstance(data, list) else 0, _MATCH_SEGMENT_TRACE_POINTS)
-            for _c, data in jobs.values()
-        )
-        if points > _MATCH_SEGMENT_INLINE_POINTS:
+        # Traces a job could not resample: the build retries them inline and logs
+        # why, as it always did, rather than another job.
+        unresampled: set[tuple[Any, float]] = set()
+        for _attempt in range(_MATCH_SEGMENT_ATTEMPTS):
+            misses: list[tuple[CycleDict, Any]] = []
+            _SEGMENT_MISSES.misses = misses
+            try:
+                snapshots = self.build_match_snapshots(used_dt)
+            finally:
+                _SEGMENT_MISSES.misses = None
+            if not misses:
+                return snapshots
+            jobs: dict[tuple[Any, float], tuple[CycleDict, Any]] = {}
+            for cycle, data in misses:
+                key = (cycle.get("id"), dt_key)
+                if key not in unresampled:
+                    jobs.setdefault(key, (cycle, data))
+            points = sum(
+                max(len(data) if isinstance(data, list) else 0, _MATCH_SEGMENT_TRACE_POINTS)
+                for _c, data in jobs.values()
+            )
+            if points <= _MATCH_SEGMENT_INLINE_POINTS:
+                break
             cache = self._cached_sample_segments
-            epoch = getattr(self, "_segment_cache_epoch", 0)
+            changed: set[Any] = set()
+            token = object()
+            watchers = self._segment_drop_watchers()
+            watchers[token] = changed
             copies = [list(data) for _c, data in jobs.values()]
             try:
                 segments = await self.hass.async_add_executor_job(
                     _resample_sample_traces, copies, used_dt
                 )
             except Exception:  # pylint: disable=broad-exception-caught
-                segments = []
-            # A trace trimmed, repaired or replaced meanwhile (a new list, or its
-            # entries dropped), or the cache reset by an import or a wipe: not
-            # cached, the build below resamples what the store holds now.
-            if (
-                cache is self._cached_sample_segments
-                and getattr(self, "_segment_cache_epoch", 0) == epoch
-            ):
-                for (key, (cycle, data)), seg in zip(jobs.items(), segments):
-                    if seg is not None and cycle.get("power_data") is data:
-                        self._store_sample_segment(key, seg)
+                break
+            finally:
+                watchers.pop(token, None)
+            if cache is not self._cached_sample_segments:
+                continue  # reset by an import or a wipe: none of it is current
+            for (key, (cycle, data)), seg in zip(jobs.items(), segments):
+                # Trimmed, repaired or replaced meanwhile (a new list, or its
+                # entries dropped): the next pass misses it again.
+                if key[0] in changed or cycle.get("power_data") is not data:
+                    continue
+                if seg is None:
+                    unresampled.add(key)
+                    continue
+                self._store_sample_segment(key, seg)
         return self.build_match_snapshots(used_dt)
+
+    def _segment_drop_watchers(self) -> dict[object, set[Any]]:
+        """The cycle-id sets of the template jobs in flight
+        (:meth:`_async_match_snapshots`): :meth:`_drop_cached_sample_segments`
+        adds each changed cycle to every one."""
+        watchers = self.__dict__.get("_segment_drop_watchers_map")
+        if watchers is None:
+            watchers = self.__dict__.setdefault("_segment_drop_watchers_map", {})
+        return cast(dict[object, set[Any]], watchers)
 
     def _segment_cache_lock(self) -> threading.Lock:
         """The sample-segment cache's lock (created on first use for bare fixtures)."""
@@ -11398,7 +11430,8 @@ class ProfileStore:
         iteration" (audit PLAYGROUND-22).
         """
         with self._segment_cache_lock():
-            self._segment_cache_epoch = getattr(self, "_segment_cache_epoch", 0) + 1
+            for changed in self._segment_drop_watchers().values():
+                changed.add(cycle_id)
             cache = self._cached_sample_segments
             for key in [k for k in list(cache) if k[0] == cycle_id]:
                 cache.pop(key, None)

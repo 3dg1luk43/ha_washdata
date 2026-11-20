@@ -9,6 +9,10 @@
   import on the replacement had saved, and Undo restored the older data.
 * A profile whose stored ``avg_duration`` was not a number (an import can carry
   anything) raised in the matcher's candidate builder: no profile was scored.
+* A trim of one cycle while a live match resampled its uncached templates in
+  the executor discarded the whole batch, and the build resampled every one of
+  them on the loop. Only the changed cycle's result goes now; a cache reset
+  collects the misses again under the same budget, a bounded number of times.
 """
 from __future__ import annotations
 
@@ -22,6 +26,7 @@ from unittest.mock import patch
 import pytest
 from homeassistant.core import HomeAssistant
 
+from custom_components.ha_washdata import profile_store as ps_mod
 from custom_components.ha_washdata.const import (
     DOMAIN,
     PRE_IMPORT_STORE_SUFFIX,
@@ -29,7 +34,13 @@ from custom_components.ha_washdata.const import (
 )
 from custom_components.ha_washdata.profile_store import StoreRetiredError
 
-from .test_pr529_review_r40a import STEP, _query, _ranking, _single_cycle_store
+from .test_pr529_review_r40a import (
+    STEP,
+    _query,
+    _ranking,
+    _single_cycle_store,
+    _trace_of,
+)
 
 
 def _trace(scale: float = 1.0) -> list[list[float]]:
@@ -243,3 +254,76 @@ def test_an_envelope_template_with_a_non_numeric_length_falls_back_to_its_span(
     snaps = {s["name"]: s for s in store.build_match_snapshots(STEP)}
     assert set(snaps) == {f"P{k}" for k in range(5)}
     assert snaps["P0"]["avg_duration"] == 3000.0
+
+
+# ── A change during the template job sends only what changed to the loop ─────
+
+
+def _recording_jobs(mock_hass: Any, during: Any) -> dict[str, Any]:
+    """Run executor jobs inline, calling ``during(n)`` after the n-th; record
+    each template resampling as in or outside a job (outside = the loop)."""
+    seen: dict[str, Any] = {"jobs": 0, "in_job": False, "loop": 0}
+
+    async def job(target: Any, *args: Any) -> Any:
+        seen["in_job"] = True
+        try:
+            out = target(*args)
+        finally:
+            seen["in_job"] = False
+        seen["jobs"] += 1
+        during(seen["jobs"])
+        return out
+
+    mock_hass.async_add_executor_job = job
+    return seen
+
+
+def _counting(seen: dict[str, Any]) -> Any:
+    real = ps_mod.resample_uniform
+
+    def counted(*args: Any, **kwargs: Any) -> Any:
+        if not seen["in_job"]:
+            seen["loop"] += 1
+        return real(*args, **kwargs)
+
+    return counted
+
+
+async def test_a_trim_during_the_job_sends_only_that_cycle_to_the_loop(mock_hass: Any) -> None:
+    store = _single_cycle_store(mock_hass)
+    cycle = store._data["past_cycles"][0]  # noqa: SLF001
+    trimmed = cycle["power_data"][:600]
+
+    def trim(n: int) -> None:
+        if n == 1:
+            cycle["power_data"] = trimmed
+            store._drop_cached_sample_segments("c0")  # noqa: SLF001
+
+    seen = _recording_jobs(mock_hass, trim)
+    with patch.object(ps_mod, "resample_uniform", side_effect=_counting(seen)):
+        snaps = await store._async_match_snapshots(STEP)  # noqa: SLF001
+    assert seen["jobs"] == 1 and seen["loop"] == 1
+    by_name = {s["name"]: s["sample_power"] for s in snaps}
+    assert by_name["P0"] == ps_mod._resample_sample_trace(trimmed, STEP).power.tolist()  # noqa: SLF001
+    for k in range(1, 5):
+        expected = ps_mod._resample_sample_trace(_trace_of(k), STEP)  # noqa: SLF001
+        assert by_name[f"P{k}"] == expected.power.tolist()
+
+
+@pytest.mark.parametrize(("resets", "jobs", "loop"), [(1, 2, 0), (99, 3, 5)])
+async def test_a_cache_reset_during_the_job_collects_the_misses_again(
+    mock_hass: Any, resets: int, jobs: int, loop: int
+) -> None:
+    """Reset once (an import): a second job, nothing on the loop. Reset under
+    every job: three jobs, then the loop, as before."""
+    store = _single_cycle_store(mock_hass)
+
+    def reset(n: int) -> None:
+        if n <= resets:
+            store._cached_sample_segments = {}  # noqa: SLF001
+
+    seen = _recording_jobs(mock_hass, reset)
+    with patch.object(ps_mod, "resample_uniform", side_effect=_counting(seen)):
+        snaps = await store._async_match_snapshots(STEP)  # noqa: SLF001
+    assert (seen["jobs"], seen["loop"]) == (jobs, loop)
+    assert [s["name"] for s in snaps] == [f"P{k}" for k in range(5)]
