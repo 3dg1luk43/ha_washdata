@@ -1224,6 +1224,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             await stale.async_shutdown()
         except Exception:  # pylint: disable=broad-exception-caught
             _log.debug("Shutdown of the stale manager failed", exc_info=True)
+        await _async_retire_store(stale)
 
     # Entity platforms from an earlier attempt are still registered (HA leaves
     # forwarded platforms in place when setup fails); forwarding them again raises
@@ -2057,6 +2058,14 @@ async def _async_sweep_orphaned_stores(hass: HomeAssistant) -> None:
         _LOGGER.debug("Orphaned store sweep failed", exc_info=True)
 
 
+async def _async_retire_store(manager: Any) -> None:
+    """``manager``'s ProfileStore writes nothing more (PR #529 review). Never raises."""
+    try:
+        await manager.profile_store.async_retire()
+    except Exception:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Retiring the unloaded entry's store failed", exc_info=True)
+
+
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
@@ -2072,6 +2081,12 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         # complete before we remove the write lock below.
         if _cancelled_tasks:
             await asyncio.gather(*_cancelled_tasks, return_exceptions=True)
+
+        # Last: no write from this store once the entry is gone. Work the unload
+        # does not cancel (a manual analysis its WS handler awaits) would save it
+        # over the file the replacement loads (PR #529 review). After the drain, so
+        # what the cancelled tasks saved still lands.
+        await _async_retire_store(manager)
 
         # Release the per-entry locks so they don't block the next setup. BOTH of
         # them: `_entry_options_lock` is a second per-entry lock created the same

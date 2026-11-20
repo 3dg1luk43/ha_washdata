@@ -5703,6 +5703,19 @@ async def ws_run_suggestion_analysis(
         return
     try:
         result = await learning.async_run_full_analysis()
+        if (
+            _get_manager(hass, entry_id) is not manager
+            or getattr(manager, "_is_shutdown", False) is True
+        ):
+            # Unloaded during the run (the unload does not cancel this await): what
+            # it stored went to the retired store, which no longer writes. No
+            # refresh from that manager and no success; the panel says to run it
+            # again (PR #529 review).
+            connection.send_error(
+                msg["id"], "analysis_superseded",
+                "The appliance was reloaded during the analysis. Run it again.",
+            )
+            return
         manager.notify_update()
         _send_result(connection, msg["id"], "run_suggestion_analysis", {"success": True, **(result or {})})
     except AnalysisSupersededError as exc:

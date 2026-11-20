@@ -1256,7 +1256,13 @@ class WashDataStore(Store[JSONDict]):
     envelope as compact JSON text (``trace_codec``): every write goes through an
     encoded shallow copy of the payload and every load is decoded, so memory never
     holds the text.
+
+    ``retired`` is set once its entry has unloaded (``ProfileStore.async_retire``):
+    the replacement writes the same key, so a write from this one would overwrite
+    newer data (PR #529 review).
     """
+
+    retired = False
 
     async def async_load(self) -> JSONDict | None:
         """Load (and migrate) the store, with every compact field decoded."""
@@ -1269,6 +1275,9 @@ class WashDataStore(Store[JSONDict]):
 
     async def async_save(self, data: JSONDict) -> None:
         """Write ``data`` with its traces and envelopes compact; ``data`` is not changed."""
+        if self.retired:
+            _LOGGER.debug("Write to %s from an unloaded entry's store skipped", self.key)
+            return
         if self.hass.state is CoreState.stopping:
             # HA defers this one to its final write, which serialised `data` as it
             # is THEN: encode then too (the override below wraps the function).
@@ -1281,6 +1290,9 @@ class WashDataStore(Store[JSONDict]):
         self, data_func: Callable[[], JSONDict], delay: float = 0
     ) -> None:
         """Debounced write; encodes the store as it is when the write fires."""
+        if self.retired:
+            _LOGGER.debug("Write to %s from an unloaded entry's store skipped", self.key)
+            return
         super().async_delay_save(lambda: encode_store_payload(data_func()), delay)
 
     async def _async_migrate_func(
@@ -6856,6 +6868,20 @@ class ProfileStore:
             self._delayed_save_pending = False
             await self._store.async_save(self._data)
 
+    async def async_retire(self) -> None:
+        """Write a pending debounced save, then never write this store again.
+
+        Called once its entry has unloaded. Work the unload does not cancel (a
+        manual analysis the WS handler awaits) could otherwise save this store
+        after the replacement loaded the same file and overwrite newer data (PR
+        #529 review). Every write, either file, is then skipped.
+        """
+        try:
+            await self.async_flush_saves()
+        finally:
+            self._retired = True
+            self._store.retired = True
+
     async def _async_load_active(self) -> None:
         """Load the active-cycle file; adopt a snapshot the main store still holds.
 
@@ -6879,6 +6905,9 @@ class ProfileStore:
             await self._async_write_active()
 
     async def _async_write_active(self) -> None:
+        if getattr(self, "_retired", False):
+            self._logger.debug("Active-cycle write from an unloaded entry's store skipped")
+            return
         data = dict(self._active_data)
         try:
             await self._active_store.async_save(data)
