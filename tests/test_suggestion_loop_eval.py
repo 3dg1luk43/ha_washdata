@@ -471,3 +471,67 @@ def test_apply_all_judges_the_end_gate_on_the_values_as_written(monkeypatch):
     assert judged and judged[-1]["min_off_gap"]["value"] == 600
     assert judged[-1]["min_off_gap"]["cascade"] is False
 
+
+# --------------------------------------------- unmatched arm: measured or skipped
+
+def _kept_alive(real: int, keepalives: int, work_w: float = 1500.0) -> dict:
+    """``real`` reports 60 s apart at ``work_w``, then ``keepalives`` watchdog rows."""
+    pts = [[60.0 * k, work_w] for k in range(real)]
+    pts += [[60.0 * (real + k), work_w] for k in range(keepalives)]
+    return {"id": f"r{real}k{keepalives}", "start_time": "2026-10-01T08:00:00+00:00",
+            "status": "completed", "termination_reason": "smart", "power_data": pts,
+            "synthetic_offsets": [p[0] for p in pts[real:]]}
+
+
+def test_readiness_counts_real_readings_not_keepalive_rows():
+    """PR #529 review: nine real readings and one keepalive row passed the replay's
+    readiness (ten rows) and failed the unmatched arm's (nine real ones)."""
+    assert not loop._replayable(_kept_alive(loop.MIN_READINGS - 1, 1))  # noqa: SLF001
+    assert loop._replayable(_kept_alive(loop.MIN_READINGS, 0))  # noqa: SLF001
+
+
+def test_a_trace_with_no_active_span_is_unmeasured_not_a_pass():
+    """One real reading above the stop has no span to cover: neither split nor whole."""
+    pts = [(0.0, 0.5), (60.0, 900.0), (120.0, 0.5)]
+    assert loop._unmatched_split([{"duration": 60.0}], pts, 2.0) is None  # noqa: SLF001
+    assert loop._unmatched_split([], pts, 2.0) is None  # noqa: SLF001
+
+
+def test_an_unmeasurable_cycle_is_listed_as_skipped_not_dropped(monkeypatch):
+    """PR #529 review: the unmatched task returned None for a cycle it could not
+    measure, and the arm dropped it from both summaries without a word. Ten real
+    readings, one of them above the 2 W stop: replayable, but no active span."""
+    from types import SimpleNamespace
+
+    src = {"id": "flat", "start_time": "2026-10-01T08:00:00+00:00", "status": "completed",
+           "termination_reason": "smart",
+           "power_data": [[60.0 * k, 900.0 if k == 4 else 0.5] for k in range(10)]}
+    whole = dict(_kept_alive(loop.MIN_READINGS, 0), id="whole")
+    assert loop._replayable(src) and loop._replayable(whole)  # noqa: SLF001
+    dev = SimpleNamespace(past=[src, whole], recorded_stop=2.0)
+    monkeypatch.setitem(loop._DEVICES, "dev", dev)  # noqa: SLF001
+
+    def _sim(*_a, **_k):
+        raise AssertionError("an unmeasurable cycle is not replayed")
+
+    monkeypatch.setattr(loop.playground, "_DetailSim", _sim)
+    _p, _a, _i, row = loop._unmatched_task(("dev", "initial", {}, 0))  # noqa: SLF001
+    assert row is not None and "above the recorded stop threshold" in row["skipped"]
+
+    real_task = loop._unmatched_task  # noqa: SLF001
+
+    def _task(job):
+        if job[3] == 1:   # the measurable one: a single record over the whole span
+            return job[0], job[1], job[3], {"split": False, "interrupted": False, "lag": 60.0}
+        return real_task(job)
+
+    monkeypatch.setattr(loop, "_unmatched_task", _task)
+    lp = SimpleNamespace(path="dev", options0={"a": 1}, options={"a": 1}, past=[src, whole],
+                         unmatched=None)
+    loop._unmatched_arm([lp], jobs=1)  # noqa: SLF001
+    um = lp.unmatched
+    assert um["initial"]["cycles"] == 1 and um["initial"]["splits"] == []
+    assert [s["id"] for s in um["skipped"]] == ["flat"]
+    assert "above the recorded stop threshold" in um["skipped"][0]["reason"]
+    assert um["splits_added"] == [] and um["interrupted_added"] == []
+

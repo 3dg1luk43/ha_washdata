@@ -48,7 +48,14 @@ no matcher: a new programme, a first run, an ambiguous match), under the export'
 options and under the last round's, and the run fails when the latter splits or
 stores as interrupted a cycle the former did not. The rounds above match in-sample,
 so they could not see that Apply all split dishwasher drying (audit 2026-11-16: 1 ->
-6 of 27 cycles on one device, 0 splits reported).
+6 of 27 cycles on one device, 0 splits reported). A replayable cycle it cannot
+measure (fewer than ``MIN_ACTIVE_READINGS`` real readings above the recorded stop
+threshold, or too few left after the reading throttle to replay) is listed as
+skipped with its reason, never counted as a pass.
+
+A cycle is replayable (here and in the rounds) when it ended on its own or was
+stored interrupted and holds ``MIN_READINGS`` real readings: keepalive rows do not
+count.
 
 Repeat until Apply all changes nothing (a fixed point) or ``--rounds`` applies. Round 0
 starts from the export's own options with no pending suggestions, no cooldown and no
@@ -200,7 +207,15 @@ DEFAULT_ROUNDS = 5
 #: A device needs this many re-detectable cycles: the batch and detection passes
 #: both require 5 clean cycles before they propose anything.
 MIN_REPLAYABLE = 5
+#: A cycle is replayed when its trace holds this many real readings. Keepalive rows
+#: (``synthetic_offsets``) do not count: the watchdog repeats the last value, which
+#: says nothing new about the run (PR #529 review: nine real readings and a
+#: keepalive passed here and failed the unmatched arm's real-reading count).
 MIN_READINGS = 10
+#: The unmatched arm's split check needs an active span to cover: this many real
+#: readings above the recorded stop threshold, the first and last bounding it. A
+#: replayable cycle with fewer is listed as skipped, never counted as a pass.
+MIN_ACTIVE_READINGS = 2
 #: The engine reads at most the last 200 stored cycles (the retention cap).
 MAX_CYCLES = 200
 #: Per-device replay caps for a time-budgeted run (path substring -> most recent
@@ -483,12 +498,18 @@ def _active_span(points: list[tuple[float, float]], stop: float) -> float:
     return (act[-1] - act[0]) if len(act) >= 2 else 0.0
 
 
+def _real_readings(c: dict) -> list[tuple[float, float]]:
+    """The trace's readings without the watchdog's keepalive rows."""
+    synthetic = synthetic_offset_keys(c) or set()
+    return [(t, p) for t, p in _cycle_readings(c) if offset_key(t) not in synthetic]
+
+
 def _replayable(c: Any) -> bool:
     return (
         isinstance(c, dict)
         and c.get("status") in ("completed", "interrupted")
         and c.get("termination_reason") not in (TerminationReason.USER, TerminationReason.FORCE_STOPPED)
-        and len(_cycle_readings(c)) >= MIN_READINGS
+        and len(_real_readings(c)) >= MIN_READINGS
     )
 
 
@@ -1332,8 +1353,17 @@ def _drive(loops: list[DeviceLoop], jobs: int) -> None:
                             pending[pool.submit(_replay_task, *job)] = loop.path
 
 
+def _unmatched_span(points: list[tuple[float, float]], stop: float) -> tuple[float, float] | None:
+    """(first active offset, active span) of the readings above ``stop``; None with
+    fewer than ``MIN_ACTIVE_READINGS`` of them or no time between the first and last."""
+    act = [t for t, p in points if p > stop]
+    if len(act) < MIN_ACTIVE_READINGS or act[-1] - act[0] <= 0:
+        return None
+    return act[0], act[-1] - act[0]
+
+
 def _unmatched_split(ended: list[dict], points: list[tuple[float, float]], stop: float,
-                     base: datetime | None = None) -> bool:
+                     base: datetime | None = None) -> bool | None:
     """Not ONE stored cycle covering ~all of the trace's active span.
 
     As ``min_off_gap_eval._is_split``: a fragment shorter than the completion
@@ -1342,17 +1372,20 @@ def _unmatched_split(ended: list[dict], points: list[tuple[float, float]], stop:
     offset 0) places it, start within the other 10% of its first active reading
     (PR #529 review): a record reopened late in the activity can reach that length
     on the synthetic quiet tail alone.
+
+    None when the trace has no active span (``_unmatched_span``): nothing was
+    measured, which is neither a split nor a pass (PR #529 review).
     """
+    active = _unmatched_span(points, stop)
+    if active is None:
+        return None
+    first, span = active
     if len(ended) != 1:
         return True
-    act = [t for t, p in points if p > stop]
-    span = (act[-1] - act[0]) if len(act) >= 2 else 0.0
-    if span <= 0:
-        return False
     if float(ended[0].get("duration") or 0.0) < 0.9 * span:
         return True
     start = _parse_utc(ended[0].get("start_time")) if base is not None else None
-    return start is not None and (start - base).total_seconds() - act[0] > 0.1 * span
+    return start is not None and (start - base).total_seconds() - first > 0.1 * span
 
 
 class _NoProfiles:
@@ -1369,7 +1402,7 @@ class _NoProfiles:
         return getattr(self._store, name)
 
 
-def _unmatched_task(job: tuple[str, str, dict, int]) -> tuple[str, str, int, dict | None]:
+def _unmatched_task(job: tuple[str, str, dict, int]) -> tuple[str, str, int, dict]:
     """Worker: one stored cycle replayed with nothing to match, under ``options``.
 
     No matcher: what a new programme, a first run or an ambiguous match gets (no
@@ -1377,14 +1410,21 @@ def _unmatched_task(job: tuple[str, str, dict, int]) -> tuple[str, str, int, dic
     above cannot show (audit 2026-11-16, register item 638). The device's history
     stays (`_NoProfiles`): with ML models on, an unmatched run can still end on the
     learned terminal drop (PR #529 review).
+
+    A cycle it cannot measure comes back as ``{"skipped": reason}``, never as
+    nothing (PR #529 review: it vanished from both summaries).
     """
     path, arm, options, idx = job
     dev = _DEVICES[path]
     src = dev.past[idx]
-    synthetic = synthetic_offset_keys(src) or set()
-    pts = [(t, p) for t, p in _cycle_readings(src) if offset_key(t) not in synthetic]
-    if len(pts) < 10:
-        return path, arm, idx, None
+    pts = _real_readings(src)
+    if len(pts) < MIN_READINGS:
+        return path, arm, idx, {"skipped": f"fewer than {MIN_READINGS} real readings"}
+    stop = dev.recorded_stop
+    if _unmatched_span(pts, stop) is None:
+        return path, arm, idx, {"skipped": (
+            f"fewer than {MIN_ACTIVE_READINGS} real readings above the recorded stop threshold"
+            f" ({stop:g} W): no active span to cover")}
     cfg = dev.detector_config(options)
     # The input `replay_one` gives the matched rounds: the stored cycle (its
     # keepalive rows marked) thinned by the reading throttle when these options
@@ -1400,24 +1440,24 @@ def _unmatched_task(job: tuple[str, str, dict, int]) -> tuple[str, str, int, dic
         cyc, cfg, None, _NoProfiles(match_mgr.profile_store), {**dev.entry_data, **options},
         None, compute_series=False,
     )
+    if not sim.ready:
+        # Only the reading throttle can leave a replayable trace this short.
+        return path, arm, idx, {"skipped": "too few readings left after the reading throttle to replay"}
     # Each detected end with the record it closed, so the lag is the kept cycle's.
     ends: list[tuple[float, dict]] = []
-    ended: list[dict] = []
-    if sim.ready:
-        det = sim.detector
-        original = det._on_cycle_end  # noqa: SLF001
+    det = sim.detector
+    original = det._on_cycle_end  # noqa: SLF001
 
-        def _end(data: dict, _original: Any = original) -> None:
-            ends.append((float(sim.cursor["t"]), data))
-            _original(data)
+    def _end(data: dict, _original: Any = original) -> None:
+        ends.append((float(sim.cursor["t"]), data))
+        _original(data)
 
-        det._on_cycle_end = _end  # noqa: SLF001
-        sim.step(0, sim.n_readings)
-        # `--idle-hold` as the matched rounds take it (PR #529 review): a kept tail
-        # at or above the new stop is force-ended, not given an invented 0 W tail.
-        finish_replay(sim, cfg, src, dev.recorded_stop, dev.idle_hold, sim.run_tail)
-        ended = list(sim.kept)
-    stop = dev.recorded_stop
+    det._on_cycle_end = _end  # noqa: SLF001
+    sim.step(0, sim.n_readings)
+    # `--idle-hold` as the matched rounds take it (PR #529 review): a kept tail
+    # at or above the new stop is force-ended, not given an invented 0 W tail.
+    finish_replay(sim, cfg, src, stop, dev.idle_hold, sim.run_tail)
+    ended = list(sim.kept)
     # The end lag as `replay_one` measures it: detection time less the source's
     # last reading at or above the recorded stop, both from the cycle's base.
     src_readings, _pts, src_base = playground._readings_from_cycle(src)  # noqa: SLF001
@@ -1435,12 +1475,16 @@ def _unmatched_task(job: tuple[str, str, dict, int]) -> tuple[str, str, int, dic
 
 
 def _unmatched_summary(rows: dict[int, dict]) -> dict[str, Any]:
-    lags = [r["lag"] for r in rows.values() if r["lag"] is not None]
+    """The measured cycles' splits, interruptions and end lag; the skipped ones by
+    index with their reason (``cycles`` counts only the measured)."""
+    measured = {i: r for i, r in rows.items() if "skipped" not in r}
+    lags = [r["lag"] for r in measured.values() if r["lag"] is not None]
     return {
-        "cycles": len(rows),
-        "splits": sorted(i for i, r in rows.items() if r["split"]),
-        "interrupted": sorted(i for i, r in rows.items() if r["interrupted"]),
+        "cycles": len(measured),
+        "splits": sorted(i for i, r in measured.items() if r["split"]),
+        "interrupted": sorted(i for i, r in measured.items() if r["interrupted"]),
         "lag_med": round(float(np.median(lags))) if lags else None,
+        "skipped": sorted([i, r["skipped"]] for i, r in rows.items() if "skipped" in r),
     }
 
 
@@ -1472,17 +1516,22 @@ def _unmatched_arm(loops: list["DeviceLoop"], jobs: int) -> None:
             ) as pool:
                 outs = list(pool.map(_unmatched_task, jobs_list, chunksize=4))
     for path, arm, idx, row in outs:
-        if row is not None:
-            found.setdefault((path, arm), {})[idx] = row
+        found.setdefault((path, arm), {})[idx] = row
     for loop in loops:
         initial = found.get((loop.path, "initial"), {})
         final = found.get((loop.path, "final"), initial)
         a, b = _unmatched_summary(initial), _unmatched_summary(final)
         ids = {i: loop.past[i].get("id") for i in range(len(loop.past))}
+        # Every replayable cycle is compared or listed here with its reason, per
+        # option set (the same set is replayed once).
+        skipped = [{"id": ids[i], "options": "export", "reason": why} for i, why in a["skipped"]]
+        if final is not initial:
+            skipped += [{"id": ids[i], "options": "fixed point", "reason": why} for i, why in b["skipped"]]
         loop.unmatched = {
             "initial": a, "final": b,
             "splits_added": [ids[i] for i in b["splits"] if i not in a["splits"]],
             "interrupted_added": [ids[i] for i in b["interrupted"] if i not in a["interrupted"]],
+            "skipped": skipped,
         }
 
 
@@ -1589,6 +1638,8 @@ def print_report(results: list[dict], rounds: int) -> None:
             print(f"    unmatched export->fixed point: splits={len(a['splits'])}->{len(b['splits'])}"
                   f" interrupted={len(a['interrupted'])}->{len(b['interrupted'])}"
                   f" lag_med={_fmt_s(a['lag_med'])}->{_fmt_s(b['lag_med'])}")
+            for s in um.get("skipped") or []:
+                print(f"    unmatched skipped ({s['options']} options): {s['id']}: {s['reason']}")
         for key, k in r["keys"].items():
             seq = " -> ".join(_fmt(v) for v in k["values"])
             print(f"    {key:34s} {k['verdict']:10s} applies={k['applies']}  {seq}")
