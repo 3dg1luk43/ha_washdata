@@ -67,7 +67,7 @@
    ]
   ]
  },
- "code_sha": "bfc0aeaceecbcd8a",
+ "code_sha": "b0af9123bf965ee2",
  "corpus_manifest": "8031528df60fb415",
  "cuts": [
   1.0,
@@ -91,7 +91,7 @@
  "mode": "fast",
  "numpy": "2.3.2",
  "override": null,
- "rev": "cd053d45",
+ "rev": "4fe858d0",
  "twin_entries": {
   "me/washdata_export_01KDMTAA.json": {
    "kept": "me/washdata_export_01KX67PQ.json",
