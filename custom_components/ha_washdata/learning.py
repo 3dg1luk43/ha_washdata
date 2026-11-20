@@ -405,8 +405,10 @@ class LearningManager:
         # cycle is stored, so the pass's pause scan sees the cycle that just ended.
         self._operational_pass_due: bool = False
         # A cycle's cadence summary is computed in the executor (PR #529 review):
-        # the jobs not yet stored, and whether the due pass waits for them. Bumped
-        # by a history wipe or restore, which discards a summary still in flight.
+        # the jobs not yet stored, and whether the due pass waits for them. The
+        # epoch is bumped by ``reset_cadence_evidence`` (a wipe, Undo Import, an
+        # import that replaces the history or the cadence rows), which discards a
+        # summary still in flight.
         self._summaries_in_flight: int = 0
         self._operational_pass_waiting: bool = False
         self._cadence_epoch: int = 0
@@ -833,10 +835,7 @@ class LearningManager:
             self._store_finished_summaries()
             return
         self._summaries_in_flight += 1
-        coro = self._async_commit_cycle_summary(
-            pending, slot, self._cadence_epoch,
-            getattr(self.profile_store, "_data_generation", 0),
-        )
+        coro = self._async_commit_cycle_summary(pending, slot, self._cadence_epoch)
         task = self._spawn(coro)
         if not isinstance(task, asyncio.Future):
             # Nothing runs it (a mocked hass): inline, or the due pass would wait forever.
@@ -850,9 +849,16 @@ class LearningManager:
         pending: deque[tuple[float, datetime]],
         slot: list[Any],
         epoch: int,
-        data_generation: int,
     ) -> None:
-        """``_commit_cycle_summary``'s executor job; then the pass that waited for it."""
+        """``_commit_cycle_summary``'s executor job; then the pass that waited for it.
+
+        Dropped only when the cadence epoch moved (``reset_cadence_evidence``): a
+        wipe, Undo Import, or an import that replaced the real history or the
+        cadence rows (stored, an old 90 s cycle joined an imported 2 s history,
+        PR #529 review). Any other store write, a profiles-only import included,
+        keeps it (PR #529 review). A summary that finished earlier and waits in
+        the queue goes the same way: the reset empties the queue.
+        """
         summary: tuple[float, float] | None = None
         try:
             summary = await self.hass.async_add_executor_job(_held_cadence, pending)
@@ -861,16 +867,11 @@ class LearningManager:
         finally:
             if epoch == self._cadence_epoch:
                 self._summaries_in_flight = max(0, self._summaries_in_flight - 1)
-                if getattr(self.profile_store, "_data_generation", 0) != data_generation:
-                    # An import replaced the history (and its summaries) it was
-                    # measured into (PR #529 review): stored, an old 90 s cycle
-                    # joined an imported 2 s history. Dropped; a cycle that ends
-                    # against the replacement stores its own.
-                    summary = None
                 # Finished, even cancelled: a later cycle's summary never waits on it.
                 slot[1:] = [summary, True]
         if epoch != self._cadence_epoch:
-            # A wipe or Undo Import replaced the history it was measured into.
+            # Replaced while it ran: a cycle that ends against the replacement
+            # stores its own.
             return
         if self._store_finished_summaries():
             # It may land after the cycle-end write: saved, or a restart with no

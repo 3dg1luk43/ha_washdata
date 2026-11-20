@@ -75,12 +75,14 @@ async def test_an_import_discards_a_summary_still_in_the_executor(
         assert lm.close_cycle_cadence(_CLEAN_END)
         lm.run_due_operational_pass()  # waits for the summary
         assert await hass.async_add_executor_job(started.wait, 5)
-        await store.async_import_data(payload)
+        # As every import caller wires it: the replacement resets the cadence
+        # evidence, whose epoch alone discards the summary (review round 39b).
+        await store.async_import_data(payload, on_replace=lm.reset_cadence_evidence)
         release.set()
         await hass.async_block_till_done()
     assert store.get_cadence_summaries(POWER) == [[2.0, 2.0]]
-    # The pass it left due reads the imported history, not the dropped summary.
-    assert ran == [[[2.0, 2.0]]]
+    # The pass it left due went with the replaced history: nothing ran on it.
+    assert ran == []
     _hold_a_cycle(lm, 90.0)
     assert lm.close_cycle_cadence(_CLEAN_END)
     await hass.async_block_till_done()
