@@ -53,6 +53,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - **An older appliance list could replace a newer one**: list refreshes were applied in arrival order, so a slow reply could undo a change on screen (a program pick, a cleared badge). A reply older than the list already shown is dropped.
 - **Undo Import left removed settings out of the settings history**: a setting the import had set and the undo removed again (back to its default) was not recorded, so the history did not show the change. It is now recorded as a change to the unset value.
 - **The ghost-cycle log named the wrong level**: "N ghost cycles in 24 h (up to X W)" took X from every ghost since the last restart, not the last 24 h, so one old 40 W ghost kept advising a Start Threshold above it. X now comes from the ghosts it counts, and a dishwasher's pump-out after its cycle is no longer counted as a ghost (it used to push the advised level up to the pump's 20-30 W).
+- **Apply all said "applied" when nothing was saved**: the panel showed the success message whatever the reply said, also when the selected suggestions no longer applied or a check withdrew them all. It now says when nothing changed, and when a suggestion changed since you looked at it, and shows the list as it stands.
 
 ## 0.6.0 - 2026-11-12
 
