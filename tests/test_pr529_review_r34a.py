@@ -8,6 +8,8 @@
   under the intermediate setting.
 * #530: a pick Stage 1's lower bound rejected (the cycle still too short a part
   of it) was read against the fifth score of a full list, a bound it never had.
+* #524: a program changed during a PAUSED door dwell, the dwell ran out before
+  the detector took it, and nothing armed another once it did.
 """
 from __future__ import annotations
 
@@ -22,7 +24,10 @@ from custom_components.ha_washdata import analysis, match_rules
 from custom_components.ha_washdata.const import (
     DOMAIN,
     PROGRAM_MISMATCH_PERSISTENCE,
+    STATE_PAUSED,
 )
+from custom_components.ha_washdata.time_utils import utc_now
+from tests.test_issue_524_door_ends_cycle import DOOR, OPTS, WASH_S, _paused_washer, _tick
 from tests.test_issue_530_program_mismatch import (
     COTTON,
     _check,
@@ -196,3 +201,50 @@ async def test_the_match_reports_the_programmes_the_min_ratio_rejected(
     assert analysis.stage1_min_ratio_rejects(1500.0, 3600.0, bounds)
     assert not analysis.stage1_min_ratio_rejects(1500.0, 600.0, bounds)
     assert not analysis.stage1_duration_rejects(1500.0, 1800.0, bounds)
+
+
+# ── #524: a program changed during a PAUSED door dwell ──────────────────────
+
+
+async def test_a_program_changed_during_the_door_dwell_still_ends_the_cycle(
+    hass: HomeAssistant, setup_washdata_entry: Any, freezer: Any
+) -> None:
+    """The dwell runs out before the detector takes the new pick; once it does,
+    still PAUSED and with the door still open, the door ends the cycle. The
+    detector is held in PAUSED (no reading reaches it): this fixture's pause
+    turns into ENDING within the minute, a transition that re-arms the dwell on
+    its own and would hide the gap."""
+    manager, ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    hass.states.async_set(DOOR, "on")
+    await hass.async_block_till_done()
+    assert manager._remove_door_end_dwell is not None  # noqa: SLF001
+    # Picked by hand during the dwell: the detector holds Cotton until its next tick.
+    manager._manual_program_active = True  # noqa: SLF001
+    manager._current_program = "Quick"  # noqa: SLF001
+    manager._matched_profile_duration = float(WASH_S)  # noqa: SLF001
+    with patch.object(manager.detector, "process_reading", lambda *_a, **_k: None):
+        await _tick(hass, freezer, 70, None)  # past the dwell
+        assert ends == []
+        assert manager.detector.state == STATE_PAUSED
+        assert manager.detector.matched_profile == "Cotton"
+        # The detector's match tick takes the pick, the door still open.
+        manager.detector._try_profile_match(utc_now(), force=True)  # noqa: SLF001
+        assert manager.detector.matched_profile == "Quick"
+        assert manager.detector.state == STATE_PAUSED
+        await _tick(hass, freezer, 70, None)
+    assert len(ends) == 1, ends
+
+
+async def test_a_user_pause_during_the_wait_keeps_the_cycle(
+    hass: HomeAssistant, setup_washdata_entry: Any, freezer: Any
+) -> None:
+    """The wait for the detector re-arms nothing under a user pause."""
+    manager, ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    hass.states.async_set(DOOR, "on")
+    await hass.async_block_till_done()
+    manager._manual_program_active = True  # noqa: SLF001
+    manager._current_program = "Quick"  # noqa: SLF001
+    manager._is_user_paused = True  # noqa: SLF001
+    manager._door_end_dwell_fired(utc_now())  # noqa: SLF001
+    assert manager._remove_door_end_dwell is None  # noqa: SLF001
+    assert ends == []

@@ -4346,25 +4346,32 @@ class WashDataManager:
             return False
         if self.detector.state != STATE_PAUSED:
             return True
+        if self._door_end_awaits_match():
+            return False
+        return bool(self.detector.door_end_due(utc_now()))
+
+    def _door_end_awaits_match(self) -> bool:
+        """Whether a PAUSED door end waits for the detector to take the match it
+        must be judged by (a pick made or cleared since its last match tick)."""
         # A program picked by hand reaches the detector at its next match tick; until
         # then `door_end_due` would judge the run by the previous program's length
         # (PR #529 review). Wait for the detector to hold the pick.
         if self._manual_program_active and self.detector.matched_profile != self._current_program:
-            return False
+            return True
         # A pick cleared mid-cycle: the detector's match is still the cleared one
         # until an automatic match replaces it. A new pick is judged by the two
-        # checks above instead: it reaches the detector through its own matcher
-        # branch, never through the automatic match that clears this (review of
-        # PR #529).
+        # checks around this one instead: it reaches the detector through its own
+        # matcher branch, never through the automatic match that clears this
+        # (review of PR #529).
         if self._door_gate_awaits_match and not self._manual_program_active:
-            return False
+            return True
         # Nor while it holds the pick at a length the pick no longer has: the same
         # program re-picked after its learned length changed (PR #529 review).
         if self._manual_program_active and self._matched_profile_duration:
             held = float(self.detector.expected_duration_seconds or 0.0)
             if abs(held - float(self._matched_profile_duration)) > 1.0:
-                return False
-        return bool(self.detector.door_end_due(utc_now()))
+                return True
+        return False
 
     def _settle_door_gate(self, profile_name: str | None, revoke: bool) -> None:
         """End the wait a cleared pick set once the detector holds the match this
@@ -4453,6 +4460,24 @@ class WashDataManager:
             )
             self.detector.door_end()
             self._notify_update()
+        elif (
+            self._door_opens_at_end
+            and self.detector.state == STATE_PAUSED
+            and not self._is_user_paused
+            and door_state is not None
+            and door_state.state == "on"
+            and self._door_end_awaits_match()
+        ):
+            # The program was changed during the dwell and the detector has not
+            # taken the replacement yet. Nothing else arms a dwell when it does
+            # without leaving PAUSED, so the open door would no longer end the
+            # cycle (PR #529 review): re-arm, the same checks judge the next expiry
+            # under the match the detector then holds. Like the re-arms above it
+            # can only delay a finalize.
+            self._logger.debug(
+                "Door-end dwell fired before the detector took the changed program: re-arming"
+            )
+            self._arm_door_end_dwell()
         else:
             self._logger.debug(
                 "Door-end dwell fired but conditions no longer hold "
