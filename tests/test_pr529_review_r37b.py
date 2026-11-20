@@ -8,6 +8,8 @@
 * Apply wrote a non-finite stored suggestion ("Infinity") as the setting.
 * An Apply whose checks withdrew every selected key wrote nothing but replied
   as a success, and the panel said the suggestions were applied.
+* Apply refreshed its manager after the settings-history await even when a
+  full unload had replaced it.
 """
 from __future__ import annotations
 
@@ -199,3 +201,41 @@ async def test_an_apply_that_writes_nothing_says_so(
     res = await _apply(hass, client, entry.entry_id, [CONF_OFF_DELAY])
     assert res["result"] == {"success": True, "applied": [CONF_OFF_DELAY]}
     assert hass.config_entries.async_get_entry(entry.entry_id).options[CONF_OFF_DELAY] == 120
+
+
+async def test_apply_does_not_refresh_a_retired_manager(
+    hass: HomeAssistant, setup_washdata_entry: Any, hass_ws_client: Any
+) -> None:
+    """A full unload replaced the manager while Apply awaited the settings
+    history: the retired one still refreshed, which can fire a device trigger
+    (unload_pending) for an entry it no longer runs. The live one still does."""
+    entry = await setup_washdata_entry(options={CONF_END_ENERGY_THRESHOLD: 0.01, CONF_OFF_DELAY: 60})
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store = manager.profile_store
+    client = await hass_ws_client(hass)
+    real_get, real_record = ws_api._get_manager, ws_api._record_option_changes  # noqa: SLF001
+    retired = {"on": False}
+    replacement = object()
+
+    def get_manager(h: Any, entry_id: str) -> Any:
+        return replacement if retired["on"] else real_get(h, entry_id)
+
+    async def record_then_unload(*args: Any, **kwargs: Any) -> None:
+        await real_record(*args, **kwargs)
+        retired["on"] = True
+
+    store.set_suggestion(CONF_OFF_DELAY, 120, reason="r", flags={"owner": OWNER_BATCH})
+    with (
+        patch.object(ws_api, "_get_manager", side_effect=get_manager),
+        patch.object(ws_api, "_record_option_changes", side_effect=record_then_unload),
+        patch.object(manager, "notify_update") as notify,
+    ):
+        res = await _apply(hass, client, entry.entry_id, [CONF_OFF_DELAY])
+    assert res["result"] == {"success": True, "applied": [CONF_OFF_DELAY]}
+    assert notify.call_count == 0
+
+    store.set_suggestion(CONF_OFF_DELAY, 180, reason="r", flags={"owner": OWNER_BATCH})
+    with patch.object(manager, "notify_update") as notify:
+        res = await _apply(hass, client, entry.entry_id, [CONF_OFF_DELAY])
+    assert res["result"] == {"success": True, "applied": [CONF_OFF_DELAY]}
+    assert notify.call_count == 1

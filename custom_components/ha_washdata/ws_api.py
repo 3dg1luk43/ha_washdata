@@ -5427,7 +5427,10 @@ async def ws_apply_suggestions(
                     await _record_option_changes(
                         hass, entry, updates, "apply_suggestions", before=before
                     )
-            if updates:
+            # Not from a manager a full unload retired during the awaits above: its
+            # refresh can fire a device trigger (unload_pending) for an entry it
+            # no longer runs (PR #529 review).
+            if updates and _get_manager(hass, entry_id) is manager:
                 manager.notify_update()
 
         # ``success`` False when nothing was written: every selected suggestion
