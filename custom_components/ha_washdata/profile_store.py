@@ -12811,6 +12811,7 @@ class ProfileStore:
         apply_settings: bool = True,
         local_device_type: str = "",
         entry_options: JSONDict | None = None,
+        on_replace: Callable[[], Any] | None = None,
     ) -> dict[str, Any]:
         """Selectively import chosen categories/items, merging into existing data.
 
@@ -12838,6 +12839,10 @@ class ProfileStore:
         name clash) saves the device's restore point first (register item 195);
         ``entry_options`` is this device's, kept for the undo and never applied here.
         A plain additive merge loses nothing and leaves the restore point alone.
+
+        ``on_replace`` is called once a replace has emptied ``past_cycles``, before
+        the first await after it, as the wholesale import's: state derived from the
+        replaced real history goes with it (PR #529 review). Never raises from it.
         """
         data_dict, meta = unwrap_import_payload(payload)
         conflict_resolutions = conflict_resolutions or {}
@@ -13013,6 +13018,11 @@ class ProfileStore:
                 self._data["reference_cycles"] = []
             if wipe_past:
                 self._data["past_cycles"] = []
+                if on_replace is not None:
+                    try:
+                        on_replace()
+                    except Exception:  # noqa: BLE001 - the import itself must complete
+                        self._logger.debug("Import follow-up failed", exc_info=True)
 
         # O(N) id pools threaded through the bulk cycle adds so SHA-id uniqueness stays
         # O(1) amortized instead of rebuilding the id set from the growing destination on

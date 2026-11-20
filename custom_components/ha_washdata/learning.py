@@ -905,9 +905,14 @@ class LearningManager:
             return None
 
     def reset_cadence_evidence(self) -> None:
-        """Forget the update intervals measured so far (a history wipe, PR #529
-        review): the stored summaries go with the history, and without this the
-        in-memory model kept sizing the operational pass from before the wipe."""
+        """Forget the update intervals measured so far and the passes run on a
+        history a wipe or an import replaced (PR #529 review): without this the
+        in-memory model kept sizing the operational pass from before it.
+
+        The stored per-cycle summaries are not touched here: they describe the
+        plug, not the history. A wipe clears them, an import takes the payload's
+        pair or keeps this device's (``_CADENCE_PAIR_KEYS``), and Undo Import puts
+        the restore point's back."""
         self._sample_interval_model = StatisticalModel(max_samples=200)
         self._model_sensor = None
         self._pending_intervals.clear()

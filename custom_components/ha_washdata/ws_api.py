@@ -4924,6 +4924,11 @@ async def ws_import_config_selective(
                 # Kept with the restore point of a destructive import so an undo puts
                 # them back (item 195); never applied to the entry from here.
                 entry_options=dict(entry.options) if entry is not None else None,
+                # A replace of the real history: the counts and passes from before
+                # it go, as in the wholesale import (PR #529 review).
+                on_replace=getattr(
+                    getattr(manager, "learning_manager", None), "reset_cadence_evidence", None,
+                ),
             )
 
             # Re-validate after the awaits — the entry may have been reloaded (a new
