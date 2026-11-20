@@ -439,6 +439,16 @@ class LearningManager:
         if data_generation is None:
             data_generation = getattr(self.profile_store, "_data_generation", 0)
         async with self._pass_lock:
+            # Superseded while it waited for the lock (several saves during one
+            # refresh queue a pass each): both generations only grow, so the scan
+            # would be discarded below. Skipped before it scans the history (PR
+            # #529 review): None as for a replaced store, nothing applied either way.
+            if getattr(self.profile_store, "_data_generation", 0) != data_generation:
+                self._logger.debug("Skipping a %s pass queued before the store was replaced", owner)
+                return None
+            if generation != self._config_generation:
+                self._logger.debug("Skipping a %s pass queued before the options changed", owner)
+                return {}
             found = await self.hass.async_add_executor_job(generate, *args)
             if getattr(self.profile_store, "_data_generation", 0) != data_generation:
                 self._logger.debug("Discarding a %s pass computed against a replaced store", owner)
@@ -1311,9 +1321,10 @@ class LearningManager:
     async def _async_run_all_passes(self, *, raise_errors: bool = False) -> None:
         """Every suggestion pass, in cycle-end order, each with its owner.
 
-        Stops applying as soon as a refresh supersedes the options it started on.
-        A pass that raises ends the run; ``raise_errors`` hands that to the caller
-        (the manual analysis), otherwise it is logged.
+        Stops as soon as a refresh (or a history wipe) supersedes the options it
+        started on: every later pass would be discarded (PR #529 review). A pass
+        that raises ends the run; ``raise_errors`` hands that to the caller (the
+        manual analysis), otherwise it is logged.
         """
         gen = self._config_generation
         try:
@@ -1333,8 +1344,14 @@ class LearningManager:
                 (OWNER_START_THRESHOLD, self.suggestion_engine.for_job().generate_start_threshold_suggestions),
                 (OWNER_MODEL, self.suggestion_engine.for_job().generate_model_suggestions),
             ):
+                if gen != self._config_generation:
+                    return
                 await self._run_pass(generate, owner, gen, strict=raise_errors)
+            if gen != self._config_generation:
+                return
             await self._async_run_detection_suggestions(gen, raise_errors=raise_errors)
+            if gen != self._config_generation:
+                return
             await self._run_pass(
                 self.suggestion_engine.for_job().run_batch_simulation,
                 OWNER_BATCH, gen, self._batch_cycles(), strict=raise_errors,

@@ -10,9 +10,12 @@
   of it) was read against the fifth score of a full list, a bound it never had.
 * #524: a program changed during a PAUSED door dwell, the dwell ran out before
   the detector took it, and nothing armed another once it did.
+* Several settings saves during one suggestion refresh each queued a pass that
+  scanned the history though it could not publish.
 """
 from __future__ import annotations
 
+import asyncio
 from datetime import timedelta
 from typing import Any
 from unittest.mock import AsyncMock, patch
@@ -248,3 +251,52 @@ async def test_a_user_pause_during_the_wait_keeps_the_cycle(
     manager._door_end_dwell_fired(utc_now())  # noqa: SLF001
     assert manager._remove_door_end_dwell is None  # noqa: SLF001
     assert ends == []
+
+
+# ── Superseded suggestion passes do not scan ────────────────────────────────
+
+
+async def test_a_pass_superseded_while_queued_does_not_scan(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    entry = await setup_washdata_entry()
+    learning = hass.data[DOMAIN][entry.entry_id].learning_manager
+    scans: list[int] = []
+
+    def generate() -> dict[str, Any]:
+        scans.append(1)
+        return {}
+
+    async with learning._pass_lock:  # noqa: SLF001  (a pass is running)
+        queued = hass.async_create_task(
+            learning._run_pass(generate, "test", learning._config_generation)  # noqa: SLF001
+        )
+        await asyncio.sleep(0)
+        learning._config_generation += 1  # noqa: SLF001  (a settings save meanwhile)
+    assert await queued == {}
+    assert scans == []
+    # A current pass still scans.
+    await learning._run_pass(generate, "test", learning._config_generation)  # noqa: SLF001
+    assert scans == [1]
+
+
+async def test_a_superseded_analysis_stops_between_passes(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """A save during the first pass supersedes the run: the passes after it are
+    not even queued."""
+    entry = await setup_washdata_entry()
+    learning = hass.data[DOMAIN][entry.entry_id].learning_manager
+    calls: list[str] = []
+    real = learning._run_pass  # noqa: SLF001
+
+    async def counting(generate: Any, owner: Any, *args: Any, **kwargs: Any) -> Any:
+        calls.append(str(owner))
+        if len(calls) == 1:
+            learning._config_generation += 1  # noqa: SLF001
+        return await real(generate, owner, *args, **kwargs)
+
+    with patch.object(learning, "_run_pass", new=counting), \
+            patch.object(learning, "cadence", return_value=None):
+        await learning._async_run_all_passes()  # noqa: SLF001
+    assert len(calls) == 1, calls
