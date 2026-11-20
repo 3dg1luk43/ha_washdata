@@ -6960,13 +6960,23 @@ class ProfileStore:
 
         return stats
 
-    async def async_save(self) -> None:
+    async def async_save(self, *, required: bool = False) -> None:
         """Save data to storage.
 
         Inside a cycle-end burst (:meth:`coalesce_saves`) the write is debounced
         instead: HA's Store rewrites the whole file on every save (MBs on a real
         store), and one cycle end used to write it six times (register item 456).
+
+        Once the entry has unloaded (:meth:`async_retire`) the write is skipped.
+        ``required`` (an import, an undo: the caller reports it done) raises
+        :class:`StoreRetiredError` instead, debounced or not; background work
+        stays silent (PR #529 review).
         """
+        if required and self.retired:
+            raise StoreRetiredError(
+                "The appliance was reloaded during this operation, so nothing was "
+                "saved. Run it again."
+            )
         if time.monotonic() < getattr(self, "_coalesce_until", 0.0):
             self._delayed_save_pending = True
             self._store.async_delay_save(self._data_for_delayed_write, _BURST_SAVE_DELAY_S)
@@ -6996,6 +7006,15 @@ class ProfileStore:
         if getattr(self, "_delayed_save_pending", False):
             self._delayed_save_pending = False
             await self._store.async_save(self._data)
+
+    @property
+    def retired(self) -> bool:
+        """Whether its entry has unloaded (:meth:`async_retire`): no write lands.
+        Only a real ``True`` counts (a test's stand-in store answers anything)."""
+        return (
+            getattr(self, "_retired", False) is True
+            or getattr(getattr(self, "_store", None), "retired", False) is True
+        )
 
     async def async_retire(self) -> None:
         """Write a pending debounced save, then never write this store again.
@@ -13044,7 +13063,9 @@ class ProfileStore:
                 on_replace()
             except Exception:  # noqa: BLE001 - the restore itself must complete
                 self._logger.debug("Restore follow-up failed", exc_info=True)
-        await self.async_save()
+        # Required: a store its entry unloaded skips the write, and the restore
+        # point must outlive a restore that was never saved (PR #529 review).
+        await self.async_save(required=True)
         await self.async_flush_saves()
         await self.async_discard_pre_import_snapshot()
         self._logger.info("Restored the store from the %s restore point", raw.get("created_at"))
@@ -13192,7 +13213,9 @@ class ProfileStore:
         self._heal_lifetime_cycle_count()
         for name in stale_profiles:
             await self.async_rebuild_envelope(name)
-        await self.async_save()
+        # Required: an unload during the rebuilds retired this store, and a
+        # skipped write must not read as an import done (PR #529 review).
+        await self.async_save(required=True)
 
         return {
             "entry_data": meta.get("entry_data", {}),
@@ -13831,7 +13854,8 @@ class ProfileStore:
         # show nor spend their programme's review budget.
         self.prune_orphaned_feedback()
         self._data_generation = getattr(self, "_data_generation", 0) + 1
-        await self.async_save()
+        # Required, as the wholesale import's (PR #529 review).
+        await self.async_save(required=True)
 
         settings_out: dict[str, Any] = {}
         if apply_settings and "settings" in cats and device_type_match:
