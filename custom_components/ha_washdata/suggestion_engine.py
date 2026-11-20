@@ -175,14 +175,16 @@ def end_gate_pause_needs(
     judged on the quiet observed before it (the gate can close there; the hole is
     not credited). ``pulse_max_w`` (dryers, #474): short pulses the detector's
     quiet tallies ignore (:func:`_quiet_pulses`) neither end the run nor count as
-    quiet; the needs are quiet seconds. Pure; never raises.
+    quiet; the needs are quiet seconds. An ``off_delay`` of 0 is a window of one
+    reading, zero energy to the live gate: nothing holds the pause (review of PR
+    #529). Pure; never raises.
     """
     needs: list[float] = []
     try:
         window = float(off_delay_s)
         limit = float(end_energy_wh)
         stop = float(stop_w)
-        if not all(math.isfinite(v) for v in (window, limit, stop)) or window <= 0:
+        if not all(math.isfinite(v) for v in (window, limit, stop)) or window < 0:
             return needs
         # A NaN reading is neither at nor below the stop, so the scan below would
         # never get past it (PR #529 review); every finite one moves it on.
@@ -552,7 +554,10 @@ def end_gate_would_split(
     """Would the fallback end gate close this cycle inside one of its own pauses?
 
     True when a pause needs bridging (:func:`end_gate_pause_needs`) at least as
-    long as the gate's wait, ``max(off_delay, min_off_gap)``.
+    long as the gate's wait, ``max(off_delay, min_off_gap)``. A wait of 0 is a gate
+    too: live, the first quiet reading in ENDING completes the cycle, so any pause
+    the gate could close in splits (review of PR #529: it read as no gate, and
+    Apply accepted 0 for both).
 
     Audit 2026-11-16: Apply all moved off_delay 1800 -> 180, min_off_gap 2000 ->
     210 and end_energy 0.05 -> 0.75 Wh together on two dishwashers drying at
@@ -566,14 +571,14 @@ def end_gate_would_split(
     # The dryer pulse rule is the detector's on QUIET_PULSE_DEVICE_TYPES only.
     pulses = pulse_max_w if device_type in QUIET_PULSE_DEVICE_TYPES else None
     if any(
-        need >= wait > 0
+        need > 0 and need >= wait
         for need in end_gate_pause_needs(
             points, stop_w, off_delay_s, end_energy_wh, max_gap_s, strict=strict,
             pulse_max_w=pulses,
         )
     ):
         return True
-    return wait > 0 and _flat_standby_split(
+    return wait >= 0 and _flat_standby_split(
         points, float(stop_w), float(off_delay_s), float(min_off_gap_s), max_gap_s,
         device_type, pulses,
     )
