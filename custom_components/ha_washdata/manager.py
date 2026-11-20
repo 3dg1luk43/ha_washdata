@@ -1879,10 +1879,15 @@ class WashDataManager:
             # repeat them on every reading (PR #529 review). It is asked again
             # an interval later, so evidence that arrives still gets checked.
             self._program_mismatch_last_s = position
-            if not self.profile_store.has_real_profiles:
-                return
-            # A pick with no template is never scored, which is no evidence.
-            if state.key[2] in self.profile_store.unmatchable_profiles():
+            # A pick with no template is never scored, which is no evidence. A due
+            # check that is not scored breaks the run, as a scored one without
+            # evidence does: the next deficit starts a run rather than completing
+            # one counted before the gap (PR #529 review).
+            if (
+                not self.profile_store.has_real_profiles
+                or state.key[2] in self.profile_store.unmatchable_profiles()
+            ):
+                state.streak = 0
                 return
             self._program_mismatch_task = self._spawn_tracked(
                 self._async_check_program_mismatch(
