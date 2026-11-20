@@ -304,8 +304,9 @@ async def test_undo_import_records_a_stop_it_removes(
 ) -> None:
     """PR #529 review: an import set Stop to 3 W; the restore point has it unset, so
     Undo Import removes the override and the Stop goes back to its default. Only
-    keys the restore wrote were recorded, so the history never saw the change,
-    and cycles that ended under 3 W read as ended under the lower default."""
+    keys the restore wrote were recorded, so the history never saw the change.
+    The Stop before the row is the restored one: every cycle the restored store
+    holds ended before the import, under it (PR #529 review, round 36b)."""
     entry = await setup_washdata_entry(options={
         "min_power": 2.0, "start_threshold_w": 10.0, CONF_STOP_THRESHOLD_W: 3.0,
     })
@@ -317,5 +318,5 @@ async def test_undo_import_records_a_stop_it_removes(
     rows = [r for r in store.get_settings_changelog() if r["key"] == CONF_STOP_THRESHOLD_W]
     assert len(rows) == 1, rows
     assert rows[0]["old"] == 3.0 and rows[0]["new"] is None
-    assert rows[0]["old_effective"] == 3.0
-    assert [old for _when, old in stop_threshold_changes(store.get_settings_changelog())] == [3.0]
+    assert rows[0]["old_effective"] == 1.2  # Stop unset: follows the 2 W Min Power
+    assert [old for _when, old in stop_threshold_changes(store.get_settings_changelog())] == [1.2]

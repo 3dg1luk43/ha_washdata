@@ -124,3 +124,27 @@ async def test_an_import_records_the_value_it_wrote(
     rows = {r["key"]: r for r in store.get_settings_changelog()}
     assert rows[CONF_MIN_POWER]["old"] == 5.0 and rows[CONF_MIN_POWER]["new"] is None
     assert rows[CONF_OFF_DELAY]["new"] == 180
+
+
+async def test_undo_import_keeps_the_restored_stop_for_restored_cycles(
+    hass: HomeAssistant, setup_washdata_entry: Any
+) -> None:
+    """A cycle finished at 1 W, an import raised Stop to 3 W, Undo restored the
+    cycle and Stop 1 W. Its row said 3 W was in force before it, so the restored
+    cycle read as ended under 3 W. The row stays listed; the restored Stop is the
+    one before it."""
+    entry = await setup_washdata_entry(options={
+        CONF_MIN_POWER: 0.5, CONF_START_THRESHOLD_W: 10.0, CONF_STOP_THRESHOLD_W: 3.0,
+    })
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    await ws_api._async_restore_entry_options(  # noqa: SLF001
+        hass, entry,
+        {CONF_MIN_POWER: 0.5, CONF_START_THRESHOLD_W: 10.0, CONF_STOP_THRESHOLD_W: 1.0},
+    )
+    assert entry.options[CONF_STOP_THRESHOLD_W] == 1.0
+    log = store.get_settings_changelog()
+    row = next(r for r in log if r["key"] == CONF_STOP_THRESHOLD_W)
+    assert row["old"] == 3.0 and row["new"] == 1.0
+    assert not ws_api._is_effective_stop_row(row)  # noqa: SLF001
+    legacy = {"end_time": (T0 - timedelta(days=1)).isoformat()}
+    assert _stop_at_end(legacy, stop_threshold_changes(log), 1.0) == 1.0

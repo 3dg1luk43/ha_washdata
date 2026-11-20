@@ -850,6 +850,7 @@ async def _record_option_changes(
     source: str,
     *,
     before: dict[str, Any] | None = None,
+    restores_cycles: bool = False,
 ) -> None:
     """Record an option write in the settings changelog (#442).
 
@@ -870,6 +871,12 @@ async def _record_option_changes(
     options now are the old values (a caller that has not written yet). Never
     raises: a changelog failure must not cost the write it is describing (same
     contract as the inline version).
+
+    ``restores_cycles``: the write puts back the options the stored cycles ran
+    under (Undo Import: the restored store holds only cycles from before the
+    import). A Stop row then records the restored Stop as the one in force
+    before it, not the imported one no stored cycle ended under, and no row is
+    added for a Stop another setting moved back (PR #529 review).
     """
     if not updates:
         return
@@ -893,7 +900,10 @@ async def _record_option_changes(
                 **old_effective,
                 **{k: data.get(k) if v is None else v for k, v in updates.items()},
             }
-        _note_stop_in_force(changes, old_effective, new_effective)
+        if restores_cycles:
+            _note_stop_in_force(changes, new_effective)
+        else:
+            _note_stop_in_force(changes, old_effective, new_effective)
         manager = _get_manager(hass, entry.entry_id)
         store = getattr(manager, "profile_store", None) if manager else None
         if store is not None:
@@ -5036,7 +5046,9 @@ async def _async_restore_entry_options(
         changed = {k: new.get(k) for k in sorted(old.keys() | new.keys()) if old.get(k) != new.get(k)}
         before = _options_before(entry)
         hass.config_entries.async_update_entry(entry, options=restored)
-        await _record_option_changes(hass, entry, changed, "undo_import", before=before)
+        await _record_option_changes(
+            hass, entry, changed, "undo_import", before=before, restores_cycles=True
+        )
 
 
 @websocket_api.websocket_command(
