@@ -4,6 +4,9 @@
   gate, so Apply accepted it; live, the first quiet reading in ENDING completes
   the cycle, splitting it at any pause that gets there. An off_delay of 0 is a
   one-reading energy window, which nothing holds.
+* The kept standby tail stopped at a synthetic reading at working power, so a
+  real 3 W tail behind a 20 W keepalive was cut and the 6 W after it read as the
+  idle level: two such cycles raised "still drawing" at a 5 W stop.
 """
 from __future__ import annotations
 
@@ -20,8 +23,10 @@ from custom_components.ha_washdata.const import (
 from custom_components.ha_washdata.cycle_detector import CycleDetector
 from custom_components.ha_washdata.detector_config import build_detector_config
 from custom_components.ha_washdata.suggestion_engine import (
+    detect_standby_above_stop,
     end_gate_would_split,
 )
+from custom_components.ha_washdata.time_utils import SYNTHETIC_OFFSETS_KEY
 
 T0 = datetime(2026, 1, 1, tzinfo=timezone.utc)
 
@@ -93,3 +98,31 @@ def test_a_zero_wait_without_a_pause_splits_nothing() -> None:
     pts = _paused_trace(1.0, 0)
     assert len(_replay({**_ZERO_OPTS, CONF_OFF_DELAY: 0, CONF_MIN_OFF_GAP: 0}, pts, "washing_machine")) == 1
     assert not end_gate_would_split(pts, 2.0, 0, 0, 0.05)
+
+
+# ── A synthetic reading does not cut the kept tail ───────────────────────────
+
+
+def _stopped_by_hand(cid: str) -> dict[str, Any]:
+    """200 W for 10 min, 30 min at 3 W, a 20 W keepalive WashData wrote, then
+    two minutes at 6 W until the user stopped it."""
+    rows = [[float(t), 200.0] for t in range(0, 600, 10)]
+    rows += [[float(t), 3.0] for t in range(600, 2400, 10)]
+    rows.append([2400.0, 20.0])
+    rows += [[float(t), 6.0] for t in range(2410, 2530, 10)]
+    return {
+        "id": cid, "status": "interrupted", "termination_reason": "user",
+        "power_data": rows, SYNTHETIC_OFFSETS_KEY: [2400.0],
+    }
+
+
+def test_a_synthetic_reading_does_not_cut_the_standby_tail() -> None:
+    """At a 5 W stop the tail settled at 3 W, below it; cut at the keepalive it
+    read 6 W, and two such cycles raised the advisory."""
+    cycles = [_stopped_by_hand("a"), _stopped_by_hand("b")]
+    assert detect_standby_above_stop(cycles, 5.0) is None
+    # A real 20 W reading still ends the tail: the 6 W after it is the evidence.
+    for cycle in cycles:
+        cycle[SYNTHETIC_OFFSETS_KEY] = []
+    found = detect_standby_above_stop(cycles, 5.0)
+    assert found is not None and found["idle_w"] == 6.0

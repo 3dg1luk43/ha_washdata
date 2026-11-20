@@ -1074,7 +1074,9 @@ def _kept_tail(
     rows: list[Any], work_w: float, synthetic: set[int]
 ) -> list[tuple[float, float]] | None:
     """The readings after the last one at or above ``work_w``, oldest first, rows
-    in ``synthetic`` left out. None at a row whose offset is not a number."""
+    in ``synthetic`` left out: one is not the last working reading either (review
+    of PR #529: a 20 W keepalive cut a 3 W tail). None at a row whose offset is
+    not a number."""
     tail: list[tuple[float, float]] = []
     for pt in reversed(rows):
         if not isinstance(pt, (list, tuple)) or len(pt) < 2:
@@ -1083,10 +1085,11 @@ def _kept_tail(
             offset, watts = float(pt[0]), float(pt[1])
         except (TypeError, ValueError, OverflowError):
             return None
+        if offset_key(offset) in synthetic:
+            continue
         if watts >= work_w:
             break
-        if offset_key(offset) not in synthetic:
-            tail.append((offset, watts))
+        tail.append((offset, watts))
     tail.reverse()
     return tail
 
