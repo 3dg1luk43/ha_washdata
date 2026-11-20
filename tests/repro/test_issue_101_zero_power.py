@@ -33,8 +33,8 @@ def manager(mock_hass):
     entry.options = {
         "power_sensor": "sensor.power",
         "min_power": 10.0,
-        # A dryer throttles at its device default, 30 s (sampling_interval is not a
-        # setting since 0.5.9).
+        # A dryer throttles at its device default, 2 s since 0.6.1 (sampling_interval
+        # is not a setting since 0.5.9).
         "device_type": "dryer",
     }
     entry.data = {}
@@ -58,19 +58,19 @@ async def test_zero_power_not_throttled(manager, mock_hass):
     
     assert manager._current_power == 100.0
     
-    # 2. Second reading: 50W (above min_power, within 30s) -> SHOULD BE THROTTLED
+    # 2. Second reading: 50W (above min_power, within 2s) -> SHOULD BE THROTTLED
     event2 = MagicMock()
     event2.data = {"new_state": MagicMock(state="50.0")}
-    with patch("homeassistant.util.dt.now", return_value=now + timedelta(seconds=10)):
+    with patch("homeassistant.util.dt.now", return_value=now + timedelta(seconds=1)):
         manager._async_power_changed(event2)
     
     # Should still be 100W because 50W was throttled
     assert manager._current_power == 100.0
     
-    # 3. Third reading: 0.0W (within 30s of last_time) -> SHOULD NOT BE THROTTLED
+    # 3. Third reading: 0.0W (within 2s of last_time) -> SHOULD NOT BE THROTTLED
     event3 = MagicMock()
     event3.data = {"new_state": MagicMock(state="0.0")}
-    with patch("homeassistant.util.dt.now", return_value=now + timedelta(seconds=20)):
+    with patch("homeassistant.util.dt.now", return_value=now + timedelta(seconds=1.5)):
         manager._async_power_changed(event3)
     
     # Should be 0.0W now because it's a critical low power update

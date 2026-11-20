@@ -92,8 +92,9 @@ async def test_one_pass_path_heals_the_seeded_dryer_cadence(
     hass: HomeAssistant, minor: int
 ) -> None:
     entry = await _migrate(hass, _seeded("dryer", minor))
-    assert entry.options[CONF_WATCHDOG_INTERVAL] == 61
-    assert entry.options[CONF_START_DURATION_THRESHOLD] == 30
+    # The dryer's own defaults: 30 / 5 since it samples at 2 s (0.6.1; 61 / 30 before).
+    assert entry.options[CONF_WATCHDOG_INTERVAL] == 30
+    assert entry.options[CONF_START_DURATION_THRESHOLD] == 5
 
 
 @pytest.mark.asyncio

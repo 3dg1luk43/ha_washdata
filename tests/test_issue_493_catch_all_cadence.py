@@ -32,16 +32,15 @@ from custom_components.ha_washdata.const import (
 )
 
 
-def test_catch_all_types_sample_every_5_s() -> None:
+def test_catch_all_types_sample_every_2_s() -> None:
+    # 5 s since #493; 2 s on every type since 0.6.1. The debounce stays 5 s.
     for device_type in ("other", "generic"):
-        assert resolve_sampling_interval_default(device_type) == 5.0
+        assert resolve_sampling_interval_default(device_type) == 2.0
         assert resolve_start_duration_default(device_type) == 5.0
-    # Unchanged: dryers' anti-crease handling was tuned at 30 s.
-    assert resolve_sampling_interval_default("dryer") == 30.0
 
 
-async def test_threshold_device_throttles_at_5_s(
+async def test_threshold_device_throttles_at_2_s(
     hass: HomeAssistant, setup_washdata_entry
 ) -> None:
     entry = await setup_washdata_entry(title="Coffee", device_type="other")
-    assert hass.data[DOMAIN][entry.entry_id]._sampling_interval == 5.0
+    assert hass.data[DOMAIN][entry.entry_id]._sampling_interval == 2.0

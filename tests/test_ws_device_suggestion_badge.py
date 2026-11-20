@@ -113,11 +113,11 @@ def test_option_defaults_reported_per_device_type():
     assert od["watchdog_interval"] == 30
     assert od["start_duration_threshold"] == 5.0
     assert od["smart_termination_duration_ratio"] == 0.98
-    # A coarse-sampling type resolves to the higher watchdog/start defaults.
-    coarse = _call_get_devices({}, {"device_type": "dryer"})["option_defaults"]
-    assert coarse["sampling_interval"] == 30.0
-    assert coarse["watchdog_interval"] == 61
-    assert coarse["start_duration_threshold"] == 30.0
+    # A dryer samples at 2 s too since 0.6.1 (it was the coarse 30 / 61 / 30 type).
+    dryer = _call_get_devices({}, {"device_type": "dryer"})["option_defaults"]
+    assert dryer["sampling_interval"] == 2.0
+    assert dryer["watchdog_interval"] == 30
+    assert dryer["start_duration_threshold"] == 5.0
 
 
 def test_option_defaults_carry_the_effective_end_wait_pair():

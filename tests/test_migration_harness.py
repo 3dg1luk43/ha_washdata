@@ -528,9 +528,10 @@ def _apply_opts_ver(e: DummyEntry, **kwargs: Any) -> None:
 async def test_migrate_3_9_to_3_10_heals_seeded_cadence_on_coarse_device(
     hass: HomeAssistant,
 ) -> None:
-    """3.9 -> 3.10 (#396): a coarse-sampling device (dryer) whose seeded
-    watchdog=30 / start_duration=5 violate the panel's own conflict rules gets the
-    device-resolved defaults (61 / 30) instead."""
+    """3.9 -> 3.10 (#396): a coarse-sampling device whose seeded watchdog=30 /
+    start_duration=5 violated the panel's own conflict rules got the device-resolved
+    defaults. Since 0.6.1 a dryer samples at 2 s too, so its resolved defaults are
+    30 / 5 and the seeded values are kept."""
     entry = DummyEntry(
         version=3, minor_version=9, data={},
         options={
@@ -543,8 +544,8 @@ async def test_migrate_3_9_to_3_10_heals_seeded_cadence_on_coarse_device(
 
     assert await async_migrate_entry(hass, entry) is True
     assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
-    assert entry.options[CONF_WATCHDOG_INTERVAL] == 61
-    assert entry.options[CONF_START_DURATION_THRESHOLD] == 30
+    assert entry.options[CONF_WATCHDOG_INTERVAL] == 30
+    assert entry.options[CONF_START_DURATION_THRESHOLD] == 5
 
 
 @pytest.mark.asyncio
@@ -664,8 +665,9 @@ async def test_migrate_3_9_to_3_10_only_heals_values_invalid_for_the_device(
     assert await async_migrate_entry(hass, coarse) is True
     assert await async_migrate_entry(hass, fast) is True
 
+    # Since 0.6.1 the dryer samples at 2 s as well: 30/5 clear its gates too.
     assert (coarse.options[CONF_WATCHDOG_INTERVAL],
-            coarse.options[CONF_START_DURATION_THRESHOLD]) == (61, 30)
+            coarse.options[CONF_START_DURATION_THRESHOLD]) == (30, 5)
     assert (fast.options[CONF_WATCHDOG_INTERVAL],
             fast.options[CONF_START_DURATION_THRESHOLD]) == (30, 5)
 
@@ -898,7 +900,7 @@ async def test_migrate_3_12_to_3_13_heals_a_raised_min_ratio(hass: HomeAssistant
     hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
 
     assert await async_migrate_entry(hass, entry) is True
-    assert entry.minor_version == 14 == CONFIG_ENTRY_MINOR_VERSION  # the 3.13 -> 3.14 step follows
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION  # the later steps follow
     assert entry.options == {
         CONF_OFF_DELAY: 120,
         CONF_PROFILE_MATCH_MIN_DURATION_RATIO: DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
@@ -923,7 +925,7 @@ async def test_migrate_3_12_to_3_13_leaves_a_dishwasher_floor(hass: HomeAssistan
             entry.data = {CONF_DEVICE_TYPE: "dishwasher"}
         hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
         assert await async_migrate_entry(hass, entry) is True
-        assert entry.minor_version == 14
+        assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
         assert entry.options[CONF_PROFILE_MATCH_MIN_DURATION_RATIO] == 0.63
 
 
@@ -945,7 +947,7 @@ async def test_migrate_3_12_to_3_13_keeps_a_lower_floor_and_absent_keys(
     hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
     assert await async_migrate_entry(hass, entry) is True
     assert entry.options == {CONF_OFF_DELAY: 120}
-    assert entry.minor_version == 14
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
 
 
 @pytest.mark.asyncio
@@ -1046,7 +1048,7 @@ async def test_migrate_3_13_to_3_14_lowers_a_washer_s_seeded_completion_floor(
     entry = _ratio_entry(13, **opts)
     hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
     assert await async_migrate_entry(hass, entry) is True
-    assert entry.minor_version == 14 == CONFIG_ENTRY_MINOR_VERSION
+    assert entry.minor_version == CONFIG_ENTRY_MINOR_VERSION
     assert entry.options[CONF_COMPLETION_MIN_SECONDS] == expected
     # Idempotent: a second pass changes nothing.
     assert await async_migrate_entry(hass, entry) is True
@@ -1063,3 +1065,51 @@ async def test_the_legacy_one_pass_migration_lowers_the_seeded_washer_floor_too(
     assert _lower_seeded_washer_completion(opts) == ["completion_min_seconds"]
     assert opts["completion_min_seconds"] == 300
     assert _lower_seeded_washer_completion(opts) == []
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("device_type", "stored", "expected"),
+    [
+        # The values the old coarse sampling derived (the 3.9 -> 3.10 heal stored them).
+        ("dryer", {CONF_START_DURATION_THRESHOLD: 30, CONF_WATCHDOG_INTERVAL: 61},
+         {CONF_START_DURATION_THRESHOLD: 5.0, CONF_WATCHDOG_INTERVAL: 30}),
+        ("pump", {CONF_START_DURATION_THRESHOLD: 10, CONF_WATCHDOG_INTERVAL: 30},
+         {CONF_START_DURATION_THRESHOLD: 5.0, CONF_WATCHDOG_INTERVAL: 30}),
+        # Anything else was set by hand and stays.
+        ("dryer", {CONF_START_DURATION_THRESHOLD: 45, CONF_WATCHDOG_INTERVAL: 90},
+         {CONF_START_DURATION_THRESHOLD: 45, CONF_WATCHDOG_INTERVAL: 90}),
+        # Not a coarse type before 0.6.1: a 30 s debounce there is a choice.
+        ("washing_machine", {CONF_START_DURATION_THRESHOLD: 30, CONF_WATCHDOG_INTERVAL: 61},
+         {CONF_START_DURATION_THRESHOLD: 30, CONF_WATCHDOG_INTERVAL: 61}),
+        ("dryer", {}, {}),
+    ],
+)
+async def test_migrate_3_14_to_3_15_lowers_the_coarse_cadence_of_a_dryer_or_pump(
+    hass: HomeAssistant, device_type: str, stored: dict, expected: dict
+) -> None:
+    """0.6.1: every type samples at 2 s, so the start debounce (30 s dryer, 10 s
+    pump) and the dryer's 61 s watchdog the old coarse sampling derived move to the
+    2 s defaults; only those exact stored values."""
+    entry = DummyEntry(
+        version=3, minor_version=14, data={},
+        options={CONF_DEVICE_TYPE: device_type, **stored},
+    )
+    hass.config_entries.async_update_entry = MagicMock(side_effect=_apply_opts_ver)
+    assert await async_migrate_entry(hass, entry) is True
+    assert entry.minor_version == 15 == CONFIG_ENTRY_MINOR_VERSION
+    got = {k: entry.options.get(k) for k in (CONF_START_DURATION_THRESHOLD, CONF_WATCHDOG_INTERVAL)}
+    assert got == {k: expected.get(k) for k in got}
+    assert await async_migrate_entry(hass, entry) is True  # idempotent
+    assert {k: entry.options.get(k) for k in got} == got
+
+
+def test_the_legacy_one_pass_migration_lowers_the_coarse_cadence_too() -> None:
+    from custom_components.ha_washdata import _lower_seeded_coarse_cadence  # noqa: PLC0415
+
+    opts = {CONF_DEVICE_TYPE: "dryer", CONF_START_DURATION_THRESHOLD: 30.0, CONF_WATCHDOG_INTERVAL: 61}
+    assert sorted(_lower_seeded_coarse_cadence(opts)) == sorted(
+        [CONF_START_DURATION_THRESHOLD, CONF_WATCHDOG_INTERVAL]
+    )
+    assert (opts[CONF_START_DURATION_THRESHOLD], opts[CONF_WATCHDOG_INTERVAL]) == (5.0, 30)
+    assert _lower_seeded_coarse_cadence(opts) == []

@@ -57,6 +57,8 @@ from .const import (
     CONF_OFF_DELAY,
     CONF_DEVICE_TYPE,
     DEVICE_TYPE_DISHWASHER,
+    DEVICE_TYPE_DRYER,
+    DEVICE_TYPE_PUMP,
     DEVICE_TYPE_WASHER_DRYER,
     DEVICE_TYPE_WASHING_MACHINE,
     CONF_POWER_SENSOR,
@@ -347,6 +349,38 @@ def _lower_seeded_washer_completion(options: dict[str, Any], device_type: Any = 
     return [CONF_COMPLETION_MIN_SECONDS]
 
 
+# The start debounce and watchdog the coarse sampling derived, per device type, until
+# every type moved to 2 s sampling in 0.6.1 (the 3.9 -> 3.10 heal stored them).
+_OLD_DERIVED_CADENCE: dict[str, dict[str, float]] = {
+    DEVICE_TYPE_DRYER: {CONF_START_DURATION_THRESHOLD: 30.0, CONF_WATCHDOG_INTERVAL: 61.0},
+    DEVICE_TYPE_PUMP: {CONF_START_DURATION_THRESHOLD: 10.0},
+}
+
+
+def _lower_seeded_coarse_cadence(options: dict[str, Any], device_type: Any = None) -> list[str]:
+    """Move a dryer's or pump's stored start debounce and watchdog from the values
+    its old coarse sampling derived to the 2 s defaults, in place (0.6.1).
+
+    Not a choice the user made: the migration stored the device default, and the
+    panel would not take a start debounce under the sampling interval. Only the
+    exact old values move; anything else is kept. One helper for the 3.14 -> 3.15
+    step and the one-pass legacy path.
+    """
+    dtype = str(device_type or options.get(CONF_DEVICE_TYPE) or DEFAULT_DEVICE_TYPE)
+    moved: list[str] = []
+    for key, old in _OLD_DERIVED_CADENCE.get(dtype, {}).items():
+        current = coerce_numeric_option(options.get(key), float)
+        if current is None or current != old:
+            continue
+        options[key] = (
+            resolve_start_duration_default(dtype)
+            if key == CONF_START_DURATION_THRESHOLD
+            else resolve_watchdog_interval_default(dtype)
+        )
+        moved.append(key)
+    return moved
+
+
 def _convert_legacy_notify_service(options: dict[str, Any]) -> list[str]:
     """Convert the deprecated ``notify_service`` to per-event lists, in place (#472).
 
@@ -635,6 +669,22 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             lowered or "none",
         )
 
+    # 3.14 -> 3.15: a dryer's or pump's start debounce and watchdog from the values
+    # its old coarse sampling derived to the 2 s defaults (0.6.1).
+    if version == 3 and minor_version == 14:
+        new_opts = dict(entry.options)
+        moved = _lower_seeded_coarse_cadence(
+            new_opts, entry.options.get(CONF_DEVICE_TYPE) or entry.data.get(CONF_DEVICE_TYPE)
+        )
+        hass.config_entries.async_update_entry(
+            entry, options=new_opts, minor_version=15
+        )
+        minor_version = 15
+        _log.debug(
+            "Migrated WashData entry from 3.14 to 3.15 (coarse cadence lowered: %s)",
+            moved or "none",
+        )
+
     if version == CONFIG_ENTRY_VERSION and minor_version >= CONFIG_ENTRY_MINOR_VERSION:
         return True
 
@@ -803,6 +853,8 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     _heal_raised_min_ratio(options)
     # And the 3.13 -> 3.14 one: the `setdefault` above keeps a stored 600 s.
     _lower_seeded_washer_completion(options)
+    # And the 3.14 -> 3.15 one: a stored 30 s / 61 s dryer or 10 s pump cadence.
+    _lower_seeded_coarse_cadence(options)
 
     # 3.6: coffee_machine / ev / heat_pump / oven device types were removed.
     # Remap any entry still on one of them to DEVICE_TYPE_OTHER (Threshold Device),

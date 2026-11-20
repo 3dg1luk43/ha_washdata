@@ -1879,19 +1879,22 @@ DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 0.2,  # Pump/Heater
     DEVICE_TYPE_PUMP: 0.003,  # ~100W motor for ~0.1 s is enough to confirm a pump cycle
 }
-# Default sampling interval by device type
+# Default sampling interval by device type: the manager's reading throttle drops a
+# reading that comes sooner than this after the last one kept (low readings always
+# pass). 2 s on every type since 0.6.1 (maintainer decision 2026-11-20): it captures
+# a washer's rapid 0<->150 W motor/heater oscillation, a dryer's short anti-crease
+# pulses (#474: at 30 s the throttle hid them) and a pump's sub-30 s runs, and keeps a
+# fast plug's readings on the catch-all types (#493). The start debounce and the
+# watchdog default follow (resolve_start_duration_default: 5 s,
+# resolve_watchdog_interval_default: 30 s on every type).
 DEFAULT_SAMPLING_INTERVAL_BY_DEVICE = {
-    # 2s captures the rapid 0<->150W motor/heater oscillation in wet appliances;
-    # the 30s global default discards those spikes and undersamples the cycle.
     DEVICE_TYPE_WASHING_MACHINE: 2.0,
     DEVICE_TYPE_WASHER_DRYER: 2.0,
     DEVICE_TYPE_DISHWASHER: 2.0,
-    DEVICE_TYPE_PUMP: 10.0,  # 10s - pump cycles can be <30 s; 30s default would miss them
-    # The catch-all types run anything from a 60 s coffee to a 3 h oven, so they must
-    # not drop a 3 s plug's readings for 30 s at a time (#493: 5 s gaps between short
-    # runs were invisible). The start debounce follows (resolve_start_duration_default).
-    DEVICE_TYPE_GENERIC: 5.0,
-    DEVICE_TYPE_OTHER: 5.0,
+    DEVICE_TYPE_DRYER: 2.0,
+    DEVICE_TYPE_PUMP: 2.0,
+    DEVICE_TYPE_GENERIC: 2.0,
+    DEVICE_TYPE_OTHER: 2.0,
 }
 
 
@@ -1970,9 +1973,9 @@ def resolve_sampling_interval_default(device_type: str) -> float:
     """Device-resolved default sampling interval (#396).
 
     Single source of truth for the sampling default, so the manager, the panel
-    (via ws_get_options) and the config migration all agree. Wet appliances
-    sample fast (2 s) to capture the rapid 0<->150 W oscillation; everything else
-    keeps the coarse 30 s scalar.
+    (via ws_get_options) and the config migration all agree. Every device type
+    samples at 2 s since 0.6.1; the 30 s scalar is only a fallback for an unknown
+    type.
     """
     return DEFAULT_SAMPLING_INTERVAL_BY_DEVICE.get(device_type, DEFAULT_SAMPLING_INTERVAL)
 
@@ -1982,10 +1985,10 @@ def resolve_watchdog_interval_default(device_type: str) -> int:
 
     The panel enforces watchdog_interval >= 2*sampling_interval (a publish-on-change
     sensor can skip a sample, so the staleness tick must be coarser than the
-    sampling gap). Derived as max(DEFAULT_WATCHDOG_INTERVAL, 2*sampling+1): 30 for
-    the fast/pump types (30 already clears 2*2 / 2*10), 61 for the 30 s-sampling
-    types. Never smaller than the 30 s floor so a fast-sampling device does not get
-    an over-aggressive watchdog.
+    sampling gap). Derived as max(DEFAULT_WATCHDOG_INTERVAL, 2*sampling+1): 30 on
+    every type at 2 s sampling (a dryer's 61 until 0.6.1, when it sampled at 30 s).
+    Never smaller than the 30 s floor so a fast-sampling device does not get an
+    over-aggressive watchdog.
     """
     sampling = resolve_sampling_interval_default(device_type)
     return int(max(DEFAULT_WATCHDOG_INTERVAL, 2.0 * sampling + 1.0))
@@ -2032,8 +2035,9 @@ def resolve_start_duration_default(device_type: str) -> float:
 
     The panel enforces start_duration_threshold >= sampling_interval (a debounce
     shorter than one sample lets a single spike open a cycle). Derived as
-    max(DEFAULT_START_DURATION_THRESHOLD, sampling): 5 s for the fast types, the
-    sampling interval for the coarser ones.
+    max(DEFAULT_START_DURATION_THRESHOLD, sampling): 5 s on every type at 2 s
+    sampling (until 0.6.1 a dryer's 30 s and a pump's 10 s followed their coarser
+    sampling).
     """
     sampling = resolve_sampling_interval_default(device_type)
     return max(DEFAULT_START_DURATION_THRESHOLD, sampling)
@@ -2238,7 +2242,7 @@ FAILED_RESTORE_STORE_SUFFIX = "failed_restore"
 # leaves an entry a version short, which then re-migrates on every start - and repeating
 # the literals in three places is what made that easy to do.
 CONFIG_ENTRY_VERSION = 3
-CONFIG_ENTRY_MINOR_VERSION = 14
+CONFIG_ENTRY_MINOR_VERSION = 15
 
 # Notification events
 EVENT_CYCLE_STARTED = "ha_washdata_cycle_started"
