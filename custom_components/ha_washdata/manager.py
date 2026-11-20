@@ -1844,6 +1844,13 @@ class WashDataManager:
                 return
             if not self._matched_profile_duration:
                 return
+            # Deferred while a user pause is open (PR #529 review): the trace spans
+            # it until the resume banks it, so the matcher's Stage 1 read the pause
+            # as programme time and could reject a right pick past its upper bound,
+            # which then reads at the fifth score. No check counts in the pause, the
+            # run is kept, and the resume's first reading is past due.
+            if self._is_user_paused:
+                return
             task = self._program_mismatch_task
             if task is not None and not task.done():
                 return
