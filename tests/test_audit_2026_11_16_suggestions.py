@@ -1903,3 +1903,25 @@ def test_a_pulse_reading_can_be_the_flat_standby_window_s_boundary() -> None:
     points += [(2400.0 + t, 0.5) for t in range(0, 600, 5)]
     args = (points, 4.0, 180.0, 360.0, 0.05)
     assert end_gate_would_split(*args, device_type="dryer", pulse_max_w=400.0)
+
+
+def test_a_low_power_resume_keeps_its_pause_in_the_standby_floor_check() -> None:
+    """Review of PR #529: hand-stopped washer runs, a 2 kW heater, a 400 s pause at
+    3.4 W, a sustained 20 W resume, then the 3.4 W standby. Cut at 10% of the peak
+    (200 W) the resume and the pause before it were dropped, so a 4.25 W floor read
+    safe; a 4.25 W Stop then ends the run inside that pause. Cut at the floor, the
+    pause is evidence and the floor is not safe."""
+    from custom_components.ha_washdata.suggestion_engine import standby_stop_floor  # noqa: PLC0415
+
+    def stopped(i: int) -> dict[str, Any]:
+        pts = [[float(t), 2000.0] for t in range(0, 1200, 10)]
+        pts += [[float(t), 3.4] for t in range(1200, 1600, 10)]
+        pts += [[float(t), 20.0] for t in range(1600, 2400, 10)]
+        pts += [[float(t), 3.4] for t in range(2400, 3600, 10)]
+        return {"id": f"w{i}", "status": "completed", "termination_reason": "user",
+                "power_data": pts, "signature": {"max_power": 2000.0}}
+
+    floor = standby_stop_floor([stopped(i) for i in range(6)], 2.5, 180.0)
+    assert floor is not None and floor["floor_w"] == 4.25
+    assert floor["longest_pause_s"] >= 390.0
+    assert floor["safe"] is False

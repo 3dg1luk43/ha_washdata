@@ -1487,9 +1487,16 @@ def standby_stop_floor(
             ):
                 continue
             points = _cycle_readings(cycle)
-            peak = max((p for _t, p in points), default=0.0)
+            synthetic = synthetic_offset_keys(cycle) or set()
+            # Up to the last real reading at or above the proposed floor, not a
+            # share of the peak: a 20 W resume after a 3.4 W pause on a 2 kW washer
+            # was cut off with the pause it ends, so the pause the floor would end
+            # inside never reached the check (review of PR #529).
             last_work = max(
-                (i for i, (_t, p) in enumerate(points) if p >= _STANDBY_PEAK_FRACTION * peak),
+                (
+                    i for i, (o, p) in enumerate(points)
+                    if p >= floor and offset_key(o) not in synthetic
+                ),
                 default=-1,
             )
             evidence.append(points[: last_work + 1])
