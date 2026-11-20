@@ -36,7 +36,7 @@ profile's learned length after it.
 
 Exit codes: 0, 2 bad input (no curve file, a malformed or non-finite value, a
 time past a week, no reading at or above the Stop Threshold, a ``--cut-min`` that
-does not cut).
+does not cut, a negative ``--seed``/``--cut``/``--cycles``).
 """
 from __future__ import annotations
 
@@ -210,15 +210,27 @@ def run(curve: list[tuple[float, float]], *, seed: int = 30, cycles: int = 60,
     }
 
 
+def _count(raw: str) -> int:
+    """A run count for argparse: a whole number, zero or more (a negative one ran
+    nothing and reported success)."""
+    try:
+        value = int(raw)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"{raw!r} is not a whole number") from None
+    if value < 0:
+        raise argparse.ArgumentTypeError(f"{raw} is negative")
+    return value
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
     ap.add_argument("--curve", default=str(DEFAULT_CURVE), help="minutes_since_start,power_w CSV")
-    ap.add_argument("--seed", type=int, default=30, help="full runs stored before the loop")
-    ap.add_argument("--cycles", type=int, default=60, help="runs replayed in the loop")
+    ap.add_argument("--seed", type=_count, default=30, help="full runs stored before the loop")
+    ap.add_argument("--cycles", type=_count, default=60, help="runs replayed in the loop")
     ap.add_argument("--stop", type=float, default=4.5)
     ap.add_argument("--start", type=float, default=5.0)
     ap.add_argument("--hold", type=float, default=40.0, help="minutes of standby after the curve")
-    ap.add_argument("--cut", type=int, default=0, help="runs stored cut short after the full ones")
+    ap.add_argument("--cut", type=_count, default=0, help="runs stored cut short after the full ones")
     ap.add_argument("--cut-min", type=float, default=131.0, help="where those were cut, minutes")
     ap.add_argument("--json")
     a = ap.parse_args(argv)

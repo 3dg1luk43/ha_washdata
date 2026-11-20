@@ -106,3 +106,19 @@ def test_a_time_no_replay_can_stamp_is_bad_input(tmp_path: Path, capsys, minutes
     assert ratchet.main(["--curve", str(bad), "--seed", "1", "--cycles", "1"]) == 2
     err = capsys.readouterr().err
     assert f"{bad}:4" in err and "minutes_since_start" in err
+
+
+@pytest.mark.parametrize("flag", ["--cycles", "--seed", "--cut"])
+def test_a_negative_run_count_is_bad_input(tmp_path: Path, capsys, flag: str) -> None:
+    """PR #529 review: ``--cycles -1`` (or a negative seed or cut) ran nothing and
+    reported success; refused by the parser (exit 2) before the curve is read."""
+    with pytest.raises(SystemExit) as stop:
+        ratchet.main(["--curve", str(tmp_path / "none.csv"), flag, "-1"])
+    assert stop.value.code == 2
+    assert flag in capsys.readouterr().err
+
+
+def test_zero_runs_stay_allowed(tmp_path: Path) -> None:
+    curve = tmp_path / "c.csv"
+    curve.write_text("minutes_since_start,power_w\n0,30\n1,1900\n2,6.3\n3,0\n")
+    assert ratchet.main(["--curve", str(curve), "--seed", "0", "--cut", "0", "--cycles", "0"]) == 0
