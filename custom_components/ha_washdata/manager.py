@@ -4360,15 +4360,20 @@ class WashDataManager:
         snapshot-restoration path (where ``_on_state_change`` is not invoked).
         Matches the state set accepted by ``_handle_door_sensor_change`` so that
         restoring a RUNNING snapshot with the door already open re-arms the dwell.
+
+        The contact is read first: an open door hands the detector a program
+        picked by hand that it has not taken yet, as an ordinary open does, and is
+        then judged by the pick's length (PR #529 review). Otherwise a restored
+        PAUSED run whose pick the detector took later, without leaving PAUSED,
+        never armed the dwell.
         """
-        if not (
-            self._door_end_may_fire()
-            and self._door_sensor_entity
-            and self._remove_door_end_dwell is None
-        ):
+        if not self._door_sensor_entity or self._remove_door_end_dwell is not None:
             return
         door_state = self.hass.states.get(self._door_sensor_entity)
-        if door_state and door_state.state == "on":
+        if not (door_state and door_state.state == "on"):
+            return
+        self._hand_pick_over_for_door()
+        if self._door_end_may_fire():
             self._logger.debug(
                 "Door already open while active: arming %ss end dwell",
                 self._door_end_dwell_seconds,
