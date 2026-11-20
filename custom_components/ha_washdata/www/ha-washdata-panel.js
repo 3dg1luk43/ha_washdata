@@ -5991,6 +5991,10 @@ class HaWashdataPanel extends HTMLElement {
   _htmlPhaseTimeline(dev, prog, isRunning) {
     const phases = this._statusPhases || [];
     if (!isRunning || !phases.length || !dev.current_program) return '';
+    // Only this appliance and program's own ranges (PR #529 review): a switch to
+    // Eco claims the slot only after its envelope read, so the answer to a Cotton
+    // read still out could land first, and a render then drew Cotton under Eco.
+    if (this._statusPhasesEid !== dev.entry_id || this._statusPhasesName !== dev.current_program) return '';
     // Same span as the live phase sensor (progress.phase_timeline_span): progress maps
     // onto the matched program's expected length (expected_duration_s), or the last
     // range end when the ranges run longer, so a range reads at its real minutes

@@ -65,6 +65,56 @@ test("another appliance on the same program never shows the last one's phases", 
   await expect(page.locator('.wd-ptl-cur')).toContainText('B wash', { timeout: 8_000 });
 });
 
+test("a program switch never draws the last program's phases while its own envelope loads", async ({ page }) => {
+  await bootPanel(page, {
+    'ha_washdata/get_devices': running('entry-a', 'Washer A', 'Mix'),
+    'ha_washdata/get_profile_phases': phasesOf('Mix'),
+  });
+  await expect(page.locator('.wd-ptl-cur')).toContainText('Mix wash', { timeout: 8_000 });
+
+  // The program moves to Cotton; Cotton's phase read is held back.
+  await page.evaluate(({ devs, phases }) => {
+    const w: any = window;
+    w.__ws_handlers['ha_washdata/get_devices'] = devs;
+    w.__ws_handlers['ha_washdata/get_profile_phases'] = () =>
+      new Promise((resolve) => { w.__releaseCotton = () => resolve(phases); });
+    w.__cottonPoll = (document.querySelector('ha-washdata-panel') as any)._fetchAll();
+  }, { devs: running('entry-a', 'Washer A', 'Cotton'), phases: phasesOf('Cotton') });
+  await expect.poll(() => page.evaluate(() => (window as any).__get_calls('ha_washdata/get_profile_phases')
+    .some((m: any) => m.profile_name === 'Cotton'))).toBe(true);
+
+  // Then to Eco on the same appliance: its refresh waits on Eco's envelope before
+  // it claims the phase slot, and Cotton's phases land in that wait.
+  await page.evaluate(({ devs, phases }) => {
+    const w: any = window;
+    w.__ws_handlers['ha_washdata/get_devices'] = devs;
+    w.__ws_handlers['ha_washdata/get_profile_phases'] = phases;
+    w.__ws_handlers['ha_washdata/get_profile_envelope'] = () =>
+      new Promise((resolve) => { w.__releaseEnvelope = () => resolve({ envelope: null }); });
+    w.__ecoPoll = (document.querySelector('ha-washdata-panel') as any)._fetchAll();
+  }, { devs: running('entry-a', 'Washer A', 'Eco'), phases: phasesOf('Eco') });
+  await expect.poll(() => page.evaluate(() => (window as any).__get_calls('ha_washdata/get_profile_envelope')
+    .some((m: any) => m.profile_name === 'Eco'))).toBe(true);
+  await page.evaluate(async () => {
+    const w: any = window;
+    w.__releaseCotton();
+    await w.__cottonPoll;
+    (document.querySelector('ha-washdata-panel') as any)._render();
+  });
+  expect(await page.evaluate(() => (document.querySelector('ha-washdata-panel') as any)._statusPhasesName))
+    .toBe('Cotton');
+  await expect(page.locator('.wd-ptl')).toHaveCount(0);
+
+  // Eco's refresh claims the slot and draws Eco's own ranges.
+  await page.evaluate(async () => {
+    const w: any = window;
+    w.__releaseEnvelope();
+    await w.__ecoPoll;
+  });
+  await poll(page);
+  await expect(page.locator('.wd-ptl-cur')).toContainText('Eco wash', { timeout: 8_000 });
+});
+
 test('a failed phase read is asked again on the next refresh', async ({ page }) => {
   await bootPanel(page, {
     'ha_washdata/get_devices': running('entry-a', 'Washer A', 'Eco'),
