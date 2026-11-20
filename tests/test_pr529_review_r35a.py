@@ -9,6 +9,8 @@
   trigger could fire naming the deleted profile.
 * A door-end dwell expiring while the unload awaited its tasks ended the cycle,
   whose history write is skipped during shutdown: the cycle was lost.
+* A settings change merged into another device and merged back carried the
+  import mark, so the history merge kept it next to the local original.
 """
 from __future__ import annotations
 
@@ -299,3 +301,44 @@ async def test_a_dwell_expiring_during_the_unload_wait_keeps_the_cycle(
     assert ends == []
     assert manager.detector.state in (STATE_PAUSED, STATE_ENDING)
     assert manager.profile_store.get_active_cycle() is not None
+
+
+# ── A settings change merged back from another device is not shown twice ────
+
+
+async def test_a_change_merged_back_from_another_device_is_kept_once(
+    hass: Any, setup_washdata_entry: Any
+) -> None:
+    """A's settings history merged into B, B exported and merged back into A: the
+    returning row is A's own change marked imported, and was appended next to the
+    original. The local row stays, unmarked; a change A never made still arrives."""
+    from custom_components.ha_washdata.const import (  # noqa: PLC0415
+        DOMAIN,
+        SETTINGS_CHANGELOG_IMPORTED_KEY,
+    )
+
+    entry = await setup_washdata_entry()
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    own = {"key": "stop_threshold_w", "old": 2.0, "new": 5.0,
+           "timestamp": "2026-11-01T10:00:00+00:00"}
+    other = {"key": "off_delay", "old": 180, "new": 300,
+             "timestamp": "2026-11-02T10:00:00+00:00"}
+    store._data["settings_changelog"] = [dict(own)]  # noqa: SLF001
+    payload = {
+        "version": 19,
+        "entry_id": "device-b",
+        "device_fingerprint": {"device_type": "washing_machine"},
+        "data": {"settings_changelog": [
+            {**own, SETTINGS_CHANGELOG_IMPORTED_KEY: True}, dict(other),
+        ]},
+        "entry_data": {},
+        "entry_options": {},
+    }
+    await store.async_import_data_selective(
+        payload, selection={"categories": ["history_logs"]},
+        local_device_type="washing_machine",
+    )
+    log = store.get_settings_changelog()
+    assert [row["key"] for row in log] == ["stop_threshold_w", "off_delay"]
+    assert SETTINGS_CHANGELOG_IMPORTED_KEY not in log[0]
+    assert log[1][SETTINGS_CHANGELOG_IMPORTED_KEY] is True

@@ -2717,17 +2717,27 @@ def _pins_golden_template(cycles: list[Any]) -> bool:
     )
 
 
-def _merge_list_dedup(base: list[Any], incoming: list[Any]) -> None:
+def _merge_list_dedup(
+    base: list[Any], incoming: list[Any], ignore_keys: tuple[str, ...] = ()
+) -> None:
     """Append items from ``incoming`` to ``base`` in place, skipping duplicates.
 
     Dedupes by ``id`` when items carry one, else by a stable JSON signature so
     re-importing the same log file is idempotent for id-less list entries.
+    ``ignore_keys`` are left out of that signature: marks an import adds (a
+    settings change merged back from another device is the local one, review of
+    PR #529); the item already in ``base`` is kept.
     """
+    def _signature(item: Any) -> str:
+        if ignore_keys and isinstance(item, dict):
+            item = {k: v for k, v in item.items() if k not in ignore_keys}
+        return json.dumps(item, sort_keys=True, default=str)
+
     seen_ids = {str(x.get("id")) for x in base if isinstance(x, dict) and x.get("id") is not None}
     seen_sigs: set[str] = set()
     for x in base:
         try:
-            seen_sigs.add(json.dumps(x, sort_keys=True, default=str))
+            seen_sigs.add(_signature(x))
         except (TypeError, ValueError, OverflowError):
             pass
     for item in incoming:
@@ -2739,7 +2749,7 @@ def _merge_list_dedup(base: list[Any], incoming: list[Any]) -> None:
             base.append(item)
             continue
         try:
-            sig = json.dumps(item, sort_keys=True, default=str)
+            sig = _signature(item)
         except (TypeError, ValueError, OverflowError):
             sig = None
         if sig is not None:
@@ -13424,7 +13434,12 @@ class ProfileStore:
                     self._data[key] = base
                 elif isinstance(src_val, list):
                     base = cur if isinstance(cur, list) else []
-                    _merge_list_dedup(base, src_val)
+                    _merge_list_dedup(
+                        base, src_val,
+                        # A change merged into another device and back is the
+                        # local one: kept once, unmarked (review of PR #529).
+                        (SETTINGS_CHANGELOG_IMPORTED_KEY,) if key == "settings_changelog" else (),
+                    )
                     self._data[key] = base
                 elif cur is None:
                     self._data[key] = src_val  # scalar: fill only when absent locally
