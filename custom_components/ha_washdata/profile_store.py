@@ -12805,7 +12805,9 @@ class ProfileStore:
         ``on_replace`` is called once the payload has replaced the data in memory,
         before the first await after it, as Undo Import's: state derived from the
         replaced history goes with it, and a refused import keeps it (PR #529
-        review). Never raises from it.
+        review). Only when the payload replaces ``past_cycles`` or the cadence
+        pair: one that keeps both replaced nothing that state describes. Never
+        raises from it.
         """
         data_dict, meta = unwrap_import_payload(payload)
         self._logger.info(
@@ -12853,7 +12855,12 @@ class ProfileStore:
             ]
         self._data = {**data_dict, **kept}
         self._data_generation = getattr(self, "_data_generation", 0) + 1
-        if on_replace is not None:
+        # The live cadence describes the real history and the plug's stored rows:
+        # an import that keeps both (profiles only) keeps the running cycle's
+        # intervals and queued summaries (PR #529 review).
+        if on_replace is not None and (
+            "past_cycles" in supplied or _CADENCE_PAIR_KEYS <= supplied
+        ):
             try:
                 on_replace()
             except Exception:  # noqa: BLE001 - the import itself must complete
