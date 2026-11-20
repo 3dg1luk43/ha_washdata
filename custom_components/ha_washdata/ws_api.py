@@ -2371,6 +2371,12 @@ async def ws_set_options(
                     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
                 )
 
+        # The resets below (None / "") remove a stored override before the
+        # null-strip sees the key, so they are collected for the history like the
+        # drops above: a 0.75 ratio cleared to "" saved without a row and could
+        # not be reverted (PR #529 review). Nothing is collected without an override.
+        dropped_reset_keys: set[str] = set()
+
         # Smart-Termination duration ratio (#393): fraction of expected duration, so it
         # is meaningless outside [0.50, 1.00] - clamp valid submissions to the range.
         # An empty or non-numeric value drops the key so the device-type default
@@ -2380,6 +2386,8 @@ async def ws_set_options(
             _raw_str = new_options[CONF_SMART_TERMINATION_DURATION_RATIO]
             if _raw_str in (None, ""):
                 new_options.pop(CONF_SMART_TERMINATION_DURATION_RATIO, None)
+                if CONF_SMART_TERMINATION_DURATION_RATIO in entry.options:
+                    dropped_reset_keys.add(CONF_SMART_TERMINATION_DURATION_RATIO)
             else:
                 try:
                     _str = float(_raw_str)
@@ -2400,6 +2408,8 @@ async def ws_set_options(
             _raw_ac = new_options[CONF_ANTI_CREASE_FINALIZE_RATIO]
             if _raw_ac in (None, ""):
                 new_options.pop(CONF_ANTI_CREASE_FINALIZE_RATIO, None)
+                if CONF_ANTI_CREASE_FINALIZE_RATIO in entry.options:
+                    dropped_reset_keys.add(CONF_ANTI_CREASE_FINALIZE_RATIO)
             else:
                 try:
                     _ac = float(_raw_ac)
@@ -2423,6 +2433,8 @@ async def ws_set_options(
             _raw_pr = new_options[CONF_CURVE_PREROLL_SECONDS]
             if _raw_pr in (None, ""):
                 new_options.pop(CONF_CURVE_PREROLL_SECONDS, None)
+                if CONF_CURVE_PREROLL_SECONDS in entry.options:
+                    dropped_reset_keys.add(CONF_CURVE_PREROLL_SECONDS)
             else:
                 try:
                     _pr = float(_raw_pr)
@@ -2500,8 +2512,8 @@ async def ws_set_options(
         # contract - and `_record_option_changes`'s own docstring already says it
         # replaces the inline version that used to live here. Keys dropped by the
         # null-strip above are still recorded, and so are stored overrides the
-        # numeric check dropped, each as what is left once written, as the import
-        # records a removal: the entry's data value where it holds the key (a
+        # numeric check or a reset dropped, each as what is left once written, as
+        # the import records a removal: the entry's data value where it holds the key (a
         # dropped 2 W Min Power override leaves its 5 W), else None ("reverted to
         # unset", PR #529 review). A no-op is skipped inside `_diff_option_changes`.
         written_merged = {**entry.data, **new_options}
@@ -2509,6 +2521,7 @@ async def ws_set_options(
             k: written_merged.get(k)
             for k in msg["options"]
             if k in new_options or k in dropped_null_keys or k in dropped_invalid_keys
+            or k in dropped_reset_keys
         }
 
         # When online features are disabled, clear the persisted store account so the
