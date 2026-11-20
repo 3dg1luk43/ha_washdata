@@ -93,6 +93,7 @@ from .const import (
     resolve_sampling_interval_default,
     resolve_watchdog_interval_default,
     is_energy_counter,
+    power_unit_scale,
     resolve_start_duration_default,
     resolve_smart_termination_duration_ratio_default,
     MAINTENANCE_CUSTOM_TASK_MAX,
@@ -499,6 +500,34 @@ def _power_scaler(manager: Any) -> Callable[[Any], float]:
         return cache[key]
 
     return _scale
+
+
+def _min_power_keeps_scale(
+    hass: HomeAssistant, merged: dict[str, Any], device_type: str, proposed: Any
+) -> bool:
+    """Does Min Power ``proposed`` read the power sensor in the unit the current one does?
+
+    ``power_unit_scale`` keeps a kilowatt sensor's readings raw under a Min Power
+    of 1 and a milliwatt one's from 1000, so a value across either line rescales
+    every reading while the thresholds stay put. The analysis never suggests one
+    (``SuggestionEngine._keeps_power_scale``), but a stored suggestion can come
+    from another device's export or an older build (PR #529 review). The unit is
+    the sensor's own, read as the engine reads it; a sensor not loaded yet, or
+    unavailable without a unit, must hold for every unit. Never raises.
+    """
+    try:
+        state = hass.states.get(str(merged.get(CONF_POWER_SENSOR) or ""))
+        unit = state.attributes.get("unit_of_measurement") if state is not None else None
+        known = state is not None and (
+            bool(str(unit or "").strip()) or state.state not in ("unavailable", "unknown")
+        )
+        current = effective_option_values(merged, device_type)[CONF_MIN_POWER]
+        return all(
+            power_unit_scale(u, current) == power_unit_scale(u, proposed)
+            for u in ([unit] if known else ["mW", "W", "kW"])
+        )
+    except Exception:  # pylint: disable=broad-exception-caught
+        return False
 
 
 async def _recorder_power(
@@ -5380,6 +5409,16 @@ async def ws_apply_suggestions(
                 # settings save can land while it is awaited or during the
                 # end-gate scan (PR #529).
                 fresh = {**entry.data, **entry.options}
+                # Nor a Min Power that changes the unit the sensor is read in: on
+                # a kW sensor 2 converts readings to watts and 0.8 keeps them raw,
+                # so the Start and Stop Thresholds (in watts) would judge kW
+                # values (PR #529 review). Withdrawn like an unsafe timing value.
+                if CONF_MIN_POWER in updates and not _min_power_keeps_scale(
+                    hass, fresh,
+                    getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
+                    updates[CONF_MIN_POWER],
+                ):
+                    updates.pop(CONF_MIN_POWER)
                 # Min Power alone moves an unset Start or Stop Threshold, which
                 # follows it (#450), past every threshold check: not without that
                 # threshold in the same write (PR #529 review).
