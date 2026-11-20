@@ -50,6 +50,8 @@ _SENSITIVE_KEYS = {
     "notify_people",
     "notify_actions",
     "power_sensor",
+    # The power sensor's id again, stored with the update-interval summaries.
+    "cadence_sensor",
     "external_end_trigger",
     "door_sensor_entity",
     "unload_confirm_entity",

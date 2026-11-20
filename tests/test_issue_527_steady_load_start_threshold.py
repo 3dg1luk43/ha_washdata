@@ -251,7 +251,7 @@ def test_a_raw_kw_load_keeps_its_exact_stop_and_speaks_in_watts() -> None:
     assert start < 0.008
     assert sug[CONF_STOP_THRESHOLD_W]["value"] < start  # the stop moves under it
     assert sug[CONF_START_THRESHOLD_W]["reason_params"]["low"] == "7.9"
-    assert "runs at 7.9 W" in sug[CONF_START_THRESHOLD_W]["reason"]
+    assert "running power is 7.9 W" in sug[CONF_START_THRESHOLD_W]["reason"]
 
 
 def test_a_raw_kw_standby_is_compared_unrounded() -> None:
@@ -293,7 +293,7 @@ def test_the_reason_uses_the_sensor_s_own_unit(mock_hass: Any) -> None:
     eng = SuggestionEngine(hass, "e", store, device_type="dryer")
     sug = eng.for_job(opts).generate_start_threshold_suggestions()
     reason = sug[CONF_START_THRESHOLD_W]["reason"]
-    assert "800 W" not in reason and "runs at 0.79 W" in reason
+    assert "800 W" not in reason and "running power is 0.79 W" in reason
 
 
 def test_the_panel_reads_low_as_a_typical_level_not_a_floor() -> None:
@@ -320,3 +320,13 @@ def test_the_panel_reads_low_as_a_typical_level_not_a_floor() -> None:
     for path in sorted(panel.glob("*.json")):
         other = json.loads(path.read_text(encoding="utf-8"))["suggestion"]["reason"]["start_above_running"]
         assert "{low}" in other and "{start}" in other, path.name
+
+
+def test_a_diagnostics_dump_redacts_the_cadence_sensor() -> None:
+    """The update-interval summaries store the power sensor's entity id again as
+    `cadence_sensor`; the dump redacts it like `power_sensor`."""
+    from custom_components.ha_washdata.diagnostics import _redact  # noqa: PLC0415
+
+    out = _redact({"cadence_sensor": "sensor.kitchen_plug_power", "cadence_summaries": [{"p95": 2.0}]})
+    assert out["cadence_sensor"] == "**REDACTED**"
+    assert out["cadence_summaries"] == [{"p95": 2.0}]

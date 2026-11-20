@@ -1662,10 +1662,9 @@ def steady_load_threshold_suggestions(adv: dict[str, Any] | None) -> dict[str, A
     params = {"low": low_txt, "start": start_txt}
     entry = {
         "reason": (
-            f"This appliance runs at {low_txt} W or more from start to end, but the "
-            f"start threshold is {start_txt} W, so a run at its lower "
-            f"power never starts. Start set to half its lowest running level, stop "
-            f"below that."
+            f"This appliance's typical low running power is {low_txt} W, but the "
+            f"start threshold is {start_txt} W, so a run at that level never "
+            f"starts. Start set to half that level, stop below that."
         ),
         "reason_key": "suggestion.reason.start_above_running",
         "reason_params": params,
