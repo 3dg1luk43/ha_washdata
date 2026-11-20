@@ -9,20 +9,33 @@
   a Stage-1 ratio included, which no build reads and after which nothing
   rebuilds: a cycle deleted meanwhile stayed in the envelope. Only a setting the
   build reads (``envelope_settings_revision``) discards it now.
+* A door end dwell that expired while a Pause waited on its power cut declined
+  in the pause; when the switch call then failed, the rollback undid the pause
+  but left no timer, so the open door never ended the cycle. The rollback now
+  judges the open door again (a fresh dwell); a successful pause still cancels.
 """
 from __future__ import annotations
 
+import asyncio
 from datetime import timedelta
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.exceptions import HomeAssistantError
+from homeassistant.util import dt as dt_util
+from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
 from custom_components.ha_washdata import cycle_detector as cd_mod
-from custom_components.ha_washdata.const import DOMAIN, PROGRAM_MISMATCH_PERSISTENCE
+from custom_components.ha_washdata.const import (
+    DOMAIN,
+    PROGRAM_MISMATCH_PERSISTENCE,
+    TerminationReason,
+)
 
 from .test_audit_detection_514_halt_followups import _det, _feed, _halt, _match, _wash
+from .test_issue_524_door_ends_cycle import DOOR, OPTS, _paused_washer, _tick
 from .test_issue_530_program_mismatch import _check, _mismatches, _past_half, _result, _seed
 
 # ── #530: the stall shown now is no programme time ───────────────────────────
@@ -148,3 +161,61 @@ async def test_a_setting_the_build_reads_still_discards_it(
     with patch.object(store, "_rebuild_envelope_sync", side_effect=worker):
         assert await store.delete_cycle("Cotton-2")
     assert store.get_envelope("Cotton")["cycle_count"] == 3
+
+
+# ── A failed power-cut pause judges an open door again ───────────────────────
+
+SWITCH = "switch.washer_plug"
+CUT_OPTS = {**OPTS, "pause_cuts_power": True, "switch_entity": SWITCH}
+
+
+async def _door_open_then_pause(
+    hass: HomeAssistant, setup_washdata_entry: Any, freezer: Any, *, fails: bool
+) -> tuple[Any, list[dict[str, Any]], bool]:
+    """A washer PAUSED at its programme end, the door open (a 60 s dwell armed),
+    Pause pressed: the switch call takes 70 s, the dwell expires in it."""
+    manager, ends = await _paused_washer(hass, setup_washdata_entry, freezer, CUT_OPTS)
+    hass.states.async_set(DOOR, "on")
+    await hass.async_block_till_done()
+    assert manager._remove_door_end_dwell is not None  # noqa: SLF001
+
+    async def turn_off(_call: ServiceCall) -> None:
+        freezer.tick(timedelta(seconds=70))
+        async_fire_time_changed(hass, dt_util.utcnow())
+        await asyncio.sleep(0)
+        # Expired inside the pause: declined, and no timer left.
+        assert manager._remove_door_end_dwell is None  # noqa: SLF001
+        if fails:
+            raise HomeAssistantError("plug offline")
+
+    hass.services.async_register("switch", "turn_off", turn_off)
+    paused = await manager.async_pause_cycle()
+    await hass.async_block_till_done()
+    assert ends == []
+    return manager, ends, paused
+
+
+async def test_a_failed_pause_judges_the_open_door_again(
+    hass: HomeAssistant, setup_washdata_entry: Any, freezer: Any
+) -> None:
+    manager, ends, paused = await _door_open_then_pause(
+        hass, setup_washdata_entry, freezer, fails=True
+    )
+    assert paused is False and manager._is_user_paused is False  # noqa: SLF001
+    assert manager._remove_door_end_dwell is not None  # noqa: SLF001  (a fresh dwell)
+    await _tick(hass, freezer, 30, None)
+    assert ends == []  # inside the fresh dwell
+    await _tick(hass, freezer, 40, None)
+    assert len(ends) == 1 and ends[0]["termination_reason"] == TerminationReason.DOOR
+
+
+async def test_a_successful_pause_still_cancels_the_dwell(
+    hass: HomeAssistant, setup_washdata_entry: Any, freezer: Any
+) -> None:
+    manager, ends, paused = await _door_open_then_pause(
+        hass, setup_washdata_entry, freezer, fails=False
+    )
+    assert paused is True and manager._is_user_paused is True  # noqa: SLF001
+    assert manager._remove_door_end_dwell is None  # noqa: SLF001
+    await _tick(hass, freezer, 120, None)
+    assert ends == []

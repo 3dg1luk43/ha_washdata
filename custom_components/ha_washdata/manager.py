@@ -779,6 +779,9 @@ class WashDataManager:
             config_entry.options.get(CONF_DOOR_END_DWELL_SECONDS, DEFAULT_DOOR_END_DWELL_SECONDS)
         )
         self._remove_door_end_dwell: Any = None
+        # Counts dwell expiries: a pause that fails while its switch call is
+        # pending tells one expired (and declined in the pause) meanwhile.
+        self._door_end_dwell_expiries: int = 0
         self._remove_door_sensor_listener = None
         # Unload confirmation without a door sensor (#451): an entity whose
         # activation means "unloaded", and/or a plain opt-in for the Mark Unloaded
@@ -4491,6 +4494,7 @@ class WashDataManager:
         live conditions here defensively — a close event could have been missed, or a
         user pause could have landed mid-dwell — before finalizing (#342)."""
         self._remove_door_end_dwell = None
+        self._door_end_dwell_expiries = getattr(self, "_door_end_dwell_expiries", 0) + 1
         if self._is_shutdown:
             # Expired while the unload awaits its tasks, before it cancels the
             # dwell: a cycle ended now skips its history write (``_on_cycle_end``)
@@ -11402,6 +11406,8 @@ class WashDataManager:
 
         self._logger.info("Cycle paused by user")
         prev_verified = self.detector._verified_pause
+        identity = self._match_identity()
+        expiries = getattr(self, "_door_end_dwell_expiries", 0)
         self._is_user_paused = True
         self._user_pause_start = utc_now()
         self.detector.set_verified_pause(True)
@@ -11426,6 +11432,17 @@ class WashDataManager:
                     self._is_user_paused = False
                     self._user_pause_start = None
                     self.detector.set_verified_pause(prev_verified)
+                    # An end dwell that expired during the wait declined in the
+                    # pause and left no timer: with the pause undone, the open
+                    # door is judged again, as when a cycle turns active with it
+                    # open (a fresh dwell, the same checks at its expiry). A
+                    # timer armed meanwhile is kept (PR #529 review).
+                    if (
+                        getattr(self, "_door_end_dwell_expiries", 0) != expiries
+                        and not self._is_shutdown
+                        and self._match_still_current(identity)
+                    ):
+                        self._maybe_arm_door_end_dwell_if_open()
                     return False
 
         # A user pause overrides an auto-open dwell: cancel it so the pending timer
