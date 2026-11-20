@@ -1236,6 +1236,45 @@ def _stop_at_end(
     return current
 
 
+def _final_real_w(cycle: dict[str, Any], raw: list[Any]) -> float | None:
+    """The last reading the plug sent: rows in ``synthetic_offsets`` are skipped.
+
+    A watchdog keepalive written while the sensor was unavailable is a 0 W row
+    WashData made up; read as the last sample it put a hand-stopped 3.4 W standby
+    below a 2.56 W Stop (PR #529 review). A trace with ISO-stamped legacy rows is
+    read through :func:`_cycle_readings`. Scans back only past the synthetic rows
+    (the caller runs on the event loop). None when the last real row is not a
+    reading, or every row is synthetic.
+    """
+    synthetic = synthetic_offset_keys(cycle)
+    last: Any = raw[-1]
+    if synthetic:
+        last = _last_unlisted_row(raw, synthetic)
+        if last is False:
+            # An ISO-stamped legacy row: its offset is read off the normalised trace.
+            last = _last_unlisted_row(_cycle_readings(cycle), synthetic)
+    if not isinstance(last, (list, tuple)) or len(last) < 2:
+        return None
+    try:
+        return float(last[1])
+    except (TypeError, ValueError, OverflowError):
+        return None
+
+
+def _last_unlisted_row(rows: list[Any], synthetic: set[int]) -> Any:
+    """The last row of ``rows`` whose offset ``synthetic`` does not list (a malformed
+    row as it is); None when there is none, False at an offset that is no number."""
+    for pt in reversed(rows):
+        if not isinstance(pt, (list, tuple)) or len(pt) < 2:
+            return pt
+        key = offset_key(pt[0])
+        if key is None:
+            return False
+        if key not in synthetic:
+            return pt
+    return None
+
+
 def _idle_evidence_w(
     cycle: dict[str, Any], stop_threshold_w: float, stop_at_end: float | None = None
 ) -> float | None:
@@ -1265,12 +1304,8 @@ def _idle_evidence_w(
     raw = cycle.get("power_data")
     if not isinstance(raw, list) or not raw:
         return None
-    last = raw[-1]
-    if not isinstance(last, (list, tuple)) or len(last) < 2:
-        return None
-    try:
-        final_w = float(last[1])
-    except (TypeError, ValueError, OverflowError):
+    final_w = _final_real_w(cycle, raw)
+    if final_w is None:
         return None
     peak = _cycle_peak_w(cycle, raw)
     # Stopped by hand mid-wash: it ends at working power and says nothing about
@@ -1278,7 +1313,7 @@ def _idle_evidence_w(
     if peak > 0 and final_w > peak * _STANDBY_PEAK_FRACTION:
         return None
     # A hand or force stop keeps the trace up to the moment it was stopped, so its
-    # last sample is what the appliance drew while it waited, unless that moment
+    # last real sample is what the appliance drew while it waited, unless that moment
     # was a drum pulse; the settled tail is what it drew most of the time, unless
     # the stop came seconds into standby after a long drain. The lower of the two
     # (#445: stopped 10 s after a 15 W drain reached 3.4 W; #525: a pulse over a
@@ -1324,8 +1359,9 @@ def detect_standby_above_stop(
     * the standby-band finalize: idles above, at the plateau it recorded
       (``standby_band_w``; cycles stored before that mark read as the timeout
       they were stored as);
-    * stopped by hand or force-stopped: the lower of its last sample (what it
-      drew when stopped) and the level its kept tail settled at.
+    * stopped by hand or force-stopped: the lower of its last real sample (what
+      it drew when stopped; a keepalive row WashData wrote is not one) and the
+      level its kept tail settled at.
 
     Reported when at least ``min_hits`` cycles idle above the threshold, they
     outnumber the ones that went below, and their levels are **consistent**
