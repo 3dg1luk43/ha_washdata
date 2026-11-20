@@ -1957,7 +1957,7 @@ class WashDataManager:
             # (not after its trace preparation: PR #529 review). A group
             # edited while the match ran makes the ranking describe neither
             # membership (a ``__group__`` family no longer linked to the pick reads
-            # as a deficit), so that result is discarded, the streak untouched.
+            # as a deficit), so that result is discarded and the run restarts.
             families = match_rules.program_families(self.profile_store.get_profile_groups())
             # An import or Undo Import replaces the store under the match: the
             # ranking then scored profiles that are gone, even under the same
@@ -1995,7 +1995,15 @@ class WashDataManager:
                 state.streak = 0
                 state.match_settings = self.profile_store.match_settings()
                 return
-            if families != match_rules.program_families(self.profile_store.get_profile_groups()):
+            now_families = match_rules.program_families(self.profile_store.get_profile_groups())
+            if families != now_families:
+                # Discarded, and the run restarts as for the guards above: an edit
+                # undone before the next check left the map the streak was counted
+                # under, so the between-checks comparison below saw no change and
+                # the run went on over a match that could not be read (PR #529
+                # review).
+                state.streak = 0
+                state.families = now_families
                 return
             expected = self._matched_profile_duration
             if not expected:

@@ -386,8 +386,9 @@ async def test_a_group_edited_during_the_match_discards_it(
     with patch.object(store, "async_match_profile", new=match_and_ungroup):
         await _check(hass, manager, state.key)
     assert _mismatches(sent) == []
-    assert state.streak == PROGRAM_MISMATCH_PERSISTENCE - 1  # discarded, not counted
+    assert state.streak == 0  # discarded, and the run restarts (PR #529 review)
     # The same ranking with the groups unchanged throughout does establish it.
+    state.streak = PROGRAM_MISMATCH_PERSISTENCE - 1
     with patch.object(store, "async_match_profile", AsyncMock(return_value=won)):
         await _check(hass, manager, state.key)
     assert len(_mismatches(sent)) == 1
