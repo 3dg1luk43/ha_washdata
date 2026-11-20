@@ -2720,6 +2720,16 @@ def _pins_golden_template(cycles: list[Any]) -> bool:
     )
 
 
+def _mark_changelog_imported(rows: list[Any]) -> list[Any]:
+    """``rows`` (a settings changelog) as new rows marked
+    ``SETTINGS_CHANGELOG_IMPORTED_KEY``: still listed, but no Stop the standby
+    advisory reads as the one the stored cycles ended under (PR #529 review)."""
+    return [
+        {**row, SETTINGS_CHANGELOG_IMPORTED_KEY: True} if isinstance(row, dict) else row
+        for row in rows
+    ]
+
+
 def _merge_list_dedup(
     base: list[Any], incoming: list[Any], ignore_keys: tuple[str, ...] = ()
 ) -> None:
@@ -12875,15 +12885,23 @@ class ProfileStore:
         # A settings history brought without the cycles it describes (the local
         # ones are kept) is another appliance's to these cycles, as in the
         # selective import: visible, but no Stop the standby advisory reads.
+        # Mirrored: another appliance's cycles brought without their history
+        # leave this device's history describing none of them (PR #529 review).
+        foreign = str(meta.get("entry_id") or "") != str(self.entry_id)
         if (
-            "past_cycles" in kept
+            foreign
+            and "past_cycles" in kept
             and isinstance(data_dict.get("settings_changelog"), list)
-            and str(meta.get("entry_id") or "") != str(self.entry_id)
         ):
-            data_dict["settings_changelog"] = [
-                {**row, SETTINGS_CHANGELOG_IMPORTED_KEY: True} if isinstance(row, dict) else row
-                for row in data_dict["settings_changelog"]
-            ]
+            data_dict["settings_changelog"] = _mark_changelog_imported(
+                data_dict["settings_changelog"]
+            )
+        if (
+            foreign
+            and "past_cycles" in supplied
+            and isinstance(kept.get("settings_changelog"), list)
+        ):
+            kept["settings_changelog"] = _mark_changelog_imported(kept["settings_changelog"])
         self._data = {**data_dict, **kept}
         self._data_generation = getattr(self, "_data_generation", 0) + 1
         # The live cadence describes the real history and the plug's stored rows:
@@ -13162,6 +13180,14 @@ class ProfileStore:
                 self._data["reference_cycles"] = []
             if wipe_past:
                 self._data["past_cycles"] = []
+                # The local settings history describes none of another appliance's
+                # cycles that replace them (PR #529 review): listed, no Stop read.
+                # The file's own history, when it brings one, replaces it below.
+                local_log = self._data.get("settings_changelog")
+                if isinstance(local_log, list) and (
+                    str(meta.get("entry_id") or "") != str(self.entry_id)
+                ):
+                    self._data["settings_changelog"] = _mark_changelog_imported(local_log)
                 if on_replace is not None:
                     try:
                         on_replace()
@@ -13470,12 +13496,7 @@ class ProfileStore:
                     # it records is not the one this appliance's cycles ended
                     # under (PR #529 review); an export without an entry id
                     # counts as another device's.
-                    src_val = [
-                        {**row, SETTINGS_CHANGELOG_IMPORTED_KEY: True}
-                        if isinstance(row, dict)
-                        else row
-                        for row in src_val
-                    ]
+                    src_val = _mark_changelog_imported(src_val)
                 if mode == "replace":
                     self._data[key] = src_val
                     continue
