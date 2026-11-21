@@ -298,10 +298,6 @@
       "start": "Verður að vera yfir Stöðvunarþröskuldi ({stop} W)",
       "stop": "Verður að vera undir Ræsingarþröskuldi ({start} W)"
     },
-    "min_power": {
-      "min_power": "Verður að vera við eða undir Stöðvunarþröskuldi ({stop} W)",
-      "stop": "Verður að vera við eða yfir Lágmarksafli ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Verður að vera meira en Gæsluabil ({wi} s)",
       "watchdog": "Verður að vera minna en Engin-uppfærsla-tímamark ({to} s)"

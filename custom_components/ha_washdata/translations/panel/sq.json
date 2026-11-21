@@ -293,10 +293,6 @@
             "start": "Duhet të jetë mbi Pragun e Ndalimit ({stop} W)",
             "stop": "Duhet të jetë nën Pragun e Nisjes ({start} W)"
         },
-        "min_power": {
-            "min_power": "Duhet të jetë në ose nën Pragun e Ndalimit ({stop} W)",
-            "stop": "Duhet të jetë në ose mbi Fuqinë Minimale ({min} W)"
-        },
         "no_update_timeout": {
             "timeout": "Duhet të jetë më i madh se Intervali i Rojtarit ({wi} s)",
             "watchdog": "Duhet të jetë më i vogël se Koha e Skadimit pa Përditësim ({to} s)"

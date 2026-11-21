@@ -298,10 +298,6 @@
       "start": "Moet boven de stopdrempel ({stop} W) liggen",
       "stop": "Moet onder de startdrempel ({start} W) liggen"
     },
-    "min_power": {
-      "min_power": "Moet op of onder de stopdrempel ({stop} W) liggen",
-      "stop": "Moet op of boven het minimumvermogen ({min} W) liggen"
-    },
     "no_update_timeout": {
       "timeout": "Moet groter zijn dan het watchdog-interval ({wi} s)",
       "watchdog": "Moet kleiner zijn dan de geen-update-timeout ({to} s)"

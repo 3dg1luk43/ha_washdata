@@ -256,10 +256,6 @@
       "start": "Doit être supérieur au Seuil d'arrêt ({stop} W)",
       "stop": "Doit être inférieur au Seuil de démarrage ({start} W)"
     },
-    "min_power": {
-      "min_power": "Doit être inférieur ou égal au Seuil d'arrêt ({stop} W)",
-      "stop": "Doit être supérieur ou égal à la Puissance minimale ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Doit être supérieur à l'Intervalle watchdog ({wi} s)",
       "watchdog": "Doit être inférieur au Délai d'absence de mise à jour ({to} s)"

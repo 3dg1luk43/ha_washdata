@@ -306,10 +306,6 @@
       "start": "Peab olema üle peatumise läve ({stop} W)",
       "stop": "Peab olema alla käivitumise läve ({start} W)"
     },
-    "min_power": {
-      "min_power": "Peab olema kuni peatumise läve ({stop} W)",
-      "stop": "Peab olema vähemalt minimaalse võimsuse tasemel ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Peab olema suurem kui valvekoera intervall ({wi} s)",
       "watchdog": "Peab olema väiksem kui ilma uuendusteta aegumine ({to} s)"

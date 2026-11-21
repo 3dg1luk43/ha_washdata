@@ -314,10 +314,6 @@
       "start": "Turi būti aukščiau sustabdymo slenksčio ({stop} W)",
       "stop": "Turi būti žemiau paleidimo slenksčio ({start} W)"
     },
-    "min_power": {
-      "min_power": "Turi būti lygus arba žemiau sustabdymo slenksčio ({stop} W)",
-      "stop": "Turi būti lygus arba aukščiau minimalios galios ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Turi būti didesnis nei stebėjimo intervalas ({wi} s)",
       "watchdog": "Turi būti mažesnis nei laikotarpis be atnaujinimų ({to} s)"

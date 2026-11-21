@@ -256,10 +256,6 @@
       "start": "Deve ser superior ao Limiar de paragem ({stop} W)",
       "stop": "Deve ser inferior ao Limiar de arranque ({start} W)"
     },
-    "min_power": {
-      "min_power": "Deve ser inferior ou igual ao Limiar de paragem ({stop} W)",
-      "stop": "Deve ser superior ou igual à Potência mínima ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Deve ser maior que o Intervalo watchdog ({wi} s)",
       "watchdog": "Deve ser menor que o Tempo de espera sem actualização ({to} s)"

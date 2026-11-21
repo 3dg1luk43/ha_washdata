@@ -306,10 +306,6 @@
       "start": "Musi być powyżej Progu Zatrzymania ({stop} W)",
       "stop": "Musi być poniżej Progu Startu ({start} W)"
     },
-    "min_power": {
-      "min_power": "Musi być równy lub niższy niż Próg Zatrzymania ({stop} W)",
-      "stop": "Musi być równy lub wyższy niż Minimalna Moc ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Musi być większy niż Interwał Watchdog ({wi} s)",
       "watchdog": "Musi być mniejszy niż Limit Czasu Braku Aktualizacji ({to} s)"

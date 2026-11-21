@@ -298,10 +298,6 @@
       "start": "Måste vara över stopptröskel ({stop} W)",
       "stop": "Måste vara under starttröskel ({start} W)"
     },
-    "min_power": {
-      "min_power": "Måste vara vid eller under stopptröskel ({stop} W)",
-      "stop": "Måste vara vid eller över mineffekt ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Måste vara större än vakthundsintervallet ({wi} s)",
       "watchdog": "Måste vara mindre än timeout utan uppdatering ({to} s)"

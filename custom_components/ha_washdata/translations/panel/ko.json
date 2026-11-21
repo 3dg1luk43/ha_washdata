@@ -294,10 +294,6 @@
             "start": "정지 임계값 ({stop} W) 이상이어야 합니다",
             "stop": "시작 임계값 ({start} W) 미만이어야 합니다"
         },
-        "min_power": {
-            "min_power": "정지 임계값 ({stop} W) 이하이어야 합니다",
-            "stop": "최소 전력 ({min} W) 이상이어야 합니다"
-        },
         "no_update_timeout": {
             "timeout": "워치독 간격 ({wi} 초) 보다 커야 합니다",
             "watchdog": "업데이트 없음 타임아웃 ({to} 초) 보다 작아야 합니다"

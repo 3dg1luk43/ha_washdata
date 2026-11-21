@@ -298,10 +298,6 @@
       "start": "Muss über dem Stop-Schwellenwert ({stop} W) liegen",
       "stop": "Muss unter dem Start-Schwellenwert ({start} W) liegen"
     },
-    "min_power": {
-      "min_power": "Muss beim oder unter dem Stop-Schwellenwert ({stop} W) liegen",
-      "stop": "Muss beim oder über der Mindestleistung ({min} W) liegen"
-    },
     "no_update_timeout": {
       "timeout": "Muss größer als das Watchdog-Intervall ({wi} s) sein",
       "watchdog": "Muss kleiner als das Timeout ohne Aktualisierung ({to} s) sein"

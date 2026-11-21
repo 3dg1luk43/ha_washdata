@@ -306,10 +306,6 @@
       "start": "Must be above Stop Threshold ({stop} W)",
       "stop": "Must be below Start Threshold ({start} W)"
     },
-    "min_power": {
-      "min_power": "Must be at or below Stop Threshold ({stop} W)",
-      "stop": "Must be at or above Min Power ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Must be greater than Watchdog Interval ({wi} s)",
       "watchdog": "Must be less than No-Update Timeout ({to} s)"

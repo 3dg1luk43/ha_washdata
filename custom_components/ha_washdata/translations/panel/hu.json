@@ -306,10 +306,6 @@
             "start": "A Leállítási küszöb felett kell lennie ({stop} W)",
             "stop": "Az Indítási küszöb alatt kell lennie ({start} W)"
         },
-        "min_power": {
-            "min_power": "Legfeljebb a Leállítási küszöb értékén lehet ({stop} W)",
-            "stop": "Legalább a Minimális teljesítmény értékén kell lennie ({min} W)"
-        },
         "no_update_timeout": {
             "timeout": "Nagyobb kell lennie a Felügyelő intervalluménál ({wi} s)",
             "watchdog": "Kisebb kell lennie a Frissítés nélküli időtúllépésnél ({to} s)"

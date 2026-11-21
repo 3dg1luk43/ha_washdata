@@ -302,10 +302,6 @@
       "start": "Mora biti iznad Praga zaustavljanja ({stop} W)",
       "stop": "Mora biti ispod Praga pokretanja ({start} W)"
     },
-    "min_power": {
-      "min_power": "Mora biti jednak ili ispod Praga zaustavljanja ({stop} W)",
-      "stop": "Mora biti jednak ili iznad Minimalne snage ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Mora biti veći od Intervala nadzornika ({wi} s)",
       "watchdog": "Mora biti manji od Vremenskog ograničenja bez ažuriranja ({to} s)"

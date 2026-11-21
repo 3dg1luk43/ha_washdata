@@ -298,10 +298,6 @@
       "start": "Må være over stoppeterskelen ({stop} W)",
       "stop": "Må være under startterskelen ({start} W)"
     },
-    "min_power": {
-      "min_power": "Må være ved eller under stoppeterskelen ({stop} W)",
-      "stop": "Må være ved eller over minimumseffekten ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Må være større enn vaktbikkjeintervallet ({wi} s)",
       "watchdog": "Må være mindre enn ingen-oppdatering-tidsavbruddet ({to} s)"

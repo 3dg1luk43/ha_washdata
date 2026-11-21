@@ -256,10 +256,6 @@
       "start": "Deve essere superiore alla Soglia di arresto ({stop} W)",
       "stop": "Deve essere inferiore alla Soglia di avvio ({start} W)"
     },
-    "min_power": {
-      "min_power": "Deve essere minore o uguale alla Soglia di arresto ({stop} W)",
-      "stop": "Deve essere maggiore o uguale alla Potenza minima ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Deve essere maggiore dell'Intervallo watchdog ({wi} s)",
       "watchdog": "Deve essere minore del Timeout assenza aggiornamenti ({to} s)"

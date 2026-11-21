@@ -234,9 +234,9 @@ const _SETTINGS_SECTIONS = [
   ] },
   { id: 'detection', label: 'Detection', intro: 'How a cycle is detected as starting, running and finishing.', groups: [
     { sub: 'Thresholds & Gap', fields: [
-      { key: 'start_threshold_w', label: 'Start Threshold', unit: 'W', type: 'number', step: 1, min: 0,
+      { key: 'start_threshold_w', label: 'Start Threshold', unit: 'W', type: 'number', step: 1, min: 0, clearable: true,
         doc: 'Power must rise above this to start a cycle. Too low: standby power causes false starts. Too high: slow-starting programs (cold fill) are missed.' },
-      { key: 'stop_threshold_w', label: 'Stop Threshold', unit: 'W', type: 'number', step: 0.1, min: 0,
+      { key: 'stop_threshold_w', label: 'Stop Threshold', unit: 'W', type: 'number', step: 0.1, min: 0, clearable: true,
         doc: 'Power must fall below this before the off delay starts counting. Keep it below the Start Threshold. Too high, and low-power phases (rinse holds, anti-crease) start the end countdown by mistake.' },
       { key: 'min_off_gap', label: 'Min Off Gap', unit: 's', type: 'number', min: 0,
         doc: 'An off period shorter than this does not split a cycle, so soak pauses stay in one wash. Keep it shorter than the gap between back-to-back loads, or those merge into one cycle.' },
@@ -532,48 +532,6 @@ function _nonPriceReason(id, vals, ctx) {
 const _ENERGY_DEVICE_CLASSES = new Set(['energy', 'energy_storage']);
 const _ENERGY_UNITS = new Set(['mwh', 'wh', 'kwh', 'gwh', 'twh', 'j', 'kj', 'mj', 'gj', 'cal', 'kcal', 'mcal', 'gcal']);
 
-// Whether a Min Power under 1 W would switch this Power Sensor to raw readings:
-// const.power_unit_scale reads a kW (or larger) sensor raw below 1 (#481), so no
-// cycle would start (PR #529). A sensor not in the states yet, or unavailable /
-// unknown without a unit, counts as one that could be kW, as
-// SuggestionEngine._min_power_floor does.
-function _powerSensorScale(id, ctx) {
-  // const.power_unit_scale's unit factor, or null when the unit is not known yet.
-  const st = (id && ctx && ctx.stateOf) ? ctx.stateOf(id) : null;
-  if (!st) return null;
-  const attrs = st.attributes || {};
-  const unit = String(attrs.unit_of_measurement == null ? '' : attrs.unit_of_measurement).trim();
-  if (!unit && (st.state === 'unavailable' || st.state === 'unknown')) return null;
-  const own = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key) ? obj[key] : null;
-  let scale = own({ mW: 0.001, W: 1, kW: 1000, MW: 1e6, GW: 1e9 }, unit);
-  if (scale == null) scale = unit.toLowerCase() === 'kw' ? 1000 : 1;
-  const slash = unit.indexOf('/');
-  if (slash >= 0) {
-    const energy = own({ Wh: 1, kWh: 1000, MWh: 1e6 }, unit.slice(0, slash).trim());
-    const per = own({ s: 1 / 3600, min: 1 / 60, h: 1, d: 24 }, unit.slice(slash + 1).trim());
-    if (energy != null && per != null) scale = energy / per;
-  }
-  return scale;
-}
-function _minPowerMustStayAtOne(id, ctx) {
-  const scale = _powerSensorScale(id, ctx);
-  return scale == null || scale > 1;
-}
-// The milliwatt side of the same rule: a mW sensor is read raw while Min Power is
-// 1000 or more (const.power_unit_scale), so a fix under 1000 would switch it to
-// watts while the thresholds stayed in milliwatts (review of PR #529).
-// The kW side of keeping the scale: a kW sensor already read raw (Min Power under
-// 1) must keep a Min Power fix under 1, or the readings switch to watts while the
-// thresholds stay in kilowatts (review of PR #529).
-function _minPowerRawKilowatt(v, ctx) {
-  const scale = _powerSensorScale(v.power_sensor, ctx);
-  return scale != null && scale > 1 && v.min_power != null && v.min_power < 1;
-}
-function _minPowerRawMilliwatt(v, ctx) {
-  const scale = _powerSensorScale(v.power_sensor, ctx);
-  return scale != null && scale < 1 && v.min_power != null && v.min_power >= 1000;
-}
-
 // Why the chosen Power Sensor cannot be one: it counts energy (#481), or null. Only
 // positive evidence, as the backend refuses it.
 function _energyCounterReason(id, ctx) {
@@ -614,31 +572,6 @@ const _SETTING_CONFLICTS = [
     fieldErrors: v => ({
       start_threshold_w: { msgKey: 'conflict.hysteresis.start', msgVars: {stop: v.stop_threshold_w}, msgFb: `Must be above Stop Threshold (${v.stop_threshold_w} W)`, fixVal: +Math.max(v.stop_threshold_w + 0.5, v.stop_threshold_w * 1.25).toFixed(1) },
       stop_threshold_w:  { msgKey: 'conflict.hysteresis.stop',  msgVars: {start: v.start_threshold_w}, msgFb: `Must be below Start Threshold (${v.start_threshold_w} W)`, fixVal: +Math.min(v.start_threshold_w - 0.5, v.start_threshold_w * 0.8).toFixed(1) },
-    }),
-  },
-  {
-    // min_power <= stop_threshold_w (noise gate must sit below the stop floor). On a
-    // sensor Min Power under 1 W switches to raw readings (a kW one, PR #529;
-    // reconcile holds it at 1 the same way) its fix is never under 1 W, and the
-    // conflict is waived only where nothing at or above 1 W can sit at or under the
-    // stop. Over the stop it is soft: no detection threshold reads it once start and
-    // stop are set.
-    keys: ['min_power', 'stop_threshold_w'],
-    check: (v, ctx) => v.min_power != null && v.stop_threshold_w != null && v.min_power > v.stop_threshold_w
-      && !(v.min_power >= 1 && v.stop_threshold_w < 1 && _minPowerMustStayAtOne(v.power_sensor, ctx))
-      && !(v.stop_threshold_w < 1000 && _minPowerRawMilliwatt(v, ctx)),
-    fieldErrors: (v, ctx) => ({
-      min_power:        { msgKey: 'conflict.min_power.min_power', msgVars: {stop: v.stop_threshold_w}, msgFb: `Must be at or below Stop Threshold (${v.stop_threshold_w} W)`,
-        fixVal: _minPowerRawMilliwatt(v, ctx)
-          ? Math.max(1000, +(v.stop_threshold_w * 0.8).toFixed(1))
-          : _minPowerRawKilowatt(v, ctx)
-            ? Math.min(0.999, +(v.stop_threshold_w * 0.8).toFixed(3))
-          : _minPowerMustStayAtOne(v.power_sensor, ctx)
-            ? Math.max(1, +(v.stop_threshold_w * 0.8).toFixed(1)) : +(v.stop_threshold_w * 0.8).toFixed(1) },
-      // Not a Stop fix that would reach Start: it would cascade into Start, and this
-      // conflict is soft when both are set (PR #529 review).
-      stop_threshold_w: { msgKey: 'conflict.min_power.stop',      msgVars: {min: v.min_power},  msgFb: `Must be at or above Min Power (${v.min_power} W)`,
-        fixVal: (v.start_threshold_w != null && +(v.min_power * 1.25).toFixed(1) >= v.start_threshold_w) ? null : +(v.min_power * 1.25).toFixed(1) },
     }),
   },
   {
@@ -16737,6 +16670,9 @@ class HaWashdataPanel extends HTMLElement {
       const n = parseFloat(el.value);
       if (!isNaN(n)) vals[key] = n;
       else if (el.value !== '') vals[key] = el.value;
+      // An emptied clearable field saves as unset (#535), so the rules must not
+      // keep judging the stored value the save is about to drop.
+      else if ((_FIELD_BY_KEY[key] || {}).clearable) vals[key] = null;
     });
     return vals;
   }

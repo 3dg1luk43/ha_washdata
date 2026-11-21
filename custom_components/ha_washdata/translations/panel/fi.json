@@ -298,10 +298,6 @@
       "start": "Täytyy olla yli pysäytyskynnyksen ({stop} W)",
       "stop": "Täytyy olla alle käynnistyskynnyksen ({start} W)"
     },
-    "min_power": {
-      "min_power": "Täytyy olla enintään pysäytyskynnys ({stop} W)",
-      "stop": "Täytyy olla vähintään minimiteho ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Täytyy olla enemmän kuin tarkkailijaväli ({wi} s)",
       "watchdog": "Täytyy olla alle päivityksettömyyden aikakatkaisun ({to} s)"

@@ -294,10 +294,6 @@
             "start": "必须高于停止阈值 ({stop} W)",
             "stop": "必须低于启动阈值 ({start} W)"
         },
-        "min_power": {
-            "min_power": "必须不超过停止阈值 ({stop} W)",
-            "stop": "必须不低于最小功率 ({min} W)"
-        },
         "no_update_timeout": {
             "timeout": "必须大于看门狗间隔 ({wi} 秒)",
             "watchdog": "必须小于无更新超时 ({to} 秒)"

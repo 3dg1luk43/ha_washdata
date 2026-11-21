@@ -306,10 +306,6 @@
             "start": "Durdurma Eşiğinin üzerinde olmalıdır ({stop} W)",
             "stop": "Başlangıç Eşiğinin altında olmalıdır ({start} W)"
         },
-        "min_power": {
-            "min_power": "Durdurma Eşiğinde veya altında olmalıdır ({stop} W)",
-            "stop": "Minimum Güç'te veya üzerinde olmalıdır ({min} W)"
-        },
         "no_update_timeout": {
             "timeout": "Bekçi Aralığından büyük olmalıdır ({wi} s)",
             "watchdog": "Güncelleme Yok Zaman Aşımından küçük olmalıdır ({to} s)"

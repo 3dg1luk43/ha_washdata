@@ -256,10 +256,6 @@
       "start": "Trebuie să fie peste Pragul de oprire ({stop} W)",
       "stop": "Trebuie să fie sub Pragul de pornire ({start} W)"
     },
-    "min_power": {
-      "min_power": "Trebuie să fie cel mult egal cu Pragul de oprire ({stop} W)",
-      "stop": "Trebuie să fie cel puțin egal cu Puterea minimă ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Trebuie să fie mai mare decât Intervalul watchdog ({wi} s)",
       "watchdog": "Trebuie să fie mai mic decât Limita de timp fără actualizări ({to} s)"

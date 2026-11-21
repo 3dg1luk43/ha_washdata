@@ -310,10 +310,6 @@
       "start": "Jābūt virs apstāšanās sliekšņa ({stop} W)",
       "stop": "Jābūt zem sākuma sliekšņa ({start} W)"
     },
-    "min_power": {
-      "min_power": "Jābūt vienādam vai zem apstāšanās sliekšņa ({stop} W)",
-      "stop": "Jābūt vienādam vai virs minimālās jaudas ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Jābūt lielākam par sargsuna intervālu ({wi} s)",
       "watchdog": "Jābūt mazākam par taimauta bez atjauninājumiem ({to} s)"

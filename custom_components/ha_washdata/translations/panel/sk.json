@@ -306,10 +306,6 @@
       "start": "Musí byť nad Prahom zastavenia ({stop} W)",
       "stop": "Musí byť pod Prahom spustenia ({start} W)"
     },
-    "min_power": {
-      "min_power": "Musí byť na úrovni alebo pod Prahom zastavenia ({stop} W)",
-      "stop": "Musí byť na úrovni alebo nad Minimálnym výkonom ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Musí byť väčší ako Interval watchdog ({wi} s)",
       "watchdog": "Musí byť menší ako Časový limit bez aktualizácie ({to} s)"
