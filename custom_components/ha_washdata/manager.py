@@ -7693,6 +7693,12 @@ class WashDataManager:
         # double-counts. Never breaks cycle end.
         if cycle_persisted:
             try:
+                # The Total Cost sensor's figure (#501 follow-up), persisted by
+                # the lifetime-energy save right below.
+                self.profile_store.add_lifetime_cost(cycle_data.get("cost"))
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                self._logger.debug("Failed to accumulate lifetime cost: %s", e)
+            try:
                 await self.profile_store.async_add_lifetime_energy_wh(
                     self._cycle_report_energy_wh(cycle_data)
                 )
@@ -11169,6 +11175,11 @@ class WashDataManager:
     def lifetime_energy_kwh(self) -> float:
         """Lifetime accumulated energy (kWh) for the HA Energy dashboard sensor."""
         return round(self.profile_store.get_lifetime_energy_wh() / 1000.0, 3)
+
+    @property
+    def lifetime_cost(self) -> float | None:
+        """What every stored run has cost, for the Total Cost sensor (#501)."""
+        return self.profile_store.get_lifetime_cost()
 
     @property
     def lifetime_cycle_count(self) -> int:

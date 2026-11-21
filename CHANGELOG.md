@@ -11,7 +11,12 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 ### TL;DR
 
+- New Total Cost sensor, with long-term statistics.
 - A Stop Threshold below Min Power can be saved, and an emptied Start or Stop Threshold goes back to its default.
+
+### Features
+
+- **Total Cost sensor** ([#501](https://github.com/3dg1luk43/ha_washdata/issues/501)): what every run has cost so far, in your currency, with long-term statistics, so cost history outlasts the recorder's retention. It starts from the costs already recorded and adds each run's cost once when it ends; editing or deleting a stored run does not change it. Last Cycle Cost stays as it is: it follows edits to that cycle, so it cannot be summed. Thanks to @Di4bLo84.
 
 ### Fixes
 

@@ -474,6 +474,9 @@
       "last_cycle_cost": {
         "name": "Kostnaður síðustu lotu"
       },
+      "total_cost": {
+        "name": "Heildarkostnaður"
+      },
       "last_cycle_start": {
         "name": "Upphaf síðustu lotu"
       }

@@ -2448,7 +2448,8 @@ _EXPORT_CATEGORIES: dict[str, dict[str, Any]] = {
     "ml_models":        {"keys": ["ml_model_versions", "ml_training_history", "ml_last_training_run"],
                          "kind": "mixed", "device_specific": True},
     "history_logs":     {"keys": ["auto_adjustments", "settings_changelog"], "kind": "list"},
-    "lifetime_stats":   {"keys": ["lifetime_energy_wh", "lifetime_cycle_count"], "kind": "scalar"},
+    "lifetime_stats":   {"keys": ["lifetime_energy_wh", "lifetime_cycle_count", "lifetime_cost"],
+                         "kind": "scalar"},
     "settings":         {"keys": [], "kind": "options", "device_specific": True},
 }
 
@@ -4774,6 +4775,70 @@ class ProfileStore:
         self._data["lifetime_energy_wh"] = round(base + add, 3)
         await self.async_save()
 
+    # ------------------------------------------------------------------
+    # Lifetime cost (#501 follow-up): the Total Cost sensor
+    # ------------------------------------------------------------------
+
+    def get_lifetime_cost(self) -> float | None:
+        """What every stored run has cost, in HA's currency, or None before any
+        run had a cost. Pure getter. Never raises."""
+        value = self._data.get("lifetime_cost")
+        if value is None or isinstance(value, bool):
+            return None
+        try:
+            number = float(value)
+        except (TypeError, ValueError, OverflowError):
+            return None
+        return number if math.isfinite(number) else None
+
+    def add_lifetime_cost(self, cost: Any) -> None:
+        """Add one stored run's cost in memory WITHOUT persisting.
+
+        Called once per stored run at its end, before the lifetime-energy save
+        that persists it (one write per cycle). A run without a cost adds
+        nothing; a negative one (a negative dynamic price) counts as it is.
+        """
+        if cost is None or isinstance(cost, bool):
+            return
+        try:
+            add = float(cost)
+        except (TypeError, ValueError, OverflowError):
+            return
+        if not math.isfinite(add):
+            return
+        base = self.get_lifetime_cost() or 0.0
+        self._data["lifetime_cost"] = round(base + add, 4)
+
+    def _seed_lifetime_cost(self) -> None:
+        """Start the figure from the stored runs' costs when there is none yet.
+
+        Only when the stored value is missing or unusable, so it runs once per
+        store and never moves a running total. With no costed run on record the
+        key stays absent and the sensor reads unknown. Never raises.
+        """
+        try:
+            if self.get_lifetime_cost() is not None:
+                return
+            total = 0.0
+            costed = False
+            for cycle in self.get_past_cycles():
+                cost = cycle.get("cost") if isinstance(cycle, dict) else None
+                if cost is None or isinstance(cost, bool):
+                    continue
+                try:
+                    value = float(cost)
+                except (TypeError, ValueError, OverflowError):
+                    continue
+                if math.isfinite(value):
+                    total += value
+                    costed = True
+            if costed:
+                self._data["lifetime_cost"] = round(total, 4)
+            else:
+                self._data.pop("lifetime_cost", None)
+        except Exception:  # noqa: BLE001 - a seed must never break a load
+            self._logger.debug("Could not seed the lifetime cost", exc_info=True)
+
     def get_lifetime_cycle_count(self) -> int:
         """Cycles this appliance has run, ever - the odometer.
 
@@ -6906,6 +6971,7 @@ class ProfileStore:
         await self._async_load_active()
         # The odometer can only be behind, never ahead, of the stored history (#414).
         self._heal_lifetime_cycle_count()
+        self._seed_lifetime_cost()
         # Ensure legacy custom phase formats are normalized in-memory.
         self._get_shared_custom_phases()
         # Assign ids to any custom phase missing one.
@@ -13366,6 +13432,7 @@ class ProfileStore:
         # the next restart could report a lifetime count below its own retained
         # history. Only ever increases, and idempotent.
         self._heal_lifetime_cycle_count()
+        self._seed_lifetime_cost()
         for name in stale_profiles:
             await self.async_rebuild_envelope(name)
         # Required: an unload during the rebuilds retired this store, and a
@@ -14004,6 +14071,7 @@ class ProfileStore:
         # the next restart could report a lifetime count below its own retained
         # history. Only ever increases, and idempotent.
         self._heal_lifetime_cycle_count()
+        self._seed_lifetime_cost()
         # A real-history replace can take cycles whose review requests stay
         # queued: drop them, as a split, merge or load does (#362), so they neither
         # show nor spend their programme's review budget.

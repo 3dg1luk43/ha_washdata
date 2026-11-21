@@ -474,6 +474,9 @@
       "last_cycle_cost": {
         "name": "上次循环费用"
       },
+      "total_cost": {
+        "name": "总费用"
+      },
       "last_cycle_start": {
         "name": "上次循环开始时间"
       }

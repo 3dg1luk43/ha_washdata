@@ -474,6 +474,9 @@
       "last_cycle_cost": {
         "name": "Strošek zadnjega cikla"
       },
+      "total_cost": {
+        "name": "Skupni strošek"
+      },
       "last_cycle_start": {
         "name": "Začetek zadnjega cikla"
       }

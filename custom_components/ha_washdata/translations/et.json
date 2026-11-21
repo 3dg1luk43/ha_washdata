@@ -474,6 +474,9 @@
       "last_cycle_cost": {
         "name": "Viimase tsükli maksumus"
       },
+      "total_cost": {
+        "name": "Maksumus kokku"
+      },
       "last_cycle_start": {
         "name": "Viimase tsükli algus"
       }

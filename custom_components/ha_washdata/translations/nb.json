@@ -474,6 +474,9 @@
       "last_cycle_cost": {
         "name": "Kostnad for siste syklus"
       },
+      "total_cost": {
+        "name": "Total kostnad"
+      },
       "last_cycle_start": {
         "name": "Start for siste syklus"
       }

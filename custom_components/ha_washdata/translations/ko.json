@@ -474,6 +474,9 @@
       "last_cycle_cost": {
         "name": "마지막 사이클 비용"
       },
+      "total_cost": {
+        "name": "총 비용"
+      },
       "last_cycle_start": {
         "name": "마지막 사이클 시작 시간"
       }
