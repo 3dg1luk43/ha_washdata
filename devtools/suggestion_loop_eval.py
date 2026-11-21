@@ -30,10 +30,10 @@ This harness closes that loop on the real corpus.
    ``ProfileStore._add_cycle_data`` (the production normaliser: trim, sampling interval,
    signature, energy) and replaces the stored cycle.
 3. The update-cadence model behind the operational pass is rebuilt from the
-   re-detected cycles that ended on their own (last 200 in-cycle intervals, >= 20 to
-   run, as ``LearningManager.close_cycle_cadence`` commits them).
-4. Every suggestion pass runs in cycle-end order (operational, standby floor, model,
-   detection, batch) through ``LearningManager._apply_suggestions_and_notify`` - the
+   re-detected cycles that ended on their own: one summary per cycle, the median
+   over the last ``CADENCE_RECENT_CYCLES`` (``LearningManager.cadence``).
+4. Every suggestion pass runs in cycle-end order (operational, standby floor, start
+   threshold, model, detection, batch) through ``LearningManager._apply_suggestions_and_notify`` - the
    noise gates, the post-apply cooldown, locks, ``reconcile_suggestions``.
    First with the cooldown still active (anything non-corrective stored then is a
    cooldown leak), then once it has expired.
@@ -41,6 +41,22 @@ This harness closes that loop on the real corpus.
    (the one filter behind the Settings list, muted and unchanged keys dropped), int
    coercion, cooldown stamped on the lifetime odometer, suggestions cleared, values
    layered onto the options.
+
+**Unmatched arm** (register item 638; ``--no-unmatched`` skips it): once the loop has
+stopped, every replayable cycle is replayed again with nothing to match (no profile,
+no matcher: a new programme, a first run, an ambiguous match), under the export's
+options and under the last round's, and the run fails when the latter splits,
+stores as interrupted or force-stops (``--idle-hold``: a kept tail at or above its
+stop) a cycle the former did not. The rounds above match in-sample,
+so they could not see that Apply all split dishwasher drying (audit 2026-11-16: 1 ->
+6 of 27 cycles on one device, 0 splits reported). A replayable cycle it cannot
+measure (fewer than ``MIN_ACTIVE_READINGS`` real readings above the recorded stop
+threshold, or too few left after the reading throttle to replay) is listed as
+skipped with its reason, never counted as a pass.
+
+A cycle is replayable (here and in the rounds) when it ended on its own or was
+stored interrupted and holds ``MIN_READINGS`` real readings: keepalive rows do not
+count.
 
 Repeat until Apply all changes nothing (a fixed point) or ``--rounds`` applies. Round 0
 starts from the export's own options with no pending suggestions, no cooldown and no
@@ -135,7 +151,7 @@ import warnings  # noqa: E402
 from concurrent.futures import ProcessPoolExecutor  # noqa: E402
 from datetime import datetime, timedelta, timezone  # noqa: E402
 from pathlib import Path  # noqa: E402
-from typing import Any, Iterator  # noqa: E402
+from typing import Any, Callable, Iterator  # noqa: E402
 from unittest.mock import MagicMock  # noqa: E402
 
 import numpy as np  # noqa: E402
@@ -167,9 +183,19 @@ from custom_components.ha_washdata.const import (  # noqa: E402
     resolve_sampling_interval_default,
 )
 from custom_components.ha_washdata.suggestion_engine import (  # noqa: E402
+    OWNER_BATCH,
+    OWNER_DETECTION,
+    OWNER_MODEL,
+    OWNER_OPERATIONAL,
+    OWNER_STANDBY_FLOOR,
+    OWNER_START_THRESHOLD,
     SuggestionEngine,
     _cycle_readings,
     select_clean_cycles,
+)
+from custom_components.ha_washdata.time_utils import (  # noqa: E402
+    offset_key,
+    synthetic_offset_keys,
 )
 
 _EVAL_PATH = REPO / "devtools" / "eval.py"
@@ -182,7 +208,15 @@ DEFAULT_ROUNDS = 5
 #: A device needs this many re-detectable cycles: the batch and detection passes
 #: both require 5 clean cycles before they propose anything.
 MIN_REPLAYABLE = 5
+#: A cycle is replayed when its trace holds this many real readings. Keepalive rows
+#: (``synthetic_offsets``) do not count: the watchdog repeats the last value, which
+#: says nothing new about the run (PR #529 review: nine real readings and a
+#: keepalive passed here and failed the unmatched arm's real-reading count).
 MIN_READINGS = 10
+#: The unmatched arm's split check needs an active span to cover: this many real
+#: readings above the recorded stop threshold, the first and last bounding it. A
+#: replayable cycle with fewer is listed as skipped, never counted as a pass.
+MIN_ACTIVE_READINGS = 2
 #: The engine reads at most the last 200 stored cycles (the retention cap).
 MAX_CYCLES = 200
 #: Per-device replay caps for a time-budgeted run (path substring -> most recent
@@ -465,21 +499,27 @@ def _active_span(points: list[tuple[float, float]], stop: float) -> float:
     return (act[-1] - act[0]) if len(act) >= 2 else 0.0
 
 
+def _real_readings(c: dict) -> list[tuple[float, float]]:
+    """The trace's readings without the watchdog's keepalive rows."""
+    synthetic = synthetic_offset_keys(c) or set()
+    return [(t, p) for t, p in _cycle_readings(c) if offset_key(t) not in synthetic]
+
+
 def _replayable(c: Any) -> bool:
     return (
         isinstance(c, dict)
         and c.get("status") in ("completed", "interrupted")
         and c.get("termination_reason") not in (TerminationReason.USER, TerminationReason.FORCE_STOPPED)
-        and len(_cycle_readings(c)) >= MIN_READINGS
+        and len(_real_readings(c)) >= MIN_READINGS
     )
 
 
 class _ManagerTap:
     """What the manager does around the detector that the Playground replay does not.
 
-    * The cadence model: every reading the manager processes while the detector is
-      active is timed against the previous processed reading (a watchdog keepalive
-      counts as processed but is never itself timed), held per cycle, dropped on a
+    * The cadence model: every real reading the manager processes while the detector
+      is active is timed against the previous real one (``_last_sensor_report``: a
+      watchdog keepalive is neither timed nor moves that clock), held per cycle, dropped on a
       start from idle or a finished state (``CADENCE_RESET_FROM_STATES``), and committed at the cycle's end only when it ended on its
       own (``process_power_reading`` / ``discard_cycle_cadence`` /
       ``close_cycle_cadence``). Readings past the end of the recorded trace (the
@@ -493,7 +533,7 @@ class _ManagerTap:
     def __init__(self, sim: Any) -> None:
         det = sim.detector
         self.pending: list[float] = []
-        self.committed: list[float] = []
+        self.committed: list[list[float]] = []  # one group per cycle end, as live
         self.ends: list[float] = []
         self._last: Any = None
         self._t_recorded_end = sim.readings[-1][0]
@@ -508,7 +548,8 @@ class _ManagerTap:
                 delta = (timestamp - self._last).total_seconds()
                 if 0.1 < delta < 1800:
                     self.pending.append(delta)
-            self._last = timestamp
+            if not synthetic:
+                self._last = timestamp
             orig_pr(power, timestamp, synthetic, observed)
 
         def on_state_change(old: str, new: str) -> None:
@@ -521,7 +562,12 @@ class _ManagerTap:
             if data.get("status") == "completed" and data.get("termination_reason") not in (
                 TerminationReason.USER, TerminationReason.FORCE_STOPPED,
             ):
-                self.committed.extend(self.pending)
+                # Live keeps the newest `_CYCLE_MAX_INTERVALS` (a bounded deque).
+                from custom_components.ha_washdata.learning import (  # noqa: PLC0415
+                    _CYCLE_MAX_INTERVALS,
+                )
+
+                self.committed.append(self.pending[-_CYCLE_MAX_INTERVALS:])
             self.pending.clear()
             orig_end(data)
 
@@ -578,6 +624,24 @@ def run_tail(sim: Any, cfg: Any) -> None:
         sim.detector.force_end(flush_ts)
 
 
+def finish_replay(sim: Any, cfg: Any, src: dict, recorded_stop: float, idle_hold: bool,
+                  tail: Callable[[], None]) -> bool:
+    """End a replay after the recorded trace; True when ``src`` kept a tail at or
+    above ``cfg``'s stop threshold (``idle_above_stop``).
+
+    With ``idle_hold`` such a cycle is force-ended at its last reading, as live
+    would once a watchdog gave up on it; anything else runs ``tail`` (the 0 W
+    quiet tail). The matched and the unmatched replays both end here.
+    """
+    level = post_cycle_level(_cycle_readings(src), recorded_stop)
+    idle_above = level is not None and level >= float(cfg.stop_threshold_w)
+    if idle_hold and idle_above:
+        sim.detector.force_end(sim.readings[-1][0] + timedelta(seconds=1))
+    else:
+        tail()
+    return idle_above
+
+
 def replay_one(src: dict, cfg: Any, match_store: Any, prebuilt: Any, options: dict,
                throttle_s: float | None, recorded_stop: float,
                idle_hold: bool = False) -> dict[str, Any] | None:
@@ -593,10 +657,12 @@ def replay_one(src: dict, cfg: Any, match_store: Any, prebuilt: Any, options: di
     pessimistic reading and records the force-end instead.
 
     Returns what the detector emitted (``captured``), when each end was detected
-    (``ends``, seconds from ``base``), the cadence intervals the manager would have
-    committed, ``idle_above_stop`` and ``work_end`` (the source's last reading at or
-    above the recorded stop threshold, the anchor of the end lag); None when the
-    trace is too short to replay.
+    (``ends``, seconds from ``base``), why the manager would not store each end
+    (``discarded``: ``ghost_rules.DISCARD_*`` or None, the replay's own rule, which
+    knows no end before the replay's first), the cadence intervals the manager
+    would have committed, ``idle_above_stop`` and ``work_end`` (the source's last
+    reading at or above the recorded stop threshold, the anchor of the end lag);
+    None when the trace is too short to replay.
     """
     cyc = src
     if throttle_s:
@@ -613,15 +679,10 @@ def replay_one(src: dict, cfg: Any, match_store: Any, prebuilt: Any, options: di
     sim.step(0, sim.n_readings)
     src_readings, _pts, src_base = playground._readings_from_cycle(src)  # noqa: SLF001
     work = [ts for ts, p in src_readings if p >= recorded_stop]
-    level = post_cycle_level(_cycle_readings(src), recorded_stop)
-    idle_above = level is not None and level >= float(cfg.stop_threshold_w)
-    if idle_hold and idle_above:
-        sim.detector.force_end(sim.readings[-1][0] + timedelta(seconds=1))
-    else:
-        run_tail(sim, cfg)
+    idle_above = finish_replay(sim, cfg, src, recorded_stop, idle_hold, lambda: run_tail(sim, cfg))
     return {
         "captured": copy.deepcopy(sim.captured), "ends": list(tap.ends),
-        "committed": list(tap.committed), "base": sim.base, "idle_above_stop": idle_above,
+        "discarded": list(sim.discarded), "committed": list(tap.committed), "base": sim.base, "idle_above_stop": idle_above,
         "work_end": (work[-1] - src_base).total_seconds() if work else None,
     }
 
@@ -660,7 +721,7 @@ def assemble(
 ) -> tuple[list[dict], list[float], dict[str, Any]]:
     """Store what the replays emitted, in history order, as the manager would.
 
-    Returns the new ``past_cycles``, the committed cadence intervals in cycle order,
+    Returns the new ``past_cycles``, the committed cadence intervals per detected cycle end, in order,
     and counts. ``replays`` maps a source index to :func:`replay_one`'s result; a
     source without one is kept as stored.
     """
@@ -692,7 +753,7 @@ def assemble(
             continue
         m["replayed"] += 1
         m["idle_above_stop"] += bool(rep.get("idle_above_stop"))
-        intervals.extend(rep["committed"])
+        intervals.extend(list(group) for group in rep["committed"])
         kept: list[dict] = []
         end_at: dict[int, float] = {}
         for i, cd in enumerate(rep["captured"]):
@@ -753,15 +814,44 @@ def assemble(
     return out, intervals, m
 
 
-def cadence(intervals: list[float]) -> tuple[float, float] | None:
-    """(p95, median) of the cadence model, or None while it holds fewer than 20.
+def stored_cycle_intervals(cycle: dict[str, Any]) -> list[float]:
+    """A stored cycle's update intervals as the live cadence model takes them.
 
-    ``StatisticalModel(max_samples=200)``: the newest 200 committed intervals.
+    ``LearningManager.process_power_reading`` times a real reading against the
+    sensor's previous real report (``manager._last_sensor_report``): the watchdog's
+    keepalives (the ``synthetic_offsets`` rows) neither add an interval nor move
+    that clock, so they are skipped. ``0.1 < dt < 1800`` s, oldest first. A trimmed
+    trace or a sensor swap mid-cycle is not visible here.
     """
-    ivs = intervals[-200:]
-    if len(ivs) < 20:
+    synthetic = synthetic_offset_keys(cycle) or set()
+    out: list[float] = []
+    prev: float | None = None
+    for t, _p in _cycle_readings(cycle):
+        if offset_key(t) in synthetic:
+            continue
+        if prev is not None and 0.1 < t - prev < 1800:
+            out.append(t - prev)
+        prev = t
+    return out
+
+
+def cadence(per_cycle: list[list[float]]) -> tuple[float, float] | None:
+    """(p95, median) the operational pass sizes from, as ``LearningManager.cadence``.
+
+    One ``learning.cycle_cadence`` summary per cycle that committed its intervals,
+    the median over the last ``CADENCE_RECENT_CYCLES`` (item 637); before any cycle
+    has 20 intervals, the newest 200 committed ones (``StatisticalModel``).
+    """
+    from custom_components.ha_washdata.learning import cycle_cadence, recent_cadence  # noqa: PLC0415
+
+    summaries = [s for s in (cycle_cadence(ivs) for ivs in per_cycle) if s is not None]
+    found = recent_cadence(summaries)
+    if found is not None:
+        return found
+    flat = [v for ivs in per_cycle for v in ivs][-200:]
+    if len(flat) < 20:
         return None
-    arr = np.array(ivs)
+    arr = np.array(flat)
     return float(np.percentile(arr, 95)), float(np.median(arr))
 
 
@@ -782,19 +872,24 @@ def run_passes(mgr: Any, cad: tuple[float, float] | None) -> dict[str, Any]:
         orig_apply(sug, **kwargs)
 
     eng.apply_suggestions = _capture
+
+    def gate(sug: dict[str, Any], owner: str) -> None:
+        # As LearningManager._run_pass: apply, then judge the stored set as a whole.
+        lm._apply_suggestions_and_notify(sug, owner=owner)  # noqa: SLF001
+        stored = {k: dict(v) for k, v in (mgr.profile_store.get_suggestions() or {}).items()
+                  if isinstance(v, dict)}
+        lm._withdraw_joint_drops(stored, eng.for_job().joint_end_gate_drops(stored))  # noqa: SLF001
+
     try:
-        gate = lm._apply_suggestions_and_notify  # noqa: SLF001
         if cad is not None:
-            gate(eng.for_job().generate_operational_suggestions(*cad))
-        gate(eng.for_job().generate_standby_floor_suggestions())
-        gate(eng.for_job().generate_model_suggestions())
-        gate(eng.for_job().generate_detection_suggestions())
-        labeled = [
-            c for c in mgr.profile_store.get_past_cycles()
-            if isinstance(c, dict) and c.get("profile_name") and c.get("profile_name") != "noise"
-            and c.get("power_data") and c.get("status") in ("completed", "force_stopped")
-        ]
-        gate(eng.for_job().run_batch_simulation(labeled))
+            gate(eng.for_job().generate_operational_suggestions(*cad), owner=OWNER_OPERATIONAL)
+        gate(eng.for_job().generate_standby_floor_suggestions(), owner=OWNER_STANDBY_FLOOR)
+        gate(eng.for_job().generate_start_threshold_suggestions(), owner=OWNER_START_THRESHOLD)
+        gate(eng.for_job().generate_model_suggestions(), owner=OWNER_MODEL)
+        gate(eng.for_job().generate_detection_suggestions(), owner=OWNER_DETECTION)
+        # The batch's own input (PR #529 review): untraced labelled cycles too, whose
+        # start and end bound the Min Off Gap merge ceiling.
+        gate(eng.for_job().run_batch_simulation(lm._batch_cycles()), owner=OWNER_BATCH)  # noqa: SLF001
     finally:
         eng.apply_suggestions = orig_apply
     return passed
@@ -807,13 +902,25 @@ def apply_all(
 
     ``refused`` is the (start, stop) pair when the handler refuses the apply (item
     515), with ``updates`` then empty: the user is stuck, which is not a fixed point.
+
+    The end-gate check runs as the handler runs it (PR #529 review): the handler's
+    own ``_drop_unsafe_end_gate_updates`` on the coerced values as written, cascade
+    flags dropped, which can withdraw a value the pass-time check on the stored set
+    let through (a muted or hidden key is judged there but never written).
     """
     updates: dict[str, Any] = {}
+    visible: dict[str, Any] = {}
     for key, item, _s, _c in ws_api._visible_suggestions(  # noqa: SLF001
         mgr.profile_store, merged, device_type
     ):
         val = item["value"]
+        visible[key] = item
         updates[key] = int(float(val)) if key in ws_api._SUGGESTION_INT_KEYS else float(val)  # noqa: SLF001
+    if updates and not ev.run_coro(ws_api._drop_unsafe_end_gate_updates(  # noqa: SLF001
+        ev._InlineHass(), mgr, visible, updates  # noqa: SLF001
+    )):
+        # The handler writes nothing and reports an error; here it is a harness bug.
+        raise RuntimeError(f"apply_all: the end-gate check failed on {sorted(updates)}")
     # Item 515: the handler refuses an apply that would leave stop >= start.
     pair = ws_api.inverted_threshold_pair(merged, {**merged, **updates}, device_type)
     if pair is not None:
@@ -961,6 +1068,8 @@ class DeviceLoop:
         self.base = ev.base_data(dev)
         self.past = list(self.base.get("past_cycles") or [])[-_cycle_cap(path):]
         self.entry_data, self.options = ev.entry_dicts(dev, {})
+        self.options0 = dict(self.options)  # the export's, for the unmatched arm
+        self.unmatched: dict[str, Any] | None = None
         # Every envelope rebuilt once with the current code (exports carry the ones the
         # exporting version built): the fixed match evidence for every round.
         mgr0 = _manager(self.entry_data, self.options, self.title, self.base)
@@ -1153,6 +1262,7 @@ class DeviceLoop:
             ],
             "cooldown_leaks": self.leaks, "lock_probe": self.lock_result,
             "legacy": list(self.legacy), "cpu_s": round(self.cpu, 1),
+            "unmatched": self.unmatched,
         }
 
 
@@ -1241,9 +1351,203 @@ def _drive(loops: list[DeviceLoop], jobs: int) -> None:
                             pending[pool.submit(_replay_task, *job)] = loop.path
 
 
+def _unmatched_span(points: list[tuple[float, float]], stop: float) -> tuple[float, float] | None:
+    """(first active offset, active span) of the readings above ``stop``; None with
+    fewer than ``MIN_ACTIVE_READINGS`` of them or no time between the first and last."""
+    act = [t for t, p in points if p > stop]
+    if len(act) < MIN_ACTIVE_READINGS or act[-1] - act[0] <= 0:
+        return None
+    return act[0], act[-1] - act[0]
+
+
+def _unmatched_split(ended: list[dict], points: list[tuple[float, float]], stop: float,
+                     base: datetime | None = None) -> bool | None:
+    """Not ONE stored cycle covering ~all of the trace's active span.
+
+    As ``min_off_gap_eval._is_split``: a fragment shorter than the completion
+    minimum is dropped silently, so a count of records alone misses a truncation.
+    The record must last 90% of the active span and, when ``base`` (the replay's
+    offset 0) places it, cover 90% of it (PR #529 review): a record reopened late in
+    the activity can reach that length on the synthetic quiet tail alone, and one
+    opened before the activity on a lead-in can end short of it.
+
+    None when the trace has no active span (``_unmatched_span``): nothing was
+    measured, which is neither a split nor a pass (PR #529 review).
+    """
+    active = _unmatched_span(points, stop)
+    if active is None:
+        return None
+    first, span = active
+    if len(ended) != 1:
+        return True
+    duration = float(ended[0].get("duration") or 0.0)
+    if duration < 0.9 * span:
+        return True
+    start = _parse_utc(ended[0].get("start_time")) if base is not None else None
+    if start is None:
+        return False
+    opened = (start - base).total_seconds()
+    covered = min(opened + duration, first + span) - max(opened, first)
+    return covered < 0.9 * span
+
+
+class _NoProfiles:
+    """The device's store with nothing to match (``has_real_profiles`` False, the
+    gate the replay's matcher checks first). Everything else is the store's own:
+    the terminal-drop baseline, the duration cap's longest programme."""
+
+    has_real_profiles = False
+
+    def __init__(self, store: Any) -> None:
+        self._store = store
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._store, name)
+
+
+def _unmatched_task(job: tuple[str, str, dict, int]) -> tuple[str, str, int, dict]:
+    """Worker: one stored cycle replayed with nothing to match, under ``options``.
+
+    No matcher: what a new programme, a first run or an ambiguous match gets (no
+    Smart Termination, no matched deferral), the case the matched in-sample rounds
+    above cannot show (audit 2026-11-16, register item 638). The device's history
+    stays (`_NoProfiles`): with ML models on, an unmatched run can still end on the
+    learned terminal drop (PR #529 review).
+
+    A cycle it cannot measure comes back as ``{"skipped": reason}``, never as
+    nothing (PR #529 review: it vanished from both summaries).
+    """
+    path, arm, options, idx = job
+    dev = _DEVICES[path]
+    src = dev.past[idx]
+    pts = _real_readings(src)
+    if len(pts) < MIN_READINGS:
+        return path, arm, idx, {"skipped": f"fewer than {MIN_READINGS} real readings"}
+    stop = dev.recorded_stop
+    if _unmatched_span(pts, stop) is None:
+        return path, arm, idx, {"skipped": (
+            f"fewer than {MIN_ACTIVE_READINGS} real readings above the recorded stop threshold"
+            f" ({stop:g} W): no active span to cover")}
+    cfg = dev.detector_config(options)
+    # The input `replay_one` gives the matched rounds: the stored cycle (its
+    # keepalive rows marked) thinned by the reading throttle when these options
+    # raise `sampling_interval` above the recorded one.
+    cyc = src
+    s_now = float(options.get(CONF_SAMPLING_INTERVAL, dev.s0))
+    if s_now > dev.s0:
+        thinned = _throttle(_cycle_readings(src), s_now, float(cfg.min_power))
+        if len(thinned) < len(_cycle_readings(src)):
+            cyc = dict(src, power_data=[[round(t, 1), p] for t, p in thinned])
+    match_mgr, _prebuilt = dev.match_side(options)
+    sim = playground._DetailSim(  # noqa: SLF001
+        cyc, cfg, None, _NoProfiles(match_mgr.profile_store), {**dev.entry_data, **options},
+        None, compute_series=False,
+    )
+    if not sim.ready:
+        # Only the reading throttle can leave a replayable trace this short.
+        return path, arm, idx, {"skipped": "too few readings left after the reading throttle to replay"}
+    # Each detected end with the record it closed, so the lag is the kept cycle's.
+    ends: list[tuple[float, dict]] = []
+    det = sim.detector
+    original = det._on_cycle_end  # noqa: SLF001
+
+    def _end(data: dict, _original: Any = original) -> None:
+        ends.append((float(sim.cursor["t"]), data))
+        _original(data)
+
+    det._on_cycle_end = _end  # noqa: SLF001
+    sim.step(0, sim.n_readings)
+    # `--idle-hold` as the matched rounds take it (PR #529 review): a kept tail
+    # at or above the new stop is force-ended, not given an invented 0 W tail.
+    finish_replay(sim, cfg, src, stop, dev.idle_hold, sim.run_tail)
+    ended = list(sim.kept)
+    # The end lag as `replay_one` measures it: detection time less the source's
+    # last reading at or above the recorded stop, both from the cycle's base.
+    src_readings, _pts, src_base = playground._readings_from_cycle(src)  # noqa: SLF001
+    work = [ts for ts, p in src_readings if p >= stop]
+    work_end = (work[-1] - src_base).total_seconds() if work else None
+    # The last end the replay keeps (PR #529 review): a dishwasher pump-out the
+    # manager discards ends later, and its time is not this cycle's end.
+    kept = {id(e) for e in ended}
+    kept_ends = [t for t, data in ends if id(data) in kept]
+    return path, arm, idx, {
+        "split": _unmatched_split(ended, pts, stop, src_base),
+        "interrupted": any(e.get("status") == "interrupted" for e in ended),
+        # `--idle-hold` force-ends a kept tail at or above the stop: one record over
+        # the whole span is no split, and no completion either (PR #529 review).
+        "force_stopped": any(e.get("status") == "force_stopped" for e in ended),
+        "lag": (kept_ends[-1] - work_end) if kept_ends and work_end is not None else None,
+    }
+
+
+def _unmatched_summary(rows: dict[int, dict]) -> dict[str, Any]:
+    """The measured cycles' splits, interruptions, force stops and end lag; the
+    skipped ones by index with their reason (``cycles`` counts only the measured)."""
+    measured = {i: r for i, r in rows.items() if "skipped" not in r}
+    lags = [r["lag"] for r in measured.values() if r["lag"] is not None]
+    return {
+        "cycles": len(measured),
+        "splits": sorted(i for i, r in measured.items() if r["split"]),
+        "interrupted": sorted(i for i, r in measured.items() if r["interrupted"]),
+        "force_stopped": sorted(i for i, r in measured.items() if r.get("force_stopped")),
+        "lag_med": round(float(np.median(lags))) if lags else None,
+        "skipped": sorted([i, r["skipped"]] for i, r in rows.items() if "skipped" in r),
+    }
+
+
+def _unmatched_arm(loops: list["DeviceLoop"], jobs: int) -> None:
+    """Every replayable cycle, unmatched, under the export's options and the loop's
+    last ones; fills ``loop.unmatched``. Same options -> replayed once."""
+    jobs_list: list[tuple[str, str, dict, int]] = []
+    for loop in loops:
+        same = _opts_key(loop.options0) == _opts_key(loop.options)
+        for idx, cycle in enumerate(loop.past):
+            if not _replayable(cycle):
+                continue
+            jobs_list.append((loop.path, "initial", loop.options0, idx))
+            if not same:
+                jobs_list.append((loop.path, "final", loop.options, idx))
+    found: dict[tuple[str, str], dict[int, dict]] = {}
+    if jobs <= 1:
+        outs = [_unmatched_task(j) for j in jobs_list]
+    else:
+        import multiprocessing  # noqa: PLC0415
+
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore", message=r".*use of fork\(\) may lead to deadlocks.*",
+                category=DeprecationWarning,
+            )
+            with ProcessPoolExecutor(
+                max_workers=jobs, mp_context=multiprocessing.get_context("fork"), initializer=_quiet,
+            ) as pool:
+                outs = list(pool.map(_unmatched_task, jobs_list, chunksize=4))
+    for path, arm, idx, row in outs:
+        found.setdefault((path, arm), {})[idx] = row
+    for loop in loops:
+        initial = found.get((loop.path, "initial"), {})
+        final = found.get((loop.path, "final"), initial)
+        a, b = _unmatched_summary(initial), _unmatched_summary(final)
+        ids = {i: loop.past[i].get("id") for i in range(len(loop.past))}
+        # Every replayable cycle is compared or listed here with its reason, per
+        # option set (the same set is replayed once).
+        skipped = [{"id": ids[i], "options": "export", "reason": why} for i, why in a["skipped"]]
+        if final is not initial:
+            skipped += [{"id": ids[i], "options": "fixed point", "reason": why} for i, why in b["skipped"]]
+        loop.unmatched = {
+            "initial": a, "final": b,
+            "splits_added": [ids[i] for i in b["splits"] if i not in a["splits"]],
+            "interrupted_added": [ids[i] for i in b["interrupted"] if i not in a["interrupted"]],
+            "force_stopped_added": [
+                ids[i] for i in b["force_stopped"] if i not in a["force_stopped"]
+            ],
+            "skipped": skipped,
+        }
+
+
 def run(corpus: Path, rounds: int = DEFAULT_ROUNDS, jobs: int = 1, only: list[str] | None = None,
         legacy: tuple[str, ...] = (), keep_locks: bool = False, lock_probe: bool = True,
-        idle_hold: bool = False) -> list[dict]:
+        idle_hold: bool = False, unmatched: bool = True) -> list[dict]:
     """Run the loop on every selected device; one result per device."""
     paths = device_paths(corpus, only)
     # Biggest first: their round-0 replays start before anything else is queued.
@@ -1255,6 +1559,8 @@ def run(corpus: Path, rounds: int = DEFAULT_ROUNDS, jobs: int = 1, only: list[st
         _DEVICES.update({loop.path: loop for loop in loops})
         try:
             _drive(loops, jobs)
+            if unmatched:
+                _unmatched_arm(loops, jobs)
         finally:
             _DEVICES.clear()
             _MATCH_SIDES.clear()
@@ -1291,6 +1597,23 @@ def failures(results: list[dict]) -> list[str]:
                 f"{r['device']}: the loop split {len(r['fragmented'])} labelled cycle(s) "
                 f"{[(d['label'], d['after']) for d in r['fragmented']]}"
             )
+        um = r.get("unmatched") or {}
+        if um.get("splits_added"):
+            out.append(
+                f"{r['device']}: the fixed point splits {len(um['splits_added'])} cycle(s) "
+                f"replayed unmatched {um['splits_added']}"
+            )
+        if um.get("interrupted_added"):
+            out.append(
+                f"{r['device']}: the fixed point stores {len(um['interrupted_added'])} cycle(s) "
+                f"replayed unmatched as interrupted {um['interrupted_added']}"
+            )
+        if um.get("force_stopped_added"):
+            out.append(
+                f"{r['device']}: the fixed point force-stops {len(um['force_stopped_added'])}"
+                f" cycle(s) replayed unmatched (kept tail at or above its stop)"
+                f" {um['force_stopped_added']}"
+            )
         idle = [row["replay"]["idle_above_stop"] for row in r["rounds"]]
         if idle and idle[-1] > idle[0]:
             out.append(
@@ -1325,6 +1648,15 @@ def print_report(results: list[dict], rounds: int) -> None:
         print(f"\n{r['device']} [{r['device_type']}] cycles={r['cycles']} replayable={r['replayable']}"
               f" applies={len(r['rounds']) - 1} fixed_point={r['fixed_point']} cpu={r['cpu_s']}s"
               f"\n    replay first->last round: {moved}{lag_s}")
+        um = r.get("unmatched")
+        if um:
+            a, b = um["initial"], um["final"]
+            print(f"    unmatched export->fixed point: splits={len(a['splits'])}->{len(b['splits'])}"
+                  f" interrupted={len(a['interrupted'])}->{len(b['interrupted'])}"
+                  f" force_stopped={len(a['force_stopped'])}->{len(b['force_stopped'])}"
+                  f" lag_med={_fmt_s(a['lag_med'])}->{_fmt_s(b['lag_med'])}")
+            for s in um.get("skipped") or []:
+                print(f"    unmatched skipped ({s['options']} options): {s['id']}: {s['reason']}")
         for key, k in r["keys"].items():
             seq = " -> ".join(_fmt(v) for v in k["values"])
             print(f"    {key:34s} {k['verdict']:10s} applies={k['applies']}  {seq}")
@@ -1362,6 +1694,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--no-lock-probe", action="store_true")
     ap.add_argument("--idle-hold", action="store_true",
                     help="a kept tail at/above the new stop threshold is standby: force-end, no 0 W tail")
+    ap.add_argument("--no-unmatched", action="store_true",
+                    help="skip the unmatched replay of the export's vs the fixed point's options")
     ap.add_argument("--corpus", default=str(REPO / "cycle_data"))
     ap.add_argument("--json", help="write the per-device results here")
     a = ap.parse_args(argv)
@@ -1371,7 +1705,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     t0 = time.time()
     results = run(corpus, a.rounds, a.jobs, a.device, tuple(a.legacy), a.keep_locks,
-                  not a.no_lock_probe, a.idle_hold)
+                  not a.no_lock_probe, a.idle_hold, unmatched=not a.no_unmatched)
     if not results:
         print("no device with enough re-detectable history")
         return 2

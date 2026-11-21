@@ -17,11 +17,12 @@
 """Issue #445 cause 1, surfaced: the appliance idles ABOVE its stop threshold.
 
 ``CycleDetector`` only starts the off delay once power is BELOW
-``stop_threshold_w``, so an appliance whose standby draw sits above it can never
-finish a cycle on its own. The evidence is in the stored cycles: a timeout cycle
-snaps back to the last reading above the threshold and a force-stopped one keeps
-its tail, so in both cases the LAST stored sample is the level the appliance was
-sitting at when the cycle closed.
+``stop_threshold_w``, so an appliance whose standby draw sits above it cannot
+finish a cycle through it. The evidence is in the stored cycles, judged by how
+each one ended (#525): a timeout / Smart end saw the power below the threshold;
+a hand or force stop keeps its tail, so its last sample and settled tail are
+what it drew while waiting. The fixtures below carry no termination reason, so
+they are read as such stops.
 
 Validated against the reporters' own exports (now in cycle_data/). Of nine real
 devices exactly one qualifies: #445's Miele, every cycle ending 3.2-7.5 W against
@@ -151,9 +152,23 @@ def test_a_genuine_standby_draw_is_still_reported() -> None:
     assert res["idle_w"] == pytest.approx(3.35, abs=0.1)
 
 
-def test_a_consistent_level_with_one_zero_cycle_is_not_reported() -> None:
-    """The single counter-example wins: seven consistent, one at zero."""
+def test_one_zero_among_hand_stops_at_standby_does_not_hide_it() -> None:
+    """#525 redesign: the idling cycles must outnumber the ones that went below.
+
+    Seven cycles stopped by hand at a consistent 3.4 W and one at 0 W (the
+    appliance switched off before the stop): the "every cycle" rule hid this, and
+    two corpus devices stopped by hand 6 of 8 times were missed exactly so.
+    """
     cycles = [_trace(3.4, cid=f"c{i}") for i in range(7)] + [_trace(0.0, cid="z")]
+    res = detect_standby_above_stop(cycles, 2.56)
+    assert res is not None
+    assert (res["cycles_above"], res["cycles_checked"]) == (7, 8)
+
+
+def test_an_even_split_is_not_reported() -> None:
+    cycles = [_trace(3.4, cid=f"c{i}") for i in range(4)] + [
+        _trace(0.0, cid=f"z{i}") for i in range(4)
+    ]
     assert detect_standby_above_stop(cycles, 2.56) is None
 
 

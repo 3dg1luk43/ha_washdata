@@ -19,6 +19,7 @@
 from __future__ import annotations
 
 from asyncio import Task
+from datetime import datetime
 import hashlib
 import logging
 import math
@@ -43,20 +44,8 @@ from homeassistant.util import dt as dt_util
 
 from .time_utils import utc_now
 from .const import (
-    CONF_AUTO_LABEL_CONFIDENCE,
     DOMAIN,
-    CONF_END_ENERGY_THRESHOLD,
-    CONF_MIN_OFF_GAP,
-    CONF_MIN_POWER,
-    CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-    CONF_OFF_DELAY,
-    CONF_PROFILE_MATCH_INTERVAL,
-    CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-    CONF_START_THRESHOLD_W,
-    CONF_STOP_THRESHOLD_W,
     SIGNAL_WASHER_UPDATE,
-    CONF_WATCHDOG_INTERVAL,
     CONF_EXPOSE_DEBUG_ENTITIES,
     CONF_POWER_PROFILE_INTERVAL_MIN,
     DEFAULT_POWER_PROFILE_INTERVAL_MIN,
@@ -75,11 +64,16 @@ from .const import (
     STATE_FORCE_STOPPED,
     STATE_UNKNOWN,
     STATE_CLEAN,
+    TRIGGER_PROGRAM_MISMATCH,
 )
 from .manager import WashDataManager
-from .profile_store import cycle_report_energy_wh
+from .profile_store import _parse_start_dt, cycle_report_energy_wh
+from .trigger_rules import trigger_offered
 
 _LOGGER = logging.getLogger(__name__)
+
+# Last Cycle Start: no run starts at or before it (a 0 stamp is a placeholder).
+_EPOCH = datetime(1970, 1, 1, tzinfo=dt_util.UTC)
 
 # The per-profile count sensors' own signal (register item 456). They read only
 # the profile summaries and envelopes, which change at a cycle end or a profile
@@ -194,6 +188,7 @@ async def async_setup_entry(
         WasherLastCycleDurationSensor(manager, entry),
         WasherLastCycleEnergySensor(manager, entry),
         WasherLastCycleCostSensor(manager, entry),
+        WasherLastCycleStartSensor(manager, entry),
     ]
 
     # Add pump-specific sensors
@@ -346,6 +341,14 @@ class WasherStateSensor(WasherBaseSensor):
         envelope_position = self._manager.envelope_position
         if envelope_position is not None:
             attrs["envelope_position"] = envelope_position
+        # #530: the running cycle does not look like the program picked by hand
+        # (the program_mismatch trigger). Visible only; cleared with the pick and
+        # at the next cycle.
+        if trigger_offered(TRIGGER_PROGRAM_MISMATCH, self._manager.device_type):
+            mismatch = getattr(self._manager, "program_mismatch", None)
+            attrs["program_mismatch"] = isinstance(mismatch, dict)
+            if isinstance(mismatch, dict):
+                attrs["program_mismatch_looks_like"] = mismatch.get("looks_like")
         # Post-cycle anomaly data (underrun, energy spike/low) from last completed cycle.
         last_post = self._manager.last_cycle_post_anomaly
         if isinstance(last_post, dict):
@@ -1042,54 +1045,45 @@ class WasherSuggestionsSensor(WasherBaseSensor):
         )
         super().__init__(manager, entry)
 
-    @staticmethod
-    def _applicable_suggestion_keys() -> tuple[str, ...]:
-        """Return suggestion keys that can be applied in options flow."""
-        return (
-            CONF_MIN_POWER,
-            CONF_OFF_DELAY,
-            CONF_WATCHDOG_INTERVAL,
-            CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-            CONF_PROFILE_MATCH_INTERVAL,
-            CONF_AUTO_LABEL_CONFIDENCE,
-            CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-            CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-            CONF_MIN_OFF_GAP,
-            CONF_STOP_THRESHOLD_W,
-            CONF_START_THRESHOLD_W,
-            CONF_END_ENERGY_THRESHOLD,
-        )
+    def _visible(self) -> dict[str, Any]:
+        """What the Settings list shows: the one shared filter (audit 2026-11-16).
 
-    def _count_applicable_suggestions(self, suggestions: dict[str, Any]) -> int:
-        """Count only suggestions with values that can be applied from options flow."""
-        count = 0
-        for key in self._applicable_suggestion_keys():
-            entry = suggestions.get(key)
-            if isinstance(entry, dict) and entry.get("value") is not None:
-                count += 1
-        return count
+        This sensor kept its own key list, which counted a retired key, missed
+        others and counted entries already applied by hand, so its badge (and any
+        automation on it) stayed on while the panel showed nothing.
+        """
+        from .ws_api import _visible_suggestions  # noqa: PLC0415 - avoids a module cycle
+
+        entry = self._manager.config_entry
+        merged = {**entry.data, **entry.options}
+        try:
+            rows = _visible_suggestions(
+                self._manager.profile_store, merged, self._manager.device_type
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            return {}
+        return {key: item for key, item, _sug, _cur in rows}
 
     @property
     def native_value(self):  # type: ignore[override]
-        suggestions = self._manager.suggestions
-        if not suggestions:
-            return 0
-        return self._count_applicable_suggestions(suggestions)
+        # Kept for the attributes HA reads next in the same state write, so the
+        # shared filter runs once per write, not twice (review of PR #529).
+        self._visible_rows = self._visible()
+        return len(self._visible_rows)
 
     @property
     def extra_state_attributes(self):  # type: ignore[override]
-        suggestions: dict[str, Any] = self._manager.suggestions or {}
-        count = self._count_applicable_suggestions(suggestions)
-        applicable_keys = sorted(
-            k for k in self._applicable_suggestion_keys()
-            if isinstance(suggestions.get(k), dict) and suggestions[k].get("value") is not None
-        )
+        visible = self.__dict__.pop("_visible_rows", None)
+        if visible is None:
+            visible = self._visible()
+        count = len(visible)
+        applicable_keys = sorted(visible)
 
         attrs: dict[str, Any] = {
             "has_actionable_suggestions": count > 0,
             "suggestions_count": count,
             "suggested_option_keys": applicable_keys,
-            "suggestions": suggestions,
+            "suggestions": visible,
         }
         return attrs
 
@@ -1289,6 +1283,41 @@ class WasherLastCycleEnergySensor(WasherLastCycleSensor):
 
     def _figure(self, cycle: dict[str, Any]) -> float | None:
         return round(cycle_report_energy_wh(cycle) / 1000.0, 3)
+
+
+class WasherLastCycleStartSensor(WasherLastCycleSensor):
+    """When the last run started, as a timestamp (#501 follow-up).
+
+    Dashboard cards that show "last washed" take an entity whose state is a
+    datetime; the other last-cycle sensors only carry it as an attribute.
+    """
+
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
+        self.entity_description = SensorEntityDescription(
+            key="last_cycle_start",
+            translation_key="last_cycle_start",
+            device_class=SensorDeviceClass.TIMESTAMP,
+            icon="mdi:clock-start",
+        )
+        super().__init__(manager, entry)
+
+    def _figure(self, cycle: dict[str, Any]) -> Any:
+        # The store's own reading (`last_finished_cycle` picked the cycle by it):
+        # quoted unix seconds too, and a naive stamp as UTC (PR #529 review). A
+        # non-finite or out-of-range number reads None there.
+        parsed = _parse_start_dt(cycle.get("start_time"))
+        if parsed is None:
+            return None
+        try:
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=dt_util.UTC)
+            # Inside the guard: 0001-01-01T00:00+01:00 parses, but is before year 1 in UTC.
+            start = dt_util.as_utc(parsed)
+        except (OverflowError, ValueError):
+            return None
+        # No start at or before the epoch, in whichever form it was stored: 0 and
+        # "0" are one instant to the store, so both read unknown (PR #529 review).
+        return start if start > _EPOCH else None
 
 
 class WasherLastCycleCostSensor(WasherLastCycleSensor):

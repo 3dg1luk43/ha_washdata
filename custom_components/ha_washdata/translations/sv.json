@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Kostnad för senaste cykeln"
+      },
+      "last_cycle_start": {
+        "name": "Start för senaste cykeln"
       }
     },
     "select": {
@@ -572,6 +575,7 @@
       "phase_started": "Fas startad",
       "finishing_soon": "Snart klar",
       "cycle_overrun": "Cykel kör för länge",
+      "program_mismatch": "Pågående program skiljer sig från det valda",
       "cycle_paused": "Cykel pausad",
       "cycle_resumed": "Cykel återupptagen",
       "still_tumbling": "Torktumlaren tumlar fortfarande efter cykeln",
@@ -646,6 +650,16 @@
         "percent": {
           "name": "Längre med",
           "description": "Procent över programmets normala varaktighet."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Pågående program skiljer sig från det valda",
+      "description": "Utlöses en gång när cykeln passar bättre till ett annat program än det du har valt. Ett nytt val startar en ny kontroll.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Endast när detta program är valt, med exakt namn. Lämna tomt för vilket program som helst."
         }
       }
     },

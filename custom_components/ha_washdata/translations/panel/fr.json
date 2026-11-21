@@ -1001,6 +1001,7 @@
     "sug_muted": "Ce paramètre ne sera plus suggéré",
     "sug_mute_failed": "Impossible de masquer la suggestion",
     "sug_unmuted_all": "Les suggestions masquées ont été réinitialisées",
+    "sug_unmute_incomplete": "La réinitialisation n'a pas abouti : certaines suggestions sont toujours masquées. Réessayez.",
     "n_suggestions_muted": "{count} suggestions masquées ; le réglage automatique ne les proposera plus.",
     "n_suggestions_muted_one": "{count} suggestion masquée ; le réglage automatique ne la proposera plus.",
     "n_suggestions_muted_many": "{count} suggestions masquées ; le réglage automatique ne les proposera plus.",
@@ -1053,6 +1054,10 @@
     "pg_in_sample_note": "Ces cycles ont servi à construire les profils auxquels ils sont comparés, les résultats sont donc optimistes : attendez-vous à un peu moins de correspondances justes sur de nouveaux cycles.",
     "hist_tail_trimmed": "{min} min d'attente après la fin du cycle ont été supprimées, comme le fait l'intégration en direct",
     "invalid_threshold_pair": "Le Seuil d'arrêt ({stop} W) doit être inférieur au Seuil de démarrage ({start} W). Rien n'a été enregistré ; modifiez les deux ensemble.",
+    "end_gate_check_failed": "Les réglages de temporisation suggérés n'ont pas pu être vérifiés au regard des pauses de cet appareil. Rien n'a été enregistré ; réessayez.",
+    "analysis_superseded": "Les réglages ou les données des cycles ont changé pendant l'analyse. Relancez-la.",
+    "analysis_check_failed": "Les réglages de temporisation suggérés n'ont pas pu être vérifiés au regard des pauses de cet appareil. Relancez-la.",
+    "apply_cycles_changed": "Un cycle a été enregistré pendant l'application des suggestions. Aucun réglage n'a été modifié et les suggestions ont été effacées. Relancez l'analyse des suggestions.",
     "hist_truncated": "arrêté à la limite de {n} mesures, le reste de l'historique n'a donc pas été analysé",
     "hist_warn_kw": "La mesure la plus élevée n'est que de {w}. Ce capteur semble indiquer des kilowatts ; WashData a besoin de watts, donc aucun cycle ne peut être détecté.",
     "hist_warn_naive_time": "{n} horodatages n'ont pas de fuseau horaire et ont été lus en UTC. Si le fichier est en heure locale, les cycles sont décalés de votre écart avec UTC et des mesures proches d'un changement d'heure peuvent être perdues.",
@@ -1533,12 +1538,12 @@
       "doc": "Ce qu'ouvre un appui sur la notification de cet appareil. Vide : le panneau WashData sur cet appareil. Saisissez un chemin de tableau de bord (p. ex. /lovelace/laundry) ou une URL, ou « none » pour aucune action."
     },
     "door_opens_at_end": {
-      "label": "La porte s'ouvre automatiquement en fin de cycle",
-      "doc": "Pour les lave-vaisselle qui ouvrent la porte en fin de cycle pour sécher (p. ex. AirDry). Une porte restée ouverte pendant le délai ci-dessous termine le cycle au lieu de le mettre en pause ; une brève ouverture est ignorée. Nécessite une Entité capteur de porte."
+      "label": "L'ouverture de la porte termine le cycle",
+      "doc": "Avec une Entité capteur de porte, une porte restée ouverte pendant le délai ci-dessous alors que la puissance est basse termine le cycle au lieu de le mettre en pause. En pause, cela ne se produit qu'une fois le programme reconnu presque fini ; une pause en milieu de programme reste donc une pause."
     },
     "door_end_dwell_seconds": {
       "label": "Durée d'attente porte ouverte",
-      "doc": "Avec « La porte s'ouvre automatiquement en fin de cycle » activé : durée pendant laquelle la porte doit rester ouverte avant la fin du cycle. Assez longue pour ignorer l'ajout d'une assiette (60 s par défaut)."
+      "doc": "Avec « L'ouverture de la porte termine le cycle » activé : durée pendant laquelle la porte doit rester ouverte avant la fin du cycle. Assez longue pour ignorer l'ajout d'une assiette (60 s par défaut)."
     },
     "profile_evidence_sources": {
       "label": "Cycles qui façonnent un programme",
@@ -1672,6 +1677,8 @@
     "working": "Traitement…",
     "torn_pick": "{a} ou {b} ?",
     "torn_tip": "WashData ne sait pas encore distinguer ces deux programmes, choisissez donc celui qui est en cours pour étiqueter ce cycle en conséquence (l'option Détection automatique annule ce choix).",
+    "program_mismatch": "Ressemble plutôt à {program}",
+    "program_mismatch_tip": "Ce cycle ressemble nettement plus à {program} qu'à {selected}, mais WashData conserve le programme que vous avez choisi.",
     "match_uncertain": "Incertain : {top} ou {runner}",
     "match_uncertain_single": "Incertain : peut-être {top}",
     "match_sure": "~{pct} % de certitude",
@@ -1766,6 +1773,8 @@
     "settings_reverted": "Paramètres rétablis ; rechargement de l'intégration",
     "settings_saved": "Paramètres enregistrés ; rechargement de l'intégration",
     "suggestions_applied": "Suggestions appliquées ; rechargement de l'intégration",
+    "suggestions_none_applied": "Aucun paramètre modifié : les suggestions sélectionnées ne s'appliquent plus",
+    "suggestions_changed": "Les suggestions ont changé depuis que vous les avez consultées. Rien n'a été enregistré ; vérifiez-les et appliquez-les à nouveau.",
     "suggestions_dismissed": "Suggestions rejetées",
     "apply_failed": "Échec de l'application : {error}",
     "delete_failed": "Échec de la suppression : {error}",
@@ -1923,6 +1932,7 @@
     },
     "reason": {
       "completion_min_seconds": "La moitié de la durée p05 des cycles propres ({minutes} min) sur {cycles} cycles ; filtre les cycles fantômes.{excl}",
+      "completion_min_seconds_capped": "Limité à {cap} pour que les programmes les plus courts comptent encore ; la moitié de la durée p05 des cycles propres ({minutes} min, {cycles} cycles) serait plus longue.{excl}",
       "match_interval": "D'après la cadence de mise à jour observée (médiane={median}s) * 10.",
       "match_interval_capped": "Plafonné pour que {persistence} correspondances consécutives tiennent dans {pct} % du programme le plus court ({shortest}s) ; la cadence de mise à jour seule (médiane={median}s) aurait suggéré un intervalle plus long.",
       "match_interval_floored": "Le programme le plus court ({shortest}s) limiterait cette valeur à {cap}s, sous le minimum de {minimum}s, donc le minimum est utilisé : {persistence} correspondances consécutives prennent {budget}s, plus de {pct}% de ce programme. La correspondance ne tourne qu'à l'arrivée d'une mesure (médiane={median}s), cela ne coûte donc rien.",
@@ -1931,7 +1941,6 @@
       "min_off_gap_bridge": "Dimensionné pour couvrir la plus longue période calme au sein d'un cycle : {span}s + 60s de marge, à partir de {spans} intervalles couverts sur {cycles} cycles propres (reste sous votre intervalle minimal de {ceiling}s entre deux charges consécutives).",
       "min_power": "40% de la puissance active la plus basse au p05 ({p05}W) sur {cycles} cycles propres, pour garder le seuil d'arrêt sous la consommation réelle.{excl}",
       "no_update_timeout": "D'après la cadence de mise à jour observée (p95={p95}s) * 20 (min 60s).",
-      "off_delay_cadence": "D'après la cadence de mise à jour observée (p95={p95}s) * 5",
       "off_delay_device_floor": "Minimum de sécurité spécifique à l'appareil utilisé pour {device} ({floor}s).",
       "off_delay_generic_floor": "Minimum de sécurité générique utilisé ({floor}s).",
       "off_delay_pauses": "Dimensionné pour dépasser les vraies pauses : pause intra-cycle p95 {p95}s + 60s de marge, à partir de {pauses} pauses sur {cycles} cycles propres (plancher {floor}s).",
@@ -1940,7 +1949,8 @@
       "watchdog": "Maintenu aussi bas que possible en toute sécurité (juste au-dessus de l'écart de mise à jour p95 de {p95}s et au moins 2x l'intervalle d'échantillonnage de {median}s, min 30s) pour détecter rapidement les blocages sans faux arrêts.",
       "end_energy_floor": "Relevé au plancher qu'impliquent le seuil d'arrêt ({stop} W) sur le délai d'arrêt ({off_delay} s) ; en dessous, le cycle ne peut se terminer que par une voie de secours.",
       "max_duration_ratio_default": "Retour à la valeur par défaut : un plafond plus bas rejette le bon programme chaque fois qu'un cycle dure plus longtemps que d'habitude.",
-      "min_duration_ratio_default": "Retour à la valeur par défaut : un plancher plus haut empêche de reconnaître un cycle en cours tant qu'il n'est pas bien avancé."
+      "min_duration_ratio_default": "Retour à la valeur par défaut : un plancher plus haut empêche de reconnaître un cycle en cours tant qu'il n'est pas bien avancé.",
+      "start_above_running": "La puissance de fonctionnement basse typique de cet appareil est de {low} W, mais le seuil de démarrage est de {start} W : un cycle à ce niveau ne démarre donc jamais. Seuil de démarrage réglé à la moitié de ce niveau, seuil d'arrêt en dessous."
     },
     "exclusions": {
       "summary": "{total} cycle(s) mal détecté(s) exclu(s) : {parts}.",
@@ -2251,6 +2261,9 @@
     },
     "cycle_overrun": {
       "name": "Cycle en retard"
+    },
+    "program_mismatch": {
+      "name": "Le programme en cours diffère de celui choisi"
     },
     "cycle_paused": {
       "name": "Cycle en pause"

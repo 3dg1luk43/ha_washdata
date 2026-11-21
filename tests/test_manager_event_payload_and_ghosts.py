@@ -262,7 +262,8 @@ async def test_dishwasher_pump_out_is_suppressed(
     manager._on_cycle_end(cycle_data)
     await hass.async_block_till_done()
 
-    manager._handle_noise_cycle.assert_called_once_with(16.1)
+    # A pump-out belongs to the cycle before it: not counted as a ghost.
+    manager._handle_noise_cycle.assert_not_called()
     manager._async_process_cycle_end.assert_not_called()
 
 

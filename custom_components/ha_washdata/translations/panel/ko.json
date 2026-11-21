@@ -1026,6 +1026,7 @@
         "sug_muted": "이 설정은 더 이상 제안되지 않습니다",
         "sug_mute_failed": "제안을 음소거할 수 없습니다",
         "sug_unmuted_all": "뮤트된 제안을 초기화했습니다",
+        "sug_unmute_incomplete": "초기화가 완료되지 않았습니다. 일부 제안이 아직 뮤트되어 있습니다. 다시 시도하세요.",
         "n_suggestions_muted": "제안 {count}개가 뮤트됨. 자동 튜너가 이 제안들을 다시 제안하지 않습니다.",
         "n_suggestions_muted_other": "제안 {count}개가 뮤트됨. 자동 튜너가 이 제안들을 다시 제안하지 않습니다.",
         "font_size_hint": "이 패널의 모든 내용을 크거나 작게 표시합니다. 이 기기의 내 계정에 적용됩니다.",
@@ -1088,6 +1089,10 @@
         "cycle_context_none": "레코더에 이 사이클 전후의 측정값이 없습니다(Home Assistant는 기본적으로 10일간의 이력을 보관합니다).",
         "cycle_context_tip": "표시 전용입니다. 이 사이클 전후의 전력 센서 레코더 이력을 아직 남아 있으면 보여 줍니다. 실패한 시작 시도를 이후 사이클에 포함하려면 곡선 프리롤(설정 > 감지 > 사이클 시작)을 사용하세요. 저장되는 소요 시간이 바뀝니다.",
         "invalid_threshold_pair": "중지 임계값({stop} W)은 시작 임계값({start} W)보다 낮아야 합니다. 아무것도 저장되지 않았습니다. 두 값을 함께 변경하세요.",
+        "end_gate_check_failed": "제안된 타이밍 설정을 이 기기의 일시 정지와 대조해 확인할 수 없었습니다. 아무것도 저장되지 않았습니다. 다시 시도하세요.",
+        "analysis_superseded": "분석 중에 설정 또는 사이클 데이터가 변경되었습니다. 다시 실행하세요.",
+        "analysis_check_failed": "제안된 타이밍 설정을 이 기기의 일시 정지와 대조해 확인할 수 없었습니다. 다시 실행하세요.",
+        "apply_cycles_changed": "제안을 적용하는 동안 사이클이 저장되었습니다. 설정은 변경되지 않았고 제안은 지워졌습니다. 제안 분석을 다시 실행하세요.",
         "bp_admin_only": "관리자가 템플릿을 설치합니다.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "WashData가 {device}를 위해 생성했습니다. 작업을 추가하세요(알림, 조명, ...).",
@@ -1539,12 +1544,12 @@
             "doc": "이 가전제품의 알림을 탭하면 열리는 곳입니다. 비워 두면 이 가전제품의 WashData 패널이 열립니다. 대시보드 경로(예: /lovelace/laundry)나 URL을 입력하거나, 탭 동작을 없애려면 'none'을 입력하세요."
         },
         "door_opens_at_end": {
-            "label": "종료 시 자동으로 문 열림",
-            "doc": "종료 시 건조를 위해 문을 여는 식기세척기(AirDry 등)용입니다. 문이 아래 대기 시간 동안 열려 있으면 일시 정지 대신 사이클을 종료합니다. 잠깐 여는 것은 무시됩니다. 문 센서 엔티티가 필요합니다."
+            "label": "문을 열면 사이클 종료",
+            "doc": "문 센서 엔티티가 있으면, 전력이 낮은 상태에서 문이 아래 대기 시간 동안 열려 있을 때 일시 정지 대신 사이클을 종료합니다. 일시 정지 중에는 인식된 프로그램이 거의 끝났을 때만 이렇게 되므로, 프로그램 도중의 일시 정지는 일시 정지로 유지됩니다."
         },
         "door_end_dwell_seconds": {
             "label": "문 열림 종료 대기 시간",
-            "doc": "\"종료 시 자동으로 문 열림\"이 켜져 있을 때 사이클이 끝나기 전에 문이 열려 있어야 하는 시간입니다. 식기를 추가하는 정도는 무시할 만큼 길게 설정합니다(기본값 60초)."
+            "doc": "\"문을 열면 사이클 종료\"가 켜져 있을 때 사이클이 끝나기 전에 문이 열려 있어야 하는 시간입니다. 식기를 추가하는 정도는 무시할 만큼 길게 설정합니다(기본값 60초)."
         },
         "dishwasher_end_spike_quiet_release": {
             "label": "자연 건조 조용 시 해제",
@@ -1693,7 +1698,9 @@
         "match_sure": "약 {pct}% 확신",
         "match_uncertain_tip": "WashData가 아직 프로그램을 확정하지 않았습니다. 이 수치는 과거 사이클에서 선두 후보인 {top}이(가) 이만큼 앞섰을 때 맞았던 비율입니다. 참고용입니다.",
         "torn_pick": "{a} 또는 {b}?",
-        "torn_tip": "WashData가 아직 이 둘을 구분하지 못하므로, 실행 중인 프로그램을 선택해 이 사이클에 그 라벨을 지정하세요('자동 감지'를 선택하면 되돌릴 수 있습니다)."
+        "torn_tip": "WashData가 아직 이 둘을 구분하지 못하므로, 실행 중인 프로그램을 선택해 이 사이클에 그 라벨을 지정하세요('자동 감지'를 선택하면 되돌릴 수 있습니다).",
+        "program_mismatch": "{program}에 더 가까움",
+        "program_mismatch_tip": "이 사이클은 {selected}보다 {program}에 분명히 더 가깝지만, WashData는 선택한 프로그램을 유지합니다."
     },
     "tab": {
         "advanced": "고급",
@@ -1780,6 +1787,8 @@
         "settings_reverted": "설정이 복원되었습니다. 통합 리로드 중",
         "settings_saved": "설정이 저장되었습니다. 통합 다시 로드",
         "suggestions_applied": "제안이 적용되었습니다. 통합 다시 로드",
+        "suggestions_none_applied": "변경된 설정이 없습니다. 선택한 제안은 더 이상 적용되지 않습니다",
+        "suggestions_changed": "검토한 후 제안이 변경되었습니다. 아무것도 저장되지 않았습니다. 확인한 후 다시 적용하세요.",
         "suggestions_dismissed": "제안이 무시되었습니다.",
         "apply_failed": "적용 실패: {error}",
         "delete_failed": "삭제 실패: {error}",
@@ -1937,13 +1946,13 @@
         },
         "reason": {
             "completion_min_seconds": "{cycles} 사이클의 p05 정상 사이클 시간의 절반({minutes} min). 허위 사이클을 걸러냅니다.{excl}",
+            "completion_min_seconds_capped": "가장 짧은 프로그램도 집계되도록 {cap}(으)로 제한했습니다. p05 정상 사이클 시간의 절반({minutes} min, {cycles} 사이클)은 이보다 깁니다.{excl}",
             "match_interval": "관측된 업데이트 주기 기반(중앙값={median}s) * 10.",
             "max_duration_ratio": "라벨이 지정된 사이클 시간 기반(p95={p95}).",
             "min_off_gap": "관측된 {gaps}개 사이클 간 간격 기반(p05={p05}s). 기기 하한: {floor}s.",
             "min_off_gap_bridge": "사이클 내에서 전력이 거의 없는 가장 긴 구간을 넘기도록 설정: {span}s + 60s 버퍼. {cycles}개 정상 사이클에 걸친 {spans}건의 넘긴 간격에서 산출(연속 실행 사이에 두는 최소 간격 {ceiling}s 미만 유지).",
             "min_power": "{cycles}개 정상 사이클의 p05 최저 활성 전력({p05}W)의 40%. 꺼짐 게이트를 실제 소비 전력보다 낮게 유지합니다.{excl}",
             "no_update_timeout": "관측된 업데이트 주기 기반(p95={p95}s) * 20(최소 60s).",
-            "off_delay_cadence": "관측된 업데이트 주기 기반(p95={p95}s) * 5",
             "off_delay_device_floor": "{device}에 대한 기기별 안전 최소값을 사용({floor}s).",
             "off_delay_generic_floor": "일반 안전 최소값을 사용({floor}s).",
             "off_delay_pauses": "실제 일시정지보다 길도록 설정: p95 사이클 내 일시정지 {p95}s + 60s 버퍼. {cycles}개 정상 사이클에 걸친 {pauses}건의 일시정지에서 산출(하한 {floor}s).",
@@ -1954,7 +1963,8 @@
             "match_interval_floored": "최단 프로그램({shortest} 초)으로는 상한이 {cap} 초가 되어 최소값 {minimum} 초보다 낮으므로 최소값을 사용합니다. 연속 {persistence}회 매칭에는 {budget} 초가 걸리며, 이는 해당 프로그램의 {pct}%를 넘습니다. 매칭은 측정값이 도착할 때만 실행되므로(중앙값={median} 초) 부담이 없습니다.",
             "end_energy_floor": "중지 임계값 ({stop} W)과 오프 지연 ({off_delay} s)이 의미하는 하한으로 올렸습니다. 이보다 낮으면 사이클이 대체 경로로만 종료될 수 있습니다.",
             "max_duration_ratio_default": "기본값으로 되돌렸습니다. 상한이 낮으면 운전이 평소보다 길어질 때마다 올바른 프로그램이 제외됩니다.",
-            "min_duration_ratio_default": "기본값으로 되돌렸습니다. 하한이 높으면 실행 중인 사이클이 상당히 진행될 때까지 인식되지 않습니다."
+            "min_duration_ratio_default": "기본값으로 되돌렸습니다. 하한이 높으면 실행 중인 사이클이 상당히 진행될 때까지 인식되지 않습니다.",
+            "start_above_running": "이 기기의 일반적인 낮은 작동 전력은 {low} W이지만 시작 임계값이 {start} W이므로, 그 수준으로 작동하는 사이클은 시작되지 않습니다. 시작 임계값은 그 수준의 절반으로, 중지 임계값은 그보다 낮게 설정합니다."
         },
         "exclusions": {
             "summary": "잘못 감지된 사이클 {total}개를 제외했습니다: {parts}.",
@@ -2211,6 +2221,9 @@
         },
         "cycle_overrun": {
             "name": "사이클이 너무 오래 실행 중"
+        },
+        "program_mismatch": {
+            "name": "실행 중인 프로그램이 선택한 프로그램과 다름"
         },
         "cycle_paused": {
             "name": "사이클이 일시 정지됨"

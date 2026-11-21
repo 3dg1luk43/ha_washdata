@@ -140,13 +140,17 @@ def test_the_raised_pair_survives_reconciliation() -> None:
 
 def test_the_batch_anchor_no_longer_lands_under_standby() -> None:
     clean = [_clean(f"c{i}") for i in range(6)]
+    # The report's 1.76 W (0.8 x the 2.2 W pre-roll reading) is already in the hold
+    # band under the lowest running reading, so the batch leaves it (item 637)...
     plain = _engine(clean).run_batch_simulation(clean)
-    # The fixture reproduces the report: 0.8 x 2.2 W.
-    assert plain[CONF_STOP_THRESHOLD_W]["value"] == pytest.approx(1.76)
-
-    floored = _engine(_history(clean)).run_batch_simulation(_history(clean))
-    assert floored[CONF_STOP_THRESHOLD_W]["value"] >= 2.75
-    assert floored[CONF_START_THRESHOLD_W]["value"] >= 3.44
+    assert CONF_STOP_THRESHOLD_W not in plain
+    # ...and with the standby evidence, neither pass proposes anything under it.
+    hist = _history(clean)
+    floored = _engine(hist).run_batch_simulation(hist)
+    assert (floored.get(CONF_STOP_THRESHOLD_W) or {}).get("value", 99.0) >= 2.75
+    raised = _engine(hist).generate_standby_floor_suggestions()
+    assert raised[CONF_STOP_THRESHOLD_W]["value"] >= 2.75
+    assert raised[CONF_START_THRESHOLD_W]["value"] >= 3.44
 
 
 def test_a_wash_that_pauses_at_standby_level_is_left_to_the_advisory() -> None:
@@ -164,9 +168,19 @@ def test_without_a_safe_floor_a_stop_under_standby_is_still_dropped() -> None:
     assert CONF_STOP_THRESHOLD_W not in out
 
 
-def test_too_little_clean_history_proposes_nothing() -> None:
+def test_too_little_history_proposes_nothing() -> None:
+    hist = [_clean("c0")] + [_force_stopped(f"fs{i}") for i in range(3)]
+    floor = standby_stop_floor(hist, 1.76, 180)
+    assert floor["safe"] is False and floor["clean_cycles"] == 4
+
+
+def test_hand_and_force_stops_count_up_to_their_last_working_reading() -> None:
+    """Audit 2026-11-16: on an appliance with this fault most cycles are stopped by
+    hand or force-stopped, so clean cycles alone never made the floor safe."""
     hist = _history([_clean(f"c{i}") for i in range(3)])
-    assert standby_stop_floor(hist, 1.76, 180)["safe"] is False
+    floor = standby_stop_floor(hist, 1.76, 180)
+    assert floor["clean_cycles"] == 11
+    assert floor["safe"] is True
 
 
 def test_an_appliance_that_reaches_zero_gets_no_floor() -> None:
@@ -232,7 +246,8 @@ def test_the_operational_pass_scans_the_cycle_that_just_ended() -> None:
     lm = LearningManager(MagicMock(), "entry1", store, device_type="washing_machine")
     seen: list[list[str]] = []
     job = MagicMock()
-    for name in ("generate_standby_floor_suggestions", "generate_model_suggestions",
+    for name in ("generate_standby_floor_suggestions", "generate_start_threshold_suggestions",
+                 "generate_model_suggestions",
                  "generate_detection_suggestions", "run_batch_simulation"):
         getattr(job, name).return_value = {}
     job.generate_operational_suggestions.side_effect = lambda *_a: (

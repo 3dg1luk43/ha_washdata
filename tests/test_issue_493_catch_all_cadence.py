@@ -36,8 +36,8 @@ def test_catch_all_types_sample_every_5_s() -> None:
     for device_type in ("other", "generic"):
         assert resolve_sampling_interval_default(device_type) == 5.0
         assert resolve_start_duration_default(device_type) == 5.0
-    # Unchanged: dryers' anti-crease handling was tuned at 30 s.
-    assert resolve_sampling_interval_default("dryer") == 30.0
+    # A dryer samples at 2 s since 0.6.1 (its 30 s throttle hid short pulses).
+    assert resolve_sampling_interval_default("dryer") == 2.0
 
 
 async def test_threshold_device_throttles_at_5_s(

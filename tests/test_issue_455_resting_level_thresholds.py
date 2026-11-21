@@ -134,7 +134,9 @@ def test_issue_455_the_anchor_still_moves_the_thresholds_above_the_rest(
     rest_w: float, low_run_w: float, stop: float, start: float
 ) -> None:
     cycles = [_washer(f"w{i}", rest_w, low_run_w=low_run_w) for i in range(6)]
-    out = _batch(cycles, WASHER_OPTS, "washing_machine")
+    # A stop at or over the lowest running phase, outside the hold band (item 637).
+    opts = {**WASHER_OPTS, CONF_STOP_THRESHOLD_W: 7.0, CONF_START_THRESHOLD_W: 9.0}
+    out = _batch(cycles, opts, "washing_machine")
     assert out[CONF_STOP_THRESHOLD_W]["value"] == pytest.approx(stop)
     assert out[CONF_START_THRESHOLD_W]["value"] == pytest.approx(start)
     assert out[CONF_STOP_THRESHOLD_W]["reason_key"] == "suggestion.reason.thr_batch"
@@ -142,11 +144,23 @@ def test_issue_455_the_anchor_still_moves_the_thresholds_above_the_rest(
 
 def test_issue_455_the_resting_level_needs_five_cycles() -> None:
     """Below five measured cycles the statistic is silent and the anchor proposes."""
-    cycles = [_washer(f"w{i}", 3.3) for i in range(4)]
+    cycles = [_washer(f"w{i}", 3.3) for i in range(2)]
     cycles += [_washer(f"z{i}", 0.0, low_run_w=3.3) for i in range(2)]
-    out = _batch(cycles, {**WASHER_OPTS, CONF_STOP_THRESHOLD_W: 3.0}, "washing_machine")
-    # Only the two 0 W-resting cycles have anything below 3.0 W.
+    cycles += [_washer("n0", 60.0)]  # never below the stop: not measured
+    # Stop 3.5 W, over the 3.3 W lowest running reading: a correction is due.
+    out = _batch(cycles, {**WASHER_OPTS, CONF_STOP_THRESHOLD_W: 3.5}, "washing_machine")
+    # Only four cycles have anything below 3.5 W.
     assert out[CONF_STOP_THRESHOLD_W]["value"] == pytest.approx(2.64)
+
+
+def test_a_stop_in_the_hold_band_is_left_alone() -> None:
+    """Item 637: a stop between half the anchor and the lowest running power stays.
+    Re-deriving a pair that already sits in the gap walked it with every batch
+    (one dishwasher 6 applies, no detection effect)."""
+    cycles = [_washer(f"w{i}", 0.0, low_run_w=6.0) for i in range(6)]
+    out = _batch(cycles, WASHER_OPTS, "washing_machine")  # stop 5.0 under 6.0
+    assert CONF_STOP_THRESHOLD_W not in out
+    assert CONF_START_THRESHOLD_W not in out
 
 
 # --------------------------------------------------------------------- the statistic
@@ -179,3 +193,33 @@ def test_resting_level_needs_five_cycles_and_never_raises() -> None:
     assert _level([pts] * 4, 1.5) is None
     assert _level([pts] * 5, 1.5) == pytest.approx(0.8)
     assert _level([[("x", "y"), (1, 2)]] * 5, 1.5) is None  # type: ignore[list-item]
+
+
+def test_the_hold_band_still_lowers_a_start_the_runs_never_reach() -> None:
+    """Review of PR #529: the stop hold withheld the start too, so a 120 W start
+    over runs that begin at 100 W was never corrected. The stop stays."""
+    phases = [(100.0, 10, 30.0), (2000.0, 30, 30.0)] + [(60.0, 1, 30.0), (0.0, 1, 30.0)] * 40
+    phases += [(6.0, 10, 30.0), (500.0, 10, 30.0)]
+    cycles = [_cycle(f"w{i}", _trace(0.0, phases)) for i in range(6)]
+    out = _batch(cycles, {**WASHER_OPTS, CONF_START_THRESHOLD_W: 120.0}, "washing_machine")
+    assert CONF_STOP_THRESHOLD_W not in out
+    assert out[CONF_START_THRESHOLD_W]["value"] == pytest.approx(6.3)
+    # Corrective: a cooldown would hold it until cycles that cannot start ran.
+    assert out[CONF_START_THRESHOLD_W]["corrective"] is True
+    # Reachable: the hold keeps both.
+    out = _batch(cycles, {**WASHER_OPTS, CONF_START_THRESHOLD_W: 80.0}, "washing_machine")
+    assert CONF_START_THRESHOLD_W not in out
+
+
+def test_the_hold_band_leaves_a_steady_load_to_its_own_correction() -> None:
+    """Review of PR #529: on a pump running at 380-430 W the held-Stop Start
+    correction offered 399 W and replaced start_above_running's 190 W, so the
+    380 W runs still never started. A steady load is checked first."""
+    cycles = [
+        _cycle(f"p{i}", _trace(0.0, [(level, 30, 30.0), (0.0, 5, 30.0)]))
+        for i, level in enumerate((380.0, 380.0, 430.0, 430.0, 430.0))
+    ]
+    opts = {CONF_STOP_THRESHOLD_W: 160.0, CONF_START_THRESHOLD_W: 500.0, CONF_OFF_DELAY: 180}
+    out = _batch(cycles, opts, "pump")
+    assert CONF_START_THRESHOLD_W not in out, out.get(CONF_START_THRESHOLD_W)
+    assert CONF_STOP_THRESHOLD_W not in out

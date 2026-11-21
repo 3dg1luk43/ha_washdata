@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Viimeisimmän syklin kustannus"
+      },
+      "last_cycle_start": {
+        "name": "Viimeisimmän syklin alku"
       }
     },
     "select": {
@@ -572,6 +575,7 @@
       "phase_started": "Vaihe alkoi",
       "finishing_soon": "Päättyy pian",
       "cycle_overrun": "Sykli kestää liian kauan",
+      "program_mismatch": "Käynnissä oleva ohjelma eroaa valitusta",
       "cycle_paused": "Sykli keskeytetty",
       "cycle_resumed": "Sykli jatkui",
       "still_tumbling": "Rumpu pyörii yhä syklin jälkeen",
@@ -646,6 +650,16 @@
         "percent": {
           "name": "Pidempi kuin",
           "description": "Prosenttia yli ohjelman tavallisen keston."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Käynnissä oleva ohjelma eroaa valitusta",
+      "description": "Käynnistyy kerran, kun sykli sopii johonkin toiseen ohjelmaan paremmin kuin valitsemaasi. Uusi valinta aloittaa uuden tarkistuksen.",
+      "fields": {
+        "program": {
+          "name": "Ohjelma",
+          "description": "Vain kun tämä ohjelma on valittuna, tarkalla nimellä. Jätä tyhjäksi mille tahansa ohjelmalle."
         }
       }
     },

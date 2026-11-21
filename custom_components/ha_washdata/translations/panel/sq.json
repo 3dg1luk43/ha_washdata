@@ -1032,6 +1032,7 @@
         "sug_muted": "Ky cilësim nuk do të sugjerohet më",
         "sug_mute_failed": "Nuk mund të heshtte sugjerimi",
         "sug_unmuted_all": "Sugjerime të heshtura u rivendosën",
+        "sug_unmute_incomplete": "Rivendosja nuk përfundoi: disa sugjerime janë ende të heshtura. Provoni përsëri.",
         "n_suggestions_muted": "{count} sugjerime të heshtura; motori i sugjerimeve nuk do t'i propozojë këto.",
         "n_suggestions_muted_one": "{count} sugjerim i heshtur; motori i sugjerimeve nuk do ta propozojë.",
         "n_suggestions_muted_other": "{count} sugjerime të heshtura; motori i sugjerimeve nuk do t'i propozojë këto.",
@@ -1100,6 +1101,10 @@
         "cycle_context_none": "Regjistruesi nuk ka lexime rreth këtij cikli (si parazgjedhje Home Assistant ruan historikun e 10 ditëve).",
         "cycle_context_tip": "Vetëm për shfaqje: tregon historikun e regjistruesit për sensorin e fuqisë rreth këtij cikli, nëse ruhet ende. Për të shtuar përpjekjet e dështuara të nisjes në ciklet e ardhshme, përdorni Sekondat hyrëse të kurbës (Cilësimet > Zbulim > Fillimi i ciklit), që ndryshon kohëzgjatjet e ruajtura.",
         "invalid_threshold_pair": "Pragu i ndalimit ({stop} W) duhet të jetë më i ulët se Pragu i nisjes ({start} W). Nuk u ruajt asgjë; ndryshojini të dy bashkë.",
+        "end_gate_check_failed": "Cilësimet e sugjeruara të kohës nuk mund të kontrolloheshin kundrejt pauzave të kësaj pajisjeje. Nuk u ruajt asgjë; provoni përsëri.",
+        "analysis_superseded": "Cilësimet ose të dhënat e cikleve ndryshuan gjatë analizës. Ekzekutojeni përsëri.",
+        "analysis_check_failed": "Cilësimet e sugjeruara të kohës nuk mund të kontrolloheshin kundrejt pauzave të kësaj pajisjeje. Ekzekutojeni përsëri.",
+        "apply_cycles_changed": "Një cikël u ruajt ndërsa po zbatoheshin sugjerimet. Asnjë cilësim nuk u ndryshua dhe sugjerimet u pastruan. Ekzekutojeni përsëri analizën e sugjerimeve.",
         "bp_admin_only": "Shabllonët i instalon një administrator.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "Krijuar nga WashData për {device}. Shtoni veprimet tuaja (njoftim, dritat, ...).",
@@ -1541,12 +1546,12 @@
             "doc": "Çfarë hap trokitja mbi njoftimin e kësaj pajisjeje. Bosh: panelin WashData te kjo pajisje. Shkruani shtegun e një paneli kontrolli (p.sh. /lovelace/laundry) ose një URL, ose \"none\" që trokitja të mos bëjë asgjë."
         },
         "door_opens_at_end": {
-            "label": "Dera hapet automatikisht në fund",
-            "doc": "Për pjatalarëset që hapin derën në fund për tharje (p.sh. AirDry). Një derë e lënë hapur për kohën e mëposhtme e përfundon ciklin në vend që ta vërë në pauzë; një hapje e shkurtër injorohet. Kërkon cilësimin Entiteta e sensorit të derës."
+            "label": "Hapja e derës e përfundon ciklin",
+            "doc": "Me cilësimin Entiteta e sensorit të derës, një derë e lënë hapur për kohën e pritjes më poshtë, me fuqi të ulët, e përfundon ciklin në vend që ta vërë në pauzë. Në pauzë kjo ndodh vetëm kur programi i njohur pothuajse ka mbaruar, prandaj një pauzë në mes të programit mbetet pauzë."
         },
         "door_end_dwell_seconds": {
             "label": "Koha e pritjes me derë të hapur",
-            "doc": "Kur \"Dera hapet automatikisht në fund\" është aktive: sa gjatë duhet të qëndrojë dera hapur përpara se cikli të përfundojë. Mjaft gjatë sa të injorohet shtimi i një pjate (parazgjedhja 60 s)."
+            "doc": "Kur \"Hapja e derës e përfundon ciklin\" është aktive: sa gjatë duhet të qëndrojë dera hapur përpara se cikli të përfundojë. Mjaft gjatë sa të injorohet shtimi i një pjate (parazgjedhja 60 s)."
         },
         "dishwasher_end_spike_quiet_release": {
             "label": "Lirim në qetësi gjatë tharjes pasive",
@@ -1684,6 +1689,8 @@
         "working": "Po përpunohet…",
         "torn_pick": "{a} apo {b}?",
         "torn_tip": "WashData ende nuk i dallon dot këto dy programe, ndaj zgjidhni atë që po punon për ta etiketuar këtë cikël me të (opsioni Zbulim automatik e anulon zgjedhjen).",
+        "program_mismatch": "Duket më shumë si {program}",
+        "program_mismatch_tip": "Ky cikël i ngjan qartë më shumë {program} se sa {selected}, por WashData e mban programin që zgjodhët.",
         "match_uncertain": "E pasigurt: {top} ose {runner}",
         "match_uncertain_single": "E pasigurt: ndoshta {top}",
         "match_sure": "~{pct}% e sigurt",
@@ -1775,6 +1782,8 @@
         "settings_reverted": "Cilësimet u rivendosën; integrimi po ringarkohet",
         "settings_saved": "Cilësimet u ruajtën; integrimi po ringarkohet",
         "suggestions_applied": "Sugjerimet u zbatuan; integrimi po ringarkohet",
+        "suggestions_none_applied": "Asnjë cilësim nuk u ndryshua: sugjerimet e zgjedhura nuk vlejnë më",
+        "suggestions_changed": "Sugjerimet ndryshuan që kur i rishikuat. Asgjë nuk u ruajt; kontrollojini dhe zbatojini përsëri.",
         "suggestions_dismissed": "Sugjerimet u injoruan",
         "apply_failed": "Aplikimi dështoi: {error}",
         "delete_failed": "Fshirja dështoi: {error}",
@@ -1933,6 +1942,7 @@
         },
         "reason": {
             "completion_min_seconds": "Gjysma e kohëzgjatjes p05 të cikleve të pastra ({minutes} min) në {cycles} cikle; filtron ciklet e rreme.{excl}",
+            "completion_min_seconds_capped": "I kufizuar në {cap} që edhe programet më të shkurtra të numërohen; gjysma e kohëzgjatjes p05 të cikleve të pastra ({minutes} min, {cycles} cikle) do të ishte më e gjatë.{excl}",
             "match_interval": "Bazuar në ritmin e vëzhguar të përditësimit (mesatarja={median}s) * 10.",
             "match_interval_capped": "Kufizuar që {persistence} përputhje të njëpasnjëshme të hyjnë në {pct}% të programit më të shkurtër ({shortest}s); vetëm ritmi i përditësimit (mesatarja={median}s) do të kishte sugjeruar një interval më të gjatë.",
             "match_interval_floored": "Programi më i shkurtër ({shortest}s) do ta kufizonte këtë në {cap}s, nën minimumin prej {minimum}s, prandaj përdoret minimumi: {persistence} përputhje të njëpasnjëshme zgjasin {budget}s, mbi {pct}% të atij programi. Përputhja kryhet vetëm kur vjen një lexim (mediana={median}s), ndaj kjo nuk kushton asgjë.",
@@ -1941,7 +1951,6 @@
             "min_off_gap_bridge": "Përcaktuar që të kapërcejë periudhën më të gjatë të qetësisë brenda ciklit: {span}s + 60s rezervë, nga {spans} boshllëqe të kapërcyera në {cycles} cikle të pastra (qëndron nën {ceiling}s, pauza më e shkurtër që lini midis dy nisjeve të njëpasnjëshme).",
             "min_power": "40% e fuqisë aktive më të ulët p05 ({p05}W) në {cycles} cikle të pastra, duke e mbajtur pragun e fikjes nën konsumin real.{excl}",
             "no_update_timeout": "Bazuar në ritmin e vëzhguar të përditësimit (p95={p95}s) * 20 (min. 60s).",
-            "off_delay_cadence": "Bazuar në ritmin e vëzhguar të përditësimit (p95={p95}s) * 5",
             "off_delay_device_floor": "U përdor minimumi i sigurt specifik për pajisjen {device} ({floor}s).",
             "off_delay_generic_floor": "U përdor minimumi i sigurt i përgjithshëm ({floor}s).",
             "off_delay_pauses": "Përcaktuar që të zgjasë më shumë se pauzat e vërteta: pauza brenda ciklit p95 {p95}s + 60s rezervë, nga {pauses} pauza në {cycles} cikle të pastra (kufiri minimal {floor}s).",
@@ -1950,7 +1959,8 @@
             "watchdog": "Mbahet sa më i ulët në mënyrë të sigurt (pak mbi boshllëkun e përditësimit p95 prej {p95}s dhe të paktën 2× intervalin e kampionimit prej {median}s, min. 30s) që bllokimet të kapen shpejt pa ndalime të rreme.",
             "end_energy_floor": "U ngrit në minimumin që nënkuptojnë pragu i ndalimit ({stop} W) gjatë vonesës së fikjes ({off_delay} s); nën të, cikli mund të përfundojë vetëm përmes një rruge rezervë.",
             "max_duration_ratio_default": "Kthim te vlera e parazgjedhur: një kufi i sipërm më i ulët refuzon programin e duhur sa herë që një cikël zgjat më shumë se zakonisht.",
-            "min_duration_ratio_default": "Kthim te vlera e parazgjedhur: një kufi i poshtëm më i lartë pengon njohjen e një cikli në zhvillim derisa të ketë përparuar mjaft."
+            "min_duration_ratio_default": "Kthim te vlera e parazgjedhur: një kufi i poshtëm më i lartë pengon njohjen e një cikli në zhvillim derisa të ketë përparuar mjaft.",
+            "start_above_running": "Fuqia e ulët tipike e punës e kësaj pajisjeje është {low} W, por pragu i nisjes është {start} W, kështu që një cikël në këtë nivel nuk niset kurrë. Pragu i nisjes vendoset në gjysmën e këtij niveli, pragu i ndalimit nën të."
         },
         "exclusions": {
             "summary": "U përjashtuan {total} cikle të zbuluar gabimisht: {parts}.",
@@ -2231,6 +2241,9 @@
         },
         "cycle_overrun": {
             "name": "Cikli po zgjat shumë"
+        },
+        "program_mismatch": {
+            "name": "Programi që po ekzekutohet ndryshon nga ai i zgjedhur"
         },
         "cycle_paused": {
             "name": "Cikli u ndërpre"

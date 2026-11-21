@@ -67,6 +67,9 @@ from .const import (
     MATCH_SURE_SINGLE_CANDIDATE,
     MAX_PLAUSIBLE_PROGRAMME_S,
     ORPHANED_PAUSE_MAX_WAIT_S,
+    PROGRAM_MISMATCH_MIN_FRACTION,
+    PROGRAM_MISMATCH_MIN_MARGIN,
+    PROGRAM_MISMATCH_PERSISTENCE,
 )
 
 #: The manager's "no program committed yet" placeholder.
@@ -1178,3 +1181,250 @@ def live_torn_choices(result: Any) -> list[str] | None:
         return [str(best), runner_up]
     except (TypeError, ValueError, OverflowError):
         return None
+
+
+# ─── #530: a hand-picked program the cycle does not look like ────────────────
+
+#: How many candidates a MatchResult lists (``ProfileStore.async_match_profile``
+#: keeps the top five of the collapsed ranking).
+_LISTED_CANDIDATES = 5
+_GROUP_PREFIX = "__group__"
+
+
+@dataclass
+class ProgramMismatchState:
+    """The background check of one hand-picked program on one cycle (#530).
+
+    ``key`` is what it belongs to (the manager's cycle identity and the picked
+    program); a different key starts it afresh. Once ``fired`` it stays set for
+    that key: the trigger is sent once and the State sensor keeps showing it.
+    ``data_generation`` is the caller's stored-data generation the pending
+    ``streak`` was counted on, ``families`` the profile groups it was counted
+    under (:func:`program_families`), ``device_type`` the device type it was
+    matched as and ``match_settings`` the matcher settings it was scored with
+    (``ProfileStore.match_settings``): matches on data an import or undo has
+    since replaced, read against groups edited since, scored as another device
+    type (its matcher settings and trigger offer differ) or under scoring
+    settings changed since (a Stage-1 ratio), are no run of evidence.
+
+    ``as_dict`` (the active-cycle snapshot) carries the outcome, not the pending
+    streak: the data generation is a counter that restarts with Home Assistant,
+    so a restored streak could not be shown to be counted on the data and groups
+    it finds, and a crash can follow an import, a group edit or a check in flight
+    that no snapshot saw (PR #529 review). A restart starts the run afresh.
+    """
+
+    key: Any = None
+    streak: int = 0
+    fired: bool = False
+    looks_like: str | None = None
+    margin: float | None = None
+    data_generation: Any = None
+    families: dict[str, str] | None = None
+    device_type: str | None = None
+    match_settings: Any = None
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "fired": self.fired,
+            "looks_like": self.looks_like,
+            "margin": self.margin,
+        }
+
+    def restore(self, raw: Any) -> None:
+        """Take a snapshot's ``as_dict`` back. Malformed values are left at reset.
+        A pending streak (an older snapshot's ``streak``) is never taken back.
+
+        A fired check comes back only with what it found, the programme and a
+        finite margin, as :func:`program_mismatch_step` always records them. A
+        record missing either is no result: latched, it showed a mismatch naming
+        nothing and skipped every later check of the pick (PR #529 review), so the
+        check starts afresh."""
+        self.streak = 0
+        self.data_generation = None
+        self.families = None
+        self.device_type = None
+        self.match_settings = None
+        self.fired = False
+        self.looks_like = None
+        self.margin = None
+        if not isinstance(raw, dict) or raw.get("fired") is not True:
+            return
+        looks_like = raw.get("looks_like")
+        margin = raw.get("margin")
+        if not isinstance(looks_like, str) or not looks_like:
+            return
+        if not isinstance(margin, (int, float)) or isinstance(margin, bool):
+            return
+        try:
+            value = float(margin)  # an unbounded JSON int (10**400) raises here
+        except (OverflowError, ValueError):
+            return
+        if math.isfinite(value):
+            self.fired, self.looks_like, self.margin = True, looks_like, value
+
+
+def program_families(profile_groups: Any) -> dict[str, str]:
+    """``{program: profile group}`` from ``ProfileStore.get_profile_groups()``."""
+    out: dict[str, str] = {}
+    if not isinstance(profile_groups, dict):
+        return out
+    for gname, group in profile_groups.items():
+        members = group.get("members") if isinstance(group, dict) else None
+        if not isinstance(members, (list, tuple)):
+            continue  # a malformed group (``"members": 1``) is skipped, not fatal
+        for member in members:
+            if isinstance(member, str):
+                out.setdefault(member, str(gname))
+    return out
+
+
+def _candidate_family(cand: dict[str, Any], key: str) -> str | None:
+    """The profile group a candidate stands for, from the producer's Stage-5
+    provenance only: a family's own entry carries ``group_best_member``
+    (``profile_store.collapse_group_candidates``), a winner resolved to its member
+    ``stage5_group``. A profile that is merely NAMED ``__group__G`` is an
+    ordinary programme."""
+    value = cand.get(key)
+    if key == "name" and not isinstance(cand.get("group_best_member"), str):
+        return None
+    if isinstance(value, str) and value.startswith(_GROUP_PREFIX):
+        return value[len(_GROUP_PREFIX):]
+    return None
+
+
+def selected_program_deficit(
+    result: Any, selected: Any, families: dict[str, str] | None = None
+) -> tuple[str, float] | None:
+    """``(the program the cycle looks like, how far the picked one trails it)``
+    for one live match, or None. Pure, never raises.
+
+    None when there is no winner, the picked program wins or is in the winner's
+    profile group (the user's own near-duplicates), or nothing bounds its score.
+    The winner is ``best_profile`` (a Stage-5 family resolved to its member). The
+    picked program's score is its own entry's, else its family's (the family's
+    best member: an upper bound), else, when the matcher ranked it below a full
+    list of five, the fifth score (also an upper bound). Missing from a shorter
+    list, it scored below ``MATCH_KEEP_MIN_SCORE`` or Stage 1 rejected its
+    duration, and that is taken as no evidence: counted as a deficit to the keep
+    score it doubled the false alarms on the right pick
+    (devtools/program_mismatch_eval.py, 1.6% -> 3.3%) for 3.8 points more caught
+    wrong picks. Rejected by Stage 1's lower bound (``min_ratio_rejected``: the
+    cycle is still too short a part of it to compare) it is missing from a full
+    list the same way, and is no evidence there either (PR #529 review); nor is
+    its family's entry then, which is the best of the members that WERE scored
+    and bounds nothing of one that was not (review of PR #529). Past the
+    upper bound (the cycle has outrun it) it still reads at the fifth score: no
+    bound of a score there, but read as no evidence it lost 316 of 1904 caught
+    wrong picks (38.4% -> 32.0%) for no false alarm fewer. Every bound makes the
+    deficit smaller, never larger.
+    """
+    try:
+        best = getattr(result, "best_profile", None) if result is not None else None
+        if not isinstance(best, str) or not best or not isinstance(selected, str):
+            return None
+        if best == selected:
+            return None
+        fam = families or {}
+        candidates = [c for c in (getattr(result, "candidates", None) or []) if isinstance(c, dict)]
+        if not candidates:
+            return None
+        top = float(candidates[0].get("score", 0.0) or 0.0)
+        own_family = fam.get(selected)
+        winner_family = _candidate_family(candidates[0], "stage5_group") or fam.get(best)
+        if own_family is not None and own_family == winner_family:
+            return None
+        rejected = getattr(result, "min_ratio_rejected", None) or ()
+        unscored = isinstance(rejected, (list, tuple, set, frozenset)) and selected in rejected
+        picked: float | None = None
+        for cand in candidates:
+            name = cand.get("name")
+            # A family's own entry is named ``__group__G``: a pick literally named
+            # that is another programme, so only the family branch reads the row.
+            is_family_row = isinstance(cand.get("group_best_member"), str)
+            if (name == selected and not is_family_row) or (
+                own_family is not None and not unscored
+                and _candidate_family(cand, "name") == own_family
+            ):
+                picked = float(cand.get("score", 0.0) or 0.0)
+                break
+        if picked is None:
+            if len(candidates) < _LISTED_CANDIDATES or unscored:
+                return None
+            picked = float(candidates[-1].get("score", 0.0) or 0.0)
+        deficit = top - picked
+        if not math.isfinite(deficit):
+            return None
+        return best, max(0.0, deficit)
+    except (TypeError, ValueError, OverflowError, AttributeError):
+        return None
+
+
+def program_mismatch_tick(
+    state: ProgramMismatchState,
+    result: Any,
+    selected: Any,
+    *,
+    elapsed_s: Any,
+    expected_s: Any,
+    families: dict[str, str] | None = None,
+    min_margin: float = PROGRAM_MISMATCH_MIN_MARGIN,
+    persistence: int = PROGRAM_MISMATCH_PERSISTENCE,
+    min_fraction: float = PROGRAM_MISMATCH_MIN_FRACTION,
+) -> bool:
+    """Feed one background match of a hand-picked program (#530). True only on
+    the match that establishes the mismatch; ``state`` then holds what it looks
+    like. Pure, never raises; it decides nothing but this flag.
+
+    The match is read by :func:`selected_program_deficit` and the elapsed time
+    as a fraction of the picked program's usual duration (``expected_s``; none
+    usable: never), then judged by :func:`program_mismatch_step`.
+    """
+    if state.fired:
+        return False
+    try:
+        expected = float(expected_s)
+        fraction = float(elapsed_s) / expected if expected > 0 else math.nan
+    except (TypeError, ValueError, OverflowError, ZeroDivisionError):
+        fraction = math.nan
+    if not math.isfinite(fraction):
+        return False
+    return program_mismatch_step(
+        state,
+        selected_program_deficit(result, selected, families),
+        fraction,
+        min_margin=min_margin,
+        persistence=persistence,
+        min_fraction=min_fraction,
+    )
+
+
+def program_mismatch_step(
+    state: ProgramMismatchState,
+    hit: tuple[str, float] | None,
+    fraction: float,
+    *,
+    min_margin: float = PROGRAM_MISMATCH_MIN_MARGIN,
+    persistence: int = PROGRAM_MISMATCH_PERSISTENCE,
+    min_fraction: float = PROGRAM_MISMATCH_MIN_FRACTION,
+) -> bool:
+    """The rule of :func:`program_mismatch_tick` on one match's ``hit`` (``(the
+    winner, the picked program's deficit)`` or None) at ``fraction`` of the
+    picked program's usual duration. Pure.
+
+    A match counts when its deficit is at least ``min_margin``; ``persistence``
+    counting matches in a row establish the mismatch once ``fraction`` has
+    reached ``min_fraction``. A match that does not count restarts the run.
+    """
+    if state.fired:
+        return False
+    if hit is None or not hit[1] >= min_margin:
+        state.streak = 0
+        return False
+    state.streak += 1
+    if state.streak < max(1, int(persistence)) or not fraction >= min_fraction:
+        return False
+    state.fired = True
+    state.looks_like = hit[0]
+    state.margin = round(hit[1], 3)
+    return True

@@ -71,10 +71,15 @@ python3 devtools/eta_eval.py --all-formats   # first-ETA timing + ETA error by e
 python3 devtools/decisive_margin_eval.py --loo   # mid-cycle switch bypass, runner-up exposure; --switching: commit/switch accuracy
 python3 devtools/end_gate_eval.py --loo --all-formats --check devtools/end_gate_baseline.json   # exit 1 on an end-gate regression
 python3 devtools/min_off_gap_eval.py         # min_off_gap split/merge bounds (replays UNMATCHED)
+python3 devtools/door_end_eval.py            # PAUSED door-end bar (#524): real ends reached vs mid-cycle quiet spells past it
 python3 devtools/start_gate_eval.py <diag.json|history.csv|sqlite:db>   # start gates on a raw idle+cycle history (missed/late/phantom)
 python3 devtools/lead_in_eval.py               # stored cycle start vs raw onset on the start-gate manifest (#463)
 python3 devtools/playground_parity_eval.py --mode replay   # replay vs the real manager: ends/programs that differ (F7)
 python3 devtools/suggestion_loop_eval.py     # apply-all loop per device: fixed point / ladder / oscillation / erased cycles (F10)
+python3 devtools/suggestion_churn_eval.py    # suggestions offered per key over each history in order; --arm legacy = 0.6.0 rules (item 637)
+python3 devtools/suggestion_evidence_eval.py # clean-cycle programme-length exemption + standby advisory, swept and vs 0.6.0
+python3 devtools/duration_ratchet_eval.py    # closed loop: does a programme's learned length shrink when runs end early (#531)
+python3 devtools/program_mismatch_eval.py --sweep   # hand-picked program check (#530): false alarms vs wrong picks caught, LOO
 
 python3 devtools/mqtt_mock_socket.py --source <export.json>   # mock MQTT plug into a real HA (web UI :8081)
 python3 devtools/mqtt_mock_socket.py --dry-run --source <export.json> --scenario soak --mode silent
@@ -436,7 +441,7 @@ arrive via [GitLocalize](https://gitlocalize.com/repo/10819) as PRs; merge them 
 Deterministic and idempotent; never drop user data (cycles, labels, corrections); add tests with
 old-schema fixtures. **Two separate layers, tested separately:**
 
-1. **Config entry migration** - `async_migrate_entry` in `__init__.py`, schema v1->3.13. The version
+1. **Config entry migration** - `async_migrate_entry` in `__init__.py`, schema v1->3.15. The version
    lives in `const.py` (`CONFIG_ENTRY_VERSION` / `CONFIG_ENTRY_MINOR_VERSION`), which the flow class,
    every stepwise block and the one-pass legacy migration all read: a bump is that constant plus one
    new migration step. Tested in `tests/test_migration_harness.py`.

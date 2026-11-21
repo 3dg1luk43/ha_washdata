@@ -976,6 +976,7 @@
     "sug_muted": "Te nastavitve ne bo več predlagalo",
     "sug_mute_failed": "Utišanje predloga ni uspelo",
     "sug_unmuted_all": "Utišani predlogi ponastavljeni",
+    "sug_unmute_incomplete": "Ponastavitev ni bila dokončana: nekateri predlogi so še vedno utišani. Poskusite znova.",
     "n_suggestions_muted": "{count} predlogov je utišanih; samodejni nastavljalnik jih ne bo predlagal.",
     "n_suggestions_muted_one": "{count} predlog je utišan; samodejni nastavljalnik ga ne bo predlagal.",
     "n_suggestions_muted_two": "{count} predloga sta utišana; samodejni nastavljalnik ju ne bo predlagal.",
@@ -1139,6 +1140,10 @@
     "cycle_context_none": "Recorder okoli tega cikla ne hrani nobenih odčitkov (Home Assistant privzeto hrani zgodovino 10 dni).",
     "cycle_context_tip": "Samo za prikaz: pokaže zgodovino senzorja moči iz recorderja okoli tega cikla, če je še shranjena. Če želite neuspele poskuse zagona dodati prihodnjim ciklom, uporabite Uvodne sekunde krivulje (Nastavitve > Zaznavanje > Začetek cikla), kar spremeni shranjena trajanja.",
     "invalid_threshold_pair": "Prag zaustavitve ({stop} W) mora biti pod Pragom zagona ({start} W). Nič ni bilo shranjeno; spremenite obe vrednosti hkrati.",
+    "end_gate_check_failed": "Predlaganih nastavitev časovanja ni bilo mogoče preveriti glede na premore te naprave. Nič ni bilo shranjeno; poskusite znova.",
+    "analysis_superseded": "Med analizo so se spremenile nastavitve ali podatki ciklov. Zaženite jo znova.",
+    "analysis_check_failed": "Predlaganih nastavitev časovanja ni bilo mogoče preveriti glede na premore te naprave. Zaženite jo znova.",
+    "apply_cycles_changed": "Med uporabo predlogov je bil shranjen cikel. Nobena nastavitev ni bila spremenjena, predlogi pa so bili počiščeni. Znova zaženite analizo predlogov.",
     "bp_admin_only": "Predloge namesti skrbnik.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Ustvaril WashData za {device}. Dodajte svoja dejanja (obvestilo, luči, ...).",
@@ -1586,12 +1591,12 @@
       "doc": "Kaj odpre dotik obvestila te naprave. Prazno: plošča WashData te naprave. Vpišite pot nadzorne plošče (npr. /lovelace/laundry) ali URL ali »none«, da dotik ne odpre ničesar."
     },
     "door_opens_at_end": {
-      "label": "Vrata se ob koncu samodejno odprejo",
-      "doc": "Za pomivalne stroje, ki ob koncu odprejo vrata za sušenje (npr. AirDry). Vrata, odprta za spodnji čas zadrževanja, cikel končajo, namesto da ga zaustavijo; kratko odprtje se prezre. Potrebuje Entiteto senzorja vrat."
+      "label": "Odprtje vrat konča cikel",
+      "doc": "Z Entiteto senzorja vrat vrata, ki so pri nizki moči odprta za spodnji čas zadrževanja, cikel končajo, namesto da ga zaustavijo. Ko je cikel zaustavljen, se to zgodi šele, ko je prepoznani program skoraj končan, zato premor sredi programa ostane premor."
     },
     "door_end_dwell_seconds": {
       "label": "Čas odprtosti vrat za zaključek",
-      "doc": "Ko je vklopljeno »Vrata se ob koncu samodejno odprejo«: kako dolgo morajo vrata ostati odprta, preden se cikel konča. Dovolj dolgo, da se dodajanje posode prezre (privzeto 60 s)."
+      "doc": "Ko je vklopljeno »Odprtje vrat konča cikel«: kako dolgo morajo vrata ostati odprta, preden se cikel konča. Dovolj dolgo, da se dodajanje posode prezre (privzeto 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Cikli, ki oblikujejo program",
@@ -1728,7 +1733,9 @@
     "match_sure": "~{pct} % gotovosti",
     "match_uncertain_tip": "WashData se še ni odločil za program. Številka pove, kako pogosto je imelo vodilno ugibanje, {top}, prav v preteklih ciklih pri takšni prednosti. Samo informativno.",
     "torn_pick": "{a} ali {b}?",
-    "torn_tip": "WashData teh dveh programov še ne zna ločiti, zato izberite tistega, ki teče, da z njim označite ta cikel (možnost Samodejno zaznaj razveljavi izbiro)."
+    "torn_tip": "WashData teh dveh programov še ne zna ločiti, zato izberite tistega, ki teče, da z njim označite ta cikel (možnost Samodejno zaznaj razveljavi izbiro).",
+    "program_mismatch": "Videti je bolj kot {program}",
+    "program_mismatch_tip": "Ta cikel je opazno bolj podoben programu {program} kot {selected}, vendar WashData obdrži program, ki ste ga izbrali."
   },
   "suggestion": {
     "observed_label": "Izmerjeno",
@@ -1780,6 +1787,7 @@
     },
     "reason": {
       "completion_min_seconds": "Polovica trajanja čistega cikla p05 ({minutes} min) čez {cycles} ciklov; odfiltrira lažne cikle.{excl}",
+      "completion_min_seconds_capped": "Omejeno na {cap}, da se upoštevajo tudi najkrajši programi; polovica trajanja čistega cikla p05 ({minutes} min, ciklov: {cycles}) bi bila daljša.{excl}",
       "match_interval": "Na podlagi opažene frekvence posodobitev (mediana={median}s) * 10.",
       "match_interval_capped": "Omejeno tako, da {persistence} zaporednih ujemanj sodi v {pct}% najkrajšega programa ({shortest}s); sama frekvenca posodobitev (mediana={median}s) bi predlagala daljši interval.",
       "match_interval_floored": "Najkrajši program ({shortest}s) bi to omejil na {cap}s, pod minimum {minimum}s, zato se uporabi minimum: {persistence} zaporednih ujemanj traja {budget}s, več kot {pct}% tega programa. Ujemanje teče le ob prihodu odčitka (mediana={median}s), zato to nič ne stane.",
@@ -1788,7 +1796,6 @@
       "min_off_gap_bridge": "Nastavljeno tako, da premosti najdaljši tihi odsek znotraj cikla: {span}s + 60s rezerve, iz {spans} premoščenih vrzeli čez {cycles} čistih ciklov (ostane pod vašo najkrajšo vrzeljo med zaporednima zagonoma, ki znaša {ceiling}s).",
       "min_power": "40 % najnižje delovne moči p05 ({p05}W) čez {cycles} čistih ciklov, da prag izklopa ostane pod dejansko porabo.{excl}",
       "no_update_timeout": "Na podlagi opažene frekvence posodobitev (p95={p95}s) * 20 (najmanj 60s).",
-      "off_delay_cadence": "Na podlagi opažene frekvence posodobitev (p95={p95}s) * 5",
       "off_delay_device_floor": "Uporabljen varni minimum, značilen za napravo {device} ({floor}s).",
       "off_delay_generic_floor": "Uporabljen splošni varni minimum ({floor}s).",
       "off_delay_pauses": "Nastavljeno tako, da preseže resnične premore: premor znotraj cikla p95 {p95}s + 60s rezerve, iz {pauses} premorov čez {cycles} čistih ciklov (spodnja meja {floor}s).",
@@ -1797,7 +1804,8 @@
       "watchdog": "Ohranjeno tako nizko, kot je varno (tik nad vrzeljo posodobitve p95 {p95}s in vsaj 2× interval vzorčenja {median}s, najmanj 30s), da se zastoji hitro zaznajo brez lažnih ustavitev.",
       "end_energy_floor": "Zvišano na minimum, ki izhaja iz praga zaustavitve ({stop} W) v času zamude izklopa ({off_delay} s); pod njim se cikel lahko konča le po nadomestni poti.",
       "max_duration_ratio_default": "Vrnjeno na privzeto vrednost: nižja zgornja meja zavrne pravi program vsakič, ko cikel traja dlje kot običajno.",
-      "min_duration_ratio_default": "Vrnjeno na privzeto vrednost: višja spodnja meja prepreči prepoznavanje cikla, ki teče, dokler ne napreduje precej daleč."
+      "min_duration_ratio_default": "Vrnjeno na privzeto vrednost: višja spodnja meja prepreči prepoznavanje cikla, ki teče, dokler ne napreduje precej daleč.",
+      "start_above_running": "Tipična nizka delovna moč te naprave je {low} W, vendar je prag zagona {start} W, zato se cikel na tej ravni nikoli ne zažene. Prag zagona je nastavljen na polovico te ravni, prag zaustavitve pod njo."
     },
     "exclusions": {
       "summary": "Izključeno {total} napačno zaznanih ciklov: {parts}.",
@@ -1903,6 +1911,8 @@
     "settings_reverted": "Nastavitve obnovljene; integracija se znova nalaga",
     "settings_saved": "Nastavitve shranjene; integracija se znova nalaga",
     "suggestions_applied": "Predlogi uporabljeni; integracija se znova nalaga",
+    "suggestions_none_applied": "Nobena nastavitev ni bila spremenjena: izbrani predlogi ne veljajo več",
+    "suggestions_changed": "Predlogi so se spremenili, odkar ste jih pregledali. Nič ni bilo shranjeno; preverite jih in jih znova uporabite.",
     "suggestions_dismissed": "Predlogi zavrnjeni",
     "apply_failed": "Uporaba ni uspela: {error}",
     "delete_failed": "Brisanje ni uspelo: {error}",
@@ -2271,6 +2281,9 @@
     },
     "cycle_overrun": {
       "name": "Cikel traja predolgo"
+    },
+    "program_mismatch": {
+      "name": "Tekoči program se razlikuje od izbranega"
     },
     "cycle_paused": {
       "name": "Cikel je ustavljen"

@@ -50,6 +50,7 @@ from .const import (
     DEVICE_TRIGGER_TYPES,
     DOMAIN,
     SIGNAL_DEVICE_TRIGGER,
+    device_entry_ids,
 )
 from .trigger_rules import (
     OPT_FROM,
@@ -95,16 +96,22 @@ async def async_validate_trigger_config(
 @callback
 def entry_for_device(hass: HomeAssistant, device_id: str) -> ConfigEntry | None:
     """The WashData config entry behind a device: identifier ``(DOMAIN, entry_id)``."""
-    device = dr.async_get(hass).async_get(device_id)
+    registry = dr.async_get(hass)
+    device = registry.async_get(device_id)
     if device is None:
         return None
-    candidates = [ident for domain, ident in device.identifiers if domain == DOMAIN]
-    candidates += list(device.config_entries)
-    for entry_id in candidates:
-        entry = hass.config_entries.async_get_entry(entry_id)
-        if entry is not None and entry.domain == DOMAIN:
-            return entry
-    return None
+    def _ours(ids: list[str]) -> ConfigEntry | None:
+        for entry_id in ids:
+            entry = hass.config_entries.async_get_entry(entry_id)
+            if entry is not None and entry.domain == DOMAIN:
+                return entry
+        return None
+
+    # WashData's own identifier first: the registry scan for a pre-split composite
+    # id is only the fallback (PR #529 review).
+    return _ours([ident for domain, ident in device.identifiers if domain == DOMAIN]) or _ours(
+        device_entry_ids(device, registry)
+    )
 
 
 @callback

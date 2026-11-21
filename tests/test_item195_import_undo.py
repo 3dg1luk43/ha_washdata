@@ -309,6 +309,7 @@ def _ws_hass() -> MagicMock:
 
 def _manager(store: Any) -> MagicMock:
     m = MagicMock()
+    m._is_shutdown = False  # a live manager (a MagicMock attribute reads as truthy)
     m.profile_store = store
     m.notify_update = MagicMock()
     m.async_schedule_banked_tail_repair = MagicMock()

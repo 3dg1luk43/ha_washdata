@@ -67,6 +67,10 @@ cycle_overrun:
           mode: box
           unit_of_measurement: "%"
 
+program_mismatch:
+  target: *target
+  fields: *program_filter
+
 cycle_paused:
   target: *target
   fields: *include_detected

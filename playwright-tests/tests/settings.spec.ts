@@ -200,6 +200,28 @@ test('Apply all previews every change before saving', async ({ page }) => {
   await assertWsCalled(page, 'ha_washdata/apply_suggestions');
 });
 
+test('Apply all that saves nothing says so, not "applied" (PR #529 review)', async ({ page }) => {
+  // The backend's checks can withdraw every selected key: nothing is written and
+  // nothing reloads, so the "applied; reloading" toast would be untrue.
+  for (const [reply, toast] of [
+    [{ success: false, applied: [] }, 'No setting changed'],
+    [{ success: true, applied: ['off_delay'] }, 'Suggestions applied'],
+  ] as const) {
+    await page.goto('/');
+    await bootPanel(page, {
+      'ha_washdata/get_suggestions': {
+        suggestions: [{ key: 'off_delay', suggested: 371, current: 120, reason: 'a' }],
+      },
+      'ha_washdata/apply_suggestions': reply,
+    });
+    await clickTab(page, 'settings');
+    await page.locator('.wd-sug-banner [data-action="sug-apply-all"]').first().click();
+    await page.locator('[data-maction="ok"]').click();
+    await expect(page.locator('.wd-toast')).toContainText(toast, { timeout: 5_000 });
+    if (!reply.success) await expect(page.locator('.wd-toast')).not.toContainText('applied');
+  }
+});
+
 test('settings changelog dot appears for changed settings', async ({ page }) => {
   await page.goto('/');
   await bootPanel(page, {

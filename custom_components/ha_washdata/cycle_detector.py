@@ -35,6 +35,9 @@ from .log_utils import DeviceLoggerAdapter
 from .time_utils import SYNTHETIC_OFFSETS_KEY, utc_now
 from .const import (
     DEFAULT_ANTI_WRINKLE_EXIT_POWER,
+    TERMINAL_BLIP_MIN_W,
+    TERMINAL_BLIP_QUIET_MIN_S,
+    TERMINAL_BLIP_RATIO,
     TERMINAL_EVENT_PEAK_FRAC,
     TERMINAL_EVENT_MAX_PEAK_FRAC,
     TERMINAL_QUIET_MIN_S,
@@ -60,6 +63,8 @@ from .const import (
     DEFAULT_DEFER_FINISH_CONFIDENCE,
     DEFAULT_SMART_TERMINATION_DURATION_RATIO,
     DISHWASHER_END_SPIKE_MIN_PROGRESS,
+    DOOR_END_PAUSED_MIN_RATIO,
+    DOOR_END_PAUSED_MIN_RATIO_BY_TYPE,
     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS,
     DISHWASHER_END_SPIKE_WAIT_SECONDS,
     DISHWASHER_SMART_TERMINATION_DEBOUNCE_SECONDS,
@@ -718,7 +723,8 @@ STANDBY_LEVEL_RECENT_CYCLES = 30
 
 
 def learned_standby_level_w(
-    cycles: Any, stop_threshold_w: float, start_threshold_w: float
+    cycles: Any, stop_threshold_w: float, start_threshold_w: float,
+    *, stop_changes: Any = None,
 ) -> float | None:
     """Discussion #452: the standby/display level of a two-level appliance, or None.
 
@@ -745,9 +751,9 @@ def learned_standby_level_w(
         if not (math.isfinite(stop) and math.isfinite(start)) or stop <= 0:
             return None
         recent = [c for c in list(cycles or [])[-STANDBY_LEVEL_RECENT_CYCLES:] if isinstance(c, dict)]
-        adv = detect_standby_above_stop(recent, stop)
+        adv = detect_standby_above_stop(recent, stop, stop_changes=stop_changes)
         if adv is not None:
-            level: float | None = float(adv["idle_w"])
+            level: float | None = float(adv.get("idle_level", adv["idle_w"]))  # unrounded
         else:
             clean, _excluded = select_clean_cycles(recent, stop_threshold_w=stop)
             points = [p for p in (_cycle_readings(c) for c in clean) if len(p) >= 5]
@@ -968,6 +974,8 @@ class CycleDetector:
         # dishwasher quiet-release gates so a single low sample after a telemetry
         # dropout can't satisfy them without the quiet having been observed.
         self._time_below_threshold_gapfree: float = 0.0
+        # The gap-free quiet a high reading ended, read by the terminal blip (#531).
+        self._gapfree_before_high: float = 0.0
         # The part of the current below-threshold run that fell inside a sensor
         # outage and so was NOT added to `_time_below_threshold` (item 266). Only
         # the hazard gate reads it, to place the quiet run's start honestly.
@@ -1452,6 +1460,59 @@ class CycleDetector:
         of it. The stored trace keeps every reading."""
         return self._cut_readings(self._gate_spans())
 
+    def open_user_pause_s(self) -> float:
+        """Seconds of the user pause still open that :meth:`_match_readings` spans
+        (#530): it leaves out a pause only once the resume banks it, so up to the
+        last reading the open one is still in its span. Net of the finished spans
+        it overlaps, so the span less this is programme time as banking it there
+        would leave it. 0.0 without one, or when the gates keep user pauses."""
+        since, start = self._user_pause_since, self._current_cycle_start
+        if (
+            not USER_PAUSE_EXCLUDED_FROM_GATES or not self._user_paused
+            or since is None or start is None or not self._power_readings
+        ):
+            return 0.0
+        begin = max(since, start)
+        length = (self._power_readings[-1][0] - begin).total_seconds()
+        if length <= 0:
+            return 0.0
+        spans = self._gate_spans()
+        merged = _merge_spans([*spans, ((begin - start).total_seconds(), length)])
+        return max(0.0, sum(n for _at, n in merged) - sum(n for _at, n in spans))
+
+    def open_halt_s(self) -> float:
+        """Seconds of programme time standing still that :meth:`_match_readings`
+        still spans (#530): the open user pause (:meth:`open_user_pause_s`) and
+        the stall shown now, which the trace keeps until it is banked but which
+        progress already leaves out from its first reading (item 514). Their
+        union, net of the finished spans the trace already cuts, so the span
+        less this is programme time. 0.0 without either. Never raises."""
+        try:
+            start = self._current_cycle_start
+            if start is None or not self._power_readings:
+                return 0.0
+            last = self._power_readings[-1][0]
+            opened: list[tuple[float, float]] = []
+            since = self._user_pause_since
+            if USER_PAUSE_EXCLUDED_FROM_GATES and self._user_paused and since is not None:
+                begin = max(since, start)
+                opened.append(((begin - start).total_seconds(), (last - begin).total_seconds()))
+            run = self._stall_run_start
+            if (
+                STALL_EXCLUDED_FROM_PROGRESS and STALL_CURRENT_EXCLUDED_FROM_PROGRESS
+                and self._stall_active and run is not None
+            ):
+                begin = max(run, start)
+                opened.append(((begin - start).total_seconds(), (last - begin).total_seconds()))
+            opened = [(at, n) for at, n in opened if n > 0]
+            if not opened:
+                return 0.0
+            spans = self._gate_spans()
+            merged = _merge_spans([*spans, *opened])
+            return max(0.0, sum(n for _at, n in merged) - sum(n for _at, n in spans))
+        except Exception:  # pylint: disable=broad-exception-caught
+            return 0.0
+
     def _cut_readings(
         self, spans: list[tuple[float, float]]
     ) -> list[tuple[datetime, float]]:
@@ -1829,6 +1890,17 @@ class CycleDetector:
         else:
             self._p95_dt = max(dt, 1.0)
 
+    def refresh_match(self, timestamp: datetime) -> None:
+        """Run the match tick now, outside its interval. The manager hands a
+        program picked by hand over this way before it judges a door opened in
+        PAUSED (#524): the pin's matcher branch answers synchronously."""
+        self._try_profile_match(timestamp, force=True)
+
+    def match_frozen(self, timestamp: datetime) -> bool:
+        """Whether no match lands now, a pin's included: the anti-crease freeze
+        (#296), which ``_try_profile_match`` and ``update_match`` both honour."""
+        return bool(self._matched_profile and self._in_anticrease_freeze(timestamp))
+
     def _try_profile_match(self, timestamp: datetime, force: bool = False) -> None:
         """Attempt to invoke the profile matcher if conditions are met.
 
@@ -1888,7 +1960,7 @@ class CycleDetector:
         # pre-tail match instead.  Self-correcting: a new wash's heating burst above
         # anti_wrinkle_max_power leaves the tail regime, so this stops applying and
         # matching re-arms for the next cycle.
-        if self._matched_profile and self._in_anticrease_freeze(timestamp):
+        if self.match_frozen(timestamp):
             return
 
         # Rate limiting
@@ -2863,6 +2935,12 @@ class CycleDetector:
         """Return the expected duration of the current cycle in seconds."""
         return self._expected_duration
 
+    @property
+    def match_ambiguous(self) -> bool:
+        """Whether the match the detector holds is ambiguous (top-1 vs top-2 within
+        ``MATCH_AMBIGUITY_MARGIN``). A program picked by hand never is."""
+        return bool(self._match_ambiguous)
+
     @staticmethod
     def _smart_term_block_reason(
         current_duration: float,
@@ -3378,6 +3456,16 @@ class CycleDetector:
         if is_high:
             self._time_above_threshold += high_dt
             self._time_below_threshold = 0.0
+            # The interval this reading closes was quiet too (the previous reading
+            # was low), credited by the tally's own test when observed; a reading
+            # that opens a quiet pulse has had it credited above (PR #529 review).
+            tail_quiet = (
+                dt
+                if not opens_pulse and not prev_high and unobserved <= 0
+                and not (synthetic and not observed) and dt <= outage_ceiling
+                else 0.0
+            )
+            self._gapfree_before_high = self._time_below_threshold_gapfree + tail_quiet
             self._time_below_threshold_gapfree = 0.0
             self._time_below_unobserved = 0.0
             # Energy for the guarded interval, computed with high_dt above.
@@ -4004,7 +4092,13 @@ class CycleDetector:
                     float(self._config.stop_threshold_w),
                     TERMINAL_EVENT_PEAK_FRAC * float(self._cycle_max_power),
                 )
-                if power > spike_floor and (
+                if (
+                    power > spike_floor
+                    or (
+                        power > float(self._config.stop_threshold_w)
+                        and self._is_terminal_blip(timestamp, power)
+                    )
+                ) and (
                     self._expected_duration <= 0
                     or current_duration
                     >= self._expected_duration * DISHWASHER_END_SPIKE_MIN_PROGRESS
@@ -5138,9 +5232,11 @@ class CycleDetector:
         # the expected duration, as it did before 0.5.7. See the constants.
         stop = float(self._config.stop_threshold_w)
         near_stop_ceiling = standby_near_stop_ceiling(stop)
+        # The level the tiers test, kept for the stored cycle (PR #529 review).
+        self._standby_band_level = float(np.median(window))
         if (
             stop > 0
-            and float(np.median(window)) >= stop
+            and self._standby_band_level >= stop
             and hi <= near_stop_ceiling
             # #452: a halt says the programme is not done (it stopped on its
             # standby draw before its end), so the near-stop tier waits; the
@@ -5151,10 +5247,12 @@ class CycleDetector:
             # has had its terminal event is past it (the pump-out it dries for).
             and (not needs_event or self._terminal_event_seen(timestamp))
         ):
+            self._standby_band_near_stop = True
             return hi
         if needs_event:
             return None  # #518: the near-stop tier only
         if current_duration >= self._expected_duration * STANDBY_BAND_LOOSE_MIN_RATIO:
+            self._standby_band_near_stop = False
             return hi
         return None
 
@@ -5249,6 +5347,8 @@ class CycleDetector:
         plateau_hi = self._standby_band_plateau(timestamp)
         if plateau_hi is None:
             return False
+        near_stop = bool(getattr(self, "_standby_band_near_stop", False))
+        level = getattr(self, "_standby_band_level", None)
         start_time = self._current_cycle_start or timestamp
         current_duration = (timestamp - start_time).total_seconds()
         # The plateau sits ABOVE stop_threshold, so it keeps advancing
@@ -5289,7 +5389,7 @@ class CycleDetector:
             "draw above stop_threshold; finalizing (plateau trimmed, "
             "duration %.0fs).",
             self._state,
-            power,
+            power if level is None else level,
             self._cycle_max_power,
             self._expected_duration,
             current_duration,
@@ -5299,6 +5399,12 @@ class CycleDetector:
             status="completed",
             termination_reason=TerminationReason.TIMEOUT,
             keep_tail=False,
+            # Only the near-stop tier is a standby: the loose one also closes a
+            # 0 W soak or a 60 W rinse stuck past twice the expected duration, so
+            # its level is kept apart. Both are the plateau median the tiers
+            # tested, not the current sample.
+            standby_band_w=level if near_stop else None,
+            loose_plateau_w=None if near_stop else level,
         )
         return True
 
@@ -6309,6 +6415,59 @@ class CycleDetector:
             return 0.0
         return DISHWASHER_QUIET_RELEASE_TERMINAL_MARGIN * max(d for _f, d in cat[1])
 
+    def _is_terminal_blip(self, timestamp: datetime, power: float) -> bool:
+        """A reading over the Stop Threshold that stands out of a long quiet (#531).
+
+        The Bauknecht in #531 dries 53 min at 3.3 W (its own standby level, under a
+        4.5 W Stop Threshold) and beeps at 6.3 W at the real end, 0.3% of its 1.97 kW
+        peak, so the peak-fraction floor never counted it and every run waited the
+        whole spike window past it. After at least ``TERMINAL_BLIP_QUIET_MIN_S`` of
+        readings under the threshold, ``TERMINAL_BLIP_RATIO`` x their median and
+        ``TERMINAL_BLIP_MIN_W`` more is the terminal event too. Asked only for a
+        reading that already clears the threshold, so it walks the quiet rarely.
+
+        Only on a matched run (the progress gate then holds it to the programme's
+        end; unmatched, the end spike also shortens the wait to 30 min, which a
+        drying blip must not do), and only after observed quiet: the gap-free
+        quiet this reading ended (``_time_below_threshold_gapfree`` before it was
+        reset, which an outage or an unobserved keepalive already resets) must
+        reach ``TERMINAL_BLIP_QUIET_MIN_S`` (PR #529 review). The readings give
+        the quiet's level.
+        """
+        if not self._matched_profile or float(self._expected_duration or 0.0) <= 0:
+            return False
+        if self._gapfree_before_high < TERMINAL_BLIP_QUIET_MIN_S:
+            return False
+        stop = float(self._config.stop_threshold_w)
+        quiet: list[float] = []
+        quiet_start: datetime | None = None
+        # The level of the stretch that qualified: no further back than the
+        # gap-free tally reaches. The tally restarts at every quiet step it does
+        # not count as observed (an outage-sized sensor step, an unread
+        # keepalive, recorded unobserved time), so older readings across one
+        # never set the level (PR #529 review). That is its record of which steps
+        # were observed: a keepalive that read the sensor is one whatever its
+        # length, so the walk takes no cadence ceiling of its own there (a 106 s
+        # keepalive step on a 10 s plug left 10 s of quiet, PR #529 review).
+        since = timestamp - timedelta(seconds=self._gapfree_before_high + 0.001)
+        # The step this reading closes is the one the tally does not restart at
+        # (it is kept out of the quiet instead): a sensor step the cadence calls
+        # an outage is no quiet right before the blip.
+        outage_ceiling = min(3600.0, max(60.0, 10.0 * self._prior_p95_dt))
+        for ts, pw in reversed(self._power_readings):
+            if ts >= timestamp:
+                continue
+            if ts < since or float(pw) >= stop:
+                break
+            if quiet_start is None and (timestamp - ts).total_seconds() > outage_ceiling:
+                break
+            quiet.append(float(pw))
+            quiet_start = ts
+        if quiet_start is None or (timestamp - quiet_start).total_seconds() < TERMINAL_BLIP_QUIET_MIN_S:
+            return False
+        level = float(np.median(quiet))
+        return power >= max(TERMINAL_BLIP_RATIO * level, level + TERMINAL_BLIP_MIN_W)
+
     def _spike_follows_terminal_quiet(
         self, timestamp: datetime, *, latest: bool = False
     ) -> bool:
@@ -6546,6 +6705,8 @@ class CycleDetector:
         tail_cap: datetime | None = None,
         duration_capped: bool = False,
         flat_power_w: float | None = None,
+        standby_band_w: float | None = None,
+        loose_plateau_w: float | None = None,
     ) -> None:
         """Finalize cycle.
 
@@ -6670,6 +6831,27 @@ class CycleDetector:
             # kept for diagnostics (a standby above the start threshold shows here).
             cycle_data["flat_power_stop"] = True
             cycle_data["flat_power_w"] = round(float(flat_power_w), 2)
+        if standby_band_w is not None and math.isfinite(float(standby_band_w)):
+            # The standby-band finalize (#445): the appliance finished but held this
+            # draw above the stop threshold, and the plateau is trimmed off the
+            # trace, so the level is kept here. It is the one TIMEOUT end that did
+            # not see the power below stop (`detect_standby_above_stop`, #525).
+            # Unrounded: the advisory compares it with the threshold, and a 2.564 W
+            # median over a 2.561 W threshold rounded to 2.56 W read as below it.
+            cycle_data["standby_band_w"] = float(standby_band_w)
+        if loose_plateau_w is not None and math.isfinite(float(loose_plateau_w)):
+            # The same finalize on its loose tier (a flat plateau past twice the
+            # expected duration): not a standby, and only below the threshold
+            # does it show the power going there (`_idle_evidence_w`). Unrounded
+            # for the same comparison.
+            cycle_data["loose_plateau_w"] = float(loose_plateau_w)
+        stop_w = float(self._config.stop_threshold_w)
+        if math.isfinite(stop_w):
+            # The Stop Threshold the finish was decided under (PR #529 review). The
+            # stored end can be the last active reading, from before a change of it
+            # the finish followed, so the settings history at ``end_time`` can name
+            # another one (``suggestion_engine._stop_at_end``).
+            cycle_data["finish_stop_threshold_w"] = stop_w
 
         self._logger.info("Cycle Finished: %s, %.1f min", status, duration / 60)
         self._on_cycle_end(cycle_data)
@@ -6705,8 +6887,13 @@ class CycleDetector:
             )
             self._ignore_power_until_idle = False
 
-    def user_stop(self) -> None:
-        """Handle user-initiated stop."""
+    def user_stop(self, reason: str = TerminationReason.USER) -> None:
+        """Handle a user-initiated stop, or another one with the same mechanics.
+
+        ``reason``: ``TerminationReason.EXTERNAL`` for the External End Trigger
+        (register 640): the same tail and restart lockout, since it can fire while
+        the appliance still draws, but a natural end in the statistics.
+        """
         if self._state != STATE_OFF:
             now = utc_now()
             # "Done now" keeps the tail only while the machine is still running.
@@ -6721,7 +6908,7 @@ class CycleDetector:
             self._finish_cycle(
                 now,
                 status="completed",
-                termination_reason=TerminationReason.USER,
+                termination_reason=reason,
                 keep_tail=True,  # User implies "Done Now"
                 tail_cap=(
                     self._keep_tail_cap(self._current_cycle_start or now)
@@ -6737,6 +6924,53 @@ class CycleDetector:
             # pre-stop gap and release the lockout early (#267).
             self._lockout_high_seconds = 0.0
             self._last_process_time = now
+
+    def door_end_due(self, timestamp: datetime) -> bool:
+        """Whether a door held open in PAUSED is the end of the run (#524).
+
+        Only once programme time has reached ``DOOR_END_PAUSED_MIN_RATIO`` (per
+        device type) of the matched programme's expected duration, and never
+        while user-paused or while the match is ambiguous (its expected duration
+        may be a shorter look-alike's, the reason Smart Termination waits too).
+        Unmatched, or earlier, the door is a pause, as before 0.6.1: PAUSED is
+        also where a mid-programme quiet sits.
+        """
+        expected = float(self._expected_duration or 0.0)
+        if (
+            not self._matched_profile
+            or expected <= 0
+            or self._user_paused
+            or self._match_ambiguous
+        ):
+            return False
+        ratio = DOOR_END_PAUSED_MIN_RATIO_BY_TYPE.get(
+            self._config.device_type, DOOR_END_PAUSED_MIN_RATIO
+        )
+        return self._gate_elapsed_s(timestamp) >= ratio * expected
+
+    def door_end(self) -> None:
+        """Finish the cycle on a door held open at its end (#342, #524).
+
+        A natural end, not a hand stop: stored as the fallback timeout stores one
+        (a dishwasher keeps its drying tail up to ``_keep_tail_cap``, anything
+        else ends at its last active reading), under ``TerminationReason.DOOR``
+        (automations still see ``user``: ``automation_termination_reason``).
+        The manager calls it only with the power below the Stop Threshold. The
+        restart lockout is ``user_stop``'s, which this path used until 0.6.1.
+        """
+        if self._state == STATE_OFF:
+            return
+        now = utc_now()
+        self._finish_cycle(
+            now,
+            status="completed",
+            termination_reason=TerminationReason.DOOR,
+            keep_tail=self._config.device_type == "dishwasher",
+            tail_cap=self._keep_tail_cap(self._current_cycle_start or now),
+        )
+        self._ignore_power_until_idle = True
+        self._lockout_high_seconds = 0.0
+        self._last_process_time = now
 
 
     def get_power_trace(self) -> list[tuple[datetime, float]]:

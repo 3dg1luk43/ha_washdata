@@ -81,6 +81,9 @@
         // Mirror HA: append the entity's unit when present, else the raw state.
         formatEntityState: (o) => {
           if (!o) return '';
+          // Optional per-state translation, as HA's own formatter applies (#526).
+          const tr = data.stateTranslations && data.stateTranslations[o.state];
+          if (tr) return tr;
           const u = o.attributes && o.attributes.unit_of_measurement;
           return u ? `${o.state} ${u}` : String(o.state);
         },

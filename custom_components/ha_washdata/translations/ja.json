@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "前回サイクルの電気料金"
+      },
+      "last_cycle_start": {
+        "name": "前回サイクルの開始時刻"
       }
     },
     "select": {
@@ -572,6 +575,7 @@
       "phase_started": "フェーズが開始された",
       "finishing_soon": "もうすぐ終わる",
       "cycle_overrun": "サイクルが長引いている",
+      "program_mismatch": "実行中のプログラムが選択したものと異なる",
       "cycle_paused": "サイクルが一時停止された",
       "cycle_resumed": "サイクルが再開された",
       "still_tumbling": "サイクル後もまだ回転中",
@@ -646,6 +650,16 @@
         "percent": {
           "name": "長い分",
           "description": "プログラムの通常所要時間を超える割合。"
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "実行中のプログラムが選択したものと異なる",
+      "description": "選んだプログラムよりも別のプログラムのほうがサイクルによく合うとき、一度トリガーします。新たに選択すると、新しいチェックを始めます。",
+      "fields": {
+        "program": {
+          "name": "プログラム",
+          "description": "このプログラムが選択されているときのみ、正確な名前で指定。任意のプログラムは空白にしてください。"
         }
       }
     },

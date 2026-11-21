@@ -122,6 +122,7 @@ const _WD_TRIGGERS = [
   { key: 'phase_started', name: 'Phase started', only: _TRIGGER_MATCHING_TYPES },
   { key: 'finishing_soon', name: 'Finishing soon', only: _TRIGGER_MATCHING_TYPES, options: { minutes: 10 } },
   { key: 'cycle_overrun', name: 'Cycle running long', only: _TRIGGER_MATCHING_TYPES, options: { percent: 20 } },
+  { key: 'program_mismatch', name: 'Running program differs from the selected one', only: _TRIGGER_MATCHING_TYPES },
   { key: 'cycle_paused', name: 'Cycle paused', options: { include_detected: false } },
   { key: 'cycle_resumed', name: 'Cycle resumed', options: { include_detected: false } },
   { key: 'cycle_stalled', name: 'Cycle stalled' },
@@ -344,10 +345,10 @@ const _SETTINGS_SECTIONS = [
     { sub: 'Door & Pause', fields: [
       { key: 'door_sensor_entity', label: 'Door Sensor Entity', basic: true, type: 'entity', domain: 'binary_sensor',
         doc: 'Optional door sensor. Shows when the appliance was opened to unload after a cycle.' },
-      { key: 'door_opens_at_end', label: 'Door Opens Automatically At End', type: 'checkbox',
-        doc: 'For dishwashers that open the door at the end to dry (e.g. AirDry). A door left open for the dwell time below ends the cycle instead of pausing it; a brief open is ignored. Needs a Door Sensor Entity.' },
+      { key: 'door_opens_at_end', label: 'Opening the Door Ends the Cycle', type: 'checkbox',
+        doc: 'With a Door Sensor Entity, a door held open for the dwell time below while the power is low ends the cycle instead of pausing it. In a paused cycle this happens only once the recognised program is nearly finished, so a pause mid-program stays a pause.' },
       { key: 'door_end_dwell_seconds', label: 'Door-Open End Dwell', unit: 's', type: 'number', min: 1, def: 60,
-        doc: 'With "Door Opens Automatically At End" on: how long the door must stay open before the cycle ends. Long enough to ignore adding a dish (default 60 s).' },
+        doc: 'With "Opening the Door Ends the Cycle" on: how long the door must stay open before the cycle ends. Long enough to ignore adding a dish (default 60 s).' },
       { key: 'pause_cuts_power', label: 'Pause Also Cuts Power (via switch)', type: 'checkbox',
         doc: 'When a cycle is paused, also switch off the Switch Entity below. Only for appliances that can safely lose power mid-cycle.' },
       { key: 'switch_entity', label: 'Switch Entity', type: 'entity', domain: 'switch',
@@ -531,6 +532,48 @@ function _nonPriceReason(id, vals, ctx) {
 const _ENERGY_DEVICE_CLASSES = new Set(['energy', 'energy_storage']);
 const _ENERGY_UNITS = new Set(['mwh', 'wh', 'kwh', 'gwh', 'twh', 'j', 'kj', 'mj', 'gj', 'cal', 'kcal', 'mcal', 'gcal']);
 
+// Whether a Min Power under 1 W would switch this Power Sensor to raw readings:
+// const.power_unit_scale reads a kW (or larger) sensor raw below 1 (#481), so no
+// cycle would start (PR #529). A sensor not in the states yet, or unavailable /
+// unknown without a unit, counts as one that could be kW, as
+// SuggestionEngine._min_power_floor does.
+function _powerSensorScale(id, ctx) {
+  // const.power_unit_scale's unit factor, or null when the unit is not known yet.
+  const st = (id && ctx && ctx.stateOf) ? ctx.stateOf(id) : null;
+  if (!st) return null;
+  const attrs = st.attributes || {};
+  const unit = String(attrs.unit_of_measurement == null ? '' : attrs.unit_of_measurement).trim();
+  if (!unit && (st.state === 'unavailable' || st.state === 'unknown')) return null;
+  const own = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key) ? obj[key] : null;
+  let scale = own({ mW: 0.001, W: 1, kW: 1000, MW: 1e6, GW: 1e9 }, unit);
+  if (scale == null) scale = unit.toLowerCase() === 'kw' ? 1000 : 1;
+  const slash = unit.indexOf('/');
+  if (slash >= 0) {
+    const energy = own({ Wh: 1, kWh: 1000, MWh: 1e6 }, unit.slice(0, slash).trim());
+    const per = own({ s: 1 / 3600, min: 1 / 60, h: 1, d: 24 }, unit.slice(slash + 1).trim());
+    if (energy != null && per != null) scale = energy / per;
+  }
+  return scale;
+}
+function _minPowerMustStayAtOne(id, ctx) {
+  const scale = _powerSensorScale(id, ctx);
+  return scale == null || scale > 1;
+}
+// The milliwatt side of the same rule: a mW sensor is read raw while Min Power is
+// 1000 or more (const.power_unit_scale), so a fix under 1000 would switch it to
+// watts while the thresholds stayed in milliwatts (review of PR #529).
+// The kW side of keeping the scale: a kW sensor already read raw (Min Power under
+// 1) must keep a Min Power fix under 1, or the readings switch to watts while the
+// thresholds stay in kilowatts (review of PR #529).
+function _minPowerRawKilowatt(v, ctx) {
+  const scale = _powerSensorScale(v.power_sensor, ctx);
+  return scale != null && scale > 1 && v.min_power != null && v.min_power < 1;
+}
+function _minPowerRawMilliwatt(v, ctx) {
+  const scale = _powerSensorScale(v.power_sensor, ctx);
+  return scale != null && scale < 1 && v.min_power != null && v.min_power >= 1000;
+}
+
 // Why the chosen Power Sensor cannot be one: it counts energy (#481), or null. Only
 // positive evidence, as the backend refuses it.
 function _energyCounterReason(id, ctx) {
@@ -574,12 +617,28 @@ const _SETTING_CONFLICTS = [
     }),
   },
   {
-    // min_power <= stop_threshold_w (noise gate must sit below the stop floor)
+    // min_power <= stop_threshold_w (noise gate must sit below the stop floor). On a
+    // sensor Min Power under 1 W switches to raw readings (a kW one, PR #529;
+    // reconcile holds it at 1 the same way) its fix is never under 1 W, and the
+    // conflict is waived only where nothing at or above 1 W can sit at or under the
+    // stop. Over the stop it is soft: no detection threshold reads it once start and
+    // stop are set.
     keys: ['min_power', 'stop_threshold_w'],
-    check: v => v.min_power != null && v.stop_threshold_w != null && v.min_power > v.stop_threshold_w,
-    fieldErrors: v => ({
-      min_power:        { msgKey: 'conflict.min_power.min_power', msgVars: {stop: v.stop_threshold_w}, msgFb: `Must be at or below Stop Threshold (${v.stop_threshold_w} W)`, fixVal: +(v.stop_threshold_w * 0.8).toFixed(1) },
-      stop_threshold_w: { msgKey: 'conflict.min_power.stop',      msgVars: {min: v.min_power},  msgFb: `Must be at or above Min Power (${v.min_power} W)`, fixVal: +(v.min_power * 1.25).toFixed(1) },
+    check: (v, ctx) => v.min_power != null && v.stop_threshold_w != null && v.min_power > v.stop_threshold_w
+      && !(v.min_power >= 1 && v.stop_threshold_w < 1 && _minPowerMustStayAtOne(v.power_sensor, ctx))
+      && !(v.stop_threshold_w < 1000 && _minPowerRawMilliwatt(v, ctx)),
+    fieldErrors: (v, ctx) => ({
+      min_power:        { msgKey: 'conflict.min_power.min_power', msgVars: {stop: v.stop_threshold_w}, msgFb: `Must be at or below Stop Threshold (${v.stop_threshold_w} W)`,
+        fixVal: _minPowerRawMilliwatt(v, ctx)
+          ? Math.max(1000, +(v.stop_threshold_w * 0.8).toFixed(1))
+          : _minPowerRawKilowatt(v, ctx)
+            ? Math.min(0.999, +(v.stop_threshold_w * 0.8).toFixed(3))
+          : _minPowerMustStayAtOne(v.power_sensor, ctx)
+            ? Math.max(1, +(v.stop_threshold_w * 0.8).toFixed(1)) : +(v.stop_threshold_w * 0.8).toFixed(1) },
+      // Not a Stop fix that would reach Start: it would cascade into Start, and this
+      // conflict is soft when both are set (PR #529 review).
+      stop_threshold_w: { msgKey: 'conflict.min_power.stop',      msgVars: {min: v.min_power},  msgFb: `Must be at or above Min Power (${v.min_power} W)`,
+        fixVal: (v.start_threshold_w != null && +(v.min_power * 1.25).toFixed(1) >= v.start_threshold_w) ? null : +(v.min_power * 1.25).toFixed(1) },
     }),
   },
   {
@@ -678,24 +737,10 @@ const _SETTING_CONFLICTS = [
       profile_match_max_duration_ratio: { msgKey: 'conflict.duration_ratio.max', msgVars: {min: v.profile_match_min_duration_ratio}, msgFb: `Must be greater than Min Duration Ratio (${v.profile_match_min_duration_ratio})`, fixVal: +(v.profile_match_min_duration_ratio * 2.0).toFixed(2) },
     }),
   },
-  {
-    // end_energy_threshold >= stop_threshold_w * off_delay / 3600  (#376)
-    // The energy gate is evaluated over an off_delay-long window, so it implies a
-    // wattage. Below this it forbids what stop_threshold_w (the power gate) allows,
-    // and the cycle can only close through a fallback path (smart termination,
-    // watchdog force-end) — surfacing only as an unexplained late completion.
-    keys: ['end_energy_threshold', 'stop_threshold_w', 'off_delay'],
-    check: v => v.end_energy_threshold != null && v.stop_threshold_w != null && v.off_delay != null
-      && v.off_delay > 0 && v.end_energy_threshold < v.stop_threshold_w * v.off_delay / 3600,
-    fieldErrors: v => ({
-      end_energy_threshold: { msgKey: 'conflict.end_energy.energy', msgVars: {w: v.stop_threshold_w, d: v.off_delay},
-        msgFb: `Too strict for Stop Threshold (${v.stop_threshold_w} W) over Off Delay (${v.off_delay} s); the cycle can only end through a fallback path`,
-        fixVal: Math.ceil(v.stop_threshold_w * v.off_delay / 3600 * 1000) / 1000 },
-      stop_threshold_w: { msgKey: 'conflict.end_energy.stop', msgVars: {e: v.end_energy_threshold, d: v.off_delay, p: +(v.end_energy_threshold * 3600 / v.off_delay).toFixed(2)},
-        msgFb: `End Energy Threshold (${v.end_energy_threshold} Wh over ${v.off_delay} s) only permits ${+(v.end_energy_threshold * 3600 / v.off_delay).toFixed(2)} W`,
-        fixVal: Math.floor(v.end_energy_threshold * 3600 / v.off_delay * 10) / 10 },
-    }),
-  },
+  // (The #376 rule end_energy_threshold >= stop_threshold_w * off_delay / 3600 is
+  // gone: under that floor is what holds a dishwasher's sub-stop drying together
+  // on an unmatched run, and its one-tap raise split 3 of 7 cycles in a replay. It
+  // also fired on stock dishwasher defaults. Register items 633, 636.)
 ];
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
@@ -2445,6 +2490,21 @@ class HaWashdataPanel extends HTMLElement {
     this._constants = { stateColors: {}, deviceTypes: [], mlLabEnabled: false, mlTrainingAvailable: false, storeOnlineAvailable: false, storeOnlineEnabled: false, storeWebOrigin: '', storePrefs: {}, pgMatchDefaults: {}, version: '', iconUrl: '' };
     this._constantsLoaded = false;
     this._devices = [];
+    // get_devices requests issued / the newest one applied: a slower reply to an
+    // older request (a poll sent before a program change) must not replace a
+    // newer list, or it re-shows what the change cleared (#530 mismatch badge).
+    this._devicesReqSeq = 0;
+    this._devicesAppliedSeq = 0;
+    // The live chart's history reads, ordered by their own request (PR #529 review).
+    this._powerReqSeq = 0;
+    this._powerAppliedSeq = 0;
+    // Likewise the match-debug and recording-state reads (_fetchMatchDebug /
+    // _fetchRecState), so a slow history read before them cannot stop them.
+    this._matchDebugReqSeq = 0;
+    this._matchDebugAppliedSeq = 0;
+    this._recStateReqSeq = 0;
+    this._recStateAppliedSeq = 0;
+    this._recStatePending = new Map();  // eid -> seq: a transition's read not yet landed
     this._cycles = [];
     this._refCycles = [];  // imported store recordings (shown alongside real cycles)
     this._shareableCycles = [];  // get_shareable_cycles result for the share-device tree
@@ -2497,7 +2557,10 @@ class HaWashdataPanel extends HTMLElement {
     this._powerHistory = [];   // [[elapsedSeconds, watts], ...]
     this._powerT0 = null;
     this._statusEnv = null;    // matched profile envelope (expected curve overlay)
-    this._statusEnvName = null;
+    this._statusEnvName = null;   // the program _statusEnv belongs to
+    this._statusEnvEid = null;    // and the appliance (entry id)
+    this._statusEnvSeq = 0;       // envelope requests issued: only the newest applies
+    this._statusEnvWant = null;   // the appliance and program a request is in flight for
     this._powerData = { live: [], raw: [], cycle_active: false, cycle_elapsed_s: 0 };
     this._stagedSuggestions = false;   // a suggestion was applied to a field this session
     this._pendingSettings = {};        // unsaved edits accumulated across section switches
@@ -2562,6 +2625,8 @@ class HaWashdataPanel extends HTMLElement {
     // D1: matched-profile phases for the Status-tab phase timeline
     this._statusPhases = [];
     this._statusPhasesName = null;
+    this._statusPhasesEid = null;   // the appliance the phases belong to
+    this._statusPhasesSeq = 0;      // the newest claim; only its answer writes
     // D3: cycle-list pagination. Imported (reference + backfill) cycles page on
     // their own cursor, outside the real-cycle offset/total (register item 129a).
     this._cycleOffset = 0;
@@ -3269,6 +3334,23 @@ class HaWashdataPanel extends HTMLElement {
         const m = /\(([-\d.]+) W\)[^(]*\(([-\d.]+) W\)/.exec(String(e.message || ''));
         e.message = this._tText('msg.invalid_threshold_pair',
           { stop: m ? m[1] : '?', start: m ? m[2] : '?' }, e.message);
+      } else if (e && e.code === 'end_gate_check_failed') {
+        e.message = this._tText('msg.end_gate_check_failed', {}, e.message);
+      } else if (e && e.code === 'analysis_superseded') {
+        // A manual analysis superseded on every run (options saved, data replaced).
+        e.message = this._tText('msg.analysis_superseded', {},
+          'Settings or cycle data changed during the analysis. Run it again.');
+      } else if (e && e.code === 'analysis_check_failed') {
+        // The manual analysis's joint timing check could not run (PR #529
+        // review). Unlike end_gate_check_failed, earlier passes may have stored
+        // suggestions, so this does not say nothing was saved.
+        e.message = this._tText('msg.analysis_check_failed', {},
+          'The suggested timing settings could not be checked against this appliance\'s pauses. Run it again.');
+      } else if (e && e.code === 'cycles_changed') {
+        // Apply refused after it had cleared the suggestions (PR #529 review): the
+        // next Apply finds none, so the user has to analyse again.
+        e.message = this._tText('msg.apply_cycles_changed', {},
+          'A cycle was saved while the suggestions were being applied. No setting was changed and the suggestions were cleared. Run the suggestion analysis again.');
       }
       throw e;
     }
@@ -3278,6 +3360,12 @@ class HaWashdataPanel extends HTMLElement {
     if (!this._hass) return;
     const firstLoad = this._loading;
     let painted = false;   // first load only: the early Status paint already ran
+    // This call's get_devices request. Once a newer one's list is in, this call is
+    // superseded: its error is no news and the newer call does the finishing paint.
+    let seq = null;
+    let stale = false;
+    let liveApplied = false;   // this call's chart history, match debug or recording state landed
+    const superseded = () => seq !== null && seq < this._devicesAppliedSeq;
     try {
       if (!this._constantsLoaded) {
         // Independent of each other, so one round trip instead of two (audit UI-19).
@@ -3297,7 +3385,10 @@ class HaWashdataPanel extends HTMLElement {
         this._constantsLoaded = true;
       }
 
+      seq = ++this._devicesReqSeq;
       const res = await this._ws({ type: `${_DOMAIN}/get_devices` });
+      if (superseded()) { stale = true; return; }   // a newer list is in
+      this._devicesAppliedSeq = seq;
       this._lastFetchErr = null;   // recovered: report the next failure even if identical
       this._fetchFailed = false;
       this._devices = res.devices || [];
@@ -3326,13 +3417,28 @@ class HaWashdataPanel extends HTMLElement {
       const dev = this._devices[this._selIdx];
       // The live chart and the matched program's overlay are independent reads, so
       // they go out together rather than one after the other (audit UI-19).
+      // Each read below lands only while the same appliance is shown. With raw power
+      // on, the washer's history can wait on the recorder while the user switches to
+      // the dryer. The live reads are ordered by their own requests, not by the
+      // device list: a history read slower than the poll would otherwise stop them
+      // on every poll. The row they read is the newest list's.
+      const shownRow = () => {
+        const cur = this._devices[this._selIdx];
+        return dev && cur && cur.entry_id === dev.entry_id ? cur : null;
+      };
       const statusData = async () => {
         // Live chart is served from the integration so it survives a refresh:
         // fetch it whenever the Status tab is visible.
         if (dev && this._tab === 'status') {
-          try { this._powerData = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: dev.entry_id, with_raw: this._pref('show_raw_active', false) }); } catch (_) { /* keep previous */ }
-          if (this._pref('show_debug', false)) {
-            try { this._matchDebug = await this._ws({ type: `${_DOMAIN}/get_match_debug`, entry_id: dev.entry_id }); } catch (_) { /* keep previous */ }
+          try {
+            // Ordered against the newest history that landed, not the newest device
+            // list: a read slower than the poll would otherwise be dropped on every
+            // poll and the chart never move. Still only for the appliance shown.
+            if (await this._fetchPowerHistory(dev.entry_id)) liveApplied = true;
+          } catch (_) { /* keep previous */ }
+          if (!shownRow()) return;
+          if (this._pref('show_debug', false) && await this._fetchMatchDebug(dev.entry_id)) {
+            liveApplied = true;
           }
           // Keep the Manual Recording widget's live duration / sample count fresh
           // while a recording is running (the backend reports them live; without
@@ -3341,29 +3447,59 @@ class HaWashdataPanel extends HTMLElement {
           // _recState, which is null on first load and would otherwise never be
           // populated -- leaving the widget showing "Start Recording" during an
           // active recording (#313).
-          if (this._canEdit() && dev.recording) {
-            try { this._recState = await this._ws({ type: `${_DOMAIN}/get_recording_state`, entry_id: dev.entry_id }); } catch (_) { /* keep previous */ }
+          // A Start/Stop/Discard/Process whose own read failed is read again too.
+          const row = shownRow();
+          const recPending = this._recStatePending.has(dev.entry_id);
+          if (this._canEdit() && row && (row.recording || recPending) && await this._fetchRecState(dev.entry_id)) {
+            liveApplied = true;
           }
           // The Overview's waiting review question, in the background so it never
           // holds the first paint (audit UI-19); refetched only when the count moves.
-          this._refreshReviewQuestion(dev);
+          const cur = shownRow();
+          if (cur) this._refreshReviewQuestion(cur);
         }
       };
       const overlayData = async () => {
         // When a program is matched, keep its expected envelope for the status overlay.
         if (dev && dev.current_program) {
-          if (this._statusEnvName !== dev.current_program) {
-            this._statusEnvName = dev.current_program;
+          const eid = dev.entry_id, prog = dev.current_program;
+          // Keyed by appliance AND program: two appliances can run programs of the
+          // same name, and the selected one can change without a device switch
+          // (a ?device= link, an entry removed from the list).
+          const want = `${eid}\n${prog}`;
+          const have = this._statusEnvEid === eid && this._statusEnvName === prog;
+          if (!have && this._statusEnvWant !== want) {
+            // The envelope and the program it belongs to are set together, and only
+            // by the newest request while its device and program are still the ones
+            // shown: a slower answer for the previous program would otherwise show
+            // under the new one, and its name would stop every later fetch.
+            const tok = ++this._statusEnvSeq;
+            this._statusEnvWant = want;
+            this._statusEnv = null; this._statusEnvName = null; this._statusEnvEid = null;
+            let env = null, answered = false;
             try {
-              const r = await this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: dev.entry_id, profile_name: dev.current_program });
-              this._statusEnv = r.envelope || null;
-            } catch (_) { this._statusEnv = null; }
+              const r = await this._ws({ type: `${_DOMAIN}/get_profile_envelope`, entry_id: eid, profile_name: prog });
+              env = r.envelope || null;
+              answered = true;
+            } catch (_) { env = null; }
+            if (tok === this._statusEnvSeq) {
+              this._statusEnvWant = null;
+              const cur = this._devices[this._selIdx];
+              // A failed request caches nothing, so the next poll asks again; an
+              // answer without an envelope is cached like one with it.
+              if (answered && cur && cur.entry_id === eid && cur.current_program === prog) {
+                this._statusEnv = env; this._statusEnvName = prog; this._statusEnvEid = eid;
+              }
+            }
           }
-          // D1: keep the matched profile's phase ranges for the Status timeline.
-          await this._ensureStatusPhases(dev.entry_id, dev.current_program);
+          // D1: keep the matched profile's phase ranges for the Status timeline,
+          // unless the appliance or program shown changed while the envelope was
+          // awaited: the call would claim the phase slot for the old pair.
+          if (this._isShownProgram(eid, prog)) await this._ensureStatusPhases(eid, prog);
         } else {
-          this._statusEnv = null; this._statusEnvName = null;
-          this._statusPhases = []; this._statusPhasesName = null;
+          this._statusEnvSeq++; this._statusEnvWant = null;
+          this._statusEnv = null; this._statusEnvName = null; this._statusEnvEid = null;
+          this._statusPhases = []; this._statusPhasesName = null; this._statusPhasesEid = null;
         }
       };
       await Promise.all([statusData(), overlayData()]);
@@ -3409,6 +3545,8 @@ class HaWashdataPanel extends HTMLElement {
         this._fetchLogs().then(() => this._refreshLogDrawer()).catch(() => {});
       }
     } catch (err) {
+      // A newer list came in after this request: its failure is no lost connection.
+      if (superseded()) { stale = true; return; }
       // Collapse repeats: a poll failure is usually transient and identical on
       // every poll, and six copies of the same line buries whatever else is in the console.
       const text = _wsErrText(err);
@@ -3420,28 +3558,40 @@ class HaWashdataPanel extends HTMLElement {
       // "No devices configured yet", and a lost connection kept "Running 45%".
       this._fetchFailed = true;
     } finally {
-      this._loading = false;
-      this._refreshStaleChip();
-      // The poll must never clobber editing on another tab or inside a modal.
-      const sr = this.shadowRoot;
-      const ae = sr && sr.activeElement;
-      const interacting = !!(ae && ['SELECT', 'INPUT', 'TEXTAREA', 'OPTION'].includes(ae.tagName));
-      if (firstLoad && !painted) {
-        this._render();
-      } else if (firstLoad && !this._modal && !interacting) {
-        // The primed data landed after the early paint: render it in, unless the
-        // user is already inside a field or a modal (handled like a poll below).
-        this._render();
-      } else if (this._tab === 'status' && !this._modal && !interacting) {
-        this._render();
-      } else if (this._tab === 'status' && !this._modal && interacting) {
-        // Don't rebuild the DOM under an open dropdown / focused field; keep the
-        // live curve and device bar fresh instead so nothing is lost.
-        this._drawStatusCurve();
-        this._refreshDeviceBar();
-      } else {
-        this._refreshDeviceBar();
-      }
+      // Superseded, at its list or while its reads were in flight: the newer call
+      // clears the spinner and paints once its own data is in. Painting here showed
+      // the screen before it had.
+      // A superseded call whose own live reads landed paints them: the newer one may
+      // still be waiting on its history read.
+      if (!stale && (!superseded() || liveApplied)) this._finishFetch(firstLoad, painted);
+    }
+  }
+
+  // The end of a _fetchAll that is still the newest (or failed as the newest).
+  _finishFetch(firstLoad, painted) {
+    this._loading = false;
+    this._refreshStaleChip();
+    // The poll must never clobber editing on another tab or inside a modal.
+    const sr = this.shadowRoot;
+    const ae = sr && sr.activeElement;
+    const interacting = !!(ae && ['SELECT', 'INPUT', 'TEXTAREA', 'OPTION'].includes(ae.tagName));
+    if (firstLoad && !painted) {
+      this._render();
+    } else if (firstLoad && !this._modal && !interacting) {
+      // The primed data landed after the early paint: render it in, unless the
+      // user is already inside a field or a modal (handled like a poll below).
+      this._render();
+    } else if (this._tab === 'status' && !this._modal && !interacting) {
+      this._render();
+    } else if (this._tab === 'status' && !this._modal && interacting) {
+      // Don't rebuild the DOM under an open dropdown / focused field; keep the
+      // live curve, the device bar and the mismatch badge fresh instead so
+      // nothing is lost.
+      this._drawStatusCurve();
+      this._refreshDeviceBar();
+      this._refreshProgramMismatch();
+    } else {
+      this._refreshDeviceBar();
     }
   }
 
@@ -3495,15 +3645,30 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   // D1: cache the matched profile's phase ranges (start/end in seconds) for the
-  // Status-tab phase timeline. Cheap + cached per program name.
+  // Status-tab phase timeline. Cheap + cached per appliance and program, and only
+  // the newest request, while its pair is still the one wanted, writes: a slower
+  // answer for a superseded program kept its phases on screen.
   async _ensureStatusPhases(entryId, program) {
-    if (!program) { this._statusPhases = []; this._statusPhasesName = null; return; }
-    if (this._statusPhasesName === program) return;
-    this._statusPhasesName = program;
+    if (!program) { this._statusPhases = []; this._statusPhasesName = null; this._statusPhasesEid = null; return; }
+    if (this._statusPhasesName === program && this._statusPhasesEid === entryId) return;
+    // A new pair shows no ranges until its own arrive (PR #529 review): a device
+    // list that put another appliance on the same program at the selected index
+    // kept the previous one's, and a poll while the read was out drew them.
+    const tok = ++this._statusPhasesSeq;
+    this._statusPhases = [];
+    this._statusPhasesName = program; this._statusPhasesEid = entryId;
+    const current = () => tok === this._statusPhasesSeq
+      && this._statusPhasesName === program && this._statusPhasesEid === entryId;
     try {
       const r = await this._ws({ type: `${_DOMAIN}/get_profile_phases`, entry_id: entryId, profile_name: program });
+      if (!current()) return;
       this._statusPhases = (r.phases || []).map(p => ({ name: p.name, start: p.start, end: p.end }));
-    } catch (_) { this._statusPhases = []; }
+    } catch (_) {
+      // A failed read (an entry reload) caches nothing, so the next refresh asks
+      // again (PR #529 review: the kept pair stopped every later read). An answer
+      // with no phases is cached like one with them.
+      if (current()) { this._statusPhases = []; this._statusPhasesName = null; this._statusPhasesEid = null; }
+    }
   }
 
   // D7: fetch the per-setting changelog (most-recent-first) and index it by key
@@ -3574,6 +3739,12 @@ class HaWashdataPanel extends HTMLElement {
   _isActiveEntry(eid) {
     const cur = this._devices[this._selIdx];
     return !!cur && cur.entry_id === eid;
+  }
+
+  // The appliance and the program the Status card shows now (the phase slot's key).
+  _isShownProgram(eid, program) {
+    const cur = this._devices[this._selIdx];
+    return !!cur && cur.entry_id === eid && cur.current_program === program;
   }
 
   // Fire all pending real deletes now (unload / device switch / timeout catch-up).
@@ -3800,6 +3971,18 @@ class HaWashdataPanel extends HTMLElement {
     } catch (_) { /* overlay is optional */ }
   }
 
+  // The live chart's history: every read goes through here, so a slower reply to
+  // an older request (a poll) never replaces a newer one (the tab load, a raw
+  // toggle), and none lands under another appliance (PR #529 review). True when
+  // this read's history was applied.
+  async _fetchPowerHistory(entryId) {
+    const hseq = ++this._powerReqSeq;
+    const pd = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: entryId, with_raw: this._pref('show_raw_active', false) });
+    if (!this._isActiveEntry(entryId) || hseq <= this._powerAppliedSeq) return false;
+    this._powerData = pd; this._powerAppliedSeq = hseq;
+    return true;
+  }
+
   async _fetchSuggestions(entryId) {
     this._suggestionsError = false;
     try {
@@ -3981,7 +4164,8 @@ class HaWashdataPanel extends HTMLElement {
     // ML comparison / cycle-ML index / settings comparison / profile envelopes.
     this._mlComparison = null; this._mlById = {}; this._profileEnvCache = {};
     this._powerHistory = []; this._powerT0 = null; this._statusEnv = null; this._statusEnvName = null;
-    this._statusPhases = []; this._statusPhasesName = null;
+    this._statusEnvEid = null; this._statusEnvSeq++; this._statusEnvWant = null;
+    this._statusPhases = []; this._statusPhasesName = null; this._statusPhasesEid = null;
     this._cycleOffset = 0; this._cyclesTotal = 0; this._cyclesHasMore = false;
     this._importedOffset = 0; this._importedHasMore = false;
     this._settingsChangelog = null; this._settingsChangeByKey = {};
@@ -4104,20 +4288,22 @@ class HaWashdataPanel extends HTMLElement {
     this._render();
     try {
       if (this._tab === 'status') {
-        this._powerData = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: eid, with_raw: this._pref('show_raw_active', false) });
+        await this._fetchPowerHistory(eid);
         if (!this._profiles.length) await this._fetchProfiles(eid);
         // F1 onboarding: the getting-started card needs the real cycle count.
         // Load it only when there are no profiles yet (the sole state where the
         // card can appear) and it hasn't been loaded for this device, so the
         // count is correct right after a device switch resets it.
         if (!this._profiles.length && !this._cycles.length) await this._fetchCycles(eid);
-        // D1: matched-profile phases for the compact Status phase timeline.
-        await this._ensureStatusPhases(eid, dev.current_program);
-        this._refreshReviewQuestion(dev);
-        if (this._pref('show_debug', false)) {
-          try { this._matchDebug = await this._ws({ type: `${_DOMAIN}/get_match_debug`, entry_id: eid }); } catch (_) { /* keep */ }
+        // D1: matched-profile phases for the compact Status phase timeline, unless
+        // the appliance or program shown changed during the awaits above, as in the
+        // overlay refresh: the call would claim the phase slot for the old pair.
+        if (this._isShownProgram(eid, dev.current_program)) {
+          await this._ensureStatusPhases(eid, dev.current_program);
         }
-        if (this._canEdit()) { try { this._recState = await this._ws({ type: `${_DOMAIN}/get_recording_state`, entry_id: eid }); } catch (_) {} }
+        this._refreshReviewQuestion(dev);
+        if (this._pref('show_debug', false)) await this._fetchMatchDebug(eid);
+        if (this._canEdit()) await this._fetchRecState(eid);
         // Fetch setup guidance phase (always, not just when profileCount === 0)
         try {
           this._setupStatus = await this._ws({
@@ -4376,8 +4562,37 @@ class HaWashdataPanel extends HTMLElement {
     });
   }
 
-  async _fetchRecState(eid) {
-    try { this._recState = await this._ws({ type: `${_DOMAIN}/get_recording_state`, entry_id: eid }); } catch (_) {}
+  // The Manual Recording widget's live detail and the Live Match Debug card, each
+  // ordered by its own requests: a slower answer to an older read (a poll's, sent
+  // before Stop) never replaces a newer one, and none lands under another
+  // appliance. True when this answer was applied; a failed read keeps the last.
+  // `transition` is the read after Start, Stop, Discard or Process: until a read
+  // sent at or after it lands, the poll retries it whatever dev.recording says
+  // (PR #529 review). Without that, a failed read after Stop kept offering Stop
+  // (the poll reads only while recording) and one after Discard kept Process.
+  // One mark per appliance: another appliance's late Stop must not replace the
+  // shown one's (its read is not applied there, and the mark it replaced is gone).
+  async _fetchRecState(eid, transition = false) {
+    const seq = ++this._recStateReqSeq;
+    if (transition) this._recStatePending.set(eid, seq);
+    try {
+      const rs = await this._ws({ type: `${_DOMAIN}/get_recording_state`, entry_id: eid });
+      if (!this._isActiveEntry(eid) || seq < this._recStateAppliedSeq) return false;
+      this._recState = rs; this._recStateAppliedSeq = seq;
+      const p = this._recStatePending.get(eid);
+      if (p !== undefined && seq >= p) this._recStatePending.delete(eid);
+      return true;
+    } catch (_) { return false; }
+  }
+
+  async _fetchMatchDebug(eid) {
+    const seq = ++this._matchDebugReqSeq;
+    try {
+      const md = await this._ws({ type: `${_DOMAIN}/get_match_debug`, entry_id: eid });
+      if (!this._isActiveEntry(eid) || seq < this._matchDebugAppliedSeq) return false;
+      this._matchDebug = md; this._matchDebugAppliedSeq = seq;
+      return true;
+    } catch (_) { return false; }
   }
 
   async _fetchFeedbacks(eid) {
@@ -5140,6 +5355,43 @@ class HaWashdataPanel extends HTMLElement {
     return `<span class="wd-prog-unc" style="font-size:.82em;color:var(--warning-color,#ff9800)">${what}${sure}</span>${tip}`;
   }
 
+  // #530: the background check of a hand-picked program found that another program
+  // fits the running cycle clearly better (backend match_rules.program_mismatch_tick).
+  // Display only: the pick, its time estimate and the label stay as they are.
+  _htmlProgramMismatch(dev, isRunning, manual) {
+    const m = dev && dev.program_mismatch;
+    if (!m || !isRunning || !manual || !m.looks_like) return '';
+    const what = this._t('status.program_mismatch', {program: m.looks_like}, 'Looks more like {program}');
+    const tip = _tip(this._tText('status.program_mismatch_tip', {selected: m.selected, program: m.looks_like},
+      'This cycle looks clearly more like {program} than {selected}, but WashData keeps the program you picked.'));
+    return `<span class="wd-prog-mismatch" data-testid="program-mismatch" style="font-size:.82em;color:var(--warning-color,#ff9800)">\u26A0 ${what}</span>${tip}`;
+  }
+
+  // The badge's place beside the program selector, there with or without a badge,
+  // so a poll that must not rebuild the card (an open dropdown, a focused field)
+  // can add or drop it in place (`_refreshProgramMismatch`). `display: contents`
+  // keeps the badge and its tip items of the selector row. A badge needs a pick
+  // and the torn chips / uncertainty line need none, so the two never share it.
+  _htmlProgramMismatchSlot(dev, isRunning, manual) {
+    return `<span class="wd-prog-mm-slot" style="display:contents">${this._htmlProgramMismatch(dev, isRunning, manual)}</span>`;
+  }
+
+  // Whether the Status card shows `dev` as running (a recording counts).
+  _statusRunning(dev) {
+    const state = dev.is_user_paused ? 'user_paused' : (dev.detector_state || 'unknown');
+    return !!dev.recording || _ACTIVE_STATES.includes(state);
+  }
+
+  _refreshProgramMismatch() {
+    const slot = this.shadowRoot && this.shadowRoot.querySelector('.wd-prog-mm-slot');
+    if (!slot) return;
+    const dev = this._devices[this._selIdx];
+    const html = dev ? this._htmlProgramMismatch(dev, this._statusRunning(dev), !!dev.manual_program) : '';
+    if (slot._wdHtml === html) return;
+    slot.innerHTML = html;
+    slot._wdHtml = html;
+  }
+
   // "X or Y?" while the live match is torn between two programmes (audit item 1):
   // the backend's match_choices (match_rules.live_torn_choices) is set when the
   // winner is ambiguous or leads by less than the cycle-end label margin, i.e. the
@@ -5459,7 +5711,7 @@ class HaWashdataPanel extends HTMLElement {
     const rec = !!dev.recording;
     const color = rec ? 'var(--error-color, #f44336)' : this._stateColor(state);
     const label = rec ? this._t('status.recording', {}, 'Recording') : this._stateLabel(state);
-    const isRunning = rec || _ACTIVE_STATES.includes(state);
+    const isRunning = this._statusRunning(dev);
     const prog = dev.cycle_progress_pct;
     const rem = dev.time_remaining_s;
 
@@ -5485,7 +5737,7 @@ class HaWashdataPanel extends HTMLElement {
           <select id="wd-status-prog">
             <option value="auto_detect" ${selVal === 'auto_detect' ? 'selected' : ''}>${this._t('status.auto_detect', {}, 'Auto-detect')}</option>
             ${profOpts}
-          </select>${tag}${this._htmlTornChips(dev, isRunning, manual) || this._htmlMatchUncertainty(dev, isRunning, manual)}</div>`;
+          </select>${tag}${this._htmlProgramMismatchSlot(dev, isRunning, manual)}${this._htmlTornChips(dev, isRunning, manual) || this._htmlMatchUncertainty(dev, isRunning, manual)}</div>`;
 
     const attn = [];
     if (dev.recording && this._canEdit()) attn.push(`<div class="wd-attn-card"><span class="wd-attn-icon">●</span><div class="wd-attn-body"><div class="wd-attn-title">${this._t('msg.recording_in_progress', {}, 'Recording in progress')}</div><div class="wd-attn-sub">${this._t('msg.see_recorder', {}, 'See recorder widget below')}</div></div></div>`);
@@ -5752,6 +6004,10 @@ class HaWashdataPanel extends HTMLElement {
   _htmlPhaseTimeline(dev, prog, isRunning) {
     const phases = this._statusPhases || [];
     if (!isRunning || !phases.length || !dev.current_program) return '';
+    // Only this appliance and program's own ranges (PR #529 review): a switch to
+    // Eco claims the slot only after its envelope read, so the answer to a Cotton
+    // read still out could land first, and a render then drew Cotton under Eco.
+    if (this._statusPhasesEid !== dev.entry_id || this._statusPhasesName !== dev.current_program) return '';
     // Same span as the live phase sensor (progress.phase_timeline_span): progress maps
     // onto the matched program's expected length (expected_duration_s), or the last
     // range end when the ranges run longer, so a range reads at its real minutes
@@ -13252,7 +13508,7 @@ class HaWashdataPanel extends HTMLElement {
       this._ws({ type: `${_DOMAIN}/set_user_prefs`, prefs: { [key]: val } }).catch(() => {});
       const dev = this._devices[this._selIdx];
       if (dev && this._tab === 'status') {
-        try { this._powerData = await this._ws({ type: `${_DOMAIN}/get_power_history`, entry_id: dev.entry_id, with_raw: this._pref('show_raw_active', false) }); } catch (_) { /* keep */ }
+        try { await this._fetchPowerHistory(dev.entry_id); } catch (_) { /* keep */ }
       }
       this._render();
     }));
@@ -13857,10 +14113,21 @@ class HaWashdataPanel extends HTMLElement {
       const eid = dev && dev.entry_id;
       if (!eid || !k) return;
       try {
-        await this._ws({ type: `${_DOMAIN}/set_suggestion_lock`, entry_id: eid, key: k, locked: true });
+        const res = await this._ws({ type: `${_DOMAIN}/set_suggestion_lock`, entry_id: eid, key: k, locked: true });
         if (!this._isActiveEntry(eid)) return;
-        this._suggestions = (this._suggestions || []).filter(s => s.key !== k);
-        if (!(this._lockedSuggestions || []).includes(k)) (this._lockedSuggestions = this._lockedSuggestions || []).push(k);
+        if (res && res.reloaded) {
+          // The device reloaded during the write: show what the live one holds.
+          await this._fetchSuggestions(eid);
+          if (!this._isActiveEntry(eid)) return;
+          if (!(this._lockedSuggestions || []).includes(k)) {
+            this._showToast(this._t('msg.sug_mute_failed', {}, 'Could not mute suggestion'), 'error');
+            this._render();
+            return;
+          }
+        } else {
+          this._suggestions = (this._suggestions || []).filter(s => s.key !== k);
+          if (!(this._lockedSuggestions || []).includes(k)) (this._lockedSuggestions = this._lockedSuggestions || []).push(k);
+        }
         this._showToast(this._t('msg.sug_muted', {}, "Won't suggest this setting again"), 'info');
         this._render();
       } catch (_) {
@@ -14363,14 +14630,14 @@ class HaWashdataPanel extends HTMLElement {
       );
 
     } else if (a === 'rec-start') {
-      this._ws({ type: `${_DOMAIN}/start_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_started', {}, 'Recording started')); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast(this._tText('toast.start_failed', {error: e.message || e}, 'Start failed: ' + (e.message || e)), 'error'));
+      this._ws({ type: `${_DOMAIN}/start_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_started', {}, 'Recording started')); return this._fetchRecState(eid, true); }).then(() => this._render()).catch(e => this._showToast(this._tText('toast.start_failed', {error: e.message || e}, 'Start failed: ' + (e.message || e)), 'error'));
     } else if (a === 'rec-stop') {
-      this._ws({ type: `${_DOMAIN}/stop_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_stopped', {}, 'Recording stopped')); return this._fetchRecState(eid); }).then(() => this._render()).catch(e => this._showToast(this._tText('toast.stop_failed', {error: e.message || e}, 'Stop failed: ' + (e.message || e)), 'error'));
+      this._ws({ type: `${_DOMAIN}/stop_recording`, entry_id: eid }).then(() => { this._showToast(this._t('toast.recording_stopped', {}, 'Recording stopped')); return this._fetchRecState(eid, true); }).then(() => this._render()).catch(e => this._showToast(this._tText('toast.stop_failed', {error: e.message || e}, 'Stop failed: ' + (e.message || e)), 'error'));
     } else if (a === 'rec-process-open') {
       this._fetchProfiles(eid).then(() => { this._modal = { type: 'process-recording' }; this._render(); });
     } else if (a === 'rec-discard') {
       this._modal = { type: 'confirm', title: this._t('modal.discard_recording_title', {}, 'Discard Recording'), message: this._t('modal.discard_recording_msg', {}, 'Discard the saved recording? This cannot be undone.'), okLabel: this._t('btn.discard', {}, 'Discard'),
-        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/discard_recording`, entry_id: eid }); this._showToast(this._t('toast.recording_discarded', {}, 'Recording discarded')); await this._fetchRecState(eid); } catch (e) { this._showToast(this._tText('toast.discard_failed', {error: e.message || e}, 'Discard failed: ' + (e.message || e)), 'error'); } } };
+        onOk: async () => { try { await this._ws({ type: `${_DOMAIN}/discard_recording`, entry_id: eid }); this._showToast(this._t('toast.recording_discarded', {}, 'Recording discarded')); await this._fetchRecState(eid, true); } catch (e) { this._showToast(this._tText('toast.discard_failed', {error: e.message || e}, 'Discard failed: ' + (e.message || e)), 'error'); } } };
       this._render();
 
     } else if (a === 'fb-confirm' || a === 'fb-pick' || a === 'fb-ignore') {
@@ -14736,10 +15003,26 @@ class HaWashdataPanel extends HTMLElement {
     }
   }
 
-  _applyAllSuggestions(eid, keys) {
+  _applyAllSuggestions(eid, keys, values) {
     this._busyRun('save-settings', async () => {
       try {
-        await this._ws({ type: `${_DOMAIN}/apply_suggestions`, entry_id: eid, keys });
+        const res = await this._ws({ type: `${_DOMAIN}/apply_suggestions`, entry_id: eid, keys, values });
+        if (res && res.success === false && (res.changed || []).length) {
+          // A suggestion changed after the preview: nothing was written. Show the
+          // list as it now stands so the next Apply previews the new values.
+          if (!this._isActiveEntry(eid)) return;
+          this._suggestions = res.suggestions || [];
+          this._lockedSuggestions = res.locked_suggestions || [];
+          this._showToast(this._t('toast.suggestions_changed', {}, 'The suggestions changed since you reviewed them. Nothing was saved; check them and apply again.'), 'warning');
+          return;
+        }
+        if (res && res.success === false) {
+          // Nothing written (every selected suggestion withdrawn or no longer
+          // offered), so nothing reloads: say so and show the list as it stands.
+          this._showToast(this._t('toast.suggestions_none_applied', {}, 'No setting changed: the selected suggestions no longer apply'), 'info');
+          await this._fetchSuggestions(eid);
+          return;
+        }
         this._showToast(this._t('toast.suggestions_applied', {}, 'Suggestions applied; integration reloading'));
         await this._fetchSuggestions(eid);
         const r = await this._ws({ type: `${_DOMAIN}/get_options`, entry_id: eid });
@@ -14748,13 +15031,20 @@ class HaWashdataPanel extends HTMLElement {
         this._prevOpts = null;
         this._cascadePending = {};
         this._preCascadeOpts = null;
-      } catch (e) { this._showToast(this._tText('toast.apply_failed', {error: e.message || e}, 'Apply failed: ' + (e.message || e)), 'error'); }
+      } catch (e) {
+        this._showToast(this._tText('toast.apply_failed', {error: e.message || e}, 'Apply failed: ' + (e.message || e)), 'error');
+        // A refusal can come after the suggestions were cleared (cycles_changed):
+        // show the list as it stands, not the one a second Apply finds empty.
+        await this._fetchSuggestions(eid);
+      }
     });
   }
 
   _onActSuggestions(a, btn, dev, eid, sr) {
     if (a === 'sug-apply-all') {
       const keys = this._suggestions.map(s => s.key);
+      // The values the preview shows: Apply writes nothing if one changed since.
+      const values = Object.fromEntries(this._suggestions.map(s => [s.key, s.suggested]));
       // Preview first: up to 17 coupled changes used to land on one click.
       const items = this._suggestions.map(sg => {
         const f = _FIELD_BY_KEY[sg.key] || {};
@@ -14770,7 +15060,7 @@ class HaWashdataPanel extends HTMLElement {
         title: this._t('modal.apply_suggestions_title', {}, 'Apply suggestions'),
         message: this._tText('modal.apply_suggestions_msg', {n: items.length}, `Change these ${items.length} settings? The integration reloads after saving.`),
         okLabel: this._t('btn.apply_all', {}, 'Apply all'),
-        onOk: () => this._applyAllSuggestions(eid, keys),
+        onOk: () => this._applyAllSuggestions(eid, keys, values),
       };
       this._render();
 
@@ -14797,8 +15087,14 @@ class HaWashdataPanel extends HTMLElement {
           const lastOk = results.slice().reverse().find(r => r.status === 'fulfilled');
           this._lockedSuggestions = (lastOk && lastOk.value && lastOk.value.locked_suggestions) || [];
           await this._fetchSuggestions(eid);
+          if (!this._isActiveEntry(eid)) return;
+          // A full reload during a write can leave the live device holding a key it
+          // answered for (`reloaded`): judged on the mute list as it now stands.
+          const stillMuted = keys.some(k => (this._lockedSuggestions || []).includes(k));
           if (failed) {
             this._showToast(this._tText('toast.error', {error: `${failed} suggestion(s) failed to unlock`}, `${failed} suggestion(s) failed to unlock`), 'error');
+          } else if (stillMuted) {
+            this._showToast(this._t('msg.sug_unmute_incomplete', {}, 'Reset did not complete: some suggestions are still muted. Try again.'), 'error');
           } else {
             this._showToast(this._t('msg.sug_unmuted_all', {}, 'Muted suggestions reset'), 'success');
           }
@@ -14812,7 +15108,11 @@ class HaWashdataPanel extends HTMLElement {
           const n = (r && r.count) || 0;
           this._showToast(n ? this._tText('toast.analysis_complete', {count: n}, `Analysis complete: ${n} suggestion(s)`) : this._t('toast.analysis_complete_none', {}, 'Analysis complete: no new suggestions'));
           await this._fetchSuggestions(eid);
-        } catch (e) { this._showToast(this._tText('toast.analysis_failed', {error: e.message || e}, 'Analysis failed: ' + (e.message || e)), 'error'); }
+        } catch (e) {
+          this._showToast(this._tText('toast.analysis_failed', {error: e.message || e}, 'Analysis failed: ' + (e.message || e)), 'error');
+          // Passes before the failure may have stored suggestions: show them.
+          await this._fetchSuggestions(eid);
+        }
       });
     }
   }
@@ -15570,7 +15870,7 @@ class HaWashdataPanel extends HTMLElement {
       const tail = parseFloat(sr.getElementById('wd-pr-tail')?.value || 0);
       this._modal = null;
       if (!profileName) { this._showToast(this._t('msg.toast_profile_name_required', {}, 'Profile name is required'), 'error'); this._render(); return; }
-      try { await this._ws({ type: `${_DOMAIN}/process_recording`, entry_id: eid, profile_name: profileName, save_mode: mode, head_trim: head, tail_trim: tail }); this._showToast(this._t('toast.recording_saved', {}, 'Recording saved to profile')); await this._fetchRecState(eid); await this._fetchProfiles(eid); }
+      try { await this._ws({ type: `${_DOMAIN}/process_recording`, entry_id: eid, profile_name: profileName, save_mode: mode, head_trim: head, tail_trim: tail }); this._showToast(this._t('toast.recording_saved', {}, 'Recording saved to profile')); await this._fetchRecState(eid, true); await this._fetchProfiles(eid); }
       catch (e) { this._showToast(this._tText('msg.toast_save_failed', {error: e.message || e}, 'Save failed: ' + (e.message || e)), 'error'); }
       this._render();
     } else if (action === 'correct-fb-ok' && eid) {
@@ -16467,8 +16767,12 @@ class HaWashdataPanel extends HTMLElement {
         // Tag the error with `suggFix` when a pending suggestion for this key
         // would satisfy the constraint — so the panel can explain that instead
         // of offering a generic "Use X" fix button.
+        // Only when staging it breaks no rule that holds now: an 8 W Stop over a
+        // 7 W Start would cascade Start up rather than keep the user's (PR #529 review).
         const sugV = suggMap[key];
-        const errInfo = (sugV != null && !rule.check({...vals, [key]: sugV}, ctx))
+        const staged = {...vals, [key]: sugV};
+        const errInfo = (sugV != null && !rule.check(staged, ctx)
+          && _SETTING_CONFLICTS.every(r => r.check(vals, ctx) || !r.check(staged, ctx)))
           ? {...info, suggFix: sugV}
           : info;
         (keyErrors[key] = keyErrors[key] || []).push(errInfo);

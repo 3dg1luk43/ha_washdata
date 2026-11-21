@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Kosten laatste cyclus"
+      },
+      "last_cycle_start": {
+        "name": "Start laatste cyclus"
       }
     },
     "select": {
@@ -572,6 +575,7 @@
       "phase_started": "Fase gestart",
       "finishing_soon": "Bijna klaar",
       "cycle_overrun": "Cyclus loopt te lang",
+      "program_mismatch": "Lopend programma wijkt af van het gekozen programma",
       "cycle_paused": "Cyclus gepauzeerd",
       "cycle_resumed": "Cyclus hervat",
       "still_tumbling": "Trommel draait nog na de cyclus",
@@ -646,6 +650,16 @@
         "percent": {
           "name": "Langer met",
           "description": "Procent boven de gebruikelijke programmauur."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Lopend programma wijkt af van het gekozen programma",
+      "description": "Wordt eenmaal geactiveerd wanneer de cyclus beter past bij een ander programma dan bij het programma dat u hebt gekozen. Een nieuwe keuze start een nieuwe controle.",
+      "fields": {
+        "program": {
+          "name": "Programma",
+          "description": "Alleen wanneer dit programma is gekozen, op exacte naam. Leeg laten voor elk programma."
         }
       }
     },

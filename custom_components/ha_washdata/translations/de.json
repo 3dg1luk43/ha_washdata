@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Kosten des letzten Zyklus"
+      },
+      "last_cycle_start": {
+        "name": "Beginn des letzten Zyklus"
       }
     },
     "select": {
@@ -572,6 +575,7 @@
       "phase_started": "Phase gestartet",
       "finishing_soon": "Bald fertig",
       "cycle_overrun": "Zyklus läuft zu lang",
+      "program_mismatch": "Laufendes Programm weicht vom gewählten ab",
       "cycle_paused": "Zyklus angehalten",
       "cycle_resumed": "Zyklus fortgesetzt",
       "still_tumbling": "Trommel bewegt sich noch nach dem Zyklus",
@@ -646,6 +650,16 @@
         "percent": {
           "name": "Länger um",
           "description": "Prozent über die übliche Programmdauer."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Laufendes Programm weicht vom gewählten ab",
+      "description": "Wird einmal ausgelöst, wenn der Zyklus besser zu einem anderen Programm passt als zu dem von Ihnen gewählten. Eine neue Auswahl startet eine neue Prüfung.",
+      "fields": {
+        "program": {
+          "name": "Programm",
+          "description": "Nur wenn dieses Programm gewählt ist, nach genauem Namen. Leer lassen für jedes Programm."
         }
       }
     },

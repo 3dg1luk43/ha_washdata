@@ -48,6 +48,7 @@ from .const import (
 from .const import (
     DEVICE_COMPLETION_THRESHOLDS,
     DOMAIN,
+    device_entry_ids,
     CONFIG_ENTRY_MINOR_VERSION,
     CONFIG_ENTRY_VERSION,
     SERVICE_SUBMIT_FEEDBACK,
@@ -56,6 +57,9 @@ from .const import (
     CONF_OFF_DELAY,
     CONF_DEVICE_TYPE,
     DEVICE_TYPE_DISHWASHER,
+    DEVICE_TYPE_DRYER,
+    DEVICE_TYPE_WASHER_DRYER,
+    DEVICE_TYPE_WASHING_MACHINE,
     CONF_POWER_SENSOR,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_EVENTS,
@@ -235,13 +239,12 @@ def _service_manager(hass: HomeAssistant, device_id: str) -> tuple[str, Any]:
             translation_domain=DOMAIN, translation_key="device_not_found"
         )
     loaded = hass.data.get(DOMAIN, {})
-    entry_id = next((eid for eid in device.config_entries if eid in loaded), None)
+    entry_ids = device_entry_ids(device, dr.async_get(hass))
+    entry_id = next((eid for eid in entry_ids if eid in loaded), None)
     if entry_id is None:
         raise ServiceValidationError(
             translation_domain=DOMAIN,
-            translation_key=(
-                "integration_not_loaded" if device.config_entries else "no_config_entry"
-            ),
+            translation_key="integration_not_loaded" if entry_ids else "no_config_entry",
         )
     return entry_id, loaded[entry_id]
 
@@ -317,6 +320,61 @@ def _heal_raised_min_ratio(options: dict[str, Any], device_type: Any = None) -> 
         options[CONF_PROFILE_MATCH_MIN_DURATION_RATIO] = DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
         return [CONF_PROFILE_MATCH_MIN_DURATION_RATIO]
     return []
+
+#: The completion floor every washer and washer-dryer entry was seeded with until
+#: 0.6.1 (the one-pass legacy migration writes the device default into options).
+_OLD_SEEDED_WASHER_COMPLETION_S = 600
+
+
+def _lower_seeded_washer_completion(options: dict[str, Any], device_type: Any = None) -> list[str]:
+    """Move a washer's stored completion floor from the old seeded 600 s to the
+    device default (5 min), in place.
+
+    Not a choice the user made: the legacy migration seeded the device default,
+    and a nominal 10 min programme records 9-10 min, so it was stored interrupted
+    (no finish alert, trigger or Clean state). Only the exact old value moves;
+    anything else was set by hand or by an applied suggestion and is kept. One
+    helper for the 3.13 -> 3.14 step and the one-pass legacy path.
+    """
+    # An entry that names no type runs as the default (a washer), as the manager
+    # resolves it (review of PR #529).
+    dtype = str(device_type or options.get(CONF_DEVICE_TYPE) or DEFAULT_DEVICE_TYPE)
+    if dtype not in (DEVICE_TYPE_WASHING_MACHINE, DEVICE_TYPE_WASHER_DRYER):
+        return []
+    current = coerce_numeric_option(options.get(CONF_COMPLETION_MIN_SECONDS), float)
+    if current is None or current != _OLD_SEEDED_WASHER_COMPLETION_S:
+        return []
+    options[CONF_COMPLETION_MIN_SECONDS] = DEVICE_COMPLETION_THRESHOLDS[dtype]
+    return [CONF_COMPLETION_MIN_SECONDS]
+
+
+# The start debounce the coarse sampling derived, per device type, until a dryer
+# moved to 2 s sampling in 0.6.1 (the 3.9 -> 3.10 heal stored it). A dryer keeps its
+# 61 s watchdog (const.DEFAULT_WATCHDOG_INTERVAL_BY_DEVICE).
+_OLD_DERIVED_CADENCE: dict[str, dict[str, float]] = {
+    DEVICE_TYPE_DRYER: {CONF_START_DURATION_THRESHOLD: 30.0},
+}
+
+
+def _lower_seeded_coarse_cadence(options: dict[str, Any], device_type: Any = None) -> list[str]:
+    """Move a dryer's stored start debounce from the value its old 30 s sampling
+    derived to the 5 s default of its 2 s sampling, in place (0.6.1).
+
+    Not a choice the user made: the migration stored the device default, and the
+    panel would not take a start debounce under the sampling interval. Only the
+    exact old values move; anything else is kept. One helper for the 3.14 -> 3.15
+    step and the one-pass legacy path.
+    """
+    dtype = str(device_type or options.get(CONF_DEVICE_TYPE) or DEFAULT_DEVICE_TYPE)
+    moved: list[str] = []
+    for key, old in _OLD_DERIVED_CADENCE.get(dtype, {}).items():
+        current = coerce_numeric_option(options.get(key), float)
+        if current is None or current != old:
+            continue
+        options[key] = resolve_start_duration_default(dtype)
+        moved.append(key)
+    return moved
+
 
 def _convert_legacy_notify_service(options: dict[str, Any]) -> list[str]:
     """Convert the deprecated ``notify_service`` to per-event lists, in place (#472).
@@ -589,6 +647,39 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             healed_ratios or "none",
         )
 
+    # 3.13 -> 3.14: a washer's completion floor from the old seeded 600 s to 5 min,
+    # so a 10-15 min quick wash, spin or drain is a completed cycle (0.6.1).
+    if version == 3 and minor_version == 13:
+        new_opts = dict(entry.options)
+        lowered = _lower_seeded_washer_completion(
+            new_opts, entry.options.get(CONF_DEVICE_TYPE) or entry.data.get(CONF_DEVICE_TYPE)
+        )
+        hass.config_entries.async_update_entry(
+            entry, options=new_opts, minor_version=14
+        )
+        minor_version = 14
+        _log.debug(
+            "Migrated WashData entry from 3.13 to 3.14 (washer completion floor "
+            "lowered: %s)",
+            lowered or "none",
+        )
+
+    # 3.14 -> 3.15: a dryer's start debounce from the value its old 30 s sampling
+    # derived to the 5 s default of its 2 s sampling (0.6.1).
+    if version == 3 and minor_version == 14:
+        new_opts = dict(entry.options)
+        moved = _lower_seeded_coarse_cadence(
+            new_opts, entry.options.get(CONF_DEVICE_TYPE) or entry.data.get(CONF_DEVICE_TYPE)
+        )
+        hass.config_entries.async_update_entry(
+            entry, options=new_opts, minor_version=15
+        )
+        minor_version = 15
+        _log.debug(
+            "Migrated WashData entry from 3.14 to 3.15 (coarse cadence lowered: %s)",
+            moved or "none",
+        )
+
     if version == CONFIG_ENTRY_VERSION and minor_version >= CONFIG_ENTRY_MINOR_VERSION:
         return True
 
@@ -755,6 +846,10 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # And the 3.12 -> 3.13 heal (item 571), which the `setdefault` above would keep
     # a stored min ratio from.
     _heal_raised_min_ratio(options)
+    # And the 3.13 -> 3.14 one: the `setdefault` above keeps a stored 600 s.
+    _lower_seeded_washer_completion(options)
+    # And the 3.14 -> 3.15 one: a stored 30 s dryer start debounce.
+    _lower_seeded_coarse_cadence(options)
 
     # 3.6: coffee_machine / ev / heat_pump / oven device types were removed.
     # Remap any entry still on one of them to DEVICE_TYPE_OTHER (Threshold Device),
@@ -1051,10 +1146,8 @@ def _service_entry_ids(hass: HomeAssistant, call: ServiceCall) -> list[str | Non
         device = dr.async_get(hass).async_get(device_id)
         if device is not None:
             loaded = hass.data.get(DOMAIN, {})
-            dev_entry = next(
-                (e for e in device.config_entries if e in loaded),
-                next(iter(device.config_entries), None),
-            )
+            dev_ids = device_entry_ids(device, dr.async_get(hass))
+            dev_entry = next((e for e in dev_ids if e in loaded), next(iter(dev_ids), None))
             if dev_entry is not None and dev_entry not in ids:
                 ids.append(dev_entry)
     return ids or [None]
@@ -1131,6 +1224,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             await stale.async_shutdown()
         except Exception:  # pylint: disable=broad-exception-caught
             _log.debug("Shutdown of the stale manager failed", exc_info=True)
+        await _async_retire_store(stale)
 
     # Entity platforms from an earlier attempt are still registered (HA leaves
     # forwarded platforms in place when setup fails); forwarding them again raises
@@ -1568,6 +1662,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             # device's, which silently disconnects it (register item 317).
             from .ws_api import (  # pylint: disable=import-outside-toplevel
                 _entry_write_lock,
+                _schedule_post_import_repairs,
                 async_apply_imported_entry_options,
             )
 
@@ -1578,6 +1673,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     payload,
                     entry_options=dict(entry.options),
                     source="import_config_service",
+                    # As the WS import: cadence evidence goes with the history.
+                    on_replace=getattr(
+                        getattr(manager, "learning_manager", None),
+                        "reset_cadence_evidence", None,
+                    ),
                 )
                 if config_updates:
                     await async_apply_imported_entry_options(
@@ -1590,8 +1690,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             # An old payload re-arms the one-time banked-tail repair. Nothing here
             # reloads the entry unless the payload brought settings with it, so
             # schedule it directly rather than leaving it for the next restart.
-            manager.async_schedule_banked_tail_repair()
-            manager.async_schedule_energy_rebuild()
+            # On the entry's current manager: the options write above reloads the
+            # entry and retires the one captured before it (PR #529 review).
+            _schedule_post_import_repairs(hass, entry_id)
 
             manager._logger.info("Imported ha_washdata entry %s from %s", entry_id, source)
 
@@ -1653,12 +1754,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     translation_domain=DOMAIN,
                     translation_key="device_not_found",
                 )
-            entry_id = next(
-                (eid for eid in device.config_entries if eid in hass.data.get(DOMAIN, {})),
-                None,
-            )
+            dev_ids = device_entry_ids(device, registry)
+            entry_id = next((eid for eid in dev_ids if eid in hass.data.get(DOMAIN, {})), None)
             if not entry_id:
-                if any(eid for eid in device.config_entries):
+                if dev_ids:
                     raise ServiceValidationError(
                         translation_domain=DOMAIN,
                         translation_key="integration_not_loaded",
@@ -1691,12 +1790,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     translation_domain=DOMAIN,
                     translation_key="device_not_found",
                 )
-            entry_id = next(
-                (eid for eid in device.config_entries if eid in hass.data.get(DOMAIN, {})),
-                None,
-            )
+            dev_ids = device_entry_ids(device, registry)
+            entry_id = next((eid for eid in dev_ids if eid in hass.data.get(DOMAIN, {})), None)
             if not entry_id:
-                if any(eid for eid in device.config_entries):
+                if dev_ids:
                     raise ServiceValidationError(
                         translation_domain=DOMAIN,
                         translation_key="integration_not_loaded",
@@ -1732,12 +1829,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     translation_domain=DOMAIN,
                     translation_key="device_not_found",
                 )
-            entry_id = next(
-                (eid for eid in device.config_entries if eid in hass.data.get(DOMAIN, {})),
-                None,
-            )
+            dev_ids = device_entry_ids(device, registry)
+            entry_id = next((eid for eid in dev_ids if eid in hass.data.get(DOMAIN, {})), None)
             if not entry_id:
-                if any(eid for eid in device.config_entries):
+                if dev_ids:
                     raise ServiceValidationError(
                         translation_domain=DOMAIN,
                         translation_key="integration_not_loaded",
@@ -1963,6 +2058,14 @@ async def _async_sweep_orphaned_stores(hass: HomeAssistant) -> None:
         _LOGGER.debug("Orphaned store sweep failed", exc_info=True)
 
 
+async def _async_retire_store(manager: Any) -> None:
+    """``manager``'s ProfileStore writes nothing more (PR #529 review). Never raises."""
+    try:
+        await manager.profile_store.async_retire()
+    except Exception:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug("Retiring the unloaded entry's store failed", exc_info=True)
+
+
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
@@ -1978,6 +2081,12 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         # complete before we remove the write lock below.
         if _cancelled_tasks:
             await asyncio.gather(*_cancelled_tasks, return_exceptions=True)
+
+        # Last: no write from this store once the entry is gone. Work the unload
+        # does not cancel (a manual analysis its WS handler awaits) would save it
+        # over the file the replacement loads (PR #529 review). After the drain, so
+        # what the cancelled tasks saved still lands.
+        await _async_retire_store(manager)
 
         # Release the per-entry locks so they don't block the next setup. BOTH of
         # them: `_entry_options_lock` is a second per-entry lock created the same

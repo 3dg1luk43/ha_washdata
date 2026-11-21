@@ -1044,6 +1044,7 @@
     "sug_muted": "Deze instelling wordt niet meer voorgesteld",
     "sug_mute_failed": "Instelling kon niet worden gedempt",
     "sug_unmuted_all": "Gedempte suggesties hersteld",
+    "sug_unmute_incomplete": "Herstellen is niet voltooid: sommige suggesties zijn nog gedempt. Probeer het opnieuw.",
     "n_suggestions_muted": "{count} suggesties gedempt; de autotuner stelt deze niet meer voor.",
     "n_suggestions_muted_one": "{count} suggestie gedempt; de autotuner stelt deze niet meer voor.",
     "n_suggestions_muted_other": "{count} suggesties gedempt; de autotuner stelt deze niet meer voor.",
@@ -1102,6 +1103,10 @@
     "hist_warn_naive_time_other": "{n} tijdstempels hebben geen tijdzone en zijn als UTC gelezen. Als het bestand lokale tijd gebruikt, zijn cycli verschoven met uw UTC-verschil en kunnen metingen rond een zomertijdwissel wegvallen.",
     "hist_tail_trimmed": "{min} min wachten na het einde van de cyclus is weggeknipt, zoals de integratie dat tijdens gebruik ook doet",
     "invalid_threshold_pair": "Stopdrempel ({stop} W) moet lager zijn dan Startdrempel ({start} W). Er is niets opgeslagen; wijzig beide samen.",
+    "end_gate_check_failed": "De voorgestelde tijdinstellingen konden niet worden getoetst aan de pauzes van dit apparaat. Er is niets opgeslagen; probeer het opnieuw.",
+    "analysis_superseded": "Instellingen of cyclusgegevens zijn tijdens de analyse gewijzigd. Voer de analyse opnieuw uit.",
+    "analysis_check_failed": "De voorgestelde tijdinstellingen konden niet worden getoetst aan de pauzes van dit apparaat. Voer de analyse opnieuw uit.",
+    "apply_cycles_changed": "Er is een cyclus opgeslagen terwijl de suggesties werden toegepast. Er is geen instelling gewijzigd en de suggesties zijn gewist. Voer de suggestieanalyse opnieuw uit.",
     "import_undo_hint": "Er wordt een herstelpunt van vóór de laatste import ({when}) bewaard: {profiles} profiel(en) en {cycles} cyclus(sen).",
     "replace_undo_hint": "Eerst wordt een herstelpunt opgeslagen, zodat deze import via Exporteren / importeren ongedaan kan worden gemaakt.",
     "pg_in_sample_note": "Deze cycli hebben de profielen helpen opbouwen waarmee ze worden vergeleken, dus de resultaten zijn optimistisch: verwacht bij nieuwe cycli iets minder juiste matches.",
@@ -1569,12 +1574,12 @@
       "doc": "Wat een tik op de melding van dit apparaat opent. Leeg: het WashData-paneel bij dit apparaat. Voer een dashboardpad (bijv. /lovelace/laundry) of URL in, of \"none\" voor geen tikactie."
     },
     "door_opens_at_end": {
-      "label": "Deur opent automatisch aan het einde",
-      "doc": "Voor vaatwassers die aan het einde de deur openen om te drogen (bijv. AirDry). Een deur die de verblijftijd hieronder open blijft, beëindigt de cyclus in plaats van hem te pauzeren; kort openen wordt genegeerd. Vereist een Deursensorentiteit."
+      "label": "Deur openen beëindigt de cyclus",
+      "doc": "Met een Deursensorentiteit beëindigt een deur die bij laag vermogen open blijft gedurende de verwijltijd hieronder de cyclus in plaats van hem te pauzeren. In een pauze gebeurt dit pas als het herkende programma bijna klaar is, zodat een pauze halverwege het programma een pauze blijft."
     },
     "door_end_dwell_seconds": {
       "label": "Deuropen-eindverwijltijd",
-      "doc": "Met \"Deur opent automatisch aan het einde\" aan: hoe lang de deur open moet blijven voordat de cyclus eindigt. Lang genoeg om het bijzetten van een bord te negeren (standaard 60 s)."
+      "doc": "Met \"Deur openen beëindigt de cyclus\" aan: hoe lang de deur open moet blijven voordat de cyclus eindigt. Lang genoeg om het bijzetten van een bord te negeren (standaard 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Cycli die een programma vormen",
@@ -1708,6 +1713,8 @@
     "working": "Bezig…",
     "torn_pick": "{a} of {b}?",
     "torn_tip": "WashData kan deze twee nog niet van elkaar onderscheiden, dus kies het programma dat draait om deze cyclus daarmee te labelen (Automatische detectie maakt de keuze ongedaan).",
+    "program_mismatch": "Lijkt meer op {program}",
+    "program_mismatch_tip": "Deze cyclus lijkt duidelijk meer op {program} dan op {selected}, maar WashData behoudt het programma dat u hebt gekozen.",
     "match_uncertain": "Onzeker: {top} of {runner}",
     "match_uncertain_single": "Onzeker: misschien {top}",
     "match_sure": "~{pct}% zeker",
@@ -1763,6 +1770,7 @@
     },
     "reason": {
       "completion_min_seconds": "De helft van de p05-duur van schone cycli ({minutes} min) over {cycles} cycli; filtert spookcycli eruit.{excl}",
+      "completion_min_seconds_capped": "Begrensd op {cap} zodat de kortste programma's nog meetellen; de helft van de p05-duur van schone cycli ({minutes} min, {cycles} cycli) zou langer zijn.{excl}",
       "match_interval": "Op basis van de waargenomen updatecadans (mediaan={median}s) * 10.",
       "match_interval_capped": "Begrensd zodat {persistence} opeenvolgende herkenningen binnen {pct}% van het kortste programma ({shortest}s) passen; de updatecadans alleen (mediaan={median}s) had een langer interval voorgesteld.",
       "match_interval_floored": "Het kortste programma ({shortest}s) zou dit begrenzen op {cap}s, onder het minimum van {minimum}s, dus wordt het minimum gebruikt: {persistence} opeenvolgende matches duren {budget}s, meer dan {pct}% van dat programma. De herkenning draait alleen als er een meting binnenkomt (mediaan={median}s), dus dit kost niets.",
@@ -1771,7 +1779,6 @@
       "min_off_gap_bridge": "Zo gedimensioneerd dat de langste stille periode binnen een cyclus wordt overbrugd: {span}s + 60s buffer, uit {spans} overbrugde tussenpozen over {cycles} schone cycli (blijft onder uw kortste tussenpoos van {ceiling}s tussen twee opeenvolgende ladingen).",
       "min_power": "40% van het laagste actieve vermogen op p05 ({p05}W) over {cycles} schone cycli, zodat de uitschakeldrempel onder het werkelijke verbruik blijft.{excl}",
       "no_update_timeout": "Op basis van de waargenomen updatecadans (p95={p95}s) * 20 (min. 60s).",
-      "off_delay_cadence": "Op basis van de waargenomen updatecadans (p95={p95}s) * 5",
       "off_delay_device_floor": "Apparaatspecifiek veilig minimum gebruikt voor {device} ({floor}s).",
       "off_delay_generic_floor": "Generiek veilig minimum gebruikt ({floor}s).",
       "off_delay_pauses": "Zo gedimensioneerd dat echte pauzes worden overbrugd: p95 van de pauze binnen een cyclus {p95}s + 60s buffer, uit {pauses} pauzes over {cycles} schone cycli (ondergrens {floor}s).",
@@ -1780,7 +1787,8 @@
       "watchdog": "Zo laag als veilig gehouden (net boven de p95-updatekloof van {p95}s en minstens 2x het meetinterval van {median}s, min. 30s) zodat vastlopers snel worden opgemerkt zonder valse stops.",
       "end_energy_floor": "Verhoogd tot de ondergrens die volgt uit de stopdrempel ({stop} W) gedurende de uitschakelvertraging ({off_delay} s); daaronder kan de cyclus alleen via een terugvalpad eindigen.",
       "max_duration_ratio_default": "Terug naar de standaardwaarde: een lager plafond wijst het juiste programma af zodra een cyclus langer duurt dan gebruikelijk.",
-      "min_duration_ratio_default": "Terug naar de standaardwaarde: een hogere ondergrens zorgt ervoor dat een lopende cyclus pas wordt herkend als hij al ver gevorderd is."
+      "min_duration_ratio_default": "Terug naar de standaardwaarde: een hogere ondergrens zorgt ervoor dat een lopende cyclus pas wordt herkend als hij al ver gevorderd is.",
+      "start_above_running": "Het typische lage draaivermogen van dit apparaat is {low} W, maar de startdrempel is {start} W, dus een cyclus op dat niveau wordt nooit opgemerkt. Start ingesteld op de helft van dat niveau, stop daaronder."
     },
     "exclusions": {
       "summary": "{total} verkeerd gedetecteerde cyclus(sen) uitgesloten: {parts}.",
@@ -1886,6 +1894,8 @@
     "settings_reverted": "Instellingen hersteld; integratie herladen",
     "settings_saved": "Instellingen opgeslagen; integratie herladen",
     "suggestions_applied": "Suggesties toegepast; integratie herladen",
+    "suggestions_none_applied": "Geen instelling gewijzigd: de geselecteerde suggesties zijn niet meer van toepassing",
+    "suggestions_changed": "De suggesties zijn gewijzigd sinds je ze bekeek. Er is niets opgeslagen; controleer ze en pas ze opnieuw toe.",
     "suggestions_dismissed": "Suggesties afgewezen",
     "apply_failed": "Toepassen mislukt: {error}",
     "delete_failed": "Verwijderen mislukt: {error}",
@@ -2231,6 +2241,9 @@
     },
     "cycle_overrun": {
       "name": "Cyclus loopt te lang"
+    },
+    "program_mismatch": {
+      "name": "Lopend programma wijkt af van het gekozen programma"
     },
     "cycle_paused": {
       "name": "Cyclus gepauzeerd"

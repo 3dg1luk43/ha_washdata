@@ -51,6 +51,9 @@ def _hass() -> tuple[MagicMock, MagicMock]:
     manager.profile_store.get_suggestions.return_value = {}
     hass = MagicMock()
     hass.data = {DOMAIN: {"e1": manager}}
+    # Apply all's joint end-gate check runs in the executor and fails closed
+    # (PR #529 review): a job that cannot be awaited would refuse every apply.
+    hass.async_add_executor_job = AsyncMock(side_effect=lambda fn, *a: fn(*a))
     return hass, manager
 
 
@@ -72,7 +75,10 @@ async def test_apply_all_suggestions_is_recorded_and_revertible() -> None:
     """The reporter's case, with their own before/after values."""
     # (The reporter's third key, smoothing_window, is no longer suggested - it sizes
     # a buffer nothing reads, audit SUGGEST-12 - so min_off_gap stands in for it.)
-    entry = _entry({"off_delay": 1780, "min_power": 1.2, "min_off_gap": 2000})
+    # Explicit thresholds: Min Power alone is not applied while Start/Stop follow
+    # it (PR #529 review), and this test is about recording, not that rule.
+    entry = _entry({"off_delay": 1780, "min_power": 1.2, "min_off_gap": 2000,
+                    "start_threshold_w": 5.0, "stop_threshold_w": 2.0})
     hass, manager = _hass()
     manager.profile_store.get_suggestions.return_value = {
         "off_delay": {"value": 1327},
@@ -102,9 +108,12 @@ async def test_apply_all_suggestions_is_recorded_and_revertible() -> None:
         assert ch["timestamp"]
 
 
-async def test_recording_happens_before_the_entry_update() -> None:
-    """async_update_entry schedules a reload that rebuilds the store, so a diff
-    recorded afterwards can be lost."""
+async def test_recording_happens_right_after_the_entry_update() -> None:
+    """Recorded once the options are written, against the values before them (PR
+    #529 review): a row stamped before Apply's awaited writes dated a Stop change
+    before the detector ran with it, and an Apply that stopped before the update
+    left a change it never made. The reload the update schedules is in place
+    (``async_reload_entry``) and keeps the store the row is written to."""
     entry = _entry({"off_delay": 1780})
     hass, manager = _hass()
     manager.profile_store.get_suggestions.return_value = {"off_delay": {"value": 1327}}
@@ -123,7 +132,7 @@ async def test_recording_happens_before_the_entry_update() -> None:
             hass, MagicMock(), {"id": 1, "entry_id": "e1", "keys": ["off_delay"]}
         )
 
-    assert order.index("record") < order.index("update"), order
+    assert order.index("update") < order.index("record"), order
 
 
 async def test_a_changelog_failure_does_not_block_the_apply() -> None:
@@ -159,8 +168,12 @@ async def test_helper_records_only_genuine_changes() -> None:
     )
 
     rec = _recorded(manager)
-    assert set(rec) == {"min_power"}, "an unchanged value must not be recorded"
+    # The Stop row is the unset Stop Min Power moved (PR #529 review), with the
+    # option itself left as it was: no setting the panel lists.
+    assert set(rec) == {"min_power", "stop_threshold_w"}, "an unchanged value must not be recorded"
     assert rec["min_power"]["old"] == 2.0 and rec["min_power"]["new"] == 1.0
+    assert rec["stop_threshold_w"]["old"] is None and rec["stop_threshold_w"]["new"] is None
+    assert ws_api._is_effective_stop_row(rec["stop_threshold_w"])  # noqa: SLF001
 
 
 async def test_helper_reads_through_to_entry_data() -> None:
@@ -264,27 +277,31 @@ async def _drive_store_download(hass, manager, entry):
     ids=["set_options", "apply_suggestions", "import", "selective_import", "undo_import",
          "store_download"],
 )
-async def test_every_option_writer_records_before_it_writes(drive) -> None:
+async def test_every_option_writer_records_when_it_writes(drive) -> None:
     """Each of the six `entry.options` writers, driven: the change is recorded
-    (old and new) BEFORE `async_update_entry` schedules the reload that rebuilds
-    the store. Two of them (store download, selective import) had no test of it
-    until this replaced a source-text count (audit TESTING-13)."""
-    entry = _entry({"min_power": 1.2})
+    (old and new) right AFTER `async_update_entry`, against the options read
+    before it (PR #529 review: stamped when it took effect). Two of them (store
+    download, selective import) had no test of it until this replaced a
+    source-text count (audit TESTING-13)."""
+    entry = _entry({"min_power": 1.2, "start_threshold_w": 5.0, "stop_threshold_w": 2.0})
     hass, manager = _hass()
     hass.async_add_executor_job = AsyncMock(side_effect=lambda fn, *a: fn(*a))
     order: list[str] = []
     manager.profile_store.async_record_settings_changes = AsyncMock(
         side_effect=lambda ch: order.append("record")
     )
-    hass.config_entries.async_update_entry = MagicMock(
-        side_effect=lambda *a, **k: order.append("update")
-    )
+    def update(e: Any, **kwargs: Any) -> None:
+        order.append("update")
+        if "options" in kwargs:  # as HA does: the old values are gone afterwards
+            e.options = kwargs["options"]
+
+    hass.config_entries.async_update_entry = MagicMock(side_effect=update)
 
     await drive(hass, manager, entry)
 
     assert "update" in order, "the writer did not write"
     assert "record" in order, "the write was not recorded in the changelog"
-    assert order.index("record") < order.index("update"), order
+    assert order.index("update") < order.index("record"), order
     rec = _recorded(manager)
     assert rec["min_power"]["old"] == 1.2
     assert rec["min_power"]["new"] == 3.5
@@ -303,7 +320,7 @@ async def test_no_seventh_option_writer_bypasses_the_helper() -> None:
     src = inspect.getsource(ws_api)
     assert src.count("async_update_entry(") == 6, (
         "a new entry.options writer appeared; wire it to _record_option_changes "
-        "and add it to test_every_option_writer_records_before_it_writes"
+        "and add it to test_every_option_writer_records_when_it_writes"
     )
     assert src.count("await _record_option_changes(") == 6, (
         "every option writer records through the helper; no inline copies"

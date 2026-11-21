@@ -97,15 +97,15 @@ async def test_periodic_snapshot_save_is_tracked(
     await _assert_one_tracked_task_cancelled_on_unload(hass, manager, before)
 
 
-async def test_noise_auto_tune_is_tracked(
-    hass: HomeAssistant, manager: WashDataManager
-) -> None:
-    _gate, slow = _blocked()
-    manager._tune_threshold = slow
+def test_ghost_cycles_store_no_suggestion(manager: WashDataManager) -> None:
+    """The noise auto-tune that wrote Min Power straight to the store is gone
+    (audit 2026-11-16); crossing the count only logs."""
     manager._noise_events_threshold = 1
+    manager.profile_store.set_suggestion = MagicMock()
     before = set(manager._background_tasks)
     manager._handle_noise_cycle(12.0)
-    await _assert_one_tracked_task_cancelled_on_unload(hass, manager, before)
+    manager.profile_store.set_suggestion.assert_not_called()
+    assert set(manager._background_tasks) == before
 
 
 async def test_unload_with_nothing_in_flight_does_not_rewrite_the_store(

@@ -1044,6 +1044,7 @@
     "sug_muted": "Vil ikke foreslå denne indstilling igen",
     "sug_mute_failed": "Kunne ikke undertrykke forslaget",
     "sug_unmuted_all": "Undertrykte forslag nulstillet",
+    "sug_unmute_incomplete": "Nulstillingen blev ikke fuldført: nogle forslag er stadig undertrykt. Prøv igen.",
     "n_suggestions_muted": "{count} forslag undertrykt; autotuneren vil ikke foreslå disse.",
     "n_suggestions_muted_one": "{count} forslag undertrykt; autotuneren vil ikke foreslå det.",
     "n_suggestions_muted_other": "{count} forslag undertrykt; autotuneren vil ikke foreslå disse.",
@@ -1102,6 +1103,10 @@
     "hist_warn_naive_time_other": "{n} tidsstempler har ingen tidszone og blev læst som UTC. Hvis filen bruger lokal tid, er cyklusser forskudt med din UTC-forskydning, og målinger omkring et sommertidsskift kan gå tabt.",
     "hist_tail_trimmed": "{min} min ventetid efter cyklussens afslutning blev skåret fra, ligesom integrationen gør under drift",
     "invalid_threshold_pair": "Stoptærskel ({stop} W) skal være under Starttærskel ({start} W). Intet blev gemt; ændr begge sammen.",
+    "end_gate_check_failed": "De foreslåede tidsindstillinger kunne ikke kontrolleres op mod dette apparats pauser. Intet blev gemt; prøv igen.",
+    "analysis_superseded": "Indstillingerne eller cyklusdataene blev ændret under analysen. Kør den igen.",
+    "analysis_check_failed": "De foreslåede tidsindstillinger kunne ikke kontrolleres op mod dette apparats pauser. Kør den igen.",
+    "apply_cycles_changed": "En cyklus blev gemt, mens forslagene blev anvendt. Ingen indstilling blev ændret, og forslagene blev ryddet. Kør forslagsanalysen igen.",
     "import_undo_hint": "Et gendannelsespunkt fra før den seneste import ({when}) er bevaret: {profiles} profil(er) og {cycles} cyklus(ser).",
     "replace_undo_hint": "Der gemmes først et gendannelsespunkt, så du kan fortryde denne import under Eksport/import.",
     "pg_in_sample_note": "Disse cyklusser var med til at bygge de profiler, de matches mod, så resultaterne er optimistiske: forvent lidt færre korrekte match på nye cyklusser.",
@@ -1569,12 +1574,12 @@
       "doc": "Hvad et tryk på dette apparats notifikation åbner. Tom: WashData-panelet for dette apparat. Angiv en dashboard-sti (f.eks. /lovelace/laundry) eller URL, eller \"none\" for ingen trykhandling."
     },
     "door_opens_at_end": {
-      "label": "Dør åbner automatisk ved afslutning",
-      "doc": "Til opvaskemaskiner, der åbner døren ved slutningen for at tørre (f.eks. AirDry). En dør, der står åben i ventetiden nedenfor, afslutter cyklussen i stedet for at sætte den på pause; en kort åbning ignoreres. Kræver en Dørsensorenhed."
+      "label": "Åbning af døren afslutter cyklussen",
+      "doc": "Med en Dørsensorenhed afslutter en dør, der står åben i ventetiden nedenfor ved lav effekt, cyklussen i stedet for at sætte den på pause. Under en pause sker det først, når det genkendte program næsten er færdigt, så en pause midt i programmet forbliver en pause."
     },
     "door_end_dwell_seconds": {
       "label": "Dørens åbningstid ved afslutning",
-      "doc": "Med \"Dør åbner automatisk ved afslutning\" slået til: hvor længe døren skal stå åben, før cyklussen slutter. Længe nok til at ignorere, at en tallerken sættes ind (standard 60 s)."
+      "doc": "Med \"Åbning af døren afslutter cyklussen\" slået til: hvor længe døren skal stå åben, før cyklussen slutter. Længe nok til at ignorere, at en tallerken sættes ind (standard 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Cyklusser, der former et program",
@@ -1708,6 +1713,8 @@
     "working": "Arbejder…",
     "torn_pick": "{a} eller {b}?",
     "torn_tip": "WashData kan endnu ikke skelne mellem disse to, så vælg det program, der kører, for at mærke denne cyklus med det (Automatisk registrering fortryder valget).",
+    "program_mismatch": "Ligner mere {program}",
+    "program_mismatch_tip": "Denne cyklus ligner tydeligt mere {program} end {selected}, men WashData beholder det program, du valgte.",
     "match_uncertain": "Usikker: {top} eller {runner}",
     "match_uncertain_single": "Usikker: måske {top}",
     "match_sure": "~{pct}% sikker",
@@ -1763,6 +1770,7 @@
     },
     "reason": {
       "completion_min_seconds": "Halvdelen af p05-varigheden for rene cyklusser ({minutes} min) på tværs af {cycles} cyklusser; filtrerer spøgelsescyklusser fra.{excl}",
+      "completion_min_seconds_capped": "Begrænset til {cap}, så de korteste programmer stadig tæller; halvdelen af p05-varigheden for rene cyklusser ({minutes} min, {cycles} cyklusser) ville være længere.{excl}",
       "match_interval": "Baseret på observeret opdateringskadence (median={median}s) * 10.",
       "match_interval_capped": "Begrænset, så {persistence} på hinanden følgende match kan være inden for {pct}% af det korteste program ({shortest}s); opdateringskadencen alene (median={median}s) ville have foreslået et længere interval.",
       "match_interval_floored": "Det korteste program ({shortest}s) ville begrænse dette til {cap}s, under minimummet på {minimum}s, så minimummet bruges: {persistence} match i træk tager {budget}s, over {pct}% af det program. Matchning kører kun, når en måling kommer (median={median}s), så det koster intet.",
@@ -1771,7 +1779,6 @@
       "min_off_gap_bridge": "Dimensioneret til at bygge bro over den længste stille periode i en cyklus: {span}s + 60s buffer, fra {spans} dækkede mellemrum på tværs af {cycles} rene cyklusser (holder sig under dit korteste mellemrum på {ceiling}s mellem to kørsler).",
       "min_power": "40% af den laveste aktive effekt ved p05 ({p05}W) på tværs af {cycles} rene cyklusser, hvilket holder sluk-tærsklen under reelt forbrug.{excl}",
       "no_update_timeout": "Baseret på observeret opdateringskadence (p95={p95}s) * 20 (min 60s).",
-      "off_delay_cadence": "Baseret på observeret opdateringskadence (p95={p95}s) * 5",
       "off_delay_device_floor": "Brugte et enhedsspecifikt sikkert minimum for {device} ({floor}s).",
       "off_delay_generic_floor": "Brugte et generisk sikkert minimum ({floor}s).",
       "off_delay_pauses": "Dimensioneret til at vare længere end reelle pauser: p95 for pause i cyklussen {p95}s + 60s buffer, fra {pauses} pauser på tværs af {cycles} rene cyklusser (gulv {floor}s).",
@@ -1780,7 +1787,8 @@
       "watchdog": "Holdt så lavt som forsvarligt (lige over p95-opdateringsmellemrummet på {p95}s og mindst 2x samplingintervallet på {median}s, min. 30s), så stilstande fanges hurtigt uden falske stop.",
       "end_energy_floor": "Hævet til den nedre grænse, som stoptærsklen ({stop} W) i løbet af slukkeforsinkelsen ({off_delay} s) giver; under den kan cyklussen kun afsluttes via en reservevej.",
       "max_duration_ratio_default": "Tilbage til standardværdien: et lavere loft afviser det rigtige program, når en kørsel varer længere end normalt.",
-      "min_duration_ratio_default": "Tilbage til standardværdien: en højere bundgrænse forhindrer en igangværende cyklus i at blive genkendt, før den er godt i gang."
+      "min_duration_ratio_default": "Tilbage til standardværdien: en højere bundgrænse forhindrer en igangværende cyklus i at blive genkendt, før den er godt i gang.",
+      "start_above_running": "Dette apparats typiske lave køreeffekt er {low} W, men starttærsklen er {start} W, så en kørsel på det niveau registreres aldrig. Start sat til halvdelen af det niveau, stop derunder."
     },
     "exclusions": {
       "summary": "{total} fejldetekterede cyklus(ser) udelukket: {parts}.",
@@ -1886,6 +1894,8 @@
     "settings_reverted": "Indstillinger gendannet; integration genindlæsning",
     "settings_saved": "Indstillinger gemt; integration genindlæsning",
     "suggestions_applied": "Forslag anvendt; integration genindlæsning",
+    "suggestions_none_applied": "Ingen indstilling ændret: de valgte forslag gælder ikke længere",
+    "suggestions_changed": "Forslagene er ændret, siden du gennemgik dem. Intet blev gemt; tjek dem, og anvend dem igen.",
     "suggestions_dismissed": "Forslag afvist",
     "apply_failed": "Anvendelse mislykkedes: {error}",
     "delete_failed": "Sletning mislykkedes: {error}",
@@ -2231,6 +2241,9 @@
     },
     "cycle_overrun": {
       "name": "Cyklus kører for længe"
+    },
+    "program_mismatch": {
+      "name": "Kørende program afviger fra det valgte"
     },
     "cycle_paused": {
       "name": "Cyklus sat på pause"

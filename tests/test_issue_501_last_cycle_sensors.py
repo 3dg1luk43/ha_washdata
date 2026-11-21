@@ -239,3 +239,91 @@ async def test_every_device_type_gets_them(
 ) -> None:
     entry = await setup_washdata_entry(device_type=device_type)
     assert _states(hass, entry) == dict.fromkeys(KEYS, "unknown")
+
+
+async def test_last_cycle_start_is_a_timestamp_of_the_last_run(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """#501 follow-up: "last washed" cards need the start time as an entity state."""
+    entry = await setup_washdata_entry()
+    manager = hass.data[DOMAIN][entry.entry_id]
+    entity_id = er.async_get(hass).async_get_entity_id(
+        "sensor", DOMAIN, f"{entry.entry_id}_last_cycle_start"
+    )
+    assert entity_id is not None
+    state = hass.states.get(entity_id)
+    assert state.state == "unknown"
+    assert state.attributes["device_class"] == SensorDeviceClass.TIMESTAMP
+    assert "state_class" not in state.attributes
+    assert er.async_get(hass).async_get(entity_id).entity_category is EntityCategory.DIAGNOSTIC
+
+    start = (dt_util.utcnow() - timedelta(hours=2)).replace(microsecond=0)
+    await manager.profile_store.async_add_cycle(_cycle(start, 60.0))
+    manager.notify_update()
+    await hass.async_block_till_done()
+    assert dt_util.parse_datetime(hass.states.get(entity_id).state) == start
+
+    # PR #529 review: a legacy cycle loaded with unix seconds (adding or editing
+    # a cycle rewrites them, loading does not).
+    manager.profile_store.get_past_cycles()[-1]["start_time"] = start.timestamp()
+    manager.notify_update()
+    await hass.async_block_till_done()
+    assert dt_util.parse_datetime(hass.states.get(entity_id).state) == start
+    # An out-of-range number is unknown, not a failed update.
+    manager.profile_store.get_past_cycles()[-1]["start_time"] = 10**400
+    manager.notify_update()
+    await hass.async_block_till_done()
+    assert hass.states.get(entity_id).state == "unknown"
+    # A well-formed but impossible ISO date: `parse_datetime` raises for it, and a
+    # failed update would keep the previous state, so start from a valid one.
+    manager.profile_store.get_past_cycles()[-1]["start_time"] = start.isoformat()
+    manager.notify_update()
+    await hass.async_block_till_done()
+    assert dt_util.parse_datetime(hass.states.get(entity_id).state) == start
+    manager.profile_store.get_past_cycles()[-1]["start_time"] = "2026-13-01T00:00:00+00:00"
+    manager.notify_update()
+    await hass.async_block_till_done()
+    assert hass.states.get(entity_id).state == "unknown"
+
+
+async def test_an_in_place_start_rewrite_reaches_the_cached_last_cycle(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """PR #529 review: Process History moves a run's start in place; the cached
+    newest run must not hide it."""
+    entry = await setup_washdata_entry()
+    store = hass.data[DOMAIN][entry.entry_id].profile_store
+    t = dt_util.utcnow().replace(microsecond=0) - timedelta(days=1)
+    await store.async_add_cycle(_cycle(t, 60.0))
+    await store.async_add_cycle(_cycle(t + timedelta(minutes=1), 60.0))
+    older, newer = sorted(store.get_past_cycles(), key=lambda c: c["start_time"])
+    assert store.last_finished_cycle() is newer
+    older["start_time"] = (t + timedelta(minutes=2)).isoformat()  # the rewrite
+    store._start_edit_gen = getattr(store, "_start_edit_gen", 0) + 1  # noqa: SLF001
+    assert store.last_finished_cycle() is older
+
+
+async def test_last_cycle_start_reads_the_stamp_as_the_store_orders_it(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """PR #529 review: the store orders a naive stamp as UTC and accepts quoted unix
+    seconds, which the sensor showed as unknown; and a year-1 instant with an offset
+    parsed, then overflowed converting to UTC and failed the update."""
+    entry = await setup_washdata_entry()
+    manager = hass.data[DOMAIN][entry.entry_id]
+    entity_id = er.async_get(hass).async_get_entity_id(
+        "sensor", DOMAIN, f"{entry.entry_id}_last_cycle_start"
+    )
+    start = (dt_util.utcnow() - timedelta(hours=2)).replace(microsecond=0)
+    await manager.profile_store.async_add_cycle(_cycle(start, 60.0))
+    cycle = manager.profile_store.get_past_cycles()[-1]
+
+    async def shown(value: Any) -> str:
+        cycle["start_time"] = value
+        manager.notify_update()
+        await hass.async_block_till_done()
+        return hass.states.get(entity_id).state
+
+    assert dt_util.parse_datetime(await shown(start.replace(tzinfo=None).isoformat())) == start
+    assert dt_util.parse_datetime(await shown(str(int(start.timestamp())))) == start
+    assert await shown("0001-01-01T00:00:00+01:00") == "unknown"

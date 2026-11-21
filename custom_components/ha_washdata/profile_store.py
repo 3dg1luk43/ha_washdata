@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import collections
 import contextlib
+import copy
 import dataclasses
 import functools
 import hashlib
@@ -33,7 +34,7 @@ import threading
 import time
 import uuid
 from array import array
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Collection, Mapping
 from datetime import datetime, timedelta
 from types import SimpleNamespace
 from typing import Any, TypeAlias, cast
@@ -45,6 +46,13 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .const import (
+    CADENCE_RECENT_CYCLES,
+    CONF_STOP_THRESHOLD_W,
+    TERMINAL_BLIP_MIN_W,
+    TERMINAL_BLIP_RATIO,
+    CUT_SHORT_MIN_RUNS,
+    CUT_SHORT_MIN_SHARE,
+    TERMINAL_BLIP_QUIET_MIN_S,
     END_GATE_HAZARD_MIN_CYCLES,
     PRICE_TIMELINE_MAX_POINTS,
     PRICE_TIMELINE_PRICE_DECIMALS,
@@ -62,6 +70,7 @@ from .const import (
     BACKFILL_TAIL_TRACE_KEY,
     BANKED_TAIL_REPAIR_KEY,
     CYCLE_ENERGY_REBUILD_KEY,
+    CUT_SHORT_REBUILD_KEY,
     BANKED_TAIL_REPAIR_MIN_S,
     TERMINAL_QUIET_CAP_S,
     TERMINAL_QUIET_MIN_CONSISTENCY,
@@ -97,6 +106,7 @@ from .const import (
     CONF_PROFILE_MIN_WARMUP_CYCLES,
     SMART_TERM_PREFIX_MIN_PAUSE_S,
     SMART_TERM_TAIL_WINDOW_FRAC,
+    SETTINGS_CHANGELOG_IMPORTED_KEY,
     STORAGE_KEY,
     STORAGE_VERSION,
     FAILED_RESTORE_STORE_SUFFIX,
@@ -157,6 +167,9 @@ from .phase_catalog import (
     normalize_phase_name,
 )
 from .log_utils import DeviceLoggerAdapter
+
+# Suggestion entry marks kept in the store (`set_suggestion`).
+SUGGESTION_FLAG_KEYS = ("corrective", "cascade", "owner")
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -379,6 +392,106 @@ def _parse_start_dt(value: Any) -> datetime | None:
     return None
 
 
+#: Readings a match converts on the loop (under a millisecond). Past this the
+#: conversion goes to the executor. Inline below it, a cycle's first matches,
+#: too short to score, return without yielding: landing a loop turn later, each
+#: cost an extra entity refresh (tests/test_perf_budgets.py).
+_MATCH_PREP_INLINE_READINGS = 512
+
+
+def _prepare_match_trace(
+    current_power_data: list[Any],
+) -> tuple[np.ndarray, np.ndarray, list[float], float] | None:
+    """A match's trace as ``(seconds, watts, resampled watts, grid step)``.
+
+    Pure and executor-safe (``ProfileStore.async_match_profile`` runs it off the
+    loop). Readings are ``(datetime | offset seconds | ISO string, watts)``. None
+    when the resampled trace is too short to match; raises on a malformed reading.
+    """
+    first_elem = current_power_data[0][0]
+    if isinstance(first_elem, datetime):
+        t_start = first_elem.timestamp()
+        ts_arr = np.array([(x[0].timestamp() - t_start) for x in current_power_data])
+    elif isinstance(first_elem, (int, float)):
+        # Already offset timestamps (from compressed format)
+        ts_arr = np.array([float(x[0]) for x in current_power_data])
+    else:
+        t_start = datetime.fromisoformat(first_elem).timestamp()
+        ts_arr = np.array(
+            [(datetime.fromisoformat(x[0]).timestamp() - t_start) for x in current_power_data]
+        )
+    p_arr = np.array([float(x[1]) for x in current_power_data])
+    segments, used_dt = resample_adaptive(ts_arr, p_arr, min_dt=5.0, gap_s=21600.0)
+    if not segments:
+        return None
+    current_seg = max(segments, key=lambda s: len(s.power))
+    if len(current_seg.power) < MATCH_MIN_RESAMPLED_POINTS:
+        return None
+    return ts_arr, p_arr, current_seg.power.tolist(), used_dt
+
+
+#: Stored trace points a live match re-grids on the loop when its templates are
+#: not cached for the query's grid step (``ProfileStore._async_match_snapshots``),
+#: each trace counted as at least ``_MATCH_SEGMENT_TRACE_POINTS`` (its fixed
+#: cost). Past this the uncached ones go to the executor: on the largest corpus
+#: store (20 profiles, 70 member templates) a cold build took 15-22 ms on the
+#: loop, 12-13 ms of it this resampling (PR #529 review).
+_MATCH_SEGMENT_INLINE_POINTS = 4096
+_MATCH_SEGMENT_TRACE_POINTS = 256
+#: Builds one ``ProfileStore.async_rebuild_envelope`` call runs while a setting
+#: the build reads keeps changing under it (PR #529 review).
+_ENVELOPE_BUILD_ATTEMPTS = 3
+#: Executor jobs one such build may run: a job whose results the store's changes
+#: meanwhile invalidated collects the misses again (PR #529 review). Past it the
+#: build resamples what is left on the loop.
+_MATCH_SEGMENT_ATTEMPTS = 3
+
+#: The miss list of a live match's first snapshot pass, per thread: set only on
+#: the loop around that pass, so the Playground's own builds (an executor thread)
+#: always resample inline.
+_SEGMENT_MISSES = threading.local()
+
+#: What a miss returns in that pass: a two-point stand-in, so the pass goes on to
+#: ask for every template a full build would (a golden profile's members follow
+#: its own template). That pass's snapshots are discarded whenever one was used.
+_SEGMENT_PLACEHOLDER = Segment(
+    timestamps=np.array([0.0, 1.0]), power=np.zeros(2), mask=np.ones(2, dtype=bool)
+)
+
+
+def _resample_sample_trace(sample_data: Any, dt: float) -> Segment | None:
+    """A stored trace (``[[offset, watts], ...]``) on a ``dt`` grid: its longest
+    gap-free segment, or None. Pure and executor-safe; raises on a malformed row."""
+    if not sample_data or not isinstance(sample_data[0], (list, tuple)):
+        return None
+    s_ts = np.array([x[0] for x in sample_data], dtype=float)
+    s_p = np.array([x[1] for x in sample_data], dtype=float)
+    # Imported data can carry NaN (json.loads accepts it); envelopes already drop
+    # non-finite rows, the sample template did not (audit MATCH-CORE-05).
+    finite = np.isfinite(s_ts) & np.isfinite(s_p)
+    if not finite.all():
+        s_ts, s_p = s_ts[finite], s_p[finite]
+    if s_ts.size < 2:
+        return None
+    s_segments = resample_uniform(s_ts, s_p, dt_s=dt, gap_s=21600.0)
+    if not s_segments:
+        return None
+    return max(s_segments, key=lambda s: len(s.power))
+
+
+def _resample_sample_traces(traces: list[Any], dt: float) -> list[Segment | None]:
+    """:func:`_resample_sample_trace` over several traces, for one executor job.
+    A trace that cannot be resampled is None (the caller's own lookup then
+    retries it and logs why)."""
+    out: list[Segment | None] = []
+    for trace in traces:
+        try:
+            out.append(_resample_sample_trace(trace, dt))
+        except Exception:  # pylint: disable=broad-exception-caught
+            out.append(None)
+    return out
+
+
 def _newest_cycle(candidates: list[Any]) -> Any:
     """The most recent candidate cycle, ordered by parsed instant (``None`` if empty).
 
@@ -496,6 +609,163 @@ def trim_zero_power_data(
     return data[start_idx:end_idx + 1]
 
 
+def _events_after_quiet(offsets: list[float], values: list[float], peak: float) -> list[tuple[float, float]]:
+    """``(quiet_start_s, event_s)`` for each terminal event a run shows after at least
+    ``TERMINAL_BLIP_QUIET_MIN_S`` of quiet (#531): a reading above
+    ``TERMINAL_EVENT_PEAK_FRAC`` of its peak but not main activity (at most
+    ``TERMINAL_EVENT_MAX_PEAK_FRAC`` of it: a heater restart after a pause is not an
+    end), or a blip inside the quiet of ``TERMINAL_BLIP_RATIO`` x the quiet's level
+    and ``TERMINAL_BLIP_MIN_W`` more."""
+    ceiling = TERMINAL_EVENT_PEAK_FRAC * peak
+    main = TERMINAL_EVENT_MAX_PEAK_FRAC * peak
+    # Only observed quiet counts (PR #529 review): a step longer than the gap ceiling
+    # of the dishwasher gap-free rule, clip(10 x p95 dt, 60, 3600) s, restarts it.
+    steps = np.diff(np.asarray(offsets, dtype=float)) if len(offsets) > 1 else np.asarray([])
+    gap_ceiling = float(np.clip(10.0 * np.percentile(steps, 95), 60.0, 3600.0)) if steps.size else 60.0
+    events: list[tuple[float, float]] = []
+    q_start: float | None = None
+    q_vals: list[float] = []
+    q_level: float | None = None
+    prev_t: float | None = None
+    for t, v in zip(offsets, values, strict=False):
+        unobserved = prev_t is not None and t - prev_t > gap_ceiling
+        prev_t = t
+        if unobserved:
+            q_start, q_vals, q_level = None, [], None
+        if v > ceiling:
+            if q_start is not None and t - q_start >= TERMINAL_BLIP_QUIET_MIN_S and v <= main:
+                events.append((q_start, t))
+            q_start, q_vals, q_level = None, [], None
+            continue
+        if q_start is None:
+            q_start, q_vals, q_level = t, [v], None
+            continue
+        if q_level is None and t - q_start >= TERMINAL_BLIP_QUIET_MIN_S:
+            q_level = float(np.median(q_vals))
+        if q_level is not None and v >= max(TERMINAL_BLIP_RATIO * q_level, q_level + TERMINAL_BLIP_MIN_W):
+            events.append((q_start, t))
+            q_start, q_vals, q_level = None, [], None
+            continue
+        if q_level is None:
+            q_vals.append(v)
+    return events
+
+
+def cut_short_mask(
+    runs: list[tuple[list[float], list[float], float, bool, float]],
+    sources: list[Any] | None = None,
+) -> list[bool]:
+    """Which of a dishwasher programme's runs were closed inside its quiet phase (#531).
+
+    ``runs``: ``(offsets, values, duration_s, pinned, peak)`` per run, as the envelope
+    build parses them. A run is cut off when it shows no terminal event of its own
+    in its last ``TERMINAL_BLIP_QUIET_MIN_S`` (a load-adaptive programme's shorter
+    runs end on their own event and are complete) and at least
+    ``CUT_SHORT_MIN_RUNS`` (and ``CUT_SHORT_MIN_SHARE`` of the runs) others go on
+    past its end into at least ``TERMINAL_BLIP_QUIET_MIN_S`` of quiet, begun no
+    later than that long after its end, and then show one
+    (:func:`_events_after_quiet`): its end came before the programme's. A pinned
+    run (golden or a corrected length) never is. Pure; never raises.
+
+    ``sources`` (one hashable per run, :func:`_cut_short_sources`) names the run
+    each one records: runs and votes count once per source, so a stored copy of a
+    run is no independent evidence (PR #529 review). Omitted, every run is its own.
+    """
+    try:
+        n = len(runs)
+        src: list[Any] = (
+            list(sources) if sources is not None and len(sources) == n else list(range(n))
+        )
+        distinct = len(set(src))
+        need = max(CUT_SHORT_MIN_RUNS, math.ceil(CUT_SHORT_MIN_SHARE * distinct))
+        if distinct <= need:
+            return [False] * n
+        # Terminal only after the run's last main activity: an event the heater
+        # restarts after is a pause, not the end (review of PR #529).
+        def _terminal(o: list[float], v: list[float], pk: float) -> list[tuple[float, float]]:
+            main = TERMINAL_EVENT_MAX_PEAK_FRAC * pk
+            last_main = max((t for t, w in zip(o, v, strict=False) if w > main), default=-math.inf)
+            return [ev for ev in _events_after_quiet(o, v, pk) if ev[1] > last_main]
+
+        events = [_terminal(o, v, pk) for o, v, _d, _p, pk in runs]
+        mask: list[bool] = []
+        for i, (_o, _v, d_i, pinned, _pk) in enumerate(runs):
+            if pinned or any(t_e >= d_i - TERMINAL_BLIP_QUIET_MIN_S for _q0, t_e in events[i]):
+                mask.append(False)
+                continue
+            # A sibling's evidence ends where its accepted length does: a trace
+            # kept past a corrected end shows what came after the run (PR #529 review).
+            later = len({
+                src[j] for j, ev in enumerate(events)
+                if src[j] != src[i] and any(
+                    d_i < t_e <= runs[j][2]
+                    and q0 <= d_i + TERMINAL_BLIP_QUIET_MIN_S
+                    and t_e - max(q0, d_i) >= TERMINAL_BLIP_QUIET_MIN_S
+                    for q0, t_e in ev
+                )
+            })
+            mask.append(later >= need)
+        return mask
+    except Exception:  # noqa: BLE001 - a statistic must never break an envelope build
+        return [False] * len(runs)
+
+
+def _positive_duration(value: Any) -> float | None:
+    """``value`` as a finite positive number of seconds, else None (never raises).
+
+    One rule for a stored duration, which an import can carry as anything: the
+    matcher's candidate builder and ``resolve_profile_duration`` read a profile's
+    length through it, and treat anything else as absent (PR #529 review)."""
+    try:
+        number = float(value or 0.0)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if not math.isfinite(number) or number <= 0:
+        return None
+    return number
+
+
+def _cut_short_sources(runs: list[tuple[Any, Any]]) -> list[Any]:
+    """The run each ``(cycle, pairs)`` of a #531 vote records (:func:`cut_short_mask`).
+
+    A reference cycle (a store import) copying another run of the vote is that
+    run: its recorded source id (``meta.source`` ``store:<id>``) names the run's
+    id, or its trace content (:func:`trace_content_hash`) is the run's. A
+    reference import dedups against other references, not against the original
+    in the real history, so a copy of a run from this device's own backup was a
+    vote of its own (PR #529 review). Every other run is its own source: two
+    recorded runs are two observations. Stored copies stay; only the count
+    changes. Never raises; hashes only when the vote holds a store import.
+    """
+    own: list[Any] = [("run", k) for k in range(len(runs))]
+    try:
+        imports = {k for k, (cycle, _pairs) in enumerate(runs) if _is_store_import(cycle)}
+        if not imports:
+            return own
+        hashes = [trace_content_hash(pairs) for _cycle, pairs in runs]
+        by_hash: dict[str, Any] = {}
+        by_id: dict[str, Any] = {}
+        # The runs that are not imports first, so a copy finds the original.
+        for k in sorted(range(len(runs)), key=lambda i: i in imports):
+            cycle = runs[k][0]
+            if k in imports:
+                meta = cycle.get("meta")
+                origin = str(meta.get("source") or "") if isinstance(meta, dict) else ""
+                while origin.startswith("store:"):
+                    origin = origin[len("store:"):]
+                if origin and origin != "store" and origin in by_id:
+                    own[k] = by_id[origin]
+                elif hashes[k] and hashes[k] in by_hash:
+                    own[k] = by_hash[hashes[k]]
+            if hashes[k]:
+                by_hash.setdefault(hashes[k], own[k])
+            if cycle.get("id") is not None:
+                by_id.setdefault(str(cycle.get("id")), own[k])
+        return own
+    except Exception:  # noqa: BLE001 - a statistic must never break an envelope build
+        return [("run", k) for k in range(len(runs))]
+
+
 def filter_duration_outliers(durations: list[float]) -> list[float]:
     """Return a robust duration set with extreme outliers removed.
 
@@ -604,6 +874,12 @@ class MatchResult:
     # (``analysis.nearest_member_duration``), for the end gates; None unless they
     # agree, and on every path without the live gate view.
     gate_run_expected: float | None = None
+    # The profiles Stage 1's lower bound rejected (``min_duration_ratio``,
+    # ``analysis.stage1_min_ratio_rejected``): the cycle is still too short a
+    # part of them to compare, so they are missing from the ranking whatever they
+    # would have scored. The #530 check reads a pick rejected here as no
+    # evidence, not as one ranked below the list (PR #529 review).
+    min_ratio_rejected: tuple[str, ...] = ()
 
     @property
     def label_confidence(self) -> float:
@@ -1102,6 +1378,24 @@ def compress_power_data(cycle: CycleDict) -> list[Any] | None:
         return None
 
 
+class StoreRetiredError(RuntimeError):
+    """A write the caller reports as done reached a store its entry unloaded.
+
+    Raised by ``ProfileStore.async_save(required=True)`` (an import, an undo)
+    and by the restore-point write: the write is skipped, as every write of a
+    retired store, and the caller must not report success. Background work
+    stays silent (PR #529 review)."""
+
+    def __init__(
+        self,
+        message: str = (
+            "The appliance was reloaded during this operation, so nothing was "
+            "saved. Run it again."
+        ),
+    ) -> None:
+        super().__init__(message)
+
+
 class WashDataStore(Store[JSONDict]):
     """Store implementation with migration support.
 
@@ -1109,7 +1403,22 @@ class WashDataStore(Store[JSONDict]):
     envelope as compact JSON text (``trace_codec``): every write goes through an
     encoded shallow copy of the payload and every load is decoded, so memory never
     holds the text.
+
+    ``retired`` is set once its entry has unloaded (``ProfileStore.async_retire``):
+    the replacement writes the same key, so a write from this one would overwrite
+    newer data (PR #529 review).
     """
+
+    retired = False
+
+    def __init__(
+        self, *args: Any, logger: logging.Logger | logging.LoggerAdapter[Any] | None = None,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(*args, **kwargs)
+        # The device's adapter when a ProfileStore owns it, so a skipped write
+        # names the appliance (PR #529 review).
+        self._device_logger = logger if logger is not None else _LOGGER
 
     async def async_load(self) -> JSONDict | None:
         """Load (and migrate) the store, with every compact field decoded."""
@@ -1122,6 +1431,11 @@ class WashDataStore(Store[JSONDict]):
 
     async def async_save(self, data: JSONDict) -> None:
         """Write ``data`` with its traces and envelopes compact; ``data`` is not changed."""
+        if self.retired:
+            self._device_logger.debug(
+                "Write to %s from an unloaded entry's store skipped", self.key
+            )
+            return
         if self.hass.state is CoreState.stopping:
             # HA defers this one to its final write, which serialised `data` as it
             # is THEN: encode then too (the override below wraps the function).
@@ -1134,6 +1448,11 @@ class WashDataStore(Store[JSONDict]):
         self, data_func: Callable[[], JSONDict], delay: float = 0
     ) -> None:
         """Debounced write; encodes the store as it is when the write fires."""
+        if self.retired:
+            self._device_logger.debug(
+                "Write to %s from an unloaded entry's store skipped", self.key
+            )
+            return
         super().async_delay_save(lambda: encode_store_payload(data_func()), delay)
 
     async def _async_migrate_func(
@@ -1732,9 +2051,9 @@ def _sane_manual_duration(value: Any, trace_span_s: float) -> float | None:
 def envelope_shape_count(envelope: Any) -> int:
     """How many cycles shaped ``envelope`` (``shape_cycle_count``).
 
-    The envelope's ``cycle_count`` is a USAGE figure: once any reference or
-    backfill cycle exists it counts real cycles only (and counts them even when
-    the evidence choice keeps real cycles out of the curve). Gating the envelope
+    The envelope's ``cycle_count`` is a USAGE figure: it counts real cycles
+    only, every one of them (also those the evidence choice, the mis-capture
+    floor or the #531 cut-off rule keep out of the curve). Gating the envelope
     template on it made a backfill-only or store-only profile match one sample
     cycle, never the envelope its cycles built (audit MR-11). An envelope built
     before ``shape_cycle_count`` existed falls back to ``cycle_count``.
@@ -1783,6 +2102,9 @@ class _EnvelopeBuild(tuple):  # type: ignore[type-arg]
     spin_ref: dict[str, Any] | None = None
     tail_ref: dict[str, Any] | None = None
     prog_ends: dict[str, float] | None = None
+    #: Ids of the runs the build left out as #531 cut-offs (empty when it fell
+    #: back to every run): never the profile's sample while another run can be.
+    cut_short_ids: frozenset[str] = frozenset()
 
 
 def _member_programme_ends(
@@ -1872,6 +2194,18 @@ def _ambiguity_from_candidates(candidates: list[dict]) -> tuple[float, bool]:
     return margin, margin < MATCH_AMBIGUITY_MARGIN
 
 
+def _is_family_row(cand: Any, group_members: dict[str, list[str]]) -> bool:
+    """Whether ``cand`` is a Stage-5 family's own entry: named by a cohesive
+    group's key and carrying the collapse's ``group_best_member`` provenance
+    (:func:`collapse_group_candidates`). A real profile merely NAMED like a group
+    key (``__group__G``) is an ordinary programme (PR #529 review)."""
+    return (
+        isinstance(cand, dict)
+        and str(cand.get("name")) in group_members
+        and isinstance(cand.get("group_best_member"), str)
+    )
+
+
 def _ambiguity_contenders(
     ranking: list[dict],
     group_members: dict[str, list[str]],
@@ -1912,7 +2246,7 @@ def _ambiguity_contenders(
             if float(cand.get("score") or 0.0) < floor:
                 break
             name = str(cand.get("name"))
-            if name in group_members:
+            if _is_family_row(cand, group_members):
                 for member in group_members[name]:
                     _add(member, durations.get(member))
             else:
@@ -2162,6 +2496,34 @@ def _selected_categories(selection: Any) -> set[str]:
     return out
 
 
+def _refuse_overlapping_groups(groups: Any, added: Any = None) -> None:
+    """Raise ``ValueError`` when an import would leave a profile in two profile
+    groups, as the panel refuses (``create_profile_group``): Stage 5 would map it
+    in each, and the #530 check reads it against the first (PR #529 review).
+
+    ``groups`` is the mapping the import leaves; ``added`` the names of the groups
+    it brings into it (None: all), so a merge is not refused over local groups
+    alone."""
+    if not isinstance(groups, dict):
+        return
+    owners: dict[str, list[str]] = {}
+    for gname, group in groups.items():
+        members = group.get("members") if isinstance(group, dict) else None
+        if not isinstance(members, (list, tuple)):
+            continue
+        for member in dict.fromkeys(m for m in members if isinstance(m, str)):
+            owners.setdefault(member, []).append(str(gname))
+    conflicts = {
+        m: gs for m, gs in owners.items()
+        if len(gs) > 1 and (added is None or any(g in added for g in gs))
+    }
+    if conflicts:
+        raise ValueError(
+            "A profile can be in only one group; the import puts "
+            + ", ".join(f"{m} in {' and '.join(gs)}" for m, gs in conflicts.items())
+        )
+
+
 def _cycles_by_profile(seq: Any) -> dict[str, list[dict[str, Any]]]:
     """Group a cycle list by ``profile_name`` (unlabeled cycles under ``""``)."""
     groups: dict[str, list[dict[str, Any]]] = {}
@@ -2294,7 +2656,13 @@ _IMPORT_CORE_KEY_TYPES: dict[str, type] = {
 #: Keys a wholesale import never keeps from the target even when the payload lacks
 #: them. Envelopes are derived from the payload's profiles and cycles (a target one
 #: would describe a profile the import replaced); the in-flight cycle is per-install.
-_WHOLESALE_IMPORT_PAYLOAD_OWNED_KEYS = frozenset({"envelopes", "active_cycle", "last_active_save"})
+#: The #531 marker describes how those envelopes were built, so it goes with them.
+_WHOLESALE_IMPORT_PAYLOAD_OWNED_KEYS = frozenset(
+    {"envelopes", "active_cycle", "last_active_save", CUT_SHORT_REBUILD_KEY}
+)
+#: Per-cycle cadence rows and the power sensor they were measured on: a wholesale
+#: import takes both from the payload or neither.
+_CADENCE_PAIR_KEYS = frozenset({"cadence_summaries", "cadence_sensor"})
 
 
 def unwrap_import_payload(payload: Any) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -2385,6 +2753,9 @@ def unwrap_import_payload(payload: Any) -> tuple[dict[str, Any], dict[str, Any]]
         "device_fingerprint": fingerprint if isinstance(fingerprint, dict) else {},
         "exported_at": payload.get("exported_at"),
         "supplied_keys": supplied_keys,
+        # The exporting device's config entry: a selective import tells this
+        # device's own settings history from another's by it.
+        "entry_id": payload.get("entry_id"),
     }
     return data_dict, meta
 
@@ -2561,19 +2932,46 @@ def _pins_golden_template(cycles: list[Any]) -> bool:
     )
 
 
-def _merge_list_dedup(base: list[Any], incoming: list[Any]) -> None:
+def _mark_changelog_imported(rows: list[Any]) -> list[Any]:
+    """``rows`` (a settings changelog) as new rows marked
+    ``SETTINGS_CHANGELOG_IMPORTED_KEY``: still listed, but no Stop the standby
+    advisory reads as the one the stored cycles ended under (PR #529 review)."""
+    return [
+        {**row, SETTINGS_CHANGELOG_IMPORTED_KEY: True} if isinstance(row, dict) else row
+        for row in rows
+    ]
+
+
+def _merge_list_dedup(
+    base: list[Any], incoming: list[Any], ignore_keys: tuple[str, ...] = ()
+) -> None:
     """Append items from ``incoming`` to ``base`` in place, skipping duplicates.
 
     Dedupes by ``id`` when items carry one, else by a stable JSON signature so
     re-importing the same log file is idempotent for id-less list entries.
+    ``ignore_keys`` are left out of that signature: marks an import adds (a
+    settings change merged back from another device is the local one, review of
+    PR #529). Of two such matching items the unmarked one is kept, whichever
+    arrived first (PR #529 review); otherwise the one already in ``base``.
     """
+    def _signature(item: Any) -> str:
+        if ignore_keys and isinstance(item, dict):
+            item = {k: v for k, v in item.items() if k not in ignore_keys}
+        return json.dumps(item, sort_keys=True, default=str)
+
+    def _marked(item: Any) -> bool:
+        return isinstance(item, dict) and any(item.get(k) for k in ignore_keys)
+
     seen_ids = {str(x.get("id")) for x in base if isinstance(x, dict) and x.get("id") is not None}
-    seen_sigs: set[str] = set()
-    for x in base:
+    # Signature -> index in ``base`` of the item kept for it (an unmarked one first).
+    seen_sigs: dict[str, int] = {}
+    for idx, x in enumerate(base):
         try:
-            seen_sigs.add(json.dumps(x, sort_keys=True, default=str))
+            sig = _signature(x)
         except (TypeError, ValueError, OverflowError):
-            pass
+            continue
+        if sig not in seen_sigs or (_marked(base[seen_sigs[sig]]) and not _marked(x)):
+            seen_sigs[sig] = idx
     for item in incoming:
         if isinstance(item, dict) and item.get("id") is not None:
             key = str(item.get("id"))
@@ -2583,13 +2981,16 @@ def _merge_list_dedup(base: list[Any], incoming: list[Any]) -> None:
             base.append(item)
             continue
         try:
-            sig = json.dumps(item, sort_keys=True, default=str)
+            sig = _signature(item)
         except (TypeError, ValueError, OverflowError):
             sig = None
         if sig is not None:
             if sig in seen_sigs:
+                kept = seen_sigs[sig]
+                if _marked(base[kept]) and not _marked(item):
+                    base[kept] = item  # this device's own row, back after its copy
                 continue
-            seen_sigs.add(sig)
+            seen_sigs[sig] = len(base)
         base.append(item)
 
 
@@ -2921,16 +3322,24 @@ class ProfileStore:
         self.hass = hass
         self.entry_id = entry_id
         self._logger = DeviceLoggerAdapter(_LOGGER, device_name)
+        # Bumped by every change of a setting ``match_settings`` reports (each one
+        # set through its property or ``set_duration_ratio_limits``): a caller
+        # holding a ranking across a match can tell a setting changed and changed
+        # back meanwhile, which a comparison of the values cannot (PR #529 review).
+        self._match_settings_revision: int = 0
+        # The same for the settings an envelope build reads (``_ENVELOPE_SETTINGS``):
+        # not the Stage-1 ratios, which no build reads (PR #529 review).
+        self._envelope_settings_revision: int = 0
         self._min_duration_ratio = min_duration_ratio
         self._max_duration_ratio = max_duration_ratio
-        self.dtw_bandwidth: float = DEFAULT_DTW_BANDWIDTH
+        self._dtw_bandwidth: float = DEFAULT_DTW_BANDWIDTH
         # Stage-4 energy-agreement mode ("mean"|"integrated"); the manager sets it
         # from the device type via analysis.stage4_energy_mode. Default "mean"
         # keeps behaviour byte-identical until wired.
-        self.energy_mode: str = "mean"
+        self._energy_mode: str = "mean"
         # The device type, pushed in by the manager like energy_mode. Scopes the
         # nearest-member templates (MATCH_MEMBER_DEVICE_TYPES, #486); None = off.
-        self.device_type: str | None = None
+        self._device_type: str | None = None
         # The detector's stop threshold, pushed in by the manager like device_type.
         # Where an imported dishwasher cycle's last activity sits is judged at it
         # (`_cut_backfill_tails_nosave`, #518); None = the store cannot judge, so
@@ -2966,6 +3375,10 @@ class ProfileStore:
         # Bumped whenever an import or an undo replaces the stored data: a build
         # that started before reads the old cycles and must not write into the new.
         self._data_generation: int = 0
+        # Bumped when a profile leaves the store under its name (deleted, renamed,
+        # cleaned up as an orphan): ``profile_set_revision``. Not the data
+        # generation, which discards every in-flight build, pass and Apply.
+        self._profile_set_revision: int = 0
         # group_cohesion runs in executor threads (live matching + Playground can
         # touch the same store concurrently); serialize the read-clear-compute-store
         # sequence so a concurrent call can't clear a half-populated cache or
@@ -2976,7 +3389,7 @@ class ProfileStore:
         # Separate store for each entry to avoid giant files
         # Use WashDataStore to handle migration
         self._store: Store[JSONDict] = WashDataStore(
-            hass, STORAGE_VERSION, f"{STORAGE_KEY}.{entry_id}"
+            hass, STORAGE_VERSION, f"{STORAGE_KEY}.{entry_id}", logger=self._logger
         )
         # The in-flight cycle snapshot lives in its own small file (audit PERF-03 /
         # MANAGER-07): written every 60 s of every cycle, it used to rewrite the
@@ -3029,13 +3442,17 @@ class ProfileStore:
         reason: str | None = None,
         reason_key: str | None = None,
         reason_params: dict[str, Any] | None = None,
+        flags: dict[str, Any] | None = None,
     ) -> None:
         """Store a suggested setting value without changing config entry options.
 
         ``reason`` is the English fallback text; ``reason_key`` + ``reason_params``
         are the localization key + interpolation values the panel resolves via
         ``_t(reason_key, reason_params, reason)``. Both localization fields are
-        optional so old callers / persisted entries keep working.
+        optional so old callers / persisted entries keep working. ``flags`` keeps
+        the entry's ``corrective`` / ``cascade`` marks and the ``owner`` pass that
+        produced it (``SUGGESTION_FLAG_KEYS``): reconcile must not move a
+        corrective, and a pass withdraws what it owns and no longer proposes.
         """
         suggestions: JSONDict = self._data.setdefault("suggestions", {})
         entry: dict[str, Any] = {
@@ -3049,6 +3466,9 @@ class ProfileStore:
             entry["reason_key"] = reason_key
         if reason_params is not None:
             entry["reason_params"] = reason_params
+        for flag in SUGGESTION_FLAG_KEYS:
+            if flags and flags.get(flag):
+                entry[flag] = flags[flag]
         suggestions[key] = entry
 
     def get_suggestions(self) -> dict[str, Any]:
@@ -3094,6 +3514,28 @@ class ProfileStore:
         self._data["suggestions"] = {}
         await self.async_save()
 
+    def get_cadence_summaries(self, sensor: str | None = None) -> list[list[float]]:
+        """Per-cycle ``[p95, median]`` update intervals, newest last (item 637).
+
+        ``sensor``: the power sensor asked about. Rows measured on another one are
+        not its cadence (PR #529 review: after a swap the old plug's rows outvoted
+        the new one's), so none are returned; rows from before the sensor was
+        recorded count for any.
+        """
+        recorded = self._data.get("cadence_sensor")
+        if sensor is not None and recorded is not None and recorded != sensor:
+            return []
+        raw = self._data.get("cadence_summaries")
+        return [list(r) for r in raw if isinstance(r, (list, tuple))] if isinstance(raw, list) else []
+
+    def add_cadence_summary(self, p95: float, median: float, sensor: str | None = None) -> None:
+        """Keep one cycle's cadence, for ``sensor``; saved with the cycle-end write."""
+        rows = self.get_cadence_summaries(sensor)
+        rows.append([round(float(p95), 2), round(float(median), 2)])
+        self._data["cadence_summaries"] = rows[-CADENCE_RECENT_CYCLES:]
+        if sensor is not None:
+            self._data["cadence_sensor"] = sensor
+
     def get_suggestion_apply_cycle_count(self) -> int:
         """Return the total cycle count recorded at the last user suggestion apply."""
         return int(self._data.get("suggestion_apply_cycle_count", 0))
@@ -3106,6 +3548,9 @@ class ProfileStore:
 
     #: Maximum settings-changelog entries retained per device (newest kept).
     SETTINGS_CHANGELOG_MAX = 50
+    #: Stop Threshold rows kept past that cap: the standby advisory reads which
+    #: threshold each recent cycle ended under from them (register item 646).
+    SETTINGS_CHANGELOG_KEEP_STOP = 10
 
     def get_settings_changelog(self) -> list[dict[str, Any]]:
         """Return the recorded settings-change history (most-recent-first).
@@ -3123,9 +3568,9 @@ class ProfileStore:
     async def async_record_settings_changes(self, changes: list[dict]) -> None:
         """Append settings-change entries and persist (capped at the newest 50).
 
-        Each entry is normalized to ``{"key", "old", "new", "timestamp"}`` and
-        prepended so the list stays most-recent-first. No-op on empty/invalid
-        input.
+        Each entry is normalized to ``{"key", "old", "new", "timestamp"}`` (plus a
+        Stop Threshold row's ``old_effective``) and prepended so the list stays
+        most-recent-first. No-op on empty/invalid input.
         """
         if not changes:
             return
@@ -3142,23 +3587,58 @@ class ProfileStore:
         for ch in changes:
             if not isinstance(ch, dict) or "key" not in ch:
                 continue
-            log.insert(
-                0,
-                {
-                    "key": str(ch.get("key")),
-                    "old": ch.get("old"),
-                    "new": ch.get("new"),
-                    "timestamp": ch.get("timestamp") or now_iso,
-                },
-            )
+            row = {
+                "key": str(ch.get("key")),
+                "old": ch.get("old"),
+                "new": ch.get("new"),
+                "timestamp": ch.get("timestamp") or now_iso,
+            }
+            # A Stop Threshold row's resolved previous value (ws_api._note_stop_in_force).
+            if ch.get("old_effective") is not None:
+                row["old_effective"] = ch.get("old_effective")
+            log.insert(0, row)
             added = True
 
         if not added:
             return
 
-        # Keep only the newest entries (list is most-recent-first).
+        # Newest first by the time each row records, not by position: a history
+        # merge appends the imported rows after the local ones whatever their age,
+        # and the limits below would drop a newer imported row (PR #529 review).
+        def _age(row: Any) -> datetime:
+            when = _parse_start_dt(row.get("timestamp")) if isinstance(row, dict) else None
+            if when is None:
+                return datetime.min.replace(tzinfo=dt_util.UTC)
+            return when if when.tzinfo else when.replace(tzinfo=dt_util.UTC)
+
+        log.sort(key=_age, reverse=True)
+
+        # Keep only the newest entries (list is most-recent-first). The slots past
+        # them go to the Stop rows the standby advisory can read
+        # (``stop_threshold_changes``: this device's own, with a readable time);
+        # a merge's foreign rows took them and evicted the last local change (PR
+        # #529 review). Only rows the settings history lists count: a Stop row
+        # for a Stop another setting moved is hidden there and took the slot of a
+        # real change (PR #529 review); among those newest ones it is kept, and
+        # past them it competes for the Stop slots.
         if len(log) > self.SETTINGS_CHANGELOG_MAX:
-            del log[self.SETTINGS_CHANGELOG_MAX:]
+            from .suggestion_engine import (  # noqa: PLC0415
+                is_effective_stop_row,
+                stop_threshold_changes,
+            )
+
+            cut, listed = len(log), 0
+            for idx, row in enumerate(log):
+                if not is_effective_stop_row(row):
+                    listed += 1
+                    if listed == self.SETTINGS_CHANGELOG_MAX:
+                        cut = idx + 1
+                        break
+            older_stops = [
+                row for row in log[cut:]
+                if isinstance(row, dict) and stop_threshold_changes([row])
+            ][: self.SETTINGS_CHANGELOG_KEEP_STOP]
+            log[cut:] = older_stops
         self._data["settings_changelog"] = log
         try:
             await self.async_save()
@@ -3435,11 +3915,17 @@ class ProfileStore:
 
         Called on every entity refresh, so the scan is cached while the list, its
         length and its last element are unchanged and the cached cycle still sits
-        at its index; a delete, merge, split, import or wipe changes one of those.
-        The returned dict is the stored one, so an in-place trim or relabel shows.
+        at its index; a delete, merge, split, import or wipe changes one of those,
+        and an in-place start time rewrite (reprocess, trim, interactive merge)
+        bumps ``_start_edit_gen`` (PR #529 review: a reprocessed run moved from 10:00
+        to 10:02 stayed behind a cached 10:01 one). The returned dict is the stored
+        one, so an in-place trim or relabel shows.
         """
         cycles = self.get_past_cycles()
-        key = (id(cycles), len(cycles), id(cycles[-1]) if cycles else None)
+        key = (
+            id(cycles), len(cycles), id(cycles[-1]) if cycles else None,
+            getattr(self, "_start_edit_gen", 0),
+        )
         cached = getattr(self, "_last_finished_cache", None)
         if cached is not None and cached[0] == key:
             idx, cycle = cached[1], cached[2]
@@ -3509,6 +3995,84 @@ class ProfileStore:
             *self.get_backfill_cycles(),
         ]
 
+    # The settings an envelope build reads: the evidence sources pick its cycles
+    # on the loop, the worker reads the rest (the DTW band, the #531 dishwasher
+    # rule and the member programme ends by device type, the rhythm and tail
+    # references by energy mode). Not the Stage-1 duration ratios.
+    _ENVELOPE_SETTINGS = frozenset(
+        {"_dtw_bandwidth", "_energy_mode", "_device_type", "_evidence_sources"}
+    )
+
+    def _set_match_setting(self, attr: str, value: Any) -> None:
+        """Store one of the matcher's scoring settings (``match_settings``) in
+        ``attr``, bumping ``match_settings_revision`` when its value changes, and
+        ``envelope_settings_revision`` too when an envelope build reads it."""
+        if getattr(self, attr, _MISSING) != value:
+            self._match_settings_revision = getattr(self, "_match_settings_revision", 0) + 1
+            if attr in self._ENVELOPE_SETTINGS:
+                self._envelope_settings_revision = (
+                    getattr(self, "_envelope_settings_revision", 0) + 1
+                )
+        setattr(self, attr, value)
+
+    @property
+    def match_settings_revision(self) -> int:
+        """Bumped by every change of a ``match_settings`` value. Comparing it
+        across a match tells a setting changed meanwhile even when it was changed
+        back before the end: the matcher reads its settings after its trace
+        preparation, so the ranking can be the intermediate settings' (the #530
+        check, PR #529 review)."""
+        return int(getattr(self, "_match_settings_revision", 0))
+
+    @property
+    def envelope_settings_revision(self) -> int:
+        """Bumped by every change of a setting an envelope build reads
+        (``_ENVELOPE_SETTINGS``). A build such a change straddled is discarded; a
+        Stage-1 ratio change is not one: no build reads it and nothing rebuilds
+        after it, so discarding left e.g. a deleted cycle in the envelope (PR #529
+        review)."""
+        return int(getattr(self, "_envelope_settings_revision", 0))
+
+    @property
+    def profile_set_revision(self) -> int:
+        """Bumped whenever a profile leaves the store under its name (deleted,
+        renamed, cleaned up as an orphan, or dropped with the last imported or
+        backfilled cycle relabelled or deleted out of it). A ranking taken across
+        one can name a profile that is gone (the #530 check, review of PR #529).
+        Narrower than ``_data_generation``, which also discards unrelated envelope
+        builds, suggestion passes and Apply all."""
+        return int(getattr(self, "_profile_set_revision", 0))
+
+    def _profile_left(self) -> None:
+        self._profile_set_revision = getattr(self, "_profile_set_revision", 0) + 1
+
+    @property
+    def dtw_bandwidth(self) -> float:
+        """The Stage-3 Sakoe-Chiba band, pushed in by the manager."""
+        return self._dtw_bandwidth
+
+    @dtw_bandwidth.setter
+    def dtw_bandwidth(self, value: float) -> None:
+        self._set_match_setting("_dtw_bandwidth", value)
+
+    @property
+    def energy_mode(self) -> str:
+        """The Stage-4 energy-agreement mode (``analysis.stage4_energy_mode``)."""
+        return self._energy_mode
+
+    @energy_mode.setter
+    def energy_mode(self, value: str) -> None:
+        self._set_match_setting("_energy_mode", value)
+
+    @property
+    def device_type(self) -> str | None:
+        """The entry's device type, pushed in by the manager."""
+        return self._device_type
+
+    @device_type.setter
+    def device_type(self, value: str | None) -> None:
+        self._set_match_setting("_device_type", value)
+
     @property
     def evidence_sources(self) -> tuple[str, ...]:
         """Categories currently allowed to shape a profile."""
@@ -3533,7 +4097,7 @@ class ProfileStore:
                     "falling back to all", value,
                 )
             wanted = tuple(PROFILE_EVIDENCE_SOURCES)
-        self._evidence_sources = wanted
+        self._set_match_setting("_evidence_sources", wanted)
 
     @property
     def save_debug_traces(self) -> bool:
@@ -3677,8 +4241,8 @@ class ProfileStore:
                 known_hashes.add(h)
         duration = float(pairs[-1][0] - pairs[0][0])
         # Re-base to offset 0 so envelope reconstruction and DTW work correctly.
-        if pairs[0][0] != 0.0:
-            origin = pairs[0][0]
+        origin = pairs[0][0]
+        if origin != 0.0:
             pairs = [[p[0] - origin, p[1]] for p in pairs]
         now = dt_util.as_utc(dt_util.now())
         store_id = str(meta.get("store_cycle_id") or "")
@@ -3711,6 +4275,13 @@ class ProfileStore:
         _reason = meta.get("termination_reason")
         if isinstance(_reason, str) and _reason:
             cycle["termination_reason"] = _reason
+        # The user's trim or edit (register item 384's sibling): the envelope build
+        # treats either as a corrected length, which the #531 cut-off vote never
+        # overrules (review of PR #529). Not golden: a store import still shapes
+        # no profile that has runs of the user's own.
+        for _marker in ("trim", "edited"):
+            if meta.get(_marker):
+                cycle["meta"][_marker] = meta[_marker]
         _manual = meta.get("manual_duration")
         if _manual is not None and not isinstance(_manual, bool):
             with contextlib.suppress(TypeError, ValueError, OverflowError):
@@ -3722,6 +4293,17 @@ class ProfileStore:
         profiles = self._data.setdefault("profiles", {})
         if profile_name not in profiles:
             profiles[profile_name] = {"avg_duration": duration}
+        # The source's keepalive rows, re-based with the trace: without them the
+        # quiet they filled reads as observed, e.g. as a terminal event for the
+        # #531 cut-off vote (review of PR #529). A source that does not say stays
+        # without the field.
+        syn = meta.get(SYNTHETIC_OFFSETS_KEY)
+        if isinstance(syn, list):
+            rebased: list[float] = []
+            for o in syn:
+                with contextlib.suppress(TypeError, ValueError, OverflowError):
+                    rebased.append(float(o) - origin)
+            set_synthetic_offsets(cycle, rebased)
         self._add_cycle_data(cycle, target=self._data.setdefault("reference_cycles", []), id_pool=id_pool)
         return str(cycle.get("id", ""))
 
@@ -3906,8 +4488,18 @@ class ProfileStore:
             self._cohesion_cache[key] = result
             return result
 
+    def _match_groups(self) -> dict[str, Any] | None:
+        """A copy of the profile groups for ``async_match_profile`` to map, taken
+        when it is called (edits mutate the stored mapping in place). None when
+        they cannot be read: ``_grouped_snapshots`` then reads them itself.
+        Never raises."""
+        try:
+            return copy.deepcopy(self.get_profile_groups())
+        except Exception:  # pylint: disable=broad-exception-caught
+            return None
+
     def _grouped_snapshots(
-        self, snapshots: list[dict[str, Any]]
+        self, snapshots: list[dict[str, Any]], groups: dict[str, Any] | None = None
     ) -> tuple[list[dict[str, Any]], dict[str, list[str]], dict[str, dict[str, Any]]]:
         """Map each *cohesive* group to its member snapshots for the Stage-5 pass.
 
@@ -3922,8 +4514,12 @@ class ProfileStore:
         family the averaged curve belongs to no member (it has a half-height
         heating block and an energy figure neither member reaches), which cost the
         family the program-level match before Stage 5 could pick between them.
+
+        ``groups``: the profile groups to map (``async_match_profile`` reads them
+        when called); the store's current ones when omitted.
         """
-        groups = self.get_profile_groups()
+        if groups is None:
+            groups = self.get_profile_groups()
         if not groups:
             return snapshots, {}, {}
         by_name = {s["name"]: s for s in snapshots}
@@ -3981,7 +4577,7 @@ class ProfileStore:
             expected = float(top.get("profile_duration") or 0.0)
             ambiguous = _ambiguity_from_candidates(single_view)[1]
             doubt = False
-            if name in group_members:
+            if _is_family_row(top, group_members):
                 chosen, fit, member_dur = self._stage5_pick_member(
                     current_power, current_duration, group_members[name], member_snaps,
                     in_progress=True, preferred=top.get("group_best_member"),
@@ -6249,13 +6845,32 @@ class ProfileStore:
         """Return (min_duration_ratio, max_duration_ratio) used for duration matching."""
         return (float(self._min_duration_ratio), float(self._max_duration_ratio))
 
+    def match_settings(self) -> tuple[Any, ...]:
+        """The entry settings ``async_match_profile`` scores with: the Stage-1
+        ratios, the DTW band, the Stage-4 energy mode, the device type (members,
+        the live rhythm term) and the evidence sources (the templates). For
+        comparison only: a caller holding a ranking across an options reload can
+        tell it was scored under other settings (the #530 check, PR #529 review).
+        Never raises."""
+        try:
+            return (
+                self.get_duration_ratio_limits(),
+                float(self.dtw_bandwidth),
+                self.energy_mode,
+                self.device_type,
+                tuple(self.evidence_sources),
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            return ()
+
     def set_duration_ratio_limits(self, *, min_ratio: float, max_ratio: float) -> None:
         """Update duration ratio bounds used for duration matching."""
         try:
-            self._min_duration_ratio = float(min_ratio)
-            self._max_duration_ratio = float(max_ratio)
+            low, high = float(min_ratio), float(max_ratio)
         except (TypeError, ValueError, OverflowError):
-            pass
+            return
+        self._set_match_setting("_min_duration_ratio", low)
+        self._set_match_setting("_max_duration_ratio", high)
 
     def _migrate_phase_ids(self) -> bool:
         """Assign ids to any custom phase missing one. Returns True if anything changed."""
@@ -6429,13 +7044,20 @@ class ProfileStore:
 
         return stats
 
-    async def async_save(self) -> None:
+    async def async_save(self, *, required: bool = False) -> None:
         """Save data to storage.
 
         Inside a cycle-end burst (:meth:`coalesce_saves`) the write is debounced
         instead: HA's Store rewrites the whole file on every save (MBs on a real
         store), and one cycle end used to write it six times (register item 456).
+
+        Once the entry has unloaded (:meth:`async_retire`) the write is skipped.
+        ``required`` (an import, an undo: the caller reports it done) raises
+        :class:`StoreRetiredError` instead, debounced or not; background work
+        stays silent (PR #529 review).
         """
+        if required and self.retired:
+            raise StoreRetiredError
         if time.monotonic() < getattr(self, "_coalesce_until", 0.0):
             self._delayed_save_pending = True
             self._store.async_delay_save(self._data_for_delayed_write, _BURST_SAVE_DELAY_S)
@@ -6466,6 +7088,29 @@ class ProfileStore:
             self._delayed_save_pending = False
             await self._store.async_save(self._data)
 
+    @property
+    def retired(self) -> bool:
+        """Whether its entry has unloaded (:meth:`async_retire`): no write lands.
+        Only a real ``True`` counts (a test's stand-in store answers anything)."""
+        return (
+            getattr(self, "_retired", False) is True
+            or getattr(getattr(self, "_store", None), "retired", False) is True
+        )
+
+    async def async_retire(self) -> None:
+        """Write a pending debounced save, then never write this store again.
+
+        Called once its entry has unloaded. Work the unload does not cancel (a
+        manual analysis the WS handler awaits) could otherwise save this store
+        after the replacement loaded the same file and overwrite newer data (PR
+        #529 review). Every write, either file, is then skipped.
+        """
+        try:
+            await self.async_flush_saves()
+        finally:
+            self._retired = True
+            self._store.retired = True
+
     async def _async_load_active(self) -> None:
         """Load the active-cycle file; adopt a snapshot the main store still holds.
 
@@ -6489,6 +7134,9 @@ class ProfileStore:
             await self._async_write_active()
 
     async def _async_write_active(self) -> None:
+        if getattr(self, "_retired", False):
+            self._logger.debug("Active-cycle write from an unloaded entry's store skipped")
+            return
         data = dict(self._active_data)
         try:
             await self._active_store.async_save(data)
@@ -6795,6 +7443,7 @@ class ProfileStore:
 
         for name in orphaned:
             del self._data["profiles"][name]
+            self._profile_left()
             self._rename_maintenance_program(name, None)  # #480
             self._logger.info(
                 "Cleaned up orphaned profile '%s' (cycle no longer exists)", name
@@ -7033,6 +7682,7 @@ class ProfileStore:
                                     raise ValueError("unparseable start_time")
                                 new_start = start_dt + timedelta(seconds=first_offset)
                                 cycle["start_time"] = dt_util.as_utc(new_start).isoformat()
+                                self._start_edit_gen = getattr(self, "_start_edit_gen", 0) + 1
 
                                 # Re-normalize offsets to 0
                                 shifted_data: list[list[float]] = []
@@ -7249,27 +7899,85 @@ class ProfileStore:
         if not parsed:
             return None
 
+        # #531: a dishwasher run closed inside its programme's quiet phase is a prefix
+        # of the programme, so it builds neither the curve, its length (the live
+        # expected duration is the envelope's `target_duration`) nor `avg_duration`
+        # (`cut_short_mask`). A corrected length or a golden pin is the user's word
+        # and always counts.
         # Degeneracy floor: below max(_DEGENERATE_POWER_FLOOR, 10% of the median
         # peak) a cycle is treated as a mis-capture and dropped (unless golden).
         peaks = sorted(p[4] for p in parsed)
         median_peak = peaks[len(peaks) // 2] if peaks else 0.0
         degen_floor = max(_DEGENERATE_POWER_FLOOR, 0.10 * median_peak)
 
+        # Only the runs the build keeps may vote on each other (a mis-capture is no
+        # evidence). A user trim or edit is a corrected length, as manual_duration.
+        cut_short = [False] * len(parsed)
+        if self.device_type == "dishwasher":
+            voters = [k for k, p in enumerate(parsed) if p[4] >= degen_floor or p[3]]
+
+            def _corrected(c: Any, offsets: list[float]) -> bool:
+                # The correction the build itself accepts, not the raw field: a
+                # unit-error manual_duration it rejects is no user correction.
+                manual = c.get("manual_duration")
+                sane = bool(manual) and (
+                    _sane_manual_duration(manual, offsets[-1] - offsets[0]) is not None
+                )
+                meta = c.get("meta")
+                return sane or bool(
+                    isinstance(meta, dict) and (meta.get("trim") or meta.get("edited"))
+                )
+
+            def _observed(k: int) -> tuple[list[float], list[float]]:
+                # WashData's own keepalives are no observation: left out, the quiet
+                # they filled reads as the gap it was (PR #529 review).
+                syn = synthetic_offset_keys(decoded[k][0]) or set()
+                pairs = [
+                    (t, v) for t, v in zip(parsed[k][0], parsed[k][1], strict=True)
+                    if offset_key(t) not in syn
+                ]
+                return [t for t, _ in pairs], [v for _, v in pairs]
+
+            sub = cut_short_mask(
+                [
+                    (*_observed(k), parsed[k][2],
+                     bool(parsed[k][3] or _corrected(decoded[k][0], parsed[k][0])),
+                     parsed[k][4])
+                    for k in voters
+                ],
+                # A stored copy of a run (a reference imported from this
+                # device's own backup) votes as that run (PR #529 review).
+                _cut_short_sources([decoded[k] for k in voters]),
+            )
+            for k, cut in zip(voters, sub, strict=True):
+                cut_short[k] = cut
+
         raw_cycles_data: list[tuple[list[float], list[float], float]] = []
         durations: list[float] = []
         golden_mask: list[bool] = []
         dropped = 0
-        for offsets, values, final_dur, is_golden, peak in parsed:
-            if peak < degen_floor and not is_golden:
+        for (offsets, values, final_dur, is_golden, peak), cut in zip(parsed, cut_short):
+            if (peak < degen_floor and not is_golden) or cut:
                 dropped += 1
                 continue
             raw_cycles_data.append((offsets, values, final_dur))
             durations.append(final_dur)
             golden_mask.append(is_golden)
+        cut_short_ids = frozenset(
+            str(decoded[k][0].get("id"))
+            for k, cut in enumerate(cut_short)
+            if cut and decoded[k][0].get("id") is not None
+        )
+        if any(cut_short):
+            self._logger.debug(
+                "Envelope rebuild: %d run(s) closed inside the programme's quiet phase "
+                "left out of its length (#531)", sum(cut_short),
+            )
 
         # Never drop everything: if the filter removed all cycles (e.g. a truly
         # low-power profile misjudged), fall back to using them all.
         if not raw_cycles_data:
+            cut_short_ids = frozenset()
             for offsets, values, final_dur, is_golden, _peak in parsed:
                 raw_cycles_data.append((offsets, values, final_dur))
                 durations.append(final_dur)
@@ -7295,6 +8003,7 @@ class ProfileStore:
             return None
 
         built = _EnvelopeBuild((result, durations))
+        built.cut_short_ids = cut_short_ids
         # Audit item 2: each member's programme end (spin_rhythm.active_end_s, the
         # #486 definition) by cycle id, for the per-run end expectation.
         if self.device_type in MATCH_MEMBER_DEVICE_TYPES:
@@ -7332,7 +8041,10 @@ class ProfileStore:
         return peak
 
     def _select_reference_cycle_id(
-        self, profile_name: str, target_duration: float | None = None
+        self,
+        profile_name: str,
+        target_duration: float | None = None,
+        exclude: Collection[str] | None = None,
     ) -> str | None:
         """Choose the best reference cycle for a profile's matching template.
 
@@ -7340,7 +8052,10 @@ class ProfileStore:
         cycles (peak not a tiny fraction of the profile's median peak - this
         rejects mis-captured near-flat traces), and among those the one closest
         to the profile's representative duration (so a truncated half-cycle is
-        not chosen). Returns a cycle id, or None if there are no usable cycles.
+        not chosen). ``exclude``: ids the envelope build left out (#531 cut-offs),
+        passed over while the pool holds another cycle (PR #529 review: one whose
+        length sat nearest the new average became the sample). Returns a cycle
+        id, or None if there are no usable cycles.
         """
         cands = [
             c for c in self.iter_evidence_cycles()
@@ -7359,6 +8074,8 @@ class ProfileStore:
             pool = golden
         else:
             pool = [c for c in cands if peaks.get(c["id"], 0.0) >= degen_floor] or cands
+        if exclude:
+            pool = [c for c in pool if str(c.get("id")) not in exclude] or pool
 
         if target_duration and target_duration > 0:
             best = min(pool, key=lambda c: abs(float(c.get("duration") or 0.0) - target_duration))
@@ -7563,7 +8280,11 @@ class ProfileStore:
                 repr(prof.get(k))
                 for k in ("min_duration", "max_duration", "avg_duration", "sample_cycle_id")
             )
-        evidence = (tuple(self._evidence_sources), self.dtw_bandwidth, tuple(rows))
+        # The device type too: the build filters a dishwasher's cut-off runs
+        # (#531), so a type change must not reuse the other type's build.
+        evidence = (
+            tuple(self._evidence_sources), self.dtw_bandwidth, self.device_type, tuple(rows),
+        )
         return evidence, built, refs
 
     async def async_rebuild_envelope(self, profile_name: str) -> bool:
@@ -7584,7 +8305,30 @@ class ProfileStore:
         (:meth:`_cut_backfill_tails_nosave`, #518): every path that gives such a
         cycle a programme (a label, the bulk auto-label, a new profile from it, an
         import) rebuilds that programme here, so the build never learns the wait.
+
+        A build a setting it reads changed under (``envelope_settings_revision``)
+        is discarded and run again under the current settings, up to
+        ``_ENVELOPE_BUILD_ATTEMPTS`` builds, while this call still owns the
+        profile's build: nothing rebuilds after e.g. a DTW band change, so a
+        caller that saved its edit kept the edit out of the envelope (a deleted
+        cycle stayed in it, PR #529 review). A newer build of the profile, a
+        replaced store, a removed profile or an unloaded entry ends it as before.
         """
+        for _attempt in range(_ENVELOPE_BUILD_ATTEMPTS):
+            built = await self._async_build_envelope_once(profile_name)
+            if built is not None:
+                return built
+            if self.retired:
+                break
+            self._logger.debug(
+                "Building the envelope of %s again under the changed settings", profile_name
+            )
+        return False
+
+    async def _async_build_envelope_once(self, profile_name: str) -> bool | None:
+        """One build of :meth:`async_rebuild_envelope`: its result, or ``None``
+        when a setting the build reads changed during it (discarded, may run
+        again)."""
         await self.async_warm_trace_summaries((profile_name,))
         if self._cut_backfill_tails_nosave(profile_name)[0]:
             # The cut traces are new lists: summarise them off the loop too.
@@ -7609,6 +8353,13 @@ class ProfileStore:
         generation = generations.get(profile_name, 0) + 1
         generations[profile_name] = generation
         data_generation = getattr(self, "_data_generation", 0)
+        # The executor job reads the device type and energy mode while it runs: a
+        # type changed and changed back meanwhile (no new data generation) built
+        # a dishwasher profile without the #531 rule, and the inputs compared
+        # equal again, so the build was memoised (PR #529 review). A change of a
+        # setting the build reads during the job discards it; a Stage-1 ratio
+        # change does not (nothing rebuilds after it, PR #529 review).
+        settings_revision = self.envelope_settings_revision
         existed = profile_name in (self._data.get("profiles") or {})
         # A rebuild changes this profile's curve, which feeds group cohesion, so
         # invalidate the cohesion cache (not only on group mutations) to avoid stale
@@ -7666,6 +8417,16 @@ class ProfileStore:
                 "Discarding a superseded envelope build for %s", profile_name
             )
             return False
+        if self.envelope_settings_revision != settings_revision:
+            self._logger.debug(
+                "Discarding an envelope build of %s a setting changed under", profile_name
+            )
+            return None
+        if self.device_type != DEVICE_TYPE_DISHWASHER:
+            # Built without the #531 cut-off rule, so it keeps a dishwasher's
+            # cut-off runs: the one-time rebuild under the rule is due again once
+            # the entry is a dishwasher again (PR #529 review).
+            self._data.pop(CUT_SHORT_REBUILD_KEY, None)
 
         if not result_pkg:
             # Envelope shape couldn't be built (no power data / too few points).
@@ -7708,7 +8469,10 @@ class ProfileStore:
             # Re-point the matching reference to a golden / non-degenerate cycle
             # near the representative duration, so a mis-captured (flat) or
             # truncated cycle can never remain the profile's template.
-            ref_id = self._select_reference_cycle_id(profile_name, avg_duration)
+            ref_id = self._select_reference_cycle_id(
+                profile_name, avg_duration,
+                exclude=getattr(result_pkg, "cut_short_ids", None),
+            )
             if ref_id and self._data["profiles"][profile_name].get("sample_cycle_id") != ref_id:
                 old = self._data["profiles"][profile_name].get("sample_cycle_id")
                 self._data["profiles"][profile_name]["sample_cycle_id"] = ref_id
@@ -7751,7 +8515,10 @@ class ProfileStore:
         if avg_energy is None:
             # avg_curve is in Watts, time_grid in seconds; integrate_wh returns Wh.
             avg_energy = integrate_wh(time_grid, avg_curve) / 1000.0
-        cycle_count = len(real_cycles) if ref_cycles else len(durations)
+        # Every real run, as avg_energy: the curve's own filters (a mis-capture, a
+        # #531 run cut inside its drying) shape `shape_cycle_count`, not the usage
+        # count (PR #529 review: four runs with one cut off read as three).
+        cycle_count = len(real_cycles)
 
         envelope_data: dict[str, Any] = {
             "time_grid": time_grid,  # Time grid used by manager for phase estimation
@@ -7961,6 +8728,93 @@ class ProfileStore:
     def cycle_energy_rebuild_pending(self) -> bool:
         """Whether the envelope rebuild armed by the v18 energy fix still has to run."""
         return bool(self._data.get(CYCLE_ENERGY_REBUILD_KEY))
+
+    def cut_short_rebuild_pending(self) -> bool:
+        """Whether this store still has to be rebuilt once under the #531 cut-off
+        rule (`CUT_SHORT_REBUILD_KEY` absent: a store from before it, or one an
+        envelope build under another device type has run on since)."""
+        return not self._data.get(CUT_SHORT_REBUILD_KEY)
+
+    async def async_rebuild_for_cut_short_rule(self, device_type: str | None = None) -> int:
+        """Rebuild, once, every profile that has traced evidence cycles (#531).
+
+        Only those: a profile known only by its saved envelope (an import without
+        its cycles) has nothing to rebuild from, and the rebuild's no-evidence path
+        would delete that envelope. The marker is set after the pass and saved;
+        an interrupted pass runs again at the next start, and so does one where a
+        profile's rebuild raised or an import/undo replaced the data meanwhile (PR
+        #529 review: the marker must not land on data the pass never rebuilt).
+        ``device_type`` is the type the pass was dispatched for (default: the
+        store's now): a reconfigure to another type meanwhile builds the rest
+        without the dishwasher rule, so the pass stops and the marker stays unset
+        (PR #529 review). Returns how many envelopes were rebuilt. Never raises.
+        """
+        count = 0
+        try:
+            data_generation = getattr(self, "_data_generation", 0)
+            bound_type = self.device_type if device_type is None else device_type
+
+            def _stale() -> bool:
+                return (
+                    getattr(self, "_data_generation", 0) != data_generation
+                    or self.device_type != bound_type
+                )
+
+            def _names() -> set[str]:
+                profiles = set(self._data.get("profiles") or {})
+                return {
+                    str(c.get("profile_name"))
+                    for c in self.iter_evidence_cycles()
+                    if isinstance(c, dict) and c.get("profile_name") and c.get("power_data")
+                } & profiles
+
+            failed: list[str] = []
+            done: set[str] = set()
+            # Until every name the store now holds is done: a rename during the pass
+            # (no new data generation) moves an unrebuilt envelope to a name the
+            # first list did not have (review of PR #529). Bounded.
+            for _round in range(3):
+                if _stale():
+                    break
+                pending = sorted(_names() - done - set(failed))
+                if not pending:
+                    break
+                for name in pending:
+                    # The names came from the data this pass started on: once an
+                    # import or undo replaced it, a name may be an envelope-only
+                    # profile of the new data, which a rebuild would delete (PR
+                    # #529 review).
+                    if _stale():
+                        break
+                    try:
+                        # A newer build of the same profile started meanwhile: this
+                        # one was discarded and that one's outcome is unknown here,
+                        # so the profile stays pending (the next round retries it)
+                        # rather than counting as rebuilt (review of PR #529).
+                        gens = self.__dict__.setdefault("_envelope_rebuild_generation", {})
+                        taken = gens.get(name, 0) + 1
+                        # Likewise a build a setting it reads changed under (a
+                        # type changed and back): discarded, so the profile stays
+                        # pending (PR #529 review).
+                        revision = self.envelope_settings_revision
+                        if await self.async_rebuild_envelope(name):
+                            count += 1
+                        if (
+                            gens.get(name, 0) <= taken
+                            and self.device_type == bound_type
+                            and self.envelope_settings_revision == revision
+                        ):
+                            done.add(name)
+                    except Exception as exc:  # noqa: BLE001 - keep the rest, retry later
+                        failed.append(name)
+                        self._logger.warning("Rebuild of %s under the #531 rule failed: %s", name, exc)
+            if failed or _stale() or _names() - done:
+                return count  # still pending: the next start runs it again
+            self._data[CUT_SHORT_REBUILD_KEY] = True
+            await self.async_save()
+        except Exception as exc:  # noqa: BLE001 - never cost the user their history
+            self._logger.warning("Rebuild under the #531 cut-off rule aborted: %s", exc)
+        return count
 
     def backfill_tail_cut_pending(self) -> bool:
         """Whether the one-time import tail cut (#518) still has to run. Absent
@@ -8385,6 +9239,10 @@ class ProfileStore:
         old_duration = float(cycle.get("duration") or 0.0)
         old_end = cycle.get("end_time")
         before = cycle.get("power_data")
+        # Which removed rows were keepalives goes with them, or a restore would
+        # put them back as real reports (review of PR #529). None: unknown.
+        syn_before = cycle.get(SYNTHETIC_OFFSETS_KEY)
+        syn_before = list(syn_before) if isinstance(syn_before, list) else None
         self._apply_repaired_duration(cycle, new_duration)
         points = decompress_power_data(cycle)
         if len(points) > 1:
@@ -8398,6 +9256,7 @@ class ProfileStore:
         kept = self._backfill_kept_tail(
             cycle, before, old_duration, old_end,
             self.stop_threshold_w if stop_w is None else stop_w,
+            synthetic_before=syn_before,
         )
         if kept is None:
             cycle.pop(BACKFILL_TAIL_TRACE_KEY, None)
@@ -8406,7 +9265,8 @@ class ProfileStore:
 
     @staticmethod
     def _backfill_kept_tail(
-        cycle: CycleDict, before: Any, old_duration: float, old_end: Any, stop_w: Any
+        cycle: CycleDict, before: Any, old_duration: float, old_end: Any, stop_w: Any,
+        *, synthetic_before: list[Any] | None = None,
     ) -> dict[str, Any] | None:
         """What a tail cut removed from ``cycle``, as :meth:`_restore_backfill_tail`
         reads it, or None when the cut cannot be undone exactly.
@@ -8443,8 +9303,18 @@ class ProfileStore:
                 if off is None or _safe_offset(pt[1]) is None or off <= cut_s + 1e-6:
                     return None
                 tail.append([pt[0], pt[1]])
+            syn_keys = (
+                {offset_key(o) for o in synthetic_before}
+                if synthetic_before is not None else None
+            )
             return {
                 "points": tail,
+                # The removed rows that were keepalives; None when the cycle did
+                # not say (provenance stays unknown through a restore).
+                "synthetic": (
+                    [pt[0] for pt in tail if offset_key(pt[0]) in syn_keys]
+                    if syn_keys is not None else None
+                ),
                 "end_row": id(after[-1]) not in before_ids,
                 "duration": old_duration,
                 "end_time": old_end if isinstance(old_end, str) else None,
@@ -8515,6 +9385,15 @@ class ProfileStore:
         if cycle_id:
             self._drop_cached_sample_segments(cycle_id)
         cycle["power_data"] = restored
+        # The tail's keepalive markers come back with it; a tail whose rows were
+        # never marked (an older record, an unmarked cycle) leaves the whole
+        # cycle unknown rather than reading its keepalives as reports.
+        current_syn = cycle.get(SYNTHETIC_OFFSETS_KEY)
+        tail_syn = record.get("synthetic")
+        if isinstance(current_syn, list) and isinstance(tail_syn, list):
+            set_synthetic_offsets(cycle, [*current_syn, *tail_syn])
+        elif isinstance(current_syn, list):
+            set_synthetic_offsets(cycle, None)
         cycle["signature"] = signature
         cycle["energy_wh"] = energy
         cycle["duration"] = duration
@@ -9367,7 +10246,7 @@ class ProfileStore:
             {
                 "points": [[offset_s, watts], ...],  # <= n samples
                 "duration_s": float,                 # profile target duration
-                "cycle_count": int,                  # cycles behind the average
+                "cycle_count": int,                  # traces behind the average
             }
 
         Offsets are absolute seconds from cycle start (0 .. ``duration_s``); a
@@ -9434,7 +10313,10 @@ class ProfileStore:
             return {
                 "points": points,
                 "duration_s": round(duration, 1),
-                "cycle_count": int(env.get("cycle_count") or 0),
+                # The traces behind the curve (PR #529 review), not the usage
+                # count: a run the #531 rule or the evidence choice keeps out of
+                # the curve is no part of it, and a reference-only curve has some.
+                "cycle_count": envelope_shape_count(env),
             }
         except Exception:  # pragma: no cover - defensive; never break the sensor
             return None
@@ -9545,16 +10427,7 @@ class ProfileStore:
             if not isinstance(profile, dict):
                 return None
 
-            def _positive(value: Any) -> float | None:
-                try:
-                    number = float(value or 0.0)
-                except (TypeError, ValueError, OverflowError):
-                    return None
-                if not math.isfinite(number) or number <= 0:
-                    return None
-                return number
-
-            direct = _positive(profile.get("avg_duration"))
+            direct = _positive_duration(profile.get("avg_duration"))
             if direct is not None:
                 return direct
 
@@ -9571,14 +10444,14 @@ class ProfileStore:
             if sample is None:
                 return None
 
-            stored = _positive(sample.get("duration"))
+            stored = _positive_duration(sample.get("duration"))
             if stored is not None:
                 return stored
 
             points = decompress_power_data(cast(Any, sample))
             if len(points) < 2:
                 return None
-            return _positive(points[-1][0] - points[0][0])
+            return _positive_duration(points[-1][0] - points[0][0])
         except Exception:  # noqa: BLE001 - a duration lookup must never raise
             return None
 
@@ -10324,11 +11197,13 @@ class ProfileStore:
                     float(_env_avg[-1][0]) - float(_env_avg[0][0])
                     if len(_env_avg) > 1 else 0.0
                 )
+                # Each source only as a finite positive number: an imported
+                # non-numeric one raised here and cost every profile its match
+                # (PR #529 review).
                 avg_duration = (
-                    envelope.get("target_duration") or
-                    profile.get("avg_duration") or
-                    _env_ts_duration or
-                    None
+                    _positive_duration(envelope.get("target_duration"))
+                    or _positive_duration(profile.get("avg_duration"))
+                    or _positive_duration(_env_ts_duration)
                 )
                 if not avg_duration:
                     skipped_profiles.append(
@@ -10382,10 +11257,11 @@ class ProfileStore:
                 float(sample_seg.timestamps[-1]) - float(sample_seg.timestamps[0])
                 if len(sample_seg.timestamps) > 1 else 0.0
             )
+            # Each only as a finite positive number, as above.
             avg_dur = (
-                profile.get("avg_duration") or
-                sample_cycle.get("duration") or
-                _seg_ts_duration
+                _positive_duration(profile.get("avg_duration"))
+                or _positive_duration(sample_cycle.get("duration"))
+                or _positive_duration(_seg_ts_duration)
             )
             if not avg_dur:
                 skipped_profiles.append(
@@ -10425,7 +11301,7 @@ class ProfileStore:
                 if mems:
                     snapshots[-1]["members"] = mems
 
-        if skipped_profiles:
+        if skipped_profiles and getattr(_SEGMENT_MISSES, "misses", None) is None:
             self._logger.debug(
                 "Profile matching skipped %d profiles: %s",
                 len(skipped_profiles),
@@ -10490,7 +11366,10 @@ class ProfileStore:
     def _get_cached_sample_segment(
         self, sample_cycle: dict[str, Any], dt: float
     ) -> Segment | None:
-        """Get or compute resampled segment for a sample cycle, using cache."""
+        """Get or compute resampled segment for a sample cycle, using cache.
+
+        In a live match's first snapshot pass (``_async_match_snapshots``) a miss
+        is recorded instead of computed, and a stand-in returned."""
         cycle_id = sample_cycle.get("id")
         if not cycle_id:
             return None
@@ -10510,43 +11389,110 @@ class ProfileStore:
         sample_data = sample_cycle.get("power_data")
         if not sample_data:
             return None
+        sink = getattr(_SEGMENT_MISSES, "misses", None)
+        if sink is not None:
+            sink.append((sample_cycle, sample_data))
+            return _SEGMENT_PLACEHOLDER
 
         try:
-            if len(sample_data) > 0 and isinstance(sample_data[0], (list, tuple)):
-                s_ts = np.array([x[0] for x in sample_data], dtype=float)
-                s_p = np.array([x[1] for x in sample_data], dtype=float)
-                # Imported data can carry NaN (json.loads accepts it); envelopes
-                # already drop non-finite rows, the sample template did not
-                # (audit MATCH-CORE-05).
-                finite = np.isfinite(s_ts) & np.isfinite(s_p)
-                if not finite.all():
-                    s_ts, s_p = s_ts[finite], s_p[finite]
-                if s_ts.size < 2:
-                    return None
-            else:
+            sample_seg = _resample_sample_trace(sample_data, dt)
+            if sample_seg is None:
                 return None
-
-            s_segments = resample_uniform(s_ts, s_p, dt_s=dt, gap_s=21600.0)
-            if not s_segments:
-                return None
-
-            sample_seg = max(s_segments, key=lambda s: len(s.power))
-
-            # Store, evicting the least recently used. Live matching's grid step
-            # drifts on change-only plugs (2.75 distinct steps per cycle, up to
-            # 22) and nothing dropped a deleted cycle's entries, so the cache
-            # grew for the life of the install (audit ML-12).
-            cap = self._sample_segment_cache_cap()
-            with self._segment_cache_lock():
-                cache = self._cached_sample_segments
-                cache.pop(key, None)
-                cache[key] = sample_seg
-                while len(cache) > cap:
-                    del cache[next(iter(cache))]
+            self._store_sample_segment(key, sample_seg)
             return sample_seg
         except Exception as e: # pylint: disable=broad-exception-caught
             self._logger.warning("Error caching sample segment %s: %s", cycle_id, e)
             return None
+
+    def _store_sample_segment(self, key: tuple[Any, float], segment: Segment) -> None:
+        """Cache ``segment`` under ``key``, evicting the least recently used. Live
+        matching's grid step drifts on change-only plugs (2.75 distinct steps per
+        cycle, up to 22) and nothing dropped a deleted cycle's entries, so the
+        cache grew for the life of the install (audit ML-12)."""
+        cap = self._sample_segment_cache_cap()
+        with self._segment_cache_lock():
+            cache = self._cached_sample_segments
+            cache.pop(key, None)
+            cache[key] = segment
+            while len(cache) > cap:
+                del cache[next(iter(cache))]
+
+    async def _async_match_snapshots(self, used_dt: float) -> list[dict[str, Any]]:
+        """:meth:`build_match_snapshots` for a live match, with the templates it
+        has not cached for ``used_dt`` resampled in the executor (PR #529 review).
+
+        A first pass on the loop records the misses instead of computing them;
+        with none (the usual case) its snapshots are the result. Otherwise, past
+        ``_MATCH_SEGMENT_INLINE_POINTS``, their traces are copied and resampled
+        in one executor job, cached on the loop if nothing changed them
+        meanwhile, and the snapshots built again: the same builder on a warm
+        cache, so the templates are the ones an inline build makes. The store is
+        read and the cache written only on the loop.
+
+        A cycle whose trace changed during the job (trimmed, repaired, replaced)
+        loses only its own result; a cache an import or a wipe reset loses all
+        of them. Either way the misses are collected again under the same budget
+        (``_MATCH_SEGMENT_ATTEMPTS`` jobs at most), so a trim of one cycle no
+        longer sends every other template to the loop (PR #529 review)."""
+        dt_key = float(round(used_dt, 2))
+        # Traces a job could not resample: the build retries them inline and logs
+        # why, as it always did, rather than another job.
+        unresampled: set[tuple[Any, float]] = set()
+        for _attempt in range(_MATCH_SEGMENT_ATTEMPTS):
+            misses: list[tuple[CycleDict, Any]] = []
+            _SEGMENT_MISSES.misses = misses
+            try:
+                snapshots = self.build_match_snapshots(used_dt)
+            finally:
+                _SEGMENT_MISSES.misses = None
+            if not misses:
+                return snapshots
+            jobs: dict[tuple[Any, float], tuple[CycleDict, Any]] = {}
+            for cycle, data in misses:
+                key = (cycle.get("id"), dt_key)
+                if key not in unresampled:
+                    jobs.setdefault(key, (cycle, data))
+            points = sum(
+                max(len(data) if isinstance(data, list) else 0, _MATCH_SEGMENT_TRACE_POINTS)
+                for _c, data in jobs.values()
+            )
+            if points <= _MATCH_SEGMENT_INLINE_POINTS:
+                break
+            cache = self._cached_sample_segments
+            changed: set[Any] = set()
+            token = object()
+            watchers = self._segment_drop_watchers()
+            watchers[token] = changed
+            copies = [list(data) for _c, data in jobs.values()]
+            try:
+                segments = await self.hass.async_add_executor_job(
+                    _resample_sample_traces, copies, used_dt
+                )
+            except Exception:  # pylint: disable=broad-exception-caught
+                break
+            finally:
+                watchers.pop(token, None)
+            if cache is not self._cached_sample_segments:
+                continue  # reset by an import or a wipe: none of it is current
+            for (key, (cycle, data)), seg in zip(jobs.items(), segments):
+                # Trimmed, repaired or replaced meanwhile (a new list, or its
+                # entries dropped): the next pass misses it again.
+                if key[0] in changed or cycle.get("power_data") is not data:
+                    continue
+                if seg is None:
+                    unresampled.add(key)
+                    continue
+                self._store_sample_segment(key, seg)
+        return self.build_match_snapshots(used_dt)
+
+    def _segment_drop_watchers(self) -> dict[object, set[Any]]:
+        """The cycle-id sets of the template jobs in flight
+        (:meth:`_async_match_snapshots`): :meth:`_drop_cached_sample_segments`
+        adds each changed cycle to every one."""
+        watchers = self.__dict__.get("_segment_drop_watchers_map")
+        if watchers is None:
+            watchers = self.__dict__.setdefault("_segment_drop_watchers_map", {})
+        return cast(dict[object, set[Any]], watchers)
 
     def _segment_cache_lock(self) -> threading.Lock:
         """The sample-segment cache's lock (created on first use for bare fixtures)."""
@@ -10578,6 +11524,8 @@ class ProfileStore:
         iteration" (audit PLAYGROUND-22).
         """
         with self._segment_cache_lock():
+            for changed in self._segment_drop_watchers().values():
+                changed.add(cycle_id)
             cache = self._cached_sample_segments
             for key in [k for k in list(cache) if k[0] == cycle_id]:
                 cache.pop(key, None)
@@ -10601,53 +11549,63 @@ class ProfileStore:
         that have never paused below it (#424, ``profile_pauses_below``). Omitted,
         the guard behaves as before.
         """
-        # 1. Prepare data in main thread (Access ProfileStore state safely)
         group_members: dict[str, list[str]] = {}
         member_snaps: dict[str, dict[str, Any]] = {}
 
-        # Convert to list of floats for current power (uniform resampling)
         if not current_power_data:
             return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
 
-        # Pre-process current data
+        # The profile groups, as they are when called, before the first await
+        # (PR #529 review): read after the trace preparation below, a group edit
+        # made while it ran and undone during the scoring built the ranking from a
+        # membership the caller never saw (the #530 check compares the groups it
+        # read next to the call with those after it).
+        call_groups = self._match_groups()
+        call_generation = getattr(self, "_data_generation", 0)
+        call_revision = self.profile_set_revision
+
+        # 1. The trace, converted and resampled: in the executor once it is long,
+        # where that is milliseconds per match (PR #529 review: a pinned 4 h cycle
+        # at 2 s), a copy so a caller's list that grows meanwhile is read as
+        # passed. A short one inline (``_MATCH_PREP_INLINE_READINGS``).
         try:
-            # Normalize input format
-            first_elem = current_power_data[0][0]
-            if isinstance(first_elem, datetime):
-                # datetime objects: compute relative timestamps
-                t_start = first_elem.timestamp()
-                ts_arr = np.array([(x[0].timestamp() - t_start) for x in cast(list[tuple[datetime, float]], current_power_data)])
-            elif isinstance(first_elem, (int, float)):
-                # Already offset timestamps (from compressed format)
-                ts_arr = np.array([float(x[0]) for x in cast(list[tuple[float, float]], current_power_data)])
+            if len(current_power_data) <= _MATCH_PREP_INLINE_READINGS:
+                prepared = _prepare_match_trace(current_power_data)
             else:
-                # ISO format strings
-                t_start = datetime.fromisoformat(first_elem).timestamp()
-                ts_arr = np.array(
-                    [
-                        (datetime.fromisoformat(x[0]).timestamp() - t_start)
-                        for x in cast(list[tuple[str, float]], current_power_data)
-                    ]
+                prepared = await self.hass.async_add_executor_job(
+                    _prepare_match_trace, list(current_power_data)
                 )
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            self._logger.error("Preparation for async match failed: %s", e)
+            return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
+        if prepared is None:
+            return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
+        ts_arr, p_arr, current_power_list, used_dt = prepared
 
-            p_arr = np.array([float(x[1]) for x in current_power_data])
-
-            # Resample current
-            segments, used_dt = resample_adaptive(ts_arr, p_arr, min_dt=5.0, gap_s=21600.0)
-            if not segments:
-                return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
-            current_seg = max(segments, key=lambda s: len(s.power))
-            if len(current_seg.power) < MATCH_MIN_RESAMPLED_POINTS:
-                return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
-
-            current_power_list = current_seg.power.tolist()
-
-            snapshots = self.build_match_snapshots(used_dt)
+        # 2. The candidates, on the loop (the store's state is read here only;
+        # uncached template resampling goes to the executor).
+        try:
+            snapshots = await self._async_match_snapshots(used_dt)
+            # An import or Undo Import replaced the store during the preparation
+            # or the template resampling: the groups read at the call are the
+            # replaced data's, the templates the new data's. Mapped together they
+            # make a family the store never held (PR #529 review), so the groups
+            # are read again, with the templates (no await between them). So does
+            # a profile renamed or deleted meanwhile (no new data generation): a
+            # member renamed A -> C left the groups naming A, the templates C, and
+            # the cohesive group was skipped (PR #529 review).
+            if (
+                getattr(self, "_data_generation", 0) != call_generation
+                or self.profile_set_revision != call_revision
+            ):
+                call_groups = self._match_groups()
 
             # Stage 5: map cohesive near-duplicate groups to their members (loose
             # groups stay individual). The members are scored individually and the
             # family is collapsed after the worker. No-op without groups.
-            snapshots, group_members, member_snaps = self._grouped_snapshots(snapshots)
+            snapshots, group_members, member_snaps = self._grouped_snapshots(
+                snapshots, call_groups
+            )
 
             config = {
                 "min_duration_ratio": self._min_duration_ratio,
@@ -10675,7 +11633,7 @@ class ProfileStore:
             self._logger.error("Preparation for async match failed: %s", e)
             return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
 
-        # 2. Run Heavy Logic in Executor. Guarded like the preparation above: the
+        # 3. Run Heavy Logic in Executor. Guarded like the preparation above: the
         # cycle-end final match runs before the cycle is stored, so a raise here
         # must cost the match, never the cycle (audit MATCH-CORE-06).
         try:
@@ -10690,7 +11648,7 @@ class ProfileStore:
             self._logger.error("Profile matching failed: %s", e)
             return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
 
-        # 3. Process Result (Main Thread)
+        # 4. Process Result (Main Thread)
         if not candidates:
             profiles_count = len(self._data.get("profiles", {}))
             snapshots_count = len(snapshots) if 'snapshots' in dir() else 0
@@ -10750,8 +11708,9 @@ class ProfileStore:
         best_duration = best["profile_duration"]
         member_confidence: float | None = None
         stage5_doubt = False
-        # Stage 5: if a group won, pick the best-fitting member.
-        if best_name in group_members:
+        # Stage 5: if a group won, pick the best-fitting member. Only a family's
+        # own entry: a real profile named like its key is no group (PR #529 review).
+        if _is_family_row(best, group_members):
             chosen, member_fit, member_dur = self._stage5_pick_member(
                 current_power_list, current_duration, group_members[best_name], member_snaps,
                 in_progress=in_progress,
@@ -10900,6 +11859,9 @@ class ProfileStore:
             ),
             gate_contenders=gate.get("contenders") if gate else None,
             gate_run_expected=gate_run_expected,
+            min_ratio_rejected=analysis.stage1_min_ratio_rejected(
+                current_duration, snapshots, config
+            ),
         )
 
     @staticmethod
@@ -11364,6 +12326,7 @@ class ProfileStore:
 
             # Rename in profiles dict
             profiles[new_name] = profiles.pop(old_name)
+            self._profile_left()
 
             # Rename in envelopes
             if "envelopes" in self._data and old_name in self._data["envelopes"]:
@@ -11457,6 +12420,7 @@ class ProfileStore:
         # Delete profile, and its envelope with it: nothing else removed it, so the
         # orphan stayed in storage and in exports (audit ML-09).
         del self._data["profiles"][name]
+        self._profile_left()
         envelopes = self._data.get("envelopes")
         if isinstance(envelopes, dict):
             envelopes.pop(name, None)
@@ -11479,6 +12443,9 @@ class ProfileStore:
 
     async def clear_all_data(self) -> None:
         """Clear all profiles, cycle data, and derived state."""
+        # A replacement like an import: work taken from the old data (Apply all's
+        # selection, a pass in flight) must see it (PR #529 review).
+        self._data_generation = getattr(self, "_data_generation", 0) + 1
         self._data["past_cycles"] = []
         self._data["reference_cycles"] = []
         self._data["backfill_cycles"] = []
@@ -11514,6 +12481,7 @@ class ProfileStore:
         # correctable by hand - the panel's Maintenance tab edits the cycle count.
         self._data["settings_changelog"] = []
         self._data["suggestion_apply_cycle_count"] = 0
+        self._data["cadence_summaries"] = []
         self._cached_sample_segments = {}
         self._cohesion_cache = {}
         self._cohesion_cache_generation += 1
@@ -11613,7 +12581,8 @@ class ProfileStore:
             if old_has_cycles:
                 touched.add(old_profile)
             else:
-                self._data.get("profiles", {}).pop(old_profile, None)
+                if self._data.get("profiles", {}).pop(old_profile, None) is not None:
+                    self._profile_left()
                 self._data.get("envelopes", {}).pop(old_profile, None)
                 self._rename_maintenance_program(old_profile, None)  # #480
         if profile_name:
@@ -12113,7 +13082,14 @@ class ProfileStore:
 
         ``entry_options`` is this device's options at that moment, put back by the
         undo; ``None`` (a caller without an entry) leaves the options alone on undo.
+
+        Raises :class:`StoreRetiredError` once the entry has unloaded: an import
+        resumed after a reload is no longer current, and the slot may hold the
+        restore point a newer import on the replacement saved (PR #529 review).
+        Checked with no await before the write below.
         """
+        if self.retired:
+            raise StoreRetiredError
         # A save during shutdown is deferred to HA's final write, which would
         # serialise the store as it is AFTER the import mutated it.
         if getattr(self.hass, "state", None) is CoreState.stopping:
@@ -12175,9 +13151,14 @@ class ProfileStore:
         return dict(self._pre_import_meta) if self._pre_import_meta else None
 
     async def async_discard_pre_import_snapshot(self) -> None:
-        """Delete the restore point (never raises)."""
+        """Delete the restore point (never raises).
+
+        Not once the entry has unloaded: the file is the replacement's, and may
+        hold a newer import's restore point (PR #529 review)."""
         self._pre_import_meta = None
         self._pre_import_meta_loaded = True
+        if self.retired:
+            return
         try:
             await self._pre_import_store.async_remove()
         except Exception as err:  # noqa: BLE001
@@ -12185,7 +13166,9 @@ class ProfileStore:
         # A fresh Store object: the old one may still hold the loaded record.
         self._pre_import_store = self._new_pre_import_store()
 
-    async def async_restore_pre_import_snapshot(self) -> JSONDict:
+    async def async_restore_pre_import_snapshot(
+        self, *, on_replace: Callable[[], Any] | None = None
+    ) -> JSONDict:
         """Put the store back exactly as it was before the last replace import.
 
         Raises ``ValueError`` when there is no usable restore point. The snapshot is
@@ -12193,6 +13176,11 @@ class ProfileStore:
         applied twice over newer data. Returns ``restored_from`` (when the snapshot
         was taken), ``counts`` and ``entry_options`` (``None`` = leave them alone);
         the caller writes the options, which live on the config entry.
+
+        ``on_replace`` is called once the validated snapshot has replaced the data
+        in memory, before the first write: state derived from the replaced history
+        goes with it, and an undo refused above keeps it (PR #529 review). Never
+        raises from it.
         """
         raw = await self._async_load_pre_import_snapshot()
         if raw is None:
@@ -12225,7 +13213,14 @@ class ProfileStore:
         self._data_generation = getattr(self, "_data_generation", 0) + 1
         self._cached_sample_segments = {}
         self._cohesion_cache_generation += 1
-        await self.async_save()
+        if on_replace is not None:
+            try:
+                on_replace()
+            except Exception:  # noqa: BLE001 - the restore itself must complete
+                self._logger.debug("Restore follow-up failed", exc_info=True)
+        # Required: a store its entry unloaded skips the write, and the restore
+        # point must outlive a restore that was never saved (PR #529 review).
+        await self.async_save(required=True)
         await self.async_flush_saves()
         await self.async_discard_pre_import_snapshot()
         self._logger.info("Restored the store from the %s restore point", raw.get("created_at"))
@@ -12242,6 +13237,7 @@ class ProfileStore:
         *,
         entry_options: JSONDict | None = None,
         source: str = "import_config",
+        on_replace: Callable[[], Any] | None = None,
     ) -> dict[str, Any]:
         """Wholesale import: replace the entire store from a JSON payload.
 
@@ -12255,11 +13251,19 @@ class ProfileStore:
         ``backfill_cycles``, ``matching_config``, ``ml_training_history`` or lifetime
         counters, and assigning the payload wholesale set those to nothing, including
         state earned on-device over weeks that no re-import can rebuild. Only
-        ``_WHOLESALE_IMPORT_PAYLOAD_OWNED_KEYS`` always come from the payload.
+        ``_WHOLESALE_IMPORT_PAYLOAD_OWNED_KEYS`` always come from the payload;
+        ``_CADENCE_PAIR_KEYS`` come from it only together.
 
         The store as it was is saved as the device's restore point first (register
         item 195); ``entry_options`` (this device's, so the undo can put them back)
         and ``source`` only describe that snapshot and are never applied here.
+
+        ``on_replace`` is called once the payload has replaced the data in memory,
+        before the first await after it, as Undo Import's: state derived from the
+        replaced history goes with it, and a refused import keeps it (PR #529
+        review). Only when the payload replaces ``past_cycles`` or the cadence
+        pair: one that keeps both replaced nothing that state describes. Never
+        raises from it.
         """
         data_dict, meta = unwrap_import_payload(payload)
         self._logger.info(
@@ -12272,10 +13276,21 @@ class ProfileStore:
             raise ValueError(
                 "Import payload contains no profiles or cycles — aborting to prevent data loss"
             )
-        # After the guard (a refused import must not burn the restore point), before
+        # The payload's groups replace this device's: refused like a panel edit
+        # that puts a profile in two of them.
+        _refuse_overlapping_groups(data_dict.get("profile_groups"))
+        # After the guards (a refused import must not burn the restore point), before
         # the first mutation.
         restore_point_saved = await self.async_save_pre_import_snapshot(source, entry_options)
         supplied = meta.get("supplied_keys") or frozenset()
+        if len(_CADENCE_PAIR_KEYS & supplied) == 1:
+            # The cadence rows and the sensor they were measured on are one record
+            # (PR #529 review): half of it would pair the file's rows with this
+            # device's sensor, or this device's rows with the file's. Taken only
+            # whole; this device keeps its own pair otherwise.
+            supplied = supplied - _CADENCE_PAIR_KEYS
+            for key in _CADENCE_PAIR_KEYS:
+                data_dict.pop(key, None)
         kept = {
             key: value
             for key, value in self._data.items()
@@ -12285,8 +13300,38 @@ class ProfileStore:
             self._logger.info(
                 "Import payload lacks %s; keeping this device's", ", ".join(sorted(kept))
             )
+        # A settings history brought without the cycles it describes (the local
+        # ones are kept) is another appliance's to these cycles, as in the
+        # selective import: visible, but no Stop the standby advisory reads.
+        # Mirrored: another appliance's cycles brought without their history
+        # leave this device's history describing none of them (PR #529 review).
+        foreign = str(meta.get("entry_id") or "") != str(self.entry_id)
+        if (
+            foreign
+            and "past_cycles" in kept
+            and isinstance(data_dict.get("settings_changelog"), list)
+        ):
+            data_dict["settings_changelog"] = _mark_changelog_imported(
+                data_dict["settings_changelog"]
+            )
+        if (
+            foreign
+            and "past_cycles" in supplied
+            and isinstance(kept.get("settings_changelog"), list)
+        ):
+            kept["settings_changelog"] = _mark_changelog_imported(kept["settings_changelog"])
         self._data = {**data_dict, **kept}
         self._data_generation = getattr(self, "_data_generation", 0) + 1
+        # The live cadence describes the real history and the plug's stored rows:
+        # an import that keeps both (profiles only) keeps the running cycle's
+        # intervals and queued summaries (PR #529 review).
+        if on_replace is not None and (
+            "past_cycles" in supplied or _CADENCE_PAIR_KEYS <= supplied
+        ):
+            try:
+                on_replace()
+            except Exception:  # noqa: BLE001 - the import itself must complete
+                self._logger.debug("Import follow-up failed", exc_info=True)
         # The payload's envelopes were built without any cycle list kept above, so
         # rebuild the profiles those lists label. A list kept from the target also
         # means a profile kept from it can lack a payload envelope.
@@ -12323,12 +13368,17 @@ class ProfileStore:
         self._heal_lifetime_cycle_count()
         for name in stale_profiles:
             await self.async_rebuild_envelope(name)
-        await self.async_save()
+        # Required: an unload during the rebuilds retired this store, and a
+        # skipped write must not read as an import done (PR #529 review).
+        await self.async_save(required=True)
 
         return {
             "entry_data": meta.get("entry_data", {}),
             "entry_options": meta.get("entry_options", {}),
             "restore_point_saved": restore_point_saved,
+            # The stored cycles are now the payload's, run under its options: the
+            # options write records its Stop row as Undo Import's (PR #529 review).
+            "replaced_past_cycles": "past_cycles" in supplied,
         }
 
     async def async_import_data_selective(
@@ -12342,6 +13392,7 @@ class ProfileStore:
         apply_settings: bool = True,
         local_device_type: str = "",
         entry_options: JSONDict | None = None,
+        on_replace: Callable[[], Any] | None = None,
     ) -> dict[str, Any]:
         """Selectively import chosen categories/items, merging into existing data.
 
@@ -12369,6 +13420,10 @@ class ProfileStore:
         name clash) saves the device's restore point first (register item 195);
         ``entry_options`` is this device's, kept for the undo and never applied here.
         A plain additive merge loses nothing and leaves the restore point alone.
+
+        ``on_replace`` is called once a replace has emptied ``past_cycles``, before
+        the first await after it, as the wholesale import's: state derived from the
+        replaced real history goes with it (PR #529 review). Never raises from it.
         """
         data_dict, meta = unwrap_import_payload(payload)
         conflict_resolutions = conflict_resolutions or {}
@@ -12466,6 +13521,20 @@ class ProfileStore:
                     raise ValueError(
                         "Import payload contains no real cycles — aborting to prevent data loss"
                     )
+        # The groups the import leaves (Step 4: a replace takes the file's, a merge
+        # adds the file's under new names): refused like a panel edit that puts a
+        # profile in two of them.
+        src_groups = data_dict.get("profile_groups")
+        if "profile_groups" in cats and isinstance(src_groups, dict):
+            if mode == "replace":
+                _refuse_overlapping_groups(src_groups)
+            else:
+                local_groups = self._data.get("profile_groups")
+                local_groups = local_groups if isinstance(local_groups, dict) else {}
+                _refuse_overlapping_groups(
+                    {**src_groups, **local_groups},
+                    added={g for g in src_groups if g not in local_groups},
+                )
 
         # Restore point: after the wipe guards (a refused import must not burn it),
         # before the first mutation below.
@@ -12478,6 +13547,11 @@ class ProfileStore:
                 f"import_selective_{mode}", entry_options
             )
 
+        # The data changes from here, and the envelope rebuilds below await: work
+        # taken from the data before (a #530 check scoring a programme this
+        # overwrites under its name) must not land on the new while they run
+        # (PR #529 review). Bumped again once the import is complete.
+        self._data_generation = getattr(self, "_data_generation", 0) + 1
         local_profiles = self._data.setdefault("profiles", {})
         name_remap: dict[str, str] = {}
         touched: set[str] = set()
@@ -12535,6 +13609,7 @@ class ProfileStore:
         # routed to the default reference destination wipes reference_cycles too -- not just
         # when the reference_cycles category itself is ticked. The empty-payload guard above
         # already refused to run if the file had nothing to replace it with.
+        wipe_past = False
         if mode == "replace":
             wipe_reference = "reference_cycles" in cats or (
                 "real_cycles" in cats and cycle_destination == "reference"
@@ -12544,6 +13619,19 @@ class ProfileStore:
                 self._data["reference_cycles"] = []
             if wipe_past:
                 self._data["past_cycles"] = []
+                # The local settings history describes none of another appliance's
+                # cycles that replace them (PR #529 review): listed, no Stop read.
+                # The file's own history, when it brings one, replaces it below.
+                local_log = self._data.get("settings_changelog")
+                if isinstance(local_log, list) and (
+                    str(meta.get("entry_id") or "") != str(self.entry_id)
+                ):
+                    self._data["settings_changelog"] = _mark_changelog_imported(local_log)
+                if on_replace is not None:
+                    try:
+                        on_replace()
+                    except Exception:  # noqa: BLE001 - the import itself must complete
+                        self._logger.debug("Import follow-up failed", exc_info=True)
 
         # O(N) id pools threaded through the bulk cycle adds so SHA-id uniqueness stays
         # O(1) amortized instead of rebuilding the id set from the growing destination on
@@ -12617,6 +13705,20 @@ class ProfileStore:
                             "store_cycle_id": _bare_store_id(raw_sid),
                             "store_uploaded_at": src_meta.get("store_uploaded_at"),
                             "sampling_interval": c.get("sampling_interval"),
+                            SYNTHETIC_OFFSETS_KEY: c.get(SYNTHETIC_OFFSETS_KEY),
+                            # A trim, edit or length correction carried by an
+                            # exported reference copy, under the real-cycles path's
+                            # device gate (review of PR #529): dropped, a re-import
+                            # loses the pin that keeps the #531 cut-off vote off
+                            # the corrected length.
+                            "manual_duration": (
+                                c.get("manual_duration") if device_type_match else None
+                            ),
+                            **(
+                                {k: src_meta.get(k) for k in ("trim", "edited")}
+                                if device_type_match
+                                else {}
+                            ),
                         },
                         id_pool=ref_id_pool,
                     )
@@ -12653,6 +13755,7 @@ class ProfileStore:
                     cid = self._add_reference_cycle_nosave(
                         target or "(imported)", c.get("power_data") or [],
                         {
+                            SYNTHETIC_OFFSETS_KEY: c.get(SYNTHETIC_OFFSETS_KEY),
                             "store_cycle_id": _bare_store_id(raw_sid),
                             # Carried so the banked-tail repair can reach this
                             # cycle (item 353). A Smart-Terminated trace holds
@@ -12693,6 +13796,15 @@ class ProfileStore:
                                 c.get("manual_duration")
                                 if device_type_match
                                 else None
+                            ),
+                            # Its trim or edit, under the same device gate.
+                            **(
+                                {
+                                    k: (c.get("meta") or {}).get(k)
+                                    for k in ("trim", "edited")
+                                }
+                                if device_type_match and isinstance(c.get("meta"), dict)
+                                else {}
                             ),
                         },
                         id_pool=ref_id_pool,
@@ -12814,6 +13926,16 @@ class ProfileStore:
                         for task_id, names in src_val.items()
                         if isinstance(names, list)
                     }
+                if (
+                    key == "settings_changelog"
+                    and isinstance(src_val, list)
+                    and str(meta.get("entry_id") or "") != str(self.entry_id)
+                ):
+                    # Another device's settings history stays visible, but a Stop
+                    # it records is not the one this appliance's cycles ended
+                    # under (PR #529 review); an export without an entry id
+                    # counts as another device's.
+                    src_val = _mark_changelog_imported(src_val)
                 if mode == "replace":
                     self._data[key] = src_val
                     continue
@@ -12829,7 +13951,12 @@ class ProfileStore:
                     self._data[key] = base
                 elif isinstance(src_val, list):
                     base = cur if isinstance(cur, list) else []
-                    _merge_list_dedup(base, src_val)
+                    _merge_list_dedup(
+                        base, src_val,
+                        # A change merged into another device and back is the
+                        # local one: kept once, unmarked (review of PR #529).
+                        (SETTINGS_CHANGELOG_IMPORTED_KEY,) if key == "settings_changelog" else (),
+                    )
                     self._data[key] = base
                 elif cur is None:
                     self._data[key] = src_val  # scalar: fill only when absent locally
@@ -12882,7 +14009,8 @@ class ProfileStore:
         # show nor spend their programme's review budget.
         self.prune_orphaned_feedback()
         self._data_generation = getattr(self, "_data_generation", 0) + 1
-        await self.async_save()
+        # Required, as the wholesale import's (PR #529 review).
+        await self.async_save(required=True)
 
         settings_out: dict[str, Any] = {}
         if apply_settings and "settings" in cats and device_type_match:
@@ -12899,6 +14027,9 @@ class ProfileStore:
             "device_type_match": device_type_match,
             "settings": settings_out,
             "restore_point_saved": restore_point_saved,
+            # The real history was replaced: its cycles ran under the imported
+            # settings, not this device's (the settings-history Stop rows).
+            "replaced_past_cycles": wipe_past,
         }
 
     async def delete_cycle(self, cycle_id: str) -> bool:
@@ -12966,7 +14097,8 @@ class ProfileStore:
             if remaining:
                 await self.async_rebuild_envelope(profile_name)
             else:
-                self._data.get("profiles", {}).pop(profile_name, None)
+                if self._data.get("profiles", {}).pop(profile_name, None) is not None:
+                    self._profile_left()
                 self._data.get("envelopes", {}).pop(profile_name, None)
                 self._rename_maintenance_program(profile_name, None)  # #480
         await self.async_save()
@@ -13076,6 +14208,7 @@ class ProfileStore:
                 cycle["start_time"] = dt_util.utc_from_timestamp(
                     start_ts + base
                 ).isoformat()
+                self._start_edit_gen = getattr(self, "_start_edit_gen", 0) + 1
 
         # Recompute sampling interval
         if len(renorm) > 1:
@@ -13605,6 +14738,7 @@ class ProfileStore:
         new_dur = (final_end_dt - c1_start_dt).total_seconds()
 
         c1["start_time"] = dt_util.as_utc(c1_start_dt).isoformat()
+        self._start_edit_gen = getattr(self, "_start_edit_gen", 0) + 1
         c1["end_time"] = dt_util.as_utc(final_end_dt).isoformat()
         c1["duration"] = round(new_dur, 1)
         c1["max_power"] = max_power

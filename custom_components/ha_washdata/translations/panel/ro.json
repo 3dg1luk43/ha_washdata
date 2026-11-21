@@ -1001,6 +1001,7 @@
     "sug_muted": "Această setare nu va mai fi sugerată",
     "sug_mute_failed": "Nu s-a putut dezactiva sugestia",
     "sug_unmuted_all": "Sugestiile dezactivate au fost resetate",
+    "sug_unmute_incomplete": "Resetarea nu s-a finalizat: unele sugestii sunt încă dezactivate. Încercați din nou.",
     "n_suggestions_muted": "{count} de sugestii dezactivate; reglajul automat nu le va propune.",
     "n_suggestions_muted_one": "{count} sugestie dezactivată; reglajul automat nu o va propune.",
     "n_suggestions_muted_few": "{count} sugestii dezactivate; reglajul automat nu le va propune.",
@@ -1053,6 +1054,10 @@
     "pg_in_sample_note": "Aceste cicluri au ajutat la construirea profilurilor cu care sunt comparate, deci rezultatele sunt optimiste: așteptați-vă la ceva mai puține potriviri corecte pe cicluri noi.",
     "hist_tail_trimmed": "Au fost eliminate {min} min de așteptare după sfârșitul ciclului, la fel cum face integrarea în timp real",
     "invalid_threshold_pair": "Pragul de Oprire ({stop} W) trebuie să fie sub Pragul de Pornire ({start} W). Nu s-a salvat nimic; modificați-le pe amândouă împreună.",
+    "end_gate_check_failed": "Setările de temporizare sugerate nu au putut fi verificate în raport cu pauzele acestui aparat. Nu s-a salvat nimic; încercați din nou.",
+    "analysis_superseded": "Setările sau datele ciclurilor s-au schimbat în timpul analizei. Rulați-o din nou.",
+    "analysis_check_failed": "Setările de temporizare sugerate nu au putut fi verificate în raport cu pauzele acestui aparat. Rulați-o din nou.",
+    "apply_cycles_changed": "Un ciclu a fost salvat în timp ce se aplicau sugestiile. Nicio setare nu a fost modificată, iar sugestiile au fost șterse. Rulați din nou analiza sugestiilor.",
     "hist_truncated": "oprit la limita de {n} citiri, așa că restul istoricului nu a fost analizat",
     "hist_warn_kw": "Cea mai mare citire este doar {w}. Acest senzor pare să raporteze kilowați; WashData are nevoie de wați, așa că nu se poate detecta niciun ciclu.",
     "hist_warn_naive_time": "{n} de marcaje temporale nu au fus orar și au fost citite ca UTC. Dacă fișierul folosește ora locală, ciclurile sunt decalate cu diferența dvs. față de UTC, iar citirile din jurul trecerii la ora de vară se pot pierde.",
@@ -1514,12 +1519,12 @@
       "doc": "Ce deschide o atingere pe notificarea acestui aparat. Gol: panoul WashData pe acest aparat. Introduceți o cale de dashboard (de ex. /lovelace/laundry) sau un URL, ori „none” pentru nicio acțiune la atingere."
     },
     "door_opens_at_end": {
-      "label": "Ușa se deschide automat la final",
-      "doc": "Pentru mașinile de spălat vase care deschid ușa la final pentru uscare (de ex. AirDry). O ușă lăsată deschisă pe durata de mai jos încheie ciclul în loc să îl pună pe pauză; o deschidere scurtă este ignorată. Necesită o Entitate Senzor Ușă."
+      "label": "Deschiderea ușii încheie ciclul",
+      "doc": "Cu o Entitate Senzor Ușă, o ușă lăsată deschisă pe durata de așteptare de mai jos, cu puterea scăzută, încheie ciclul în loc să îl pună pe pauză. În pauză, acest lucru se întâmplă doar când programul recunoscut este aproape gata, așa că o pauză la mijlocul programului rămâne o pauză."
     },
     "door_end_dwell_seconds": {
       "label": "Durată de așteptare la deschiderea ușii",
-      "doc": "Cu „Ușa se deschide automat la final” activat: cât timp trebuie să stea ușa deschisă înainte ca ciclul să se încheie. Suficient cât să ignore adăugarea unei farfurii (implicit 60 s)."
+      "doc": "Cu „Deschiderea ușii încheie ciclul” activat: cât timp trebuie să stea ușa deschisă înainte ca ciclul să se încheie. Suficient cât să ignore adăugarea unei farfurii (implicit 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Ciclurile care formează un program",
@@ -1653,6 +1658,8 @@
     "working": "Se procesează…",
     "torn_pick": "{a} sau {b}?",
     "torn_tip": "WashData nu poate încă deosebi aceste două programe, așa că alegeți programul care rulează pentru a eticheta acest ciclu cu el (opțiunea Detectare automată anulează alegerea).",
+    "program_mismatch": "Seamănă mai mult cu {program}",
+    "program_mismatch_tip": "Acest ciclu seamănă clar mai mult cu {program} decât cu {selected}, dar WashData păstrează programul pe care l-ați ales.",
     "match_uncertain": "Incert: {top} sau {runner}",
     "match_uncertain_single": "Incert: poate {top}",
     "match_sure": "~{pct}% certitudine",
@@ -1747,6 +1754,8 @@
     "settings_reverted": "Setări restaurate; integrarea se reîncarcă",
     "settings_saved": "Setări salvate; integrarea se reîncarcă",
     "suggestions_applied": "Sugestii aplicate; integrarea se reîncarcă",
+    "suggestions_none_applied": "Nicio setare nu a fost modificată: sugestiile selectate nu mai sunt valabile",
+    "suggestions_changed": "Sugestiile s-au schimbat de când le-ați verificat. Nu s-a salvat nimic; verificați-le și aplicați-le din nou.",
     "suggestions_dismissed": "Sugestii ignorate",
     "apply_failed": "Aplicarea a eșuat: {error}",
     "delete_failed": "Ștergerea a eșuat: {error}",
@@ -1904,6 +1913,7 @@
     },
     "reason": {
       "completion_min_seconds": "Jumătate din durata p05 a ciclurilor curate ({minutes} min) pe {cycles} cicluri; filtrează ciclurile false.{excl}",
+      "completion_min_seconds_capped": "Limitat la {cap} pentru ca și cele mai scurte programe să conteze; jumătate din durata p05 a ciclurilor curate ({minutes} min, {cycles} cicluri) ar fi mai lungă.{excl}",
       "match_interval": "Pe baza cadenței de actualizare observate (mediană={median}s) * 10.",
       "match_interval_capped": "Limitat astfel încât {persistence} potriviri consecutive să încapă în {pct}% din cel mai scurt program ({shortest}s); singură, cadența de actualizare (mediană={median}s) ar fi sugerat un interval mai lung.",
       "match_interval_floored": "Cel mai scurt program ({shortest}s) ar limita această valoare la {cap}s, sub minimul de {minimum}s, așa că se folosește minimul: {persistence} potriviri consecutive durează {budget}s, peste {pct}% din acel program. Potrivirea rulează doar când sosește o citire (mediana={median}s), deci nu costă nimic.",
@@ -1912,7 +1922,6 @@
       "min_off_gap_bridge": "Dimensionat pentru a acoperi cea mai lungă perioadă de liniște din interiorul unui ciclu: {span}s + 60s marjă, din {spans} intervale acoperite pe {cycles} cicluri curate (rămâne sub intervalul dvs. minim de {ceiling}s dintre două încărcături consecutive).",
       "min_power": "40% din cea mai mică putere activă p05 ({p05}W) pe {cycles} cicluri curate, menținând pragul de oprire sub consumul real.{excl}",
       "no_update_timeout": "Pe baza cadenței de actualizare observate (p95={p95}s) * 20 (min. 60s).",
-      "off_delay_cadence": "Pe baza cadenței de actualizare observate (p95={p95}s) * 5",
       "off_delay_device_floor": "S-a folosit minimul sigur specific dispozitivului pentru {device} ({floor}s).",
       "off_delay_generic_floor": "S-a folosit minimul sigur generic ({floor}s).",
       "off_delay_pauses": "Dimensionat pentru a depăși pauzele reale: pauza p95 din interiorul ciclului {p95}s + 60s marjă, din {pauses} pauze pe {cycles} cicluri curate (limită inferioară {floor}s).",
@@ -1921,7 +1930,8 @@
       "watchdog": "Păstrat cât mai mic în siguranță (puțin peste intervalul de actualizare p95 de {p95}s și cel puțin 2x intervalul de eșantionare de {median}s, min. 30s), astfel încât blocajele să fie surprinse rapid fără opriri false.",
       "end_energy_floor": "Ridicat la minimul implicat de pragul de oprire ({stop} W) pe durata întârzierii la oprire ({off_delay} s); sub acesta, ciclul se poate încheia doar printr-o cale de rezervă.",
       "max_duration_ratio_default": "Revenire la valoarea implicită: o limită superioară mai mică respinge programul corect ori de câte ori un ciclu durează mai mult decât de obicei.",
-      "min_duration_ratio_default": "Revenire la valoarea implicită: o limită inferioară mai mare împiedică recunoașterea unui ciclu în desfășurare până când acesta este bine avansat."
+      "min_duration_ratio_default": "Revenire la valoarea implicită: o limită inferioară mai mare împiedică recunoașterea unui ciclu în desfășurare până când acesta este bine avansat.",
+      "start_above_running": "Puterea de funcționare scăzută tipică a acestui aparat este {low} W, dar pragul de pornire este {start} W, deci un ciclu la acest nivel nu pornește niciodată. Pragul de pornire setat la jumătate din acest nivel, pragul de oprire sub acesta."
     },
     "exclusions": {
       "summary": "Excluse {total} cicluri detectate greșit: {parts}.",
@@ -2251,6 +2261,9 @@
     },
     "cycle_overrun": {
       "name": "Ciclu în depășire"
+    },
+    "program_mismatch": {
+      "name": "Programul care rulează diferă de cel selectat"
     },
     "cycle_paused": {
       "name": "Ciclu în pauză"

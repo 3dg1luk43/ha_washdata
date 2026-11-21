@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Kostnad for siste syklus"
+      },
+      "last_cycle_start": {
+        "name": "Start for siste syklus"
       }
     },
     "select": {
@@ -572,6 +575,7 @@
       "phase_started": "Fase startet",
       "finishing_soon": "Snart ferdig",
       "cycle_overrun": "Syklus kjører for lenge",
+      "program_mismatch": "Pågående program avviker fra det valgte",
       "cycle_paused": "Syklus satt på pause",
       "cycle_resumed": "Syklus gjenopptatt",
       "still_tumbling": "Trommelen roterer fortsatt etter syklusen",
@@ -646,6 +650,16 @@
         "percent": {
           "name": "Lengre med",
           "description": "Prosent over programmets normale varighet."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Pågående program avviker fra det valgte",
+      "description": "Utløses én gang når syklusen passer bedre til et annet program enn det du har valgt. Et nytt valg starter en ny kontroll.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Kun når dette programmet er valgt, ved nøyaktig navn. La feltet stå tomt for ethvert program."
         }
       }
     },

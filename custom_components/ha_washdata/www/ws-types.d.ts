@@ -28,6 +28,9 @@ export interface AnalyzeSplitResponse {
 export interface ApplySuggestionsResponse {
   success: boolean;
   applied: string[];
+  changed?: string[];
+  suggestions?: Record<string, unknown>[];
+  locked_suggestions?: string[];
 }
 
 export interface BlueprintInput {
@@ -90,6 +93,7 @@ export interface DeviceInfo {
   envelope_position: number | null;
   match_uncertainty: MatchUncertainty | null;
   match_choices: string[] | null;
+  program_mismatch: ProgramMismatch | null;
   suggestions_count: number;
   suggestion_keys: string[];
   feedback_count: number;
@@ -438,6 +442,12 @@ export interface ProfileGroupInfo {
   cohesive: boolean;
 }
 
+export interface ProgramMismatch {
+  selected: string;
+  looks_like: string | null;
+  margin: number | null;
+}
+
 export interface RunSuggestionAnalysisResponse {
   success?: boolean;
   count?: number;
@@ -457,6 +467,7 @@ export interface SetMaintenanceProgramsResponse {
 export interface SetSuggestionLockResponse {
   success: boolean;
   locked_suggestions: string[];
+  reloaded?: boolean;
 }
 
 export interface StartTaskResponse {
@@ -875,6 +886,7 @@ export interface GetSuggestionsRequest {
 export interface ApplySuggestionsRequest {
   entry_id: string;
   keys: string[];
+  values?: Record<string, unknown>;
 }
 
 export interface ClearSuggestionsRequest {

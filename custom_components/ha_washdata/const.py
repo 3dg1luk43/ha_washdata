@@ -33,6 +33,19 @@ class TerminationReason(StrEnum):
     FORCE_STOPPED = "force_stopped"  # watchdog / no-update force end
     USER = "user"                # user manually stopped the cycle
     TERMINAL_DROP = "terminal_drop"  # anomalously-early hard cliff-to-0 (opt-in)
+    DOOR = "door"                # door held open at the end (#342, #524): natural
+    EXTERNAL = "external"        # External End Trigger fired (register 640): natural
+
+
+#: Natural ends that automations still see as ``user``, the reason both carried
+#: until 0.6.1: stored under their own reason so the statistics count them as
+#: ends the appliance reached, reported as before so no automation changes.
+AUTOMATION_USER_REASONS = frozenset({TerminationReason.DOOR, TerminationReason.EXTERNAL})
+
+
+def automation_termination_reason(reason: Any) -> Any:
+    """The ``termination_reason`` an automation sees for a stored one."""
+    return TerminationReason.USER.value if reason in AUTOMATION_USER_REASONS else reason
 
 
 # Completed cycles stay eligible for anti-wrinkle handling only for these
@@ -202,6 +215,27 @@ CONF_DOOR_OPENS_AT_END = "door_opens_at_end"
 CONF_DOOR_END_DWELL_SECONDS = "door_end_dwell_seconds"
 DEFAULT_DOOR_OPENS_AT_END = False
 DEFAULT_DOOR_END_DWELL_SECONDS = 60  # door must stay open this long to finalize
+# In PAUSED a held door ends the cycle only once the run has reached this share of
+# its matched programme's expected duration; earlier (or unmatched) it is a pause,
+# as before 0.6.1 (#524). PAUSED is where a mid-programme quiet sits, so this is
+# what keeps a door opened there to add an item from ending the cycle.
+# `devtools/door_end_eval.py` drives `CycleDetector.door_end_due` (expected = the
+# leave-one-out mean of the programme) over the PAUSED intervals of a replayed
+# detector (a door opened in one before activity resumes, held 60 s while
+# quiet). A miss falls back to the pre-0.6.1 pause; an exposed interval is new
+# behaviour, so the bar favours few exposures. The figures are gate checks (the
+# bar open at each stored end), not live ends, which also need the door held for
+# the dwell. Dishwashers at 0.95: the gate open at 88.5% of 165 ends, 4.2% of 95
+# mid-cycle PAUSED intervals exposed (2.4% of cycles; 0.9: 98.2% / 24.2%, 13.9%
+# of cycles). A washer's door is locked while it runs, so its bar sits lower: at
+# 0.75 the gate is open at 93.2% of 206 ends (0.9: 74.3%), 2 of 3 such intervals
+# exposed (1.0% of cycles). Past PAUSED a spell is in ENDING, where a held
+# door ended the cycle before 0.6.1 too.
+DOOR_END_PAUSED_MIN_RATIO = 0.95
+DOOR_END_PAUSED_MIN_RATIO_BY_TYPE: dict[str, float] = {
+    "washing_machine": 0.75,
+    "washer_dryer": 0.75,
+}
 CONF_PAUSE_CUTS_POWER = "pause_cuts_power"  # Also turn off switch entity when pausing
 CONF_SWITCH_ENTITY = "switch_entity"  # Optional switch entity toggled on pause/resume
 CONF_NOTIFY_UNLOAD_DELAY_MINUTES = "notify_unload_delay_minutes"  # Minutes before "laundry waiting" nag
@@ -721,6 +755,36 @@ MATCH_LABEL_MIN_MARGIN = 0.08
 # so this is the conservative end of an accuracy/stability trade. Do not retune it
 # in isolation: any Stage-2 scoring change rescales the margin along with it.
 MATCH_DECISIVE_MARGIN = 0.12
+# Issue #530: a hand-picked program the running cycle does not look like
+# (match_rules.program_mismatch_tick). While a program is picked by hand the live
+# match does not run; a background match on the same profile_match_interval
+# cadence ranks the trace without changing anything, and the mismatch is
+# established once another program beats the picked one by at least
+# PROGRAM_MISMATCH_MIN_MARGIN on PROGRAM_MISMATCH_PERSISTENCE consecutive
+# background matches, with at least PROGRAM_MISMATCH_MIN_FRACTION of the picked
+# program's usual duration elapsed. A margin, not the confidence (item 305): per
+# tick the deficit separates a wrong pick from the right one at AUC 0.89, the
+# pick's own score at 0.79. devtools/program_mismatch_eval.py (LOO, 946 labelled
+# cycles of 86 devices, a match on the first reading one profile_match_interval
+# after the last, as the manager schedules it):
+#   margin persist minfrac  false alarm  wrong picks caught  at (median)
+#    0.12      3     0.25      7.1%            70.4%            0.33
+#    0.15      6     0.50      2.0%            48.6%            0.59
+#    0.18      6     0.50      1.3%            38.4%            0.62
+#    0.22      6     0.50      0.6%            28.6%            0.62
+# False alarm: the cycle's own program picked (once per cycle); 5 of the 12 here
+# are on the 437 cycles of single-appliance histories (1.1%), the rest on store
+# packages that hold one programme under two names. Caught: every other programme
+# of the device picked, one without a template or a learned duration counted as
+# missed; 42.6% for the one closest in duration. "At": fraction of the cycle
+# elapsed. The false alarms are mid-cycle matcher errors, so no threshold reaches
+# zero. 0.18 was chosen when it kept own-history alarms at the strictest row's (3
+# of 449, on a replay that matched at fixed interval marks); the two added since
+# hover at the bar (0.17-0.20 at one end of a six-match run), which a shift of the
+# match times moves across it (0.20 holds 3 of 437 at 33.3% caught).
+PROGRAM_MISMATCH_MIN_MARGIN = 0.18
+PROGRAM_MISMATCH_PERSISTENCE = 6
+PROGRAM_MISMATCH_MIN_FRACTION = 0.5
 # The first commit of a live programme (match_rules.decide_switch, Case 1). A winner
 # that is AMBIGUOUS on the tick (inside MATCH_AMBIGUITY_MARGIN of the runner-up, or
 # flagged by a Stage-5 safeguard) commits only once it has led for this many times
@@ -1324,6 +1388,12 @@ BANKED_TAIL_REPAIR_KEY = "_banked_tail_repair_pending"
 # config and can take minutes on a large store, so it runs after setup, not in the
 # migration.
 CYCLE_ENERGY_REBUILD_KEY = "_cycle_energy_rebuild_pending"
+# Store key: a dishwasher store has had the one rebuild under the #531 cut-off rule
+# (`profile_store.cut_short_mask`). Absent on every store from before it, so a
+# programme that was ending inside its drying stops at the first run after the
+# update, not the second; the manager rebuilds every profile with traced evidence in
+# the background after setup and sets it. No storage version.
+CUT_SHORT_REBUILD_KEY = "_cut_short_rebuild_done"
 # Store key for the one pass that cuts the end wait off history-imported dishwasher
 # cycles already labelled before the cut existed (#518). Absent counts as pending,
 # so every store that predates it runs the pass once without a storage version;
@@ -1770,10 +1840,16 @@ DEVICE_SMOOTHING_THRESHOLDS = {
 }
 
 # Device specific completion thresholds (min run time to be considered a valid "completed" cycle)
+# Washers at 5 min: a 10-15 min quick wash, spin or drain programme is recorded
+# from its first to its last working reading, which put a nominal 10 min one at
+# 9-10 min, under the old 600 s floor (stored interrupted: no finish alert,
+# trigger or Clean state). The corpus holds 10.5-16 min washer programmes and an
+# 8.3 min one stored interrupted. A config migration (3.13 -> 3.14) moves an entry
+# still on the old seeded 600 s to it.
 DEVICE_COMPLETION_THRESHOLDS = {
-    DEVICE_TYPE_WASHING_MACHINE: 600,  # 10 min
+    DEVICE_TYPE_WASHING_MACHINE: 300,  # 5 min
     DEVICE_TYPE_DRYER: 600,  # 10 min
-    DEVICE_TYPE_WASHER_DRYER: 600,  # 10 min (same as washer)
+    DEVICE_TYPE_WASHER_DRYER: 300,  # 5 min (same as washer)
     DEVICE_TYPE_DISHWASHER: 900,  # 15 min
     DEVICE_TYPE_PUMP: 5,  # 5 s - pump cycles can be under 30 seconds
 }
@@ -1803,17 +1879,23 @@ DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 0.2,  # Pump/Heater
     DEVICE_TYPE_PUMP: 0.003,  # ~100W motor for ~0.1 s is enough to confirm a pump cycle
 }
-# Default sampling interval by device type
+# Default sampling interval by device type: the manager's reading throttle drops a
+# reading that comes sooner than this after the last one kept (low readings always
+# pass). 2 s captures a washer's rapid 0<->150 W motor/heater oscillation and, since
+# 0.6.1, a dryer's short anti-crease pulses (#474: at 30 s the throttle hid them;
+# start_gate_eval: dryer starts unchanged, confirmed 63 -> 23 s median). The start
+# debounce follows (resolve_start_duration_default); a dryer keeps its watchdog
+# (DEFAULT_WATCHDOG_INTERVAL_BY_DEVICE). Pump and the catch-all types keep their
+# values: the corpus holds no raw history of them to measure a change on.
 DEFAULT_SAMPLING_INTERVAL_BY_DEVICE = {
-    # 2s captures the rapid 0<->150W motor/heater oscillation in wet appliances;
-    # the 30s global default discards those spikes and undersamples the cycle.
     DEVICE_TYPE_WASHING_MACHINE: 2.0,
     DEVICE_TYPE_WASHER_DRYER: 2.0,
     DEVICE_TYPE_DISHWASHER: 2.0,
+    DEVICE_TYPE_DRYER: 2.0,
     DEVICE_TYPE_PUMP: 10.0,  # 10s - pump cycles can be <30 s; 30s default would miss them
     # The catch-all types run anything from a 60 s coffee to a 3 h oven, so they must
     # not drop a 3 s plug's readings for 30 s at a time (#493: 5 s gaps between short
-    # runs were invisible). The start debounce follows (resolve_start_duration_default).
+    # runs were invisible).
     DEVICE_TYPE_GENERIC: 5.0,
     DEVICE_TYPE_OTHER: 5.0,
 }
@@ -1894,11 +1976,17 @@ def resolve_sampling_interval_default(device_type: str) -> float:
     """Device-resolved default sampling interval (#396).
 
     Single source of truth for the sampling default, so the manager, the panel
-    (via ws_get_options) and the config migration all agree. Wet appliances
-    sample fast (2 s) to capture the rapid 0<->150 W oscillation; everything else
-    keeps the coarse 30 s scalar.
+    (via ws_get_options) and the config migration all agree. Wet appliances and,
+    since 0.6.1, dryers sample at 2 s; a pump at 10 s, the catch-all types at 5 s;
+    the 30 s scalar is only a fallback for an unknown type.
     """
     return DEFAULT_SAMPLING_INTERVAL_BY_DEVICE.get(device_type, DEFAULT_SAMPLING_INTERVAL)
+
+
+# A dryer keeps the 61 s watchdog its 30 s sampling derived until 0.6.1: at 30 s the
+# keepalives through its quiet anti-crease stretches split one #478 AEG cycle and cut
+# another 6 min short in `end_gate_eval.py --loo --all-formats` (dryer splits 3 -> 4).
+DEFAULT_WATCHDOG_INTERVAL_BY_DEVICE = {DEVICE_TYPE_DRYER: 61}
 
 
 def resolve_watchdog_interval_default(device_type: str) -> int:
@@ -1906,13 +1994,14 @@ def resolve_watchdog_interval_default(device_type: str) -> int:
 
     The panel enforces watchdog_interval >= 2*sampling_interval (a publish-on-change
     sensor can skip a sample, so the staleness tick must be coarser than the
-    sampling gap). Derived as max(DEFAULT_WATCHDOG_INTERVAL, 2*sampling+1): 30 for
-    the fast/pump types (30 already clears 2*2 / 2*10), 61 for the 30 s-sampling
-    types. Never smaller than the 30 s floor so a fast-sampling device does not get
-    an over-aggressive watchdog.
+    sampling gap). Derived as max(DEFAULT_WATCHDOG_INTERVAL, 2*sampling+1): 30 at
+    2, 5 or 10 s sampling, or the type's own value (``DEFAULT_WATCHDOG_INTERVAL_BY_DEVICE``:
+    a dryer's 61). Never smaller than the 30 s floor so a fast-sampling device does
+    not get an over-aggressive watchdog.
     """
     sampling = resolve_sampling_interval_default(device_type)
-    return int(max(DEFAULT_WATCHDOG_INTERVAL, 2.0 * sampling + 1.0))
+    derived = int(max(DEFAULT_WATCHDOG_INTERVAL, 2.0 * sampling + 1.0))
+    return max(derived, int(DEFAULT_WATCHDOG_INTERVAL_BY_DEVICE.get(device_type, 0)))
 
 
 def resolve_min_off_gap_default(device_type: str) -> int:
@@ -1956,8 +2045,8 @@ def resolve_start_duration_default(device_type: str) -> float:
 
     The panel enforces start_duration_threshold >= sampling_interval (a debounce
     shorter than one sample lets a single spike open a cycle). Derived as
-    max(DEFAULT_START_DURATION_THRESHOLD, sampling): 5 s for the fast types, the
-    sampling interval for the coarser ones.
+    max(DEFAULT_START_DURATION_THRESHOLD, sampling): 5 s at 2 or 5 s sampling, a
+    pump's 10 s (until 0.6.1 a dryer's 30 s followed its 30 s sampling).
     """
     sampling = resolve_sampling_interval_default(device_type)
     return max(DEFAULT_START_DURATION_THRESHOLD, sampling)
@@ -2050,6 +2139,24 @@ GROUP_MIN_COHESION = 0.80
 # The quiet minimum separates "the event after the drying phase" from an ordinary
 # gap inside the wash; 120 s is well under the measured p10 of 624 s.
 TERMINAL_EVENT_PEAK_FRAC = 0.004
+# #531: a dishwasher's terminal event after a long quiet can be a blip far under
+# TERMINAL_EVENT_PEAK_FRAC of its peak: the Bauknecht beeps at 6.3 W after drying at
+# 3.3 W, its own standby level, against a 1.97 kW peak (0.3%). After at least
+# TERMINAL_BLIP_QUIET_MIN_S of quiet, a reading of TERMINAL_BLIP_RATIO x the quiet's
+# level and TERMINAL_BLIP_MIN_W more is one too: the detector's end spike (above
+# the Stop Threshold) and `profile_store.cut_short_mask`.
+# A run closed inside its programme's quiet phase is a cut-off, not a short run: it
+# builds neither the envelope nor the learned length, or every gate that ends a run
+# at that length (Smart Termination, the end-spike wait and its quiet release)
+# stores the next run as short too and the length only ever shrinks. Cut off = at
+# least CUT_SHORT_MIN_RUNS (and CUT_SHORT_MIN_SHARE) of the programme's runs go on
+# past its end into TERMINAL_BLIP_QUIET_MIN_S or more of quiet and then show a
+# terminal event. Measured with devtools/duration_ratchet_eval.py.
+TERMINAL_BLIP_QUIET_MIN_S = 600.0
+TERMINAL_BLIP_RATIO = 1.5
+TERMINAL_BLIP_MIN_W = 1.0
+CUT_SHORT_MIN_RUNS = 3
+CUT_SHORT_MIN_SHARE = 0.10
 TERMINAL_QUIET_MIN_S = 120.0
 # ...but a gap of 120 s also sits between a dishwasher's own heating blocks
 # (120-160 s on 01KGM619), so a cycle closed before its pump-out offered its LAST
@@ -2112,6 +2219,11 @@ SELF_UNMATCHABLE_MIN_CYCLES = 3
 STORAGE_VERSION = 19
 STORAGE_KEY = "ha_washdata"
 
+# Marks a settings-changelog row a selective import brought from another device
+# (PR #529 review). Shown in the history like any row; never read as the Stop
+# Threshold this appliance's cycles ended under (the standby advisory, item 646).
+SETTINGS_CHANGELOG_IMPORTED_KEY = "imported"
+
 # Restore point for "Undo last import" (register item 195): the store as it was before
 # the last replace import, in its own file `ha_washdata.<entry_id>.pre_import` so the
 # main store's per-save rewrite never carries a second copy. One per device: the next
@@ -2139,7 +2251,7 @@ FAILED_RESTORE_STORE_SUFFIX = "failed_restore"
 # leaves an entry a version short, which then re-migrates on every start - and repeating
 # the literals in three places is what made that easy to do.
 CONFIG_ENTRY_VERSION = 3
-CONFIG_ENTRY_MINOR_VERSION = 13
+CONFIG_ENTRY_MINOR_VERSION = 15
 
 # Notification events
 EVENT_CYCLE_STARTED = "ha_washdata_cycle_started"
@@ -2162,6 +2274,9 @@ TRIGGER_PROGRAM_RECOGNISED = "program_recognised"
 TRIGGER_PHASE_STARTED = "phase_started"
 TRIGGER_FINISHING_SOON = "finishing_soon"
 TRIGGER_CYCLE_OVERRUN = "cycle_overrun"
+# #530: the running cycle does not look like the program picked by hand
+# (match_rules.program_mismatch_tick). Once per cycle and pick.
+TRIGGER_PROGRAM_MISMATCH = "program_mismatch"
 TRIGGER_CYCLE_PAUSED = "cycle_paused"
 TRIGGER_CYCLE_RESUMED = "cycle_resumed"
 TRIGGER_CYCLE_STALLED = "cycle_stalled"
@@ -2183,6 +2298,7 @@ DEVICE_TRIGGER_TYPES = (
     TRIGGER_PHASE_STARTED,
     TRIGGER_FINISHING_SOON,
     TRIGGER_CYCLE_OVERRUN,
+    TRIGGER_PROGRAM_MISMATCH,
     TRIGGER_CYCLE_PAUSED,
     TRIGGER_CYCLE_RESUMED,
     TRIGGER_CYCLE_STALLED,
@@ -2220,6 +2336,7 @@ DEVICE_TRIGGER_ONLY_FOR = {
     TRIGGER_PHASE_STARTED: _MATCHING_DEVICE_TYPES,
     TRIGGER_FINISHING_SOON: _MATCHING_DEVICE_TYPES,
     TRIGGER_CYCLE_OVERRUN: _MATCHING_DEVICE_TYPES,
+    TRIGGER_PROGRAM_MISMATCH: _MATCHING_DEVICE_TYPES,
     TRIGGER_ANTI_WRINKLE_STARTED: _TUMBLING_DEVICE_TYPES,
     TRIGGER_STILL_TUMBLING: _TUMBLING_DEVICE_TYPES,
     TRIGGER_PUMP_STUCK: (DEVICE_TYPE_PUMP,),
@@ -2459,6 +2576,18 @@ MIN_SUGGESTION_REL_DELTA = 0.08  # 8% minimum relative change
 # completed cycles. Prevents the engine from immediately re-suggesting
 # slightly-different values based on a single new cycle.
 MIN_SUGGESTION_COOLDOWN_CYCLES = 3
+# The plug cadence the operational suggestions (watchdog, no-update timeout, match
+# interval) are sized from: one (p95, median) summary per cycle that ended on its
+# own, over all of its update intervals, and the median over the last this many
+# (register item 637). The newest 200 intervals of the newest cycle (its quiet
+# tail, mostly) moved them at every cycle end: 107 watchdog, 123 no-update and 68
+# match-interval applies over ~720 replayed cycle ends.
+CADENCE_RECENT_CYCLES = 10
+CADENCE_MIN_INTERVALS = 20
+# ...and a suggestion for one of those keys within this share of the value in force
+# is not surfaced: a plug reporting every 20 s gives a p95 of 40, 60 or 80 s, and the
+# median over 10 cycles flipped between them (live washer watchdog 43/63/83 s).
+CADENCE_HOLD_REL = 0.25
 
 # ─── Appliance health & predictive maintenance (Group E) ───────────────────────
 # Per-device maintenance-reminder thresholds: a dict {event_type: cycle_threshold}
@@ -2680,3 +2809,50 @@ def drop_invalid_numeric_options(options: Any) -> tuple[dict[str, Any], list[str
                 clean[key] = number
     return clean, dropped
 
+
+
+def device_entry_ids(device: Any, registry: Any = None) -> list[str]:
+    """The config entry ids of a device registry entry (#532).
+
+    Home Assistant 2026.8 gave a device a single ``config_entry_id`` and turned
+    ``config_entries`` into a compatibility shim, which 2026.10 began logging a
+    warning for on every read (removed in 2027.10); older releases only have
+    ``config_entries``. It also split every device shared by several entries
+    into one device per entry, and
+    ``async_get`` on the old id returns a read-only composite whose
+    ``config_entry_id`` is only the former primary: with ``registry`` given, the
+    entries of the devices split from ``device`` (``composite_device_id``) follow
+    it, so a service or trigger naming the old id still finds WashData's.
+    Never raises.
+    """
+    out: list[str] = []
+    try:
+        entry_id = getattr(device, "config_entry_id", None)
+        if isinstance(entry_id, str) and entry_id:
+            out.append(entry_id)
+        else:
+            out.extend(
+                e for e in (getattr(device, "config_entries", None) or ())
+                if isinstance(e, str) and e
+            )
+        device_id = getattr(device, "id", None)
+        if registry is not None and isinstance(entry_id, str) and isinstance(device_id, str):
+            # The registry's own lookup where it has one (it reads its index, and
+            # the shape of `registry.devices` changed between releases); else a scan
+            # of the entries, iterated, as any mapping access warns since 2026.9
+            # (review of PR #529).
+            lookup = getattr(registry, "async_get_devices_for_composite_device_id", None)
+            if callable(lookup):
+                splits = list(lookup(device_id) or ())
+            else:
+                splits = [
+                    split for split in list(getattr(registry, "devices", None) or ())
+                    if getattr(split, "composite_device_id", None) == device_id
+                ]
+            for split in splits:
+                split_entry = getattr(split, "config_entry_id", None)
+                if isinstance(split_entry, str) and split_entry and split_entry not in out:
+                    out.append(split_entry)
+    except Exception:  # noqa: BLE001 - a lookup helper must never raise
+        return out
+    return out

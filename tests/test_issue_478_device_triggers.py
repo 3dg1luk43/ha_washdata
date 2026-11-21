@@ -65,6 +65,7 @@ ALL_TYPES = {
     "phase_started",
     "finishing_soon",
     "cycle_overrun",
+    "program_mismatch",
     "cycle_paused",
     "cycle_resumed",
     "cycle_stalled",
@@ -80,7 +81,9 @@ ALL_TYPES = {
     "pump_stuck",
 }
 # Matching-only types: a Threshold Device (`other`) recognises no program.
-MATCHING = {"program_recognised", "phase_started", "finishing_soon", "cycle_overrun"}
+MATCHING = {
+    "program_recognised", "phase_started", "finishing_soon", "cycle_overrun", "program_mismatch",
+}
 TUMBLING = {"anti_wrinkle_started", "still_tumbling"}
 
 FAST = {

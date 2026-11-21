@@ -43,6 +43,15 @@ is the production config's. ``--all-formats`` reads diagnostics dumps too (the
 format is read, as before. Figures taken before this rewrite (the suggestion
 engine's "152 clean cycles" note) measured the old loop.
 
+The ``SHIPPED`` row is what the product offers: the model pass
+(``generate_model_suggestions``) on the export's history and options, its end-gate
+guard included, ``(suppressed)`` when it offers no Min Off Gap. The other rows
+replay each sizing statistic as is, to compare the methods, on an export with >= 5
+clean traces and 3 bridged spans at the detector's stop threshold. SHIPPED is
+asked on every export with a device type and >= 5 cycles, whatever that gate says
+(the pass reads cycle health at its own threshold), and replays the same clean
+traces as the other rows, or the pass's own clean ones when this scan kept none.
+
 Usage:  python3 devtools/min_off_gap_eval.py [--all-formats] [--jobs N]
 
 Exit codes: 0 ok, 2 no usable export in cycle_data/.
@@ -132,11 +141,43 @@ def _is_split(ended: list[dict], points, stop: float) -> bool:
     return float(ended[0].get("duration") or 0.0) < 0.9 * span
 
 
-def _bridged_spans(clean: list[dict], stop: float) -> tuple[list[float], int]:
+def _pulse_max_w(device_type: str, options: dict) -> float | None:
+    """The dryer pulse ceiling the engine measures with (#474), None elsewhere.
+
+    ``SuggestionEngine._measured_bridge_requirement``: on ``QUIET_PULSE_DEVICE_TYPES``
+    the entry's Anti-Wrinkle Max Power, else its default; no pulse rule on others.
+    """
+    from custom_components.ha_washdata.const import (  # noqa: PLC0415
+        CONF_ANTI_WRINKLE_MAX_POWER,
+        DEFAULT_ANTI_WRINKLE_MAX_POWER,
+        QUIET_PULSE_DEVICE_TYPES,
+    )
+    from custom_components.ha_washdata.suggestion_engine import _num  # noqa: PLC0415
+
+    if device_type not in QUIET_PULSE_DEVICE_TYPES:
+        return None
+    value = _num(options.get(CONF_ANTI_WRINKLE_MAX_POWER))
+    return DEFAULT_ANTI_WRINKLE_MAX_POWER if value is None else value
+
+
+def _bridged_spans(
+    clean: list[dict], stop: float, off_delay: float, end_energy: float,
+    pulse_max_w: float | None = None,
+) -> tuple[list[float], int]:
+    """The pauses the end gate needs bridged, as the engine measures them.
+
+    ``suggestion_engine.end_gate_pause_needs`` (register item 633): runs below the
+    stop threshold resumed by any reading at or above it, each needing bridging up
+    to the last moment the off_delay-window energy is at most end_energy; 0 (left
+    out) when the energy gate holds it. Until 0.6.1 this measured at max(stop, 2%
+    of the peak), where a dishwasher's terminal pump-out never ended its drying run.
+    ``pulse_max_w`` (:func:`_pulse_max_w`): a dryer's short pulses neither end a
+    run nor count as quiet, as the engine and the detector read them; without it
+    each pulse split one bridged run into two shorter ones (PR #529 review).
+    """
     from custom_components.ha_washdata.suggestion_engine import (  # noqa: PLC0415
-        _CLEAN_ACTIVE_FLOOR_RATIO,
         _cycle_readings,
-        _resumed_low_runs,
+        end_gate_pause_needs,
     )
 
     spans: list[float] = []
@@ -145,15 +186,14 @@ def _bridged_spans(clean: list[dict], stop: float) -> tuple[list[float], int]:
         pts = _cycle_readings(c)
         if len(pts) < 10:
             continue
-        peak = max((p for _, p in pts), default=0.0)
-        if peak <= 0:
+        if max((p for _, p in pts), default=0.0) <= 0:
             continue
         traced += 1
-        thr = max(stop, _CLEAN_ACTIVE_FLOOR_RATIO * peak)
-        for low_start, resume_idx in _resumed_low_runs(
-            pts, thr, 3600.0, min_resume_active_s=0.0
-        ):
-            spans.append(pts[resume_idx][0] - low_start)
+        spans.extend(
+            n for n in end_gate_pause_needs(
+                pts, stop, off_delay, end_energy, pulse_max_w=pulse_max_w
+            ) if n > 0
+        )
     return spans, traced
 
 
@@ -175,25 +215,49 @@ def _real_gaps(cycles: list[dict]) -> list[float]:
     ]
 
 
-def _shipped_suggestion(device_type, clean, raw, stop) -> int | None:
-    """Whatever `SuggestionEngine._suggest_min_off_gap` proposes for this export."""
+def _shipped_suggestion(
+    device_type: str, raw: list[dict], options: dict, profiles: dict | None = None
+) -> tuple[int | None, list[dict]]:
+    """(The Min Off Gap the shipped model pass offers for this export or None, the
+    cycles that pass reads as clean).
+
+    Drives ``SuggestionEngine.generate_model_suggestions`` with the export's history
+    and options (PR #529 review): it sizes the value with ``_suggest_min_off_gap``
+    and then withholds it when the end-gate guard finds that it ends one of the
+    device's own cycles inside a pause the setting in force bridges, a cycle the
+    clean filter may have left out of the sizing. Scoring the sizing helper alone
+    reported a value the product never offers. Nothing else is pending (the
+    export's stored suggestions predate the per-pass owners), so this is the model
+    pass against the settings in force.
+
+    The clean cycles are the pass's own (``generate_model_suggestions``: the newest
+    100, health read at its own stop threshold, Min Power when Stop is unset), which
+    can differ from this scan's (the detector's stop threshold).
+    """
     from unittest.mock import MagicMock  # noqa: PLC0415
 
+    from custom_components.ha_washdata.const import CONF_MIN_OFF_GAP  # noqa: PLC0415
     from custom_components.ha_washdata.suggestion_engine import (  # noqa: PLC0415
         SuggestionEngine,
+        select_clean_cycles,
     )
 
     hass = MagicMock()
     hass.config_entries.async_get_entry.return_value = None
+    hass.states.get.return_value = None
     store = MagicMock()
-    store.get_past_cycles.return_value = raw
-    store.get_profiles.return_value = {}
+    store.get_past_cycles.return_value = list(raw)
+    store.get_profiles.return_value = dict(profiles or {})
     store.get_suggestions.return_value = {}
-    eng = SuggestionEngine(hass, "eval", store, device_type=device_type)
-    out = eng._suggest_min_off_gap(  # pylint: disable=protected-access
-        clean, stop_threshold_w=stop, gap_cycles=raw
+    eng = SuggestionEngine(hass, "eval", store, device_type=device_type).for_job(options=options)
+    out = eng.generate_model_suggestions().get(CONF_MIN_OFF_GAP)
+    clean, _ = select_clean_cycles(
+        list(raw)[-100:],
+        stop_threshold_w=eng._current_stop_threshold(eng._entry_options()),  # noqa: SLF001
     )
-    return int(out["value"]) if out else None
+    if not isinstance(out, dict) or out.get("value") is None:
+        return None, clean
+    return int(out["value"]), clean
 
 
 def _scan(job: tuple[str, bool]) -> tuple[list[str], dict[str, dict[str, int]]] | None:
@@ -222,11 +286,26 @@ def _scan(job: tuple[str, bool]) -> tuple[list[str], dict[str, dict[str, int]]] 
     options = {k: v for k, v in (doc.get("entry_options") or {}).items() if v is not None}
     options.setdefault("device_type", device_type)
     replay_opts = {**entry_data, **options}
-    stop = float(_cfg(entry_data, options, device_type, None).stop_threshold_w)
+    cfg0 = _cfg(entry_data, options, device_type, None)
+    stop = float(cfg0.stop_threshold_w)
     clean, _ = select_clean_cycles(cycles, stop_threshold_w=stop)
     traces = [c for c in clean if len(_cycle_readings(c)) >= 10]
-    spans, traced = _bridged_spans(clean, stop)
-    if traced < 5 or len(spans) < 3 or not traces:
+    spans, traced = _bridged_spans(
+        clean, stop, float(cfg0.off_delay), float(cfg0.end_energy_threshold),
+        _pulse_max_w(device_type, replay_opts),
+    )
+    # The value the shipped model pass actually offers (sized, then judged by the
+    # end-gate guard), evaluated alongside the raw candidates so the regression is
+    # validated, not just the choice. Asked whatever this scan's own evidence gate
+    # says (PR #529 review): the pass reads cycle health at its own threshold (Min
+    # Power when Stop is unset, not the detector's 0.6 x Min Power), so a lead-in
+    # this scan calls a high start can be the evidence the pass sizes from.
+    profiles = (doc.get("data") or {}).get("profiles")
+    shipped, shipped_clean = _shipped_suggestion(
+        device_type, cycles, replay_opts, profiles if isinstance(profiles, dict) else None
+    )
+    compare = traced >= 5 and len(spans) >= 3 and bool(traces)
+    if not compare and shipped is None:
         return None
     significant = [s for s in spans if s > SIGNIFICANT_S]
     gaps = _real_gaps(cycles)
@@ -241,23 +320,29 @@ def _scan(job: tuple[str, bool]) -> tuple[list[str], dict[str, dict[str, int]]] 
         f"device default={floor}s  shortest real gap="
         + (f"{min(gaps):.0f}s" if gaps else "n/a")
     )
+    if not compare:
+        lines.append("      (too little clean evidence to compare the statistics)")
 
-    # The value the shipped heuristic actually proposes, evaluated alongside
-    # the raw candidates so the regression is validated, not just the choice.
-    shipped = _shipped_suggestion(device_type, clean, cycles, stop)
-    candidates = dict(CANDIDATES)
+    candidates = dict(CANDIDATES) if compare else {}
     if shipped is not None:
         candidates["SHIPPED"] = lambda _s, _g, v=shipped: float(v) - BUFFER_S
     else:
         lines.append("      SHIPPED          -> (suppressed)")
+    # SHIPPED replays the traces the statistics do; when this scan kept none, the
+    # ones the pass read as clean.
+    shipped_traces = traces or [c for c in shipped_clean if len(_cycle_readings(c)) >= 10]
 
     totals: dict[str, dict[str, int]] = {}
     for name, fn in candidates.items():
         value = int(max(DEFAULT_MIN_OFF_GAP, round(fn(spans, significant) + BUFFER_S)))
+        pool = shipped_traces if name == "SHIPPED" else traces
+        if not pool:
+            lines.append(f"      {name:16} -> {value:>6}s   (no clean trace to replay)")
+            continue
         cfg_split = _cfg(entry_data, options, device_type, value)
         splits = 0
         split_ids: list[str] = []
-        for c in traces:
+        for c in pool:
             pts = _cycle_readings(c)
             if _is_split(_replay(cfg_split, replay_opts, pts), pts, stop):
                 splits += 1
@@ -267,17 +352,17 @@ def _scan(job: tuple[str, bool]) -> tuple[list[str], dict[str, dict[str, int]]] 
         merges = 0
         if gaps:
             probe_gap = min(gaps)
-            a = _cycle_readings(traces[0])
+            a = _cycle_readings(pool[0])
             end = a[-1][0]
             joined = list(a)
             joined += [(end + probe_gap + t, p) for t, p in a]
             if len(_replay(cfg_split, replay_opts, joined)) < 2:
                 merges = 1
-        totals[name] = {"split": splits, "merge": merges, "cycles": len(traces)}
+        totals[name] = {"split": splits, "merge": merges, "cycles": len(pool)}
         ids = (" " + ",".join(split_ids)) if split_ids else ""
         merge_txt = ("MERGED" if merges else "ok") if gaps else "n/a"
         lines.append(
-            f"      {name:16} -> {value:>6}s   splits {splits}/{len(traces)}{ids}"
+            f"      {name:16} -> {value:>6}s   splits {splits}/{len(pool)}{ids}"
             f"   merge probe: {merge_txt}"
         )
     return lines, totals

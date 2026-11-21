@@ -1053,6 +1053,7 @@
     "sug_muted": "Won't suggest this setting again",
     "sug_staged": "Set {key} = {val}. Save to apply.",
     "sug_unmuted_all": "Muted suggestions reset",
+    "sug_unmute_incomplete": "Reset did not complete: some suggestions are still muted. Try again.",
     "tail_trim_hint": "Remove this many seconds from the end",
     "toast_auto_detect_enabled": "Auto-detect enabled",
     "toast_auto_label_complete": "Auto-label complete",
@@ -1116,6 +1117,10 @@
     "hist_warn_naive_time_other": "{n} timestamps have no time zone and were read as UTC. If the file uses local time, cycles are shifted by your UTC offset and readings near a DST change may be dropped.",
     "hist_tail_trimmed": "{min} min of waiting after the cycle ended were trimmed, as the live integration trims them",
     "invalid_threshold_pair": "Stop Threshold ({stop} W) must be below Start Threshold ({start} W). Nothing was saved; change both together.",
+    "end_gate_check_failed": "The suggested timing settings could not be checked against this appliance's pauses. Nothing was saved; try again.",
+    "analysis_superseded": "Settings or cycle data changed during the analysis. Run it again.",
+    "analysis_check_failed": "The suggested timing settings could not be checked against this appliance's pauses. Run it again.",
+    "apply_cycles_changed": "A cycle was saved while the suggestions were being applied. No setting was changed and the suggestions were cleared. Run the suggestion analysis again.",
     "bp_admin_only": "An administrator installs templates.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Created by WashData for {device}. Add your actions (notify, lights, ...).",
@@ -1306,11 +1311,11 @@
     },
     "door_end_dwell_seconds": {
       "label": "Door-Open End Dwell",
-      "doc": "With \"Door Opens Automatically At End\" on: how long the door must stay open before the cycle ends. Long enough to ignore adding a dish (default 60 s)."
+      "doc": "With \"Opening the Door Ends the Cycle\" on: how long the door must stay open before the cycle ends. Long enough to ignore adding a dish (default 60 s)."
     },
     "door_opens_at_end": {
-      "label": "Door Opens Automatically At End",
-      "doc": "For dishwashers that open the door at the end to dry (e.g. AirDry). A door left open for the dwell time below ends the cycle instead of pausing it; a brief open is ignored. Needs a Door Sensor Entity."
+      "label": "Opening the Door Ends the Cycle",
+      "doc": "With a Door Sensor Entity, a door held open for the dwell time below while the power is low ends the cycle instead of pausing it. In a paused cycle this happens only once the recognised program is nearly finished, so a pause mid-program stays a pause."
     },
     "door_sensor_entity": {
       "doc": "Optional door sensor. Shows when the appliance was opened to unload after a cycle.",
@@ -1722,7 +1727,9 @@
     "unlabelling": "Unlabelling…",
     "working": "Working…",
     "torn_pick": "{a} or {b}?",
-    "torn_tip": "WashData cannot tell these two apart yet, so pick the one that is running to label this cycle with it (Auto-detect undoes the choice)."
+    "torn_tip": "WashData cannot tell these two apart yet, so pick the one that is running to label this cycle with it (Auto-detect undoes the choice).",
+    "program_mismatch": "Looks more like {program}",
+    "program_mismatch_tip": "This cycle looks clearly more like {program} than {selected}, but WashData keeps the program you picked."
   },
   "suggestion": {
     "observed_label": "Observed",
@@ -1775,7 +1782,6 @@
     "reason": {
       "watchdog": "Kept as low as safe (just above the p95 update gap of {p95}s and at least 2x the sampling interval of {median}s, min 30s) so stalls are caught quickly without false stops.",
       "no_update_timeout": "Based on observed update cadence (p95={p95}s) * 20 (min 60s).",
-      "off_delay_cadence": "Based on observed update cadence (p95={p95}s) * 5",
       "off_delay_device_floor": "Used device-specific safe minimum for {device} ({floor}s).",
       "off_delay_generic_floor": "Used generic safe minimum ({floor}s).",
       "off_delay_pauses": "Sized to outlast real pauses: p95 intra-cycle pause {p95}s + 60s buffer, from {pauses} pauses across {cycles} clean cycles (floor {floor}s).",
@@ -1785,9 +1791,11 @@
       "max_duration_ratio": "Based on labeled cycle durations (p95={p95}).",
       "min_power": "40% of the p05 lowest active power ({p05}W) across {cycles} clean cycles, keeping the off-gate below real draw.{excl}",
       "completion_min_seconds": "Half the p05 clean-cycle duration ({minutes} min) across {cycles} cycles; filters ghost cycles.{excl}",
+      "completion_min_seconds_capped": "Capped at {cap} so the shortest programs still count; half the p05 clean-cycle duration ({minutes} min, {cycles} cycles) would be more.{excl}",
       "min_off_gap": "Based on {gaps} observed inter-cycle gaps (p05={p05}s). Device floor: {floor}s.",
       "min_off_gap_bridge": "Sized to bridge the longest quiet stretch inside a cycle: {span}s + 60s buffer, from {spans} bridged gaps across {cycles} clean cycles (stays under your {ceiling}s back-to-back headroom).",
       "standby_floor": "Every recent cycle was still drawing {idle}W when it ended, so a threshold below that can never see the appliance switch off. Kept above it; the {cycles} clean cycles on record never paused under it for more than {pause}s.",
+      "start_above_running": "This appliance's typical low running power is {low} W, but the start threshold is {start} W, so a run at that level never starts. Start set to half that level, stop below that.",
       "thr_batch": "Just above the lowest active power (p05) across {cycles} cycles ({p05}W), so starts are caught early and the stop threshold stays below the lowest running power.",
       "max_duration_ratio_default": "Back to the default: a lower ceiling rejects the right programme whenever a run is longer than usual.",
       "min_duration_ratio_default": "Back to the default: a higher floor stops a running cycle from being recognised until it is well under way.",
@@ -1990,6 +1998,8 @@
     "store_shared": "Shared to the community store - pending review.",
     "store_unavailable": "The community store is not available.",
     "suggestions_applied": "Suggestions applied; integration reloading",
+    "suggestions_none_applied": "No setting changed: the selected suggestions no longer apply",
+    "suggestions_changed": "The suggestions changed since you reviewed them. Nothing was saved; check them and apply again.",
     "suggestions_dismissed": "Suggestions dismissed",
     "task_cancelled": "Cancelled.",
     "thanks_confirming": "Thanks for confirming",
@@ -2231,6 +2241,9 @@
     },
     "cycle_overrun": {
       "name": "Cycle running long"
+    },
+    "program_mismatch": {
+      "name": "Running program differs from the selected one"
     },
     "cycle_paused": {
       "name": "Cycle paused"

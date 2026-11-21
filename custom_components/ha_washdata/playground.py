@@ -565,11 +565,23 @@ class _SimStore:
         self._pending = hit
         return hit[0]
 
-    def _grouped_snapshots(self, snapshots: list[dict[str, Any]]) -> Any:
+    async def _async_match_snapshots(self, used_dt: float) -> list[dict[str, Any]]:
+        # The live match moves uncached template resampling to the executor; the
+        # replay already runs off the loop and keeps its templates per grid above.
+        return self.build_match_snapshots(used_dt)
+
+    def _match_groups(self) -> None:
+        # The groups come with the snapshots they were mapped on (``_pending``);
+        # a replay in the executor never reads the live store's per match.
+        return None
+
+    def _grouped_snapshots(
+        self, snapshots: list[dict[str, Any]], groups: dict[str, Any] | None = None
+    ) -> Any:
         pending = self._pending
         if pending is not None and pending[0] is snapshots:
             return pending[1]
-        return self._store._grouped_snapshots(snapshots)  # noqa: SLF001
+        return self._store._grouped_snapshots(snapshots, groups)  # noqa: SLF001
 
     def match(
         self,

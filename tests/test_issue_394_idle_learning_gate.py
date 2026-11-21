@@ -135,12 +135,19 @@ def test_detector_receives_every_reading_even_when_idle(manager: WashDataManager
 
 
 def test_learning_gets_the_previous_reading_time(manager: WashDataManager) -> None:
-    """When it IS called, it still receives the prior reading time as the 3rd arg
-    (the delta source), not the just-updated one."""
+    """When it IS called, it still receives the prior report time as the 3rd arg
+    (the delta source), not the just-updated one. Since PR #529's review that is
+    the sensor's previous report, not ``_last_reading_time`` (keepalives move it)."""
     prev = datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
-    manager._last_reading_time = prev
+    manager._last_sensor_report = (manager.power_sensor_entity_id, prev)
     manager.detector.state = STATE_RUNNING
     manager._async_power_changed(_power_event(100.0))
     args = manager.learning_manager.process_power_reading.call_args[0]
     assert args[0] == 100.0
-    assert args[2] == prev  # previous reading time, not `now`
+    assert args[2] == prev  # previous report time, not `now`
+    # Another sensor's report starts no interval for this one.
+    manager._last_sensor_report = ("sensor.old_plug", prev)
+    manager._last_reading_time = None  # past the sampling-interval throttle
+    manager._async_power_changed(_power_event(100.0))
+    assert manager.learning_manager.process_power_reading.call_count == 2
+    assert manager.learning_manager.process_power_reading.call_args[0][2] is None

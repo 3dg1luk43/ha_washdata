@@ -23,6 +23,7 @@
       "envelope_position": null,
       "match_uncertainty": null,
       "match_choices": null,
+      "program_mismatch": null,
       "options": {
         "name": "Test Washer",
         "device_type": "washing_machine",

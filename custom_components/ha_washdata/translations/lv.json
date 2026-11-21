@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Pēdējā cikla izmaksas"
+      },
+      "last_cycle_start": {
+        "name": "Pēdējā cikla sākums"
       }
     },
     "select": {
@@ -572,6 +575,7 @@
       "phase_started": "Fāze sākās",
       "finishing_soon": "Drīz beigsies",
       "cycle_overrun": "Cikls ilgst pārāk ilgi",
+      "program_mismatch": "Darbojošā programma atšķiras no izvēlētās",
       "cycle_paused": "Cikls pauzēts",
       "cycle_resumed": "Cikls atsākās",
       "still_tumbling": "Trumulis vēl griežas pēc cikla",
@@ -646,6 +650,16 @@
         "percent": {
           "name": "Garāks par",
           "description": "Procenti virs programmas parastā ilguma."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Darbojošā programma atšķiras no izvēlētās",
+      "description": "Aktivizējas vienu reizi, kad cikls labāk atbilst citai programmai nekā jūsu izvēlētajai. Jauna izvēle sāk jaunu pārbaudi.",
+      "fields": {
+        "program": {
+          "name": "Programma",
+          "description": "Tikai tad, ja izvēlēta šī programma, ar precīzu nosaukumu. Atstājiet tukšu jebkurai programmai."
         }
       }
     },

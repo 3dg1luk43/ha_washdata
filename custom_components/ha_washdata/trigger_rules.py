@@ -65,6 +65,7 @@ from .const import (
     TRIGGER_FINISHING_SOON_DEFAULT_MINUTES,
     TRIGGER_MAINTENANCE_DUE,
     TRIGGER_PHASE_STARTED,
+    TRIGGER_PROGRAM_MISMATCH,
     TRIGGER_PROGRAM_RECOGNISED,
     TRIGGER_STATE_CHANGED,
     TRIGGER_STILL_TUMBLING,
@@ -113,8 +114,13 @@ def _minutes(default: int) -> Any:
     return vol.Optional(OPT_MINUTES, default=default)
 
 
-def _same_text(wanted: Any, actual: Any) -> bool:
-    return isinstance(actual, str) and str(wanted).strip().casefold() == actual.strip().casefold()
+def _same_text(wanted: Any, actual: Any, *, exact: bool = False) -> bool:
+    """Whether a filter's text names ``actual``: trimmed, case-folded unless ``exact``."""
+    if not isinstance(actual, str):
+        return False
+    if exact:
+        return str(wanted).strip() == actual.strip()
+    return str(wanted).strip().casefold() == actual.strip().casefold()
 
 
 class _CoerceInt(vol.Coerce):
@@ -149,6 +155,7 @@ OPTION_FIELDS: dict[str, dict[Any, Any]] = {
             _CoerceInt(), vol.Range(min=PERCENT_RANGE[0], max=PERCENT_RANGE[1])
         ),
     },
+    TRIGGER_PROGRAM_MISMATCH: {vol.Optional(OPT_PROGRAM): _TEXT},
     TRIGGER_CYCLE_PAUSED: {vol.Optional(OPT_INCLUDE_DETECTED, default=False): bool},
     TRIGGER_CYCLE_RESUMED: {vol.Optional(OPT_INCLUDE_DETECTED, default=False): bool},
     TRIGGER_CYCLE_FINISHED: {vol.Optional(OPT_PROGRAM): _TEXT},
@@ -198,9 +205,14 @@ def run_variables(  # noqa: C901 - one flat branch per trigger type
     filter it out. Never raises; drops the ``_`` keys."""
     opts = options or {}
     public = {k: v for k, v in variables.items() if not str(k).startswith("_")}
-    if trigger_type in (TRIGGER_PROGRAM_RECOGNISED, TRIGGER_CYCLE_FINISHED):
+    if trigger_type in (
+        TRIGGER_PROGRAM_RECOGNISED, TRIGGER_CYCLE_FINISHED, TRIGGER_PROGRAM_MISMATCH
+    ):
         wanted = opts.get(OPT_PROGRAM)
-        if wanted and not _same_text(wanted, variables.get("program")):
+        # The picked program by its exact name (PR #529 review): "Eco" and "ECO"
+        # are two profiles, and the filter says it takes the exact name.
+        exact = trigger_type == TRIGGER_PROGRAM_MISMATCH
+        if wanted and not _same_text(wanted, variables.get("program"), exact=exact):
             return None
     elif trigger_type == TRIGGER_PHASE_STARTED:
         wanted = opts.get(OPT_PHASE)

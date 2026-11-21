@@ -127,7 +127,7 @@ async def test_every_retired_key_goes_from_options_and_data(hass: HomeAssistant)
 
     assert await async_migrate_entry(hass, entry) is True
 
-    assert (entry.version, entry.minor_version) == (3, 13) == (
+    assert (entry.version, entry.minor_version) == (3, 15) == (
         CONFIG_ENTRY_VERSION, CONFIG_ENTRY_MINOR_VERSION,
     )
     _no_retired_keys(entry)
@@ -338,4 +338,4 @@ async def test_get_options_hides_a_stray_retired_key(hass: HomeAssistant) -> Non
 
     assert not set(sent["options"]) & RETIRED_OPTION_KEYS
     assert sent["options"][CONF_OFF_DELAY] == 120
-    assert sent["defaults"]["sampling_interval"] == 30.0  # the dryer's cadence
+    assert sent["defaults"]["sampling_interval"] == 2.0  # the dryer's cadence (0.6.1)

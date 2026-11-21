@@ -84,7 +84,7 @@ KEYS = (
     "status", "duration", "energy_kwh", "end_time", "label_applied", "anomaly",
     "minutes_since_finish", "bursts", "burst_seconds", "how", "minutes_waiting",
     "from_state", "to_state", "task", "task_name", "due_reason", "cycle_count",
-    "elapsed_seconds", "threshold_seconds", "cycle_id",
+    "elapsed_seconds", "threshold_seconds", "cycle_id", "looks_like", "margin",
 )
 
 
@@ -175,6 +175,7 @@ SAMPLES: dict[str, dict[str, Any]] = {
                        "_from_minute": 11, "_to_minute": 9},
     "cycle_overrun": {"overrun_ratio": 1.21, "expected_duration": 3600,
                       "_from_percent": 15, "_to_percent": 21},
+    "program_mismatch": {"looks_like": "Synthetics", "margin": 0.2, "elapsed_seconds": 1800},
     "cycle_paused": {"reason": "user", "_previous_reason": None},
     "cycle_resumed": {"reason": "user", "paused_seconds": 60, "_new_reason": None,
                       "_user_paused_seconds": 60},
@@ -971,6 +972,12 @@ async def test_device_trigger_options_filter(hass: HomeAssistant, setup_washdata
         ("program_recognised", {"program": " cotton "}, {"program": "Cotton"}, True),
         ("program_recognised", {"program": "Eco"}, {"program": "Cotton"}, False),
         ("cycle_finished", {"program": "Eco"}, {"program": None}, False),
+        # PR #529 review: the picked program by its exact name, "Eco" and "ECO" are
+        # two profiles; the other program filters stay case-insensitive.
+        ("program_mismatch", {"program": " Eco "}, {"program": "Eco"}, True),
+        ("program_mismatch", {"program": "Eco"}, {"program": "ECO"}, False),
+        ("program_mismatch", {}, {"program": "ECO"}, True),
+        ("cycle_finished", {"program": "Eco"}, {"program": "ECO"}, True),
         ("phase_started", {"phase": "rinse"}, {"phase": "Rinse"}, True),
         ("phase_started", {"phase": "Spin"}, {"phase": "Rinse"}, False),
         ("finishing_soon", {"minutes": 10}, {"_from_minute": None, "_to_minute": 3}, True),

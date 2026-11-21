@@ -141,3 +141,45 @@ async def test_a_current_match_is_still_applied(mock_hass) -> None:
     mgr._current_power = 500.0
     await mgr._async_do_perform_matching(readings, mgr._match_identity())
     assert mgr.detector._matched_profile == "Cotton"
+
+
+async def test_a_program_picked_while_the_match_ran_wins(mock_hass) -> None:
+    """Review of PR #529: the user pinned Eco while an automatic match was in the
+    executor; its decisive Cotton result overwrote the pick and its length."""
+    mgr = _manager(mock_hass)
+    readings = _put_in_ending(mgr)
+    mgr._current_power = 500.0
+    mgr._current_program = "Eco"
+    real = mgr.profile_store.async_match_profile
+
+    async def picked_meanwhile(*a: Any, **k: Any) -> Any:
+        out = await real(*a, **k)
+        mgr._manual_program_active = True
+        mgr._program_pick_generation = getattr(mgr, "_program_pick_generation", 0) + 1
+        return out
+
+    mgr.profile_store.async_match_profile = picked_meanwhile
+    await mgr._async_do_perform_matching(readings, mgr._match_identity())
+    assert mgr._current_program == "Eco"
+    assert mgr.detector._matched_profile != "Cotton"
+
+
+async def test_a_crashed_alignment_check_after_a_pick_is_discarded(mock_hass) -> None:
+    """Review of PR #529: the alignment fallback carried a tick superseded by a
+    pick made while the check was in the executor into the detector."""
+    mgr = _manager(mock_hass)
+    readings = _put_in_ending(mgr)
+    mgr._current_power = 0.0
+    mgr.detector._matched_profile = "Cotton"
+    identity = mgr._match_identity()
+
+    async def _verify(*_a: Any, **_k: Any) -> tuple[bool, float, float]:
+        mgr._manual_program_active = True
+        mgr._program_pick_generation = getattr(mgr, "_program_pick_generation", 0) + 1
+        raise RuntimeError("executor failed")
+
+    mgr.profile_store.async_verify_alignment = _verify
+    seen: list[Any] = []
+    mgr.detector.update_match = lambda *a, **k: seen.append(a)
+    await mgr._async_do_perform_matching(readings, identity)
+    assert seen == []

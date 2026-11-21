@@ -150,7 +150,10 @@ class TestMinPowerDetectionSuggestion:
     def test_min_power_excludes_tail_on_anti_crease_device(self):
         """p05 min-active should reflect the MAIN phase (200 W), not the 3 W baseline."""
         eng = SuggestionEngine(MagicMock(), "e", self._make_store_with_cycles(), DEVICE_TYPE_DRYER)
-        eng._entry_options = lambda: _ANTI_CREASE_OPTIONS
+        # Min Power is only suggested once Start/Stop are set (audit 2026-11-16).
+        eng._entry_options = lambda: {
+            **_ANTI_CREASE_OPTIONS, "start_threshold_w": 5.0, "stop_threshold_w": 3.0,
+        }
         result = eng.generate_detection_suggestions()
         # min_power = max(p05 * 0.4, 1.0) capped at 10.0
         # With tail stripped, p05 min_active ≥ 200 W → p05 * 0.4 = 80 W → capped at 10.0
@@ -187,21 +190,21 @@ class TestOffDelayCadenceSuppressed:
         result = eng.generate_operational_suggestions(p95_dt=81.3, median_dt=30.0)
         assert CONF_OFF_DELAY not in result
 
-    def test_cadence_off_delay_present_when_anti_crease_off(self):
-        """Normal (non-anti-crease) path still emits the cadence-based off_delay."""
+    def test_no_cadence_off_delay_when_anti_crease_off(self):
+        """Without pause evidence no device gets a cadence off_delay any more
+        (audit 2026-11-16: it raised the value with nothing measured)."""
         eng = _engine(options={CONF_ANTI_WRINKLE_ENABLED: False, CONF_ANTI_WRINKLE_MAX_POWER: 400.0})
         eng.profile_store.get_past_cycles.return_value = []
         eng._current_stop_threshold = lambda opts: 4.0
         result = eng.generate_operational_suggestions(p95_dt=81.3, median_dt=30.0)
-        assert CONF_OFF_DELAY in result
+        assert CONF_OFF_DELAY not in result
 
-    def test_cadence_off_delay_present_for_ineligible_device(self):
-        """Dishwasher is not anti-crease eligible; cadence path must run normally."""
+    def test_no_cadence_off_delay_for_ineligible_device(self):
         eng = _engine(device_type=DEVICE_TYPE_DISHWASHER)
         eng.profile_store.get_past_cycles.return_value = []
         eng._current_stop_threshold = lambda opts: 4.0
         result = eng.generate_operational_suggestions(p95_dt=81.3, median_dt=30.0)
-        assert CONF_OFF_DELAY in result
+        assert CONF_OFF_DELAY not in result
 
 
 # ─── Gap C: pause-based off_delay strips anti-crease inter-burst gaps ─────────

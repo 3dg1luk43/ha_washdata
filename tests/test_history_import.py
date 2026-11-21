@@ -461,7 +461,7 @@ def test_cadence_gate_is_relative_to_the_devices_own_reporting_rate():
 
 def test_sample_floor_follows_the_device_type():
     """A pump cycle is seconds long; a flat floor of 20 samples would discard it."""
-    assert hi.min_block_samples(washer_config()) == 20
+    assert hi.min_block_samples(washer_config()) == 10  # a 5 min completion floor
     assert hi.min_block_samples(washer_config(device_type=DEVICE_TYPE_PUMP)) == 3
 
 

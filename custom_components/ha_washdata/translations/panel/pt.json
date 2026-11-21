@@ -1001,6 +1001,7 @@
     "sug_muted": "Esta definição não será sugerida novamente",
     "sug_mute_failed": "Não foi possível silenciar a sugestão",
     "sug_unmuted_all": "Sugestões silenciadas repostas",
+    "sug_unmute_incomplete": "A reposição não foi concluída: algumas sugestões continuam silenciadas. Tente novamente.",
     "n_suggestions_muted": "{count} sugestões silenciadas; o ajustador automático não as proporá.",
     "n_suggestions_muted_one": "{count} sugestão silenciada; o ajustador automático não a proporá.",
     "n_suggestions_muted_many": "{count} sugestões silenciadas; o ajustador automático não as proporá.",
@@ -1053,6 +1054,10 @@
     "pg_in_sample_note": "Estes ciclos ajudaram a construir os perfis com que são comparados, por isso os resultados são otimistas: conte com um pouco menos de correspondências certas em ciclos novos.",
     "hist_tail_trimmed": "Foram cortados {min} min de espera após o fim do ciclo, tal como faz a integração em tempo real",
     "invalid_threshold_pair": "O Limiar de Paragem ({stop} W) tem de ser inferior ao Limiar de Início ({start} W). Nada foi guardado; altere ambos em conjunto.",
+    "end_gate_check_failed": "Não foi possível verificar as definições de tempo sugeridas em relação às pausas deste aparelho. Nada foi guardado; tente novamente.",
+    "analysis_superseded": "As definições ou os dados dos ciclos mudaram durante a análise. Execute-a novamente.",
+    "analysis_check_failed": "Não foi possível verificar as definições de tempo sugeridas em relação às pausas deste aparelho. Execute-a novamente.",
+    "apply_cycles_changed": "Um ciclo foi guardado enquanto as sugestões eram aplicadas. Nenhuma definição foi alterada e as sugestões foram limpas. Execute novamente a análise de sugestões.",
     "hist_truncated": "parou no limite de {n} leituras, pelo que o resto do histórico não foi analisado",
     "hist_warn_kw": "A leitura mais alta é de apenas {w}. Este sensor parece indicar quilowatts; o WashData precisa de watts, por isso não é possível detetar ciclos.",
     "hist_warn_naive_time": "{n} carimbos de data/hora não têm fuso horário e foram lidos como UTC. Se o ficheiro usar a hora local, os ciclos ficam desfasados pela sua diferença em relação ao UTC e podem perder-se leituras perto de uma mudança da hora de verão.",
@@ -1533,12 +1538,12 @@
       "doc": "O que um toque na notificação deste eletrodoméstico abre. Em branco: o painel WashData neste eletrodoméstico. Introduza um caminho de painel (p. ex. /lovelace/laundry) ou um URL, ou \"none\" para nenhuma ação ao tocar."
     },
     "door_opens_at_end": {
-      "label": "Porta Abre Automaticamente no Fim",
-      "doc": "Para máquinas de lavar loiça que abrem a porta no fim para secar (p. ex. AirDry). Uma porta que fica aberta durante o tempo de espera abaixo termina o ciclo em vez de o pausar; uma abertura breve é ignorada. Requer uma Entidade do Sensor de Porta."
+      "label": "Abrir a Porta Termina o Ciclo",
+      "doc": "Com uma Entidade do Sensor de Porta, uma porta que fica aberta durante o tempo de espera abaixo, com a potência baixa, termina o ciclo em vez de o pausar. Em pausa, isto só acontece quando o programa reconhecido está quase concluído, por isso uma pausa a meio do programa continua a ser uma pausa."
     },
     "door_end_dwell_seconds": {
       "label": "Tempo de Espera com Porta Aberta para Fim",
-      "doc": "Com «Porta Abre Automaticamente no Fim» ligado: quanto tempo a porta tem de ficar aberta antes de o ciclo terminar. O suficiente para ignorar que se junta um prato (predefinição 60 s)."
+      "doc": "Com «Abrir a Porta Termina o Ciclo» ligado: quanto tempo a porta tem de ficar aberta antes de o ciclo terminar. O suficiente para ignorar que se junta um prato (predefinição 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Ciclos que moldam um programa",
@@ -1672,6 +1677,8 @@
     "working": "A processar…",
     "torn_pick": "{a} ou {b}?",
     "torn_tip": "O WashData ainda não consegue distinguir estes dois programas, por isso escolha o que está a decorrer para rotular este ciclo com ele (a opção Detectar automaticamente anula a escolha).",
+    "program_mismatch": "Parece-se mais com {program}",
+    "program_mismatch_tip": "Este ciclo parece-se claramente mais com {program} do que com {selected}, mas o WashData mantém o programa que escolheu.",
     "match_uncertain": "Incerto: {top} ou {runner}",
     "match_uncertain_single": "Incerto: talvez {top}",
     "match_sure": "~{pct}% de certeza",
@@ -1766,6 +1773,8 @@
     "settings_reverted": "Definições revertidas; a integração está a recarregar",
     "settings_saved": "Definições guardadas; a integração está a recarregar",
     "suggestions_applied": "Sugestões aplicadas; a integração está a recarregar",
+    "suggestions_none_applied": "Nenhuma definição alterada: as sugestões selecionadas já não se aplicam",
+    "suggestions_changed": "As sugestões mudaram desde que as reviu. Nada foi guardado; verifique-as e aplique novamente.",
     "suggestions_dismissed": "Sugestões dispensadas",
     "apply_failed": "Falha ao aplicar: {error}",
     "delete_failed": "Falha ao eliminar: {error}",
@@ -1923,6 +1932,7 @@
     },
     "reason": {
       "completion_min_seconds": "Metade da duração p05 dos ciclos limpos ({minutes} min) ao longo de {cycles} ciclos; filtra os ciclos fantasma.{excl}",
+      "completion_min_seconds_capped": "Limitado a {cap} para que os programas mais curtos continuem a contar; metade da duração p05 dos ciclos limpos ({minutes} min, {cycles} ciclos) seria superior.{excl}",
       "match_interval": "Com base na cadência de atualização observada (mediana={median}s) * 10.",
       "match_interval_capped": "Limitado para que {persistence} correspondências consecutivas caibam em {pct}% do programa mais curto ({shortest}s); só a cadência de atualização (mediana={median}s) teria sugerido um intervalo mais longo.",
       "match_interval_floored": "O programa mais curto ({shortest}s) limitaria isto a {cap}s, abaixo do mínimo de {minimum}s, por isso usa-se o mínimo: {persistence} correspondências seguidas demoram {budget}s, mais de {pct}% desse programa. A correspondência só corre quando chega uma leitura (mediana={median}s), por isso não custa nada.",
@@ -1931,7 +1941,6 @@
       "min_off_gap_bridge": "Dimensionado para cobrir o período de silêncio mais longo dentro de um ciclo: {span}s + 60s de margem, a partir de {spans} intervalos cobertos ao longo de {cycles} ciclos limpos (mantém-se abaixo do seu intervalo mínimo de {ceiling}s entre cargas consecutivas).",
       "min_power": "40% da potência ativa mais baixa no p05 ({p05}W) ao longo de {cycles} ciclos limpos, mantendo o limiar de desligamento abaixo do consumo real.{excl}",
       "no_update_timeout": "Com base na cadência de atualização observada (p95={p95}s) * 20 (mín. 60s).",
-      "off_delay_cadence": "Com base na cadência de atualização observada (p95={p95}s) * 5",
       "off_delay_device_floor": "Utilizado o mínimo seguro específico do dispositivo para {device} ({floor}s).",
       "off_delay_generic_floor": "Utilizado o mínimo seguro genérico ({floor}s).",
       "off_delay_pauses": "Dimensionado para durar mais do que as pausas reais: pausa intraciclo p95 {p95}s + 60s de margem, a partir de {pauses} pausas ao longo de {cycles} ciclos limpos (mínimo {floor}s).",
@@ -1940,7 +1949,8 @@
       "watchdog": "Mantido o mais baixo que é seguro (ligeiramente acima do intervalo de atualização p95 de {p95}s e pelo menos 2x o intervalo de amostragem de {median}s, mín. 30s) para detetar rapidamente os bloqueios sem paragens falsas.",
       "end_energy_floor": "Elevado ao mínimo implicado pelo limiar de paragem ({stop} W) durante o atraso de desligamento ({off_delay} s); abaixo dele, o ciclo só pode terminar por um mecanismo de recurso.",
       "max_duration_ratio_default": "Reposto o valor predefinido: um limite superior mais baixo rejeita o programa certo sempre que um ciclo dura mais do que o habitual.",
-      "min_duration_ratio_default": "Reposto o valor predefinido: um limite inferior mais alto impede que um ciclo em curso seja reconhecido até estar bem adiantado."
+      "min_duration_ratio_default": "Reposto o valor predefinido: um limite inferior mais alto impede que um ciclo em curso seja reconhecido até estar bem adiantado.",
+      "start_above_running": "A potência de funcionamento baixa típica deste eletrodoméstico é {low} W, mas o limiar de início é {start} W, pelo que um ciclo a esse nível nunca arranca. Limiar de início definido para metade desse nível, limiar de paragem abaixo disso."
     },
     "exclusions": {
       "summary": "Excluído(s) {total} ciclo(s) mal detetado(s): {parts}.",
@@ -2251,6 +2261,9 @@
     },
     "cycle_overrun": {
       "name": "Ciclo em atraso"
+    },
+    "program_mismatch": {
+      "name": "O programa em curso difere do selecionado"
     },
     "cycle_paused": {
       "name": "Ciclo em pausa"

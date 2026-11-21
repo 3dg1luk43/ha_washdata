@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Paskutinio ciklo kaina"
+      },
+      "last_cycle_start": {
+        "name": "Paskutinio ciklo pradžia"
       }
     },
     "select": {
@@ -572,6 +575,7 @@
       "phase_started": "Fazė prasidėjo",
       "finishing_soon": "Baigsis greitai",
       "cycle_overrun": "Ciklas trunka per ilgai",
+      "program_mismatch": "Veikianti programa skiriasi nuo pasirinktos",
       "cycle_paused": "Ciklas pristabdytas",
       "cycle_resumed": "Ciklas atnaujintas",
       "still_tumbling": "Vis dar sukasi po ciklo",
@@ -646,6 +650,16 @@
         "percent": {
           "name": "Ilgesnis per",
           "description": "Procentai viršijant įprastą programos trukmę."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Veikianti programa skiriasi nuo pasirinktos",
+      "description": "Suaktyvinamas vieną kartą, kai ciklas geriau atitinka kitą programą nei jūsų pasirinktąją. Naujas pasirinkimas pradeda naują patikrą.",
+      "fields": {
+        "program": {
+          "name": "Programa",
+          "description": "Tik kai pasirinkta ši programa, tiksliu pavadinimu. Palikite tuščia bet kuriai programai."
         }
       }
     },

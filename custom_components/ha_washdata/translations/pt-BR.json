@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Custo do último ciclo"
+      },
+      "last_cycle_start": {
+        "name": "Início do último ciclo"
       }
     },
     "select": {
@@ -572,6 +575,7 @@
       "phase_started": "Fase iniciada",
       "finishing_soon": "Encerrando em breve",
       "cycle_overrun": "Ciclo em atraso",
+      "program_mismatch": "O programa em andamento difere do selecionado",
       "cycle_paused": "Ciclo pausado",
       "cycle_resumed": "Ciclo retomado",
       "still_tumbling": "Ainda girando após o ciclo",
@@ -646,6 +650,16 @@
         "percent": {
           "name": "A mais de",
           "description": "Percentagem acima da duração habitual do programa."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "O programa em andamento difere do selecionado",
+      "description": "Aciona uma vez quando o ciclo corresponde melhor a outro programa do que ao que você escolheu. Uma nova escolha inicia uma nova verificação.",
+      "fields": {
+        "program": {
+          "name": "Programa",
+          "description": "Somente quando este programa for o escolhido, pelo nome exato. Deixe vazio para qualquer programa."
         }
       }
     },

@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "上次循环费用"
+      },
+      "last_cycle_start": {
+        "name": "上次循环开始时间"
       }
     },
     "select": {
@@ -572,6 +575,7 @@
       "phase_started": "阶段已开始",
       "finishing_soon": "即将完成",
       "cycle_overrun": "周期运行过长",
+      "program_mismatch": "运行中的程序与所选程序不同",
       "cycle_paused": "周期已暂停",
       "cycle_resumed": "周期已恢复",
       "still_tumbling": "周期结束后仍在转动",
@@ -646,6 +650,16 @@
         "percent": {
           "name": "超出",
           "description": "超过程序通常时长的百分比。"
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "运行中的程序与所选程序不同",
+      "description": "当周期与另一个程序比与您所选的程序更匹配时触发一次。新的选择会开始新的检查。",
+      "fields": {
+        "program": {
+          "name": "程序",
+          "description": "仅当所选程序为此程序时，使用准确名称。留空表示任意程序。"
         }
       }
     },

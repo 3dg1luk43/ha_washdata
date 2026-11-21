@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Kostoja e ciklit të fundit"
+      },
+      "last_cycle_start": {
+        "name": "Fillimi i ciklit të fundit"
       }
     },
     "select": {
@@ -572,6 +575,7 @@
       "phase_started": "Faza filloi",
       "finishing_soon": "Po mbaron së shpejti",
       "cycle_overrun": "Cikli po zgjat shumë",
+      "program_mismatch": "Programi që po ekzekutohet ndryshon nga ai i zgjedhur",
       "cycle_paused": "Cikli u ndërpre",
       "cycle_resumed": "Cikli u vazhdua",
       "still_tumbling": "Vazhdon të rrotullohet pas ciklit",
@@ -646,6 +650,16 @@
         "percent": {
           "name": "Më i gjatë me",
           "description": "Përqindja mbi kohëzgjatjen e zakonshme të programit."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Programi që po ekzekutohet ndryshon nga ai i zgjedhur",
+      "description": "Aktivizohet një herë kur cikli i përshtatet më mirë një programi tjetër sesa atij që zgjodhët. Një zgjedhje e re nis një kontroll të ri.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Vetëm kur ky program është ai i zgjedhur, me emrin e saktë. Lëreni bosh për çdo program."
         }
       }
     },

@@ -80,6 +80,18 @@ class MatchUncertainty(TypedDict):
     sure_pct: int
 
 
+class ProgramMismatch(TypedDict):
+    """#530: the running cycle does not look like the program picked by hand.
+
+    ``selected`` is the pick, ``looks_like`` the program that fits better and
+    ``margin`` by how much (``match_rules.program_mismatch_tick``). Display only.
+    """
+
+    selected: str
+    looks_like: str | None
+    margin: float | None
+
+
 class DeviceInfo(TypedDict):
     """One entry in :class:`GetDevicesResponse`: live state for a device."""
 
@@ -104,6 +116,9 @@ class DeviceInfo(TypedDict):
     # MATCH_LABEL_MIN_MARGIN (the cycle would end in a review); None otherwise.
     # The Status card offers both as a manual pick. Display only.
     match_choices: list[str] | None
+    # Set once the background check of a hand-picked program finds that another
+    # program fits the running cycle clearly better (#530); None otherwise.
+    program_mismatch: ProgramMismatch | None
     suggestions_count: int
     suggestion_keys: list[str]
     feedback_count: int
@@ -368,14 +383,34 @@ class GetSuggestionsResponse(TypedDict):
     locked_suggestions: list[str]
 
 
-class ApplySuggestionsResponse(TypedDict):
+class _ApplySuggestionsBase(TypedDict):
     success: bool
     applied: list[str]
 
 
-class SetSuggestionLockResponse(TypedDict):
+class ApplySuggestionsResponse(_ApplySuggestionsBase, total=False):
+    """``success`` False, with ``applied`` empty, when nothing was written.
+
+    ``changed``: the keys whose suggestion differs from the confirmed ``values``;
+    the reply then carries ``suggestions`` and ``locked_suggestions`` as
+    ``get_suggestions`` does, for the user to confirm again.
+    """
+
+    changed: list[str]
+    suggestions: list[dict[str, Any]]
+    locked_suggestions: list[str]
+
+
+class _SetSuggestionLockBase(TypedDict):
     success: bool
     locked_suggestions: list[str]
+
+
+class SetSuggestionLockResponse(_SetSuggestionLockBase, total=False):
+    """``reloaded`` True: a full reload replaced the device during the write, so
+    ``locked_suggestions`` is the live device's and the client re-reads it."""
+
+    reloaded: bool
 
 
 class RunSuggestionAnalysisResponse(TypedDict, total=False):
@@ -1152,7 +1187,9 @@ WS_COMMANDS: dict[str, dict] = {
     "undo_import": {"params": [_entry()]},
     "get_constants": {"params": []},
     "get_suggestions": {"params": [_entry()]},
-    "apply_suggestions": {"params": [_entry(), _p("keys", "list[str]")]},
+    "apply_suggestions": {"params": [
+        _entry(), _p("keys", "list[str]"), _p("values", "dict", False),
+    ]},
     "clear_suggestions": {"params": [_entry()]},
     "set_suggestion_lock": {"params": [_entry(), _p("key", "str"), _p("locked", "bool")]},
     "run_suggestion_analysis": {"params": [_entry()]},

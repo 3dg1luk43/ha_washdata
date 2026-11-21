@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Náklady posledního cyklu"
+      },
+      "last_cycle_start": {
+        "name": "Začátek posledního cyklu"
       }
     },
     "select": {
@@ -572,6 +575,7 @@
       "phase_started": "Fáze zahájena",
       "finishing_soon": "Brzy konec",
       "cycle_overrun": "Cyklus trvá příliš dlouho",
+      "program_mismatch": "Běžící program se liší od vybraného",
       "cycle_paused": "Cyklus pozastaven",
       "cycle_resumed": "Cyklus obnoven",
       "still_tumbling": "Stále otáčí bubnem po skončení",
@@ -646,6 +650,16 @@
         "percent": {
           "name": "Delší o",
           "description": "Procent nad obvyklou délkou programu."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Běžící program se liší od vybraného",
+      "description": "Spustí se jednou, když cyklu odpovídá jiný program lépe než ten, který jste vybrali. Nový výběr spustí novou kontrolu.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Pouze když je vybrán tento program, přesným názvem. Prázdné = jakýkoli program."
         }
       }
     },

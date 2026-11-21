@@ -1026,6 +1026,7 @@
         "sug_muted": "将不再建议此设置",
         "sug_mute_failed": "无法屏蔽建议",
         "sug_unmuted_all": "已重置屏蔽的建议",
+        "sug_unmute_incomplete": "重置未完成：部分建议仍被屏蔽。请重试。",
         "n_suggestions_muted": "已屏蔽 {count} 条建议，自动调整器将不再提议这些建议。",
         "n_suggestions_muted_other": "已屏蔽 {count} 条建议，自动调整器将不再提议这些建议。",
         "font_size_hint": "调整此面板所有内容的字体大小，仅对您在此设备上的账户生效。",
@@ -1088,6 +1089,10 @@
         "cycle_context_none": "记录器中没有此周期前后的读数（Home Assistant 默认保留 10 天的历史）。",
         "cycle_context_tip": "仅用于显示：显示功率传感器在此周期前后的记录器历史（如仍保留）。若要将失败的启动尝试并入以后的周期，请使用“曲线前导采样”（设置 > 检测 > 周期开始），这会改变存储的时长。",
         "invalid_threshold_pair": "停止阈值（{stop} W）必须低于启动阈值（{start} W）。未保存任何内容；请同时修改这两个值。",
+        "end_gate_check_failed": "无法根据该设备的暂停情况检查建议的时间设置。未保存任何内容；请重试。",
+        "analysis_superseded": "分析期间设置或周期数据已更改。请重新运行。",
+        "analysis_check_failed": "无法根据该设备的暂停情况检查建议的时间设置。请重新运行。",
+        "apply_cycles_changed": "应用建议期间保存了一个周期。未更改任何设置，建议已清除。请重新运行建议分析。",
         "bp_admin_only": "模板由管理员安装。",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "由 WashData 为 {device} 创建。添加您的动作（通知、灯光等）。",
@@ -1539,12 +1544,12 @@
             "doc": "点击此家电通知时打开的内容。留空：此家电的 WashData 面板。可输入仪表板路径（例如 /lovelace/laundry）或 URL，输入“none”则点击无动作。"
         },
         "door_opens_at_end": {
-            "label": "结束时自动开门",
-            "doc": "适用于结束时开门干燥的洗碗机（例如 AirDry）。门保持打开达到下方的停留时间后，将结束周期而不是暂停；短暂开门会被忽略。需要门传感器实体。"
+            "label": "开门即结束周期",
+            "doc": "设置门传感器实体后，在功率较低时门保持打开达到下方的停留时间，将结束周期而不是暂停。暂停期间，仅当已识别的程序接近完成时才会这样，因此程序中途的暂停仍是暂停。"
         },
         "door_end_dwell_seconds": {
             "label": "门开放终止停留时间",
-            "doc": "「结束时自动开门」开启时，周期结束前门需保持打开的时长。应足够长，以忽略放入餐具时的开门（默认 60 秒）。"
+            "doc": "「开门即结束周期」开启时，周期结束前门需保持打开的时长。应足够长，以忽略放入餐具时的开门（默认 60 秒）。"
         },
         "dishwasher_end_spike_quiet_release": {
             "label": "自然干燥静止释放",
@@ -1693,7 +1698,9 @@
         "match_sure": "约 {pct}% 把握",
         "match_uncertain_tip": "WashData 尚未确定程序。该数值表示在过去的周期中，领先猜测 {top} 领先这么多时猜对的频率。仅供参考。",
         "torn_pick": "{a} 还是 {b}？",
-        "torn_tip": "WashData 暂时还无法区分这两个程序，因此请选择正在运行的程序，将此周期标记为该程序（选择“自动检测”可撤销此选择）。"
+        "torn_tip": "WashData 暂时还无法区分这两个程序，因此请选择正在运行的程序，将此周期标记为该程序（选择“自动检测”可撤销此选择）。",
+        "program_mismatch": "更像 {program}",
+        "program_mismatch_tip": "此周期明显更像 {program} 而不是 {selected}，但 WashData 会保留您选择的程序。"
     },
     "tab": {
         "advanced": "高级",
@@ -1780,6 +1787,8 @@
         "settings_reverted": "设置已恢复；集成正在重新加载",
         "settings_saved": "设置已保存；集成重载中",
         "suggestions_applied": "建议已应用；集成重载中",
+        "suggestions_none_applied": "未更改任何设置：所选建议已不再适用",
+        "suggestions_changed": "建议在您查看后已更改。未保存任何内容；请检查后重新应用。",
         "suggestions_dismissed": "建议已关闭",
         "apply_failed": "应用失败：{error}",
         "delete_failed": "删除失败：{error}",
@@ -1937,13 +1946,13 @@
         },
         "reason": {
             "completion_min_seconds": "{cycles} 个周期中 p05 正常周期时长的一半（{minutes} min）；用于过滤误检周期。{excl}",
+            "completion_min_seconds_capped": "已限制为 {cap}，以便最短的程序仍能计入；p05 正常周期时长的一半（{minutes} min，{cycles} 个周期）会更长。{excl}",
             "match_interval": "基于观测到的更新频率（中位数={median}s） * 10。",
             "max_duration_ratio": "基于已标注的周期时长（p95={p95}）。",
             "min_off_gap": "基于观测到的 {gaps} 个周期间间隔（p05={p05}s）。设备下限：{floor}s。",
             "min_off_gap_bridge": "设定为足以跨过周期内最长的静默段：{span}s + 60s 缓冲，来自 {cycles} 个正常周期中的 {spans} 段已跨过的间隔（保持在您连续两次运行之间最短间隔 {ceiling}s 以内）。",
             "min_power": "{cycles} 个正常周期中 p05 最低工作功率（{p05}W）的 40%，使关闭门限保持在实际功耗之下。{excl}",
             "no_update_timeout": "基于观测到的更新频率（p95={p95}s） * 20（最小 60s）。",
-            "off_delay_cadence": "基于观测到的更新频率（p95={p95}s） * 5",
             "off_delay_device_floor": "对 {device} 使用了特定于设备的安全最小值（{floor}s）。",
             "off_delay_generic_floor": "使用了通用安全最小值（{floor}s）。",
             "off_delay_pauses": "设定为足以超过真实暂停：p95 周期内暂停 {p95}s + 60s 缓冲，来自 {cycles} 个正常周期中的 {pauses} 次暂停（下限 {floor}s）。",
@@ -1954,7 +1963,8 @@
             "match_interval_floored": "按最短程序（{shortest} 秒）计算，上限为 {cap} 秒，低于 {minimum} 秒的最小值，因此使用最小值：{persistence} 次连续匹配需要 {budget} 秒，超过该程序的 {pct}%。匹配只在有读数到达时运行（中位数={median} 秒），因此不会带来额外开销。",
             "end_energy_floor": "已提高到停止阈值（{stop} W）和关闭延迟（{off_delay} s）所决定的下限；低于该值，周期只能通过备用路径结束。",
             "max_duration_ratio_default": "已恢复默认值：上限较低时，只要某次运行比平时长，就会排除正确的程序。",
-            "min_duration_ratio_default": "已恢复默认值：下限较高时，运行中的周期要进行到相当程度后才会被识别。"
+            "min_duration_ratio_default": "已恢复默认值：下限较高时，运行中的周期要进行到相当程度后才会被识别。",
+            "start_above_running": "该设备典型的低运行功率为 {low} W，但启动阈值为 {start} W，因此在该水平运行的周期永远不会开始。启动阈值设为该水平的一半，停止阈值低于该值。"
         },
         "exclusions": {
             "summary": "已排除 {total} 个误检测周期：{parts}。",
@@ -2211,6 +2221,9 @@
         },
         "cycle_overrun": {
             "name": "周期运行过长"
+        },
+        "program_mismatch": {
+            "name": "运行中的程序与所选程序不同"
         },
         "cycle_paused": {
             "name": "周期已暂停"

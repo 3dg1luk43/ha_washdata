@@ -71,16 +71,19 @@ def test_resolved_cadence_defaults_satisfy_conflict_rules_for_every_device_type(
         assert sd >= s, f"{dt}: start_duration {sd} < sampling {s}"
 
 
-def test_wet_appliances_keep_fast_sampling():
-    for dt in ("washing_machine", "washer_dryer", "dishwasher"):
+def test_wet_appliances_and_dryers_sample_fast():
+    # 0.6.1: the dryer's 30 s throttle hid its short anti-crease pulses (measured
+    # with start_gate_eval). Pump and the catch-all types keep 10 s / 5 s.
+    for dt in ("washing_machine", "washer_dryer", "dishwasher", "dryer"):
         assert resolve_sampling_interval_default(dt) == 2.0
     assert resolve_sampling_interval_default("pump") == 10.0
-    assert resolve_sampling_interval_default("dryer") == 30.0
+    assert resolve_sampling_interval_default("generic") == 5.0
 
 
 def test_watchdog_never_below_the_30s_floor():
     # A fast-sampling device must not get an over-aggressive watchdog tick.
     assert resolve_watchdog_interval_default("washing_machine") == 30
+    # A dryer keeps 61 s: 30 s keepalives split a recorded dryer cycle (0.6.1).
     assert resolve_watchdog_interval_default("dryer") == 61
 
 
@@ -146,12 +149,13 @@ def _run_get_options(device_type: str) -> dict:
     return captured["payload"]
 
 
-def test_ws_get_options_defaults_for_coarse_device():
+def test_ws_get_options_defaults_for_a_dryer():
     payload = _run_get_options("dryer")
     d = payload["defaults"]
-    assert d[CONF_SAMPLING_INTERVAL] == 30.0
+    # 2 s sampling since 0.6.1; the debounce follows, the watchdog stays 61 s.
+    assert d[CONF_SAMPLING_INTERVAL] == 2.0
     assert d[CONF_WATCHDOG_INTERVAL] == 61
-    assert d[CONF_START_DURATION_THRESHOLD] == 30.0
+    assert d[CONF_START_DURATION_THRESHOLD] == 5.0
     # #393: the Smart-Termination ratio field is pre-populated from here (0.98 non-dishwasher)
     assert d[CONF_SMART_TERMINATION_DURATION_RATIO] == 0.98
 

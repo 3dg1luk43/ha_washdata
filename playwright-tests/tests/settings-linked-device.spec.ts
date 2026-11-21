@@ -26,8 +26,6 @@ const CADENCE = {
   watchdog_interval: 30,
   no_update_active_timeout: 600,
   start_duration_threshold: 10,
-  // stop_threshold_w (3 W) over off_delay (120 s) needs >= 0.1 Wh, above the 0.05
-  // schema default, or End Energy conflicts too.
   end_energy_threshold: 0.2,
 };
 

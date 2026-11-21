@@ -1044,6 +1044,7 @@
     "sug_muted": "Kommer inte att föreslå den här inställningen igen",
     "sug_mute_failed": "Kunde inte tysta förslaget",
     "sug_unmuted_all": "Tysta förslag återställda",
+    "sug_unmute_incomplete": "Återställningen slutfördes inte: vissa förslag är fortfarande tystade. Försök igen.",
     "n_suggestions_muted": "{count} förslag tystade; auto-tunern föreslår inte dessa.",
     "n_suggestions_muted_one": "{count} förslag tystat; auto-tunern föreslår det inte.",
     "n_suggestions_muted_other": "{count} förslag tystade; auto-tunern föreslår inte dessa.",
@@ -1102,6 +1103,10 @@
     "hist_warn_naive_time_other": "{n} tidsstämplar saknar tidszon och lästes som UTC. Om filen använder lokal tid är cyklerna förskjutna med din UTC-förskjutning, och mätvärden kring ett sommartidsbyte kan försvinna.",
     "hist_tail_trimmed": "{min} min väntan efter att cykeln avslutats klipptes bort, precis som integrationen gör under drift",
     "invalid_threshold_pair": "Stopptröskel ({stop} W) måste vara under Starttröskel ({start} W). Inget sparades; ändra båda tillsammans.",
+    "end_gate_check_failed": "De föreslagna tidsinställningarna kunde inte kontrolleras mot den här apparatens pauser. Inget sparades; försök igen.",
+    "analysis_superseded": "Inställningarna eller cykeldata ändrades under analysen. Kör den igen.",
+    "analysis_check_failed": "De föreslagna tidsinställningarna kunde inte kontrolleras mot den här apparatens pauser. Kör den igen.",
+    "apply_cycles_changed": "En cykel sparades medan förslagen tillämpades. Ingen inställning ändrades och förslagen rensades. Kör förslagsanalysen igen.",
     "import_undo_hint": "En återställningspunkt från före den senaste importen ({when}) finns kvar: {profiles} profil(er) och {cycles} cykel/cykler.",
     "replace_undo_hint": "En återställningspunkt sparas först, så att du kan ångra den här importen under Exportera / Importera.",
     "pg_in_sample_note": "De här cyklerna var med och byggde de profiler de matchas mot, så resultaten är optimistiska: räkna med något färre korrekta matchningar på nya cykler.",
@@ -1569,12 +1574,12 @@
       "doc": "Vad ett tryck på den här apparatens avisering öppnar. Tomt: WashData-panelen för den här apparaten. Ange en sökväg till en instrumentpanel (t.ex. /lovelace/laundry) eller en URL, eller \"none\" för ingen tryckåtgärd."
     },
     "door_opens_at_end": {
-      "label": "Dörren öppnas automatiskt vid avslut",
-      "doc": "För diskmaskiner som öppnar dörren i slutet för att torka (t.ex. AirDry). En dörr som står öppen under väntetiden nedan avslutar cykeln i stället för att pausa den; en kort öppning ignoreras. Kräver en Dörrsensorentitet."
+      "label": "Dörröppning avslutar cykeln",
+      "doc": "Med en Dörrsensorentitet avslutar en dörr som står öppen under uppehållstiden nedan vid låg effekt cykeln i stället för att pausa den. Under en paus sker detta först när det identifierade programmet nästan är klart, så en paus mitt i programmet förblir en paus."
     },
     "door_end_dwell_seconds": {
       "label": "Dörröppningens uppehållstid vid avslut",
-      "doc": "Med \"Dörren öppnas automatiskt vid avslut\" på: hur länge dörren måste vara öppen innan cykeln avslutas. Tillräckligt länge för att ignorera att man ställer in en tallrik (standard 60 s)."
+      "doc": "Med \"Dörröppning avslutar cykeln\" på: hur länge dörren måste vara öppen innan cykeln avslutas. Tillräckligt länge för att ignorera att man ställer in en tallrik (standard 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Cykler som formar ett program",
@@ -1708,6 +1713,8 @@
     "working": "Arbetar…",
     "torn_pick": "{a} eller {b}?",
     "torn_tip": "WashData kan ännu inte skilja dessa två åt, så välj det program som körs för att märka den här cykeln med det (Autoidentifiera ångrar valet).",
+    "program_mismatch": "Liknar mer {program}",
+    "program_mismatch_tip": "Den här cykeln liknar tydligt mer {program} än {selected}, men WashData behåller programmet du valde.",
     "match_uncertain": "Osäker: {top} eller {runner}",
     "match_uncertain_single": "Osäker: kanske {top}",
     "match_sure": "~{pct}% säker",
@@ -1763,6 +1770,7 @@
     },
     "reason": {
       "completion_min_seconds": "Hälften av p05-varaktigheten för rena cykler ({minutes} min) över {cycles} cykler; filtrerar bort spökcykler.{excl}",
+      "completion_min_seconds_capped": "Begränsat till {cap} så att de kortaste programmen fortfarande räknas; hälften av p05-varaktigheten för rena cykler ({minutes} min, {cycles} cykler) skulle vara längre.{excl}",
       "match_interval": "Baserat på observerad uppdateringstakt (median={median}s) * 10.",
       "match_interval_capped": "Begränsad så att {persistence} matchningar i följd får plats inom {pct}% av det kortaste programmet ({shortest}s); enbart uppdateringstakten (median={median}s) hade föreslagit ett längre intervall.",
       "match_interval_floored": "Det kortaste programmet ({shortest}s) skulle begränsa detta till {cap}s, under minimivärdet {minimum}s, så minimivärdet används: {persistence} matchningar i följd tar {budget}s, över {pct}% av det programmet. Matchningen körs bara när ett mätvärde kommer (median={median}s), så det kostar inget.",
@@ -1771,7 +1779,6 @@
       "min_off_gap_bridge": "Dimensionerad för att överbrygga den längsta tysta perioden inom en cykel: {span}s + 60s buffert, från {spans} överbryggade mellanrum över {cycles} rena cykler (håller sig under ditt kortaste mellanrum på {ceiling}s mellan två körningar).",
       "min_power": "40% av den lägsta aktiva effekten vid p05 ({p05}W) över {cycles} rena cykler, vilket håller av-tröskeln under verklig förbrukning.{excl}",
       "no_update_timeout": "Baserat på observerad uppdateringstakt (p95={p95}s) * 20 (min 60s).",
-      "off_delay_cadence": "Baserat på observerad uppdateringstakt (p95={p95}s) * 5",
       "off_delay_device_floor": "Använde ett enhetsspecifikt säkert minimum för {device} ({floor}s).",
       "off_delay_generic_floor": "Använde ett generiskt säkert minimum ({floor}s).",
       "off_delay_pauses": "Dimensionerad för att vara längre än verkliga pauser: p95 för pauser inom cykeln {p95}s + 60s buffert, från {pauses} pauser över {cycles} rena cykler (golv {floor}s).",
@@ -1780,7 +1787,8 @@
       "watchdog": "Hålls så lågt som är säkert (strax över p95-uppdateringsmellanrummet på {p95}s och minst 2x samplingsintervallet på {median}s, min. 30s) så att stillestånd upptäcks snabbt utan falska stopp.",
       "end_energy_floor": "Höjd till den nedre gräns som stopptröskeln ({stop} W) under avfördröjningen ({off_delay} s) ger; lägre än så kan cykeln bara avslutas via en reservväg.",
       "max_duration_ratio_default": "Tillbaka till standardvärdet: ett lägre tak avvisar rätt program så fort en körning tar längre tid än vanligt.",
-      "min_duration_ratio_default": "Tillbaka till standardvärdet: ett högre golv gör att en pågående cykel inte känns igen förrän den har kommit en bra bit."
+      "min_duration_ratio_default": "Tillbaka till standardvärdet: ett högre golv gör att en pågående cykel inte känns igen förrän den har kommit en bra bit.",
+      "start_above_running": "Den här apparatens typiska låga drifteffekt är {low} W, men starttröskeln är {start} W, så en körning på den nivån registreras aldrig. Start satt till hälften av den nivån, stopp under det."
     },
     "exclusions": {
       "summary": "Uteslöt {total} feldetekterade cykler: {parts}.",
@@ -1886,6 +1894,8 @@
     "settings_reverted": "Inställningar återställda; integration laddas om",
     "settings_saved": "Inställningar sparade; integration laddas om",
     "suggestions_applied": "Förslag tillämpade; integration laddas om",
+    "suggestions_none_applied": "Ingen inställning ändrad: de valda förslagen gäller inte längre",
+    "suggestions_changed": "Förslagen har ändrats sedan du granskade dem. Inget sparades; kontrollera dem och tillämpa dem igen.",
     "suggestions_dismissed": "Förslag avfärdade",
     "apply_failed": "Tillämpning misslyckades: {error}",
     "delete_failed": "Borttagning misslyckades: {error}",
@@ -2231,6 +2241,9 @@
     },
     "cycle_overrun": {
       "name": "Cykel kör för länge"
+    },
+    "program_mismatch": {
+      "name": "Pågående program skiljer sig från det valda"
     },
     "cycle_paused": {
       "name": "Cykel pausad"

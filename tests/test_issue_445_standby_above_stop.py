@@ -40,6 +40,7 @@ from custom_components.ha_washdata.cycle_detector import (
     CycleDetector,
     CycleDetectorConfig,
 )
+from custom_components.ha_washdata.suggestion_engine import _idle_evidence_w
 
 T0 = datetime(2026, 9, 20, 10, 0, tzinfo=timezone.utc)
 EXPECTED = 5470.0  # the reporter's "Jeans 60" profile, ~91 min
@@ -122,6 +123,29 @@ def test_the_idle_plateau_is_trimmed_off_the_stored_cycle() -> None:
         f"stored trace ends on the idle plateau: tail={tail}"
     )
     assert IDLE_W not in tail
+    # ...so the level it trimmed is kept with the cycle (#525): the one TIMEOUT
+    # end that did not see the power below the threshold.
+    assert data["standby_band_w"] == pytest.approx(IDLE_W)
+
+
+def test_a_loose_tier_finish_carries_no_standby_level() -> None:
+    """A flat 15 W plateau (6% of the run level, well over the near-stop ceiling)
+    closes on the loose tier at twice the expected duration: a stuck low phase, not
+    a standby, so nothing may read it as one (PR #529 review)."""
+    _idle_s, data = _run(_cfg(), idle_w=15.0)
+    assert data is not None and data["termination_reason"] == "timeout"
+    assert "standby_band_w" not in data
+    # Its level is kept apart, and the standby evidence reads it as unknown, not
+    # as an end that saw the power below the threshold (PR #529 round 2).
+    assert data["loose_plateau_w"] == pytest.approx(15.0)
+    assert _idle_evidence_w(data, 2.56) is None
+    assert _idle_evidence_w({**data, "loose_plateau_w": 0.0}, 2.56) == 0.0
+
+
+def test_a_normal_timeout_carries_no_standby_level() -> None:
+    _idle_s, data = _run(_cfg(), idle_w=0.5)
+    assert data is not None and data["termination_reason"] == "timeout"
+    assert "standby_band_w" not in data
 
 
 def test_fluctuating_activity_past_expected_is_not_a_standby_plateau() -> None:
@@ -181,3 +205,15 @@ def test_constants_still_describe_a_finished_appliance() -> None:
     assert STANDBY_BAND_WINDOW_S >= 600.0
     assert STANDBY_BAND_MAX_FRACTION <= 0.10
     assert STANDBY_BAND_FLATNESS_FRACTION <= 0.03
+
+
+def test_the_stored_standby_level_keeps_full_precision() -> None:
+    """The near-stop tier accepts a plateau median at or above the threshold. Stored
+    rounded to 2 decimals, a 2.564 W median over a 2.561 W threshold read back as
+    2.56 W, below it, and the advisory counted the cycle as evidence the power gets
+    there (PR #529 review). The level is stored unrounded."""
+    stop = 2.561
+    idle_s, data = _run(_cfg(stop_threshold_w=stop), idle_w=2.564)
+    assert data is not None and idle_s is not None
+    assert data["standby_band_w"] >= stop
+    assert _idle_evidence_w(data, stop) == pytest.approx(2.564)

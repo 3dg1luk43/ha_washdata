@@ -304,10 +304,14 @@ def load_device(root: Path, rel: str) -> Device | None:
     return dev
 
 
-def load_corpus(root: Path) -> tuple[list[Device], dict[str, str]]:
-    """All devices, minus clone files. Returns (kept sorted by path, {dropped: kept-twin})."""
-    devices = [d for d in (load_device(root, str(p.relative_to(root)))
-                           for p in sorted(root.rglob("*.json"))) if d is not None]
+def load_corpus(root: Path, exclude: tuple[str, ...] = ()) -> tuple[list[Device], dict[str, str]]:
+    """All devices, minus clone files. Returns (kept sorted by path, {dropped: kept-twin}).
+
+    ``exclude``: relative path prefixes never loaded, so a file left out cannot
+    drop another as its clone (``store/``: a package holding a history's traces)."""
+    rels = (str(p.relative_to(root)) for p in sorted(root.rglob("*.json")))
+    devices = [d for d in (load_device(root, rel) for rel in rels if not rel.startswith(exclude))
+               if d is not None]
     seen: dict[str, str] = {}
     kept: list[Device] = []
     dropped: dict[str, str] = {}

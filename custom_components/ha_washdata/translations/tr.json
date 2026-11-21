@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Son Döngü Maliyeti"
+      },
+      "last_cycle_start": {
+        "name": "Son Döngü Başlangıcı"
       }
     },
     "select": {
@@ -572,6 +575,7 @@
       "phase_started": "Aşama başladı",
       "finishing_soon": "Yakında bitiyor",
       "cycle_overrun": "Döngü çok uzun sürüyor",
+      "program_mismatch": "Çalışan program seçilenden farklı",
       "cycle_paused": "Döngü duraklatıldı",
       "cycle_resumed": "Döngü devam etti",
       "still_tumbling": "Döngüden sonra hâlâ dönüyor",
@@ -646,6 +650,16 @@
         "percent": {
           "name": "Daha uzun",
           "description": "Programın olağan süresinin yüzde üzeri."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Çalışan program seçilenden farklı",
+      "description": "Döngü başka bir programa seçtiğiniz programdan daha iyi uyduğunda bir kez tetiklenir. Yeni bir seçim yeni bir kontrol başlatır.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Yalnızca seçilen program bu olduğunda, tam adıyla. Herhangi bir program için boş bırakın."
         }
       }
     },

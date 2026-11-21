@@ -1044,6 +1044,7 @@
     "sug_muted": "Diese Einstellung wird nicht mehr vorgeschlagen",
     "sug_mute_failed": "Einstellung konnte nicht stummgeschaltet werden",
     "sug_unmuted_all": "Stummgeschaltete Vorschläge zurückgesetzt",
+    "sug_unmute_incomplete": "Zurücksetzen nicht abgeschlossen: Einige Vorschläge sind noch stummgeschaltet. Versuchen Sie es erneut.",
     "n_suggestions_muted": "{count} Vorschläge stummgeschaltet; der Autotuner schlägt diese nicht mehr vor.",
     "n_suggestions_muted_one": "{count} Vorschlag stummgeschaltet; der Autotuner schlägt ihn nicht mehr vor.",
     "n_suggestions_muted_other": "{count} Vorschläge stummgeschaltet; der Autotuner schlägt diese nicht mehr vor.",
@@ -1102,6 +1103,10 @@
     "hist_warn_naive_time_other": "{n} Zeitstempel haben keine Zeitzone und wurden als UTC gelesen. Wenn die Datei Ortszeit verwendet, sind die Zyklen um Ihren UTC-Versatz verschoben, und Messwerte nahe einer Sommerzeitumstellung können verloren gehen.",
     "hist_tail_trimmed": "{min} Min. Wartezeit nach dem Zyklusende wurden abgeschnitten, wie es auch die Integration im laufenden Betrieb tut",
     "invalid_threshold_pair": "Der Stoppschwellenwert ({stop} W) muss unter dem Startschwellenwert ({start} W) liegen. Es wurde nichts gespeichert; ändern Sie beide Werte gemeinsam.",
+    "end_gate_check_failed": "Die vorgeschlagenen Zeiteinstellungen konnten nicht mit den Pausen dieses Geräts abgeglichen werden. Es wurde nichts gespeichert; versuchen Sie es erneut.",
+    "analysis_superseded": "Einstellungen oder Zyklusdaten wurden während der Analyse geändert. Starten Sie sie erneut.",
+    "analysis_check_failed": "Die vorgeschlagenen Zeiteinstellungen konnten nicht mit den Pausen dieses Geräts abgeglichen werden. Starten Sie sie erneut.",
+    "apply_cycles_changed": "Während die Vorschläge angewendet wurden, wurde ein Zyklus gespeichert. Keine Einstellung wurde geändert und die Vorschläge wurden verworfen. Führen Sie die Vorschlagsanalyse erneut aus.",
     "import_undo_hint": "Ein Wiederherstellungspunkt von vor dem letzten Import ({when}) wird aufbewahrt: {profiles} Profil(e) und {cycles} Zyklus/Zyklen.",
     "replace_undo_hint": "Zuvor wird ein Wiederherstellungspunkt gespeichert, sodass Sie diesen Import unter „Exportieren / Importieren“ rückgängig machen können.",
     "pg_in_sample_note": "Diese Zyklen haben die Profile mitgebildet, mit denen sie abgeglichen werden, daher sind die Ergebnisse optimistisch: Bei neuen Zyklen ist mit etwas weniger richtigen Zuordnungen zu rechnen.",
@@ -1569,12 +1574,12 @@
       "doc": "Was ein Tippen auf die Benachrichtigung dieses Geräts öffnet. Leer: das WashData-Panel bei diesem Gerät. Geben Sie einen Dashboard-Pfad (z. B. /lovelace/laundry) oder eine URL ein, oder „none“ für keine Aktion."
     },
     "door_opens_at_end": {
-      "label": "Tür öffnet sich am Ende automatisch",
-      "doc": "Für Geschirrspüler, die am Ende zum Trocknen die Tür öffnen (z. B. AirDry). Bleibt die Tür für die unten eingestellte Verweildauer offen, endet der Zyklus, statt zu pausieren; ein kurzes Öffnen wird ignoriert. Erfordert eine Türsensor-Entität."
+      "label": "Türöffnung beendet den Zyklus",
+      "doc": "Mit einer Türsensor-Entität beendet eine Tür, die bei niedriger Leistung für die unten eingestellte Verweildauer offen bleibt, den Zyklus, statt ihn zu pausieren. In einer Pause geschieht das erst, wenn das erkannte Programm fast fertig ist, sodass eine Pause mitten im Programm eine Pause bleibt."
     },
     "door_end_dwell_seconds": {
       "label": "Türöffnungs-Endverweildauer",
-      "doc": "Bei aktivem „Tür öffnet sich am Ende automatisch“: wie lange die Tür offen bleiben muss, bevor der Zyklus endet. Lang genug, um das Nachlegen eines Geschirrteils zu ignorieren (Standard 60 s)."
+      "doc": "Wenn „Türöffnung beendet den Zyklus“ aktiv ist: wie lange die Tür offen bleiben muss, bevor der Zyklus endet. Lang genug, um das Nachlegen eines Geschirrteils zu ignorieren (Standard 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Zyklen, die ein Programm prägen",
@@ -1708,6 +1713,8 @@
     "working": "Wird ausgeführt…",
     "torn_pick": "{a} oder {b}?",
     "torn_tip": "WashData kann diese beiden noch nicht unterscheiden, wählen Sie also das laufende Programm, um diesen Zyklus damit zu beschriften (Automatische Erkennung macht die Auswahl rückgängig).",
+    "program_mismatch": "Sieht eher nach {program} aus",
+    "program_mismatch_tip": "Dieser Zyklus sieht deutlich eher nach {program} aus als nach {selected}, aber WashData behält das von Ihnen gewählte Programm bei.",
     "match_uncertain": "Unsicher: {top} oder {runner}",
     "match_uncertain_single": "Unsicher: vielleicht {top}",
     "match_sure": "~{pct}% sicher",
@@ -1763,6 +1770,7 @@
     },
     "reason": {
       "completion_min_seconds": "Die Hälfte der p05-Dauer sauberer Zyklen ({minutes} min) über {cycles} Zyklen; filtert Geisterzyklen heraus.{excl}",
+      "completion_min_seconds_capped": "Auf {cap} begrenzt, damit auch die kürzesten Programme zählen; die Hälfte der p05-Dauer sauberer Zyklen ({minutes} min, {cycles} Zyklen) wäre länger.{excl}",
       "match_interval": "Basierend auf dem beobachteten Aktualisierungsrhythmus (Median={median}s) * 10.",
       "match_interval_capped": "Begrenzt, damit {persistence} aufeinanderfolgende Zuordnungen in {pct}% des kürzesten Programms ({shortest}s) passen; der Aktualisierungsrhythmus allein (Median={median}s) hätte ein längeres Intervall vorgeschlagen.",
       "match_interval_floored": "Das kürzeste Programm ({shortest}s) würde dies auf {cap}s begrenzen, unter dem Minimum von {minimum}s, daher gilt das Minimum: {persistence} aufeinanderfolgende Zuordnungen dauern {budget}s, über {pct}% dieses Programms. Der Abgleich läuft nur, wenn ein Messwert eintrifft (Median={median}s), das kostet also nichts.",
@@ -1771,7 +1779,6 @@
       "min_off_gap_bridge": "So bemessen, dass die längste Ruhephase innerhalb eines Zyklus überbrückt wird: {span}s + 60s Puffer, aus {spans} überbrückten Lücken über {cycles} saubere Zyklen (bleibt unter Ihrem kürzesten Abstand von {ceiling}s zwischen zwei Ladungen).",
       "min_power": "40% der p05-niedrigsten aktiven Leistung ({p05}W) über {cycles} saubere Zyklen, sodass die Aus-Schwelle unter der tatsächlichen Leistungsaufnahme bleibt.{excl}",
       "no_update_timeout": "Basierend auf dem beobachteten Aktualisierungsrhythmus (p95={p95}s) * 20 (min 60s).",
-      "off_delay_cadence": "Basierend auf dem beobachteten Aktualisierungsrhythmus (p95={p95}s) * 5",
       "off_delay_device_floor": "Gerätespezifisches sicheres Minimum für {device} verwendet ({floor}s).",
       "off_delay_generic_floor": "Generisches sicheres Minimum verwendet ({floor}s).",
       "off_delay_pauses": "So bemessen, dass echte Pausen überbrückt werden: p95 der Pause innerhalb eines Zyklus {p95}s + 60s Puffer, aus {pauses} Pausen über {cycles} saubere Zyklen (Untergrenze {floor}s).",
@@ -1780,7 +1787,8 @@
       "watchdog": "So niedrig wie sicher gehalten (knapp über der p95-Aktualisierungslücke von {p95}s und mindestens 2x dem Abtastintervall von {median}s, min. 30s), damit Hänger schnell erkannt werden, ohne Fehl-Stopps auszulösen.",
       "end_energy_floor": "Auf die Untergrenze angehoben, die sich aus dem Stoppschwellenwert ({stop} W) während der Abschaltverzögerung ({off_delay} s) ergibt; darunter kann der Zyklus nur über einen Ausweichpfad enden.",
       "max_duration_ratio_default": "Zurück auf den Standardwert: Eine niedrigere Obergrenze verwirft das richtige Programm, sobald ein Durchlauf länger als üblich dauert.",
-      "min_duration_ratio_default": "Zurück auf den Standardwert: Eine höhere Untergrenze verhindert, dass ein laufender Zyklus erkannt wird, bevor er weit fortgeschritten ist."
+      "min_duration_ratio_default": "Zurück auf den Standardwert: Eine höhere Untergrenze verhindert, dass ein laufender Zyklus erkannt wird, bevor er weit fortgeschritten ist.",
+      "start_above_running": "Die typische niedrige Betriebsleistung dieses Geräts liegt bei {low} W, aber der Startschwellenwert liegt bei {start} W, sodass ein Lauf auf diesem Niveau nie erkannt wird. Start auf die Hälfte dieses Niveaus gesetzt, Stopp darunter."
     },
     "exclusions": {
       "summary": "{total} falsch erkannte Zyklen ausgeschlossen: {parts}.",
@@ -1886,6 +1894,8 @@
     "settings_reverted": "Einstellungen wiederhergestellt; Neuladen der Integration",
     "settings_saved": "Einstellungen gespeichert; Neuladen der Integration",
     "suggestions_applied": "Angewendete Vorschläge; Neuladen der Integration",
+    "suggestions_none_applied": "Keine Einstellung geändert: Die ausgewählten Vorschläge gelten nicht mehr",
+    "suggestions_changed": "Die Vorschläge haben sich geändert, seit Sie sie geprüft haben. Nichts wurde gespeichert; prüfen Sie sie und wenden Sie sie erneut an.",
     "suggestions_dismissed": "Vorschläge abgelehnt",
     "apply_failed": "Anwenden fehlgeschlagen: {error}",
     "delete_failed": "Löschen fehlgeschlagen: {error}",
@@ -2231,6 +2241,9 @@
     },
     "cycle_overrun": {
       "name": "Zyklus läuft zu lang"
+    },
+    "program_mismatch": {
+      "name": "Laufendes Programm weicht vom gewählten ab"
     },
     "cycle_paused": {
       "name": "Zyklus angehalten"

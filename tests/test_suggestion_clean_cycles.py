@@ -272,7 +272,10 @@ def test_detection_suggestions_basic_keys() -> None:
     cycles = [
         _cycle(_ramp_trace(), cid=f"c{i}", sampling_interval=30.0) for i in range(15)
     ]
-    out = engine_out = _engine(cycles).generate_detection_suggestions()
+    engine = _engine(cycles)
+    # Min Power is only suggested once Start/Stop are set (audit 2026-11-16).
+    engine._entry_options = lambda: {"start_threshold_w": 5.0, "stop_threshold_w": 3.0}
+    out = engine_out = engine.generate_detection_suggestions()
 
     # Audit SUGGEST-04/12: no sampling_interval (it read back its own throttle and
     # ratcheted), smoothing_window (dead) or start debounce (derived from it).
@@ -282,9 +285,15 @@ def test_detection_suggestions_basic_keys() -> None:
 
     assert CONF_MIN_POWER in out
     assert 1.0 <= out[CONF_MIN_POWER]["value"] <= 10.0
+    # ...and not while they follow Min Power: it would move them past every guard.
+    unset = _engine(cycles)
+    unset._entry_options = lambda: {}
+    assert CONF_MIN_POWER not in unset.generate_detection_suggestions()
 
     assert CONF_COMPLETION_MIN_SECONDS in out
-    assert out[CONF_COMPLETION_MIN_SECONDS]["value"] == 1800  # half of 3600s p05
+    # Half the 3600 s p05 would be 1800 s; capped at the washer default (300 s)
+    # so an unseen quick programme is not stored interrupted (audit 2026-11-16).
+    assert out[CONF_COMPLETION_MIN_SECONDS]["value"] == 300
 
     # The detector never reads end_repeat_count (audit DETECT-11).
     assert CONF_END_REPEAT_COUNT not in out

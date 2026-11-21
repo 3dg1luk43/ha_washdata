@@ -1040,6 +1040,7 @@
         "sug_muted": "Ezt a beállítást nem javasolja többé",
         "sug_mute_failed": "Nem sikerült elhallgattatni a javaslatot",
         "sug_unmuted_all": "Az elhallgattatott javaslatok visszaállítva",
+        "sug_unmute_incomplete": "A visszaállítás nem fejeződött be: néhány javaslat még mindig el van hallgattatva. Próbálja újra.",
         "n_suggestions_muted": "{count} javaslat elhallgattatva; az automatikus finomhangolás nem fogja javasolni ezeket.",
         "n_suggestions_muted_one": "{count} javaslat elhallgattatva; az automatikus finomhangolás nem fogja javasolni.",
         "n_suggestions_muted_other": "{count} javaslat elhallgattatva; az automatikus finomhangolás nem fogja javasolni ezeket.",
@@ -1105,6 +1106,10 @@
         "cycle_context_none": "A rögzítő nem tárol leolvasásokat a ciklus körül (a Home Assistant alapértelmezés szerint 10 napnyi előzményt őriz meg).",
         "cycle_context_tip": "Csak megjelenítés: a teljesítményérzékelő rögzítő-előzményeit mutatja a ciklus körül, ha még megvannak. Ha a megszakadt indítási kísérleteket a jövőbeli ciklusokhoz szeretné adni, használja a Görbe előfutama beállítást (Beállítások > Érzékelés > Ciklus indítása), amely megváltoztatja a tárolt időtartamokat.",
         "invalid_threshold_pair": "A Leállítási küszöbnek ({stop} W) kisebbnek kell lennie az Indítási küszöbnél ({start} W). Semmi sem lett mentve; a kettőt együtt módosítsa.",
+        "end_gate_check_failed": "A javasolt időzítési beállításokat nem sikerült ellenőrizni a készülék szüneteihez képest. Semmi sem lett mentve; próbálja újra.",
+        "analysis_superseded": "A beállítások vagy a ciklusadatok megváltoztak az elemzés közben. Futtassa újra.",
+        "analysis_check_failed": "A javasolt időzítési beállításokat nem sikerült ellenőrizni a készülék szüneteihez képest. Futtassa újra.",
+        "apply_cycles_changed": "A javaslatok alkalmazása közben egy ciklus mentésre került. Egyetlen beállítás sem változott, és a javaslatok törlődtek. Futtassa újra a javaslatelemzést.",
         "bp_admin_only": "A sablonokat egy rendszergazda telepíti.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "A WashData hozta létre {device} számára. Adja hozzá a saját műveleteit (értesítés, világítás, ...).",
@@ -1542,12 +1547,12 @@
             "doc": "Mit nyit meg egy koppintás a készülék értesítésén. Üres: a WashData panel ennél a készüléknél. Adjon meg egy irányítópult-útvonalat (pl. /lovelace/laundry) vagy URL-t, illetve a \"none\" értéket, ha ne legyen koppintási művelet."
         },
         "door_opens_at_end": {
-            "label": "Az ajtó automatikusan kinyílik a végén",
-            "doc": "Olyan mosogatógépekhez, amelyek a végén szárításhoz kinyitják az ajtót (pl. AirDry). Ha az ajtó az alábbi ideig nyitva marad, a ciklus befejeződik, nem szünetel; a rövid nyitást figyelmen kívül hagyja. Ajtóérzékelő entitás szükséges."
+            "label": "Az ajtó kinyitása befejezi a ciklust",
+            "doc": "Ajtóérzékelő entitás esetén, ha az ajtó alacsony teljesítmény mellett az alábbi várakozási ideig nyitva marad, a ciklus befejeződik, nem szünetel. Szünet közben ez csak akkor történik meg, amikor a felismert program már majdnem kész, így a program közbeni szünet szünet marad."
         },
         "door_end_dwell_seconds": {
             "label": "Ajtó-nyitásvégi várakozási idő",
-            "doc": "Bekapcsolt \"Az ajtó automatikusan kinyílik a végén\" beállításnál: mennyi ideig kell nyitva maradnia az ajtónak, mielőtt a ciklus véget ér. Elég hosszú legyen ahhoz, hogy egy edény betöltését figyelmen kívül hagyja (alapértelmezés: 60 mp)."
+            "doc": "Bekapcsolt \"Az ajtó kinyitása befejezi a ciklust\" beállításnál: mennyi ideig kell nyitva maradnia az ajtónak, mielőtt a ciklus véget ér. Elég hosszú legyen ahhoz, hogy egy edény betöltését figyelmen kívül hagyja (alapértelmezés: 60 mp)."
         },
         "profile_evidence_sources": {
             "label": "A programot alakító ciklusok",
@@ -1692,7 +1697,9 @@
         "match_sure": "~{pct}% biztos",
         "match_uncertain_tip": "A WashData még nem döntött a programról. A szám azt mutatja, a korábbi ciklusokban milyen gyakran volt helyes a vezető tipp, {top}, amikor ennyivel vezetett. Csak tájékoztató.",
         "torn_pick": "{a} vagy {b}?",
-        "torn_tip": "A WashData még nem tudja megkülönböztetni ezt a kettőt, ezért válassza ki a futó programot, hogy a ciklus azt a címkét kapja (az Automatikus felismerés visszavonja a választást)."
+        "torn_tip": "A WashData még nem tudja megkülönböztetni ezt a kettőt, ezért válassza ki a futó programot, hogy a ciklus azt a címkét kapja (az Automatikus felismerés visszavonja a választást).",
+        "program_mismatch": "Inkább erre hasonlít: {program}",
+        "program_mismatch_tip": "A ciklus egyértelműen jobban hasonlít erre: {program}, mint a választott programra ({selected}), de a WashData megtartja az Ön választását."
     },
     "tab": {
         "advanced": "Fejlett",
@@ -1780,6 +1787,8 @@
         "settings_reverted": "A beállítások visszaállítva; integráció újratöltése",
         "settings_saved": "A beállítások elmentve; integráció újratöltése",
         "suggestions_applied": "Javaslatok alkalmazva; integráció újratöltése",
+        "suggestions_none_applied": "Egy beállítás sem változott: a kiválasztott javaslatok már nem érvényesek",
+        "suggestions_changed": "A javaslatok megváltoztak, mióta átnézte őket. Semmi sem lett mentve; ellenőrizze őket, és alkalmazza újra.",
         "suggestions_dismissed": "Javaslatok elutasítva",
         "apply_failed": "Az alkalmazás sikertelen: {error}",
         "delete_failed": "A törlés sikertelen: {error}",
@@ -1938,13 +1947,13 @@
         },
         "reason": {
             "completion_min_seconds": "A p05 tiszta ciklus időtartamának fele ({minutes} perc) {cycles} cikluson át; kiszűri a fantomciklusokat.{excl}",
+            "completion_min_seconds_capped": "{cap} értékre korlátozva, hogy a legrövidebb programok is számítsanak; a p05 tiszta ciklus időtartamának fele ({minutes} perc, {cycles} ciklus) hosszabb lenne.{excl}",
             "match_interval": "A megfigyelt frissítési ütem alapján (médián={median}s) * 10.",
             "max_duration_ratio": "A címkézett ciklusok időtartama alapján (p95={p95}).",
             "min_off_gap": "{gaps} megfigyelt ciklusközi szünet alapján (p05={p05}s). Készülék alsó korlátja: {floor}s.",
             "min_off_gap_bridge": "Úgy méretezve, hogy áthidalja a cikluson belüli leghosszabb csendes szakaszt: {span}s + 60s ráhagyás, {spans} áthidalt szünetből {cycles} tiszta cikluson át ({ceiling}s alatt marad, ami a két egymást követő indítás között hagyott legrövidebb szüneted).",
             "min_power": "A(z) {cycles} tiszta ciklus p05 legkisebb aktív teljesítményének ({p05}W) 40%-a, hogy a kikapcsolási küszöb a valós fogyasztás alatt maradjon.{excl}",
             "no_update_timeout": "A megfigyelt frissítési ütem alapján (p95={p95}s) * 20 (min. 60s).",
-            "off_delay_cadence": "A megfigyelt frissítési ütem alapján (p95={p95}s) * 5",
             "off_delay_device_floor": "A(z) {device} eszközre jellemző biztonságos minimum használva ({floor}s).",
             "off_delay_generic_floor": "Általános biztonságos minimum használva ({floor}s).",
             "off_delay_pauses": "Úgy méretezve, hogy túlélje a valódi szüneteket: p95 cikluson belüli szünet {p95}s + 60s ráhagyás, {pauses} szünetből {cycles} tiszta cikluson át (alsó korlát {floor}s).",
@@ -1955,7 +1964,8 @@
             "match_interval_floored": "A legrövidebb program ({shortest} mp) {cap} mp-re korlátozná ezt, ami a(z) {minimum} mp-es minimum alatt van, ezért a minimum érvényes: {persistence} egymást követő egyezés {budget} mp, ami a program {pct}%-ánál több. Az egyeztetés csak leolvasás érkezésekor fut (medián={median} mp), így ez semmibe sem kerül.",
             "end_energy_floor": "Megemelve arra az alsó határra, amelyet a Leállítási küszöb ({stop} W) a Kikapcsolási késleltetés ({off_delay} s) alatt megkövetel; ez alatt a ciklus csak tartalék úton érhet véget.",
             "max_duration_ratio_default": "Vissza az alapértékre: egy alacsonyabb felső határ elveti a helyes programot, ha egy futás a szokásosnál tovább tart.",
-            "min_duration_ratio_default": "Vissza az alapértékre: egy magasabb alsó határ miatt a futó ciklus csak akkor ismerhető fel, amikor már jócskán előrehaladt."
+            "min_duration_ratio_default": "Vissza az alapértékre: egy magasabb alsó határ miatt a futó ciklus csak akkor ismerhető fel, amikor már jócskán előrehaladt.",
+            "start_above_running": "A készülék jellemző alacsony üzemi teljesítménye {low} W, de az indítási küszöb {start} W, így az ezen a szinten futó ciklus soha nem indul el. Az indítási küszöb ennek a szintnek a felére, a leállítási küszöb ez alá kerül."
         },
         "exclusions": {
             "summary": "{total} tévesen észlelt ciklus kizárva: {parts}.",
@@ -2231,6 +2241,9 @@
         },
         "cycle_overrun": {
             "name": "Ciklus túllépi az időt"
+        },
+        "program_mismatch": {
+            "name": "Futó program eltér a kiválasztottól"
         },
         "cycle_paused": {
             "name": "Ciklus szüneteltetva"

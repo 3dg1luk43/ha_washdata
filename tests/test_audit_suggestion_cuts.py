@@ -135,12 +135,9 @@ def test_dishwasher_timeout_and_off_delay_keep_their_floors() -> None:
     assert out[CONF_NO_UPDATE_ACTIVE_TIMEOUT]["value"] >= (
         DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE["dishwasher"]
     )
-    assert out[CONF_OFF_DELAY]["value"] < 1800
-    # With 8 traced cycles the measured floor, not the 1800 s prior and not the
-    # cadence (30 s x 5 = 150 s), set the off delay: the reason must say so.
-    off = out[CONF_OFF_DELAY]
-    assert off["reason_key"] == "suggestion.reason.off_delay_generic_floor"
-    assert off["reason_params"]["floor"] == off["value"]
+    # Traced but no pause measured: no off_delay at all, neither the 1800 s
+    # prior nor a cadence or generic floor (audit 2026-11-16).
+    assert CONF_OFF_DELAY not in out
     # The device default won here (30 s x 20 = 600 s < 4 h), so the reason must
     # name it, not the cadence formula the value did not come from.
     timeout = out[CONF_NO_UPDATE_ACTIVE_TIMEOUT]
@@ -206,6 +203,8 @@ async def test_apply_all_never_applies_a_muted_key() -> None:
     manager.profile_store.get_lifetime_cycle_count.return_value = 10
     manager.profile_store.clear_suggestions = AsyncMock()
     hass = MagicMock()
+    # The joint end-gate check runs in the executor and fails closed (PR #529).
+    hass.async_add_executor_job = AsyncMock(side_effect=lambda fn, *a: fn(*a))
     with patch.object(ws_api, "_get_manager", return_value=manager), patch.object(
         ws_api, "_get_entry", return_value=entry
     ), patch.object(ws_api, "_record_option_changes", AsyncMock()):
@@ -289,3 +288,56 @@ def test_an_unset_stop_threshold_sets_the_end_energy_floor_at_what_the_detector_
     opts = {CONF_MIN_POWER: 2.0, CONF_OFF_DELAY: 600, CONF_END_ENERGY_THRESHOLD: 0.25}
     out = _engine(cycles, options=opts).run_batch_simulation(cycles)
     assert CONF_END_ENERGY_THRESHOLD not in out
+
+
+def test_min_power_is_not_suggested_across_a_milliwatt_sensor_s_raw_line() -> None:
+    """PR #529 review: a milliwatt sensor with Min Power 1500 is read raw (start
+    1500, stop 900 in its own unit). Min Power 10 would read it in watts while the
+    thresholds stay put, so no cycle could start; a watt sensor keeps it."""
+    from custom_components.ha_washdata.const import (  # noqa: PLC0415
+        CONF_MIN_POWER,
+        CONF_POWER_SENSOR,
+        CONF_START_THRESHOLD_W,
+        CONF_STOP_THRESHOLD_W,
+    )
+
+    opts = {CONF_MIN_POWER: 1500.0, CONF_START_THRESHOLD_W: 1500.0, CONF_STOP_THRESHOLD_W: 900.0,
+            CONF_POWER_SENSOR: "sensor.plug"}
+    cycles = [_cycle(i) for i in range(30)]
+    for unit, offered in (("mW", False), ("W", True)):
+        eng = _engine(cycles, options=opts)
+        state = MagicMock()
+        state.state, state.attributes = "1200", {"unit_of_measurement": unit}
+        eng.hass.states.get.return_value = state
+        out = eng.for_job(opts).generate_detection_suggestions()
+        assert (CONF_MIN_POWER in out) is offered, unit
+    # Not loaded yet: the unit could be mW, so no change across the line either.
+    eng = _engine(cycles, options=opts)
+    eng.hass.states.get.return_value = None
+    assert CONF_MIN_POWER not in eng.for_job(opts).generate_detection_suggestions()
+
+
+def test_a_capped_completion_minimum_says_so() -> None:
+    """PR #529 review: capped at half the shortest programme, the value was still
+    explained as half the p05 duration."""
+    cycles = [_cycle(i, duration=9000.0, name="Cotton") for i in range(30)]
+    eng = _engine(cycles)
+    with patch.object(SuggestionEngine, "_shortest_profile_duration", return_value=2870.0):
+        out = eng.generate_detection_suggestions()[CONF_COMPLETION_MIN_SECONDS]
+    assert out["reason_key"] == "suggestion.reason.completion_min_seconds_capped"
+    assert out["reason_params"]["cap"] == f"{out['value'] / 60:.0f} min"
+    eng = _engine([_cycle(i, duration=600.0, name="Quick") for i in range(30)])
+    with patch.object(SuggestionEngine, "_shortest_profile_duration", return_value=600.0):
+        out = eng.generate_detection_suggestions()[CONF_COMPLETION_MIN_SECONDS]
+    assert out["reason_key"] == "suggestion.reason.completion_min_seconds"
+
+
+def test_a_capped_completion_minimum_names_its_unit() -> None:
+    """PR #529 review: a pump's 5 s cap read "Capped at 0 min"."""
+    cycles = [_cycle(i, duration=3600.0, name="Cotton") for i in range(30)]
+    eng = _engine(cycles)
+    with patch.object(SuggestionEngine, "_shortest_profile_duration", return_value=8.0), \
+            patch("custom_components.ha_washdata.suggestion_engine.DEVICE_COMPLETION_THRESHOLDS", {"washing_machine": 5}):
+        out = eng.generate_detection_suggestions()[CONF_COMPLETION_MIN_SECONDS]
+    assert out["value"] == 5 and out["reason_params"]["cap"] == "5 s"
+    assert "Capped at 5 s" in out["reason"]

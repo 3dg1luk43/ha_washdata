@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Costul ultimului ciclu"
+      },
+      "last_cycle_start": {
+        "name": "Începutul ultimului ciclu"
       }
     },
     "select": {
@@ -572,6 +575,7 @@
       "phase_started": "Fază pornită",
       "finishing_soon": "Se termină curând",
       "cycle_overrun": "Ciclu în depășire",
+      "program_mismatch": "Programul care rulează diferă de cel selectat",
       "cycle_paused": "Ciclu în pauză",
       "cycle_resumed": "Ciclu reluat",
       "still_tumbling": "Încă se rotește după ciclu",
@@ -646,6 +650,16 @@
         "percent": {
           "name": "Depășit cu",
           "description": "Procent peste durata obișnuită a programului."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Programul care rulează diferă de cel selectat",
+      "description": "Se declanșează o dată când ciclul se potrivește mai bine cu alt program decât cu cel pe care l-ai ales. O nouă alegere pornește o nouă verificare.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Doar când acesta este programul ales, după numele exact. Lasă gol pentru orice program."
         }
       }
     },

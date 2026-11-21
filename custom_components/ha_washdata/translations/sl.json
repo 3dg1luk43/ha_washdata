@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Strošek zadnjega cikla"
+      },
+      "last_cycle_start": {
+        "name": "Začetek zadnjega cikla"
       }
     },
     "select": {
@@ -572,6 +575,7 @@
       "phase_started": "Faza se je začela",
       "finishing_soon": "Kmalu konec",
       "cycle_overrun": "Cikel traja predolgo",
+      "program_mismatch": "Tekoči program se razlikuje od izbranega",
       "cycle_paused": "Cikel je ustavljen",
       "cycle_resumed": "Cikel je nadaljeval",
       "still_tumbling": "Po koncu še vedno vrti boben",
@@ -646,6 +650,16 @@
         "percent": {
           "name": "Dlje za",
           "description": "Odstotkov nad običajnim trajanjem programa."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Tekoči program se razlikuje od izbranega",
+      "description": "Sproži enkrat, ko se cikel bolje ujema z drugim programom kot z izbranim. Nova izbira začne novo preverjanje.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Samo ko je izbran ta program, po točnem imenu. Prazno = kateri koli program."
         }
       }
     },

@@ -71,6 +71,7 @@
       "phase_started": "Phase started",
       "finishing_soon": "Finishing soon",
       "cycle_overrun": "Cycle running long",
+      "program_mismatch": "Running program differs from the selected one",
       "cycle_paused": "Cycle paused",
       "cycle_resumed": "Cycle resumed",
       "cycle_stalled": "Cycle stalled",
@@ -438,6 +439,16 @@
         }
       }
     },
+    "program_mismatch": {
+      "name": "Running program differs from the selected one",
+      "description": "Triggers once when the cycle fits another program better than the one you picked. A new pick starts a new check.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Only when this program is the one picked, by its exact name. Leave empty for any program."
+        }
+      }
+    },
     "cycle_paused": {
       "name": "Cycle paused",
       "description": "Triggers when you pause a cycle, and optionally when the appliance pauses on its own.",
@@ -661,6 +672,9 @@
       },
       "last_cycle_cost": {
         "name": "Last Cycle Cost"
+      },
+      "last_cycle_start": {
+        "name": "Last Cycle Start"
       }
     },
     "select": {

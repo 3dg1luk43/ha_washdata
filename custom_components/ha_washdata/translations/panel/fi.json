@@ -1040,6 +1040,7 @@
     "sug_muted": "Tätä asetusta ei enää ehdoteta",
     "sug_mute_failed": "Ehdotuksen vaimennus epäonnistui",
     "sug_unmuted_all": "Vaiennetut ehdotukset palautettu",
+    "sug_unmute_incomplete": "Palautus ei valmistunut: osa ehdotuksista on yhä vaiennettu. Yritä uudelleen.",
     "n_suggestions_muted": "{count} ehdotusta vaimennettu; automaattinen virittäjä ei ehdota näitä.",
     "n_suggestions_muted_one": "{count} ehdotus vaimennettu; automaattinen virittäjä ei ehdota sitä.",
     "n_suggestions_muted_other": "{count} ehdotusta vaimennettu; automaattinen virittäjä ei ehdota näitä.",
@@ -1105,6 +1106,10 @@
     "cycle_context_none": "Tallentimessa ei ole lukemia tämän syklin ympäriltä (Home Assistant säilyttää oletuksena 10 päivän historian).",
     "cycle_context_tip": "Vain näyttöä varten: näyttää tehoanturin tallentimen historian tämän syklin ympäriltä, jos se on vielä tallessa. Jos haluat liittää keskeytyneet käynnistysyritykset tuleviin sykleihin, käytä asetusta Käyrän esijakso (Asetukset > Tunnistus > Syklin alku). Se muuttaa tallennettuja kestoja.",
     "invalid_threshold_pair": "Pysäytyskynnyksen ({stop} W) on oltava pienempi kuin Käynnistyskynnys ({start} W). Mitään ei tallennettu; muuta molempia yhdessä.",
+    "end_gate_check_failed": "Ehdotettuja ajoitusasetuksia ei voitu tarkistaa tämän laitteen taukoja vasten. Mitään ei tallennettu; yritä uudelleen.",
+    "analysis_superseded": "Asetukset tai jaksojen tiedot muuttuivat analyysin aikana. Suorita se uudelleen.",
+    "analysis_check_failed": "Ehdotettuja ajoitusasetuksia ei voitu tarkistaa tämän laitteen taukoja vasten. Suorita se uudelleen.",
+    "apply_cycles_changed": "Jakso tallennettiin, kun ehdotuksia otettiin käyttöön. Mitään asetusta ei muutettu, ja ehdotukset tyhjennettiin. Suorita ehdotusanalyysi uudelleen.",
     "bp_admin_only": "Järjestelmänvalvoja asentaa mallit.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "WashDatan luoma automaatio laitteelle {device}. Lisää omat toimintosi (ilmoitus, valot, ...).",
@@ -1569,12 +1574,12 @@
       "doc": "Mitä tämän laitteen ilmoituksen napautus avaa. Tyhjä: tämän laitteen WashData-paneeli. Anna kojelaudan polku (esim. /lovelace/laundry) tai URL, tai \"none\", jos napautus ei tee mitään."
     },
     "door_opens_at_end": {
-      "label": "Ovi avautuu automaattisesti lopussa",
-      "doc": "Astianpesukoneille, jotka avaavat oven lopussa kuivausta varten (esim. AirDry). Jos ovi pysyy auki alla olevan odotusajan, sykli päättyy tauon sijaan; lyhyt avaus ohitetaan. Vaatii asetuksen Ovianturin entiteetti."
+      "label": "Oven avaaminen päättää syklin",
+      "doc": "Kun Ovianturin entiteetti on asetettu, ovi, joka pysyy auki alla asetetun viiveen ajan tehon ollessa alhainen, päättää syklin tauon sijaan. Tauon aikana näin käy vasta, kun tunnistettu ohjelma on lähes valmis, joten tauko kesken ohjelman pysyy taukona."
     },
     "door_end_dwell_seconds": {
       "label": "Oven avauksen loppuviive",
-      "doc": "Kun \"Ovi avautuu automaattisesti lopussa\" on käytössä: kuinka kauan oven on pysyttävä auki, ennen kuin sykli päättyy. Tarpeeksi pitkä, jotta lautasen lisäämistä ei huomioida (oletus 60 s)."
+      "doc": "Kun \"Oven avaaminen päättää syklin\" on käytössä: kuinka kauan oven on pysyttävä auki, ennen kuin sykli päättyy. Tarpeeksi pitkä, jotta lautasen lisäämistä ei huomioida (oletus 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Ohjelmaa muovaavat syklit",
@@ -1711,7 +1716,9 @@
     "match_sure": "~{pct} % varma",
     "match_uncertain_tip": "WashData ei ole vielä päättänyt ohjelmaa. Luku kertoo, kuinka usein johtava arvaus, {top}, osui oikeaan aiemmissa sykleissä, kun se johti näin paljon. Vain tiedoksi.",
     "torn_pick": "{a} vai {b}?",
-    "torn_tip": "WashData ei vielä osaa erottaa näitä kahta toisistaan, joten valitse käynnissä oleva ohjelma, niin tämä sykli merkitään sillä (Automaattinen tunnistus kumoaa valinnan)."
+    "torn_tip": "WashData ei vielä osaa erottaa näitä kahta toisistaan, joten valitse käynnissä oleva ohjelma, niin tämä sykli merkitään sillä (Automaattinen tunnistus kumoaa valinnan).",
+    "program_mismatch": "Näyttää enemmän ohjelmalta {program}",
+    "program_mismatch_tip": "Tämä sykli näyttää selvästi enemmän ohjelmalta {program} kuin ohjelmalta {selected}, mutta WashData pitää valitsemasi ohjelman."
   },
   "suggestion": {
     "observed_label": "Havaittu",
@@ -1763,6 +1770,7 @@
     },
     "reason": {
       "completion_min_seconds": "Puolet puhtaiden jaksojen p05-kestosta ({minutes} min) {cycles} jakson joukossa; suodattaa haamujaksot pois.{excl}",
+      "completion_min_seconds_capped": "Rajattu arvoon {cap}, jotta lyhimmätkin ohjelmat lasketaan; puolet puhtaiden jaksojen p05-kestosta ({minutes} min, {cycles} jaksoa) olisi pidempi.{excl}",
       "match_interval": "Perustuu havaittuun päivitystahtiin (mediaani={median}s) * 10.",
       "match_interval_capped": "Rajoitettu niin, että {persistence} peräkkäistä täsmäystä mahtuu {pct} prosenttiin lyhimmästä ohjelmasta ({shortest}s); pelkkä päivitystahti (mediaani={median}s) olisi ehdottanut pidempää väliä.",
       "match_interval_floored": "Lyhin ohjelma ({shortest}s) rajaisi tämän arvoon {cap}s, alle {minimum}s vähimmäisarvon, joten käytetään vähimmäisarvoa: {persistence} peräkkäistä täsmäytystä kestää {budget}s, yli {pct} % kyseisestä ohjelmasta. Täsmäytys tehdään vain lukeman saapuessa (mediaani={median}s), joten tämä ei maksa mitään.",
@@ -1771,7 +1779,6 @@
       "min_off_gap_bridge": "Mitoitettu siltaamaan jakson pisin hiljainen vaihe: {span}s + 60s puskuri, {spans} sillatusta katkosta {cycles} puhtaan jakson joukossa (pysyy alle {ceiling}s, joka on lyhin peräkkäisten käynnistysten välinen taukosi).",
       "min_power": "40% pienimmästä aktiivisesta tehosta p05:ssä ({p05}W) {cycles} puhtaan jakson joukossa, mikä pitää sammutuskynnyksen todellisen kulutuksen alapuolella.{excl}",
       "no_update_timeout": "Perustuu havaittuun päivitystahtiin (p95={p95}s) * 20 (väh. 60s).",
-      "off_delay_cadence": "Perustuu havaittuun päivitystahtiin (p95={p95}s) * 5",
       "off_delay_device_floor": "Käytettiin laitekohtaista turvallista vähimmäisarvoa laitteelle {device} ({floor}s).",
       "off_delay_generic_floor": "Käytettiin yleistä turvallista vähimmäisarvoa ({floor}s).",
       "off_delay_pauses": "Mitoitettu kestämään todellisia taukoja pidempään: p95 jakson sisäiselle tauolle {p95}s + 60s puskuri, {pauses} tauosta {cycles} puhtaan jakson joukossa (alaraja {floor}s).",
@@ -1780,7 +1787,8 @@
       "watchdog": "Pidetään niin matalana kuin on turvallista (hieman yli p95-päivitysvälin {p95}s ja vähintään 2x näytteenottoväli {median}s, väh. 30s), jotta pysähdykset havaitaan nopeasti ilman vääriä pysäytyksiä.",
       "end_energy_floor": "Nostettu alarajaan, jonka pysäytyskynnys ({stop} W) sammutusviiveen ({off_delay} s) aikana edellyttää; sen alapuolella sykli voi päättyä vain varapolun kautta.",
       "max_duration_ratio_default": "Takaisin oletusarvoon: matalampi yläraja hylkää oikean ohjelman aina, kun ajo kestää tavallista pidempään.",
-      "min_duration_ratio_default": "Takaisin oletusarvoon: korkeampi alaraja estää käynnissä olevan syklin tunnistamisen, kunnes se on jo pitkällä."
+      "min_duration_ratio_default": "Takaisin oletusarvoon: korkeampi alaraja estää käynnissä olevan syklin tunnistamisen, kunnes se on jo pitkällä.",
+      "start_above_running": "Tämän laitteen tyypillinen matala käyntiteho on {low} W, mutta käynnistyskynnys on {start} W, joten sillä tasolla käyvä sykli ei koskaan käynnisty. Käynnistyskynnys asetetaan puoleen tästä tasosta, pysäytyskynnys sen alle."
     },
     "exclusions": {
       "summary": "Suljettu pois {total} väärin tunnistettua sykliä: {parts}.",
@@ -1887,6 +1895,8 @@
     "settings_reverted": "Asetukset palautettu; integroinnin uudelleenlataus",
     "settings_saved": "Asetukset tallennettu; integroinnin uudelleenlataus",
     "suggestions_applied": "Ehdotuksia otettu käyttöön; integroinnin uudelleenlataus",
+    "suggestions_none_applied": "Asetuksia ei muutettu: valitut ehdotukset eivät ole enää voimassa",
+    "suggestions_changed": "Ehdotukset ovat muuttuneet tarkistuksesi jälkeen. Mitään ei tallennettu; tarkista ne ja ota ne uudelleen käyttöön.",
     "suggestions_dismissed": "Ehdotukset hylätty",
     "apply_failed": "Käyttöönotto epäonnistui: {error}",
     "delete_failed": "Poisto epäonnistui: {error}",
@@ -2231,6 +2241,9 @@
     },
     "cycle_overrun": {
       "name": "Sykli kestää liian kauan"
+    },
+    "program_mismatch": {
+      "name": "Käynnissä oleva ohjelma eroaa valitusta"
     },
     "cycle_paused": {
       "name": "Sykli keskeytetty"

@@ -1044,6 +1044,7 @@
     "sug_muted": "Mun ekki stinga upp á þessari stillingu aftur",
     "sug_mute_failed": "Gat ekki þaggað tillögu",
     "sug_unmuted_all": "Þaggaðar tillögur endurstilltar",
+    "sug_unmute_incomplete": "Endurstilling kláraðist ekki: sumar tillögur eru enn þaggaðar. Reyndu aftur.",
     "n_suggestions_muted": "{count} tillögur þaggaðar; sjálfvirki stillirinn leggur þær ekki til.",
     "n_suggestions_muted_one": "{count} tillaga þögguð; sjálfvirki stillirinn leggur hana ekki til.",
     "n_suggestions_muted_other": "{count} tillögur þaggaðar; sjálfvirki stillirinn leggur þær ekki til.",
@@ -1102,6 +1103,10 @@
     "hist_warn_naive_time_other": "{n} tímastimplar hafa ekkert tímabelti og voru lesnir sem UTC. Ef skráin notar staðartíma hliðrast lotur um UTC-frávikið þitt, og mælingar í kringum skipti yfir í sumartíma geta glatast.",
     "hist_tail_trimmed": "{min} mín. bið eftir lok lotunnar var klippt af, eins og samþættingin gerir í rauntíma",
     "invalid_threshold_pair": "Stöðvunarþröskuldur ({stop} W) verður að vera undir Ræsingarþröskuldi ({start} W). Ekkert var vistað; breyttu báðum saman.",
+    "end_gate_check_failed": "Ekki var hægt að bera tímastillingarnar sem lagðar voru til saman við hlé þessa tækis. Ekkert var vistað; reyndu aftur.",
+    "analysis_superseded": "Stillingar eða gögn lotna breyttust meðan á greiningunni stóð. Keyrðu hana aftur.",
+    "analysis_check_failed": "Ekki var hægt að bera tímastillingarnar sem lagðar voru til saman við hlé þessa tækis. Keyrðu hana aftur.",
+    "apply_cycles_changed": "Lota var vistuð á meðan verið var að nota tillögurnar. Engri stillingu var breytt og tillögurnar voru hreinsaðar. Keyrðu tillögugreininguna aftur.",
     "import_undo_hint": "Endurheimtarpunktur frá því fyrir síðasta innflutning ({when}) er geymdur með {profiles} prófíl(um) og {cycles} lotu(m).",
     "replace_undo_hint": "Endurheimtarpunktur er vistaður fyrst, svo þú getur afturkallað þennan innflutning undir Útflutningur / Innflutningur.",
     "pg_in_sample_note": "Þessar lotur hjálpuðu til við að byggja sniðin sem þær eru bornar saman við, svo niðurstöðurnar eru bjartsýnar: búast má við aðeins færri réttum samsvörunum á nýjum lotum.",
@@ -1569,12 +1574,12 @@
       "doc": "Hvað opnast þegar ýtt er á tilkynningu þessa tækis. Autt: WashData-spjaldið á þessu tæki. Sláðu inn slóð á mælaborð (t.d. /lovelace/laundry) eða URL, eða „none“ fyrir enga aðgerð."
     },
     "door_opens_at_end": {
-      "label": "Hurð opnast sjálfkrafa í lok",
-      "doc": "Fyrir uppþvottavélar sem opna hurðina í lokin til að þurrka (t.d. AirDry). Hurð sem stendur opin í biðtímann hér að neðan lýkur lotunni í stað þess að gera hlé á henni; stutt opnun er hunsuð. Krefst Dyraskynjareiningar."
+      "label": "Opnun hurðar lýkur lotunni",
+      "doc": "Með Dyraskynjareiningu lýkur hurð sem stendur opin í dvaltímann hér að neðan, á meðan aflið er lágt, lotunni í stað þess að gera hlé á henni. Í hléi gerist þetta aðeins þegar þekkta kerfið er næstum búið, svo hlé í miðju kerfi helst hlé."
     },
     "door_end_dwell_seconds": {
       "label": "Dvaltími hurðar við lok",
-      "doc": "Þegar „Hurð opnast sjálfkrafa í lok“ er virkt: hversu lengi hurðin þarf að vera opin áður en lotunni lýkur. Nógu lengi til að hunsa að diski sé bætt við (sjálfgefið 60 s)."
+      "doc": "Þegar „Opnun hurðar lýkur lotunni“ er virkt: hversu lengi hurðin þarf að vera opin áður en lotunni lýkur. Nógu lengi til að hunsa að diski sé bætt við (sjálfgefið 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Lotur sem móta kerfi",
@@ -1708,6 +1713,8 @@
     "working": "Í vinnslu…",
     "torn_pick": "{a} eða {b}?",
     "torn_tip": "WashData getur ekki enn greint þessi tvö kerfi í sundur, svo veldu kerfið sem er í gangi til að merkja þessa lotu með því (Sjálfvirk skynjun afturkallar valið).",
+    "program_mismatch": "Líkist frekar {program}",
+    "program_mismatch_tip": "Þessi lota líkist greinilega frekar {program} en {selected}, en WashData heldur kerfinu sem þú valdir.",
     "match_uncertain": "Óvíst: {top} eða {runner}",
     "match_uncertain_single": "Óvíst: kannski {top}",
     "match_sure": "~{pct}% vissa",
@@ -1763,6 +1770,7 @@
     },
     "reason": {
       "completion_min_seconds": "Helmingur af p05-lengd hreinna lota ({minutes} min) yfir {cycles} lotur; síar út draugalotur.{excl}",
+      "completion_min_seconds_capped": "Takmarkað við {cap} svo stystu kerfin teljist enn með; helmingur af p05-lengd hreinna lota ({minutes} min, {cycles} lotur) væri lengri.{excl}",
       "match_interval": "Byggt á mældri uppfærslutíðni (miðgildi={median}s) * 10.",
       "match_interval_capped": "Takmarkað þannig að {persistence} samfelldar samsvaranir rúmist innan {pct}% af stysta kerfinu ({shortest}s); uppfærslutíðnin ein og sér (miðgildi={median}s) hefði stungið upp á lengra bili.",
       "match_interval_floored": "Stysta kerfið ({shortest}s) myndi takmarka þetta við {cap}s, undir {minimum}s lágmarkinu, svo lágmarkið er notað: {persistence} samfelldar samsvaranir taka {budget}s, yfir {pct}% af því kerfi. Samsvörun keyrir aðeins þegar mæling berst (miðgildi={median}s), svo þetta kostar ekkert.",
@@ -1771,7 +1779,6 @@
       "min_off_gap_bridge": "Stærðin valin til að brúa lengsta kyrrðartímabilið innan lotu: {span}s + 60s biðminni, úr {spans} brúuðum bilum yfir {cycles} hreinar lotur (helst undir stysta bilinu þínu, {ceiling}s, milli tveggja keyrslna).",
       "min_power": "40% af lægsta virka afli við p05 ({p05}W) yfir {cycles} hreinar lotur, sem heldur slökkviþröskuldinum undir raunverulegri notkun.{excl}",
       "no_update_timeout": "Byggt á mældri uppfærslutíðni (p95={p95}s) * 20 (lágm. 60s).",
-      "off_delay_cadence": "Byggt á mældri uppfærslutíðni (p95={p95}s) * 5",
       "off_delay_device_floor": "Notaði tækjasértækt öruggt lágmark fyrir {device} ({floor}s).",
       "off_delay_generic_floor": "Notaði almennt öruggt lágmark ({floor}s).",
       "off_delay_pauses": "Stærðin valin til að endast lengur en raunveruleg hlé: p95 fyrir hlé innan lotu {p95}s + 60s biðminni, úr {pauses} hléum yfir {cycles} hreinar lotur (lágmark {floor}s).",
@@ -1780,7 +1787,8 @@
       "watchdog": "Haldið eins lágu og óhætt er (rétt yfir p95-uppfærslubilinu {p95}s og að minnsta kosti 2x sýnatökubilinu {median}s, lágm. 30s) svo að stöðnun greinist fljótt án falskra stöðvana.",
       "end_energy_floor": "Hækkað upp í lágmarkið sem Stöðvunarþröskuldur ({stop} W) yfir Slökkvitöf ({off_delay} s) felur í sér; fyrir neðan það getur lotan aðeins endað eftir varaleið.",
       "max_duration_ratio_default": "Aftur í sjálfgefið gildi: lægra hámark hafnar réttu kerfi í hvert sinn sem keyrsla er lengri en venjulega.",
-      "min_duration_ratio_default": "Aftur í sjálfgefið gildi: hærra lágmark kemur í veg fyrir að lota í gangi þekkist fyrr en hún er vel á veg komin."
+      "min_duration_ratio_default": "Aftur í sjálfgefið gildi: hærra lágmark kemur í veg fyrir að lota í gangi þekkist fyrr en hún er vel á veg komin.",
+      "start_above_running": "Dæmigert lágt gangafl þessa tækis er {low} W, en ræsingarþröskuldurinn er {start} W, svo keyrsla á því stigi greinist aldrei. Ræsing stillt á helming þess stigs, stöðvun undir því."
     },
     "exclusions": {
       "summary": "Útilokaði {total} ranggreindar lotur: {parts}.",
@@ -1886,6 +1894,8 @@
     "settings_reverted": "Stillingar endurheimtar; endurhleðsla samþættingar",
     "settings_saved": "Stillingar vistaðar; endurhleðsla samþættingar",
     "suggestions_applied": "Tillögur beitt; endurhleðsla samþættingar",
+    "suggestions_none_applied": "Engin stilling breyttist: valdar tillögur eiga ekki lengur við",
+    "suggestions_changed": "Tillögurnar breyttust eftir að þú fórst yfir þær. Ekkert var vistað; athugaðu þær og notaðu aftur.",
     "suggestions_dismissed": "Tillögum vísað frá",
     "apply_failed": "Beiting mistókst: {error}",
     "delete_failed": "Eyðing mistókst: {error}",
@@ -2231,6 +2241,9 @@
     },
     "cycle_overrun": {
       "name": "Lota rennur yfir"
+    },
+    "program_mismatch": {
+      "name": "Forrit í gangi víkur frá völdu forriti"
     },
     "cycle_paused": {
       "name": "Hlé á lotu"

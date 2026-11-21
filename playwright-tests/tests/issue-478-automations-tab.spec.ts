@@ -548,7 +548,7 @@ test('the trigger list follows the device type', async ({ page }) => {
   expect(keys).toContain('anti_wrinkle_started');
   expect(keys).toContain('finishing_soon');
   expect(keys).not.toContain('pump_stuck');
-  expect(keys).toHaveLength(17);
+  expect(keys).toHaveLength(18);
   await expect(page.locator('[data-trigger="still_tumbling"]')).toHaveText('Still tumbling after the cycle');
 
   await openTab(page, typeOptions('dryer'));
@@ -568,7 +568,7 @@ test('the trigger list follows the device type', async ({ page }) => {
   await openTab(page, typeOptions('other'));
   await page.locator('[data-action="auto-toggle-triggers"]').click();
   keys = await triggerKeys(page);
-  for (const k of ['program_recognised', 'phase_started', 'finishing_soon', 'cycle_overrun', 'anti_wrinkle_started', 'still_tumbling', 'pump_stuck']) {
+  for (const k of ['program_recognised', 'phase_started', 'finishing_soon', 'cycle_overrun', 'program_mismatch', 'anti_wrinkle_started', 'still_tumbling', 'pump_stuck']) {
     expect(keys).not.toContain(k);
   }
   // The common ones first, then the rest in their usual order.

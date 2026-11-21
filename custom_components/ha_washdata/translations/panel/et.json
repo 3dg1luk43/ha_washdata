@@ -1040,6 +1040,7 @@
     "sug_muted": "Seda seadet enam ei soovitata",
     "sug_mute_failed": "Soovituse vaigistamine ebaõnnestus",
     "sug_unmuted_all": "Vaigistatud soovitused lähtestatud",
+    "sug_unmute_incomplete": "Lähtestamine ei lõppenud: mõned soovitused on endiselt vaigistatud. Proovi uuesti.",
     "n_suggestions_muted": "{count} soovitust vaigistatud; automaatne häälestaja ei paku neid enam.",
     "n_suggestions_muted_one": "{count} soovitus vaigistatud; automaatne häälestaja ei paku seda enam.",
     "n_suggestions_muted_other": "{count} soovitust vaigistatud; automaatne häälestaja ei paku neid enam.",
@@ -1105,6 +1106,10 @@
     "cycle_context_none": "Salvestis pole selle tsükli ümber ühtegi näitu (Home Assistant hoiab vaikimisi 10 päeva ajalugu).",
     "cycle_context_tip": "Ainult kuvamiseks: näitab võimsusanduri salvesti ajalugu selle tsükli ümber, kui see on veel alles. Katkenud käivituskatsete lisamiseks tulevastesse tsüklitesse kasutage sätet Kõvera eeljooks (Seaded > Tuvastamine > Tsükli Algus), mis muudab salvestatud kestusi.",
     "invalid_threshold_pair": "Peatumise Lävi ({stop} W) peab olema väiksem kui Käivitumise Lävi ({start} W). Midagi ei salvestatud; muutke mõlemat korraga.",
+    "end_gate_check_failed": "Soovitatud ajastussätteid ei õnnestunud selle seadme pauside suhtes kontrollida. Midagi ei salvestatud; proovige uuesti.",
+    "analysis_superseded": "Seaded või tsüklite andmed muutusid analüüsi ajal. Käivitage see uuesti.",
+    "analysis_check_failed": "Soovitatud ajastussätteid ei õnnestunud selle seadme pauside suhtes kontrollida. Käivitage see uuesti.",
+    "apply_cycles_changed": "Soovituste rakendamise ajal salvestati tsükkel. Ühtegi sätet ei muudetud ja soovitused tühjendati. Käivitage soovituste analüüs uuesti.",
     "bp_admin_only": "Malle installib administraator.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Loodud WashData poolt {device} jaoks. Lisa oma toimingud (teavitus, tuled, ...).",
@@ -1569,12 +1574,12 @@
       "doc": "Mis avaneb selle seadme teavituse puudutamisel. Tühi: selle seadme WashData paneel. Sisestage töölaua tee (nt /lovelace/laundry) või URL, või \"none\", kui puudutus ei tohi midagi teha."
     },
     "door_opens_at_end": {
-      "label": "Uks avaneb automaatselt lõpus",
-      "doc": "Nõudepesumasinatele, mis avavad lõpus kuivatamiseks ukse (nt AirDry). Kui uks jääb allpool määratud viibimisajaks avatuks, lõpetab see tsükli, mitte ei peata seda; lühikest avamist eiratakse. Vajab sätet Ukse Anduri Olem."
+      "label": "Ukse avamine lõpetab tsükli",
+      "doc": "Ukse Anduri Olemi korral lõpetab uks, mis jääb madala võimsuse juures allpool määratud viibimisajaks avatuks, tsükli, mitte ei peata seda. Pausi ajal juhtub see alles siis, kui tuvastatud programm on peaaegu lõpus, nii et paus programmi keskel jääb pausiks."
     },
     "door_end_dwell_seconds": {
       "label": "Ukse avamise lõppviibimisaeg",
-      "doc": "Kui \"Uks avaneb automaatselt lõpus\" on sees: kui kaua peab uks avatuks jääma, enne kui tsükkel lõpeb. Piisavalt kaua, et nõude lisamist eirata (vaikimisi 60 s)."
+      "doc": "Kui \"Ukse avamine lõpetab tsükli\" on sees: kui kaua peab uks avatuks jääma, enne kui tsükkel lõpeb. Piisavalt kaua, et nõude lisamist eirata (vaikimisi 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Programmi kujundavad tsüklid",
@@ -1711,7 +1716,9 @@
     "match_sure": "~{pct}% kindel",
     "match_uncertain_tip": "WashData pole veel programmi valinud. Protsent näitab, kui sageli juhtiv oletus, {top}, oli varasemates tsüklites õige, kui see oli nii palju ees. Ainult teadmiseks.",
     "torn_pick": "{a} või {b}?",
-    "torn_tip": "WashData ei suuda neid kahte veel eristada, seega valige praegu töötav programm, millega see tsükkel sildistatakse (Automaatne tuvastamine tühistab valiku)."
+    "torn_tip": "WashData ei suuda neid kahte veel eristada, seega valige praegu töötav programm, millega see tsükkel sildistatakse (Automaatne tuvastamine tühistab valiku).",
+    "program_mismatch": "Sarnaneb rohkem programmiga {program}",
+    "program_mismatch_tip": "See tsükkel sarnaneb selgelt rohkem programmiga {program} kui programmiga {selected}, kuid WashData säilitab teie valitud programmi."
   },
   "tab": {
     "advanced": "Täpsemalt",
@@ -1799,6 +1806,8 @@
     "settings_reverted": "Seaded taastatud; integratsiooni uuesti laadimine",
     "settings_saved": "Seaded salvestatud; integratsiooni uuesti laadimine",
     "suggestions_applied": "Soovitused rakendatud; integratsiooni uuesti laadimine",
+    "suggestions_none_applied": "Ühtegi sätet ei muudetud: valitud soovitused ei kehti enam",
+    "suggestions_changed": "Soovitused on pärast ülevaatamist muutunud. Midagi ei salvestatud; kontrolli neid ja rakenda uuesti.",
     "suggestions_dismissed": "Soovitused lükati tagasi",
     "apply_failed": "Rakendamine ebaõnnestus: {error}",
     "delete_failed": "Kustutamine ebaõnnestus: {error}",
@@ -1957,6 +1966,7 @@
     },
     "reason": {
       "completion_min_seconds": "Pool puhaste tsüklite p05 kestusest ({minutes} min) {cycles} tsükli lõikes; filtreerib välja kummitustsüklid.{excl}",
+      "completion_min_seconds_capped": "Piiratud väärtusega {cap}, et ka lühimad programmid arvesse läheksid; pool puhaste tsüklite p05 kestusest ({minutes} min, {cycles} tsüklit) oleks pikem.{excl}",
       "match_interval": "Põhineb täheldatud uuendustempol (mediaan={median}s) * 10.",
       "match_interval_capped": "Piiratud nii, et {persistence} järjestikust vastet mahuks lühima programmi ({shortest}s) {pct}% sisse; ainuüksi uuendustempo (mediaan={median}s) oleks soovitanud pikemat intervalli.",
       "match_interval_floored": "Lühim programm ({shortest}s) piiraks selle väärtusega {cap}s, mis jääb alla {minimum}s miinimumi, seega kasutatakse miinimumi: {persistence} järjestikust vastet võtab {budget}s, üle {pct}% sellest programmist. Sobitamine käib ainult näidu saabudes (mediaan={median}s), seega see ei maksa midagi.",
@@ -1965,7 +1975,6 @@
       "min_off_gap_bridge": "Mõõdetud nii, et katab tsükli pikima vaikse lõigu: {span}s + 60s puhver, {spans} sillatud vahest {cycles} puhta tsükli lõikes (jääb alla teie lühima järjestikuste käivituste vahelise pausi, mis on {ceiling}s).",
       "min_power": "40% madalaimast aktiivvõimsusest p05 juures ({p05}W) {cycles} puhta tsükli lõikes, hoides väljalülituse läve alla tegeliku tarbimise.{excl}",
       "no_update_timeout": "Põhineb täheldatud uuendustempol (p95={p95}s) * 20 (min 60s).",
-      "off_delay_cadence": "Põhineb täheldatud uuendustempol (p95={p95}s) * 5",
       "off_delay_device_floor": "Kasutati seadmepõhist ohutut miinimumi seadmele {device} ({floor}s).",
       "off_delay_generic_floor": "Kasutati üldist ohutut miinimumi ({floor}s).",
       "off_delay_pauses": "Mõõdetud kestma kauem kui tegelikud pausid: p95 tsüklisisene paus {p95}s + 60s puhver, {pauses} pausist {cycles} puhta tsükli lõikes (alampiir {floor}s).",
@@ -1974,7 +1983,8 @@
       "watchdog": "Hoitakse nii madal kui ohutu (veidi üle p95 uuendusintervalli {p95}s ja vähemalt 2x proovivõtu intervall {median}s, min 30s), et seiskumised tuvastataks kiiresti ilma valeseisakuteta.",
       "end_energy_floor": "Tõstetud miinimumini, mis tuleneb peatumise lävest ({stop} W) väljalülitumise viivituse ({off_delay} s) jooksul; sellest madalamal saab tsükkel lõppeda ainult varumehhanismi kaudu.",
       "max_duration_ratio_default": "Taastatud vaikeväärtus: madalam ülempiir lükkab õige programmi tagasi alati, kui tsükkel kestab tavalisest kauem.",
-      "min_duration_ratio_default": "Taastatud vaikeväärtus: kõrgem alampiir takistab käimasoleva tsükli tuvastamist, kuni see on juba hästi käima läinud."
+      "min_duration_ratio_default": "Taastatud vaikeväärtus: kõrgem alampiir takistab käimasoleva tsükli tuvastamist, kuni see on juba hästi käima läinud.",
+      "start_above_running": "Selle seadme tüüpiline madal töövõimsus on {low} W, kuid käivitumise lävi on {start} W, seega sellel tasemel töötav tsükkel ei käivitu kunagi. Käivitumise lävi seatakse poolele sellest tasemest, peatumise lävi sellest allapoole."
     },
     "exclusions": {
       "summary": "Välja jäetud {total} valesti tuvastatud tsüklit: {parts}.",
@@ -2231,6 +2241,9 @@
     },
     "cycle_overrun": {
       "name": "Tsükkel kestab liiga kaua"
+    },
+    "program_mismatch": {
+      "name": "Töötav programm erineb valitust"
     },
     "cycle_paused": {
       "name": "Tsükkel peatati"

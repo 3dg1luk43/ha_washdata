@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "마지막 사이클 비용"
+      },
+      "last_cycle_start": {
+        "name": "마지막 사이클 시작 시간"
       }
     },
     "select": {
@@ -572,6 +575,7 @@
       "phase_started": "단계가 시작됨",
       "finishing_soon": "곧 완료됨",
       "cycle_overrun": "사이클이 너무 오래 실행 중",
+      "program_mismatch": "실행 중인 프로그램이 선택한 프로그램과 다름",
       "cycle_paused": "사이클이 일시 정지됨",
       "cycle_resumed": "사이클이 재개됨",
       "still_tumbling": "사이클 후에도 계속 회전 중",
@@ -646,6 +650,16 @@
         "percent": {
           "name": "더 긴 시간",
           "description": "프로그램의 일반적인 소요 시간을 초과한 비율."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "실행 중인 프로그램이 선택한 프로그램과 다름",
+      "description": "선택한 프로그램보다 다른 프로그램이 사이클에 더 잘 맞을 때 한 번 트리거됩니다. 새로 선택하면 새 확인을 시작합니다.",
+      "fields": {
+        "program": {
+          "name": "프로그램",
+          "description": "이 프로그램이 선택된 경우에만, 정확한 이름으로. 모든 프로그램은 비워 두세요."
         }
       }
     },

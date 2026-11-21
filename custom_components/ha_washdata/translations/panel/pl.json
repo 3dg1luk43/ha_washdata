@@ -976,6 +976,7 @@
     "sug_muted": "To ustawienie nie będzie więcej sugerowane",
     "sug_mute_failed": "Nie udało się wyciszyć sugestii",
     "sug_unmuted_all": "Wyciszone sugestie przywrócone",
+    "sug_unmute_incomplete": "Przywracanie nie zostało zakończone: niektóre sugestie są nadal wyciszone. Spróbuj ponownie.",
     "n_suggestions_muted": "Wyciszono {count} sugestii; automatyczny tuner nie będzie ich proponować.",
     "n_suggestions_muted_one": "Wyciszono {count} sugestię; automatyczny tuner nie będzie jej proponować.",
     "n_suggestions_muted_few": "Wyciszono {count} sugestie; automatyczny tuner nie będzie ich proponować.",
@@ -1139,6 +1140,10 @@
     "cycle_context_none": "Recorder nie przechowuje żadnych odczytów z okresu wokół tego cyklu (Home Assistant domyślnie przechowuje historię przez 10 dni).",
     "cycle_context_tip": "Tylko podgląd: pokazuje historię czujnika mocy z recordera wokół tego cyklu, jeśli jest jeszcze przechowywana. Aby dołączać nieudane próby startu do przyszłych cykli, użyj ustawienia Wstępny zapis krzywej (Ustawienia > Wykrywanie > Start Cyklu), które zmienia zapisane czasy trwania.",
     "invalid_threshold_pair": "Próg Zatrzymania ({stop} W) musi być niższy niż Próg Startu ({start} W). Nic nie zostało zapisane; zmień obie wartości razem.",
+    "end_gate_check_failed": "Nie udało się sprawdzić sugerowanych ustawień czasowych względem przerw tego urządzenia. Nic nie zostało zapisane; spróbuj ponownie.",
+    "analysis_superseded": "Ustawienia lub dane cykli zmieniły się w trakcie analizy. Uruchom ją ponownie.",
+    "analysis_check_failed": "Nie udało się sprawdzić sugerowanych ustawień czasowych względem przerw tego urządzenia. Uruchom ją ponownie.",
+    "apply_cycles_changed": "Podczas stosowania sugestii zapisano cykl. Żadne ustawienie nie zostało zmienione, a sugestie zostały wyczyszczone. Uruchom ponownie analizę sugestii.",
     "bp_admin_only": "Szablony instaluje administrator.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Utworzone przez WashData dla {device}. Dodaj swoje akcje (powiadomienie, światła, ...).",
@@ -1582,12 +1587,12 @@
       "doc": "Co otwiera dotknięcie powiadomienia tego urządzenia. Puste: panel WashData tego urządzenia. Wpisz ścieżkę pulpitu (np. /lovelace/laundry) lub URL albo „none”, aby dotknięcie nic nie otwierało."
     },
     "door_opens_at_end": {
-      "label": "Drzwi otwierają się automatycznie na końcu",
-      "doc": "Dla zmywarek, które na końcu otwierają drzwi, aby suszyć (np. AirDry). Drzwi otwarte przez czas oczekiwania poniżej kończą cykl zamiast go wstrzymywać; krótkie otwarcie jest ignorowane. Wymaga Encji Czujnika Drzwi."
+      "label": "Otwarcie drzwi kończy cykl",
+      "doc": "Jeśli ustawiono Encję Czujnika Drzwi, drzwi otwarte przy niskiej mocy przez czas oczekiwania podany poniżej kończą cykl zamiast go wstrzymywać. Gdy cykl jest wstrzymany, dzieje się to dopiero wtedy, gdy rozpoznany program jest bliski końca, więc wstrzymanie w trakcie programu pozostaje wstrzymaniem."
     },
     "door_end_dwell_seconds": {
       "label": "Czas otwarcia drzwi do zakończenia cyklu",
-      "doc": "Przy włączonym „Drzwi otwierają się automatycznie na końcu”: jak długo drzwi muszą pozostać otwarte, zanim cykl się zakończy. Na tyle długo, aby zignorować dołożenie naczynia (domyślnie 60 s)."
+      "doc": "Przy włączonym „Otwarcie drzwi kończy cykl”: jak długo drzwi muszą pozostać otwarte, zanim cykl się zakończy. Na tyle długo, aby zignorować dołożenie naczynia (domyślnie 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Cykle kształtujące program",
@@ -1728,7 +1733,9 @@
     "match_sure": "~{pct}% pewności",
     "match_uncertain_tip": "WashData nie wybrał jeszcze programu. Liczba pokazuje, jak często wiodący kandydat, {top}, okazywał się trafny w poprzednich cyklach przy takiej przewadze. Tylko informacyjnie.",
     "torn_pick": "{a} czy {b}?",
-    "torn_tip": "WashData nie potrafi jeszcze rozróżnić tych dwóch programów, więc wybierz ten, który właśnie działa, aby oznaczyć nim ten cykl (Automatyczne wykrywanie cofa wybór)."
+    "torn_tip": "WashData nie potrafi jeszcze rozróżnić tych dwóch programów, więc wybierz ten, który właśnie działa, aby oznaczyć nim ten cykl (Automatyczne wykrywanie cofa wybór).",
+    "program_mismatch": "Wygląda raczej jak {program}",
+    "program_mismatch_tip": "Ten cykl wyraźnie bardziej przypomina program {program} niż {selected}, ale WashData zachowuje wybrany przez Ciebie program."
   },
   "suggestion": {
     "observed_label": "Zmierzono",
@@ -1780,6 +1787,7 @@
     },
     "reason": {
       "completion_min_seconds": "Połowa czasu trwania p05 poprawnego cyklu ({minutes} min) dla {cycles} cykli; odfiltrowuje fałszywe cykle.{excl}",
+      "completion_min_seconds_capped": "Ograniczono do {cap}, aby liczyły się też najkrótsze programy; połowa czasu trwania p05 poprawnego cyklu ({minutes} min, liczba cykli: {cycles}) byłaby dłuższa.{excl}",
       "match_interval": "Na podstawie obserwowanej częstotliwości aktualizacji (mediana={median}s) * 10.",
       "match_interval_capped": "Ograniczone tak, aby {persistence} kolejnych dopasowań zmieściło się w {pct}% najkrótszego programu ({shortest}s); sama częstotliwość aktualizacji (mediana={median}s) sugerowałaby dłuższy interwał.",
       "match_interval_floored": "Najkrótszy program ({shortest}s) ograniczyłby tę wartość do {cap}s, poniżej minimum {minimum}s, więc użyto minimum: {persistence} kolejnych dopasowań zajmuje {budget}s, ponad {pct}% tego programu. Dopasowanie uruchamia się tylko po nadejściu odczytu (mediana={median}s), więc nic to nie kosztuje.",
@@ -1788,7 +1796,6 @@
       "min_off_gap_bridge": "Dobrane tak, aby pokryć najdłuższy cichy odcinek wewnątrz cyklu: {span}s + zapas 60s, z {spans} pokrytych przerw w {cycles} poprawnych cyklach (pozostaje poniżej {ceiling}s, czyli najkrótszej przerwy, jaką zostawiasz między kolejnymi uruchomieniami).",
       "min_power": "40% najniższej mocy czynnej p05 ({p05}W) w {cycles} poprawnych cyklach, tak aby próg wyłączenia pozostał poniżej rzeczywistego poboru.{excl}",
       "no_update_timeout": "Na podstawie obserwowanej częstotliwości aktualizacji (p95={p95}s) * 20 (min. 60s).",
-      "off_delay_cadence": "Na podstawie obserwowanej częstotliwości aktualizacji (p95={p95}s) * 5",
       "off_delay_device_floor": "Użyto bezpiecznego minimum specyficznego dla urządzenia {device} ({floor}s).",
       "off_delay_generic_floor": "Użyto ogólnego bezpiecznego minimum ({floor}s).",
       "off_delay_pauses": "Dobrane tak, aby przetrwać rzeczywiste pauzy: pauza w cyklu p95 {p95}s + zapas 60s, z {pauses} pauz w {cycles} poprawnych cyklach (minimum {floor}s).",
@@ -1797,7 +1804,8 @@
       "watchdog": "Utrzymane tak nisko, jak to bezpieczne (tuż powyżej przerwy aktualizacji p95 wynoszącej {p95}s i co najmniej 2x powyżej interwału próbkowania {median}s, min. 30s), aby zawieszenia były szybko wykrywane bez fałszywych zatrzymań.",
       "end_energy_floor": "Podniesiono do minimum wynikającego z progu zatrzymania ({stop} W) w czasie opóźnienia wyłączenia ({off_delay} s); poniżej niego cykl może się zakończyć tylko ścieżką awaryjną.",
       "max_duration_ratio_default": "Przywrócono wartość domyślną: niższy górny limit odrzuca właściwy program za każdym razem, gdy cykl trwa dłużej niż zwykle.",
-      "min_duration_ratio_default": "Przywrócono wartość domyślną: wyższy dolny limit uniemożliwia rozpoznanie trwającego cyklu, dopóki nie jest on mocno zaawansowany."
+      "min_duration_ratio_default": "Przywrócono wartość domyślną: wyższy dolny limit uniemożliwia rozpoznanie trwającego cyklu, dopóki nie jest on mocno zaawansowany.",
+      "start_above_running": "Typowa niska moc pracy tego urządzenia to {low} W, ale próg startu wynosi {start} W, więc cykl na tym poziomie nigdy się nie rozpocznie. Próg startu ustawiony na połowę tego poziomu, próg zatrzymania poniżej niego."
     },
     "exclusions": {
       "summary": "Wykluczono {total} błędnie wykrytych cykli: {parts}.",
@@ -1903,6 +1911,8 @@
     "settings_reverted": "Ustawienia przywrócono; integracja jest przeładowywana",
     "settings_saved": "Ustawienia zapisane; przeładowanie integracji",
     "suggestions_applied": "Zastosowano sugestie; przeładowanie integracji",
+    "suggestions_none_applied": "Nie zmieniono żadnego ustawienia: wybrane sugestie nie mają już zastosowania",
+    "suggestions_changed": "Sugestie zmieniły się od czasu ich przejrzenia. Nic nie zostało zapisane; sprawdź je i zastosuj ponownie.",
     "suggestions_dismissed": "Sugestie odrzucone",
     "apply_failed": "Zastosowanie nie powiodło się: {error}",
     "delete_failed": "Usuwanie nie powiodło się: {error}",
@@ -2271,6 +2281,9 @@
     },
     "cycle_overrun": {
       "name": "Cykl trwa za długo"
+    },
+    "program_mismatch": {
+      "name": "Działający program różni się od wybranego"
     },
     "cycle_paused": {
       "name": "Cykl wstrzymany"

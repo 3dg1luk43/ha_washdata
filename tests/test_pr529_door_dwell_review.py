@@ -1,0 +1,213 @@
+"""PR #529 final review: three gaps around the door end dwell and the ghost log.
+
+* A door sensor that loses contact while the end dwell runs: the door can close
+  unseen, so the dwell is cancelled; a recovery to "on" starts a fresh one through
+  the same eligibility check.
+* The dwell's expiry checked the cached power, which a reading the sampling
+  throttle dropped leaves low while the appliance runs again; it reads the sensor's
+  live state now.
+* The ghost-cycle log advised a Start Threshold above a peak that had already aged
+  out of its 24 h count.
+"""
+from __future__ import annotations
+
+import logging
+from datetime import timedelta
+from typing import Any
+from unittest.mock import patch
+
+from homeassistant.core import HomeAssistant
+
+from custom_components.ha_washdata.time_utils import utc_now
+
+from .test_issue_524_door_ends_cycle import DOOR, OPTS, _paused_washer, _tick
+
+
+async def test_a_door_sensor_that_loses_contact_cancels_the_dwell(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    manager, ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    hass.states.async_set(DOOR, "on")
+    await hass.async_block_till_done()
+    assert manager._remove_door_end_dwell is not None  # noqa: SLF001
+
+    hass.states.async_set(DOOR, "unavailable")
+    await hass.async_block_till_done()
+    assert manager._remove_door_end_dwell is None  # noqa: SLF001
+    await _tick(hass, freezer, 90, None)  # past the original dwell
+    assert ends == []
+
+    # Back, still open: a fresh dwell, and the cycle ends when it runs out.
+    hass.states.async_set(DOOR, "on")
+    await hass.async_block_till_done()
+    assert manager._remove_door_end_dwell is not None  # noqa: SLF001
+    await _tick(hass, freezer, 70, None)
+    assert len(ends) == 1
+
+
+async def test_back_from_unavailable_and_closed_arms_nothing(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    manager, ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    hass.states.async_set(DOOR, "unavailable")
+    await hass.async_block_till_done()
+    hass.states.async_set(DOOR, "off")
+    await hass.async_block_till_done()
+    assert manager._remove_door_end_dwell is None  # noqa: SLF001
+    await _tick(hass, freezer, 90, None)
+    assert ends == []
+
+
+async def test_the_dwell_reads_the_live_power_not_the_cache(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """The plug reports 300 W, but the throttle dropped it: the cache still says
+    0.5 W. The dwell must not finalise a cycle that is running again."""
+    manager, ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    hass.states.async_set(DOOR, "on")
+    await hass.async_block_till_done()
+    manager._current_power = 0.5  # noqa: SLF001
+    with patch.object(manager, "_live_power_state", return_value=(300.0, utc_now())):
+        manager._door_end_dwell_fired(utc_now())  # noqa: SLF001
+    assert ends == []
+    assert manager._remove_door_end_dwell is not None  # re-armed  # noqa: SLF001
+
+
+async def test_the_ghost_log_names_a_peak_inside_its_24_h(
+    hass: HomeAssistant, setup_washdata_entry, caplog: Any
+) -> None:
+    from custom_components.ha_washdata.const import DOMAIN  # noqa: PLC0415
+
+    entry = await setup_washdata_entry(options={"auto_tune_noise_events_threshold": 2})
+    manager = hass.data[DOMAIN][entry.entry_id]
+    t0 = utc_now()
+    caplog.set_level(logging.INFO)
+    with patch("custom_components.ha_washdata.manager.utc_now", return_value=t0):
+        manager._handle_noise_cycle(40.0)  # noqa: SLF001
+    later = t0 + timedelta(hours=25)
+    with patch("custom_components.ha_washdata.manager.utc_now", return_value=later):
+        manager._handle_noise_cycle(5.0)  # noqa: SLF001
+    with patch("custom_components.ha_washdata.manager.utc_now", return_value=later + timedelta(minutes=1)):
+        manager._handle_noise_cycle(5.0)  # noqa: SLF001
+    logged = [r.getMessage() for r in caplog.records if "ghost cycles in 24 h" in r.getMessage()]
+    assert logged and "up to 5.0 W" in logged[-1], logged
+
+
+async def test_a_new_pick_waits_for_the_detector_before_a_paused_door_end(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """Re-picked to a longer program, the detector still holds the old one until its
+    next match: the door must not end the run by the old program's length."""
+    manager, _ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    assert manager._door_end_may_fire()  # noqa: SLF001 - "Cotton" matched, at its end
+    manager._manual_program_active = True  # noqa: SLF001
+    manager._current_program = "Intensive"  # noqa: SLF001 - picked, detector not told yet
+    assert manager._door_end_may_fire() is False  # noqa: SLF001
+    manager._current_program = "Cotton"  # noqa: SLF001 - the pick and the detector agree
+    assert manager._door_end_may_fire()  # noqa: SLF001
+
+
+async def test_a_paused_door_end_needs_a_usable_power_reading(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """The plug dropped out after 0 W: the cached reading cannot say the appliance
+    did not resume, so the dwell re-arms instead of ending the run (PR #529 review)."""
+    manager, ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    hass.states.async_set(DOOR, "on")
+    await hass.async_block_till_done()
+    with patch.object(manager, "_live_power_state", return_value=None):
+        manager._door_end_dwell_fired(utc_now())  # noqa: SLF001
+    assert ends == []
+    assert manager._remove_door_end_dwell is not None  # noqa: SLF001
+
+
+async def test_an_attribute_update_keeps_the_running_dwell(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """PR #529 review: an on -> on attribute update re-armed the dwell, so a sensor
+    reporting more often than the dwell kept the door from ever ending the run."""
+    manager, ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    hass.states.async_set(DOOR, "on")
+    await hass.async_block_till_done()
+    for i in range(3):
+        await _tick(hass, freezer, 25, None)
+        hass.states.async_set(DOOR, "on", {"battery": 90 - i})
+        await hass.async_block_till_done()
+    await _tick(hass, freezer, 10, None)
+    assert len(ends) == 1
+
+
+async def test_a_re_pick_at_a_new_length_waits_for_the_detector(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """PR #529 review: Cotton re-picked after its learned length grew; the detector
+    still holds the old length until its next match, so the door must not end the
+    run by it. At the length it holds, it still ends."""
+    manager, _ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    held = float(manager.detector.expected_duration_seconds)
+    manager._manual_program_active = True  # noqa: SLF001
+    manager._current_program = manager.detector.matched_profile  # noqa: SLF001
+    manager._matched_profile_duration = held * 2.5  # noqa: SLF001 - the pick's new length
+    assert manager._door_end_may_fire() is False  # noqa: SLF001
+    manager._matched_profile_duration = held  # noqa: SLF001
+    assert manager._door_end_may_fire()  # noqa: SLF001
+
+
+async def test_a_cleared_pick_waits_for_the_detector_before_a_paused_door_end(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """Review of PR #529: the pick was cleared in PAUSED; the detector still held the
+    cleared program's match and length until its next tick, so the door could end
+    the run by that length."""
+    manager, _ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    manager._manual_program_active = True  # noqa: SLF001
+    manager._current_program = manager.detector.matched_profile  # noqa: SLF001
+    manager._matched_profile_duration = float(manager.detector.expected_duration_seconds)  # noqa: SLF001
+    assert manager._door_end_may_fire()  # noqa: SLF001
+    manager.clear_manual_program()
+    assert manager._door_end_may_fire() is False  # noqa: SLF001
+    manager._door_gate_awaits_match = False  # noqa: SLF001 - what the next match tick does
+    assert manager._door_end_may_fire()  # noqa: SLF001
+
+
+async def test_a_new_pick_after_a_cleared_one_reopens_the_paused_door_end(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """Review of PR #529: Eco cleared, then Cotton picked before any automatic
+    match. Cotton reaches the detector through the pin's own matcher branch, so the
+    wait set by the clear must not outlive it; the name and length checks decide."""
+    manager, _ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    held = float(manager.detector.expected_duration_seconds)
+    manager._manual_program_active = True  # noqa: SLF001
+    manager._current_program = manager.detector.matched_profile  # noqa: SLF001
+    manager._matched_profile_duration = held  # noqa: SLF001
+    manager.clear_manual_program()
+    assert manager._door_end_may_fire() is False  # noqa: SLF001 - auto-detect: wait
+    # The new pick, held by the detector at its own length.
+    manager._manual_program_active = True  # noqa: SLF001
+    manager._current_program = manager.detector.matched_profile  # noqa: SLF001
+    manager._matched_profile_duration = held  # noqa: SLF001
+    assert manager._door_end_may_fire()  # noqa: SLF001
+    # Picked but not yet held at its length: still waits.
+    manager._matched_profile_duration = held * 2  # noqa: SLF001
+    assert manager._door_end_may_fire() is False  # noqa: SLF001
+
+
+async def test_a_failed_match_after_a_cleared_pick_keeps_the_door_waiting(
+    hass: HomeAssistant, setup_washdata_entry, freezer
+) -> None:
+    """Review of PR #529: the automatic match that should replace a cleared pick
+    failed (no profile, no revoke); the detector kept the cleared program and its
+    length, yet the wait ended, so the door could end the run by that length."""
+    manager, _ends = await _paused_washer(hass, setup_washdata_entry, freezer, OPTS)
+    held = manager.detector.matched_profile
+    manager._manual_program_active = True  # noqa: SLF001
+    manager._current_program = held  # noqa: SLF001
+    manager._matched_profile_duration = float(manager.detector.expected_duration_seconds)  # noqa: SLF001
+    manager.clear_manual_program()
+    manager._settle_door_gate(None, False)  # noqa: SLF001 - the failed tick
+    assert manager._door_end_may_fire() is False  # noqa: SLF001
+    manager._settle_door_gate("Some other", False)  # noqa: SLF001 - named, but not held
+    assert manager._door_end_may_fire() is False  # noqa: SLF001
+    manager._settle_door_gate(held, False)  # noqa: SLF001 - the detector holds it
+    assert manager._door_end_may_fire()  # noqa: SLF001

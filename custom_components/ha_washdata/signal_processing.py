@@ -24,6 +24,7 @@ Constraint: Resampling must be segment-based (no interpolation across gaps).
 from __future__ import annotations
 
 import math
+from bisect import bisect_right
 
 from dataclasses import dataclass
 from collections.abc import Sequence
@@ -99,6 +100,49 @@ def integrate_wh(
 
     mask = (dt_hours > 0) & (dt_hours <= float(max_gap_s) / 3600.0)
     return float(np.sum(avg_power[mask] * dt_hours[mask]))
+
+
+def cumulative_wh(timestamps: np.ndarray, power: np.ndarray) -> np.ndarray:
+    """Running :func:`integrate_wh` (no gap mask) at each reading, from the first.
+
+    ``out[k] - out[lo]`` equals ``integrate_wh(ts[lo:k + 1], p[lo:k + 1])`` and, when
+    no interval in it exceeds ``max_gap_s``, the masked form too; a scan over many
+    windows of one trace reads them in O(1) each instead of re-integrating.
+    """
+    ts = np.asarray(timestamps, dtype=float)
+    ps = np.asarray(power, dtype=float)
+    if ts.size < 2:
+        return np.zeros(ts.size, dtype=float)
+    dt = np.diff(ts)
+    # Non-positive intervals add nothing, as integrate_wh's mask leaves them out.
+    seg = np.where(dt > 0, (ps[:-1] + ps[1:]) * 0.5 * dt / 3600.0, 0.0)
+    return np.concatenate(([0.0], np.cumsum(seg)))
+
+
+def cumulative_held_wh(timestamps: Sequence[float], power: Sequence[float]) -> list[float]:
+    """Energy (Wh) from the first reading to each reading, each held to the next.
+
+    The held model of :func:`integrate_cycle_wh` with no gap rule (a caller skips
+    outages itself), as running sums: ``held_wh_until`` reads any instant from it.
+    """
+    out = [0.0]
+    for k in range(1, len(timestamps)):
+        out.append(out[-1] + float(power[k - 1]) * (float(timestamps[k]) - float(timestamps[k - 1])) / 3600.0)
+    return out
+
+
+def held_wh_until(
+    timestamps: Sequence[float], power: Sequence[float], cumulative: list[float], t: float
+) -> float:
+    """Held energy (Wh) from the first reading to instant ``t``, from
+    :func:`cumulative_held_wh`'s running sums; 0 at or before the first reading
+    (no reading holds there: review of PR #529, a window reaching back past the
+    pause's first reading read a negative term and looked fuller than it was)."""
+    if not timestamps or t <= float(timestamps[0]):
+        return 0.0
+    k = bisect_right(timestamps, t) - 1
+    k = max(0, min(k, len(timestamps) - 1))
+    return cumulative[k] + float(power[k]) * (t - float(timestamps[k])) / 3600.0
 
 
 #: A stored cycle's interval longer than this is an outage, not a held reading.

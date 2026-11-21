@@ -203,8 +203,10 @@ class TestModelSuggestionsMinOffGap:
             "status": "completed",
         }
 
-    def test_min_off_gap_emitted_with_sufficient_cycles(self, mock_hass):
-        # 5 cycles separated by ~600s gaps
+    def test_min_off_gap_not_emitted_without_traces(self, mock_hass):
+        """Five untraced cycles ~600 s apart: no pause is measurable, so nothing is
+        proposed (audit 2026-11-16: the inter-cycle-gap fallback had no merge
+        ceiling and gave the #527 dryer 1773 s against a 1650 s turnaround)."""
         cycles = [
             self._make_cycle("2026-01-01T08:00:00+00:00", "2026-01-01T09:00:00+00:00"),
             self._make_cycle("2026-01-01T09:11:00+00:00", "2026-01-01T10:11:00+00:00"),
@@ -216,10 +218,7 @@ class TestModelSuggestionsMinOffGap:
         engine = SuggestionEngine(mock_hass, "test", store, device_type="washing_machine")
 
         result = engine.generate_model_suggestions()
-        assert CONF_MIN_OFF_GAP in result, "_suggest_min_off_gap should emit a suggestion for 5 completed cycles"
-        val = result[CONF_MIN_OFF_GAP]["value"]
-        assert val > 0
-        assert val <= 3600
+        assert CONF_MIN_OFF_GAP not in result
 
     def test_min_off_gap_not_emitted_with_too_few_gaps(self, mock_hass):
         # Only 2 cycles → 1 gap → not enough

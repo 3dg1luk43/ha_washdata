@@ -68,6 +68,12 @@ async def _feed(
         t += step
 
 
+# Local noon in the test time zone: the cycles fed here span about an hour, and one
+# that crossed local midnight met the nightly maintenance save (the tests failed on
+# any run started between about 23:00 and 00:00 local).
+MIDDAY = "2026-11-18T20:00:00+00:00"
+
+
 def _count_main_store_writes(manager: Any) -> list[Any]:
     """Record every write of the main store file (not the active-cycle file)."""
     store = manager.profile_store._store  # noqa: SLF001
@@ -107,6 +113,7 @@ async def _one_cycle_then_idle(hass: HomeAssistant, freezer: Any, manager: Any) 
 async def test_running_cycle_with_pending_suggestions_does_not_rewrite_the_store(
     hass: HomeAssistant, setup_washdata_entry, freezer, monkeypatch
 ) -> None:
+    freezer.move_to(MIDDAY)  # the nightly maintenance save is not the one tested
     entry = await setup_washdata_entry(power_sensor=POWER, options=FAST)
     manager = hass.data[DOMAIN][entry.entry_id]
     await _one_cycle_then_idle(hass, freezer, manager)
@@ -130,6 +137,7 @@ async def test_running_cycle_with_pending_suggestions_does_not_rewrite_the_store
 async def test_running_cycle_with_applied_suggestions_does_not_rewrite_the_store(
     hass: HomeAssistant, setup_washdata_entry, freezer, monkeypatch
 ) -> None:
+    freezer.move_to(MIDDAY)  # the nightly maintenance save is not the one tested
     entry = await setup_washdata_entry(power_sensor=POWER, options=FAST)
     manager = hass.data[DOMAIN][entry.entry_id]
     await _one_cycle_then_idle(hass, freezer, manager)
@@ -159,6 +167,7 @@ async def test_the_pass_runs_once_per_cycle_end_and_stores_what_it_derived(
 ) -> None:
     """What the user sees after a cycle is the cycle-end pass's output, as before:
     one run, on the cadence model the cycle just committed."""
+    freezer.move_to(MIDDAY)  # the nightly maintenance save is not the one tested
     entry = await setup_washdata_entry(power_sensor=POWER, options=FAST)
     manager = hass.data[DOMAIN][entry.entry_id]
     runs = _spy_operational_pass(monkeypatch)
@@ -186,6 +195,7 @@ async def test_a_changed_suggestion_is_still_saved(
     hass: HomeAssistant, setup_washdata_entry, freezer
 ) -> None:
     """Save only on change, not never: a new value still reaches disk."""
+    freezer.move_to(MIDDAY)  # the nightly maintenance save is not the one tested
     entry = await setup_washdata_entry(power_sensor=POWER, options=FAST)
     manager = hass.data[DOMAIN][entry.entry_id]
     await _one_cycle_then_idle(hass, freezer, manager)
@@ -208,10 +218,15 @@ async def test_a_deleted_suggestion_is_saved_when_the_rest_is_unchanged(
     """The learning pass drops a locked key and re-sends the rest unchanged:
     apply_suggestions changes nothing itself, but the deletion must reach disk, or
     the locked suggestion comes back at the next restart."""
+    freezer.move_to(MIDDAY)  # the nightly maintenance save is not the one tested
     entry = await setup_washdata_entry(power_sensor=POWER, options=FAST)
     manager = hass.data[DOMAIN][entry.entry_id]
     await _one_cycle_then_idle(hass, freezer, manager)
     store = manager.profile_store
+    if len(store.get_suggestions()) < 2:
+        # The cadence off_delay fallback that used to make the second one is gone
+        # (audit 2026-11-16): store one by hand.
+        store.set_suggestion("off_delay", 240, reason="seeded")
     stored = {k: dict(v) for k, v in store.get_suggestions().items()}
     assert len(stored) >= 2, "the cycle should leave at least two suggestions"
     gone = next(iter(stored))

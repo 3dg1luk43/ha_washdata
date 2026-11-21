@@ -976,6 +976,7 @@
     "sug_muted": "Toto nastavenie sa už nebude navrhovať",
     "sug_mute_failed": "Nastavenie sa nepodarilo stíšiť",
     "sug_unmuted_all": "Stíšené návrhy obnovené",
+    "sug_unmute_incomplete": "Obnovenie sa nedokončilo: niektoré návrhy sú stále stíšené. Skúste to znova.",
     "n_suggestions_muted": "{count} návrhov je stíšených; automatický ladiaci nástroj ich nebude navrhovať.",
     "n_suggestions_muted_one": "{count} návrh je stíšený; automatický ladiaci nástroj ho nebude navrhovať.",
     "n_suggestions_muted_few": "{count} návrhy sú stíšené; automatický ladiaci nástroj ich nebude navrhovať.",
@@ -1139,6 +1140,10 @@
     "cycle_context_none": "Recorder okolo tohto cyklu neuchováva žiadne merania (Home Assistant štandardne uchováva históriu 10 dní).",
     "cycle_context_tip": "Len na zobrazenie: ukazuje históriu senzora výkonu z recordera okolo tohto cyklu, ak je ešte uložená. Ak chcete pridávať neúspešné pokusy o spustenie do budúcich cyklov, použite Nábeh krivky (Nastavenia > Detekcia > Začiatok cyklu), ktorý mení uložené doby trvania.",
     "invalid_threshold_pair": "Prah zastavenia ({stop} W) musí byť nižší ako Prah spustenia ({start} W). Nič sa neuložilo; zmeňte obe hodnoty spolu.",
+    "end_gate_check_failed": "Navrhované nastavenia časovania sa nepodarilo overiť voči pauzám tohto spotrebiča. Nič sa neuložilo; skúste to znova.",
+    "analysis_superseded": "Počas analýzy sa zmenili nastavenia alebo údaje cyklov. Spustite ju znova.",
+    "analysis_check_failed": "Navrhované nastavenia časovania sa nepodarilo overiť voči pauzám tohto spotrebiča. Spustite ju znova.",
+    "apply_cycles_changed": "Počas použitia návrhov sa uložil cyklus. Žiadne nastavenie sa nezmenilo a návrhy sa vymazali. Spustite analýzu návrhov znova.",
     "bp_admin_only": "Šablóny inštaluje správca.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Vytvorené WashData pre {device}. Pridajte svoje akcie (upozornenie, svetlá, ...).",
@@ -1582,12 +1587,12 @@
       "doc": "Čo otvorí klepnutie na upozornenie tohto spotrebiča. Prázdne: panel WashData pre tento spotrebič. Zadajte cestu k nástenke (napr. /lovelace/laundry) alebo URL, alebo „none“, aby klepnutie nič neotvorilo."
     },
     "door_opens_at_end": {
-      "label": "Dvere sa na konci automaticky otvoria",
-      "doc": "Pre umývačky, ktoré na konci otvoria dvere kvôli sušeniu (napr. AirDry). Dvere otvorené počas času nižšie cyklus ukončia namiesto pozastavenia; krátke otvorenie sa ignoruje. Vyžaduje Entitu senzora dverí."
+      "label": "Otvorenie dverí ukončí cyklus",
+      "doc": "S Entitou senzora dverí dvere otvorené pri nízkom výkone počas času čakania uvedeného nižšie cyklus ukončia namiesto pozastavenia. Keď je cyklus pozastavený, stane sa to až vtedy, keď je rozpoznaný program takmer na konci, takže pozastavenie uprostred programu zostane pozastavením."
     },
     "door_end_dwell_seconds": {
       "label": "Čakanie na otvorenie dverí pre ukončenie",
-      "doc": "Pri zapnutom „Dvere sa na konci automaticky otvoria“: ako dlho musia dvere zostať otvorené, než cyklus skončí. Dosť dlho, aby sa ignorovalo pridanie riadu (predvolené 60 s)."
+      "doc": "Pri zapnutom „Otvorenie dverí ukončí cyklus“: ako dlho musia dvere zostať otvorené, než cyklus skončí. Dosť dlho, aby sa ignorovalo pridanie riadu (predvolené 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Cykly tvoriace program",
@@ -1728,7 +1733,9 @@
     "match_sure": "istota ~{pct} %",
     "match_uncertain_tip": "WashData sa zatiaľ nerozhodol pre program. Číslo udáva, ako často mal vedúci odhad, {top}, v minulých cykloch pravdu pri takom náskoku. Len na informáciu.",
     "torn_pick": "{a} alebo {b}?",
-    "torn_tip": "WashData zatiaľ tieto dva programy nedokáže rozlíšiť, preto vyberte ten, ktorý práve beží, aby ste ním označili tento cyklus (Automatické zisťovanie výber vráti späť)."
+    "torn_tip": "WashData zatiaľ tieto dva programy nedokáže rozlíšiť, preto vyberte ten, ktorý práve beží, aby ste ním označili tento cyklus (Automatické zisťovanie výber vráti späť).",
+    "program_mismatch": "Vyzerá skôr ako {program}",
+    "program_mismatch_tip": "Tento cyklus sa zreteľne viac podobá programu {program} než {selected}, WashData však ponechá vami vybraný program."
   },
   "suggestion": {
     "observed_label": "Namerané",
@@ -1780,6 +1787,7 @@
     },
     "reason": {
       "completion_min_seconds": "Polovica dĺžky p05 čistého cyklu ({minutes} min) naprieč {cycles} cyklami; odfiltruje falošné cykly.{excl}",
+      "completion_min_seconds_capped": "Obmedzené na {cap}, aby sa započítali aj najkratšie programy; polovica dĺžky p05 čistého cyklu ({minutes} min, cyklov: {cycles}) by bola dlhšia.{excl}",
       "match_interval": "Na základe pozorovanej frekvencie aktualizácií (medián={median}s) * 10.",
       "match_interval_capped": "Obmedzené tak, aby sa {persistence} po sebe idúcich zhôd zmestilo do {pct}% najkratšieho programu ({shortest}s); samotná frekvencia aktualizácií (medián={median}s) by navrhla dlhší interval.",
       "match_interval_floored": "Najkratší program ({shortest}s) by hodnotu obmedzil na {cap}s, pod minimum {minimum}s, takže sa použije minimum: {persistence} po sebe idúcich zhôd trvá {budget}s, viac ako {pct}% tohto programu. Párovanie beží len pri príchode hodnoty (medián={median}s), takže to nič nestojí.",
@@ -1788,7 +1796,6 @@
       "min_off_gap_bridge": "Nastavené tak, aby preklenulo najdlhší tichý úsek vnútri cyklu: {span}s + rezerva 60s, z {spans} preklenutých medzier naprieč {cycles} čistými cyklami (zostáva pod {ceiling}s, najkratšou medzerou, ktorú necháte medzi dvoma dávkami).",
       "min_power": "40% najnižšieho činného výkonu p05 ({p05}W) naprieč {cycles} čistými cyklami, aby prah vypnutia zostal pod skutočným odberom.{excl}",
       "no_update_timeout": "Na základe pozorovanej frekvencie aktualizácií (p95={p95}s) * 20 (min. 60s).",
-      "off_delay_cadence": "Na základe pozorovanej frekvencie aktualizácií (p95={p95}s) * 5",
       "off_delay_device_floor": "Použité bezpečné minimum špecifické pre zariadenie {device} ({floor}s).",
       "off_delay_generic_floor": "Použité všeobecné bezpečné minimum ({floor}s).",
       "off_delay_pauses": "Nastavené tak, aby prečkalo skutočné pauzy: pauza vnútri cyklu p95 {p95}s + rezerva 60s, z {pauses} páuz naprieč {cycles} čistými cyklami (minimum {floor}s).",
@@ -1797,7 +1804,8 @@
       "watchdog": "Ponechané čo najnižšie pri zachovaní bezpečnosti (tesne nad intervalom aktualizácie p95 vo výške {p95}s a aspoň 2x nad intervalom vzorkovania {median}s, min. 30s), aby sa zaseknutia rýchlo odhalili bez falešných zastavení.",
       "end_energy_floor": "Zvýšené na minimum, ktoré vyplýva z prahu zastavenia ({stop} W) počas oneskorenia vypnutia ({off_delay} s); pod ním môže cyklus skončiť len záložnou cestou.",
       "max_duration_ratio_default": "Vrátené na predvolenú hodnotu: nižšia horná hranica odmietne správny program vždy, keď cyklus trvá dlhšie než zvyčajne.",
-      "min_duration_ratio_default": "Vrátené na predvolenú hodnotu: vyššia dolná hranica bráni rozpoznaniu bežiaceho cyklu, kým nie je v plnom prúde."
+      "min_duration_ratio_default": "Vrátené na predvolenú hodnotu: vyššia dolná hranica bráni rozpoznaniu bežiaceho cyklu, kým nie je v plnom prúde.",
+      "start_above_running": "Typický nízky prevádzkový príkon tohto spotrebiča je {low} W, ale prah spustenia je {start} W, takže cyklus na tejto úrovni sa nikdy nespustí. Prah spustenia nastavený na polovicu tejto úrovne, prah zastavenia pod ňou."
     },
     "exclusions": {
       "summary": "Vylúčených {total} chybne zistených cyklov: {parts}.",
@@ -1903,6 +1911,8 @@
     "settings_reverted": "Nastavenia boli obnovené; integrácia sa znovu načítava",
     "settings_saved": "Nastavenia uložené; integrácia sa znovu načítava",
     "suggestions_applied": "Návrhy použité; integrácia sa znovu načítava",
+    "suggestions_none_applied": "Žiadne nastavenie sa nezmenilo: vybrané návrhy už neplatia",
+    "suggestions_changed": "Návrhy sa od vašej kontroly zmenili. Nič sa neuložilo; skontrolujte ich a použite znova.",
     "suggestions_dismissed": "Návrhy zamietnuté",
     "apply_failed": "Použitie zlyhalo: {error}",
     "delete_failed": "Odstránenie zlyhalo: {error}",
@@ -2271,6 +2281,9 @@
     },
     "cycle_overrun": {
       "name": "Cyklus trvá príliš dlho"
+    },
+    "program_mismatch": {
+      "name": "Bežiaci program sa líši od vybraného"
     },
     "cycle_paused": {
       "name": "Cyklus pozastavený"

@@ -237,6 +237,32 @@ test('glance: renders one row per device with state dot and time', async ({ page
   expect(rows[0].dot).toContain('--success-color');
 });
 
+test('a default "Running" sub_state shows the localized state in every layout (#526)', async ({ page }) => {
+  const data = JSON.parse(JSON.stringify(RUN));
+  data.language = 'de';
+  data.stateTranslations = { running: 'Läuft' };
+  data.states['sensor.wm_state'].attributes.sub_state = 'Running';
+  const texts: Record<string, string> = {};
+  for (const layout of ['tile', 'detail', 'glance']) {
+    await mount(page, { entity: 'sensor.wm_state', entities: ['sensor.wm_state'], layout }, data);
+    texts[layout] = await page.evaluate((l: string) => {
+      const sr = (window as any).__card.shadowRoot;
+      return l === 'glance'
+        ? sr.querySelector('.row [data-sub]').textContent
+        : sr.getElementById('state').textContent;
+    }, layout);
+  }
+  for (const [layout, text] of Object.entries(texts)) {
+    expect(text.split(' • ')[0], layout).toBe('Läuft');
+    expect(text, layout).not.toContain('Running');
+  }
+  // A phase in the sub_state still wins over the state label.
+  data.states['sensor.wm_state'].attributes.sub_state = 'Running (Spülen)';
+  await mount(page, { entity: 'sensor.wm_state', layout: 'tile' }, data);
+  const tile = await page.evaluate(() => (window as any).__card.shadowRoot.getElementById('state').textContent);
+  expect(tile.split(' • ')[0]).toBe('Spülen');
+});
+
 test('editor: exposes a layout-aware flat schema', async ({ page }) => {
   await page.evaluate(
     ({ c, d }: any) => (window as any).__mountEditor(c, d),

@@ -1040,6 +1040,7 @@
         "sug_muted": "Bu ayar bir daha önerilmeyecek",
         "sug_mute_failed": "Öneri susturulamadı",
         "sug_unmuted_all": "Susturulan öneriler sıfırlandı",
+        "sug_unmute_incomplete": "Sıfırlama tamamlanmadı: bazı öneriler hâlâ susturulmuş durumda. Tekrar deneyin.",
         "n_suggestions_muted": "{count} öneri susturuldu; öneri motoru bunları önermeyecek.",
         "n_suggestions_muted_one": "{count} öneri susturuldu; öneri motoru bunu önermeyecek.",
         "n_suggestions_muted_other": "{count} öneri susturuldu; öneri motoru bunları önermeyecek.",
@@ -1105,6 +1106,10 @@
         "cycle_context_none": "Kaydedicide bu döngünün çevresine ait okuma yok (Home Assistant varsayılan olarak 10 günlük geçmiş tutar).",
         "cycle_context_tip": "Yalnızca görüntüleme: hâlâ saklanıyorsa güç sensörünün bu döngü çevresindeki kaydedici geçmişini gösterir. Başarısız başlatma denemelerini gelecekteki döngülere eklemek için Eğri Ön Kaydı'nı kullanın (Ayarlar > Algılama > Döngü Başlangıcı); bu, kaydedilen süreleri değiştirir.",
         "invalid_threshold_pair": "Durdurma Eşiği ({stop} W), Başlangıç Eşiği'nden ({start} W) düşük olmalı. Hiçbir şey kaydedilmedi; ikisini birlikte değiştirin.",
+        "end_gate_check_failed": "Önerilen zamanlama ayarları bu cihazın duraklamalarına göre kontrol edilemedi. Hiçbir şey kaydedilmedi; tekrar deneyin.",
+        "analysis_superseded": "Analiz sırasında ayarlar veya çevrim verileri değişti. Yeniden çalıştırın.",
+        "analysis_check_failed": "Önerilen zamanlama ayarları bu cihazın duraklamalarına göre kontrol edilemedi. Yeniden çalıştırın.",
+        "apply_cycles_changed": "Öneriler uygulanırken bir çevrim kaydedildi. Hiçbir ayar değiştirilmedi ve öneriler temizlendi. Öneri analizini yeniden çalıştırın.",
         "bp_admin_only": "Şablonları bir yönetici yükler.",
         "automation_alias_trigger": "{device}: {trigger}",
         "automation_desc_trigger": "{device} için WashData tarafından oluşturuldu. Eylemlerinizi ekleyin (bildir, ışıklar, ...).",
@@ -1557,12 +1562,12 @@
             "doc": "Bu cihazın bildirimine dokunulduğunda ne açılacağı. Boş: bu cihazda WashData paneli. Bir pano yolu (örn. /lovelace/laundry) veya URL girin; dokunma eylemi olmaması için \"none\" yazın."
         },
         "door_opens_at_end": {
-            "label": "Döngü Sonunda Kapı Otomatik Açılır",
-            "doc": "Kurutmak için sonda kapıyı açan bulaşık makineleri için (örn. AirDry). Aşağıdaki bekleme süresi kadar açık kalan kapı döngüyü duraklatmak yerine bitirir; kısa bir açılma yok sayılır. Kapı Sensörü Varlığı gerektirir."
+            "label": "Kapının Açılması Döngüyü Bitirir",
+            "doc": "Kapı Sensörü Varlığı ayarlıysa, güç düşükken aşağıdaki bekleme süresi kadar açık kalan kapı döngüyü duraklatmak yerine bitirir. Duraklama sırasında bu yalnızca tanınan program bitmek üzereyken olur, bu nedenle programın ortasındaki bir duraklama duraklama olarak kalır."
         },
         "door_end_dwell_seconds": {
             "label": "Kapı Açık Bekleme Süresi",
-            "doc": "\"Döngü Sonunda Kapı Otomatik Açılır\" açıkken: döngünün bitmesi için kapının ne kadar açık kalması gerektiği. Tabak eklemeyi yok sayacak kadar uzun olmalı (varsayılan 60 sn)."
+            "doc": "\"Kapının Açılması Döngüyü Bitirir\" açıkken: döngünün bitmesi için kapının ne kadar açık kalması gerektiği. Tabak eklemeyi yok sayacak kadar uzun olmalı (varsayılan 60 sn)."
         },
         "dishwasher_end_spike_quiet_release": {
             "label": "Pasif Kurutma Sessiz Serbest Bırakma",
@@ -1708,6 +1713,8 @@
         "working": "İşleniyor…",
         "torn_pick": "{a} veya {b}?",
         "torn_tip": "WashData bu iki programı henüz ayırt edemiyor, bu yüzden bu döngüyü onunla etiketlemek için çalışan programı seçin (Otomatik algıla bu seçimi geri alır).",
+        "program_mismatch": "Daha çok şuna benziyor: {program}",
+        "program_mismatch_tip": "Bu döngü seçtiğiniz programdan ({selected}) çok açıkça {program} programına benziyor, ancak WashData seçtiğiniz programı korur.",
         "match_uncertain": "Belirsiz: {top} veya {runner}",
         "match_uncertain_single": "Belirsiz: belki {top}",
         "match_sure": "~%{pct} emin",
@@ -1799,6 +1806,8 @@
         "settings_reverted": "Ayarlar geri yüklendi; entegrasyon yeniden yükleniyor",
         "settings_saved": "Ayarlar kaydedildi; entegrasyon yeniden yükleniyor",
         "suggestions_applied": "Öneriler uygulandı; entegrasyon yeniden yükleniyor",
+        "suggestions_none_applied": "Hiçbir ayar değiştirilmedi: seçilen öneriler artık geçerli değil",
+        "suggestions_changed": "Öneriler, siz inceledikten sonra değişti. Hiçbir şey kaydedilmedi; önerileri kontrol edip yeniden uygulayın.",
         "suggestions_dismissed": "Öneriler reddedildi",
         "apply_failed": "Uygulama başarısız: {error}",
         "delete_failed": "Silme başarısız: {error}",
@@ -1957,13 +1966,13 @@
         },
         "reason": {
             "completion_min_seconds": "{cycles} çevrim boyunca p05 temiz çevrim süresinin yarısı ({minutes} min); sahte çevrimleri filtreler.{excl}",
+            "completion_min_seconds_capped": "En kısa programlar da sayılsın diye {cap} ile sınırlandı; p05 temiz çevrim süresinin yarısı ({minutes} min, {cycles} çevrim) daha uzun olurdu.{excl}",
             "match_interval": "Gözlemlenen güncelleme sıklığına dayalı (medyan={median}s) * 10.",
             "max_duration_ratio": "Etiketli çevrim sürelerine dayalı (p95={p95}).",
             "min_off_gap": "Gözlemlenen {gaps} çevrimler arası boşluğa dayalı (p05={p05}s). Cihaz alt sınırı: {floor}s.",
             "min_off_gap_bridge": "Çevrim içindeki en uzun sessiz aralığı köprülemek üzere boyutlandırıldı: {span}s + 60s tampon, {cycles} temiz çevrim boyunca köprülenen {spans} boşluktan (iki ardışık çalıştırma arasında bıraktığınız en kısa süre olan {ceiling}s'nin altında kalır).",
             "min_power": "{cycles} temiz çevrim boyunca p05 en düşük aktif gücün ({p05}W) %40'ı; kapalı eşiğini gerçek çekişin altında tutar.{excl}",
             "no_update_timeout": "Gözlemlenen güncelleme sıklığına dayalı (p95={p95}s) * 20 (en az 60s).",
-            "off_delay_cadence": "Gözlemlenen güncelleme sıklığına dayalı (p95={p95}s) * 5",
             "off_delay_device_floor": "{device} için cihaza özgü güvenli minimum kullanıldı ({floor}s).",
             "off_delay_generic_floor": "Genel güvenli minimum kullanıldı ({floor}s).",
             "off_delay_pauses": "Gerçek duraklamalardan uzun sürecek şekilde boyutlandırıldı: p95 çevrim içi duraklama {p95}s + 60s tampon, {cycles} temiz çevrim boyunca {pauses} duraklamadan (alt sınır {floor}s).",
@@ -1974,7 +1983,8 @@
             "match_interval_floored": "En kısa program ({shortest}s) bunu {cap}s ile sınırlardı; bu {minimum}s alt sınırının altında olduğundan alt sınır kullanılır: {persistence} ardışık eşleşme {budget}s sürer, bu da o programın %{pct} kadarından fazladır. Eşleştirme yalnızca bir okuma geldiğinde çalışır (medyan={median}s), bu yüzden bunun bir maliyeti yok.",
             "end_energy_floor": "Kapatma gecikmesi ({off_delay} s) boyunca durdurma eşiğinin ({stop} W) gerektirdiği alt sınıra yükseltildi; bunun altında döngü yalnızca bir yedek yoldan bitebilir.",
             "max_duration_ratio_default": "Varsayılana döndürüldü: daha düşük bir üst sınır, bir döngü her zamankinden uzun sürdüğünde doğru programı reddeder.",
-            "min_duration_ratio_default": "Varsayılana döndürüldü: daha yüksek bir alt sınır, çalışan bir döngünün iyice ilerleyene kadar tanınmasını engeller."
+            "min_duration_ratio_default": "Varsayılana döndürüldü: daha yüksek bir alt sınır, çalışan bir döngünün iyice ilerleyene kadar tanınmasını engeller.",
+            "start_above_running": "Bu cihazın tipik düşük çalışma gücü {low} W, ancak başlangıç eşiği {start} W; bu yüzden bu seviyedeki bir döngü hiç başlamaz. Başlangıç eşiği bu seviyenin yarısına, durdurma eşiği bunun altına ayarlandı."
         },
         "exclusions": {
             "summary": "{total} yanlış algılanan döngü hariç tutuldu: {parts}.",
@@ -2231,6 +2241,9 @@
         },
         "cycle_overrun": {
             "name": "Döngü çok uzun sürüyor"
+        },
+        "program_mismatch": {
+            "name": "Çalışan program seçilenden farklı"
         },
         "cycle_paused": {
             "name": "Döngü duraklatıldı"

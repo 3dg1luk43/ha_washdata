@@ -1054,6 +1054,7 @@
     "sug_muted": "Šis iestatījums vairs netiks ieteikts",
     "sug_mute_failed": "Neizdevās klusināt ieteikumu",
     "sug_unmuted_all": "Klusināto ieteikumu atiestatīšana pabeigta",
+    "sug_unmute_incomplete": "Atiestatīšana netika pabeigta: daži ieteikumi joprojām ir klusināti. Mēģiniet vēlreiz.",
     "n_suggestions_muted": "{count} ieteikumi klusināti; automātiskais regulētājs tos vairs nepiedāvās.",
     "n_suggestions_muted_zero": "{count} ieteikumi klusināti; automātiskais regulētājs tos vairs nepiedāvās.",
     "n_suggestions_muted_one": "{count} ieteikums klusināts; automātiskais regulētājs to vairs nepiedāvās.",
@@ -1122,6 +1123,10 @@
     "cycle_context_none": "Recorder nesatur nolasījumus pirms un pēc šī cikla (Home Assistant pēc noklusējuma glabā vēsturi 10 dienas).",
     "cycle_context_tip": "Tikai attēlošanai: rāda jaudas sensora recorder vēsturi ap šo ciklu, ja tā vēl glabājas. Lai turpmākajiem cikliem pievienotu neizdevušos starta mēģinājumus, izmantojiet Līknes ievadsekundes (Iestatījumi > Noteikšana > Cikla sākums), kas maina saglabātos ilgumus.",
     "invalid_threshold_pair": "Apstāšanās slieksnim ({stop} W) jābūt zemākam par Starta slieksni ({start} W). Nekas netika saglabāts; mainiet abas vērtības kopā.",
+    "end_gate_check_failed": "Ieteiktos laika iestatījumus neizdevās pārbaudīt pret šīs ierīces pauzēm. Nekas netika saglabāts; mēģiniet vēlreiz.",
+    "analysis_superseded": "Analīzes laikā mainījās iestatījumi vai ciklu dati. Palaidiet to vēlreiz.",
+    "analysis_check_failed": "Ieteiktos laika iestatījumus neizdevās pārbaudīt pret šīs ierīces pauzēm. Palaidiet to vēlreiz.",
+    "apply_cycles_changed": "Ieteikumu lietošanas laikā tika saglabāts cikls. Neviens iestatījums netika mainīts, un ieteikumi tika notīrīti. Palaidiet ieteikumu analīzi vēlreiz.",
     "bp_admin_only": "Veidnes instalē administrators.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Izveidojis WashData priekš {device}. Pievienojiet savas darbības (paziņojums, gaismas, ...).",
@@ -1568,12 +1573,12 @@
       "doc": "Ko atver pieskāriens šīs ierīces paziņojumam. Tukšs: WashData panelis ar šo ierīci. Ievadiet informācijas paneļa ceļu (piem., /lovelace/laundry) vai URL, vai “none”, ja pieskārienam nav jādara nekas."
     },
     "door_opens_at_end": {
-      "label": "Durvis automātiski atveras beigās",
-      "doc": "Trauku mazgājamām mašīnām, kas beigās atver durvis žāvēšanai (piem., AirDry). Ja durvis paliek atvērtas zemāk norādīto laiku, cikls beidzas, nevis tiek pauzēts; īsa atvēršana tiek ignorēta. Nepieciešama Durvju sensora entītija."
+      "label": "Durvju atvēršana beidz ciklu",
+      "doc": "Ar Durvju sensora entītiju durvis, kas pie zemas jaudas paliek atvērtas zemāk norādīto uzturēšanās laiku, beidz ciklu, nevis to pauzē. Kamēr cikls ir pauzēts, tas notiek tikai tad, kad atpazītā programma ir gandrīz pabeigta, tāpēc pauze programmas vidū paliek pauze."
     },
     "door_end_dwell_seconds": {
       "label": "Durvju atvēršanas beigu uzturēšanās laiks",
-      "doc": "Ja ieslēgts \"Durvis automātiski atveras beigās\": cik ilgi durvīm jāpaliek atvērtām, pirms cikls beidzas. Pietiekami ilgi, lai ignorētu trauka pievienošanu (noklusējums 60 s)."
+      "doc": "Ja ieslēgts \"Durvju atvēršana beidz ciklu\": cik ilgi durvīm jāpaliek atvērtām, pirms cikls beidzas. Pietiekami ilgi, lai ignorētu trauka pievienošanu (noklusējums 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Cikli, kas veido programmu",
@@ -1710,7 +1715,9 @@
     "match_sure": "~{pct}% pārliecība",
     "match_uncertain_tip": "WashData vēl nav izlēmis par programmu. Skaitlis rāda, cik bieži vadošais minējums, {top}, iepriekšējos ciklos bija pareizs, kad tas vadīja ar tik lielu pārsvaru. Tikai informācijai.",
     "torn_pick": "{a} vai {b}?",
-    "torn_tip": "WashData vēl nespēj atšķirt šīs divas programmas, tāpēc izvēlieties to, kas pašlaik darbojas, lai ar to iezīmētu šo ciklu (Automātiska noteikšana izvēli atceļ)."
+    "torn_tip": "WashData vēl nespēj atšķirt šīs divas programmas, tāpēc izvēlieties to, kas pašlaik darbojas, lai ar to iezīmētu šo ciklu (Automātiska noteikšana izvēli atceļ).",
+    "program_mismatch": "Drīzāk tā ir {program}",
+    "program_mismatch_tip": "Šis cikls skaidri vairāk līdzinās programmai {program} nekā {selected}, taču WashData saglabā jūsu izvēlēto programmu."
   },
   "tab": {
     "advanced": "Papildu",
@@ -1798,6 +1805,8 @@
     "settings_reverted": "Iestatījumi atjaunoti; integrācijas pārlādēšana",
     "settings_saved": "Iestatījumi saglabāti; integrācijas pārlādēšana",
     "suggestions_applied": "Ieteikumi piemēroti; integrācijas pārlādēšana",
+    "suggestions_none_applied": "Neviens iestatījums netika mainīts: atlasītie ieteikumi vairs nav spēkā",
+    "suggestions_changed": "Ieteikumi ir mainījušies kopš to pārskatīšanas. Nekas netika saglabāts; pārbaudiet tos un lietojiet vēlreiz.",
     "suggestions_dismissed": "Ieteikumi noraidīti",
     "apply_failed": "Lietošana neizdevās: {error}",
     "delete_failed": "Dzēšana neizdevās: {error}",
@@ -1958,6 +1967,7 @@
     },
     "reason": {
       "completion_min_seconds": "Puse no p05 tīro ciklu ilguma ({minutes} min) {cycles} ciklos; filtrē viltus ciklus.{excl}",
+      "completion_min_seconds_capped": "Ierobežots līdz {cap}, lai tiktu ieskaitītas arī īsākās programmas; puse no p05 tīro ciklu ilguma ({minutes} min, ciklu skaits: {cycles}) būtu garāka.{excl}",
       "match_interval": "Pamatots ar novēroto atjaunināšanas biežumu (mediāna={median}s) * 10.",
       "match_interval_capped": "Ierobežots tā, lai {persistence} secīgas atbilstības ietilptu {pct}% no īsākās programmas ({shortest}s); tikai atjaunināšanas biežums (mediāna={median}s) būtu ieteicis garāku intervālu.",
       "match_interval_floored": "Īsākā programma ({shortest}s) ierobežotu šo vērtību līdz {cap}s, kas ir zem {minimum}s minimuma, tāpēc tiek izmantots minimums: {persistence} secīgas atbilstības aizņem {budget}s, vairāk nekā {pct}% no šīs programmas. Saskaņošana notiek tikai tad, kad pienāk rādījums (mediāna={median}s), tāpēc tas neko nemaksā.",
@@ -1966,7 +1976,6 @@
       "min_off_gap_bridge": "Aprēķināts, lai pārsegtu garāko kluso posmu cikla iekšienē: {span}s + 60s buferis, no {spans} pārsegtiem intervāliem {cycles} tīros ciklos (paliek zem jūsu īsākā intervāla starp divām secīgām palaišanas reizēm, kas ir {ceiling}s).",
       "min_power": "40% no p05 zemākās aktīvās jaudas ({p05}W) {cycles} tīros ciklos, saglabājot izslēgšanas slieksni zem reālā patēriņa.{excl}",
       "no_update_timeout": "Pamatots ar novēroto atjaunināšanas biežumu (p95={p95}s) * 20 (min. 60s).",
-      "off_delay_cadence": "Pamatots ar novēroto atjaunināšanas biežumu (p95={p95}s) * 5",
       "off_delay_device_floor": "Izmantots ierīcei {device} raksturīgais drošais minimums ({floor}s).",
       "off_delay_generic_floor": "Izmantots vispārīgs drošais minimums ({floor}s).",
       "off_delay_pauses": "Aprēķināts, lai pārsniegtu reālās pauzes: p95 cikla iekšējā pauze {p95}s + 60s buferis, no {pauses} pauzēm {cycles} tīros ciklos (apakšējā robeža {floor}s).",
@@ -1975,7 +1984,8 @@
       "watchdog": "Saglabāts pēc iespējas zemāks, cik droši (tikai nedaudz virs p95 atjaunināšanas intervāla {p95}s un vismaz 2x paraugu ņemšanas intervāls {median}s, min. 30s), lai apstāšanās tiktu atklāta ātri bez viltus apturēšanas.",
       "end_energy_floor": "Paaugstināts līdz minimumam, ko nosaka apstāšanās slieksnis ({stop} W) izslēgšanas aizkaves laikā ({off_delay} s); zem tā cikls var beigties tikai ar rezerves mehānismu.",
       "max_duration_ratio_default": "Atjaunota noklusējuma vērtība: zemāka augšējā robeža noraida pareizo programmu ikreiz, kad cikls ilgst ilgāk nekā parasti.",
-      "min_duration_ratio_default": "Atjaunota noklusējuma vērtība: augstāka apakšējā robeža neļauj atpazīt notiekošu ciklu, līdz tas ir krietni pavirzījies uz priekšu."
+      "min_duration_ratio_default": "Atjaunota noklusējuma vērtība: augstāka apakšējā robeža neļauj atpazīt notiekošu ciklu, līdz tas ir krietni pavirzījies uz priekšu.",
+      "start_above_running": "Šīs iekārtas tipiskā zemā darbības jauda ir {low} W, bet starta slieksnis ir {start} W, tāpēc cikls šajā līmenī nekad nesākas. Starta slieksnis iestatīts uz pusi no šī līmeņa, apstāšanās slieksnis zem tā."
     },
     "exclusions": {
       "summary": "Izslēgti {total} kļūdaini atpazīti cikli: {parts}.",
@@ -2251,6 +2261,9 @@
     },
     "cycle_overrun": {
       "name": "Cikls ilgst pārāk ilgi"
+    },
+    "program_mismatch": {
+      "name": "Darbojošā programma atšķiras no izvēlētās"
     },
     "cycle_paused": {
       "name": "Cikls pauzēts"

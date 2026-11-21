@@ -63,6 +63,9 @@ from homeassistant.helpers.storage import Store
 
 from .const import NOTIFY_QUEUE_STORE_SUFFIX, STORAGE_KEY
 from .const import (
+    DEVICE_TYPE_DISHWASHER,
+    TerminationReason,
+    automation_termination_reason,
     resolve_off_delay_default,
     CADENCE_RESET_FROM_STATES,
     DOMAIN,
@@ -120,6 +123,7 @@ from .const import (
     TRIGGER_MAINTENANCE_RECHECK_S,
     TRIGGER_MAINTENANCE_IDLE_CHECK_S,
     TRIGGER_PHASE_STARTED,
+    TRIGGER_PROGRAM_MISMATCH,
     TRIGGER_PROGRAM_RECOGNISED,
     DATA_TRIGGER_LISTENERS,
     TRIGGER_MILESTONE_REACHED,
@@ -257,6 +261,7 @@ from .cycle_detector import (
     terminal_high_for_guards,
 )
 from .learning import LearningManager, resolve_review_answer, review_answer_choices
+from .suggestion_engine import recorded_stop_changes
 from .profile_store import (
     MatchResult,
     ProfileStore,
@@ -338,6 +343,11 @@ _SENSOR_SWAP_BLOCKED_STATES = frozenset(
     }
 )
 
+# "Opening the door ends the cycle" (#342 auto-open dishwashers, #524 door-locked
+# washers): the states in which a held door-open finalises. STARTING is left out
+# (nothing has run yet), so a door opened while loading is a pause as before.
+_DOOR_END_STATES = frozenset({STATE_RUNNING, STATE_PAUSED, STATE_ENDING})
+
 # #478: the live triggers whose announcement the snapshot keeps (trigger_marks).
 _MARKED_TRIGGERS = frozenset({
     TRIGGER_PROGRAM_RECOGNISED, TRIGGER_PHASE_STARTED,
@@ -389,6 +399,16 @@ _UNSET: Any = object()
 _EVENT_EXCLUDED_FIELDS = frozenset(
     {"power_data", "debug_data", "power_trace", "price_timeline", SYNTHETIC_OFFSETS_KEY}
 )
+
+
+def _event_cycle_data(cycle_data: dict[str, Any]) -> dict[str, Any]:
+    """``cycle_data`` as the ``ha_washdata_cycle_ended`` event carries it: no trace
+    fields, and a door or External End Trigger end reported as ``user``, as before
+    0.6.1 (register 640): they are natural ends in the store, not to automations."""
+    out = {k: v for k, v in cycle_data.items() if k not in _EVENT_EXCLUDED_FIELDS}
+    if "termination_reason" in out:
+        out["termination_reason"] = automation_termination_reason(out["termination_reason"])
+    return out
 
 
 def _finite_power(raw: Any) -> float | None:
@@ -703,6 +723,7 @@ class WashDataManager:
         self._remove_maintenance_timer: Callable[[], None] | None = None
         self._remove_notify_queue_restore: Callable[[], None] | None = None
         self._remove_trace_warm_at_started: Callable[[], None] | None = None
+        self._remove_threshold_check_at_started: Callable[[], None] | None = None
         self._remove_notify_people_listener = None
         self._live_notification_sent_count = 0
 
@@ -739,6 +760,10 @@ class WashDataManager:
 
         # Pause tracking (user-triggered)
         self._user_pause_start: datetime | None = None
+        # The pause the user-pause state belongs to: set by each Pause, cleared by
+        # a Resume (put back when the Resume rolls back). A Pause whose power cut
+        # fails rolls back only while it is still its own (PR #529 review).
+        self._user_pause_token: object | None = None
         self._total_user_paused_seconds: float = 0.0
         self._user_paused_flag: bool = False
         self._pause_cuts_power: bool = bool(
@@ -758,6 +783,9 @@ class WashDataManager:
             config_entry.options.get(CONF_DOOR_END_DWELL_SECONDS, DEFAULT_DOOR_END_DWELL_SECONDS)
         )
         self._remove_door_end_dwell: Any = None
+        # Counts dwell expiries: a pause that fails while its switch call is
+        # pending tells one expired (and declined in the pause) meanwhile.
+        self._door_end_dwell_expiries: int = 0
         self._remove_door_sensor_listener = None
         # Unload confirmation without a door sensor (#451): an entity whose
         # activation means "unloaded", and/or a plain opt-in for the Mark Unloaded
@@ -855,6 +883,16 @@ class WashDataManager:
         self._maintenance_checked: tuple[datetime, int] | None = None
         self._tumble_held: dict[str, Any] | None = None
         self._restored_trigger_marks: Any = None
+        # #530: the background check of a hand-picked program (keyed by the cycle
+        # and the pick, see _program_mismatch_state), the in-flight check, the
+        # stored trace's span at the last one (the profile_match_interval
+        # cadence, _program_mismatch_clock), and
+        # the pick's generation: every new selection is a new key, so a check
+        # still in flight for an earlier pick of the same program never counts.
+        self._program_mismatch = match_rules.ProgramMismatchState()
+        self._program_mismatch_task: asyncio.Task[Any] | None = None
+        self._program_mismatch_last_s: float | None = None
+        self._program_pick_generation = 0
         self._cycle_start_time: datetime | None = None
         # Per-cycle UUID: the identity token the live match and the cycle-end tail
         # check so work for one cycle never lands on the next, even when both share
@@ -875,14 +913,19 @@ class WashDataManager:
         self._remove_power_off_timer: Any | None = None
         self._last_reading_time: datetime | None = None
         self._last_real_reading_time: datetime | None = None # Track last real sensor update
+        # ``(sensor, time)`` of the last report this manager processed, the start
+        # of the next cadence interval learning measures. ``_last_reading_time``
+        # also moves on the watchdog's keepalives and deferrals, which would
+        # measure a 120 s reporter at the watchdog's 30 s (PR #529 review).
+        self._last_sensor_report: tuple[str, datetime] | None = None
         # Register item 266, restart hazard. The silence clock and sensor value a
         # restored cycle's snapshot carried, consumed once by the setup read; and
         # the report that read took, which the resync must not mistake for a
         # missed one (it would hand the restart's own write back as fresh).
         self._restored_sensor_clock: tuple[datetime, float | None] | None = None
         self._setup_report_ts: datetime | None = None
-        self._noise_events: list[datetime] = []
-        self._noise_max_powers: list[float] = []
+        # (time, peak W) of each ghost cycle in the last 24 h.
+        self._noise_events: list[tuple[datetime, float]] = []
         self._last_match_result = None
         self._last_phase_estimate_time = None
         self._matching_task: Task[Any] | None = None
@@ -891,7 +934,14 @@ class WashDataManager:
         self._in_power_event = False
         self._cycle_end_task: Task[Any] | None = None
         self._banked_tail_repair_task: Task[Any] | None = None
+        # An import or undo armed the banked-tail repair while a pass ran: the
+        # pass cleared the marker before its rebuild, so it runs again.
+        self._banked_tail_repair_again = False
         self._energy_rebuild_task: Task[Any] | None = None
+        self._cut_short_rebuild_task: Task[Any] | None = None
+        # An import or undo asked for the #531 rebuild while a pass ran: the pass
+        # sees the data change and leaves the marker unset, so it runs again.
+        self._cut_short_rebuild_again = False
         self._backfill_tail_cut_task: Task[Any] | None = None
         # Detached store-touching tasks (matching trigger, active-cycle clear,
         # post-cycle processing) tracked so async_shutdown can cancel them before a
@@ -940,6 +990,7 @@ class WashDataManager:
             # Its store saves and suggestion passes are cancelled with ours on an
             # unload (audit MANAGER-13), not left writing the swapped-out store.
             spawn=self._spawn_tracked,
+            on_suggestions_changed=self._on_suggestions_changed,
         )
         self.recorder = CycleRecorder(hass, self.entry_id, device_name=config_entry.title)
         self._store_bridge: Any = None  # lazy community-store bridge (online features)
@@ -1089,7 +1140,7 @@ class WashDataManager:
                 # Elements 5-8 stay False: a manual pin is certain by definition,
                 # so there is no mismatch or ambiguity to report.
                 terminal_high = self._terminal_high_for_guards(self._current_program)
-                return (
+                manual_tuple = (
                     self._current_program,
                     1.0,
                     expected_duration,
@@ -1131,6 +1182,10 @@ class WashDataManager:
                         self.profile_store, self._current_program, self.device_type
                     ),
                 )
+                # #530: rank the trace in the background against the pick. It
+                # changes nothing above: the tuple stays the pin's.
+                self._schedule_program_mismatch_check(readings)
+                return manual_tuple
 
             if not readings:
                 return None
@@ -1244,6 +1299,10 @@ class WashDataManager:
         self._pump_stuck: bool = False  # True once the stuck threshold has fired for this cycle
 
         self._manual_program_active: bool = False
+        # Set when a pick is cleared mid-cycle: the detector still holds the
+        # cleared program's match (and length) until its next match tick, so a
+        # PAUSED door end waits for that tick (review of PR #529).
+        self._door_gate_awaits_match: bool = False
         # The user's standing program choice for the current or next cycle (#411).
         # Rehydrated from the store during setup so arming survives a restart.
         self._armed_program: str | None = None
@@ -1322,6 +1381,20 @@ class WashDataManager:
         """Inner task to handle actual matching logic."""
         if identity is None:
             identity = self._match_identity()
+        # The selection this automatic match runs under: a program pinned while it
+        # waited makes its result stale, or a decisive one would overwrite the pick
+        # and its length (review of PR #529).
+        selection = (
+            getattr(self, "_manual_program_active", False),
+            getattr(self, "_program_pick_generation", 0),
+        )
+
+        def _selection_changed() -> bool:
+            return selection != (
+                getattr(self, "_manual_program_active", False),
+                getattr(self, "_program_pick_generation", 0),
+            )
+
         try:
             end_time = readings[-1][0]
             start_time = readings[0][0]
@@ -1363,6 +1436,9 @@ class WashDataManager:
                     "Discarding a live match that returned after its cycle ended "
                     "(detector %s)", self.detector.state,
                 )
+                return
+            if _selection_changed():
+                self._logger.debug("Discarding a live match: a program was picked meanwhile")
                 return
 
             # 2. UPDATE MANAGER STATE (Estimates, Program Name, etc.)
@@ -1426,15 +1502,6 @@ class WashDataManager:
                     is_confirmed, mapped_time, _ = (
                         await verify_alignment(current_matched, formatted)
                     )
-                    if not self._match_still_current(identity):
-                        # Same race as the matcher await above (audit LIVE-02): a
-                        # verified pause and the old match must not land on a
-                        # finished detector and carry into the next cycle.
-                        self._logger.debug(
-                            "Discarding a live match whose alignment check returned "
-                            "after its cycle ended"
-                        )
-                        return
                 except Exception as e: # pylint: disable=broad-exception-caught
                     self._logger.error(
                         "Alignment verification crashed for profile %s: %s",
@@ -1442,6 +1509,17 @@ class WashDataManager:
                     )
                     is_confirmed = False
                     mapped_time = 0.0
+                if not self._match_still_current(identity) or _selection_changed():
+                    # Same race as the matcher await above (audit LIVE-02): a
+                    # verified pause and the old match must not land on a
+                    # finished detector and carry into the next cycle, nor over
+                    # a program picked meanwhile; checked after a crashed check
+                    # too, whose fallback would carry the stale tick on.
+                    self._logger.debug(
+                        "Discarding a live match whose alignment check returned "
+                        "after its cycle ended or a program was picked"
+                    )
+                    return
                 alignment = (is_confirmed, mapped_time)
 
             # Confirmed alignment, the 95%-of-span release, the high-power clear,
@@ -1570,6 +1648,11 @@ class WashDataManager:
                     self.profile_store, profile_name, self.device_type
                 ),
             ))
+            # The wait a cleared pick set ends only once the detector holds what
+            # this tick named, or has revoked its match: a failed match (no profile,
+            # no revoke) or one the detector refused leaves the cleared pick and
+            # its length in place (review of PR #529).
+            self._settle_door_gate(profile_name, revoke)
 
             # --- LOGGING (Unified) ---
             self._logger.info(
@@ -1642,6 +1725,398 @@ class WashDataManager:
 
         except Exception as e:
             self._logger.error("Perform combined matching failed: %s", e, exc_info=True)
+
+    # ─── #530: a hand-picked program the cycle does not look like ─────────────
+
+    def _program_mismatch_key(self) -> tuple[Any, ...] | None:
+        """What the hand-picked program check belongs to: this cycle and this
+        pick, or None without a pick. A new cycle or a new selection is a new key,
+        even one that picks the same program again (``_program_pick_generation``)."""
+        if not getattr(self, "_manual_program_active", False):
+            return None
+        program = self._current_program
+        if not isinstance(program, str) or not program:
+            return None
+        # A profile may be named like a placeholder ("off"): picked, it is still
+        # a program to check (PR #529 review). A deleted one is not: the pin
+        # outlives it, and other profiles would keep scoring against its name.
+        if program not in self._resolve_profiles():
+            return None
+        token, start, _active = self._match_identity()
+        return (token, start, program, getattr(self, "_program_pick_generation", 0))
+
+    def _program_mismatch_state(self) -> match_rules.ProgramMismatchState | None:
+        """The check for the current cycle and pick, started afresh on a new key."""
+        key = self._program_mismatch_key()
+        if key is None:
+            return None
+        state = getattr(self, "_program_mismatch", None)
+        if state is None or state.key != key:
+            state = match_rules.ProgramMismatchState(key=key)
+            self._program_mismatch = state
+            self._program_mismatch_last_s = None
+        return state
+
+    def _restore_program_mismatch(self, raw: Any) -> None:
+        """Take a snapshot's check back for the restored pick (#530), so a
+        restart neither repeats the trigger nor forgets the mismatch.
+
+        A pending streak does not come back (``ProgramMismatchState.as_dict``):
+        nothing shows it was counted on the data and groups the restore finds,
+        nor that the check in flight at the snapshot would not have broken it
+        (PR #529 review). The trace position of the last check does, so the
+        next one waits a match interval as before. Never raises: the check is
+        optional, the cycle it rides on is restored whatever it holds (a
+        failure starts it afresh)."""
+        try:
+            self._restore_program_mismatch_state(raw)
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Could not restore the program check", exc_info=True)
+            self._program_mismatch = match_rules.ProgramMismatchState()
+            self._program_mismatch_last_s = None
+
+    def _restore_program_mismatch_state(self, raw: Any) -> None:
+        if not isinstance(raw, dict) or raw.get("program") != self._current_program:
+            return
+        state = self._program_mismatch_state()
+        if state is None:
+            return
+        state.restore(raw)
+        checked = raw.get("checked_s")
+        try:
+            # An unbounded JSON int (10**400) raises here rather than reading inf.
+            position = (
+                float(checked)
+                if isinstance(checked, (int, float)) and not isinstance(checked, bool)
+                else math.nan
+            )
+        except (OverflowError, ValueError):
+            position = math.nan
+        if math.isfinite(position) and position >= 0:
+            self._program_mismatch_last_s = position
+
+    def _program_mismatch_snapshot(self) -> dict[str, Any] | None:
+        """The check for the active-cycle snapshot, or None. Never raises."""
+        try:
+            state = getattr(self, "_program_mismatch", None)
+            if state is None or state.key is None or state.key != self._program_mismatch_key():
+                return None
+            return {
+                "program": state.key[2],
+                # ``fired`` and what it found, so a restart does not send it again.
+                **state.as_dict(),
+                # The stored trace's span at the last check: the cadence
+                # (``_program_mismatch_last_s``).
+                "checked_s": self._program_mismatch_last_s,
+            }
+        except Exception:  # pylint: disable=broad-exception-caught
+            return None
+
+    @property
+    def program_mismatch(self) -> dict[str, Any] | None:
+        """``{selected, looks_like, margin}`` once the cycle has been found not to
+        look like the program picked by hand (#530), else None. Display and
+        automations only: nothing that ends, labels or switches a cycle reads it."""
+        try:
+            state = getattr(self, "_program_mismatch", None)
+            if state is None or not state.fired or state.key is None:
+                return None
+            if state.key != self._program_mismatch_key():
+                return None
+            return {
+                "selected": str(state.key[2]),
+                "looks_like": state.looks_like,
+                "margin": state.margin,
+            }
+        except Exception:  # pylint: disable=broad-exception-caught
+            return None
+
+    def _schedule_program_mismatch_check(
+        self, readings: list[tuple[datetime, float]] | None = None
+    ) -> None:
+        """Start the background check of a hand-picked program (#530), at most once
+        per ``profile_match_interval`` of elapsed time and one at a time. Called
+        from the pin's matcher branch with the detector's match trace, and from
+        every reading of a live cycle (``_update_estimates`` and the watchdog's
+        own readings, ``readings`` None: the same trace, read here), so a pick
+        still gets checked while the detector's own match tick is frozen. Never
+        raises."""
+        try:
+            if self._is_shutdown:
+                return
+            if not trigger_rules.trigger_offered(TRIGGER_PROGRAM_MISMATCH, self.device_type):
+                return
+            state = self._program_mismatch_state()
+            if state is None or state.fired:
+                return
+            if not self._matched_profile_duration:
+                return
+            # Deferred while a user pause is open (PR #529 review): the trace spans
+            # it until the resume banks it, so the matcher's Stage 1 read the pause
+            # as programme time and could reject a right pick past its upper bound,
+            # which then reads at the fifth score. No check counts in the pause, the
+            # run is kept, and the resume's first reading is past due.
+            if self._is_user_paused:
+                return
+            # ...and while a stall is shown: the trace keeps it until it is banked
+            # (``CycleDetector._match_readings``), so a long one carried the span
+            # past the pick's Stage-1 upper bound the same way (PR #529 review).
+            # The first reading after it is banked and cut out checks again.
+            if self.detector.stalled:
+                return
+            task = self._program_mismatch_task
+            if task is not None and not task.done():
+                return
+            interval = float(self._profile_match_interval or DEFAULT_PROFILE_MATCH_INTERVAL)
+            last = self._program_mismatch_last_s
+            due = interval if last is None else last + interval
+            # The cadence reads the stored trace, which only grows while the cycle
+            # runs. The cut trace the check matches moves back when a stall is
+            # banked on resume (item 511): a deadline on it waited out the stall
+            # again, and a cycle that ended within it was never checked (PR #529
+            # review). Read before the cut trace, which is a new list built from
+            # every reading after a stall.
+            position = self._program_mismatch_clock()
+            if position is None or position < due:
+                return
+            if readings is None:
+                # What the detector hands its matcher (item 511's stall cut).
+                readings = self.detector._match_readings()  # pylint: disable=protected-access
+            if not readings or len(readings) < 2:
+                return
+            # Paced before the eligibility scans, not only the match: both read
+            # the evidence, and a pick that cannot be matched would otherwise
+            # repeat them on every reading (PR #529 review). It is asked again
+            # an interval later, so evidence that arrives still gets checked.
+            self._program_mismatch_last_s = position
+            # A pick with no template is never scored, which is no evidence. A due
+            # check that is not scored breaks the run, as a scored one without
+            # evidence does: the next deficit starts a run rather than completing
+            # one counted before the gap (PR #529 review).
+            if (
+                not self.profile_store.has_real_profiles
+                or state.key[2] in self.profile_store.unmatchable_profiles()
+            ):
+                state.streak = 0
+                return
+            self._program_mismatch_task = self._spawn_tracked(
+                self._async_check_program_mismatch(
+                    list(readings), self._match_identity(), state.key,
+                    paused_s=self._program_mismatch_open_pause_s(),
+                    device_type=self.device_type,
+                )
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Could not start the program check", exc_info=True)
+
+    def _check_pick_after_watchdog_reading(self) -> None:
+        """#530: a reading the watchdog hands the detector (a keepalive, or a report
+        the resync caught up on) extends the trace without passing through
+        ``_update_estimates``. A pick made in a frozen silent tail (the dishwasher
+        ENDING freeze) refreshes only the ETA, so without this nothing checks it
+        before the cycle ends. Only while the cycle is still live; the scheduler's
+        own guards set the cadence."""
+        if (
+            getattr(self, "_manual_program_active", False)
+            and self.detector.state in self._MATCH_ACTIVE_STATES
+        ):
+            self._schedule_program_mismatch_check()
+
+    def _program_mismatch_clock(self) -> float | None:
+        """The #530 check's cadence clock: the seconds the detector's STORED trace
+        spans. It only grows while a cycle runs (readings are appended, a pre-roll
+        only moves the start earlier, trims happen at the end), unlike the cut
+        trace a check matches, which moves back when a stall is banked. None when
+        the detector cannot be read. Never raises."""
+        try:
+            raw = self.detector._power_readings  # pylint: disable=protected-access
+            if len(raw) < 2:
+                return 0.0
+            return float((raw[-1][0] - raw[0][0]).total_seconds())
+        except Exception:  # pylint: disable=broad-exception-caught
+            return None
+
+    def _program_mismatch_data_generation(self) -> tuple[int, int]:
+        """The stored data a #530 ranking was scored on: the store's data
+        generation (an import or undo replaced it) and its profile set revision
+        (a profile deleted or renamed since). Neither moves on anything else."""
+        store = self.profile_store
+        return (
+            getattr(store, "_data_generation", 0),
+            int(getattr(store, "profile_set_revision", 0) or 0),
+        )
+
+    def _program_mismatch_open_pause_s(self) -> float:
+        """The open user pause and the stall shown now that the #530 check's trace
+        still spans (``CycleDetector.open_halt_s``), read with the trace. 0.0 when
+        the detector cannot say. Never raises."""
+        try:
+            return max(0.0, float(self.detector.open_halt_s()))
+        except Exception:  # pylint: disable=broad-exception-caught
+            return 0.0
+
+    async def _async_check_program_mismatch(
+        self,
+        readings: list[tuple[datetime, float]],
+        identity: tuple[str, datetime | None, bool],
+        key: tuple[Any, ...],
+        *,
+        paused_s: float | None = None,
+        device_type: str | None = None,
+    ) -> None:
+        """One background match of a hand-picked program (#530): the live tick's
+        own ``async_match_profile`` call, read only by
+        ``match_rules.program_mismatch_tick``. The displayed program, the expected
+        duration, the detector and the labels are never touched. Sends the
+        ``program_mismatch`` trigger on the match that establishes it.
+
+        The fraction gate reads the pick's usual duration as it is when the match
+        lands: picking the same program again keeps the check going (no new
+        generation) but can bring a new duration. It reads programme time: the
+        trace's span less ``paused_s``, the user pause and the stall still open
+        in it (read with the trace; now when not given). Finished pauses and
+        stalls are already cut out, the open ones only once they are banked: a
+        pick paused at 20 of its 100 minutes was past half after 30 minutes of
+        pause, and a 60 min pick stalled at minute 20 after 30 minutes of the
+        stall (PR #529 review).
+
+        ``device_type`` is the one the check was scheduled as (now when not
+        given): a device type changed in place (the panel, no reload) while the
+        match ran discards it, the streak restarted, before it can set the latch
+        the new type never sends (PR #529 review)."""
+        try:
+            if device_type is None:
+                device_type = self.device_type
+            if paused_s is None:
+                paused_s = self._program_mismatch_open_pause_s()
+            duration = (readings[-1][0] - readings[0][0]).total_seconds()
+            elapsed = max(0.0, duration - paused_s)
+            # The profile groups the ranking is built from: the matcher reads them
+            # when called, before its first await, so read here, next to the call
+            # (not after its trace preparation: PR #529 review). A group
+            # edited while the match ran makes the ranking describe neither
+            # membership (a ``__group__`` family no longer linked to the pick reads
+            # as a deficit), so that result is discarded and the run restarts.
+            families = match_rules.program_families(self.profile_store.get_profile_groups())
+            # An import or Undo Import replaces the store under the match: the
+            # ranking then scored profiles that are gone, even under the same
+            # names, so it is discarded and the run of counting matches restarts.
+            # So does a profile deleted or renamed meanwhile: the ranking can name
+            # it as what the cycle looks like (review of PR #529).
+            generation = self._program_mismatch_data_generation()
+            # The scoring settings (Stage-1 ratios, DTW band, evidence sources), as
+            # the device type below: changed by an options reload while the match
+            # ran, the ranking is the old settings' (PR #529 review). With their
+            # revision: the matcher reads them after its trace preparation, so a
+            # change undone before the match lands scored it under settings the
+            # values no longer show (PR #529 review).
+            settings = self.profile_store.match_settings()
+            settings_revision = getattr(self.profile_store, "match_settings_revision", 0)
+            result = await self.profile_store.async_match_profile(
+                readings,
+                duration,
+                in_progress=True,
+                stop_threshold_w=float(self.detector.config.stop_threshold_w),
+            )
+            if self._is_shutdown or not self._match_still_current(identity):
+                return
+            state = self._program_mismatch_state()
+            if state is None or state.key != key:
+                return  # the pick changed while the match ran
+            if self._is_user_paused:
+                # Paused while it scored (PR #529 review): no check counts in a
+                # user pause (the scheduler's guard covers only the dispatch). The
+                # run so far is kept; the resume's first reading checks again.
+                return
+            if self._program_mismatch_data_generation() != generation:
+                state.streak = 0
+                state.data_generation = self._program_mismatch_data_generation()
+                return
+            if self.device_type != device_type:
+                # Scored as the old type (energy mode, rhythm term, members) and
+                # perhaps for a type the trigger is not offered for any more.
+                state.streak = 0
+                state.device_type = self.device_type
+                return
+            if (
+                self.profile_store.match_settings() != settings
+                or getattr(self.profile_store, "match_settings_revision", 0) != settings_revision
+            ):
+                # Scored under settings since replaced (a Stage-1 ratio that now
+                # rejects the pick), or changed and changed back meanwhile:
+                # discarded, the streak restarted. A fired mark stays, as for the
+                # device type. Between two checks the values decide (below): the
+                # ranking of a check that lands here unchanged is its call's.
+                state.streak = 0
+                state.match_settings = self.profile_store.match_settings()
+                return
+            now_families = match_rules.program_families(self.profile_store.get_profile_groups())
+            if families != now_families:
+                # Discarded, and the run restarts as for the guards above: an edit
+                # undone before the next check left the map the streak was counted
+                # under, so the between-checks comparison below saw no change and
+                # the run went on over a match that could not be read (PR #529
+                # review).
+                state.streak = 0
+                state.families = now_families
+                return
+            expected = self._matched_profile_duration
+            if not expected:
+                return
+            # The pending streak was counted on data an import or undo replaced
+            # (or with a profile deleted or renamed since) BETWEEN two checks:
+            # those matches scored profiles that are gone
+            # (PR #529 review), so the run restarts on this one. Likewise under
+            # profile groups edited between two checks: the deficits were read
+            # against another membership (the guard above only sees an edit
+            # during the match). ``_cohesion_cache_generation`` is no revision
+            # of the groups: every envelope rebuild bumps it too.
+            if state.data_generation is not None and state.data_generation != generation:
+                state.streak = 0
+            state.data_generation = generation
+            if state.families is not None and state.families != families:
+                state.streak = 0
+            state.families = families
+            # ...and as another device type BETWEEN two checks.
+            if state.device_type is not None and state.device_type != device_type:
+                state.streak = 0
+            state.device_type = device_type
+            # ...and under other scoring settings BETWEEN two checks.
+            if state.match_settings is not None and state.match_settings != settings:
+                state.streak = 0
+            state.match_settings = settings
+            selected = key[2]
+            fired = match_rules.program_mismatch_tick(
+                state,
+                result,
+                selected,
+                elapsed_s=elapsed,
+                expected_s=float(expected),
+                families=families,
+            )
+            if not fired:
+                return
+            self._logger.info(
+                "The running cycle does not look like the picked program %r: %r fits "
+                "better by %.3f after %.0f s",
+                selected, state.looks_like, state.margin or 0.0, elapsed,
+            )
+            self._fire_device_trigger(
+                TRIGGER_PROGRAM_MISMATCH,
+                selected,
+                # The pick's own name, also one that reads like a placeholder.
+                program=selected,
+                looks_like=state.looks_like,
+                margin=state.margin,
+                elapsed_seconds=round(elapsed),
+            )
+            # A restart must not send it again (as the live trigger marks).
+            if self._has_trigger_listeners():
+                snapshot = self._augment_active_snapshot(self.detector.get_state_snapshot())
+                self._spawn_tracked(self.profile_store.async_save_active_cycle(snapshot))
+            self._notify_update_deferrable()
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Program check failed", exc_info=True)
 
     @property
     def top_candidates(self) -> list[dict[str, Any]]:
@@ -2090,6 +2565,9 @@ class WashDataManager:
                     self._restored_trigger_marks = active_snapshot_to_restore.get(
                         "trigger_marks"
                     )
+                    self._restore_program_mismatch(
+                        active_snapshot_to_restore.get("program_mismatch")
+                    )
                     _gaps = active_snapshot_to_restore.get("restart_gaps")
                     self._restart_gaps = [
                         g for g in (_gaps if isinstance(_gaps, list) else [])
@@ -2218,26 +2696,35 @@ class WashDataManager:
         """One-time repair of cycles that banked the end-of-cycle confirmation
         delay as cycle time (register item 297).
 
-        Runs in the background after setup. Never raises: the store method already
-        swallows its own failures and leaves the history untouched, and this
-        wrapper exists only so a scheduling error cannot surface as an unhandled
-        task exception.
+        Runs in the background after setup. Runs again when an import or undo
+        armed the marker during the pass (PR #529 review). Never raises: the store
+        method already swallows its own failures and leaves the history untouched,
+        and this wrapper exists only so a scheduling error cannot surface as an
+        unhandled task exception.
         """
-        try:
-            result = await self.profile_store.async_repair_banked_tails(
-                float(self.detector.config.stop_threshold_w), self.device_type
-            )
-            if result.get("repaired"):
-                self._logger.info(
-                    "Repaired %d of %d stored cycles that had banked the "
-                    "end-of-cycle confirmation delay (%.0f min reclaimed); profile "
-                    "averages and envelopes rebuilt.",
-                    result["repaired"],
-                    result["examined"],
-                    result["reclaimed_s"] / 60.0,
+        while True:
+            self._banked_tail_repair_again = False
+            try:
+                result = await self.profile_store.async_repair_banked_tails(
+                    float(self.detector.config.stop_threshold_w), self.device_type
                 )
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            self._logger.warning("Banked-tail repair could not run: %s", exc)
+                if result.get("repaired"):
+                    self._logger.info(
+                        "Repaired %d of %d stored cycles that had banked the "
+                        "end-of-cycle confirmation delay (%.0f min reclaimed); profile "
+                        "averages and envelopes rebuilt.",
+                        result["repaired"],
+                        result["examined"],
+                        result["reclaimed_s"] / 60.0,
+                    )
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                self._logger.warning("Banked-tail repair could not run: %s", exc)
+            if (
+                not self._banked_tail_repair_again
+                or self._is_shutdown
+                or not self.profile_store.banked_tail_repair_pending()
+            ):
+                return
 
     def async_schedule_banked_tail_repair(self) -> None:
         """Run the one-time banked-tail repair now if the marker is armed.
@@ -2253,15 +2740,18 @@ class WashDataManager:
         restart.
 
         Cheap when there is nothing to do - the marker is the whole test, and the
-        repair clears it. A second call while the first is still in flight is a
-        no-op rather than a second walk of the history: the repair only clears the
-        marker at the end, so the check alone would not stop two concurrent runs
-        from rebuilding the same envelopes.
+        repair clears it. A second call while the first is still in flight starts
+        no second walk of the history, which would rebuild the same envelopes
+        concurrently; it is remembered instead. The store clears the marker before
+        it rebuilds the envelopes and saves, so an import arming it again in that
+        window is seen only when the pass ends, which then runs once more (PR #529
+        review).
         """
         if self.profile_store.banked_tail_repair_pending() is not True:
             return
         existing = self._banked_tail_repair_task
         if existing is not None and not existing.done():
+            self._banked_tail_repair_again = True
             return
         self._banked_tail_repair_task = self._spawn_tracked(
             self._async_repair_banked_tails()
@@ -2277,6 +2767,48 @@ class WashDataManager:
             )
         except Exception as exc:  # pylint: disable=broad-exception-caught
             self._logger.warning("Envelope rebuild after the energy fix failed: %s", exc)
+
+    async def _async_rebuild_for_cut_short_rule(self, device_type: str) -> None:
+        """Rebuild a dishwasher's profiles once under the #531 cut-off rule, so a
+        programme that was ending inside its drying stops at the first run after
+        the update. Runs again when a request arrived during the pass and the
+        marker is still unset (PR #529 review). Bound to ``device_type``, the type
+        it was dispatched for: a pass the store finds reconfigured to another type
+        leaves the marker unset (PR #529 review). Never raises."""
+        while True:
+            self._cut_short_rebuild_again = False
+            try:
+                count = await self.profile_store.async_rebuild_for_cut_short_rule(
+                    device_type=device_type
+                )
+                self._logger.info(
+                    "Rebuilt %d profiles without runs cut inside their drying (#531)", count
+                )
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                self._logger.warning("Rebuild under the #531 cut-off rule failed: %s", exc)
+            if (
+                not self._cut_short_rebuild_again
+                or self._is_shutdown
+                or self.device_type != DEVICE_TYPE_DISHWASHER
+                or not self.profile_store.cut_short_rebuild_pending()
+            ):
+                return
+
+    def async_schedule_cut_short_rebuild(self) -> None:
+        """#531: rebuild a dishwasher's profiles once under the cut-off rule, in the
+        background (not billed to the startup time, #408). Called at setup and
+        after an import or undo, whose payload may predate the rule. A call while
+        one runs is remembered, not dropped: that pass sees the data replaced and
+        leaves the marker unset, so it runs once more when it ends."""
+        if self.device_type != DEVICE_TYPE_DISHWASHER or not self.profile_store.cut_short_rebuild_pending():
+            return
+        existing = self._cut_short_rebuild_task
+        if existing is not None and not existing.done():
+            self._cut_short_rebuild_again = True
+            return
+        self._cut_short_rebuild_task = self._spawn_tracked(
+            self._async_rebuild_for_cut_short_rule(self.device_type)
+        )
 
     def async_schedule_energy_rebuild(self) -> None:
         """Run the envelope rebuild armed by the v18 migration or an import of an
@@ -2598,6 +3130,12 @@ class WashDataManager:
         self._remove_trace_warm_at_started = async_at_started(
             self.hass, self._schedule_trace_summary_warm
         )
+        # A threshold no cycle can start or end under is corrected at a cycle end,
+        # but one no cycle can START under (#527) never produces a cycle end:
+        # re-derive the suggestions once HA has started, off the loop.
+        self._remove_threshold_check_at_started = async_at_started(
+            self.hass, self._schedule_threshold_check
+        )
 
         # Register schedulers (maintenance + ML training). These are also re-
         # registered on every config reload; calling them here ensures they
@@ -2632,6 +3170,7 @@ class WashDataManager:
         # ProfileStore: an untracked task would keep writing to the store a reload
         # had already swapped out.
         self.async_schedule_banked_tail_repair()
+        self.async_schedule_cut_short_rebuild()
         self.async_schedule_energy_rebuild()
         self.async_schedule_backfill_tail_cut()
 
@@ -2667,6 +3206,7 @@ class WashDataManager:
         self._apply_power_sensor_option()
 
         # Update device type
+        previous_device_type = self.device_type
         self.device_type = config_entry.options.get(
             CONF_DEVICE_TYPE,
             config_entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE),
@@ -2674,6 +3214,15 @@ class WashDataManager:
         # Propagate to learning pipeline (captured at construction time)
         self.learning_manager.device_type = self.device_type
         self.learning_manager.suggestion_engine.device_type = self.device_type
+        # Every stored suggestion was judged against the options (and device type)
+        # just replaced: re-derive them, off the loop. A device type change drops
+        # them all first (they name another type's floors). Audit 2026-11-16.
+        if not self._is_shutdown:
+            self._spawn_tracked(
+                self.learning_manager.async_refresh_suggestions(
+                    clear=previous_device_type != self.device_type
+                )
+            )
         # A saved reminder change (or an import) may switch a preset maintenance
         # reminder on or off: re-stamp its counting origin (#461).
         self._sync_maintenance_baselines()
@@ -2719,6 +3268,12 @@ class WashDataManager:
         # mean power elsewhere (see analysis.stage4_energy_mode).
         self.profile_store.energy_mode = analysis.stage4_energy_mode(self.device_type)
         self.profile_store.device_type = self.device_type
+        # An entry that becomes a dishwasher here skipped the one-time #531 rebuild
+        # at setup (not a dishwasher then): run it now, before its first cycle reads
+        # the old drying estimates (PR #529 review). A no-op for any other type, once
+        # the marker is set, or while one runs.
+        if previous_device_type != self.device_type and not self._is_shutdown:
+            self.async_schedule_cut_short_rebuild()
         if _stop_level_changed:
             # A new stop threshold can show where an imported dishwasher cycle's
             # activity really ended (#518: a 1.7 W standby above a 1.2 W stop hid it).
@@ -3065,6 +3620,10 @@ class WashDataManager:
         if task is not None and hasattr(task, "add_done_callback"):
             self._background_tasks.add(task)
             task.add_done_callback(self._background_tasks.discard)
+        if not isinstance(task, asyncio.Future) and hasattr(coro, "close"):
+            # Nothing will run it (a mocked hass): close it rather than leave a
+            # coroutine that is never awaited (review of PR #529).
+            coro.close()
         return task
 
     async def async_shutdown(self) -> None:
@@ -3091,6 +3650,7 @@ class WashDataManager:
         for _unsub_name in (
             "_remove_ha_stop_listener", "_remove_notify_queue_restore", "_remove_maintenance_timer",
             "_remove_clean_door_recheck", "_remove_trace_warm_at_started",
+            "_remove_threshold_check_at_started",
         ):
             _unsub = getattr(self, _unsub_name, None)
             if _unsub is not None:
@@ -3379,6 +3939,13 @@ class WashDataManager:
         old_val = old_state.state if old_state else None
 
         if new_val in ("unavailable", "unknown"):
+            # Contact lost: the door can close unseen, so a running end dwell no
+            # longer proves it stayed open (PR #529 review). A recovery to "on"
+            # starts a fresh one below.
+            if self._remove_door_end_dwell is not None:
+                self._logger.debug("Door sensor lost contact: cancelling the end dwell")
+                self._cancel_door_end_dwell()
+                self._notify_update()
             return
         if self._clean_door_recheck_pending:
             # The sensor was not up when the restored Clean state was checked:
@@ -3387,25 +3954,48 @@ class WashDataManager:
             if new_val == "on" and self._is_clean_state:
                 self.mark_unloaded("door open after restart", how="door")
                 return
-        # Ignore unavailability transitions
+        # Ignore unavailability transitions, except that a door reported open when
+        # the sensor comes back may start a fresh end dwell (a lost one was
+        # cancelled above), through the same hand-over and eligibility check as an
+        # ordinary open: nothing arms it later in PAUSED once the detector takes a
+        # pick with the door still open (PR #529 review).
         if old_val in ("unavailable", "unknown"):
+            if (
+                new_val == "on"
+                and not self._is_clean_state
+                and self._remove_door_end_dwell is None
+            ):
+                self._hand_pick_over_for_door()
+                if self._door_end_may_fire():
+                    self._logger.debug("Door open after the sensor came back: arming a fresh end dwell")
+                    self._arm_door_end_dwell()
+                    self._notify_update()
             return
 
         door_open = new_val == "on"  # binary_sensor: on = open
+
+        if door_open and old_val == "on" and self._remove_door_end_dwell is not None:
+            # An attribute-only update of a door still open: the dwell that is
+            # running keeps its deadline (PR #529 review).
+            return
+
+        if door_open and not self._is_clean_state:
+            self._hand_pick_over_for_door()
 
         if door_open:
             if self._is_clean_state:
                 # User opened the door after the cycle - laundry retrieved
                 self.mark_unloaded("door opened", how="door")
-            elif (
-                self._door_opens_at_end
-                and self.detector.state in (STATE_RUNNING, STATE_ENDING)
-            ):
-                # Auto-open dishwasher (#342): the machine pops its door at the end.
-                # A sustained open means the cycle finished; a brief open (adding an
-                # item) does not. Arm a dwell timer instead of the sticky user-pause
-                # (which would strand the cycle in user_paused). If the door stays
-                # open past the dwell we finalize; if it closes first we cancel.
+            elif self._door_end_may_fire():
+                # Auto-open dishwasher (#342), or a washer whose door stays locked
+                # while it runs (#524): a sustained open means the cycle finished; a
+                # brief open (adding an item) does not. Arm a dwell timer instead of
+                # the sticky user-pause (which would strand the cycle in user_paused).
+                # If the door stays open past the dwell we finalize; if it closes
+                # first we cancel. PAUSED counts once the run has reached its
+                # programme's end (#524): the detector sits there for minutes after
+                # the final power drop, which is when the door is opened. Earlier in
+                # PAUSED the door falls through to the pause below, as before 0.6.1.
                 self._logger.debug(
                     "Door opened on auto-open device: arming %ss end dwell",
                     self._door_end_dwell_seconds,
@@ -3788,27 +4378,113 @@ class WashDataManager:
             self.mark_unloaded("door open after restart", how="door")
 
     def _maybe_arm_door_end_dwell_if_open(self) -> None:
-        """Arm the end-dwell timer when in RUNNING or ENDING with the door already open.
+        """Arm the end-dwell timer in an active state with the door already open.
 
         Called from both ``_on_state_change`` (live transition) and the
         snapshot-restoration path (where ``_on_state_change`` is not invoked).
         Matches the state set accepted by ``_handle_door_sensor_change`` so that
         restoring a RUNNING snapshot with the door already open re-arms the dwell.
+
+        The contact is read first: an open door hands the detector a program
+        picked by hand that it has not taken yet, as an ordinary open does, and is
+        then judged by the pick's length (PR #529 review). Otherwise a restored
+        PAUSED run whose pick the detector took later, without leaving PAUSED,
+        never armed the dwell.
         """
-        if not (
-            self.detector.state in (STATE_RUNNING, STATE_ENDING)
-            and self._door_opens_at_end
-            and self._door_sensor_entity
-            and self._remove_door_end_dwell is None
-        ):
+        if not self._door_sensor_entity or self._remove_door_end_dwell is not None:
             return
         door_state = self.hass.states.get(self._door_sensor_entity)
-        if door_state and door_state.state == "on":
+        if not (door_state and door_state.state == "on"):
+            return
+        self._hand_pick_over_for_door()
+        if self._door_end_may_fire():
             self._logger.debug(
-                "Door already open on ENDING: arming %ss end dwell",
+                "Door already open while active: arming %ss end dwell",
                 self._door_end_dwell_seconds,
             )
             self._arm_door_end_dwell()
+
+    def _door_end_may_fire(self) -> bool:
+        """Whether a held door-open ends the cycle in the detector's state now.
+
+        RUNNING and ENDING with the option on, as since #342. PAUSED only once
+        the run has reached its programme's end (``CycleDetector.door_end_due``,
+        #524): a door opened in an earlier PAUSED is a pause, as before 0.6.1, so
+        a mid-programme open does not end a cycle (or fire its end automations).
+        """
+        if not self._door_opens_at_end or self.detector.state not in _DOOR_END_STATES:
+            return False
+        if self.detector.state != STATE_PAUSED:
+            return True
+        if self._door_end_awaits_match():
+            return False
+        return bool(self.detector.door_end_due(utc_now()))
+
+    def _door_end_awaits_match(self) -> bool:
+        """Whether a PAUSED door end waits for the detector to take the match it
+        must be judged by (a pick made or cleared since its last match tick)."""
+        # A program picked by hand reaches the detector at its next match tick; until
+        # then `door_end_due` would judge the run by the previous program's length
+        # (PR #529 review). Wait for the detector to hold the pick.
+        if self._manual_program_active and self.detector.matched_profile != self._current_program:
+            return True
+        # A pick cleared mid-cycle: the detector's match is still the cleared one
+        # until an automatic match replaces it. A new pick is judged by the two
+        # checks around this one instead: it reaches the detector through its own
+        # matcher branch, never through the automatic match that clears this
+        # (review of PR #529).
+        if self._door_gate_awaits_match and not self._manual_program_active:
+            return True
+        # Nor while it holds the pick at a length the pick no longer has: the same
+        # program re-picked after its learned length changed (PR #529 review).
+        if self._manual_program_active and self._matched_profile_duration:
+            held = float(self.detector.expected_duration_seconds or 0.0)
+            if abs(held - float(self._matched_profile_duration)) > 1.0:
+                return True
+        # Nor while it holds an ambiguous automatic match under the pick, of the
+        # same program at the same length: a pick is never ambiguous, so it has
+        # not landed (PR #529 review). Inside the anti-crease freeze no match
+        # lands, the pick's included: the door is judged by the match kept there.
+        if (
+            self._manual_program_active
+            and self.detector.match_ambiguous
+            and not self.detector.match_frozen(utc_now())
+        ):
+            return True
+        return False
+
+    def _hand_pick_over_for_door(self) -> None:
+        """Before a door opened in PAUSED is judged, hand the detector a program
+        picked by hand that it has not taken yet (#524, PR #529 review).
+
+        Its next match tick does the same (the pin's matcher branch answers
+        synchronously). Before it, the door paused the cycle, and that pause
+        outlived the tick that would have let the door end it. Handed over, the
+        door is judged as it is once that tick has run: by the pick's length
+        (``door_end_due``) and the dwell. A cleared pick waits for an automatic
+        match, which is asynchronous: that door still pauses, as before 0.6.1.
+        """
+        if not (
+            self._door_opens_at_end
+            and self._manual_program_active
+            and self.detector.state == STATE_PAUSED
+            and not self._is_user_paused
+            and self._door_end_awaits_match()
+        ):
+            return
+        try:
+            self.detector.refresh_match(utc_now())
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Could not hand the picked program to the detector", exc_info=True)
+
+    def _settle_door_gate(self, profile_name: str | None, revoke: bool) -> None:
+        """End the wait a cleared pick set once the detector holds the match this
+        tick named, or has revoked its own (see the call site)."""
+        if self._door_gate_awaits_match and (
+            (profile_name and self.detector.matched_profile == profile_name)
+            or (revoke and not self.detector.matched_profile)
+        ):
+            self._door_gate_awaits_match = False
 
     def _arm_door_end_dwell(self) -> None:
         """(Re)arm the auto-open door-end dwell timer (#342)."""
@@ -3833,14 +4509,20 @@ class WashDataManager:
         live conditions here defensively — a close event could have been missed, or a
         user pause could have landed mid-dwell — before finalizing (#342)."""
         self._remove_door_end_dwell = None
+        self._door_end_dwell_expiries = getattr(self, "_door_end_dwell_expiries", 0) + 1
+        if self._is_shutdown:
+            # Expired while the unload awaits its tasks, before it cancels the
+            # dwell: a cycle ended now skips its history write (``_on_cycle_end``)
+            # and is lost. Left running, the active-cycle snapshot keeps it for the
+            # next setup (review of PR #529).
+            return
         door_state = (
             self.hass.states.get(self._door_sensor_entity)
             if self._door_sensor_entity
             else None
         )
         if (
-            self.detector.state in (STATE_RUNNING, STATE_ENDING)
-            and self._door_opens_at_end
+            self._door_end_may_fire()
             and not self._is_user_paused
             and door_state is not None
             and door_state.state == "on"
@@ -3861,11 +4543,24 @@ class WashDataManager:
                 stop_thr = float(getattr(self.detector.config, "stop_threshold_w", 0.0) or 0.0)
             except (TypeError, ValueError, OverflowError):
                 stop_thr = 0.0
-            if stop_thr > 0.0 and self._current_power >= stop_thr:
+            # The sensor's own state, not the cache: a reading the sampling throttle
+            # dropped can leave the cache low while the appliance runs again (PR
+            # #529 review). The cache stands in while the sensor is unavailable.
+            live = self._live_power_state()
+            if live is None and self.detector.state == STATE_PAUSED:
+                # In a pause the cached reading may predate a resume the sensor never
+                # reported: no door end without a usable reading (PR #529 review; a
+                # PAUSED door end is new in 0.6.1, before it the dwell never fired
+                # there). Re-arm, so a sensor that comes back still gets its turn.
+                self._logger.debug("Door-end dwell fired in a pause with no usable power reading: re-arming")
+                self._arm_door_end_dwell()
+                return
+            power_now = live[0] if live is not None else self._current_power
+            if stop_thr > 0.0 and power_now >= stop_thr:
                 self._logger.debug(
                     "Door-end dwell fired but power %.1fW is still at/above the stop "
                     "threshold %.1fW: treating as a mid-cycle door open, re-arming",
-                    self._current_power,
+                    power_now,
                     stop_thr,
                 )
                 self._arm_door_end_dwell()
@@ -3874,8 +4569,26 @@ class WashDataManager:
                 "Door held open %ss on auto-open device: finalizing cycle",
                 self._door_end_dwell_seconds,
             )
-            self.detector.user_stop()
+            self.detector.door_end()
             self._notify_update()
+        elif (
+            self._door_opens_at_end
+            and self.detector.state == STATE_PAUSED
+            and not self._is_user_paused
+            and door_state is not None
+            and door_state.state == "on"
+            and self._door_end_awaits_match()
+        ):
+            # The program was changed during the dwell and the detector has not
+            # taken the replacement yet. Nothing else arms a dwell when it does
+            # without leaving PAUSED, so the open door would no longer end the
+            # cycle (PR #529 review): re-arm, the same checks judge the next expiry
+            # under the match the detector then holds. Like the re-arms above it
+            # can only delay a finalize.
+            self._logger.debug(
+                "Door-end dwell fired before the detector took the changed program: re-arming"
+            )
+            self._arm_door_end_dwell()
         else:
             self._logger.debug(
                 "Door-end dwell fired but conditions no longer hold "
@@ -3957,7 +4670,8 @@ class WashDataManager:
                 self.detector.reset(STATE_OFF)
                 self._logger.info("%s exited via external trigger", self.detector.state)
             elif self.detector.state != STATE_OFF:
-                self.detector.user_stop()
+                # A natural end in the statistics, `user` to automations (register 640).
+                self.detector.user_stop(reason=TerminationReason.EXTERNAL)
                 self._logger.info("Cycle completed via external trigger")
 
     def _external_end_trigger_available(self) -> bool:
@@ -4361,13 +5075,16 @@ class WashDataManager:
         # it, so the detector stops crediting quiet until the next real reading
         # (register item 266, audit DETECT-13). Returning without a trace left
         # the watchdog's keepalives to run out the end gates during a dropout.
-        if new_state is None or new_state.state in (STATE_UNKNOWN, STATE_UNAVAILABLE):
+        power = (
+            None if new_state is None or new_state.state in (STATE_UNKNOWN, STATE_UNAVAILABLE)
+            else self._state_power(new_state)
+        )
+        if new_state is None or power is None:
             self.detector.mark_sensor_unavailable(utc_now())
-            return
-
-        power = self._state_power(new_state)
-        if power is None:
-            self.detector.mark_sensor_unavailable(utc_now())
+            # No cadence interval spans the outage: the first report after it
+            # starts a new one, or an 8 min dropout of a 30 s reporter was
+            # learned as one 480 s interval (PR #529 review).
+            self._last_sensor_report = None
             return
 
         # Capture every raw sensor reading before any throttling or processing.
@@ -4388,6 +5105,13 @@ class WashDataManager:
             return
 
         now = utc_now()
+        # The cadence clock (``_last_sensor_report``); the detector keeps ``now``.
+        report_clock = report_ts if isinstance(report_ts, datetime) else now
+        # Advanced by every report, the throttled ones too: moved only on processed
+        # readings, a 1 s meter under a 2 s throttle was learned as 2 s (PR #529
+        # review). ``_last_reading_time`` stays the throttle's processed clock.
+        prev_report = self._last_sensor_report
+        self._last_sensor_report = (self.power_sensor_entity_id, report_clock)
 
         # still_tumbling (#478) sees every reading, before the throttle: a short
         # tumble may be a single report. Passive, detection never sees it.
@@ -4442,8 +5166,15 @@ class WashDataManager:
             STATE_PAUSED,
             STATE_ENDING,
         ):
+            # Measured from the sensor's previous report, not from a keepalive,
+            # and on the report clock at both ends: the resync stores the report's
+            # own stamp, so callback time here mixed clocks (PR #529 review).
             self.learning_manager.process_power_reading(
-                power, now, self._last_reading_time
+                power, report_clock,
+                prev_report[1]
+                if prev_report is not None and prev_report[0] == self.power_sensor_entity_id
+                else None,
+                sensor=self.power_sensor_entity_id,
             )
         self._last_reading_time = now
         if self._restored_sensor_clock is not None:
@@ -4520,11 +5251,15 @@ class WashDataManager:
                 ]
                 if isinstance(c, dict)
             ]
+            changes = recorded_stop_changes(self.profile_store)
             level = await self.hass.async_add_executor_job(
-                learned_standby_level_w,
-                cycles,
-                float(cfg.stop_threshold_w),
-                float(cfg.start_threshold_w),
+                functools.partial(
+                    learned_standby_level_w,
+                    cycles,
+                    float(cfg.stop_threshold_w),
+                    float(cfg.start_threshold_w),
+                    stop_changes=changes,
+                )
             )
             self.detector.set_standby_level(level)
             self._logger.debug("Idle display standby level: %s W", level)
@@ -5153,6 +5888,9 @@ class WashDataManager:
             self.detector.process_reading(power, now)
             self._last_reading_time = now
             self._last_real_reading_time = report_ts
+            # A real report: the next cadence interval starts at it.
+            self._last_sensor_report = (self.power_sensor_entity_id, report_ts)
+            self._check_pick_after_watchdog_reading()
         self._current_power = power
 
     def _low_power_silence_budget_s(
@@ -5469,6 +6207,7 @@ class WashDataManager:
                 self.detector.process_reading(
                     _ka_w, now, synthetic=True, observed=_ka_obs
                 )
+                self._check_pick_after_watchdog_reading()
                 self._last_reading_time = now
                 self._current_power = _ka_w
                 self._save_snapshot_while_silent(now)
@@ -5494,6 +6233,7 @@ class WashDataManager:
             self.detector.process_reading(
                 _ka_w, now, synthetic=True, observed=_ka_obs
             )
+            self._check_pick_after_watchdog_reading()
             self._last_reading_time = now
             self._current_power = _ka_w
             self._save_snapshot_while_silent(now)
@@ -5623,6 +6363,7 @@ class WashDataManager:
 
                 self._current_program = "detecting..."
                 self._manual_program_active = False
+                self._door_gate_awaits_match = False
                 # Confidence belongs to the match that produced it, so it cannot
                 # carry into the next cycle. It was only ever assigned by a real
                 # match update, never cleared, and the cycle-end tail stamps it onto
@@ -5882,7 +6623,9 @@ class WashDataManager:
                     duration,
                     cycle_energy_wh,
                 )
-            self._handle_noise_cycle(max_power)
+            if reason != ghost_rules.DISCARD_PUMP_OUT:
+                # A pump-out belongs to the cycle before it, not to noise.
+                self._handle_noise_cycle(max_power)
             self._discard_cycle_cleanup()
             # Nothing is stored, so the pass the cadence commit left due runs now.
             try:
@@ -6489,6 +7232,8 @@ class WashDataManager:
         tracker = getattr(self, "_live_triggers", None)
         if tracker is not None:
             snapshot["trigger_marks"] = tracker.marks()
+        # #530: the hand-picked program check, so a restart sends no second trigger.
+        snapshot["program_mismatch"] = self._program_mismatch_snapshot()
         snapshot["restart_gaps"] = list(self._restart_gaps)
         snapshot["live_activity_started"] = bool(self._live_activity_started)
         # When the power sensor last really reported, and the value the manager
@@ -6979,9 +7724,7 @@ class WashDataManager:
 
         # Prepare cycle data for event (enrich if needed)
         # IMPORTANT: Exclude large fields to prevent exceeding HA's 32KB event data limit
-        event_cycle_data = {
-            k: v for k, v in cycle_data.items() if k not in _EVENT_EXCLUDED_FIELDS
-        }
+        event_cycle_data = _event_cycle_data(cycle_data)
         event_cycle_data["device_type"] = self.device_type
         # The program to SHOW: the stored label, else THIS cycle's captured live
         # program (not the live field, which may already belong to a newly-started
@@ -7539,6 +8282,18 @@ class WashDataManager:
         self._remove_trace_warm_at_started = None
         if not self._is_shutdown:
             self._spawn_tracked(self.profile_store.async_warm_trace_summaries())
+
+    @callback
+    def _schedule_threshold_check(self, _hass: HomeAssistant) -> None:
+        """Re-derive the stored suggestions once HA has started, off the loop.
+
+        Includes the threshold correctives (#527), which a device that cannot start
+        a cycle would otherwise never reach, and drops entries an older version
+        stored that no pass owns (audit 2026-11-16).
+        """
+        self._remove_threshold_check_at_started = None
+        if not self._is_shutdown:
+            self._spawn_tracked(self.learning_manager.async_refresh_suggestions())
 
     @callback
     def _schedule_notify_queue_restore(self, _hass: HomeAssistant) -> None:
@@ -8513,63 +9268,32 @@ class WashDataManager:
             _deliver(entry)
 
     def _handle_noise_cycle(self, max_power: float) -> None:
-        """Handle a detected noise cycle."""
-        # Clean up old noise events > 24h
+        """Count a ghost cycle (short and low energy), and log when they pile up.
+
+        This used to store a Min Power suggestion of 1.2 x the largest ghost peak
+        (up to 50 W), straight into the store past every suggestion gate, lock and
+        reconcile, and with no translation. With Start/Stop set Min Power does not
+        decide a start, so it could not stop a ghost and only moved the keepalive
+        gate; with them unset it moved both thresholds past every threshold guard
+        (audit 2026-11-16). A ghost is discarded without being stored either way.
+        """
         now = utc_now()
+        # (time, peak) pairs, so the count and the peak describe the same 24 h (PR
+        # #529 review: a 40 W ghost aged out still set the advised level).
         self._noise_events = [
-            t
-            for t in getattr(self, "_noise_events", [])
+            (t, p)
+            for t, p in getattr(self, "_noise_events", [])
             if (now - t).total_seconds() < 86400
         ]
-        self._noise_events.append(now)
-
-        # Track max power of noise
-        self._noise_max_powers = getattr(self, "_noise_max_powers", [])
-        self._noise_max_powers.append(max_power)
-
-        # If noise events exceed threshold in 24h, trigger tune
+        self._noise_events.append((now, float(max_power)))
         if len(self._noise_events) >= self._noise_events_threshold:
-            # Tracked (audit MANAGER-13): it saves the store.
-            self._spawn_tracked(self._tune_threshold())
-
-    async def _tune_threshold(self) -> None:
-        """Increase the minimum power threshold."""
-        current_min = self.detector.config.min_power
-
-        # Calculate new suggested threshold
-        # Max of observed noise * 1.2 safety factor
-        noise_max = max(self._noise_max_powers)
-        new_min = noise_max * 1.2
-
-        # Cap absolute max to avoid runaway (e.g. 50W)
-        if new_min > 50.0:
-            new_min = 50.0
-
-        if new_min <= current_min:
-            # Clear events so we don't loop try to update
+            self._logger.info(
+                "%d ghost cycles in 24 h (up to %.1f W): a Start Threshold above that "
+                "level would stop them",
+                len(self._noise_events),
+                max(p for _t, p in self._noise_events),
+            )
             self._noise_events = []
-            self._noise_max_powers = []
-            return
-
-        self._logger.info(
-            "Auto-Tune suggestion: min_power from %.1fW -> %.1fW due to noise",
-            current_min,
-            new_min,
-        )
-
-        # Store a suggestion (do not mutate user-set options). The suggestion is
-        # surfaced in the panel (Settings suggestions banner / per-field pill);
-        # WashData intentionally does not raise a persistent notification here.
-        self.profile_store.set_suggestion(
-            CONF_MIN_POWER,
-            float(new_min),
-            f"Auto-tune: {len(self._noise_events)} ghost cycles detected in 24h",
-        )
-        await self.profile_store.async_save()
-
-        # Reset trackers
-        self._noise_events = []
-        self._noise_max_powers = []
 
     def _update_estimates(self) -> None:
         """Update time remaining and profile estimates."""
@@ -8603,6 +9327,13 @@ class WashDataManager:
             return
 
         now = utc_now()
+
+        # #530: the hand-picked program's background check, on every reading of a
+        # live cycle. The pin's matcher branch runs only on the detector's match
+        # tick, which the dishwasher ENDING freeze and the anti-crease freeze stop,
+        # so a pick made then was never checked. Its own guards set the cadence.
+        if self._manual_program_active:
+            self._schedule_program_mismatch_check()
 
         # Throttle heavy matching to configured interval (default: 5 minutes)
         effective_match_interval = self._profile_match_interval
@@ -9886,9 +10617,7 @@ class WashDataManager:
             program = self._trigger_ended_program
         if bus:
             try:
-                event_cycle_data = {
-                    k: v for k, v in cycle_data.items() if k not in _EVENT_EXCLUDED_FIELDS
-                }
+                event_cycle_data = _event_cycle_data(cycle_data)
                 self.hass.bus.async_fire(
                     EVENT_CYCLE_ENDED,
                     {
@@ -10130,6 +10859,13 @@ class WashDataManager:
     def notify_update(self) -> None:
         """Public method to notify entities of update."""
         self._notify_update()
+
+    def _on_suggestions_changed(self) -> None:
+        """A background suggestion pass or refresh changed what is stored: the
+        Suggested Settings sensor does not poll, so push it (PR #529 review). Not
+        after an unload."""
+        if not getattr(self, "_is_shutdown", False):
+            self._notify_update_deferrable()
 
     @property
     def is_user_paused(self) -> bool:
@@ -10562,6 +11298,13 @@ class WashDataManager:
         self, profile_name: str, profile: dict[str, Any] | None
     ) -> None:
         """Pin *profile_name* to the cycle in progress. Shared by set and re-arm."""
+        if not (
+            getattr(self, "_manual_program_active", False)
+            and getattr(self, "_current_program", None) == profile_name
+        ):
+            # A new selection (#530): a check in flight for an earlier one, even of
+            # this same program, must not count. Re-picking the pick keeps it.
+            self._program_pick_generation = getattr(self, "_program_pick_generation", 0) + 1
         self._current_program = profile_name
         self._manual_program_active = True
 
@@ -10683,6 +11426,10 @@ class WashDataManager:
 
         self._logger.info("Cycle paused by user")
         prev_verified = self.detector._verified_pause
+        identity = self._match_identity()
+        expiries = getattr(self, "_door_end_dwell_expiries", 0)
+        token = object()
+        self._user_pause_token = token
         self._is_user_paused = True
         self._user_pause_start = utc_now()
         self.detector.set_verified_pause(True)
@@ -10700,13 +11447,35 @@ class WashDataManager:
                         "switch", "turn_off", {"entity_id": switch_entity}, blocking=True
                     )
                 except HomeAssistantError as err:
+                    if getattr(self, "_user_pause_token", None) is not token:
+                        # A Resume (and perhaps a later Pause) since: the state is
+                        # theirs. Rolled back, a later Pause would be undone and
+                        # the open door re-armed under it (PR #529 review).
+                        self._logger.warning(
+                            "pause_cuts_power: failed to turn off %s: %s - a later "
+                            "pause or resume holds the state, leaving it",
+                            switch_entity, err,
+                        )
+                        return False
                     self._logger.warning(
                         "pause_cuts_power: failed to turn off %s: %s - rolling back pause state",
                         switch_entity, err,
                     )
+                    self._user_pause_token = None
                     self._is_user_paused = False
                     self._user_pause_start = None
                     self.detector.set_verified_pause(prev_verified)
+                    # An end dwell that expired during the wait declined in the
+                    # pause and left no timer: with the pause undone, the open
+                    # door is judged again, as when a cycle turns active with it
+                    # open (a fresh dwell, the same checks at its expiry). A
+                    # timer armed meanwhile is kept (PR #529 review).
+                    if (
+                        getattr(self, "_door_end_dwell_expiries", 0) != expiries
+                        and not self._is_shutdown
+                        and self._match_still_current(identity)
+                    ):
+                        self._maybe_arm_door_end_dwell_if_open()
                     return False
 
         # A user pause overrides an auto-open dwell: cancel it so the pending timer
@@ -10738,6 +11507,8 @@ class WashDataManager:
         )
 
         self._total_user_paused_seconds += accumulated
+        prev_token = getattr(self, "_user_pause_token", None)
+        self._user_pause_token = None
         self._user_pause_start = None
         self._is_user_paused = False
         self.detector.set_verified_pause(False)
@@ -10763,6 +11534,7 @@ class WashDataManager:
                         switch_entity, err,
                     )
                     self._total_user_paused_seconds -= accumulated
+                    self._user_pause_token = prev_token
                     self._user_pause_start = prev_pause_start
                     self._is_user_paused = True
                     self.detector.set_verified_pause(True)
@@ -10858,6 +11630,7 @@ class WashDataManager:
             return
 
         self._manual_program_active = False
+        self._door_gate_awaits_match = self.detector.state in _DOOR_END_STATES
         # A live cycle goes back to auto-detection. PAUSED and ENDING are live too
         # (audit MANAGER-15): comparing against "running" alone showed "off" for a
         # cycle still under way. The refresh mirrors set_manual_program's.

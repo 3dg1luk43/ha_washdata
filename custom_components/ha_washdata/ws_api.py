@@ -93,6 +93,7 @@ from .const import (
     resolve_sampling_interval_default,
     resolve_watchdog_interval_default,
     is_energy_counter,
+    power_unit_scale,
     resolve_start_duration_default,
     resolve_smart_termination_duration_ratio_default,
     MAINTENANCE_CUSTOM_TASK_MAX,
@@ -131,7 +132,12 @@ from .detector_config import (
     effective_option_values,
     inverted_threshold_pair,
 )
-from .learning import review_choices
+from .learning import (
+    AnalysisSupersededError,
+    EndGateCheckError,
+    end_gate_evidence_token,
+    review_choices,
+)
 from .maintenance import editor_types, effective_reminders
 from .options_utils import retire_device_type, strip_null_options
 from .setup_advisor import compute_setup_phase
@@ -318,6 +324,67 @@ def _visible_suggestions(
     return out
 
 
+async def _drop_unsafe_end_gate_updates(
+    hass: HomeAssistant, manager: Any, visible: dict[str, Any], updates: dict[str, Any]
+) -> bool:
+    """Withdraw from ``updates`` what, written together, splits own cycles (PR #529).
+
+    A pass stores its values before its joint check
+    (``LearningManager._enforce_joint_end_gate``) can withdraw any, and Apply all
+    does not wait for it, so the stored set can briefly be one no pass would leave.
+    This judges exactly what is written. Never raises. False when the check could
+    not run: the caller writes nothing, since an unjudged end-gate set can split
+    cycles (PR #529 review). True otherwise, with ``updates`` withdrawn from.
+    """
+    # Imported here to keep the ws_api import graph free of suggestion_engine.
+    from .suggestion_engine import END_GATE_KEYS  # pylint: disable=import-outside-toplevel
+
+    if not any(key in END_GATE_KEYS for key in updates):
+        return True
+    store = manager.profile_store
+    try:
+        engine = manager.learning_manager.suggestion_engine.for_job()
+        # As written: a cascade the selection carries is a value like any other
+        # here, not one derived from an off delay that may not be applied with it.
+        judged = {
+            key: {**visible[key], "value": val, "cascade": False}
+            for key, val in updates.items()
+        }
+        # A cycle stored or edited while the scan ran was judged or not by chance:
+        # judge again on the evidence as it now stands (PR #529 review); a store
+        # that keeps changing fails closed like a failed scan.
+        for _attempt in range(3):
+            before = end_gate_evidence_token(store)
+            drops = await hass.async_add_executor_job(
+                functools.partial(engine.joint_end_gate_drops, judged, strict=True)
+            )
+            if end_gate_evidence_token(store) == before:
+                break
+        else:
+            _LOGGER.warning("Cycle evidence kept changing during the joint end-gate check")
+            return False
+    except Exception:  # pylint: disable=broad-exception-caught
+        _LOGGER.warning("Joint end-gate check on apply failed; nothing applied", exc_info=True)
+        return False
+    for key in list(drops or ()):
+        updates.pop(key, None)
+    return True
+
+
+def _end_gate_evidence(manager: Any, updates: dict[str, Any]) -> tuple[Any, ...] | None:
+    """The cycle evidence a write with a timing setting is judged on, else None.
+
+    Read right after ``_drop_unsafe_end_gate_updates`` accepted the write (no await
+    between), so it is the evidence the joint check judged; a cycle stored before
+    the write lands was not judged (PR #529 review).
+    """
+    from .suggestion_engine import END_GATE_KEYS  # pylint: disable=import-outside-toplevel
+
+    if not any(key in END_GATE_KEYS for key in updates):
+        return None
+    return end_gate_evidence_token(manager.profile_store)
+
+
 def _threshold_pair_message(start: float, stop: float) -> str:
     """The error a write that would invert the threshold pair is refused with (item 515)."""
     return (
@@ -433,6 +500,34 @@ def _power_scaler(manager: Any) -> Callable[[Any], float]:
         return cache[key]
 
     return _scale
+
+
+def _min_power_keeps_scale(
+    hass: HomeAssistant, merged: dict[str, Any], device_type: str, proposed: Any
+) -> bool:
+    """Does Min Power ``proposed`` read the power sensor in the unit the current one does?
+
+    ``power_unit_scale`` keeps a kilowatt sensor's readings raw under a Min Power
+    of 1 and a milliwatt one's from 1000, so a value across either line rescales
+    every reading while the thresholds stay put. The analysis never suggests one
+    (``SuggestionEngine._keeps_power_scale``), but a stored suggestion can come
+    from another device's export or an older build (PR #529 review). The unit is
+    the sensor's own, read as the engine reads it; a sensor not loaded yet, or
+    unavailable without a unit, must hold for every unit. Never raises.
+    """
+    try:
+        state = hass.states.get(str(merged.get(CONF_POWER_SENSOR) or ""))
+        unit = state.attributes.get("unit_of_measurement") if state is not None else None
+        known = state is not None and (
+            bool(str(unit or "").strip()) or state.state not in ("unavailable", "unknown")
+        )
+        current = effective_option_values(merged, device_type)[CONF_MIN_POWER]
+        return all(
+            power_unit_scale(u, current) == power_unit_scale(u, proposed)
+            for u in ([unit] if known else ["mW", "W", "kW"])
+        )
+    except Exception:  # pylint: disable=broad-exception-caught
+        return False
 
 
 async def _recorder_power(
@@ -723,8 +818,82 @@ def _diff_option_changes(
     return changes
 
 
+def _effective_stop(merged: dict[str, Any]) -> float | None:
+    """The Stop Threshold the detector runs with under ``merged``; None if unknown.
+
+    A None value is an unset key, as the write boundary stores it (#389)."""
+    try:
+        opts = {k: v for k, v in merged.items() if v is not None}
+        device_type = opts.get(CONF_DEVICE_TYPE) or DEFAULT_DEVICE_TYPE
+        value = float(effective_option_values(opts, device_type)[CONF_STOP_THRESHOLD_W])
+    except Exception:  # pylint: disable=broad-exception-caught
+        return None
+    return value if math.isfinite(value) else None
+
+
+def _is_effective_stop_row(row: Any) -> bool:
+    """A row :func:`_note_stop_in_force` added for a Stop the option did not change."""
+    from .suggestion_engine import is_effective_stop_row  # pylint: disable=import-outside-toplevel
+
+    return is_effective_stop_row(row)
+
+
+def _note_stop_in_force(
+    changes: list[dict[str, Any]],
+    old_merged: dict[str, Any],
+    new_merged: dict[str, Any] | None = None,
+) -> None:
+    """Give a Stop Threshold row the Stop the detector ran with before the write.
+
+    ``old`` is the stored option, None while it was unset and Stop followed Min
+    Power, so the standby advisory could not tell which threshold the cycles before
+    the change ended under (``stop_threshold_changes``, PR #529 review). Recorded as
+    ``old_effective``; Revert still restores ``old``. Left out when it cannot be
+    resolved, and the reader then falls back to ``old``.
+
+    A write that moves that Stop without a Stop row (Min Power under an unset Stop,
+    #450) gets one, with ``old`` and ``new`` the stored option it left as it was, so
+    a Revert of it changes nothing (PR #529 review). The panel's history leaves
+    such a row out (:func:`_is_effective_stop_row`).
+    """
+    if not changes:
+        return
+    before = _effective_stop(old_merged)
+    if before is None:
+        return
+    rows = [ch for ch in changes if ch.get("key") == CONF_STOP_THRESHOLD_W]
+    for ch in rows:
+        ch["old_effective"] = before
+    if rows or new_merged is None:
+        return
+    after = _effective_stop(new_merged)
+    if after is not None and after != before:
+        stored = _json_safe(old_merged.get(CONF_STOP_THRESHOLD_W))
+        changes.append({
+            "key": CONF_STOP_THRESHOLD_W,
+            "old": stored,
+            "new": stored,
+            "timestamp": changes[0].get("timestamp"),
+            "old_effective": before,
+        })
+
+
+def _options_before(entry: Any) -> dict[str, Any] | None:
+    """The entry's merged options before a write, for ``_record_option_changes``."""
+    try:
+        return {**getattr(entry, "data", {}), **getattr(entry, "options", {})}
+    except Exception:  # pylint: disable=broad-exception-caught
+        return None
+
+
 async def _record_option_changes(
-    hass: HomeAssistant, entry: Any, updates: dict[str, Any], source: str
+    hass: HomeAssistant,
+    entry: Any,
+    updates: dict[str, Any],
+    source: str,
+    *,
+    before: dict[str, Any] | None = None,
+    restores_cycles: bool = False,
 ) -> None:
     """Record an option write in the settings changelog (#442).
 
@@ -735,17 +904,50 @@ async def _record_option_changes(
     values were only recoverable because they happened to have an older
     diagnostics dump.
 
-    Must be awaited BEFORE ``async_update_entry``, which schedules a reload that
-    rebuilds the store. Never raises: a changelog failure must not cost the write
-    it is describing (same contract as the inline version).
+    Awaited right AFTER ``async_update_entry``, with ``before`` the merged options
+    read just before it (PR #529 review): each row is stamped when its value took
+    effect, so the standby advisory judges a cycle that ended while the writer
+    was still awaiting under the Stop it ran with (``stop_threshold_changes``),
+    and a writer that aborts before the update records nothing. The reload the
+    update schedules is in place (``async_reload_entry``) and keeps this store;
+    the rows are on it before that reload can run. Without ``before`` the entry's
+    options now are the old values (a caller that has not written yet). Never
+    raises: a changelog failure must not cost the write it is describing (same
+    contract as the inline version).
+
+    ``restores_cycles``: the write puts back the options the stored cycles ran
+    under (Undo Import: the restored store holds only cycles from before the
+    import; a wholesale import that replaced them: they are the payload's). A
+    Stop row then records the Stop written as the one in force before it, not
+    the one it replaced, which no stored cycle ended under, and no row is added
+    for a Stop another setting moved (PR #529 review).
     """
     if not updates:
         return
     try:
-        old_effective = {**getattr(entry, "data", {}), **getattr(entry, "options", {})}
+        old_effective = (
+            dict(before) if before is not None
+            else {**getattr(entry, "data", {}), **getattr(entry, "options", {})}
+        )
         changes = _diff_option_changes(old_effective, updates)
         if not changes:
             return
+        data = dict(getattr(entry, "data", {}) or {})
+        if before is not None:
+            # Written already: what the detector now runs with. ``updates`` holds
+            # a cleared key as None, which reads as the compiled default; the
+            # entry falls back to its data (Min Power 5 W there: clearing a 2 W
+            # override moved an unset Stop 1.2 W -> 3 W, PR #529 review).
+            new_effective = {**data, **getattr(entry, "options", {})}
+        else:
+            new_effective = {
+                **old_effective,
+                **{k: data.get(k) if v is None else v for k, v in updates.items()},
+            }
+        if restores_cycles:
+            _note_stop_in_force(changes, new_effective)
+        else:
+            _note_stop_in_force(changes, old_effective, new_effective)
         manager = _get_manager(hass, entry.entry_id)
         store = getattr(manager, "profile_store", None) if manager else None
         if store is not None:
@@ -1509,9 +1711,12 @@ async def _apply_store_settings(
                 filtered = _without_inverted_threshold_pair(
                     entry, filtered, "store_download"
                 )  # item 515
-                await _record_option_changes(hass, entry, filtered, "store_download")
+                before = _options_before(entry)
                 hass.config_entries.async_update_entry(
                     entry, options={**entry.options, **filtered}
+                )
+                await _record_option_changes(
+                    hass, entry, filtered, "store_download", before=before
                 )
             settings_applied = len(filtered)
     return settings_applied
@@ -1715,6 +1920,8 @@ def ws_get_devices(
             # The two programmes a live match is torn between: the Status card's
             # "X or Y?" manual pick (match_rules.live_torn_choices).
             "match_choices": None,
+            # #530: the running cycle does not look like the hand-picked program.
+            "program_mismatch": None,
             # Merged data+options, matching ``ws_get_options`` and the
             # options-first resolution in WashDataManager (#450). An entry added
             # after its last schema migration carries the structural keys in
@@ -1783,6 +1990,9 @@ def ws_get_devices(
                     [str(n) for n in _choices[:2]]
                     if isinstance(_choices, list) and len(_choices) >= 2 else None
                 )
+                # #530: the Status card's "does not look like <pick>" badge.
+                _mismatch = getattr(manager, "program_mismatch", None)
+                info["program_mismatch"] = _mismatch if isinstance(_mismatch, dict) else None
 
                 store = getattr(manager, "profile_store", None)
                 if store is not None:
@@ -1812,6 +2022,7 @@ def ws_get_devices(
                         # other use in this file does.
                         from .suggestion_engine import (  # pylint: disable=import-outside-toplevel
                             detect_standby_above_stop,
+                            recorded_stop_changes,
                         )
 
                         # #445 cause 1: an appliance whose standby draw sits ABOVE
@@ -1833,6 +2044,7 @@ def ws_get_devices(
                         info["standby_above_stop"] = detect_standby_above_stop(
                             store.get_past_cycles() or [],
                             float(_stop_w or 0.0),
+                            stop_changes=recorded_stop_changes(store),
                         )
                     except Exception:  # pylint: disable=broad-exception-caught
                         # Logged, not swallowed silently: this advisory shipped dead
@@ -2137,12 +2349,18 @@ async def ws_set_options(
         # again. A bad value drops the key so its default applies - the contract
         # the per-key blocks below already follow; None / "" reach their reset path.
         _numeric = numeric_option_keys()
+        # A stored override such a drop removes is a change like a cleared one,
+        # recorded below: with Stop unset it can move the Stop the standby
+        # advisory reads (PR #529 review).
+        dropped_invalid_keys: set[str] = set()
         for _key, _val in msg["options"].items():
             if _key not in _numeric or _val is None or _val == "":
                 continue
             _num = coerce_numeric_option(_val, _numeric[_key])
             if _num is None:
                 new_options.pop(_key, None)
+                if _key in entry.options:
+                    dropped_invalid_keys.add(_key)
             else:
                 new_options[_key] = _num
 
@@ -2196,6 +2414,12 @@ async def ws_set_options(
                     DISHWASHER_END_SPIKE_QUIET_RELEASE_SECONDS
                 )
 
+        # The resets below (None / "") remove a stored override before the
+        # null-strip sees the key, so they are collected for the history like the
+        # drops above: a 0.75 ratio cleared to "" saved without a row and could
+        # not be reverted (PR #529 review). Nothing is collected without an override.
+        dropped_reset_keys: set[str] = set()
+
         # Smart-Termination duration ratio (#393): fraction of expected duration, so it
         # is meaningless outside [0.50, 1.00] - clamp valid submissions to the range.
         # An empty or non-numeric value drops the key so the device-type default
@@ -2205,6 +2429,8 @@ async def ws_set_options(
             _raw_str = new_options[CONF_SMART_TERMINATION_DURATION_RATIO]
             if _raw_str in (None, ""):
                 new_options.pop(CONF_SMART_TERMINATION_DURATION_RATIO, None)
+                if CONF_SMART_TERMINATION_DURATION_RATIO in entry.options:
+                    dropped_reset_keys.add(CONF_SMART_TERMINATION_DURATION_RATIO)
             else:
                 try:
                     _str = float(_raw_str)
@@ -2225,6 +2451,8 @@ async def ws_set_options(
             _raw_ac = new_options[CONF_ANTI_CREASE_FINALIZE_RATIO]
             if _raw_ac in (None, ""):
                 new_options.pop(CONF_ANTI_CREASE_FINALIZE_RATIO, None)
+                if CONF_ANTI_CREASE_FINALIZE_RATIO in entry.options:
+                    dropped_reset_keys.add(CONF_ANTI_CREASE_FINALIZE_RATIO)
             else:
                 try:
                     _ac = float(_raw_ac)
@@ -2248,6 +2476,8 @@ async def ws_set_options(
             _raw_pr = new_options[CONF_CURVE_PREROLL_SECONDS]
             if _raw_pr in (None, ""):
                 new_options.pop(CONF_CURVE_PREROLL_SECONDS, None)
+                if CONF_CURVE_PREROLL_SECONDS in entry.options:
+                    dropped_reset_keys.add(CONF_CURVE_PREROLL_SECONDS)
             else:
                 try:
                     _pr = float(_raw_pr)
@@ -2318,20 +2548,24 @@ async def ws_set_options(
 
         # Settings change history (D7): diff the pre-update effective options against
         # the post-normalization values, but only for keys the user actually
-        # submitted, and persist BEFORE async_update_entry (which schedules a reload
-        # that rebuilds the store). A changelog failure must never block the save.
+        # submitted, recorded right after async_update_entry so each row is stamped
+        # when it took effect. A changelog failure must never block the save.
         # Through the shared helper, not a second copy of it. The per-setting
         # Revert trusts this history, so the two writers have to follow one
         # contract - and `_record_option_changes`'s own docstring already says it
         # replaces the inline version that used to live here. Keys dropped by the
-        # null-strip above are still recorded as a change to None ("reverted to
-        # unset"); a None -> None no-op is skipped inside `_diff_option_changes`.
+        # null-strip above are still recorded, and so are stored overrides the
+        # numeric check or a reset dropped, each as what is left once written, as
+        # the import records a removal: the entry's data value where it holds the key (a
+        # dropped 2 W Min Power override leaves its 5 W), else None ("reverted to
+        # unset", PR #529 review). A no-op is skipped inside `_diff_option_changes`.
+        written_merged = {**entry.data, **new_options}
         submitted_post = {
-            k: new_options.get(k)
+            k: written_merged.get(k)
             for k in msg["options"]
-            if k in new_options or k in dropped_null_keys
+            if k in new_options or k in dropped_null_keys or k in dropped_invalid_keys
+            or k in dropped_reset_keys
         }
-        await _record_option_changes(hass, entry, submitted_post, "set_options")
 
         # When online features are disabled, clear the persisted store account so the
         # user's identity isn't silently retained after they opt out.
@@ -2357,7 +2591,9 @@ async def ws_set_options(
                     exc_info=True,
                 )
 
+        before = _options_before(entry)
         hass.config_entries.async_update_entry(entry, **update_kwargs)
+        await _record_option_changes(hass, entry, submitted_post, "set_options", before=before)
         _send_result(connection, msg["id"], "set_options", {"success": True})
     finally:
         lock.release()
@@ -2386,7 +2622,12 @@ async def ws_get_settings_changelog(
     try:
         store = getattr(manager, "profile_store", None)
         if store is not None:
-            changelog = store.get_settings_changelog()
+            # A Stop moved by another setting is history for the standby advisory,
+            # not a change of the setting the panel lists (``_note_stop_in_force``).
+            changelog = [
+                row for row in store.get_settings_changelog()
+                if not _is_effective_stop_row(row)
+            ]
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug(
             "Error fetching settings changelog for entry %s: %s", entry_id, exc
@@ -4372,6 +4613,11 @@ async def ws_wipe_history(
         return
 
     try:
+        # Before the wipe awaits its write: a cadence pass finishing meanwhile must
+        # not refill the cleared suggestions, and a failed write must not skip it.
+        learning = getattr(manager, "learning_manager", None)
+        if learning is not None:
+            learning.reset_cadence_evidence()
         await manager.profile_store.clear_all_data()
         # clear_all_data pops the persisted arm, but the manager's in-memory field is
         # the authoritative one, so the pin has to be retired there too or the next
@@ -4381,6 +4627,20 @@ async def ws_wipe_history(
         _send_result(connection, msg["id"], "wipe_history", {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+def _schedule_post_import_repairs(hass: HomeAssistant, entry_id: str) -> None:
+    """Arm the one-time repairs an imported store may need, on the entry's CURRENT
+    manager. An options write during the import reloads the entry, which retires
+    the manager the handler captured; its ``_spawn_tracked`` does not check
+    shutdown, so a rebuild started there ran against the retired store (PR #529
+    review). The replacement's own setup arms them for the data it loaded."""
+    current = _get_manager(hass, entry_id)
+    if current is None or getattr(current, "_is_shutdown", False) is True:
+        return
+    current.async_schedule_banked_tail_repair()
+    current.async_schedule_energy_rebuild()
+    current.async_schedule_cut_short_rebuild()
 
 
 def _export_json(payload: dict[str, Any]) -> str:
@@ -4475,8 +4735,23 @@ async def async_apply_imported_entry_options(
         new_options = strip_null_options({**entry.options, **entry_options_updates})
         # ...and a non-numeric numeric setting is dropped, same reason (PLATFORM-13).
         new_options, _ = drop_invalid_numeric_options(new_options)
-        await _record_option_changes(hass, entry, entry_options_updates, source)
+        before = _options_before(entry)
         hass.config_entries.async_update_entry(entry, options=new_options)
+        # What was written, not what was submitted (PR #529 review): a rejected
+        # value removed the override and is recorded as what is left (None, the
+        # unset value a Revert writes, unless the entry's data holds the key, as
+        # Undo Import records a removal); a valid one as normalised.
+        written_merged = {**entry.data, **new_options}
+        written = {key: written_merged.get(key) for key in entry_options_updates}
+        # An import that replaced the stored cycles puts in the options they ran
+        # under, as Undo Import does: its Stop row stays listed (Revert needs
+        # ``old``), but the Stop in force before it is the imported one, not this
+        # device's, which no stored cycle ended under (PR #529 review). A merge
+        # that kept the local cycles records as before.
+        await _record_option_changes(
+            hass, entry, written, source, before=before,
+            restores_cycles=bool(config_updates.get("replaced_past_cycles")),
+        )
 
 
 @websocket_api.websocket_command(
@@ -4506,10 +4781,14 @@ async def ws_import_config(
         try:
             payload = await hass.async_add_executor_job(json.loads, msg["json_data"])
             pre_entry = _get_entry(hass, entry_id)
+            learning = getattr(manager, "learning_manager", None)
             config_updates = await manager.profile_store.async_import_data(
                 payload,
                 # Kept with the restore point so an undo puts them back (item 195).
                 entry_options=dict(pre_entry.options) if pre_entry else None,
+                # As the wipe and Undo Import: the intervals measured before it and
+                # any pass in flight go with the history it replaces (PR #529 review).
+                on_replace=getattr(learning, "reset_cadence_evidence", None),
             )
             result = {
                 "success": True,
@@ -4538,9 +4817,12 @@ async def ws_import_config(
             # options write above is the only thing here that could reload the
             # entry - so an import that carries no options would otherwise leave
             # the imported tails inflating avg_duration until the next restart.
-            manager.async_schedule_banked_tail_repair()
-            manager.async_schedule_energy_rebuild()
-            manager.notify_update()
+            _schedule_post_import_repairs(hass, entry_id)
+            # Not from a manager a full reload retired while the settings history
+            # was written: its refresh can fire a device trigger for an entry it
+            # no longer runs (PR #529 review). The import itself stands.
+            if _get_manager(hass, entry_id) is manager:
+                manager.notify_update()
             _send_result(connection, msg["id"], "import_config", result)
         except json.JSONDecodeError as exc:
             connection.send_error(msg["id"], "invalid_json", str(exc))
@@ -4728,6 +5010,11 @@ async def ws_import_config_selective(
                 # Kept with the restore point of a destructive import so an undo puts
                 # them back (item 195); never applied to the entry from here.
                 entry_options=dict(entry.options) if entry is not None else None,
+                # A replace of the real history: the counts and passes from before
+                # it go, as in the wholesale import (PR #529 review).
+                on_replace=getattr(
+                    getattr(manager, "learning_manager", None), "reset_cadence_evidence", None,
+                ),
             )
 
             # Re-validate after the awaits — the entry may have been reloaded (a new
@@ -4763,11 +5050,15 @@ async def ws_import_config_selective(
                         filtered = _without_inverted_threshold_pair(
                             entry, filtered, "store_device_package"
                         )  # item 515
-                        await _record_option_changes(
-                            hass, entry, filtered, "store_device_package"
-                        )
+                        before = _options_before(entry)
                         hass.config_entries.async_update_entry(
                             entry, options={**entry.options, **filtered}
+                        )
+                        await _record_option_changes(
+                            hass, entry, filtered, "store_device_package", before=before,
+                            # Replaced cycles ran under the imported Stop (as the
+                            # wholesale import, review of PR #529).
+                            restores_cycles=bool(summary.get("replaced_past_cycles")),
                         )
                     settings_applied = len(filtered)
             summary = {**summary, "settings_applied": settings_applied}
@@ -4776,9 +5067,11 @@ async def ws_import_config_selective(
             # whose settings subset comes back empty) skips the options write
             # above, so nothing reloads the entry and the re-armed repair would
             # wait for a restart.
-            manager.async_schedule_banked_tail_repair()
-            manager.async_schedule_energy_rebuild()
-            manager.notify_update()
+            _schedule_post_import_repairs(hass, entry_id)
+            # Not from a manager a full reload retired during the settings write,
+            # as the wholesale import (PR #529 review). The import itself stands.
+            if _get_manager(hass, entry_id) is manager:
+                manager.notify_update()
             _send_result(
                 connection, msg["id"], "import_config_selective",
                 {"success": True, "summary": summary},
@@ -4821,11 +5114,19 @@ async def _async_restore_entry_options(
         restored, _ = drop_invalid_numeric_options(restored)
         if restored == current:
             return
-        await _record_option_changes(
-            hass, entry, {k: v for k, v in restored.items() if current.get(k) != v},
-            "undo_import",
-        )
+        # Diffed on the resolved maps, removals included (PR #529 review): a key
+        # the import set that the restore point leaves unset goes back to its
+        # default, and the Stop Threshold history must see that, or the cycles
+        # that ended under an imported 3 W Stop read as ended under the default.
+        # A removed key is recorded as None, the unset value a Revert writes.
+        old = {**entry.data, **current}
+        new = {**entry.data, **restored}
+        changed = {k: new.get(k) for k in sorted(old.keys() | new.keys()) if old.get(k) != new.get(k)}
+        before = _options_before(entry)
         hass.config_entries.async_update_entry(entry, options=restored)
+        await _record_option_changes(
+            hass, entry, changed, "undo_import", before=before, restores_cycles=True
+        )
 
 
 @websocket_api.websocket_command(
@@ -4852,7 +5153,13 @@ async def ws_undo_import(
     # as the imports and cannot interleave with a reprocess / recording persist.
     async with _entry_write_lock(hass, entry_id):
         try:
-            restored = await manager.profile_store.async_restore_pre_import_snapshot()
+            # As the wipe: the intervals measured before the restore and any pass
+            # in flight go with the history it replaces (PR #529 review), once the
+            # restore point has really replaced it: a refused undo keeps them.
+            learning = getattr(manager, "learning_manager", None)
+            restored = await manager.profile_store.async_restore_pre_import_snapshot(
+                on_replace=getattr(learning, "reset_cadence_evidence", None),
+            )
             result = {
                 "success": True,
                 "summary": {
@@ -4872,9 +5179,15 @@ async def ws_undo_import(
             snapshot_options = restored.get("entry_options")
             if entry is not None and isinstance(snapshot_options, dict):
                 await _async_restore_entry_options(hass, entry, snapshot_options)
-            manager.async_schedule_banked_tail_repair()
-            manager.async_schedule_energy_rebuild()
-            manager.notify_update()
+            # The entry's manager as it is now, after the writes: a reload during
+            # them retires the one captured above, and its tracked spawner does not
+            # check for that, so the rebuilds would run against a dead store.
+            current = _get_manager(hass, entry_id)
+            if current is not None and not getattr(current, "_is_shutdown", False):
+                current.async_schedule_banked_tail_repair()
+                current.async_schedule_energy_rebuild()
+                current.async_schedule_cut_short_rebuild()
+                current.notify_update()
             _send_result(connection, msg["id"], "undo_import", result)
         except ValueError as exc:
             connection.send_error(msg["id"], "not_found", str(exc))
@@ -4950,7 +5263,17 @@ def ws_get_suggestions(
 
     entry = _get_entry(hass, entry_id)
     merged: dict[str, Any] = {**entry.data, **entry.options} if entry else {}
+    _send_result(
+        connection, msg["id"], "get_suggestions", _suggestion_list(manager, merged, entry_id)
+    )
 
+
+def _suggestion_list(manager: Any, merged: dict[str, Any], entry_id: str) -> dict[str, Any]:
+    """``suggestions`` and ``locked_suggestions`` as the Settings list shows them.
+
+    The ``get_suggestions`` reply, and what a refused Apply hands back so the user
+    confirms the values as they now stand (PR #529 review).
+    """
     out: list[dict[str, Any]] = []
     try:
         for key, item, suggested, current in _visible_suggestions(
@@ -4980,10 +5303,7 @@ def ws_get_suggestions(
         locked = manager.profile_store.get_locked_suggestions()
     except Exception:  # pylint: disable=broad-exception-caught
         locked = []
-    _send_result(
-        connection, msg["id"], "get_suggestions",
-        {"suggestions": out, "locked_suggestions": locked},
-    )
+    return {"suggestions": out, "locked_suggestions": locked}
 
 
 @websocket_api.websocket_command(
@@ -4991,6 +5311,8 @@ def ws_get_suggestions(
         vol.Required("type"): "ha_washdata/apply_suggestions",
         vol.Required("entry_id"): str,
         vol.Required("keys"): [str],
+        # Each key's value as the user confirmed it; optional for older clients.
+        vol.Optional("values"): dict,
     }
 )
 @websocket_api.async_response
@@ -4999,7 +5321,13 @@ async def ws_apply_suggestions(
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
-    """Stage selected suggested values into options, then clear suggestions."""
+    """Stage selected suggested values into options, then clear suggestions.
+
+    ``values`` (optional) carries each key's value as the user confirmed it: a
+    suggestion that differs from it now, or is no longer offered, writes
+    nothing, and the reply is ``success`` False with the ``changed`` keys and
+    the list as it now stands.
+    """
     entry_id: str = msg["entry_id"]
     manager = _get_manager(hass, entry_id)
     if manager is None:
@@ -5012,61 +5340,279 @@ async def ws_apply_suggestions(
         return
 
     try:
-        merged = {**entry.data, **entry.options}
-        # Only what the Settings list would show: a muted key re-created by the
-        # reconcile cascade used to be applied here (audit SUGGEST-11).
-        visible = {
-            key: item
-            for key, item, _s, _c in _visible_suggestions(
-                manager.profile_store, merged,
-                getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
-            )
-        }
         updates: dict[str, Any] = {}
-        for key in msg["keys"]:
-            item = visible.get(key)
-            if not isinstance(item, dict) or item.get("value") is None:
-                continue
-            val = item["value"]
-            updates[key] = (
-                int(float(val)) if key in _SUGGESTION_INT_KEYS else float(val)
-            )
+        # Same critical section as ws_set_options (#442 follow-up): the changelog
+        # snapshot and the options write must be atomic per entry. The selection is
+        # inside it too, and a mute takes the same lock, so a mute that completed
+        # while Apply waited is seen (PR #529 review).
+        async with _entry_options_lock(hass, entry_id):
+            # Resolved again inside the lock, as the mute handler does: a reload
+            # while Apply waited replaced the manager, and the list judged and
+            # returned below must be the live store's (PR #529 review).
+            manager = _get_manager(hass, entry_id)
+            entry = _get_entry(hass, entry_id)
+            if manager is None or not entry:
+                _err_not_found(connection, msg["id"], entry_id)
+                return
+            merged = {**entry.data, **entry.options}
+            # Only what the Settings list would show: a muted key re-created by the
+            # reconcile cascade used to be applied here (audit SUGGEST-11).
+            visible = {
+                key: item
+                for key, item, _s, _c in _visible_suggestions(
+                    manager.profile_store, merged,
+                    getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
+                )
+            }
+            # What the user confirmed, against what the list shows now (PR #529
+            # review): a newer analysis may have replaced a value after the preview
+            # or while Apply waited for this lock. Refused before anything is
+            # cleared or written, with the list as it stands to confirm again. A
+            # confirmed key no longer offered (dismissed, muted or applied by
+            # another client) changed too: skipped, the rest was saved and
+            # reported as applied (PR #529 review). A key with no confirmed value
+            # (an older panel) is judged as before.
+            confirmed = msg.get("values") or {}
+            changed = [
+                key for key in msg["keys"]
+                if confirmed.get(key) is not None
+                and (
+                    not isinstance(visible.get(key), dict)
+                    or not _suggestion_equivalent(
+                        confirmed[key], _coerce_suggested(key, visible[key].get("value"))
+                    )
+                )
+            ]
+            if changed:
+                _send_result(
+                    connection, msg["id"], "apply_suggestions",
+                    {
+                        "success": False, "applied": [], "changed": changed,
+                        **_suggestion_list(manager, merged, entry_id),
+                    },
+                )
+                return
+            for key in msg["keys"]:
+                item = visible.get(key)
+                if not isinstance(item, dict) or item.get("value") is None:
+                    continue
+                # A stored "Infinity" or NaN (an imported store) is no setting:
+                # written, the detector would run with it, and the joint checks
+                # skip a non-finite value. Nor is a negative one, which the
+                # Settings form refuses for every suggested key: an Off Delay of
+                # -1 empties the end-energy window and the joint check finds no
+                # pause it must bridge. Refused before anything is cleared or
+                # written (PR #529 review).
+                try:
+                    val = float(item["value"])
+                except (TypeError, ValueError, OverflowError):
+                    val = math.nan
+                if not math.isfinite(val) or val < 0:
+                    connection.send_error(
+                        msg["id"], "invalid_suggestion",
+                        f"The suggested value for {key} is not a valid setting. Nothing "
+                        "was saved; run the analysis again or dismiss the suggestions.",
+                    )
+                    return
+                # The value the user confirmed: the list shows and compares it
+                # coerced (int keys whole, the rest 4 dp), so that is what every
+                # check below judges and what is saved (PR #529 review).
+                updates[key] = _coerce_suggested(key, val)
+            if updates:
+                # Both checks read the options as they are now, inside the lock: a
+                # settings save can land while it is awaited or during the
+                # end-gate scan (PR #529).
+                fresh = {**entry.data, **entry.options}
+                # Nor a Min Power that changes the unit the sensor is read in: on
+                # a kW sensor 2 converts readings to watts and 0.8 keeps them raw,
+                # so the Start and Stop Thresholds (in watts) would judge kW
+                # values (PR #529 review). Withdrawn like an unsafe timing value.
+                if CONF_MIN_POWER in updates and not _min_power_keeps_scale(
+                    hass, fresh,
+                    getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
+                    updates[CONF_MIN_POWER],
+                ):
+                    updates.pop(CONF_MIN_POWER)
+                # Min Power alone moves an unset Start or Stop Threshold, which
+                # follows it (#450), past every threshold check: not without that
+                # threshold in the same write (PR #529 review).
+                def _drop_min_power_alone() -> None:
+                    if CONF_MIN_POWER in updates and any(
+                        fresh.get(key) is None and key not in updates
+                        for key in (CONF_START_THRESHOLD_W, CONF_STOP_THRESHOLD_W)
+                    ):
+                        updates.pop(CONF_MIN_POWER)
 
-        # Item 515: the reconciler keeps a stored start/stop pair ordered, but
-        # applying one of the two alone (a subset, a muted cascade, or a pair
-        # reconciled against options that changed since) could still invert it.
-        _inverted = inverted_threshold_pair(
-            merged,
-            {**merged, **updates},
-            getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
-        )
-        if _inverted is not None:
-            connection.send_error(
-                msg["id"], "invalid_threshold_pair", _threshold_pair_message(*_inverted)
-            )
-            return
+                _drop_min_power_alone()
+                # An Undo Import takes the write lock, not this one: a store it
+                # replaces meanwhile was not the one these values were judged on
+                # (PR #529 review).
+                data_generation = getattr(manager.profile_store, "_data_generation", 0)
 
-        if updates:
-            # Clear before updating the entry: async_update_entry schedules a
-            # reload that rebuilds the store, so persist the cleared state first.
-            # The odometer, like the cooldown check (audit SUGGEST-05): at the
-            # retention cap len(past_cycles) never grows past the stamp again.
-            cycle_count = manager.profile_store.get_lifetime_cycle_count()
-            manager.profile_store.set_suggestion_apply_cycle_count(cycle_count)
-            # Same critical section as ws_set_options (#442 follow-up): the
-            # changelog snapshot and the options write must be atomic per entry.
-            async with _entry_options_lock(hass, entry_id):
-                # Record BEFORE clear_suggestions/async_update_entry: both persist,
-                # and the reload the latter schedules rebuilds the store (#442).
-                await _record_option_changes(hass, entry, updates, "apply_suggestions")
-                await manager.profile_store.clear_suggestions()
-                # Suggested values are all tunables -> layer them onto the existing
-                # options; never spread entry.data into options.
-                new_options = {**entry.options, **updates}
-                hass.config_entries.async_update_entry(entry, options=new_options)
-            manager.notify_update()
+                def _still_current() -> bool:
+                    # A native reconfigure saves without this lock and reloads in
+                    # place (same manager and store): options other than the ones
+                    # judged here are not the settings these values were checked
+                    # against (review of PR #529).
+                    return (
+                        _get_manager(hass, entry_id) is manager
+                        and getattr(manager.profile_store, "_data_generation", 0)
+                        == data_generation
+                        and {**entry.data, **entry.options} == fresh
+                    )
 
-        _send_result(connection, msg["id"], "apply_suggestions", {"success": True, "applied": list(updates.keys())}
+                selected = {key: visible[key].get("value") for key in updates}
+
+                def _selection_current() -> bool:
+                    # The values chosen above are still the ones the Settings list
+                    # shows; read before the clear, which empties it.
+                    now = {
+                        key: item
+                        for key, item, _s, _c in _visible_suggestions(
+                            manager.profile_store, {**entry.data, **entry.options},
+                            getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
+                        )
+                    }
+                    return all(
+                        isinstance(now.get(key), dict)
+                        and now[key].get("value") == selected[key]
+                        for key in updates
+                    )
+
+                def _scale_kept() -> bool:
+                    # The sensor's unit is no option, so ``_still_current`` cannot
+                    # see it change during an await below (PR #529 review).
+                    return CONF_MIN_POWER not in updates or _min_power_keeps_scale(
+                        hass, fresh,
+                        getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
+                        updates[CONF_MIN_POWER],
+                    )
+
+                if not await _drop_unsafe_end_gate_updates(hass, manager, visible, updates):
+                    connection.send_error(
+                        msg["id"], "end_gate_check_failed",
+                        "The suggested timing settings could not be checked against "
+                        "this appliance's pauses. Nothing was saved; try again.",
+                    )
+                    return
+                evidence = _end_gate_evidence(manager, updates)
+                # Again on what is left: the check can withdraw the threshold the
+                # Min Power cascade was written with (review of PR #529).
+                _drop_min_power_alone()
+                # Item 515: the reconciler keeps a stored start/stop pair ordered,
+                # but applying one of the two alone (a subset, a muted cascade, or
+                # a pair reconciled against options that changed since) could
+                # still invert it.
+                _inverted = inverted_threshold_pair(
+                    fresh,
+                    {**fresh, **updates},
+                    getattr(manager, "device_type", None) or DEFAULT_DEVICE_TYPE,
+                )
+                if _inverted is not None:
+                    connection.send_error(
+                        msg["id"], "invalid_threshold_pair", _threshold_pair_message(*_inverted)
+                    )
+                    return
+                if updates and not _still_current():
+                    # Reloaded or restored while the check was awaited: the store it
+                    # judged is gone, so nothing is written (PR #529 review).
+                    connection.send_error(
+                        msg["id"], "entry_reloaded",
+                        "The appliance was reloaded, its settings changed or its data "
+                        "restored while the suggestions were applied. Nothing was "
+                        "saved; try again.",
+                    )
+                    return
+                if updates and not _selection_current():
+                    # Dismissed or replaced while the check was awaited: a dismiss
+                    # clears the list without this lock and moves nothing else
+                    # ``_still_current`` reads (PR #529 review).
+                    connection.send_error(
+                        msg["id"], "entry_reloaded",
+                        "The suggestions changed or were dismissed while they were "
+                        "applied. Nothing was saved; try again.",
+                    )
+                    return
+                if updates and not _scale_kept():
+                    connection.send_error(
+                        msg["id"], "entry_reloaded",
+                        "The power sensor's unit changed while the suggestions were "
+                        "applied. Nothing was saved; try again.",
+                    )
+                    return
+                if updates:
+                    # Clear before updating the entry: the reload async_update_entry
+                    # schedules refreshes the suggestions, so persist the cleared
+                    # state first.
+                    # Each write is awaited: a reload in between leaves the rest
+                    # unwritten, and the reply says what already was (PR #529 review).
+                    # The settings history is written last, once the options are
+                    # (``_record_option_changes``): an Apply that stops before them
+                    # records no change it did not make.
+                    await manager.profile_store.clear_suggestions()
+                    if not _still_current():
+                        connection.send_error(
+                            msg["id"], "entry_reloaded",
+                            "The appliance was reloaded, its settings changed or its data "
+                            "restored while the suggestions were applied. The suggestions "
+                            "were cleared, but no setting was saved; try again once they "
+                            "are offered again.",
+                        )
+                        return
+                    if (
+                        evidence is not None
+                        and end_gate_evidence_token(manager.profile_store) != evidence
+                    ):
+                        # A cycle stored or edited while the clear was saved: the
+                        # timing settings were judged without it (PR #529 review).
+                        connection.send_error(
+                            msg["id"], "cycles_changed",
+                            "A cycle was stored while the suggestions were applied, so "
+                            "the timing settings were not checked against it. The "
+                            "suggestions were cleared, but no setting was saved; try "
+                            "again once they are offered again.",
+                        )
+                        return
+                    if not _scale_kept():
+                        # Last, with no await before the write: a Min Power across
+                        # the sensor's new unit line rescales every reading.
+                        connection.send_error(
+                            msg["id"], "entry_reloaded",
+                            "The power sensor's unit changed while the suggestions were "
+                            "applied. The suggestions were cleared, but no setting was "
+                            "saved; run the suggestion analysis again.",
+                        )
+                        return
+                    # Suggested values are all tunables -> layer them onto the
+                    # existing options; never spread entry.data into options.
+                    new_options = {**entry.options, **updates}
+                    before = _options_before(entry)
+                    hass.config_entries.async_update_entry(entry, options=new_options)
+                    # The cooldown only once the options are written (PR #529
+                    # review): stamped before, an Apply a reload stopped kept the
+                    # suggestions it never applied quiet after the reload. Before
+                    # any await, so the refresh the reload runs reads it, and
+                    # saved with the settings history below. The odometer, like
+                    # the cooldown check (audit SUGGEST-05): at the retention cap
+                    # len(past_cycles) never grows past the stamp again.
+                    manager.profile_store.set_suggestion_apply_cycle_count(
+                        manager.profile_store.get_lifetime_cycle_count()
+                    )
+                    await _record_option_changes(
+                        hass, entry, updates, "apply_suggestions", before=before
+                    )
+            # Not from a manager a full unload retired during the awaits above: its
+            # refresh can fire a device trigger (unload_pending) for an entry it
+            # no longer runs (PR #529 review).
+            if updates and _get_manager(hass, entry_id) is manager:
+                manager.notify_update()
+
+        # ``success`` False when nothing was written: every selected suggestion
+        # was withdrawn by the checks above or is no longer offered, so no reload
+        # follows and the panel must not say it applied any (PR #529 review).
+        _send_result(
+            connection, msg["id"], "apply_suggestions",
+            {"success": bool(updates), "applied": list(updates.keys())},
         )
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
@@ -5126,7 +5672,47 @@ async def ws_set_suggestion_lock(
         _err_not_found(connection, msg["id"], entry_id)
         return
     try:
-        await manager.profile_store.set_suggestion_locked(key, bool(msg["locked"]))
+        # The lock Apply all selects under (PR #529 review): a mute that completes
+        # before Apply reads the list is seen by it.
+        async with _entry_options_lock(hass, msg["entry_id"]):
+            # Resolved again inside the lock: a reload while it waited replaced it.
+            manager = _get_manager(hass, entry_id)
+            if manager is None:
+                _err_not_found(connection, msg["id"], entry_id)
+                return
+            await manager.profile_store.set_suggestion_locked(key, bool(msg["locked"]))
+        # Looked up after the write: an unload during it retires `manager`, and a
+        # check spawned on it would save its retired store (review of PR #529).
+        current = _get_manager(hass, entry_id)
+        learning = getattr(current, "learning_manager", None) if current is not None else None
+        if (
+            msg["locked"] and learning is not None
+            and getattr(current, "_is_shutdown", False) is not True
+        ):
+            # The muted entry may be what made another pending one safe (PR #529).
+            learning.schedule_joint_end_gate_check()
+        if current is not manager:
+            # A full reload replaced the manager during the write: the change went
+            # to the retired store, and whether the live one loaded it depends on
+            # when that save landed. No refresh from the retired manager (it can
+            # fire a device trigger for an entry it no longer runs) and no list
+            # from it: ``reloaded`` tells the client to re-read the live mute
+            # state; the write is not undone (PR #529 review).
+            live = (
+                current if current is not None
+                and getattr(current, "_is_shutdown", False) is not True else None
+            )
+            _send_result(
+                connection, msg["id"], "set_suggestion_lock",
+                {
+                    "success": True,
+                    "locked_suggestions": (
+                        live.profile_store.get_locked_suggestions() if live is not None else []
+                    ),
+                    "reloaded": True,
+                },
+            )
+            return
         manager.notify_update()
         _send_result(
             connection, msg["id"], "set_suggestion_lock",
@@ -5157,8 +5743,28 @@ async def ws_run_suggestion_analysis(
         return
     try:
         result = await learning.async_run_full_analysis()
+        if (
+            _get_manager(hass, entry_id) is not manager
+            or getattr(manager, "_is_shutdown", False) is True
+        ):
+            # Unloaded during the run (the unload does not cancel this await): what
+            # it stored went to the retired store, which no longer writes. No
+            # refresh from that manager and no success; the panel says to run it
+            # again (PR #529 review).
+            connection.send_error(
+                msg["id"], "analysis_superseded",
+                "The appliance was reloaded during the analysis. Run it again.",
+            )
+            return
         manager.notify_update()
         _send_result(connection, msg["id"], "run_suggestion_analysis", {"success": True, **(result or {})})
+    except AnalysisSupersededError as exc:
+        # Not complete: the panel shows msg.analysis_superseded (PR #529 review).
+        connection.send_error(msg["id"], "analysis_superseded", str(exc))
+    except EndGateCheckError as exc:
+        # The stored set is unjudged: not complete, but what earlier passes stored
+        # stays (panel: msg.analysis_check_failed, PR #529 review).
+        connection.send_error(msg["id"], "analysis_check_failed", str(exc))
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 

@@ -473,6 +473,9 @@
       },
       "last_cycle_cost": {
         "name": "Utolsó ciklus költsége"
+      },
+      "last_cycle_start": {
+        "name": "Utolsó ciklus kezdete"
       }
     },
     "select": {
@@ -572,6 +575,7 @@
       "phase_started": "Fázis elkezdődött",
       "finishing_soon": "Hamarosan kész",
       "cycle_overrun": "Ciklus túllépi az időt",
+      "program_mismatch": "Futó program eltér a kiválasztottól",
       "cycle_paused": "Ciklus szüneteltetva",
       "cycle_resumed": "Ciklus folytatódott",
       "still_tumbling": "A ciklus után még forog a dob",
@@ -646,6 +650,16 @@
         "percent": {
           "name": "Hosszabb ezzel",
           "description": "Százalék a program szokásos időtartama felett."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "Futó program eltér a kiválasztottól",
+      "description": "Egyszer aktiválódik, amikor a ciklus jobban illik egy másik programhoz, mint a kiválasztotthoz. Az új választás új ellenőrzést indít.",
+      "fields": {
+        "program": {
+          "name": "Program",
+          "description": "Csak akkor, ha ez a kiválasztott program, pontos névvel. Hagyja üresen bármely programhoz."
         }
       }
     },

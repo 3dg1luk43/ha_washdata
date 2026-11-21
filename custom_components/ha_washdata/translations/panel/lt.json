@@ -1068,6 +1068,7 @@
     "sug_muted": "Šio nustatymo daugiau nebesiūlys",
     "sug_mute_failed": "Nepavyko nutildyti pasiūlymo",
     "sug_unmuted_all": "Nutildyti pasiūlymai atstatyti",
+    "sug_unmute_incomplete": "Atstatymas neužbaigtas: kai kurie pasiūlymai vis dar nutildyti. Bandykite dar kartą.",
     "n_suggestions_muted": "{count} pasiūlymų nutildyta; automatinis derintuvas jų nebesiūlys.",
     "n_suggestions_muted_one": "{count} pasiūlymas nutildytas; automatinis derintuvas jo nebesiūlys.",
     "n_suggestions_muted_few": "{count} pasiūlymai nutildyti; automatinis derintuvas jų nebesiūlys.",
@@ -1139,6 +1140,10 @@
     "cycle_context_none": "Recorder neturi rodmenų prieš šį ciklą ir po jo (Home Assistant pagal numatytuosius nustatymus saugo 10 dienų istoriją).",
     "cycle_context_tip": "Tik rodymui: rodo galios jutiklio recorder istoriją aplink šį ciklą, jei ji dar saugoma. Norėdami nepavykusius paleidimo bandymus pridėti prie būsimų ciklų, naudokite „Kreivės įžanginės sekundės“ (Nustatymai > Aptikimas > Ciklo pradžia); tai pakeičia išsaugotas trukmes.",
     "invalid_threshold_pair": "Sustabdymo slenkstis ({stop} W) turi būti mažesnis už Paleidimo slenkstį ({start} W). Niekas neišsaugota; keiskite abu kartu.",
+    "end_gate_check_failed": "Nepavyko patikrinti siūlomų laiko nustatymų pagal šio prietaiso pauzes. Niekas neišsaugota; bandykite dar kartą.",
+    "analysis_superseded": "Analizės metu pasikeitė nustatymai arba ciklų duomenys. Paleiskite ją dar kartą.",
+    "analysis_check_failed": "Nepavyko patikrinti siūlomų laiko nustatymų pagal šio prietaiso pauzes. Paleiskite ją dar kartą.",
+    "apply_cycles_changed": "Taikant pasiūlymus buvo išsaugotas ciklas. Joks nustatymas nepakeistas, o pasiūlymai išvalyti. Paleiskite pasiūlymų analizę dar kartą.",
     "bp_admin_only": "Šablonus diegia administratorius.",
     "automation_alias_trigger": "{device}: {trigger}",
     "automation_desc_trigger": "Sukurta WashData, skirta {device}. Pridėkite savo veiksmus (pranešimai, šviesos, ...).",
@@ -1586,12 +1591,12 @@
       "doc": "Kas atidaroma paspaudus šio prietaiso pranešimą. Tuščia: WashData skydelis su šiuo prietaisu. Įveskite prietaisų skydelio kelią (pvz., /lovelace/laundry) ar URL, arba „none“, kad paspaudimas nieko nedarytų."
     },
     "door_opens_at_end": {
-      "label": "Durys automatiškai atsidaromos pabaigoje",
-      "doc": "Indaplovėms, kurios pabaigoje atidaro duris džiovinimui (pvz., AirDry). Jei durys lieka atviros toliau nurodytą laiką, ciklas užbaigiamas, o ne pristabdomas; trumpas atidarymas ignoruojamas. Reikalingas Durų jutiklio objektas."
+      "label": "Durų atidarymas užbaigia ciklą",
+      "doc": "Su Durų jutiklio objektu durys, esant mažai galiai paliktos atviros toliau nurodytą laukimo laiką, ciklą užbaigia, o ne pristabdo. Kai ciklas pristabdytas, tai įvyksta tik tada, kai atpažinta programa beveik baigta, todėl pauzė programos viduryje lieka pauze."
     },
     "door_end_dwell_seconds": {
       "label": "Durų atidarymo pabaigos laukimas",
-      "doc": "Kai įjungta \"Durys automatiškai atsidaromos pabaigoje\": kiek laiko durys turi likti atviros, kad ciklas baigtųsi. Pakankamai ilgai, kad būtų ignoruojamas indo įdėjimas (numatytoji 60 s)."
+      "doc": "Kai įjungta \"Durų atidarymas užbaigia ciklą\": kiek laiko durys turi likti atviros, kad ciklas baigtųsi. Pakankamai ilgai, kad būtų ignoruojamas indo įdėjimas (numatytoji 60 s)."
     },
     "profile_evidence_sources": {
       "label": "Ciklai, formuojantys programą",
@@ -1728,7 +1733,9 @@
     "match_sure": "~{pct} % tikrumas",
     "match_uncertain_tip": "WashData dar nenusprendė, kuri tai programa. Skaičius rodo, kaip dažnai pirmaujantis spėjimas, {top}, ankstesniuose cikluose pasitvirtindavo, kai pirmavo tiek pat. Tik informacija.",
     "torn_pick": "{a} ar {b}?",
-    "torn_tip": "WashData dar negali atskirti šių dviejų programų, todėl pasirinkite tą, kuri dabar veikia, kad ja pažymėtumėte šį ciklą (Automatinis aptikimas pasirinkimą atšaukia)."
+    "torn_tip": "WashData dar negali atskirti šių dviejų programų, todėl pasirinkite tą, kuri dabar veikia, kad ja pažymėtumėte šį ciklą (Automatinis aptikimas pasirinkimą atšaukia).",
+    "program_mismatch": "Labiau tinka {program}",
+    "program_mismatch_tip": "Šis ciklas aiškiai labiau panašus į programą {program} nei į {selected}, tačiau WashData palieka jūsų pasirinktą programą."
   },
   "tab": {
     "advanced": "Išplėstinė",
@@ -1816,6 +1823,8 @@
     "settings_reverted": "Nustatymai atkurti; integracijos perkrovimas",
     "settings_saved": "Nustatymai išsaugoti; integracijos perkrovimas",
     "suggestions_applied": "Pasiūlymai pritaikyti; integracijos perkrovimas",
+    "suggestions_none_applied": "Joks nustatymas nepakeistas: pasirinkti pasiūlymai nebegalioja",
+    "suggestions_changed": "Pasiūlymai pasikeitė po to, kai juos peržiūrėjote. Niekas neišsaugota; patikrinkite juos ir pritaikykite dar kartą.",
     "suggestions_dismissed": "Pasiūlymai atmesti",
     "apply_failed": "Nepavyko pritaikyti: {error}",
     "delete_failed": "Nepavyko ištrinti: {error}",
@@ -1978,6 +1987,7 @@
     },
     "reason": {
       "completion_min_seconds": "Pusė p05 švarių ciklų trukmės ({minutes} min) iš {cycles} ciklų; atfiltruoja netikrus ciklus.{excl}",
+      "completion_min_seconds_capped": "Apribota iki {cap}, kad būtų įskaitomos ir trumpiausios programos; pusė p05 švarių ciklų trukmės ({minutes} min, ciklų: {cycles}) būtų ilgesnė.{excl}",
       "match_interval": "Pagrįsta stebimu atnaujinimo dažniu (mediana={median}s) * 10.",
       "match_interval_capped": "Apribota taip, kad {persistence} iš eilės einančios atitiktys tilptų į {pct}% trumpiausios programos ({shortest}s); vien atnaujinimo dažnis (mediana={median}s) būtų pasiūlęs ilgesnį intervalą.",
       "match_interval_floored": "Trumpiausia programa ({shortest}s) apribotų šią reikšmę iki {cap}s, o tai mažiau nei {minimum}s minimumas, todėl naudojamas minimumas: {persistence} atitiktys iš eilės užtrunka {budget}s, daugiau nei {pct}% tos programos. Atitikimas vykdomas tik gavus rodmenį (mediana={median}s), todėl tai nieko nekainuoja.",
@@ -1986,7 +1996,6 @@
       "min_off_gap_bridge": "Nustatyta taip, kad perdengtų ilgiausią tylos tarpsnį ciklo viduje: {span}s + 60s buferis, iš {spans} perdengtų tarpų per {cycles} švarius ciklus (lieka žemiau trumpiausio jūsų tarpo tarp dviejų paleidimų iš eilės, kuris yra {ceiling}s).",
       "min_power": "40% p05 mažiausios aktyvios galios ({p05}W) per {cycles} švarius ciklus, išlaikant išjungimo slenkstį žemiau realaus suvartojimo.{excl}",
       "no_update_timeout": "Pagrįsta stebimu atnaujinimo dažniu (p95={p95}s) * 20 (min. 60s).",
-      "off_delay_cadence": "Pagrįsta stebimu atnaujinimo dažniu (p95={p95}s) * 5",
       "off_delay_device_floor": "Naudotas prietaisui {device} būdingas saugus minimumas ({floor}s).",
       "off_delay_generic_floor": "Naudotas bendrinis saugus minimumas ({floor}s).",
       "off_delay_pauses": "Nustatyta taip, kad viršytų realias pauzes: p95 ciklo vidinė pauzė {p95}s + 60s buferis, iš {pauses} pauzių per {cycles} švarius ciklus (apatinė riba {floor}s).",
@@ -1995,7 +2004,8 @@
       "watchdog": "Paliktas kuo mažesnis, kiek saugu (vos didesnis nei p95 atnaujinimo tarpas {p95}s ir bent 2x mėginių ėmimo intervalas {median}s, min. 30s), kad strigtys būtų aptiktos greitai be klaidingų sustabdymų.",
       "end_energy_floor": "Padidinta iki minimumo, kurį lemia sustabdymo slenkstis ({stop} W) per išjungimo delsimą ({off_delay} s); žemiau jo ciklas gali baigtis tik atsarginiu būdu.",
       "max_duration_ratio_default": "Grąžinta numatytoji reikšmė: žemesnė viršutinė riba atmeta teisingą programą kiekvieną kartą, kai ciklas trunka ilgiau nei įprastai.",
-      "min_duration_ratio_default": "Grąžinta numatytoji reikšmė: aukštesnė apatinė riba neleidžia atpažinti vykstančio ciklo, kol jis gerokai neįsibėgėja."
+      "min_duration_ratio_default": "Grąžinta numatytoji reikšmė: aukštesnė apatinė riba neleidžia atpažinti vykstančio ciklo, kol jis gerokai neįsibėgėja.",
+      "start_above_running": "Įprasta žema šio prietaiso veikimo galia yra {low} W, bet paleidimo slenkstis yra {start} W, todėl tokiu lygiu veikiantis ciklas niekada neprasideda. Paleidimo slenkstis nustatomas ties puse šio lygio, sustabdymo slenkstis žemiau jo."
     },
     "exclusions": {
       "summary": "Neįtraukta {total} klaidingai aptiktų ciklų: {parts}.",
@@ -2271,6 +2281,9 @@
     },
     "cycle_overrun": {
       "name": "Ciklas trunka per ilgai"
+    },
+    "program_mismatch": {
+      "name": "Veikianti programa skiriasi nuo pasirinktos"
     },
     "cycle_paused": {
       "name": "Ciklas pristabdytas"
