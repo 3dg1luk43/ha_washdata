@@ -13,6 +13,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 - New Total Cost sensor, with long-term statistics.
 - A Stop Threshold below Min Power can be saved, and an emptied Start or Stop Threshold goes back to its default.
+- An unrecognised dishwasher run no longer splits in a drying pause longer than 30 min.
 
 ### Features
 
@@ -20,6 +21,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 ### Fixes
 
+- **An unrecognised dishwasher run could split in its drying**: with no program recognised, a drain or rinse that came back after the run had started ending capped the final wait at 30 min, whatever Min Off Gap was set to, so a longer drying pause started a new cycle. The cap now needs the last activity to look like the final pump-out (a low-power event after at least 10 min of quiet). On the recorded histories one end moved: an unrecognised Quick wash now ends 3 min later.
 - **A Stop Threshold below Min Power could not be saved, and a threshold could not be cleared** ([#535](https://github.com/3dg1luk43/ha_washdata/issues/535)): Settings flagged a Stop Threshold under Min Power as a conflict and held it back, although an unset Stop Threshold is 60% of Min Power and Min Power is not read by detection once both thresholds are set. The check is gone. An emptied Start or Stop Threshold was ignored on save; it is now saved as unset, so the threshold follows Min Power again. Thanks to @soeffi.
 
 ## 0.6.1 - 2026-11-21
