@@ -464,14 +464,17 @@ def test_dishwasher_unmatched_end_spike_caps_off_delay_at_1800s(mock_callbacks):
         f"Expected ENDING after 15 low readings, got {detector.state}"
     )
 
-    # Accumulate ≥ 120 s in ENDING to satisfy long_ending_tail.
-    for _ in range(4):
+    # Accumulate ≥ 120 s in ENDING to satisfy long_ending_tail, and the
+    # TERMINAL_BLIP_QUIET_MIN_S (600 s) of quiet a pump-out follows (item 701).
+    for _ in range(6):
         detector.process_reading(LOW, dt(t))
         t += 30
 
     # Pump-out spike: high reading → _end_spike_seen = True.
     # long_ending_tail is True, so the spike is terminal - stays in ENDING.
-    detector.process_reading(50.0, dt(t))
+    # A fraction of the run's peak, as a pump-out is (item 701: 50 W of a 100 W
+    # run reads as the wash resuming, which no longer caps the wait).
+    detector.process_reading(20.0, dt(t))
     t += 30
     assert detector._end_spike_seen, "Pump-out spike should set _end_spike_seen"
     assert detector.state == STATE_ENDING, "Should remain in ENDING after terminal spike"

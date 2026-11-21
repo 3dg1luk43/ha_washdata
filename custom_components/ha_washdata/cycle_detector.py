@@ -205,6 +205,7 @@ from .signal_processing import (
     integrate_wh,
     median_fast,
     percentile_linear,
+    quiet_run_before,
     TERMINAL_QUIET_SEEN_FRAC,
     terminal_event_end,
     terminal_event_measure,
@@ -1095,6 +1096,8 @@ class CycleDetector:
         # `_terminal_event_so_far`'s memo (#518): (cycle start, gate spans, readings
         # checked, the last of them, the event threshold, the result).
         self._terminal_event_memo: tuple[Any, int, int, datetime, float, Any] | None = None
+        # `_unmatched_end_spike_terminal`'s memo (item 701): ((start, last active), result).
+        self._unmatched_spike_memo: tuple[tuple[Any, Any], bool] | None = None
         # One-shot per cycle, so the held-finalise reason is visible in the log
         # without repeating it on every reading.
         self._anticrease_spin_wait_logged: bool = False
@@ -4636,10 +4639,12 @@ class CycleDetector:
                 # unmatched cycle doesn't need to wait the full min_off_gap (up to
                 # 9000s) before closing. Cap at 30 min so cycle 3 ends cleanly
                 # ~30 min after the pump-out rather than sitting open for hours.
+                # Only while the last activity looks like that pump-out (item 701).
                 if (
                     self._config.device_type == "dishwasher"
                     and not self._matched_profile
                     and self._end_spike_seen
+                    and self._unmatched_end_spike_terminal()
                 ):
                     effective_off_delay = min(effective_off_delay, 1800)
                     gate_window = effective_off_delay
@@ -5295,6 +5300,49 @@ class CycleDetector:
             and at >= expected * DISHWASHER_END_SPIKE_MIN_PROGRESS
             and at <= self._gate_elapsed_s(timestamp) - STANDBY_BAND_WINDOW_S
         )
+
+    def _unmatched_end_spike_terminal(self) -> bool:
+        """May an unmatched dishwasher's end spike cap the fallback wait? (item 701)
+
+        Unmatched, every ENDING reading over the end-spike floor arms the spike
+        once ENDING is 120 s old, a drain a few minutes after the last rinse too,
+        and the 30 min cap then split a longer drying quiet that ``min_off_gap``
+        was set to bridge. The cap now also needs the run's last activity to look
+        like the pump-out: a low-power event, not main activity, after
+        ``TERMINAL_BLIP_QUIET_MIN_S`` or more of quiet (the drying it ends).
+        Asked at the terminal signature's level (:meth:`_terminal_event_so_far`)
+        and at the Stop Threshold, either answering yes, as
+        ``terminal_quiet_seen`` asks (#424): a pump-out that dips under the
+        signature's level mid-run reads as main activity there. A resume that
+        heats or a drain shortly after the wash keeps the full wait.
+        Lengthen-only.
+        """
+        found = self._terminal_event_so_far()
+        if found is not None and found[0] >= TERMINAL_BLIP_QUIET_MIN_S:
+            return True
+        start, last = self._current_cycle_start, self._last_active_time
+        if start is None or last is None:
+            return False
+        # A reading under the Stop Threshold cannot change the answer.
+        memo = self._unmatched_spike_memo
+        if memo is not None and memo[0] == (start, last):
+            return memo[1]
+        stop = float(self._config.stop_threshold_w)
+        pts = [
+            ((ts - start).total_seconds(), float(p))
+            for ts, p in self._power_readings
+            if ts <= last
+        ]
+        i = len(pts) - 1
+        while i > 0 and pts[i - 1][1] > stop:
+            i -= 1
+        result = bool(pts) and (
+            max(p for _o, p in pts[i:])
+            <= TERMINAL_EVENT_MAX_PEAK_FRAC * float(self._cycle_max_power)
+            and quiet_run_before(pts, pts[-1][0], stop) >= TERMINAL_BLIP_QUIET_MIN_S
+        )
+        self._unmatched_spike_memo = ((start, last), result)
+        return result
 
     def _terminal_event_so_far(self) -> tuple[float, float] | None:
         """``(quiet before, programme-time offset of its end)`` of this run's
