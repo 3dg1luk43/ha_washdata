@@ -1334,6 +1334,9 @@
       "doc": "Behandl, at sensoren slukker (ikke tænder), som slutsignalet.",
       "label": "Inverter ekstern udløser (udløs ved SLUK)"
     },
+    "interrupted_min_seconds": {
+      "label": "Minimum varighed (Afbrudt)"
+    },
     "learning_confidence": {
       "doc": "Laveste matchscore for at mærke en færdig cyklus. En klar vinder mærkes; et tæt løb går til gennemgangskøen under Cykler. Under denne værdi mærkes eller spørges der ikke. Hold den under Auto-mærkning konfidens.",
       "label": "Læringskonfidens"

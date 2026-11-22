@@ -1279,6 +1279,9 @@
       "doc": "Considerați trecerea senzorului pe OPRIT (nu pe PORNIT) drept semnal de final.",
       "label": "Inversați Declanșatorul Extern (declanșare la OPRIT)"
     },
+    "interrupted_min_seconds": {
+      "label": "Durata Minimă (Întrerupt)"
+    },
     "learning_confidence": {
       "doc": "Scorul minim de potrivire pentru a eticheta un ciclu încheiat. Un câștigător clar este etichetat; un caz strâns ajunge în coada de revizuire din Cicluri. Sub acest prag nu se etichetează și nu se întreabă nimic. Păstrați-l sub Încredere Etichetare Automată.",
       "label": "Încredere Învățare"

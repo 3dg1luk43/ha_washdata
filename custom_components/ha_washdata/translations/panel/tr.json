@@ -1322,6 +1322,9 @@
             "doc": "Sensörün AÇIK yerine KAPALI duruma geçmesini bitiş sinyali sayın.",
             "label": "Harici Tetikleyiciyi Tersine Çevir (KAPALI'da tetikle)"
         },
+        "interrupted_min_seconds": {
+            "label": "Min. Süre (Kesintiye uğradı)"
+        },
         "learning_confidence": {
             "doc": "Biten bir döngüyü etiketlemek için en düşük eşleşme puanı. Açık bir kazanan etiketlenir; kıl payı durumlar Döngüler'deki inceleme kuyruğuna gider. Bunun altında hiçbir şey etiketlenmez veya sorulmaz. Otomatik Etiket Güveni'nin altında tutun.",
             "label": "Öğrenme Güveni"

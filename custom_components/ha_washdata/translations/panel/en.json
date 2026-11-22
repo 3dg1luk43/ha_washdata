@@ -1357,6 +1357,9 @@
       "doc": "Treat the sensor turning OFF (not ON) as the end signal.",
       "label": "Invert External Trigger (trigger on OFF)"
     },
+    "interrupted_min_seconds": {
+      "label": "Interrupted Min"
+    },
     "learning_confidence": {
       "doc": "Lowest match score for labelling a finished cycle. A clear winner is labelled; a close call goes to the review queue in Cycles. Below this, nothing is labelled or asked. Keep it below Auto-Label Confidence.",
       "label": "Learning Confidence"

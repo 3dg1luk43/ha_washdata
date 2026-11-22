@@ -1333,6 +1333,9 @@
       "doc": "Smatrajte ISKLJUČIVANJE senzora (a ne uključivanje) signalom kraja.",
       "label": "Invertuj spoljni okidač (okidaj na ISKLJUČENO)"
     },
+    "interrupted_min_seconds": {
+      "label": "Min. trajanje (Prekinuto)"
+    },
     "learning_confidence": {
       "doc": "Najniži rezultat podudaranja za označavanje završenog ciklusa. Jasan pobednik se označava; tesan rezultat ide u red za pregled u Ciklusima. Ispod ove vrednosti ništa se ne označava niti pita. Držite je ispod Pouzdanosti automatskog označavanja.",
       "label": "Pouzdanost učenja"

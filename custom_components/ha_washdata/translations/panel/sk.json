@@ -1347,6 +1347,9 @@
       "doc": "Brať VYPNUTIE senzora (nie zapnutie) ako signál konca.",
       "label": "Invertovať externý spúšť (spustiť pri VYPNUTÍ)"
     },
+    "interrupted_min_seconds": {
+      "label": "Min. trvanie (Prerušený)"
+    },
     "learning_confidence": {
       "doc": "Najnižšie skóre zhody na označenie dokončeného cyklu. Jasný víťaz sa označí; tesný výsledok ide do frontu kontroly v Cykloch. Pod touto hodnotou sa nič neoznačí ani sa nepýta. Držte ju pod Spoľahlivosťou autooznačovania.",
       "label": "Spoľahlivosť učenia"

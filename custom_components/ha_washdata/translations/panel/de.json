@@ -1330,6 +1330,9 @@
       "doc": "Das Ausschalten (statt Einschalten) des Sensors als Endsignal werten.",
       "label": "Externen Auslöser umkehren (bei AUS auslösen)"
     },
+    "interrupted_min_seconds": {
+      "label": "Mindestdauer (Unterbrochen)"
+    },
     "learning_confidence": {
       "doc": "Niedrigster Übereinstimmungswert, um einen abgeschlossenen Zyklus zu beschriften. Ein klarer Sieger wird beschriftet; ein knapper Fall kommt in die Bewertungswarteschlange unter Zyklen. Darunter wird nichts beschriftet oder nachgefragt. Unter der Automatischen Beschriftungskonfidenz halten.",
       "label": "Lernkonfidenz"

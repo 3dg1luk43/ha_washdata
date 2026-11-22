@@ -1334,6 +1334,9 @@
       "doc": "Behandle at sensoren slår seg AV (ikke PÅ) som sluttsignalet.",
       "label": "Inverter ekstern utløser (utløs ved AV)"
     },
+    "interrupted_min_seconds": {
+      "label": "Min. varighet (Avbrutt)"
+    },
     "learning_confidence": {
       "doc": "Laveste matchpoeng for å merke en ferdig syklus. En klar vinner merkes; et jevnt tilfelle går til vurderingskøen under Sykluser. Under dette merkes eller spørres ingenting. Hold den under Auto-merking konfidensgrad.",
       "label": "Lærings-konfidensgrad"

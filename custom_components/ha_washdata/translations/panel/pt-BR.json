@@ -1279,6 +1279,9 @@
       "doc": "Tratar a passagem do sensor para desligado (e não para ligado) como sinal de fim.",
       "label": "Inverter Gatilho Externo (acionar em DESLIGADO)"
     },
+    "interrupted_min_seconds": {
+      "label": "Duração Mínima (Interrompido)"
+    },
     "learning_confidence": {
       "doc": "Pontuação de correspondência mínima para rotular um ciclo concluído. Um vencedor claro é rotulado; um caso apertado vai para a fila de revisão em Ciclos. Abaixo disso, nada é rotulado nem perguntado. Mantenha abaixo da Confiança de Rotulagem Automática.",
       "label": "Confiança de Aprendizado"

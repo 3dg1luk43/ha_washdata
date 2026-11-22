@@ -1351,6 +1351,9 @@
       "doc": "IZKLOP senzorja (ne vklop) obravnavajte kot signal konca.",
       "label": "Obrni zunanji sprožilec (sproži ob IZKLOP)"
     },
+    "interrupted_min_seconds": {
+      "label": "Min. trajanje (Prekinjeno)"
+    },
     "learning_confidence": {
       "doc": "Najnižja ocena ujemanja za označitev končanega cikla. Jasen zmagovalec se označi; tesen izid gre v čakalno vrsto za pregled v Ciklih. Pod to vrednostjo se nič ne označi in nič ne vpraša. Držite jo pod Zaupanjem samodejnega označevanja.",
       "label": "Zaupanje učenja"

@@ -1298,6 +1298,9 @@
       "doc": "Considérer le passage du capteur à OFF (et non à ON) comme signal de fin.",
       "label": "Inverser le déclencheur externe (déclencher sur ARRÊT)"
     },
+    "interrupted_min_seconds": {
+      "label": "Durée minimale (Interrompu)"
+    },
     "learning_confidence": {
       "doc": "Score de correspondance minimal pour étiqueter un cycle terminé. Un gagnant net est étiqueté ; un cas serré va dans la file de vérification de Cycles. En dessous, rien n'est étiqueté ni demandé. Gardez-le sous la Confiance d'étiquetage automatique.",
       "label": "Confiance d'apprentissage"

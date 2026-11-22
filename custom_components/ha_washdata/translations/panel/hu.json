@@ -1307,6 +1307,9 @@
             "doc": "Az érzékelő KI állapotba váltása (nem a BE) jelzi a ciklus végét.",
             "label": "Külső trigger invertálása (trigger KI-re)"
         },
+        "interrupted_min_seconds": {
+            "label": "Min. időtartam (Megszakított)"
+        },
         "learning_confidence": {
             "doc": "A legkisebb egyezési pontszám egy befejezett ciklus megjelöléséhez. Egyértelmű győztest megjelöl; szoros eredménynél a ciklus a Ciklusok lap felülvizsgálati sorába kerül. Ez alatt semmit nem jelöl meg és nem kérdez. Tartsa az Automatikus jelölési megbízhatóság alatt.",
             "label": "Tanulási megbízhatóság"

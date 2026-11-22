@@ -1306,6 +1306,9 @@
             "doc": "Trajtojeni kalimin e sensorit në OFF (jo ON) si sinjal përfundimi.",
             "label": "Invertoj aktivizuesin e jashtëm (aktivizoj kur FIKUR)"
         },
+        "interrupted_min_seconds": {
+            "label": "Kohëzgjatja min. (I ndërprerë)"
+        },
         "learning_confidence": {
             "doc": "Rezultati më i ulët i përputhjes për të etiketuar një cikël të përfunduar. Një fitues i qartë etiketohet; një rast i ngushtë shkon në radhën e rishikimit te Cikle. Nën këtë vlerë nuk etiketohet dhe nuk pyetet asgjë. Mbajeni më të ulët se Besueshmëria e etiketimit automatik.",
             "label": "Besueshmëria e të mësuarit"

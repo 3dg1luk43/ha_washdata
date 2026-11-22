@@ -1334,6 +1334,9 @@
       "doc": "Líttu á það þegar skynjarinn fer í SLÖKKT (ekki KVEIKT) sem lokamerkið.",
       "label": "Snúa ytri kveikin (kvikna á SLÖKKT)"
     },
+    "interrupted_min_seconds": {
+      "label": "Lágm. lengd (Truflað)"
+    },
     "learning_confidence": {
       "doc": "Lægsta samsvörunarskor til að merkja lotu sem er lokið. Skýr sigurvegari er merktur; tvísýnt tilvik fer í yfirferðarbiðröðina í Lotum. Fyrir neðan þetta er ekkert merkt eða spurt. Hafðu það undir Sjálfvirku merkingaöryggi.",
       "label": "Námsöryggi"

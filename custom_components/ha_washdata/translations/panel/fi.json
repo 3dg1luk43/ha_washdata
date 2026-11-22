@@ -1334,6 +1334,9 @@
       "doc": "Käsittele anturin kytkeytymistä POIS (ei PÄÄLLE) päättymissignaalina.",
       "label": "Käännä ulkoinen signaali (laukaise POIS)"
     },
+    "interrupted_min_seconds": {
+      "label": "Vähimmäiskesto (Keskeytetty)"
+    },
     "learning_confidence": {
       "doc": "Pienin täsmäytyspistemäärä valmiin syklin merkitsemiseen. Selvä voittaja merkitään; tiukka tapaus menee Syklit-välilehden tarkistusjonoon. Tämän alapuolella mitään ei merkitä eikä kysytä. Pidä se pienempänä kuin Automaattimerkinnän varmuus.",
       "label": "Oppimisen varmuus"

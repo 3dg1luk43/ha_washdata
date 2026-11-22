@@ -1298,6 +1298,9 @@
       "doc": "Tomar como señal de fin el paso del sensor a apagado (no a encendido).",
       "label": "Invertir disparador externo (disparar en APAGADO)"
     },
+    "interrupted_min_seconds": {
+      "label": "Duración mínima (interrumpido)"
+    },
     "learning_confidence": {
       "doc": "Puntuación de coincidencia mínima para etiquetar un ciclo terminado. Un ganador claro se etiqueta; un caso dudoso va a la cola de revisión de Ciclos. Por debajo, no se etiqueta ni se pregunta nada. Manténgala por debajo de la Confianza de etiquetado automático.",
       "label": "Confianza de aprendizaje"

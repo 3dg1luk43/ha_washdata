@@ -1333,6 +1333,9 @@
       "doc": "Uzskatīt sensora pāreju uz IZSLĒGTS (nevis IESLĒGTS) par beigu signālu.",
       "label": "Invertēt ārējo aktivatoru (aktivēt pie IZSLĒGTS)"
     },
+    "interrupted_min_seconds": {
+      "label": "Min. ilgums (Pārtrauca)"
+    },
     "learning_confidence": {
       "doc": "Zemākais atbilstības rezultāts pabeigta cikla marķēšanai. Skaidrs uzvarētājs tiek marķēts; ja rezultāti ir tuvi, cikls nonāk pārskatīšanas rindā sadaļā Cikli. Zem šīs vērtības nekas netiek marķēts un nekas netiek jautāts. Turiet to zem Automātiskās marķēšanas pārliecības.",
       "label": "Mācīšanās pārliecība"
