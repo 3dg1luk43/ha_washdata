@@ -1330,6 +1330,9 @@
       "doc": "Behandla att sensorn slås AV (inte PÅ) som slutsignalen.",
       "label": "Invertera extern utlösare (utlös vid AV)"
     },
+    "interrupted_min_seconds": {
+      "label": "Min. varaktighet (Avbruten)"
+    },
     "learning_confidence": {
       "doc": "Lägsta matchningspoäng för att märka en avslutad cykel. En klar vinnare märks; ett jämnt fall hamnar i granskningskön under Cykler. Under detta märks eller frågas ingenting. Håll den under Automärkningskonfidens.",
       "label": "Inlärningskonfidens"

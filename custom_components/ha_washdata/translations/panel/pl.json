@@ -1343,6 +1343,9 @@
       "doc": "Traktuj wyłączenie czujnika (a nie włączenie) jako sygnał końca.",
       "label": "Odwróć Zewnętrzny Wyzwalacz (wyzwalaj przy WYŁ)"
     },
+    "interrupted_min_seconds": {
+      "label": "Minimalny Czas Trwania (Przerwano)"
+    },
     "learning_confidence": {
       "doc": "Najniższy wynik dopasowania, przy którym zakończony cykl dostaje etykietę. Wyraźny zwycięzca jest etykietowany; wynik na styk trafia do kolejki przeglądu w Cyklach. Poniżej tej wartości nic nie jest etykietowane ani nie ma pytania. Utrzymuj poniżej Pewności Automatycznego Etykietowania.",
       "label": "Pewność Uczenia"

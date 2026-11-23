@@ -1330,6 +1330,9 @@
       "doc": "Gebruik het UIT gaan (niet AAN) van de sensor als eindsignaal.",
       "label": "Externe trigger omkeren (activeer bij UIT)"
     },
+    "interrupted_min_seconds": {
+      "label": "Min. duur (Onderbroken)"
+    },
     "learning_confidence": {
       "doc": "Laagste matchscore om een voltooide cyclus te labelen. Een duidelijke winnaar wordt gelabeld; een nipte uitslag gaat naar de beoordelingswachtrij in Cycli. Daaronder wordt niets gelabeld of gevraagd. Houd het onder Auto-label betrouwbaarheid.",
       "label": "Leerbetrouwbaarheid"

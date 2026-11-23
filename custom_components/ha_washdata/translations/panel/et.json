@@ -1330,6 +1330,9 @@
       "doc": "Käsitlege anduri VÄLJA lülitumist (mitte SISSE) lõpu signaalina.",
       "label": "Pööra Väline Päästik (käivita VÄLJAS)"
     },
+    "interrupted_min_seconds": {
+      "label": "Min Kestus (Katkestatud)"
+    },
     "learning_confidence": {
       "doc": "Väikseim vasteskoor lõppenud tsükli sildistamiseks. Selge võitja saab sildi; napp tulemus läheb vahekaardi Tsüklid ülevaatusjärjekorda. Sellest allpool ei sildistata ega küsita midagi. Hoidke see väiksem kui Automaatse Sildi Usaldus.",
       "label": "Õppimise Usaldus"

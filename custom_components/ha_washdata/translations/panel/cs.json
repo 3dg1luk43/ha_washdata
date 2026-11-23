@@ -1343,6 +1343,9 @@
       "doc": "Brát VYPNUTÍ senzoru (ne zapnutí) jako signál konce.",
       "label": "Invertovat vnější spouštěč (spustit při VYP)"
     },
+    "interrupted_min_seconds": {
+      "label": "Min. délka (Přerušeno)"
+    },
     "learning_confidence": {
       "doc": "Nejnižší skóre shody pro označení dokončeného cyklu. Jasný vítěz se označí; těsný výsledek jde do fronty kontroly v Cyklech. Pod touto hodnotou se nic neoznačí ani se neptá. Držte ji pod Důvěrou auto-označení.",
       "label": "Důvěra učení"

@@ -1347,6 +1347,9 @@
       "doc": "Pabaigos signalu laikyti jutiklio išsijungimą, o ne įsijungimą.",
       "label": "Invertuoti išorinį trigerį (OFF)"
     },
+    "interrupted_min_seconds": {
+      "label": "Min. trukmė (Pertraukė)"
+    },
     "learning_confidence": {
       "doc": "Mažiausias atitikties balas baigtam ciklui pažymėti. Aiškus nugalėtojas pažymimas; jei rezultatai artimi, ciklas patenka į peržiūros eilę skiltyje Ciklai. Žemiau šios reikšmės niekas nežymima ir neklausiama. Laikykite ją mažesnę už Automatinio žymėjimo pasitikėjimą.",
       "label": "Mokymosi pasitikėjimas"

@@ -1294,6 +1294,9 @@
       "doc": "Considera come segnale di fine il passaggio del sensore a OFF (non a ON).",
       "label": "Inverti trigger esterno (attiva su SPENTO)"
     },
+    "interrupted_min_seconds": {
+      "label": "Durata minima (Interrotto)"
+    },
     "learning_confidence": {
       "doc": "Punteggio di corrispondenza minimo per etichettare un ciclo terminato. Un vincitore netto viene etichettato; un caso incerto va nella coda di revisione in Cicli. Sotto questo valore non si etichetta né si chiede nulla. Tienilo sotto la Confidenza etichettatura automatica.",
       "label": "Confidenza apprendimento"
