@@ -1110,7 +1110,13 @@
         "review_q_started": "开始于 {when}",
         "review_q_more": "还有 {count} 个待审查",
         "review_q_more_other": "还有 {count} 个待审查",
-        "review_which_program": "是哪个程序？"
+        "review_which_program": "是哪个程序？",
+        "trim_extend_hint": "灰色：周期结束后 Home Assistant 记录的数据。将结束点拖入其中，即可将其加入周期。",
+        "trim_extend_note": "结束点超出已记录的周期：将加入 Home Assistant 记录到该点为止的读数。",
+        "extend_no_history": "Home Assistant 没有此插座在周期结束后的读数。",
+        "extend_overlaps": "结束点不能移到下一个周期的开始之后。",
+        "extend_too_far": "结束点最多可移到已记录周期之后 4 小时。",
+        "extend_not_live": "只能延长由此设备记录的周期。"
     },
     "pg_desc": {
         "completion_min_seconds": "计为真实周期的最短运行时间",
@@ -1893,7 +1899,8 @@
         "copied": "已复制",
         "copy_failed": "复制失败。请选择文本并手动复制。",
         "automation_label_failed": "自动化已创建，但无法添加 WashData 标签或类别。",
-        "review_answered": "已保存：{program}"
+        "review_answered": "已保存：{program}",
+        "cycle_extended": "周期结束点已移动；已加入记录的读数"
     },
     "suggestion": {
         "observed_label": "观测值",

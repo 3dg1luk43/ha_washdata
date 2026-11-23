@@ -1146,7 +1146,13 @@
     "review_q_more_zero": "Vēl {count} cikli pārskatīšanai",
     "review_q_more_one": "Vēl {count} cikls pārskatīšanai",
     "review_q_more_other": "Vēl {count} cikli pārskatīšanai",
-    "review_which_program": "Kura programma tā bija?"
+    "review_which_program": "Kura programma tā bija?",
+    "trim_extend_hint": "Pelēkā krāsā: tas, ko Home Assistant ierakstīja pēc cikla. Velciet beigas pelēkajā daļā, lai to pievienotu ciklam.",
+    "trim_extend_note": "Beigas ir aiz ierakstītā cikla: tiek pievienoti rādījumi, ko Home Assistant ierakstīja līdz tām.",
+    "extend_no_history": "Home Assistant nav ierakstījis šī spraudņa rādījumus pēc cikla.",
+    "extend_overlaps": "Beigas nevar pārvietot aiz nākamā cikla sākuma.",
+    "extend_too_far": "Beigas var pārvietot ne vairāk kā 4 h aiz ierakstītā cikla.",
+    "extend_not_live": "Pagarināt var tikai ciklu, ko ierakstījusi šī ierīce."
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas trumulis īsi griežas, lai samazinātu grumbiņas.",
@@ -1914,7 +1920,8 @@
     "copied": "Nokopēts",
     "copy_failed": "Kopēšana neizdevās. Atlasiet tekstu un kopējiet to manuāli.",
     "automation_label_failed": "Automatizācija izveidota, bet WashData etiķeti vai kategoriju nevarēja pievienot.",
-    "review_answered": "Saglabāts: {program}"
+    "review_answered": "Saglabāts: {program}",
+    "cycle_extended": "Cikla beigas pārvietotas; ierakstītie rādījumi pievienoti"
   },
   "suggestion": {
     "observed_label": "Novērotais",

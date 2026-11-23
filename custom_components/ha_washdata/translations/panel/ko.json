@@ -1110,7 +1110,13 @@
         "review_q_started": "시작: {when}",
         "review_q_more": "{count}개 더 검토 대기 중",
         "review_q_more_other": "{count}개 더 검토 대기 중",
-        "review_which_program": "어떤 프로그램이었나요?"
+        "review_which_program": "어떤 프로그램이었나요?",
+        "trim_extend_hint": "회색: 사이클 이후 Home Assistant가 기록한 내용입니다. 끝 지점을 이 영역으로 드래그하면 사이클에 추가됩니다.",
+        "trim_extend_note": "끝 지점이 기록된 사이클 이후에 있습니다. 그 지점까지 Home Assistant가 기록한 측정값이 추가됩니다.",
+        "extend_no_history": "사이클 이후 이 플러그의 측정값이 Home Assistant에 없습니다.",
+        "extend_overlaps": "끝 지점은 다음 사이클의 시작 이후로 이동할 수 없습니다.",
+        "extend_too_far": "끝 지점은 기록된 사이클 이후 최대 4시간까지 이동할 수 있습니다.",
+        "extend_not_live": "이 기기가 기록한 사이클만 연장할 수 있습니다."
     },
     "pg_desc": {
         "completion_min_seconds": "실제 사이클로 인정되는 최단 실행",
@@ -1893,7 +1899,8 @@
         "copied": "복사됨",
         "copy_failed": "복사 실패. 텍스트를 선택하여 수동으로 복사하세요.",
         "automation_label_failed": "자동화가 생성되었지만 WashData 라벨 또는 카테고리를 추가할 수 없었습니다.",
-        "review_answered": "저장됨: {program}"
+        "review_answered": "저장됨: {program}",
+        "cycle_extended": "사이클 끝 지점을 이동하고 기록된 측정값을 추가했습니다"
     },
     "suggestion": {
         "observed_label": "관측값",

@@ -1128,7 +1128,13 @@
     "review_q_more": "{count} til å vurdere",
     "review_q_more_one": "{count} til å vurdere",
     "review_q_more_other": "{count} til å vurdere",
-    "review_which_program": "Hvilket program var det?"
+    "review_which_program": "Hvilket program var det?",
+    "trim_extend_hint": "Grå: det Home Assistant har registrert etter syklusen. Dra slutten inn i det for å legge det til syklusen.",
+    "trim_extend_note": "Slutten ligger etter den registrerte syklusen: målingene Home Assistant har registrert frem dit, legges til.",
+    "extend_no_history": "Home Assistant har ingen målinger fra denne pluggen etter syklusen.",
+    "extend_overlaps": "Slutten kan ikke flyttes forbi starten av neste syklus.",
+    "extend_too_far": "Slutten kan flyttes høyst 4 t forbi den registrerte syklusen.",
+    "extend_not_live": "Bare en syklus denne enheten har registrert, kan forlenges."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Oppvaskmaskin: sekunder under Stoppterskel siden siste aktivitet som trengs for å avslutte ventingen på siste tømming etter forventet varighet",
@@ -2002,7 +2008,8 @@
     "copied": "Kopiert",
     "copy_failed": "Kopiering mislyktes. Velg teksten og kopier manuelt.",
     "automation_label_failed": "Automatisering opprettet, men WashData-etiketten eller kategorien kunne ikke legges til.",
-    "review_answered": "Lagret: {program}"
+    "review_answered": "Lagret: {program}",
+    "cycle_extended": "Slutten av syklusen er flyttet; de registrerte målingene ble lagt til"
   },
   "trend": {
     "down": "Trender nedover",

@@ -1092,7 +1092,13 @@
     "review_q_more_one": "Mais {count} para revisar",
     "review_q_more_many": "Mais {count} para revisar",
     "review_q_more_other": "Mais {count} para revisar",
-    "review_which_program": "Qual foi o programa?"
+    "review_which_program": "Qual foi o programa?",
+    "trim_extend_hint": "Cinza: o que o Home Assistant registrou após o ciclo. Arraste o fim até lá para adicioná-lo ao ciclo.",
+    "trim_extend_note": "O fim está além do ciclo registrado: as leituras que o Home Assistant registrou até esse ponto são adicionadas.",
+    "extend_no_history": "O Home Assistant não tem leituras deste plugue após o ciclo.",
+    "extend_overlaps": "O fim não pode passar do início do próximo ciclo.",
+    "extend_too_far": "O fim pode avançar no máximo 4 h além do ciclo registrado.",
+    "extend_not_live": "Só é possível estender um ciclo registrado por este dispositivo."
   },
   "phase_desc": {
     "anti_crease": "Giros curtos ocasionais após a conclusão para reduzir amassados.",
@@ -1860,7 +1866,8 @@
     "copied": "Copiado",
     "copy_failed": "Falha ao copiar. Selecione o texto e copie-o manualmente.",
     "automation_label_failed": "Automação criada, mas o rótulo ou categoria WashData não pôde ser adicionado.",
-    "review_answered": "Salvo: {program}"
+    "review_answered": "Salvo: {program}",
+    "cycle_extended": "Fim do ciclo movido; as leituras registradas foram adicionadas"
   },
   "suggestion": {
     "observed_label": "Observado",

@@ -1164,7 +1164,13 @@
     "review_q_more_few": "Ještě {count} cykly ke kontrole",
     "review_q_more_many": "Ještě {count} cyklu ke kontrole",
     "review_q_more_other": "Ještě {count} cyklů ke kontrole",
-    "review_which_program": "Který program to byl?"
+    "review_which_program": "Který program to byl?",
+    "trim_extend_hint": "Šedě: co Home Assistant zaznamenal po cyklu. Přetáhněte konec do této oblasti a přidáte ji k cyklu.",
+    "trim_extend_note": "Konec je za zaznamenaným cyklem: přidají se odečty, které Home Assistant zaznamenal až k němu.",
+    "extend_no_history": "Home Assistant nemá po cyklu žádné odečty z této zásuvky.",
+    "extend_overlaps": "Konec nelze posunout za začátek dalšího cyklu.",
+    "extend_too_far": "Konec lze posunout nejvýše 4 h za zaznamenaný cyklus.",
+    "extend_not_live": "Prodloužit lze jen cyklus, který zaznamenalo toto zařízení."
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
@@ -2023,7 +2029,8 @@
     "copied": "Zkopírováno",
     "copy_failed": "Kopírování se nezdařilo. Vyberte text a zkopírujte ho ručně.",
     "automation_label_failed": "Automatizace vytvořena, ale štítek nebo kategorie WashData nemohly být přidány.",
-    "review_answered": "Uloženo: {program}"
+    "review_answered": "Uloženo: {program}",
+    "cycle_extended": "Konec cyklu posunut; zaznamenané odečty byly přidány"
   },
   "trend": {
     "down": "Klesající trend",

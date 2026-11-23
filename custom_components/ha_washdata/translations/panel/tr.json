@@ -1128,7 +1128,13 @@
         "review_q_more": "{count} tane daha incelenecek",
         "review_q_more_one": "{count} tane daha incelenecek",
         "review_q_more_other": "{count} tane daha incelenecek",
-        "review_which_program": "Hangi programdı?"
+        "review_which_program": "Hangi programdı?",
+        "trim_extend_hint": "Gri: Home Assistant'ın döngüden sonra kaydettikleri. Bunları döngüye eklemek için bitişi bu alana sürükleyin.",
+        "trim_extend_note": "Bitiş, kaydedilen döngünün ötesinde: Home Assistant'ın o noktaya kadar kaydettiği okumalar eklenir.",
+        "extend_no_history": "Home Assistant'ta döngüden sonra bu prize ait okuma yok.",
+        "extend_overlaps": "Bitiş, sonraki döngünün başlangıcını geçemez.",
+        "extend_too_far": "Bitiş, kaydedilen döngünün en fazla 4 sa ötesine taşınabilir.",
+        "extend_not_live": "Yalnızca bu cihazın kaydettiği bir döngü uzatılabilir."
     },
     "pg_desc": {
         "completion_min_seconds": "Gerçek döngü sayılan en kısa çalışma",
@@ -1913,7 +1919,8 @@
         "copied": "Kopyalandı",
         "copy_failed": "Kopyalama başarısız. Metni seçin ve elle kopyalayın.",
         "automation_label_failed": "Otomasyon oluşturuldu, ancak WashData etiketi veya kategorisi eklenemedi.",
-        "review_answered": "Kaydedildi: {program}"
+        "review_answered": "Kaydedildi: {program}",
+        "cycle_extended": "Döngü bitişi taşındı; kaydedilen okumalar eklendi"
     },
     "suggestion": {
         "observed_label": "Gözlemlenen",

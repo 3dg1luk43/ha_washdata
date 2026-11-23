@@ -1139,7 +1139,13 @@
     "review_q_more": "{count} more to review",
     "review_q_more_one": "{count} more to review",
     "review_q_more_other": "{count} more to review",
-    "review_which_program": "Which program was it?"
+    "review_which_program": "Which program was it?",
+    "trim_extend_hint": "Grey: what Home Assistant recorded after the cycle. Drag the end into it to add it to the cycle.",
+    "trim_extend_note": "The end is past the recorded cycle: the readings Home Assistant recorded up to it are added.",
+    "extend_no_history": "Home Assistant has no readings of this plug after the cycle.",
+    "extend_overlaps": "The end cannot move past the start of the next cycle.",
+    "extend_too_far": "The end can move at most 4 h past the recorded cycle.",
+    "extend_not_live": "Only a cycle this device recorded can be extended."
   },
   "pg_desc": {
     "completion_min_seconds": "Shortest run that counts as a real cycle",
@@ -2013,7 +2019,8 @@
     "copied": "Copied",
     "copy_failed": "Copy failed. Select the text and copy it by hand.",
     "automation_label_failed": "Automation created, but the WashData label or category could not be added.",
-    "review_answered": "Saved: {program}"
+    "review_answered": "Saved: {program}",
+    "cycle_extended": "Cycle end moved; the recorded readings were added"
   },
   "trend": {
     "down": "Trending down",

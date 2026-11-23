@@ -1092,7 +1092,13 @@
     "review_q_more_one": "Încă {count} de revizuit",
     "review_q_more_few": "Încă {count} de revizuit",
     "review_q_more_other": "Încă {count} de revizuit",
-    "review_which_program": "Ce program a fost?"
+    "review_which_program": "Ce program a fost?",
+    "trim_extend_hint": "Gri: ce a înregistrat Home Assistant după ciclu. Trageți sfârșitul în această zonă pentru a o adăuga la ciclu.",
+    "trim_extend_note": "Sfârșitul este după ciclul înregistrat: se adaugă citirile înregistrate de Home Assistant până acolo.",
+    "extend_no_history": "Home Assistant nu are citiri de la această priză după ciclu.",
+    "extend_overlaps": "Sfârșitul nu poate fi mutat după începutul ciclului următor.",
+    "extend_too_far": "Sfârșitul poate fi mutat cu cel mult 4 h după ciclul înregistrat.",
+    "extend_not_live": "Doar un ciclu înregistrat de acest dispozitiv poate fi prelungit."
   },
   "phase_desc": {
     "anti_crease": "Rotiri scurte ocazionale ale tamburului după finalizare pentru a reduce șifonarea.",
@@ -1860,7 +1866,8 @@
     "copied": "Copiat",
     "copy_failed": "Copiere eșuată. Selectați textul și copiați-l manual.",
     "automation_label_failed": "Automatizare creată, dar eticheta sau categoria WashData nu a putut fi adăugată.",
-    "review_answered": "Salvat: {program}"
+    "review_answered": "Salvat: {program}",
+    "cycle_extended": "Sfârșitul ciclului a fost mutat; citirile înregistrate au fost adăugate"
   },
   "suggestion": {
     "observed_label": "Observat",

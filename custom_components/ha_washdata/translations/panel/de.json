@@ -1128,7 +1128,13 @@
     "review_q_more": "Noch {count} zu bewerten",
     "review_q_more_one": "Noch {count} zu bewerten",
     "review_q_more_other": "Noch {count} zu bewerten",
-    "review_which_program": "Welches Programm war es?"
+    "review_which_program": "Welches Programm war es?",
+    "trim_extend_hint": "Grau: was Home Assistant nach dem Zyklus aufgezeichnet hat. Ziehen Sie das Ende hinein, um es dem Zyklus hinzuzufügen.",
+    "trim_extend_note": "Das Ende liegt nach dem aufgezeichneten Zyklus: Die bis dahin von Home Assistant aufgezeichneten Messwerte werden hinzugefügt.",
+    "extend_no_history": "Home Assistant hat nach dem Zyklus keine Messwerte dieser Steckdose.",
+    "extend_overlaps": "Das Ende kann nicht über den Start des nächsten Zyklus hinaus verschoben werden.",
+    "extend_too_far": "Das Ende kann höchstens 4 Std. über den aufgezeichneten Zyklus hinaus verschoben werden.",
+    "extend_not_live": "Nur ein Zyklus, den dieses Gerät aufgezeichnet hat, kann verlängert werden."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Geschirrspüler: Sekunden unter dem Stoppschwellenwert seit der letzten Aktivität, die nötig sind, um nach der erwarteten Dauer das Warten auf das letzte Abpumpen zu beenden",
@@ -2002,7 +2008,8 @@
     "copied": "Kopiert",
     "copy_failed": "Kopieren fehlgeschlagen. Text auswählen und manuell kopieren.",
     "automation_label_failed": "Automatisierung erstellt, aber das WashData-Label oder die Kategorie konnte nicht hinzugefügt werden.",
-    "review_answered": "Gespeichert: {program}"
+    "review_answered": "Gespeichert: {program}",
+    "cycle_extended": "Zyklusende verschoben; die aufgezeichneten Messwerte wurden hinzugefügt"
   },
   "trend": {
     "down": "Abwärtstrend",

@@ -1128,7 +1128,13 @@
     "review_q_more": "Nog {count} te beoordelen",
     "review_q_more_one": "Nog {count} te beoordelen",
     "review_q_more_other": "Nog {count} te beoordelen",
-    "review_which_program": "Welk programma was het?"
+    "review_which_program": "Welk programma was het?",
+    "trim_extend_hint": "Grijs: wat Home Assistant na de cyclus heeft vastgelegd. Sleep het einde erin om het aan de cyclus toe te voegen.",
+    "trim_extend_note": "Het einde ligt na de vastgelegde cyclus: de metingen die Home Assistant tot dat punt heeft vastgelegd, worden toegevoegd.",
+    "extend_no_history": "Home Assistant heeft geen metingen van deze stekker na de cyclus.",
+    "extend_overlaps": "Het einde kan niet voorbij het begin van de volgende cyclus worden verplaatst.",
+    "extend_too_far": "Het einde kan maximaal 4 uur voorbij de vastgelegde cyclus worden verplaatst.",
+    "extend_not_live": "Alleen een cyclus die dit apparaat heeft vastgelegd, kan worden verlengd."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Vaatwasser: seconden onder de Stopdrempel sinds de laatste activiteit die nodig zijn om na de verwachte duur het wachten op het laatste wegpompen te beëindigen",
@@ -2002,7 +2008,8 @@
     "copied": "Gekopieerd",
     "copy_failed": "Kopiëren mislukt. Selecteer de tekst en kopieer het handmatig.",
     "automation_label_failed": "Automatisering aangemaakt, maar het WashData-label of de categorie kon niet worden toegevoegd.",
-    "review_answered": "Opgeslagen: {program}"
+    "review_answered": "Opgeslagen: {program}",
+    "cycle_extended": "Einde van de cyclus verplaatst; de vastgelegde metingen zijn toegevoegd"
   },
   "trend": {
     "down": "Trend naar beneden",

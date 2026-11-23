@@ -1128,7 +1128,13 @@
     "review_q_more": "Veel {count} ootab ülevaatamist",
     "review_q_more_one": "Veel {count} ootab ülevaatamist",
     "review_q_more_other": "Veel {count} ootab ülevaatamist",
-    "review_which_program": "Milline programm see oli?"
+    "review_which_program": "Milline programm see oli?",
+    "trim_extend_hint": "Hall: see, mida Home Assistant pärast tsüklit salvestas. Lohistage lõpp halli alasse, et see tsüklile lisada.",
+    "trim_extend_note": "Lõpp on salvestatud tsüklist hiljem: lisatakse näidud, mille Home Assistant kuni selle punktini salvestas.",
+    "extend_no_history": "Home Assistant ei ole pärast tsüklit selle pistiku näite salvestanud.",
+    "extend_overlaps": "Lõppu ei saa nihutada järgmise tsükli algusest kaugemale.",
+    "extend_too_far": "Lõppu saab nihutada salvestatud tsüklist kõige rohkem 4 h kaugemale.",
+    "extend_not_live": "Pikendada saab ainult tsüklit, mille on salvestanud see seade."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Nõudepesumasin: sekundid allpool Peatumise Läve alates viimasest tegevusest, mida on vaja lõpliku tühjenduse ootamise lõpetamiseks pärast eeldatavat kestust",
@@ -1913,7 +1919,8 @@
     "copied": "Kopeeritud",
     "copy_failed": "Kopeerimine ebaõnnestus. Vali tekst ja kopeeri käsitsi.",
     "automation_label_failed": "Automatiseerimine loodud, kuid WashData silti või kategooriat ei saanud lisada.",
-    "review_answered": "Salvestatud: {program}"
+    "review_answered": "Salvestatud: {program}",
+    "cycle_extended": "Tsükli lõpp nihutatud; salvestatud näidud lisati"
   },
   "suggestion": {
     "observed_label": "Mõõdetud",

@@ -1110,7 +1110,13 @@
         "review_q_started": "開始: {when}",
         "review_q_more": "ほか {count} 件がレビュー待ち",
         "review_q_more_other": "ほか {count} 件がレビュー待ち",
-        "review_which_program": "どのプログラムでしたか？"
+        "review_which_program": "どのプログラムでしたか？",
+        "trim_extend_hint": "グレー: サイクル後に Home Assistant が記録した内容です。終了位置をここへドラッグすると、サイクルに追加されます。",
+        "trim_extend_note": "終了位置が記録されたサイクルより後にあります。そこまでに Home Assistant が記録した測定値が追加されます。",
+        "extend_no_history": "サイクル後のこのプラグの測定値が Home Assistant にありません。",
+        "extend_overlaps": "終了位置を次のサイクルの開始より後に移動することはできません。",
+        "extend_too_far": "終了位置は記録されたサイクルから最大 4 時間後まで移動できます。",
+        "extend_not_live": "延長できるのは、このデバイスが記録したサイクルだけです。"
     },
     "pg_desc": {
         "completion_min_seconds": "実サイクルとみなす最短の稼働時間",
@@ -1893,7 +1899,8 @@
         "copied": "コピーしました",
         "copy_failed": "コピーできませんでした。テキストを選択して手動でコピーしてください。",
         "automation_label_failed": "オートメーションを作成しましたが、WashDataのラベルまたはカテゴリを追加できませんでした。",
-        "review_answered": "保存しました: {program}"
+        "review_answered": "保存しました: {program}",
+        "cycle_extended": "サイクルの終了位置を移動し、記録された測定値を追加しました"
     },
     "suggestion": {
         "observed_label": "観測値",

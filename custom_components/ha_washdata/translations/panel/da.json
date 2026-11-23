@@ -1128,7 +1128,13 @@
     "review_q_more": "{count} mere at gennemgå",
     "review_q_more_one": "{count} mere at gennemgå",
     "review_q_more_other": "{count} mere at gennemgå",
-    "review_which_program": "Hvilket program var det?"
+    "review_which_program": "Hvilket program var det?",
+    "trim_extend_hint": "Grå: det, Home Assistant har registreret efter cyklussen. Træk slutningen ind i det for at føje det til cyklussen.",
+    "trim_extend_note": "Slutningen ligger efter den registrerede cyklus: de målinger, Home Assistant har registreret indtil da, tilføjes.",
+    "extend_no_history": "Home Assistant har ingen målinger fra dette stik efter cyklussen.",
+    "extend_overlaps": "Slutningen kan ikke flyttes forbi starten af næste cyklus.",
+    "extend_too_far": "Slutningen kan højst flyttes 4 t forbi den registrerede cyklus.",
+    "extend_not_live": "Kun en cyklus, som denne enhed har registreret, kan forlænges."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Opvaskemaskine: sekunder under Stoptærskel siden seneste aktivitet, der skal til for at afslutte ventetiden på den sidste udpumpning efter den forventede varighed",
@@ -2002,7 +2008,8 @@
     "copied": "Kopieret",
     "copy_failed": "Kopiering mislykkedes. Vælg teksten og kopiér manuelt.",
     "automation_label_failed": "Automatisering oprettet, men WashData-etiketten eller kategorien kunne ikke tilføjes.",
-    "review_answered": "Gemt: {program}"
+    "review_answered": "Gemt: {program}",
+    "cycle_extended": "Cyklussens slutning flyttet; de registrerede målinger blev tilføjet"
   },
   "trend": {
     "down": "Trend nedad",

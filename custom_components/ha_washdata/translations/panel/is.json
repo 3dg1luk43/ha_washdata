@@ -1128,7 +1128,13 @@
     "review_q_more": "{count} í viðbót til yfirferðar",
     "review_q_more_one": "{count} í viðbót til yfirferðar",
     "review_q_more_other": "{count} í viðbót til yfirferðar",
-    "review_which_program": "Hvaða kerfi var það?"
+    "review_which_program": "Hvaða kerfi var það?",
+    "trim_extend_hint": "Grátt: það sem Home Assistant skráði eftir lotuna. Dragðu endann inn á gráa svæðið til að bæta því við lotuna.",
+    "trim_extend_note": "Endirinn er fyrir aftan skráðu lotuna: mælingunum sem Home Assistant skráði fram að honum er bætt við.",
+    "extend_no_history": "Home Assistant hefur engar mælingar frá þessari innstungu eftir lotuna.",
+    "extend_overlaps": "Ekki er hægt að færa endann fram yfir upphaf næstu lotu.",
+    "extend_too_far": "Hægt er að færa endann mest 4 klst. fram yfir skráðu lotuna.",
+    "extend_not_live": "Aðeins er hægt að lengja lotu sem þetta tæki skráði."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Uppþvottavél: sekúndur undir Stöðvunarþröskuldi frá síðustu virkni sem þarf til að ljúka biðinni eftir lokaútdælingu að lokinni væntanlegri lengd",
@@ -2002,7 +2008,8 @@
     "copied": "Afritað",
     "copy_failed": "Afritun mistókst. Veldu textann og afritu handvirkt.",
     "automation_label_failed": "Sjálvvirkni búinn til, en WashData-merkimiðann eða flokkinn var ekki hægt að bæta við.",
-    "review_answered": "Vistað: {program}"
+    "review_answered": "Vistað: {program}",
+    "cycle_extended": "Endir lotunnar færður; skráðu mælingunum var bætt við"
   },
   "trend": {
     "down": "Stefnir niður",

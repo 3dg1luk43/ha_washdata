@@ -178,6 +178,9 @@ const _AXIS_HANDLE_GRAB = 22;
 // Minutes of recorder history the cycle dialog can draw either side of a cycle
 // (item 513, discussion #463). Same list ws_set_user_prefs accepts; 0 = off.
 const _CYCLE_CONTEXT_CHOICES = [0, 5, 10, 30, 60];
+// How far Trim may move a cycle's end past its stored trace (#536); the backend's
+// ws_api._CYCLE_EXTEND_MAX_S, which clamps the request anyway.
+const _TRIM_EXTEND_MAX_S = 4 * 3600;
 const _CYCLE_CONTEXT_DEFAULT_MIN = 10;
 
 // Floor for the measured panel height (_syncPanelHeight), so a bad measurement in a
@@ -2946,7 +2949,19 @@ class HaWashdataPanel extends HTMLElement {
   // Kick off a detached task command, show a header pill via the registry, and run
   // onDone(result, state) when it settles. Falls back to polling if the task
   // subscription isn't active. Errors surface as a toast.
-  async _kickAndTrack(msg, busyKey, onDone) {
+  // Why an extended trim was refused (#536), or null for any other error.
+  _trimErrorText(code) {
+    const texts = {
+      extend_no_history: ['msg.extend_no_history', 'Home Assistant has no readings of this plug after the cycle.'],
+      extend_overlaps: ['msg.extend_overlaps', 'The end cannot move past the start of the next cycle.'],
+      extend_too_far: ['msg.extend_too_far', 'The end can move at most 4 h past the recorded cycle.'],
+      extend_not_live: ['msg.extend_not_live', 'Only a cycle this device recorded can be extended.'],
+    };
+    const t = texts[code];
+    return t ? this._tText(t[0], {}, t[1]) : null;
+  }
+
+  async _kickAndTrack(msg, busyKey, onDone, errorText) {
     if (this._busy.has(busyKey)) return;  // single-flight: ignore a double click
     this._busy.add(busyKey);
     this._render();
@@ -2971,7 +2986,8 @@ class HaWashdataPanel extends HTMLElement {
     this._taskCallbacks[tid] = async (t) => {
       this._busy.delete(busyKey);
       if (t.state === 'error') {
-        this._showToast(this._tText('msg.toast_error', {error: t.error || ''}, 'Error: ' + (t.error || '')), 'error');
+        const worded = errorText ? errorText(t.error) : null;
+        this._showToast(worded || this._tText('msg.toast_error', {error: t.error || ''}, 'Error: ' + (t.error || '')), 'error');
         this._render();
         return;
       }
@@ -12381,7 +12397,9 @@ class HaWashdataPanel extends HTMLElement {
       const sv = tm === 'clock' ? this._offsetToClock(m.trim.start) : Math.round(m.trim.start);
       const ev = tm === 'clock' ? this._offsetToClock(m.trim.end) : Math.round(m.trim.end);
       const itype = tm === 'clock' ? 'time' : 'number';
-      const iattr = tm === 'clock' ? 'step="1"' : `min="0" max="${Math.ceil(full)}" step="1"`;
+      const endLimit = this._trimEndLimit(m);
+      const iattr = tm === 'clock' ? 'step="1"' : `min="0" max="${Math.ceil(endLimit)}" step="1"`;
+      const extNote = `<div id="wd-trim-ext-note">${this._trimExtendNoteHtml(m)}</div>`;
       const ulbl = tm === 'clock' ? '' : ' ' + this._t('lbl.unit_s', {}, '(s)');
       controls = `<p class="wd-info" style="margin:4px 0 8px">${this._t('msg.trim_intro', {}, 'Drag the red handles, or enter values. Everything outside the window is removed.')}</p>
         <div class="wd-mode-bar" style="margin-bottom:8px;align-items:center">
@@ -12389,6 +12407,7 @@ class HaWashdataPanel extends HTMLElement {
           <button class="wd-btn wd-btn-sm ${tm === 's' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="trim-mode-s">${this._t('lbl.seconds_from_start', {}, 'Seconds from start')}</button>
           <button class="wd-btn wd-btn-sm ${tm === 'clock' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="trim-mode-clock">${this._t('lbl.clock_time', {}, 'Clock time')}</button>
         </div>
+        ${extNote}
         <div class="wd-form-grid">
           <div class="wd-field"><label>${this._t('lbl.start', {}, 'Start')}${ulbl}</label><input type="${itype}" id="wd-trim-start" ${iattr} value="${sv}"></div>
           <div class="wd-field"><label>${this._t('lbl.end', {}, 'End')}${ulbl}</label><input type="${itype}" id="wd-trim-end" ${iattr} value="${ev}"></div>
@@ -12876,14 +12895,18 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   // The context as one drawable series plus its extent, or null when none is
-  // shown (off, loading, nothing recorded, or Trim/Split, which edit the trace and
-  // must not suggest they can reach outside it). A change-only sensor holds its
+  // shown (off, loading, nothing recorded, or Split, which edits the trace and
+  // must not suggest it can reach outside it). Trim draws only the history after
+  // the end, which its end handle can move into (#536). A change-only sensor holds its
   // value until the next row, so it is drawn as steps: a straight line from the
   // last idle row to the first cycle reading would invent a slow rise that never
   // happened. A null power (an unavailable row) breaks the line.
   _cycleContextSeries(m) {
-    if (!m || (m.mode !== 'view' && m.mode !== 'review')) return null;
-    const d = m.ctx && m.ctx.data;
+    if (!m) return null;
+    // Trim shows the history after the end, which the end can move into (#536).
+    const trim = m.mode === 'trim';
+    if (!trim && m.mode !== 'view' && m.mode !== 'review') return null;
+    const d = trim ? (m.ext && m.ext.data) : (m.ctx && m.ctx.data);
     const samples = (m.curve && m.curve.samples) || [];
     if (!d || !d.available || !samples.length) return null;
     const first = samples[0], last = samples[samples.length - 1];
@@ -12896,8 +12919,9 @@ class HaWashdataPanel extends HTMLElement {
       hold = w;
     };
     const rows = (list, keep) => (Array.isArray(list) ? list : []).filter(p => Array.isArray(p) && Number.isFinite(p[0]) && keep(p[0]));
-    const before = rows(d.before, t => t < first[0]);
-    const after = rows(d.after, t => t >= last[0]);
+    const lim = trim ? this._trimEndLimit(m) : Infinity;
+    const before = trim ? [] : rows(d.before, t => t < first[0]);
+    const after = rows(d.after, t => t >= last[0] && t <= lim);
     before.forEach(([t, w]) => add(t, w));
     // Hold the last reading up to the start, then rise into the trace's first one.
     if (hold != null) { pts.push([first[0], hold]); pts.push([first[0], first[1]]); }
@@ -12906,12 +12930,12 @@ class HaWashdataPanel extends HTMLElement {
       hold = null;
       add(last[0], last[1]);
       after.forEach(([t, w]) => add(t, w));
-      const endX = Number(d.after_end_s) || 0;
+      const endX = Math.min(Number(d.after_end_s) || 0, lim);
       if (hold != null && endX > pts[pts.length - 1][0]) pts.push([endX, hold]);
     }
     if (!pts.some(p => p[1] != null)) return null;
     const xStart = before.length ? Math.min(before[0][0], -(Number(d.before_s) || 0)) : first[0];
-    const xEnd = after.length ? Math.max(pts[pts.length - 1][0], Number(d.after_end_s) || 0) : last[0];
+    const xEnd = after.length ? Math.max(pts[pts.length - 1][0], Math.min(Number(d.after_end_s) || 0, lim)) : last[0];
     return {
       series: { kind: 'context', points: pts, stroke: '#9e9e9e', width: 2, alpha: 1, bounded: true, aside: true,
         name: this._tText('lbl.cycle_context_series', {}, 'Recorder history') },
@@ -14139,6 +14163,21 @@ class HaWashdataPanel extends HTMLElement {
     const s = sr.getElementById('wd-trim-start'), e = sr.getElementById('wd-trim-end');
     if (s) s.value = clock ? this._offsetToClock(m.trim.start) : Math.round(m.trim.start);
     if (e) e.value = clock ? this._offsetToClock(m.trim.end) : Math.round(m.trim.end);
+    const note = sr.getElementById('wd-trim-ext-note');
+    if (note) note.innerHTML = this._trimExtendNoteHtml(m);
+  }
+
+  // #536: says that the history after the cycle is drawn and the end can move into
+  // it, or, once it has, that those readings are added.
+  _trimExtendNoteHtml(m) {
+    const full = (m && m.curve && m.curve.full_duration_s) || 0;
+    if (m.trim && m.trim.end > full + 1) {
+      return `<p class="wd-info wd-trim-extend" style="margin:4px 0 8px">${this._t('msg.trim_extend_note', {}, 'The end is past the recorded cycle: the readings Home Assistant recorded up to it are added.')}</p>`;
+    }
+    if (this._trimEndLimit(m) > full + 1) {
+      return `<p class="wd-info wd-trim-extend" style="margin:4px 0 8px">${this._t('msg.trim_extend_hint', {}, 'Grey: what Home Assistant recorded after the cycle. Drag the end into it to add it to the cycle.')}</p>`;
+    }
+    return '';
   }
 
   // Snap the trim window to the nearest real sample offsets so the shaded
@@ -14152,12 +14191,14 @@ class HaWashdataPanel extends HTMLElement {
     const m = this._modal;
     const samples = (m.curve && m.curve.samples) || [];
     if (samples.length < 2) return;
-    const snap = (v) => samples.reduce(
+    const snap = (v, pts) => pts.reduce(
       (best, s) => (Math.abs(s[0] - v) < Math.abs(best - v) ? s[0] : best),
-      samples[0][0],
+      pts[0][0],
     );
-    m.trim.start = snap(m.trim.start);
-    m.trim.end = snap(m.trim.end);
+    m.trim.start = snap(m.trim.start, samples);
+    // Past the trace the end lands on a recorded reading (#536), which the store
+    // snaps to as well.
+    m.trim.end = snap(m.trim.end, samples.concat(this._trimExtensionRows(m)));
     if (m.trim.end <= m.trim.start) {
       const startIdx = samples.findIndex((s) => s[0] === m.trim.start);
       if (startIdx >= 0 && startIdx + 1 < samples.length) {
@@ -14168,6 +14209,47 @@ class HaWashdataPanel extends HTMLElement {
         m.trim.start = samples[startIdx - 1][0];
       }
     }
+  }
+
+  // The recorder readings after the trace Trim may move the end onto (#536):
+  // real ones only, up to the furthest end allowed.
+  _trimExtensionRows(m) {
+    const d = m && m.ext && m.ext.data;
+    const samples = (m && m.curve && m.curve.samples) || [];
+    if (!d || !d.available || !samples.length) return [];
+    const last = samples[samples.length - 1][0], lim = this._trimEndLimit(m);
+    return (Array.isArray(d.after) ? d.after : [])
+      .filter(p => Array.isArray(p) && Number.isFinite(p[0]) && p[1] != null && p[0] > last && p[0] <= lim);
+  }
+
+  // The furthest Trim may move the end (#536): the trace's own end, or into the
+  // recorder history after it, short of the next run.
+  _trimEndLimit(m) {
+    const full = (m && m.curve && m.curve.full_duration_s) || 0;
+    const d = m && m.ext && m.ext.data;
+    if (!d || !d.available) return full;
+    let lim = Math.max(full, Number(d.after_end_s) || 0);
+    if (d.next_start_s != null && Number.isFinite(+d.next_start_s)) lim = Math.min(lim, +d.next_start_s - 1);
+    return Math.max(full, lim);
+  }
+
+  // Fetch the recorder history after the trace for Trim (#536). Only a cycle this
+  // device recorded: the backend answers `not_live` for any other.
+  async _loadTrimExtension(entryId, cycleId) {
+    const m = this._modal;
+    if (!m || m.type !== 'cycle-detail' || m.cycleId !== cycleId) return;
+    const curve = m.curve;
+    if (!curve || curve.is_reference || !(curve.samples || []).length) { m.ext = { loading: false, data: null }; return; }
+    if (m.ext && (m.ext.loading || m.ext.data)) return;
+    m.ext = { loading: true, data: null };
+    let data = null;
+    try {
+      data = await this._ws({ type: `${_DOMAIN}/get_cycle_context`, entry_id: entryId, cycle_id: cycleId, before_s: 0, after_s: _TRIM_EXTEND_MAX_S });
+    } catch (_) { data = null; }
+    const cur = this._modal;
+    if (!cur || cur.type !== 'cycle-detail' || cur.cycleId !== cycleId || cur.entryId !== entryId) return;
+    cur.ext = { loading: false, data };
+    if (cur.mode === 'trim') this._render();
   }
 
   // Trim-input value <-> cycle-offset seconds (supports the clock-time mode).
@@ -14190,7 +14272,8 @@ class HaWashdataPanel extends HTMLElement {
     const dt = new Date(start);
     dt.setHours(p[0] || 0, p[1] || 0, p[2] || 0, 0);
     let off = (dt - start) / 1000;
-    const full = (m.curve && m.curve.full_duration_s) || 0;
+    // In Trim the end may reach into the recorder history after the trace (#536).
+    const full = m.mode === 'trim' ? this._trimEndLimit(m) : ((m.curve && m.curve.full_duration_s) || 0);
     // Only apply the past-midnight +24h correction when the shifted value still
     // lands inside the cycle. An early START (a clock time before the cycle's
     // actual start) would otherwise wrap forward a full day and clamp to the far
@@ -14231,7 +14314,7 @@ class HaWashdataPanel extends HTMLElement {
       // 'input' tracks the live value for the preview; 'change' (blur/Enter)
       // commits and snaps both handles to real samples (#373).
       if (start) start.addEventListener('input', () => { const off = this._trimInputToOffset(start.value); if (off === null) return; m.trim.start = Math.max(0, Math.min(off, m.trim.end - 1)); this._drawCycleEditor(); });
-      if (end) end.addEventListener('input', () => { const off = this._trimInputToOffset(end.value); if (off === null) return; m.trim.end = Math.min(m.curve.full_duration_s, Math.max(off, m.trim.start + 1)); this._drawCycleEditor(); });
+      if (end) end.addEventListener('input', () => { const off = this._trimInputToOffset(end.value); if (off === null) return; m.trim.end = Math.min(this._trimEndLimit(m), Math.max(off, m.trim.start + 1)); this._drawCycleEditor(); });
       const commit = () => { this._snapTrimBounds(); this._syncTrimInputs(); this._drawCycleEditor(); };
       if (start) start.addEventListener('change', commit);
       if (end) end.addEventListener('change', commit);
@@ -14269,7 +14352,7 @@ class HaWashdataPanel extends HTMLElement {
         if (!m.drag || cyc._wdPinching) return; const wd = cyc._wd; if (!wd) return;
         const r = cyc.getBoundingClientRect(); const x = wd.cssToX(e.clientX - r.left);
         if (m.drag === 'start') m.trim.start = Math.min(x, m.trim.end - 1);
-        else m.trim.end = Math.max(x, m.trim.start + 1);
+        else m.trim.end = Math.min(this._trimEndLimit(m), Math.max(x, m.trim.start + 1));
         this._syncTrimInputs(); this._drawCycleEditor();
       });
       cyc.addEventListener('pointerup', stop); cyc.addEventListener('pointercancel', stop);
@@ -16336,7 +16419,7 @@ class HaWashdataPanel extends HTMLElement {
     // ---- Cycle inspector ----
     if (m && m.type === 'cycle-detail') {
       if (action === 'cyc-view') { m.mode = 'view'; this._render(); return; }
-      if (action === 'cyc-trim') { m.mode = 'trim'; if (!m.trim || m.trim.end <= 0) m.trim = { start: 0, end: (m.curve && m.curve.full_duration_s) || 0 }; this._render(); return; }
+      if (action === 'cyc-trim') { m.mode = 'trim'; if (!m.trim || m.trim.end <= 0) m.trim = { start: 0, end: (m.curve && m.curve.full_duration_s) || 0 }; this._render(); this._loadTrimExtension(eid, m.cycleId); return; }
       if (action === 'cyc-split') { m.mode = 'split'; this._render(); return; }
       if (action === 'cyc-review') { m.mode = 'review'; this._render(); return; }
       if (action === 'cyc-ctx') {
@@ -16419,14 +16502,18 @@ class HaWashdataPanel extends HTMLElement {
         const full = (m.curve && m.curve.full_duration_s) || 0;
         const keptPct = full > 0 ? Math.max(0, Math.round(((e2 - s) / full) * 100)) : 100;
         if (keptPct < 50 && !confirm(this._tText('msg.trim_destructive_confirm', {pct: keptPct}, `This keeps only ${keptPct}% of the cycle and cannot be undone. Continue?`))) return;
+        const extended = e2 > full + 1;
         this._kickAndTrack(
           { type: `${_DOMAIN}/trim_cycle`, entry_id: eid, cycle_id: cid, start_s: s, end_s: e2 },
           'cyc-trim-apply',
           async () => {
-            this._showToast(this._t('toast.cycle_trimmed', {}, 'Cycle trimmed'));
+            this._showToast(extended
+              ? this._t('toast.cycle_extended', {}, 'Cycle end moved; the recorded readings were added')
+              : this._t('toast.cycle_trimmed', {}, 'Cycle trimmed'));
             await this._closeCycleDetail(eid);
             await this._fetchCycles(eid);
           },
+          (code) => this._trimErrorText(code),
         );
         return;
       }

@@ -1128,7 +1128,13 @@
     "review_q_more": "{count} till att granska",
     "review_q_more_one": "{count} till att granska",
     "review_q_more_other": "{count} till att granska",
-    "review_which_program": "Vilket program var det?"
+    "review_which_program": "Vilket program var det?",
+    "trim_extend_hint": "Grått: det som Home Assistant registrerade efter cykeln. Dra slutet in i det för att lägga till det i cykeln.",
+    "trim_extend_note": "Slutet ligger efter den registrerade cykeln: mätvärdena som Home Assistant registrerade fram dit läggs till.",
+    "extend_no_history": "Home Assistant har inga mätvärden från den här kontakten efter cykeln.",
+    "extend_overlaps": "Slutet kan inte flyttas förbi starten av nästa cykel.",
+    "extend_too_far": "Slutet kan flyttas högst 4 tim förbi den registrerade cykeln.",
+    "extend_not_live": "Endast en cykel som den här enheten har registrerat kan förlängas."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Diskmaskin: sekunder under Stopptröskel sedan senaste aktiviteten som krävs för att avsluta väntan på den sista tömningen efter den förväntade längden",
@@ -2002,7 +2008,8 @@
     "copied": "Kopierad",
     "copy_failed": "Kopiering misslyckades. Markera texten och kopiera manuellt.",
     "automation_label_failed": "Automatisering skapad, men WashData-etiketten eller kategorin kunde inte läggas till.",
-    "review_answered": "Sparat: {program}"
+    "review_answered": "Sparat: {program}",
+    "cycle_extended": "Cykelns slut flyttat; de registrerade mätvärdena lades till"
   },
   "trend": {
     "down": "Nedåtgående trend",

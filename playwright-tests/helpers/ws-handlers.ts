@@ -184,7 +184,7 @@ export const DEFAULT_HANDLERS: Record<string, unknown> = {
   // spec that does not ask for it draws no context.
   'ha_washdata/get_cycle_context': {
     cycle_id: 'cyc-001', available: false, reason: 'no_history', entity_id: 'sensor.washer_power',
-    before_s: 600, after_s: 600, trace_end_s: 1740, after_end_s: 0, before: [], after: [],
+    before_s: 600, after_s: 600, trace_end_s: 1740, after_end_s: 0, next_start_s: null, before: [], after: [],
   },
   'ha_washdata/get_cycle_power_data': {
     cycle_id: 'cyc-001',

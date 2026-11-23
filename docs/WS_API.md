@@ -1115,6 +1115,7 @@ _Open-ended: additional top-level keys from an upstream summary may be present._
 | `after_s` | yes | number |
 | `trace_end_s` | yes | number |
 | `after_end_s` | yes | number |
+| `next_start_s` | yes | number \| null |
 | `before` | yes | list[list[number \| null]] |
 | `after` | yes | list[list[number \| null]] |
 

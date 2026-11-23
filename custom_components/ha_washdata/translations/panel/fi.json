@@ -1128,7 +1128,13 @@
     "review_q_more": "Vielä {count} tarkistettavana",
     "review_q_more_one": "Vielä {count} tarkistettavana",
     "review_q_more_other": "Vielä {count} tarkistettavana",
-    "review_which_program": "Mikä ohjelma se oli?"
+    "review_which_program": "Mikä ohjelma se oli?",
+    "trim_extend_hint": "Harmaa: mitä Home Assistant tallensi syklin jälkeen. Vedä loppu harmaalle alueelle, niin se lisätään sykliin.",
+    "trim_extend_note": "Loppu on tallennetun syklin jälkeen: Home Assistantin siihen asti tallentamat lukemat lisätään.",
+    "extend_no_history": "Home Assistantilla ei ole tämän pistokkeen lukemia syklin jälkeen.",
+    "extend_overlaps": "Loppua ei voi siirtää seuraavan syklin alun yli.",
+    "extend_too_far": "Loppua voi siirtää enintään 4 t tallennetun syklin yli.",
+    "extend_not_live": "Vain tämän laitteen tallentaman syklin voi pidentää."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Astianpesukone: sekunnit Pysäytyskynnyksen alapuolella viimeisestä toiminnasta, joita tarvitaan lopullisen vedenpoiston odotuksen päättämiseen odotetun keston jälkeen",
@@ -2002,7 +2008,8 @@
     "copied": "Kopioitu",
     "copy_failed": "Kopiointi epäonnistui. Valitse teksti ja kopioi käsin.",
     "automation_label_failed": "Automaatio luotu, mutta WashData-etikettiä tai -luokkaa ei voitu lisätä.",
-    "review_answered": "Tallennettu: {program}"
+    "review_answered": "Tallennettu: {program}",
+    "cycle_extended": "Syklin loppua siirretty; tallennetut lukemat lisättiin"
   },
   "trend": {
     "down": "Trendikäs alaspäin",

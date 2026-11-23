@@ -1146,7 +1146,13 @@
     "review_q_more_one": "Još {count} ciklus za pregled",
     "review_q_more_few": "Još {count} ciklusa za pregled",
     "review_q_more_other": "Još {count} ciklusa za pregled",
-    "review_which_program": "Koji je to bio program?"
+    "review_which_program": "Koji je to bio program?",
+    "trim_extend_hint": "Sivo: ono što je Home Assistant zabeležio posle ciklusa. Prevucite kraj u sivi deo da biste ga dodali ciklusu.",
+    "trim_extend_note": "Kraj je posle zabeleženog ciklusa: dodaju se očitavanja koja je Home Assistant zabeležio do njega.",
+    "extend_no_history": "Home Assistant nema očitavanja ovog utikača posle ciklusa.",
+    "extend_overlaps": "Kraj ne može da se pomeri posle početka sledećeg ciklusa.",
+    "extend_too_far": "Kraj može da se pomeri najviše 4 h posle zabeleženog ciklusa.",
+    "extend_not_live": "Može da se produži samo ciklus koji je zabeležio ovaj uređaj."
   },
   "phase_desc": {
     "anti_crease": "Povremena kratka okretanja nakon završetka radi smanjenja gužvanja.",
@@ -2003,7 +2009,8 @@
     "copied": "Kopirano",
     "copy_failed": "Kopiranje nije uspelo. Izaberite tekst i kopirajte ga ručno.",
     "automation_label_failed": "Automatizacija kreirana, ali oznaka ili kategorija WashData nije mogla biti dodata.",
-    "review_answered": "Sačuvano: {program}"
+    "review_answered": "Sačuvano: {program}",
+    "cycle_extended": "Kraj ciklusa je pomeren; zabeležena očitavanja su dodata"
   },
   "trend": {
     "down": "Opadajući trend",

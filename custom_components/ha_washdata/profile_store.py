@@ -1864,6 +1864,79 @@ def _recompute_cycle_energy(data: JSONDict) -> dict[str, Any]:
     return summary
 
 
+def cycle_extension_points(
+    trace_end_s: float,
+    last_power: float,
+    rows: list[tuple[float, float | None]],
+    end_s: float,
+    keepalive_s: float,
+) -> tuple[list[list[float]], list[float]] | None:
+    """The readings that carry a stored trace on to ``end_s`` (#536).
+
+    ``rows`` are the power sensor's recorder rows as ``(offset_s, watts)`` from the
+    cycle's start, None for an unavailable one; a row at or before
+    ``trace_end_s`` is the state in force at the trace's end. The new end snaps to
+    the last real reading at or before ``end_s`` (within the trim's whole-second
+    tolerance), as a trim does. A change-only sensor records nothing while its
+    value holds, so a silence longer than ``keepalive_s`` gets the keepalives the
+    live watchdog would have stored (the held value every ``keepalive_s``), and
+    they are returned as synthetic offsets; nothing is held across an
+    unavailable stretch. Offsets are on the trace's 0.1 s grid. None when no real
+    reading lies after the trace's end. Pure; never raises.
+    """
+    try:
+        trace_end = float(trace_end_s)
+        limit = float(end_s) + _TRIM_SNAP_TOLERANCE_S
+        step = float(keepalive_s)
+        if not (math.isfinite(trace_end) and math.isfinite(limit)) or limit <= trace_end:
+            return None
+        if not math.isfinite(step) or step <= 0:
+            step = math.inf
+        held: float | None = float(last_power) if math.isfinite(float(last_power)) else None
+        clean: list[tuple[float, float | None]] = []
+        for offset, watts in rows:
+            o = float(offset)
+            if not math.isfinite(o):
+                continue
+            w = None if watts is None else float(watts)
+            clean.append((o, w if w is not None and math.isfinite(w) else None))
+        clean.sort(key=lambda r: r[0])
+        for o, w in clean:
+            if o <= trace_end:
+                held = w
+        after = [(o, w) for o, w in clean if trace_end < o <= limit]
+        real = [o for o, w in after if w is not None]
+        if not real:
+            return None
+        new_end = max(real)
+        points: dict[int, list[float]] = {}
+        synthetic: set[int] = set()
+        prev = trace_end
+        for o, w in after:
+            if o > new_end:
+                break
+            if held is not None and math.isfinite(step):
+                k = prev + step
+                while k < o - 0.05:
+                    key = round(k * 10)
+                    if key > round(trace_end * 10):
+                        points[key] = [round(k, 1), held]
+                        synthetic.add(key)
+                    k += step
+            if w is None:
+                held = None
+            else:
+                key = round(o * 10)
+                points[key] = [round(o, 1), w]
+                synthetic.discard(key)
+                held = w
+            prev = o
+        out = [points[k] for k in sorted(points)]
+        return out, [round(k / 10, 1) for k in sorted(synthetic)]
+    except (TypeError, ValueError, OverflowError):
+        return None
+
+
 def _rescale_cycle_cost(cycle: CycleDict, old_wh: float | None, new_wh: float) -> None:
     """Move a cycle's cost with its re-integrated energy. A time-weighted cost is
     scaled (its prices are frozen with it); a fixed one is energy x price."""
@@ -14189,8 +14262,15 @@ class ProfileStore:
         cycle_id: str,
         new_start_s: float,
         new_end_s: float,
+        extension: tuple[list[list[float]], list[float]] | None = None,
     ) -> bool:
         """Trim a cycle's power_data to the window [new_start_s, new_end_s].
+
+        ``extension`` (#536, :func:`cycle_extension_points`): readings after the
+        trace's end, from the power sensor's history, appended before the window
+        is cut, so the end can move past the stored one. Only a cycle this device
+        observed live (``past``), and not over the next stored run; its energy,
+        cost and meter reading move with the added stretch.
 
         Offsets are renormalized so the kept segment starts at 0.0.
         The cycle's ``duration``, ``signature``, and ``sampling_interval`` are
@@ -14214,6 +14294,32 @@ class ProfileStore:
 
         new_start_s = max(0.0, float(new_start_s))
         new_end_s = float(new_end_s)
+
+        old_end_s = float(p_data[-1][0])
+        ext_synthetic: list[float] = []
+        ext_meter_wh = 0.0
+        old_report_wh: float | None = None
+        if extension is not None:
+            ext_points, ext_synthetic = extension
+            ext_points = [
+                [float(o), float(w)] for o, w in ext_points
+                if math.isfinite(float(o)) and math.isfinite(float(w)) and float(o) > old_end_s
+            ]
+            if origin != "past" or not ext_points:
+                return False
+            start_ts = _value_to_timestamp(cycle.get("start_time"))
+            if start_ts is None or self._extension_overlaps(
+                cycle_id, start_ts + old_end_s, start_ts + ext_points[-1][0]
+            ):
+                return False
+            # The added stretch's own energy, held from the trace's last reading.
+            stretch = [list(p_data[-1]), *ext_points]
+            ext_meter_wh = integrate_cycle_wh(
+                np.array([float(r[0]) for r in stretch], dtype=float),
+                np.array([float(r[1]) for r in stretch], dtype=float),
+            )
+            old_report_wh = cycle_report_energy_wh(cycle)
+            p_data = [*p_data, *ext_points]
 
         # Guard against a destructive trim (#366): an inverted/empty window would
         # produce a zero- or single-sample segment that collapses the cycle to
@@ -14301,6 +14407,7 @@ class ProfileStore:
         remap_synthetic_offsets(
             cycle,
             lambda o: round(o - base, 2) if new_start_s <= o <= new_end_s else None,
+            [round(o - base, 2) for o in ext_synthetic if new_start_s <= o <= new_end_s],
         )
         cycle["sampling_interval"] = round(sampling_interval, 1)
         cycle["duration"] = new_duration
@@ -14328,12 +14435,28 @@ class ProfileStore:
         # Clear manual_duration override - trimmed duration is now authoritative
         cycle.pop("manual_duration", None)
 
+        extended = extension is not None and new_end_s > old_end_s
+        if extended:
+            # A meter reading stops where the cycle used to: the added stretch's
+            # integrated energy carries it on. The cost follows the energy as an
+            # energy re-integration moves it.
+            meter = cycle.get("energy_meter_wh")
+            if isinstance(meter, (int, float)) and not isinstance(meter, bool) and math.isfinite(meter):
+                cycle["energy_meter_wh"] = round(float(meter) + ext_meter_wh, 3)
+            if cycle.get("cost") is not None:
+                try:
+                    _rescale_cycle_cost(cycle, old_report_wh, cycle_report_energy_wh(cycle))
+                except (TypeError, ValueError, OverflowError):
+                    self._logger.debug("Could not move the cost with the extension", exc_info=True)
+
         # Mark the cycle as edited so store-upload provenance (qc) can distinguish a
         # trimmed cycle from a plain detected one.
         meta = cycle.setdefault("meta", {})
         if isinstance(meta, dict):
             meta["edited"] = True
             meta["trim"] = [round(new_start_s, 1), round(new_end_s, 1)]
+            if extended:
+                meta["extend"] = [round(old_end_s, 1), round(new_end_s, 1)]
 
         # Invalidate cached sample segments for this cycle so future lookups
         # are recomputed from the trimmed data
@@ -14346,6 +14469,21 @@ class ProfileStore:
 
         await self.async_save()
         return True
+
+    def _extension_overlaps(self, cycle_id: str, from_ts: float, to_ts: float) -> str | None:
+        """The id of another stored run of this device that starts after
+        ``from_ts`` and at or before ``to_ts`` (#536), else None: an end moved
+        past it would take its readings twice. Never raises."""
+        try:
+            for other in self.get_past_cycles():
+                if other.get("id") == cycle_id:
+                    continue
+                ts = _value_to_timestamp(other.get("start_time"))
+                if ts is not None and from_ts < ts <= to_ts:
+                    return str(other.get("id") or "?")
+        except Exception:  # noqa: BLE001
+            return None
+        return None
 
     def analyze_split_sync(
         self, cycle: CycleDict, min_gap_s: int = 900, idle_power: float = 2.0

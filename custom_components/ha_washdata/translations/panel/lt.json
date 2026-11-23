@@ -1164,7 +1164,13 @@
     "review_q_more_few": "Dar {count} ciklai peržiūrai",
     "review_q_more_many": "Dar {count} ciklo peržiūrai",
     "review_q_more_other": "Dar {count} ciklų peržiūrai",
-    "review_which_program": "Kuri tai buvo programa?"
+    "review_which_program": "Kuri tai buvo programa?",
+    "trim_extend_hint": "Pilka: tai, ką Home Assistant įrašė po ciklo. Vilkite pabaigą į šią sritį, kad ją pridėtumėte prie ciklo.",
+    "trim_extend_note": "Pabaiga yra po įrašyto ciklo: pridedami rodmenys, kuriuos Home Assistant įrašė iki jos.",
+    "extend_no_history": "Home Assistant neturi šio kištuko rodmenų po ciklo.",
+    "extend_overlaps": "Pabaigos negalima perkelti už kito ciklo pradžios.",
+    "extend_too_far": "Pabaigą galima perkelti ne daugiau kaip 4 val. už įrašyto ciklo.",
+    "extend_not_live": "Pratęsti galima tik ciklą, kurį įrašė šis įrenginys."
   },
   "phase_desc": {
     "anti_crease": "Po pagrindinio ciklo būgnas intermitiškai sukasi, kad išvengtų audinių raukšlių.",
@@ -1934,7 +1940,8 @@
     "copied": "Nukopijuota",
     "copy_failed": "Kopijuoti nepavyko. Pasirinkite tekstą ir nukopijuokite rankiniu būdu.",
     "automation_label_failed": "Automatizavimas sukurtas, tačiau WashData žymos ar kategorijos nepavyko pridėti.",
-    "review_answered": "Išsaugota: {program}"
+    "review_answered": "Išsaugota: {program}",
+    "cycle_extended": "Ciklo pabaiga perkelta; įrašyti rodmenys pridėti"
   },
   "suggestion": {
     "observed_label": "Pastebėta",

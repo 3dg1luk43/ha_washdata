@@ -1092,7 +1092,13 @@
     "review_q_more_one": "{count} más por revisar",
     "review_q_more_many": "{count} más por revisar",
     "review_q_more_other": "{count} más por revisar",
-    "review_which_program": "¿Qué programa fue?"
+    "review_which_program": "¿Qué programa fue?",
+    "trim_extend_hint": "Gris: lo que Home Assistant registró después del ciclo. Arrastre el final hasta ahí para añadirlo al ciclo.",
+    "trim_extend_note": "El final está más allá del ciclo registrado: se añaden las lecturas que Home Assistant registró hasta ese punto.",
+    "extend_no_history": "Home Assistant no tiene lecturas de este enchufe después del ciclo.",
+    "extend_overlaps": "El final no puede ir más allá del inicio del ciclo siguiente.",
+    "extend_too_far": "El final puede ir como máximo 4 h más allá del ciclo registrado.",
+    "extend_not_live": "Solo se puede ampliar un ciclo registrado por este dispositivo."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavavajillas: segundos por debajo del Umbral de parada desde la última actividad necesarios para terminar la espera del vaciado final tras la duración esperada",
@@ -1879,7 +1885,8 @@
     "copied": "Copiado",
     "copy_failed": "Error al copiar. Seleccione el texto y cópielo manualmente.",
     "automation_label_failed": "Automatización creada, pero no se pudo añadir la etiqueta o categoría WashData.",
-    "review_answered": "Guardado: {program}"
+    "review_answered": "Guardado: {program}",
+    "cycle_extended": "Final del ciclo movido; se añadieron las lecturas registradas"
   },
   "suggestion": {
     "observed_label": "Observado",

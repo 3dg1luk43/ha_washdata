@@ -1092,7 +1092,13 @@
     "review_q_more_one": "{count} autre à réviser",
     "review_q_more_many": "{count} autres à réviser",
     "review_q_more_other": "{count} autres à réviser",
-    "review_which_program": "De quel programme s'agissait-il ?"
+    "review_which_program": "De quel programme s'agissait-il ?",
+    "trim_extend_hint": "Gris : ce que Home Assistant a enregistré après le cycle. Faites glisser la fin dedans pour l'ajouter au cycle.",
+    "trim_extend_note": "La fin dépasse le cycle enregistré : les relevés enregistrés par Home Assistant jusqu'à ce point sont ajoutés.",
+    "extend_no_history": "Home Assistant n'a aucun relevé de cette prise après le cycle.",
+    "extend_overlaps": "La fin ne peut pas dépasser le début du cycle suivant.",
+    "extend_too_far": "La fin peut dépasser le cycle enregistré de 4 h au maximum.",
+    "extend_not_live": "Seul un cycle enregistré par cet appareil peut être prolongé."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lave-vaisselle : secondes sous le Seuil d'arrêt depuis la dernière activité nécessaires pour mettre fin à l'attente de la vidange finale après la durée attendue",
@@ -1879,7 +1885,8 @@
     "copied": "Copié",
     "copy_failed": "Échec de la copie. Sélectionnez le texte et copiez-le manuellement.",
     "automation_label_failed": "Automatisation créée, mais l’étiquette ou la catégorie WashData n’a pas pu être ajoutée.",
-    "review_answered": "Enregistré : {program}"
+    "review_answered": "Enregistré : {program}",
+    "cycle_extended": "Fin du cycle déplacée ; les relevés enregistrés ont été ajoutés"
   },
   "suggestion": {
     "observed_label": "Observé",

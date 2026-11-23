@@ -29,7 +29,7 @@ import re
 import time
 import uuid
 from collections.abc import Callable
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Any
 
 import voluptuous as vol
@@ -5857,6 +5857,9 @@ async def ws_get_cycle_power_data(
 # history just before and just after a stored cycle, for the cycle chart to draw
 # greyed either side of the stored trace. The cap bounds the two recorder queries.
 _CYCLE_CONTEXT_MAX_S = 3600.0
+# How far Trim may move a cycle's end past its stored trace, from the power
+# sensor's history (#536). The recorder keeps 10 days by default.
+_CYCLE_EXTEND_MAX_S = 4 * 3600.0
 _CYCLE_CONTEXT_MAX_POINTS = 300
 
 
@@ -5901,6 +5904,33 @@ def _cycle_context_points(
     return out
 
 
+def _next_run_start_ts(manager: Any, cycle_id: str, after_ts: float) -> float | None:
+    """When the next run after ``after_ts`` started (#536): the earliest stored run
+    of this device other than ``cycle_id``, or the one under way. A cycle's end
+    may not move past it. Never raises."""
+    best: float | None = None
+    try:
+        for other in manager.profile_store.get_past_cycles():
+            if other.get("id") == cycle_id:
+                continue
+            raw = other.get("start_time")
+            parsed = dt_util.parse_datetime(str(raw)) if raw else None
+            if parsed is None:
+                continue
+            ts = dt_util.as_utc(parsed).timestamp()
+            if ts > after_ts and (best is None or ts < best):
+                best = ts
+        detector = getattr(manager, "detector", None)
+        running = getattr(detector, "current_cycle_start", None) if detector else None
+        if isinstance(running, datetime):
+            ts = dt_util.as_utc(running).timestamp()
+            if ts > after_ts and (best is None or ts < best):
+                best = ts
+    except Exception:  # pylint: disable=broad-exception-caught
+        return best
+    return best
+
+
 @websocket_api.websocket_command(
     {
         vol.Required("type"): "ha_washdata/get_cycle_context",
@@ -5938,14 +5968,16 @@ async def ws_get_cycle_context(
         _err_not_found(connection, msg["id"], entry_id)
         return
 
-    def _window(key: str) -> float:
+    def _window(key: str, cap: float) -> float:
         value = float(msg.get(key) or 0.0)
         if not math.isfinite(value):
             return 0.0
-        return max(0.0, min(_CYCLE_CONTEXT_MAX_S, value))
+        return max(0.0, min(cap, value))
 
     cycle_id: str = msg["cycle_id"]
-    before_s, after_s = _window("before_s"), _window("after_s")
+    # The after window reaches as far as Trim can extend the end (#536).
+    before_s = _window("before_s", _CYCLE_CONTEXT_MAX_S)
+    after_s = _window("after_s", _CYCLE_EXTEND_MAX_S)
     out: dict[str, Any] = {
         "cycle_id": cycle_id,
         "available": False,
@@ -5955,6 +5987,7 @@ async def ws_get_cycle_context(
         "after_s": after_s,
         "trace_end_s": 0.0,
         "after_end_s": 0.0,
+        "next_start_s": None,
         "before": [],
         "after": [],
     }
@@ -5983,6 +6016,9 @@ async def ws_get_cycle_context(
                 trace_end = 0.0
             trace_end = max(0.0, trace_end) if math.isfinite(trace_end) else 0.0
             out["trace_end_s"] = round(trace_end, 2)
+            nxt = _next_run_start_ts(manager, cycle_id, start_ts + trace_end)
+            if nxt is not None:
+                out["next_start_s"] = round(nxt - start_ts, 2)
             if before_s > 0:
                 lo = start_ts - before_s
                 rows = await _recorder_power(
@@ -6051,6 +6087,62 @@ def ws_trim_cycle(
     _send_result(connection, msg["id"], "trim_cycle", {"task_id": task.id})
 
 
+async def _trim_extension(
+    hass: HomeAssistant, manager: Any, cycle_id: str, end_s: float,
+) -> tuple[tuple[list[list[float]], list[float]] | None, str | None]:
+    """The readings a trim whose end lies past the stored trace adds (#536).
+
+    ``(None, None)`` for a plain trim. Past the trace's end the readings come from
+    the power sensor's recorder history, so only for a run this device observed
+    live, up to ``_CYCLE_EXTEND_MAX_S`` past it, not into the future and not over
+    the next run. The error is a code the panel words: ``extend_not_live``,
+    ``extend_too_far``, ``extend_overlaps``, ``extend_no_history``.
+    """
+    store = manager.profile_store
+    cycle, origin = store.find_stored_cycle(cycle_id)
+    samples = store.get_cycle_power_data(cycle_id) if cycle else []
+    if not cycle or not samples:
+        return None, None
+    try:
+        trace_end = float(samples[-1][0])
+        last_power = float(samples[-1][1])
+    except (TypeError, ValueError, OverflowError, IndexError):
+        return None, None
+    if not math.isfinite(end_s) or end_s <= trace_end + 1.0:
+        return None, None
+    entity_id = getattr(manager, "power_sensor_entity_id", None)
+    raw = cycle.get("start_time")
+    start_dt = dt_util.parse_datetime(str(raw)) if raw else None
+    if origin != "past" or not entity_id or start_dt is None:
+        return None, "extend_not_live"
+    if end_s - trace_end > _CYCLE_EXTEND_MAX_S:
+        return None, "extend_too_far"
+    start_ts = dt_util.as_utc(start_dt).timestamp()
+    nxt = _next_run_start_ts(manager, cycle_id, start_ts + trace_end)
+    if nxt is not None and start_ts + end_s >= nxt:
+        return None, "extend_overlaps"
+    end_dt = min(
+        dt_util.as_utc(start_dt) + timedelta(seconds=end_s + 1.0), dt_util.utcnow()
+    )
+    lo_dt = dt_util.as_utc(start_dt) + timedelta(seconds=trace_end)
+    if end_dt <= lo_dt:
+        return None, "extend_no_history"
+    rows = await _recorder_power(
+        hass, entity_id, lo_dt, end_dt=end_dt, keep_unavailable=True,
+        scale=_power_scaler(manager),
+    )
+    from .profile_store import cycle_extension_points  # pylint: disable=import-outside-toplevel
+
+    keepalive_s = float(getattr(manager, "_watchdog_interval", 0) or 0)
+    extension = await hass.async_add_executor_job(
+        cycle_extension_points, trace_end, last_power,
+        [(ts - start_ts, w) for ts, w in rows], end_s, keepalive_s,
+    )
+    if extension is None:
+        return None, "extend_no_history"
+    return extension, None
+
+
 async def _trim_task(
     hass: HomeAssistant, task: Any, entry_id: str,
     cycle_id: str, start_s: float, end_s: float,
@@ -6072,7 +6164,11 @@ async def _trim_task(
             reg.finish(task, state=task_registry.STATE_CANCELLED)
             return
         reg.update(task, total=1, done=0)
-        ok = await store.trim_cycle_power_data(cycle_id, start_s, end_s)
+        extension, error = await _trim_extension(hass, manager, cycle_id, end_s)
+        if error is not None:
+            reg.finish(task, state=task_registry.STATE_ERROR, error=error)
+            return
+        ok = await store.trim_cycle_power_data(cycle_id, start_s, end_s, extension=extension)
         reg.update(task, done=1)
         if not ok:
             reg.finish(task, state=task_registry.STATE_ERROR, error="trim_failed")

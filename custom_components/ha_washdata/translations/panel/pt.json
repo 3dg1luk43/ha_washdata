@@ -1092,7 +1092,13 @@
     "review_q_more_one": "Mais {count} para rever",
     "review_q_more_many": "Mais {count} para rever",
     "review_q_more_other": "Mais {count} para rever",
-    "review_which_program": "Qual foi o programa?"
+    "review_which_program": "Qual foi o programa?",
+    "trim_extend_hint": "Cinzento: o que o Home Assistant registou após o ciclo. Arraste o fim até lá para o adicionar ao ciclo.",
+    "trim_extend_note": "O fim está para além do ciclo registado: são adicionadas as leituras que o Home Assistant registou até esse ponto.",
+    "extend_no_history": "O Home Assistant não tem leituras desta tomada após o ciclo.",
+    "extend_overlaps": "O fim não pode passar o início do ciclo seguinte.",
+    "extend_too_far": "O fim pode avançar no máximo 4 h para além do ciclo registado.",
+    "extend_not_live": "Só é possível prolongar um ciclo registado por este dispositivo."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Máquina de lavar loiça: segundos abaixo do Limiar de Paragem desde a última atividade necessários para terminar a espera pelo escoamento final após a duração esperada",
@@ -1879,7 +1885,8 @@
     "copied": "Copiado",
     "copy_failed": "Falha na cópia. Selecione o texto e copie-o manualmente.",
     "automation_label_failed": "Automatização criada, mas a etiqueta ou categoria WashData não pôde ser adicionada.",
-    "review_answered": "Guardado: {program}"
+    "review_answered": "Guardado: {program}",
+    "cycle_extended": "Fim do ciclo movido; as leituras registadas foram adicionadas"
   },
   "suggestion": {
     "observed_label": "Observado",
