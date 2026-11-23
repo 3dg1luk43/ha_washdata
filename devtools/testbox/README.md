@@ -77,6 +77,7 @@ Everything lives under `devtools/testbox/`:
 | `assert_run.py` | the acceptance checks, run by `smoke.sh` step 7 |
 | `check_notify_actions.sh` | the notification-ACTION delivery path, ~1 min, standalone |
 | `check_unload_confirm.sh` | unload confirmation without a door sensor (#451): the button entity, the service and the confirmation-entity listener, ~3 min, standalone |
+| `check_extend_end.sh` | Trim moving a cycle's end past its trace from the recorder (#536): extend, trim back to the same trace and energy, refused at the next run, ~2 min, standalone |
 | `check_clean_restart.sh` | the Clean state across a graceful restart and a SIGKILL crash (#500): original start kept, reminder not resent, door and Mark Unloaded still clear it, ~8 min, standalone |
 | `check_review_actions.sh` | the finish notification's review answers (audit item 1): two actions on the mobile target only, a tap resolves the request, a second tap does nothing, and the listener survives a restart, ~10 min, standalone |
 | `support/configuration.yaml` | baseline HA config, copied into `config/` on first start |

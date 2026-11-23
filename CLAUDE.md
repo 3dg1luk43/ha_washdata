@@ -80,6 +80,7 @@ python3 devtools/suggestion_churn_eval.py    # suggestions offered per key over 
 python3 devtools/suggestion_evidence_eval.py # clean-cycle programme-length exemption + standby advisory, swept and vs 0.6.0
 python3 devtools/duration_ratchet_eval.py    # closed loop: does a programme's learned length shrink when runs end early (#531)
 python3 devtools/program_mismatch_eval.py --sweep   # hand-picked program check (#530): false alarms vs wrong picks caught, LOO
+python3 devtools/extend_end_eval.py --store S --db DB --entity E   # #536 extension rebuilt from a recorder copy vs the stored tails
 
 python3 devtools/mqtt_mock_socket.py --source <export.json>   # mock MQTT plug into a real HA (web UI :8081)
 python3 devtools/mqtt_mock_socket.py --dry-run --source <export.json> --scenario soak --mode silent
@@ -88,6 +89,7 @@ cd devtools/testbox && ./up.sh --fresh   # real-HA container test box (see its R
 cd devtools/testbox && ./smoke.sh        # one cycle end-to-end on real HA + 22 checks (~4 min)
 cd devtools/testbox && ./check_notify_actions.sh   # the notification-ACTION delivery path (~1 min)
 cd devtools/testbox && ./check_unload_confirm.sh  # unload confirmation button/service/entity (~3 min)
+cd devtools/testbox && ./check_extend_end.sh     # Trim extending a cycle's end from the recorder (#536, ~2 min)
 cd devtools/testbox && ./check_clean_restart.sh  # the Clean state across a graceful restart and a crash (~8 min, #500)
 cd devtools/testbox && ./hactl.py ws ha_washdata/get_profiles entry_id=<id>   # drive it
 ```
