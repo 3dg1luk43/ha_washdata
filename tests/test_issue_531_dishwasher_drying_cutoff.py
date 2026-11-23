@@ -170,6 +170,7 @@ async def test_a_store_from_before_the_rule_is_rebuilt_once_at_setup(
         CONFIG_ENTRY_MINOR_VERSION,
         CONFIG_ENTRY_VERSION,
         CUT_SHORT_REBUILD_KEY,
+        CUT_SHORT_RULE_REVISION,
         STORAGE_KEY,
         STORAGE_VERSION,
     )
@@ -205,7 +206,7 @@ async def test_a_store_from_before_the_rule_is_rebuilt_once_at_setup(
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
     store = hass.data[DOMAIN][entry.entry_id].profile_store
-    assert store._data.get(CUT_SHORT_REBUILD_KEY) is True  # noqa: SLF001
+    assert store._data.get(CUT_SHORT_REBUILD_KEY) == CUT_SHORT_RULE_REVISION  # noqa: SLF001
     assert store.get_profiles()["ECO"]["avg_duration"] > stale + 50 * 60
     assert store.cut_short_rebuild_pending() is False  # once only
     # The envelope-only profile is not sent through a rebuild that would drop it.
@@ -423,12 +424,16 @@ async def test_an_import_from_before_the_rule_is_rebuilt_under_it(
     run the sweep, kept that store's marker, and its programme kept the cut-off length."""
     import json  # noqa: PLC0415
 
-    from custom_components.ha_washdata.const import CUT_SHORT_REBUILD_KEY, STORAGE_VERSION  # noqa: PLC0415
+    from custom_components.ha_washdata.const import (  # noqa: PLC0415
+        CUT_SHORT_REBUILD_KEY,
+        CUT_SHORT_RULE_REVISION,
+        STORAGE_VERSION,
+    )
 
     entry = await setup_washdata_entry(device_type="dishwasher", options={"stop_threshold_w": 4.5})
     store = hass.data[DOMAIN][entry.entry_id].profile_store
     await hass.async_block_till_done()
-    assert store._data.get(CUT_SHORT_REBUILD_KEY) is True  # noqa: SLF001 - swept already
+    assert store._data.get(CUT_SHORT_REBUILD_KEY) == CUT_SHORT_RULE_REVISION  # noqa: SLF001 - swept already
     stale = 131 * 60.0
     runs = [_eco(hold_s=30)] * 5 + [_eco(cut_s=131 * 60)] * 12
     backup = {
@@ -599,7 +604,7 @@ async def test_a_rebuild_asked_for_during_a_pass_runs_again_when_it_ends(
     import asyncio  # noqa: PLC0415
     from unittest.mock import AsyncMock, patch  # noqa: PLC0415
 
-    from custom_components.ha_washdata.const import CUT_SHORT_REBUILD_KEY  # noqa: PLC0415
+    from custom_components.ha_washdata.const import CUT_SHORT_REBUILD_KEY, CUT_SHORT_RULE_REVISION  # noqa: PLC0415
 
     entry = await setup_washdata_entry(device_type="dishwasher", options={"stop_threshold_w": 4.5})
     manager = hass.data[DOMAIN][entry.entry_id]
@@ -615,7 +620,7 @@ async def test_a_rebuild_asked_for_during_a_pass_runs_again_when_it_ends(
         if calls == 1:
             await gate.wait()  # an import lands meanwhile: the marker stays unset
             return 0
-        store._data[CUT_SHORT_REBUILD_KEY] = True  # noqa: SLF001
+        store._data[CUT_SHORT_REBUILD_KEY] = CUT_SHORT_RULE_REVISION  # noqa: SLF001
         return 1
 
     with patch.object(store, "async_rebuild_for_cut_short_rule", new=rebuild):
