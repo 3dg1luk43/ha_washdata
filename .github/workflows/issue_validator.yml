@@ -343,9 +343,13 @@ jobs:
                 const latestStable = published.find(r => !r.prerelease);
                 const latestPre = published.find(r => r.prerelease);
 
-                // Parse "1.2.3" or "1.2.3-alpha" into { parts: [1,2,3], isPre: bool }
+                // Parse "1.2.3" or "1.2.3-alpha" into { parts: [1,2,3], isPre: bool }.
+                // Only the first token: a version copied from the CHANGELOG or the
+                // update dialog carries its date ("0.6.0 - 2026-11-12"), whose " - "
+                // read as a pre-release suffix and flagged the current release as
+                // outdated (#534).
                 const parseVer = v => {
-                  const s = v.replace(/^v/i, '').trim().toLowerCase();
+                  const s = v.replace(/^v/i, '').trim().toLowerCase().split(/[\s(]/)[0];
                   const [base, ...rest] = s.split('-');
                   return { parts: base.split('.').map(Number), isPre: rest.length > 0 };
                 };
@@ -395,11 +399,15 @@ jobs:
             }
 
             // 4. Logs / Error Evidence - must contain actual log/error output, an attached file, or a clear N/A with stated reason
-            const logContent = fieldBlock('Logs / Error Evidence');
+            // The form renders this field with `render: shell`, so whatever the reporter
+            // typed arrives inside a ```shell fence: read what is inside it, or an
+            // explained N/A never matched and every one was flagged (#533, #535).
+            const logContent = fieldBlock('Logs / Error Evidence')
+              .replace(/^```[^\n]*\n?/, '').replace(/\n?```[ \t]*$/, '').trim();
             // Accept "N/A" / "NA" only when a reason follows on the same line
             // (e.g. "N/A - crashes before logs"), not a bare "N/A".
             const logIsExplainedNA =
-              /^n\/?a(?:[ \t]*[-:][ \t]*|[ \t]+)\S[^\r\n]*$/i.test(logContent);
+              /^n\/?a(?:[ \t]*[-:][ \t]*|[ \t]+)\S/i.test(logContent);
             // Detect GitHub file attachments (pasted as markdown links)
             const hasAttachment = /https:\/\/github\.com\/[^)]+\/files\//.test(logContent) ||
               /https:\/\/github\.com\/user-attachments\//.test(logContent);

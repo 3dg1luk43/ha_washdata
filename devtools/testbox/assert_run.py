@@ -330,6 +330,19 @@ async def main() -> int:
             if "ERROR" in line and "ha_washdata" in line
         ]
         checks.check(not ours, "no ha_washdata errors", "\n".join(ours[-8:]))
+        # Home Assistant reports a custom integration's use of a deprecated API
+        # as a WARNING ("Detected that custom integration 'ha_washdata' ..."),
+        # which the error check above never saw: #532 reached users that way.
+        deprecated = [
+            line for line in log.splitlines()
+            if "custom integration 'ha_washdata'" in line
+            or ("ha_washdata" in line and "deprecat" in line.lower())
+        ]
+        checks.check(
+            not deprecated,
+            "no deprecated Home Assistant API reported",
+            "\n".join(deprecated[-6:]),
+        )
         tracebacks = log.count("Traceback (most recent call last)")
         checks.check(tracebacks == 0, f"no tracebacks ({tracebacks} found)")
 

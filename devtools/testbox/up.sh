@@ -2,7 +2,8 @@
 # Bring up the WashData test box and leave it ready to drive.
 #
 #   ./up.sh            start (keeps any existing config/)
-#   ./up.sh --fresh    wipe config/ first, so storage migrations run from zero
+#   ./up.sh --fresh    wipe config/ first, so storage migrations run from zero,
+#                      and pull the current Home Assistant image
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -23,6 +24,15 @@ mkdir -p config
 # Never overwrite a config the user has been editing in place.
 [ -f config/configuration.yaml ] || cp support/configuration.yaml config/configuration.yaml
 : > config/notify_capture.jsonl
+
+# A fresh box takes the current Home Assistant release: compose never pulls a
+# tag it already has, so `:stable` stayed at the first image pulled (2026.9.3
+# while HA 2026.10 began reporting #532's deprecated API). Offline, the image on
+# hand is used.
+if [ "$FRESH" = 1 ]; then
+  echo "== pulling the current Home Assistant image"
+  docker compose pull ha || echo "   (pull failed; using the image on hand)"
+fi
 
 echo "== starting Home Assistant (this takes ~30 s on a cold config)"
 docker compose up -d

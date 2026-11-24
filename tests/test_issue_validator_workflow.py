@@ -258,3 +258,40 @@ def test_job_triggers_are_scoped_correctly():
     assert "always()" in validate["if"]
     # The `bug` gate moved into the script; leaving it in the `if:` would re-break #399.
     assert "labels.*.name" not in validate["if"]
+
+
+def _with_logs(body: str, logs: list[str]) -> str:
+    """``body`` with its Logs / Error Evidence field replaced by ``logs``."""
+    head, rest = body.split("Logs / Error Evidence\n", 1)
+    tail = rest[rest.index("\n#") :]
+    return head + "Logs / Error Evidence\n\n" + "\n".join(logs) + "\n" + tail
+
+
+def test_a_version_with_its_date_is_not_outdated():
+    """#534: "0.6.0 - 2026-11-12" (as the CHANGELOG and the update dialog write it)
+    read the " - " as a pre-release suffix and flagged the current release."""
+    current = _run([_scenario("cur", _bug_body("###", version="0.5.5 - 2026-08-17"), ["bug"])])
+    assert current["cur"]["validate"]["comments"] == []
+    old = _run([_scenario("old", _bug_body("###", version="v0.5.4 - 2026-08-10"), ["bug"])])
+    assert "Outdated version" in old["old"]["validate"]["comments"][0]
+
+
+@pytest.mark.parametrize(
+    ("logs", "flagged"),
+    [
+        # The form renders the field with `render: shell`: an explained N/A arrives
+        # fenced (#533) and was flagged although the form asks for exactly that.
+        (["```shell", "N/A as it is about configuration", "```"], False),
+        (["```shell", "N/A - UI only, not a runtime issue", "```"], False),
+        (["N/A - typo in README, no runtime behavior involved"], False),
+        # A bare N/A, fenced or not, still is.
+        (["```shell", "N/A", "```"], True),
+        (["N/A"], True),
+        (["```shell", "```"], True),
+    ],
+)
+def test_logs_inside_the_form_fence_are_read(logs, flagged):
+    body = _with_logs(_bug_body("###", version="0.5.5"), logs)
+    res = _run([_scenario("logs", body, ["bug"])])["logs"]
+    comments = res["validate"]["comments"]
+    assert any("Logs / Error Evidence" in c for c in comments) is flagged
