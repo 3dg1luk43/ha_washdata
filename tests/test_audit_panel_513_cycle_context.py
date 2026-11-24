@@ -178,8 +178,11 @@ async def test_display_only_the_cycle_is_never_touched():
     await _call(manager, _Recorder(_history()))
     assert cycle == snapshot
     called = {name for name, _a, _k in manager.profile_store.method_calls}
-    # Reads only; get_past_cycles finds the next run, which bounds Trim's end (#536).
-    assert called <= {"find_stored_cycle", "get_cycle_power_data", "get_past_cycles"}
+    # Reads only; the past and backfill lists find the next run, which bounds
+    # Trim's end (#536).
+    assert called <= {
+        "find_stored_cycle", "get_cycle_power_data", "get_past_cycles", "get_backfill_cycles",
+    }
 
 
 def test_context_points_thin_each_run_and_keep_the_gap():

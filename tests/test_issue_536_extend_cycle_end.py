@@ -27,7 +27,7 @@ from __future__ import annotations
 
 from datetime import timedelta
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from homeassistant.core import HomeAssistant
@@ -147,6 +147,43 @@ async def test_never_over_the_next_run_or_onto_a_reference(hass: HomeAssistant) 
     ext = cycle_extension_points(3600.0, 30.0, [(4500.0, 2000.0)], 4500.0, 0)
     assert not await store.trim_cycle_power_data(first["id"], 0.0, 4500.0, extension=ext)
     assert store.find_stored_cycle(first["id"])[0]["duration"] == snapshot["duration"]
+
+
+async def test_never_over_a_history_imported_run(hass: HomeAssistant) -> None:
+    """A backfill run is this device's own too: an end moved into it would take
+    its readings twice (PR #539 review). A non-overlapping one is no obstacle."""
+    store = ProfileStore(hass, "e536b")
+    start = dt_util.utcnow() - timedelta(hours=8)
+    await store.async_add_cycle(_cycle(start, TRACE))
+    cid = store.get_past_cycles()[0]["id"]
+    later = _cycle(start + timedelta(seconds=4000), TRACE, id="bf1")
+    store._data["backfill_cycles"] = [later]  # noqa: SLF001
+    ext = cycle_extension_points(3600.0, 30.0, [(4500.0, 2000.0)], 4500.0, 0)
+    assert not await store.trim_cycle_power_data(cid, 0.0, 4500.0, extension=ext)
+    assert store.get_past_cycles()[0]["duration"] == 3600.0
+
+    later["start_time"] = (start + timedelta(seconds=6000)).isoformat()
+    assert await store.trim_cycle_power_data(cid, 0.0, 4500.0, extension=ext)
+    assert store.get_past_cycles()[0]["duration"] == 4500.0
+
+
+async def test_an_oversized_meter_reading_does_not_break_the_extension(
+    hass: HomeAssistant,
+) -> None:
+    """``float()`` raises on an integer too large for a float (a parsed import,
+    before any save): the extension still lands, the meter stays as it was
+    (PR #539 review). The save is stubbed: no store file can hold one."""
+    store = ProfileStore(hass, "e536x")
+    start = dt_util.utcnow() - timedelta(hours=5)
+    await store.async_add_cycle(_cycle(start, TRACE))
+    cid = store.get_past_cycles()[0]["id"]
+    store.get_past_cycles()[0]["energy_meter_wh"] = 10**400
+    ext = cycle_extension_points(3600.0, 30.0, [(4200.0, 30.0)], 4200.0, 0)
+    with patch.object(store, "async_save", AsyncMock()):
+        assert await store.trim_cycle_power_data(cid, 0.0, 4200.0, extension=ext)
+    cycle = store.get_past_cycles()[0]
+    assert cycle["duration"] == 4200.0
+    assert cycle["energy_meter_wh"] == 10**400
 
 
 # --- the trim task, through a real boot --------------------------------------

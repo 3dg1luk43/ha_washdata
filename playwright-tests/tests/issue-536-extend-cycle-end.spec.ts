@@ -94,3 +94,21 @@ test('a refused extension is worded', async ({ page }) => {
   expect(texts[3]).toContain('recorded');
   expect(texts[4]).toBeNull();
 });
+
+test('cutting most of the start still asks, though the end moves past the trace', async ({ page }) => {
+  // 1500 of the 1740 s trace cut from the start: about 14% of the original is
+  // kept, whatever the extension adds (PR #539 review: it counted 54%).
+  await bootWith(page, {});
+  await openTrim(page);
+  await setEnd(page, '2440');
+  const start = page.locator('#wd-trim-start');
+  await start.fill('1500');
+  await start.dispatchEvent('change');
+  const dialogs: string[] = [];
+  page.on('dialog', (d) => { dialogs.push(d.message()); void d.dismiss(); });
+  await page.locator('.wd-modal button[data-maction="cyc-apply-trim"]').click();
+  await expect.poll(() => dialogs.length).toBe(1);
+  expect(dialogs[0]).toMatch(/keeps only \d+% of the cycle/);
+  const sent = await page.evaluate(() => (window as any).__get_calls('ha_washdata/trim_cycle').length);
+  expect(sent).toBe(0);
+});

@@ -62,13 +62,16 @@ jobs:
         run: ./check_notify_actions.sh && ./log_check.sh
       # Load-sensitive: whether cycle 3 is close enough to ask depends on how the
       # compressed replay lands (it passed idle and failed once under load
-      # locally), so one retry; a real regression fails both.
+      # locally), so the check gets one retry; a real regression fails both. The
+      # log is judged after each attempt, before the retry's fresh box wipes it.
       - name: Review answers on the finish notification
         run: |
-          if ! { ./check_review_actions.sh && ./log_check.sh; }; then
+          if ! ./check_review_actions.sh; then
+            ./log_check.sh
             echo "::warning::check_review_actions failed once; retrying (load-sensitive)"
-            ./check_review_actions.sh && ./log_check.sh
+            ./check_review_actions.sh
           fi
+          ./log_check.sh
       - name: Unload confirmation (#451)
         run: ./check_unload_confirm.sh && ./log_check.sh
       - name: Clean state across a restart and a crash (#500)

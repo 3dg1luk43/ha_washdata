@@ -5905,12 +5905,13 @@ def _cycle_context_points(
 
 
 def _next_run_start_ts(manager: Any, cycle_id: str, after_ts: float) -> float | None:
-    """When the next run after ``after_ts`` started (#536): the earliest stored run
-    of this device other than ``cycle_id``, or the one under way. A cycle's end
-    may not move past it. Never raises."""
+    """When the next run after ``after_ts`` started (#536): the earliest run of
+    this device other than ``cycle_id``, observed or history-imported, or the one
+    under way. A cycle's end may not move past it. Never raises."""
     best: float | None = None
     try:
-        for other in manager.profile_store.get_past_cycles():
+        store = manager.profile_store
+        for other in (*store.get_past_cycles(), *store.get_backfill_cycles()):
             if other.get("id") == cycle_id:
                 continue
             raw = other.get("start_time")

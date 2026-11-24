@@ -171,3 +171,22 @@ async def test_an_unusable_stored_value_is_reseeded(hass: HomeAssistant) -> None
     empty._seed_lifetime_cost()  # noqa: SLF001
     assert "lifetime_cost" not in empty._data  # noqa: SLF001
     assert empty.get_lifetime_cost() is None
+
+
+async def test_undo_import_to_a_restore_point_from_before_0_6_2_seeds_it(
+    hass: HomeAssistant,
+) -> None:
+    """A restore point taken before 0.6.2 has costed runs but no Total Cost: the
+    restore seeds it, or the next run would start the total from zero and the
+    earlier costs would never count (PR #539 review)."""
+    store = ProfileStore(hass, "e5")
+    await store.async_load()
+    start = dt_util.utcnow() - timedelta(days=2)
+    await store.async_add_cycle(_cycle(start, 60.0, cost=0.40))
+    await store.async_add_cycle(_cycle(start + timedelta(hours=4), 45.0, cost=0.15))
+    store._data.pop("lifetime_cost", None)  # noqa: SLF001 - as stored before 0.6.2
+    assert await store.async_save_pre_import_snapshot("test")
+
+    store._data = {"profiles": {}, "past_cycles": [], "reference_cycles": [], "backfill_cycles": []}  # noqa: SLF001
+    await store.async_restore_pre_import_snapshot()
+    assert store.get_lifetime_cost() == 0.55

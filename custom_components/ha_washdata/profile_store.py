@@ -1990,8 +1990,11 @@ def cycle_extension_points(
     tolerance), as a trim does. A change-only sensor records nothing while its
     value holds, so a silence longer than ``keepalive_s`` gets the keepalives the
     live watchdog would have stored (the held value every ``keepalive_s``), and
-    they are returned as synthetic offsets; nothing is held across an
-    unavailable stretch. Offsets are on the trace's 0.1 s grid. None when no real
+    they are returned as synthetic offsets; no keepalive is made across an
+    unavailable stretch. The stored cycle then integrates the gap as a live
+    trace does (the manager records no row for an unavailable state, and
+    ``integrate_cycle_wh`` holds each reading to the next, dropping gaps over
+    1 h). Offsets are on the trace's 0.1 s grid. None when no real
     reading lies after the trace's end. Pure; never raises.
     """
     try:
@@ -13496,6 +13499,8 @@ class ProfileStore:
         data.pop("active_cycle", None)
         data.pop("last_active_save", None)
         self._data = data
+        # A restore point from before 0.6.2 has costs but no Total Cost yet.
+        self._seed_lifetime_cost()
         self._data_generation = getattr(self, "_data_generation", 0) + 1
         self._cached_sample_segments = {}
         self._cohesion_cache_generation += 1
@@ -14588,8 +14593,16 @@ class ProfileStore:
             # integrated energy carries it on. The cost follows the energy as an
             # energy re-integration moves it.
             meter = cycle.get("energy_meter_wh")
-            if isinstance(meter, (int, float)) and not isinstance(meter, bool) and math.isfinite(meter):
-                cycle["energy_meter_wh"] = round(float(meter) + ext_meter_wh, 3)
+            try:
+                meter_wh = (
+                    float(meter)
+                    if isinstance(meter, (int, float)) and not isinstance(meter, bool)
+                    else None
+                )
+            except OverflowError:  # an imported integer too large for a float
+                meter_wh = None
+            if meter_wh is not None and math.isfinite(meter_wh):
+                cycle["energy_meter_wh"] = round(meter_wh + ext_meter_wh, 3)
             if cycle.get("cost") is not None:
                 try:
                     _rescale_cycle_cost(cycle, old_report_wh, cycle_report_energy_wh(cycle))
@@ -14618,11 +14631,12 @@ class ProfileStore:
         return True
 
     def _extension_overlaps(self, cycle_id: str, from_ts: float, to_ts: float) -> str | None:
-        """The id of another stored run of this device that starts after
-        ``from_ts`` and at or before ``to_ts`` (#536), else None: an end moved
-        past it would take its readings twice. Never raises."""
+        """The id of another run of this device, observed or history-imported,
+        that starts after ``from_ts`` and at or before ``to_ts`` (#536), else
+        None: an end moved past it would take its readings twice. A downloaded
+        reference cycle ran in another home and is not one. Never raises."""
         try:
-            for other in self.get_past_cycles():
+            for other in (*self.get_past_cycles(), *self.get_backfill_cycles()):
                 if other.get("id") == cycle_id:
                     continue
                 ts = _value_to_timestamp(other.get("start_time"))

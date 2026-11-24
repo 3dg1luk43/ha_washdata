@@ -178,7 +178,7 @@ def main(argv: list[str] | None = None) -> int:
         if not r["rebuilt"]:
             print(f"{str(r['id'])[:14]:14} {r['cut_min']:>4.0f}  not rebuilt (no recorder reading after the cut; {r['tail_reports']} stored reports)")
             continue
-        print(f"{str(r['id'])[:14]:14} {r['cut_min']:>4.0f} {r['end_diff_s']:>8} {r['energy_rel']:>8} "
+        print(f"{str(r['id'])[:14]:14} {r['cut_min']:>4.0f} {r['end_diff_s']!s:>8} {r['energy_rel']!s:>8} "
               f"{r['tail_wh_stored']:>7}/{r['tail_wh_rebuilt']:<7} {r['tail_reports']:>7} {r['recorder_rows']:>5} "
               f"{r['keepalives']:>5} {r['matched']!s:>7}")
     if args.json:

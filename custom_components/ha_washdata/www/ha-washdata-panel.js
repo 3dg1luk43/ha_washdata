@@ -16499,8 +16499,10 @@ class HaWashdataPanel extends HTMLElement {
         // The trim is irreversible (no undo). Confirm before discarding the
         // majority of the trace so an accidental collapse can't slip through on
         // a single click (#373).
+        // Of the ORIGINAL trace: an extension past its end adds readings but
+        // keeps nothing of what the start cut removes.
         const full = (m.curve && m.curve.full_duration_s) || 0;
-        const keptPct = full > 0 ? Math.max(0, Math.round(((e2 - s) / full) * 100)) : 100;
+        const keptPct = full > 0 ? Math.max(0, Math.round(((Math.min(e2, full) - s) / full) * 100)) : 100;
         if (keptPct < 50 && !confirm(this._tText('msg.trim_destructive_confirm', {pct: keptPct}, `This keeps only ${keptPct}% of the cycle and cannot be undone. Continue?`))) return;
         const extended = e2 > full + 1;
         this._kickAndTrack(

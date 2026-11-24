@@ -56,11 +56,11 @@ jobs:
       - name: Install
         run: npm ci && npx playwright install --with-deps chromium
       - name: Readable panel (chromium + mobile-chrome)
-        run: npx playwright test --workers=4 --reporter=dot
+        run: npx playwright test --workers=4
       - name: Minified panel (chromium)
         env:
           PANEL_BUILD: min
-        run: npx playwright test --project=chromium --workers=4 --reporter=dot
+        run: npx playwright test --project=chromium --workers=4
       - name: Keep the report of a failed run
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
