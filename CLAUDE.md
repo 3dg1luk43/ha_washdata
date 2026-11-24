@@ -425,7 +425,10 @@ arrive via [GitLocalize](https://gitlocalize.com/repo/10819) as PRs; merge them 
 
 ### CHANGELOG style
 
-- **Every release opens with a `### TL;DR`** - a handful of bullets, a few words each. It is
+- **Every release opens with the badge row** (donate, docs, chat, translate, store; copy it from the
+  previous release): the section is pasted as the GitHub release, which Home Assistant's update dialog
+  shows. `release_check.sh` fails without it.
+- **Then a `### TL;DR`** - a handful of bullets, a few words each. It is
   **rewritten as a whole** every time an entry is added, not appended to: merge and re-cut the bullets.
 - **Entries are direct and concise, not stories.** Symptom, cause, fix. Keep measured numbers, the
   issue link, and the `Thanks to @user` credit; cut the narration and the case history.

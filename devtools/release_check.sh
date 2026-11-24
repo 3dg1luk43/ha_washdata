@@ -116,6 +116,13 @@ elif mf != cl:
     bad.append(f"manifest.json says {mf} but the top CHANGELOG entry is {cl}")
 if want and want != mf:
     bad.append(f"tag says {want} but manifest.json says {mf}")
+# The top section is pasted as the GitHub release, which Home Assistant's update
+# dialog shows: it opens with the badge row (donate, docs, chat, translate, store).
+if m:
+    section = open("CHANGELOG.md", encoding="utf-8").read()[m.end():]
+    section = section.split("\n## ", 1)[0]
+    if "ko-fi.com/3dg1luk43" not in section.split("### ", 1)[0]:
+        bad.append("the top CHANGELOG section does not open with the badge row (copy it from the previous release)")
 for b in bad:
     print("PROBLEM:" + b)
 sys.exit(1 if bad else 0)
