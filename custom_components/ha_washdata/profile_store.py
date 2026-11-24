@@ -14464,12 +14464,9 @@ class ProfileStore:
                 cycle_id, start_ts + old_end_s, start_ts + ext_points[-1][0]
             ):
                 return False
-            # The added stretch's own energy, held from the trace's last reading.
-            stretch = [list(p_data[-1]), *ext_points]
-            ext_meter_wh = integrate_cycle_wh(
-                np.array([float(r[0]) for r in stretch], dtype=float),
-                np.array([float(r[1]) for r in stretch], dtype=float),
-            )
+            # The added stretch, held from the trace's last reading; its energy is
+            # taken once the kept window is known.
+            stretch = [[float(r[0]), float(r[1])] for r in (p_data[-1], *ext_points)]
             old_report_wh = cycle_report_energy_wh(cycle)
             p_data = [*p_data, *ext_points]
 
@@ -14592,6 +14589,15 @@ class ProfileStore:
             # A meter reading stops where the cycle used to: the added stretch's
             # integrated energy carries it on. The cost follows the energy as an
             # energy re-integration moves it.
+            # The stretch up to the kept end. A start cut at or past the old end
+            # keeps none of the trace the meter reading describes: it is dropped
+            # and the integrated energy stands in, as for a cycle with no meter.
+            kept = [r for r in stretch if r[0] <= new_end_s]
+            if len(kept) > 1:
+                ext_meter_wh = integrate_cycle_wh(
+                    np.array([r[0] for r in kept], dtype=float),
+                    np.array([r[1] for r in kept], dtype=float),
+                )
             meter = cycle.get("energy_meter_wh")
             try:
                 meter_wh = (
@@ -14601,7 +14607,9 @@ class ProfileStore:
                 )
             except OverflowError:  # an imported integer too large for a float
                 meter_wh = None
-            if meter_wh is not None and math.isfinite(meter_wh):
+            if new_start_s >= old_end_s:
+                cycle.pop("energy_meter_wh", None)
+            elif meter_wh is not None and math.isfinite(meter_wh):
                 cycle["energy_meter_wh"] = round(meter_wh + ext_meter_wh, 3)
             if cycle.get("cost") is not None:
                 try:
@@ -14639,7 +14647,10 @@ class ProfileStore:
             for other in (*self.get_past_cycles(), *self.get_backfill_cycles()):
                 if other.get("id") == cycle_id:
                     continue
-                ts = _value_to_timestamp(other.get("start_time"))
+                try:
+                    ts = _value_to_timestamp(other.get("start_time"))
+                except (TypeError, ValueError, OverflowError):
+                    continue  # an impossible date must not end the scan
                 if ts is not None and from_ts < ts <= to_ts:
                     return str(other.get("id") or "?")
         except Exception:  # noqa: BLE001

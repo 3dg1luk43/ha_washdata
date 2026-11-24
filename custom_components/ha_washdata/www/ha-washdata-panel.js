@@ -14249,7 +14249,12 @@ class HaWashdataPanel extends HTMLElement {
     const cur = this._modal;
     if (!cur || cur.type !== 'cycle-detail' || cur.cycleId !== cycleId || cur.entryId !== entryId) return;
     cur.ext = { loading: false, data };
-    if (cur.mode === 'trim') this._render();
+    if (cur.mode !== 'trim') return;
+    // The render replaces the canvas, and its pointerup never reaches the old
+    // one: a drag left set would follow the pointer with no button down. End it
+    // where it is, as a release would.
+    if (cur.drag) { cur.drag = null; this._snapTrimBounds(); }
+    this._render();
   }
 
   // Trim-input value <-> cycle-offset seconds (supports the clock-time mode).

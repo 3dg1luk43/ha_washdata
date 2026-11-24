@@ -5915,7 +5915,10 @@ def _next_run_start_ts(manager: Any, cycle_id: str, after_ts: float) -> float | 
             if other.get("id") == cycle_id:
                 continue
             raw = other.get("start_time")
-            parsed = dt_util.parse_datetime(str(raw)) if raw else None
+            try:
+                parsed = dt_util.parse_datetime(str(raw)) if raw else None
+            except (TypeError, ValueError, OverflowError):
+                continue  # an impossible date must not end the scan
             if parsed is None:
                 continue
             ts = dt_util.as_utc(parsed).timestamp()

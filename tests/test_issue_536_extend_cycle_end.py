@@ -26,6 +26,7 @@ next stored run.
 from __future__ import annotations
 
 from datetime import timedelta
+from types import SimpleNamespace
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
@@ -184,6 +185,41 @@ async def test_an_oversized_meter_reading_does_not_break_the_extension(
     cycle = store.get_past_cycles()[0]
     assert cycle["duration"] == 4200.0
     assert cycle["energy_meter_wh"] == 10**400
+
+
+async def test_a_start_cut_past_the_old_end_drops_the_meter_reading(
+    hass: HomeAssistant,
+) -> None:
+    """Nothing of the trace the meter measured is kept: the reading would
+    describe what was cut, so the integrated energy stands in (PR #539)."""
+    store = ProfileStore(hass, "e536s")
+    start = dt_util.utcnow() - timedelta(hours=5)
+    await store.async_add_cycle(_cycle(start, TRACE, energy_meter_wh=1500.0))
+    cid = store.get_past_cycles()[0]["id"]
+    ext = cycle_extension_points(3600.0, 30.0, [(3900.0, 30.0), (4200.0, 30.0)], 4200.0, 0)
+    assert await store.trim_cycle_power_data(cid, 3900.0, 4200.0, extension=ext)
+    cycle = store.get_past_cycles()[0]
+    assert "energy_meter_wh" not in cycle
+    assert cycle_report_energy_wh(cycle) == cycle["energy_wh"] == 2.5
+
+
+async def test_an_impossible_date_does_not_end_the_overlap_scans(
+    hass: HomeAssistant,
+) -> None:
+    """A malformed start_time before an overlapping run used to end both scans
+    in their outer handler, so the overlap went unseen (PR #539 review)."""
+    store = ProfileStore(hass, "e536d")
+    start = dt_util.utcnow() - timedelta(hours=8)
+    await store.async_add_cycle(_cycle(start, TRACE))
+    cid = store.get_past_cycles()[0]["id"]
+    store._data["backfill_cycles"] = [  # noqa: SLF001
+        {"id": "bad", "start_time": "2026-13-45T10:00:00+00:00"},
+        _cycle(start + timedelta(seconds=4000), TRACE, id="bf1"),
+    ]
+    start_ts = start.timestamp()
+    assert store._extension_overlaps(cid, start_ts + 3600, start_ts + 4500) == "bf1"  # noqa: SLF001
+    manager = SimpleNamespace(profile_store=store, detector=None)
+    assert ws_api._next_run_start_ts(manager, cid, start_ts + 3600) == pytest.approx(start_ts + 4000)  # noqa: SLF001
 
 
 # --- the trim task, through a real boot --------------------------------------
