@@ -6144,6 +6144,11 @@ async def _trim_extension(
     )
     if extension is None:
         return None, "extend_no_history"
+    # The end snaps up to a second past the one asked for: the next run's start
+    # bounds the snapped end too (asked again, a run may have started meanwhile).
+    nxt = _next_run_start_ts(manager, cycle_id, start_ts + trace_end)
+    if nxt is not None and start_ts + extension[0][-1][0] >= nxt:
+        return None, "extend_overlaps"
     return extension, None
 
 

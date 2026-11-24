@@ -14598,14 +14598,14 @@ class ProfileStore:
                     np.array([r[0] for r in kept], dtype=float),
                     np.array([r[1] for r in kept], dtype=float),
                 )
+            # As cycle_report_energy_wh reads it: an imported numeric string
+            # counts, an integer too large for a float does not.
             meter = cycle.get("energy_meter_wh")
             try:
                 meter_wh = (
-                    float(meter)
-                    if isinstance(meter, (int, float)) and not isinstance(meter, bool)
-                    else None
+                    None if meter is None or isinstance(meter, bool) else float(meter)
                 )
-            except OverflowError:  # an imported integer too large for a float
+            except (TypeError, ValueError, OverflowError):
                 meter_wh = None
             if new_start_s >= old_end_s:
                 cycle.pop("energy_meter_wh", None)

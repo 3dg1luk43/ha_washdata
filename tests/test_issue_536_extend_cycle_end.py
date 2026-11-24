@@ -28,7 +28,7 @@ from __future__ import annotations
 from datetime import timedelta
 from types import SimpleNamespace
 from typing import Any
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, PropertyMock, patch
 
 import pytest
 from homeassistant.core import HomeAssistant
@@ -135,6 +135,19 @@ async def test_meter_reading_moves_with_the_added_stretch(hass: HomeAssistant) -
     ext = cycle_extension_points(3600.0, 30.0, [(4200.0, 30.0)], 4200.0, 0)
     assert await store.trim_cycle_power_data(cid, 0.0, 4200.0, extension=ext)
     # 600 s held at 30 W = 5 Wh.
+    assert store.get_past_cycles()[0]["energy_meter_wh"] == 1505.0
+
+
+async def test_a_numeric_string_meter_reading_moves_too(hass: HomeAssistant) -> None:
+    # An import can carry the meter as text; the report reads it, so it must
+    # move with the stretch (PR #539 review).
+    store = ProfileStore(hass, "e536ms")
+    start = dt_util.utcnow() - timedelta(hours=5)
+    await store.async_add_cycle(_cycle(start, TRACE))
+    store.get_past_cycles()[0]["energy_meter_wh"] = "1500"
+    cid = store.get_past_cycles()[0]["id"]
+    ext = cycle_extension_points(3600.0, 30.0, [(4200.0, 30.0)], 4200.0, 0)
+    assert await store.trim_cycle_power_data(cid, 0.0, 4200.0, extension=ext)
     assert store.get_past_cycles()[0]["energy_meter_wh"] == 1505.0
 
 
@@ -314,3 +327,19 @@ async def test_the_next_run_bounds_the_end(hass: HomeAssistant, booted) -> None:
     task = await _run_trim(hass, entry, cid, 0.0, 4000.0, recorder)
     assert task.state == task_registry.STATE_DONE, task.error
     assert manager.profile_store.find_stored_cycle(cid)[0]["duration"] == 4000.0
+
+
+async def test_the_snapped_end_stays_short_of_the_running_cycle(
+    hass: HomeAssistant, booted
+) -> None:
+    """The end snaps up to 1 s past the one asked for: a reading at 3999.8 s for
+    an end of 3999 s, with a run under way since 3999.5 s, would put the end
+    inside it (PR #539 review)."""
+    entry, manager, start, cid = booted
+    s = start.timestamp()
+    recorder = _Recorder([(s + 3700, 3.3), (s + 3999.8, 3.2)])
+    running = PropertyMock(return_value=start + timedelta(seconds=3999.5))
+    with patch.object(type(manager.detector), "current_cycle_start", running):
+        task = await _run_trim(hass, entry, cid, 0.0, 3999.0, recorder)
+    assert task.error == "extend_overlaps"
+    assert manager.profile_store.find_stored_cycle(cid)[0]["duration"] == 3600.0
