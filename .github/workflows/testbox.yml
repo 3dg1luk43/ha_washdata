@@ -1,0 +1,79 @@
+name: Real Home Assistant
+
+# The test box (devtools/testbox) against the current Home Assistant release and
+# beta: what only a real HA can judge (service schemas, entity wiring, the
+# recorder, setup ordering) and the deprecated-API reports a new release adds
+# (#532 reached users that way, weeks after HA started logging it). Only the
+# checks that drive made-up cycles run here; smoke.sh replays private recordings
+# and stays local. Weekly, on a box change, or by hand.
+#
+# Public repository: standard runners cost nothing. About 15 min per channel.
+
+on:
+  schedule:
+    - cron: "30 3 * * 1"  # Mondays 03:30 UTC
+  workflow_dispatch:
+  push:
+    paths:
+      - "devtools/testbox/**"
+      - ".github/workflows/testbox.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: testbox-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  box:
+    name: Box checks (HA ${{ matrix.ha }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        ha: [stable, beta]
+    env:
+      HA_IMAGE_TAG: ${{ matrix.ha }}
+    defaults:
+      run:
+        working-directory: devtools/testbox
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Driver (hactl.py needs aiohttp only)
+        working-directory: .
+        run: python -m venv .venv && .venv/bin/pip install --quiet aiohttp
+      - name: Pull the Home Assistant image
+        run: docker compose pull ha
+      - name: Home Assistant version
+        run: docker compose run --rm --no-deps --entrypoint python ha -c "from homeassistant.const import __version__ as v; print(v)"
+      - name: Trim extends a cycle's end from the recorder (#536)
+        run: ./check_extend_end.sh && ./log_check.sh
+      - name: Notification actions
+        run: ./check_notify_actions.sh && ./log_check.sh
+      # Load-sensitive: whether cycle 3 is close enough to ask depends on how the
+      # compressed replay lands (it passed idle and failed once under load
+      # locally), so one retry; a real regression fails both.
+      - name: Review answers on the finish notification
+        run: |
+          if ! { ./check_review_actions.sh && ./log_check.sh; }; then
+            echo "::warning::check_review_actions failed once; retrying (load-sensitive)"
+            ./check_review_actions.sh && ./log_check.sh
+          fi
+      - name: Unload confirmation (#451)
+        run: ./check_unload_confirm.sh && ./log_check.sh
+      - name: Clean state across a restart and a crash (#500)
+        run: ./check_clean_restart.sh && ./log_check.sh
+      - name: Keep the log of a failed run
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ha-log-${{ matrix.ha }}
+          path: devtools/testbox/config/home-assistant.log*
+          retention-days: 7

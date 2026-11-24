@@ -106,7 +106,8 @@ that gap; keep both working:
 - `tests/conftest.py` has an **autouse guard** that replays every recorded service call through
   Home Assistant's real schemas. Do not "simplify" it away - reintroducing item 316 fails 13 tests
   because of it. When adding a notification path, assert on the payload *and* let the guard run.
-- `devtools/testbox/` is a **real HA container** (floats on HA `:stable`, 2026.9.3 at last check; the in-process test HA
+- `devtools/testbox/` is a **real HA container** (HA `:stable`, pulled again on every `up.sh --fresh`, 2026.11.3 at last
+  check; `HA_IMAGE_TAG=beta` for the beta; the in-process test HA
   is pinned to 2026.2.3 - the newest Home Assistant and pytest-homeassistant-custom-component that
   install on the Python 3.13 the suite runs on, so that gap cannot be closed from PyPI here, item
   322) with the working tree bind-mounted in and a notify platform that records every delivered
@@ -133,6 +134,12 @@ reject or sequence, which is where "all green, still broken" comes from:
   (item 316) or that needs `async_get_hass()` (item 323).
 - Config-flow steps, storage migration against a real `Store`, WS API handlers, entity wiring.
 - Anything whose failure mode is "the integration still loads, it just does nothing".
+
+**CI covers part of this:** `Checks` (tests.yml) runs the fast suite on every push; `Panel E2E` (e2e.yml)
+runs Playwright when the panel, its translations or the specs change; `Real Home Assistant` (testbox.yml)
+runs the synthetic box checks + `log_check.sh` (deprecated-API reports, errors, tracebacks) on HA stable
+and beta every Monday. The slow suite, the evals and `smoke.sh` need the private recordings and stay
+local. The repository is public: standard runners cost nothing, the only budget is concurrency.
 
 `smoke.sh` (~4 min) is the default choice; `check_notify_actions.sh` (~1 min) when the change is
 only in the notification-action path. Say in the commit or the report that the box ran and what it

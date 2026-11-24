@@ -111,7 +111,9 @@ async def main():
         d0 = before["full_duration_s"]
         ctx = await ws.cmd("ha_washdata/get_cycle_context", entry_id=ENTRY, cycle_id=cid,
                            before_s=0, after_s=14400)
-        after = [p for p in ctx["after"] if p[1] is not None and p[0] > d0]
+        # Past the trace's end by more than its rounding: the state in force at the
+        # end itself comes back as a row a few hundredths of a second after it.
+        after = [p for p in ctx["after"] if p[1] is not None and p[0] > d0 + 0.5]
         # The final 0 W may not be committed yet (the recorder commits every few s).
         check("the recorder holds the readings after the end",
               [p[1] for p in after if p[1] > 0] == [3.0, 12.0, 3.0], str(after))
