@@ -39,6 +39,9 @@ jobs:
     defaults:
       run:
         working-directory: devtools/testbox
+        # As root, like a local run: HA writes config/ as root (.storage at 0600,
+        # which check_clean_restart reads) and up.sh --fresh must delete it.
+        shell: sudo -E bash --noprofile --norc -eo pipefail {0}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
