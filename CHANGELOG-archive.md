@@ -1,14 +1,5 @@
 # Changelog archive
 
-[![Donate](https://img.shields.io/badge/Donate-Ko--fi-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/3dg1luk43)
-[![Latest release](https://img.shields.io/github/v/release/3dg1luk43/ha_washdata?label=Latest)](https://github.com/3dg1luk43/ha_washdata/releases/latest)
-[![Installations](https://img.shields.io/badge/dynamic/json?color=41BDF5&logo=home-assistant&label=Installations&cacheSeconds=15600&url=https://analytics.home-assistant.io/custom_integrations.json&query=$.ha_washdata.total)](https://analytics.home-assistant.io/custom_integrations.json)
-[![Home Assistant](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/3dg1luk43/ha_washdata/main/hacs.json&query=$.homeassistant&label=Home%20Assistant&prefix=%E2%89%A5%20&color=41BDF5&logo=home-assistant&logoColor=white)](https://github.com/3dg1luk43/ha_washdata/blob/main/hacs.json)
-[![Wiki](https://img.shields.io/badge/Docs-Wiki-0969DA?logo=github)](https://github.com/3dg1luk43/ha_washdata/wiki)
-[![Matrix](https://img.shields.io/matrix/washdata%3Amatrix.org?logo=matrix&label=Matrix%20chat&color=0dbd8b)](https://matrix.to/#/#washdata:matrix.org)
-[![Translate](https://img.shields.io/badge/Translate-GitLocalize-5A67D8)](https://gitlocalize.com/repo/10819)
-[![WashData Store](https://img.shields.io/badge/Programs-WashData%20Store-F28C28)](https://3dg1luk43.github.io/washdata-store/)
-
 WashData releases 0.5.4 and earlier, moved out of [CHANGELOG.md](CHANGELOG.md) at the 0.5.8 release.
 
 ## 0.5.4 - 2026-08-17
