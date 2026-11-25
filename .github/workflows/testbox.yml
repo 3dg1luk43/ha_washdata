@@ -63,11 +63,14 @@ jobs:
       # Load-sensitive: whether cycle 3 is close enough to ask depends on how the
       # compressed replay lands (it passed idle and failed once under load
       # locally), so the check gets one retry; a real regression fails both. The
-      # log is judged after each attempt, before the retry's fresh box wipes it.
+      # logs of a failed attempt (its last boot and, past its restart, the boot
+      # before) are judged before the retry's fresh box wipes them: a log
+      # failure is never retried.
       - name: Review answers on the finish notification
         run: |
           if ! ./check_review_actions.sh; then
             ./log_check.sh
+            if [ -f config/home-assistant.log.1 ]; then ./log_check.sh --previous; fi
             echo "::warning::check_review_actions failed once; retrying (load-sensitive)"
             ./check_review_actions.sh
           fi
