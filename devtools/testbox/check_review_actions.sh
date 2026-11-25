@@ -318,6 +318,7 @@ else
   echo
   echo "== restart with the request waiting (the setup must re-register the listener)"
   $HACTL restart > /dev/null
+  "$HERE/log_check.sh" --previous || FAIL=1  # the boot before the restart
   # A REST-pushed state is not restored across a restart (check_unload_confirm.sh).
   $HACTL set "$SENSOR" 0 > /dev/null
   for _ in $(seq 1 30); do

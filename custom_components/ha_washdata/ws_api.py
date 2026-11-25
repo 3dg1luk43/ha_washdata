@@ -5905,9 +5905,10 @@ def _cycle_context_points(
 
 
 def _next_run_start_ts(manager: Any, cycle_id: str, after_ts: float) -> float | None:
-    """When the next run after ``after_ts`` started (#536): the earliest run of
-    this device other than ``cycle_id``, observed or history-imported, or the one
-    under way. A cycle's end may not move past it. Never raises."""
+    """When the next run at or after ``after_ts`` started (#536): the earliest
+    run of this device other than ``cycle_id``, observed or history-imported, or
+    the one under way. A cycle's end may not move past it; a split leaves the
+    next run starting on the first one's last reading. Never raises."""
     best: float | None = None
     try:
         store = manager.profile_store
@@ -5922,13 +5923,13 @@ def _next_run_start_ts(manager: Any, cycle_id: str, after_ts: float) -> float | 
             if parsed is None:
                 continue
             ts = dt_util.as_utc(parsed).timestamp()
-            if ts > after_ts and (best is None or ts < best):
+            if ts >= after_ts and (best is None or ts < best):
                 best = ts
         detector = getattr(manager, "detector", None)
         running = getattr(detector, "current_cycle_start", None) if detector else None
         if isinstance(running, datetime):
             ts = dt_util.as_utc(running).timestamp()
-            if ts > after_ts and (best is None or ts < best):
+            if ts >= after_ts and (best is None or ts < best):
                 best = ts
     except Exception:  # pylint: disable=broad-exception-caught
         return best

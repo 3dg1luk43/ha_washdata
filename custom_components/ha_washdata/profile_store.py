@@ -14640,7 +14640,7 @@ class ProfileStore:
 
     def _extension_overlaps(self, cycle_id: str, from_ts: float, to_ts: float) -> str | None:
         """The id of another run of this device, observed or history-imported,
-        that starts after ``from_ts`` and at or before ``to_ts`` (#536), else
+        that starts at or after ``from_ts`` and at or before ``to_ts`` (#536), else
         None: an end moved past it would take its readings twice. A downloaded
         reference cycle ran in another home and is not one. Never raises."""
         try:
@@ -14651,7 +14651,9 @@ class ProfileStore:
                     ts = _value_to_timestamp(other.get("start_time"))
                 except (TypeError, ValueError, OverflowError):
                     continue  # an impossible date must not end the scan
-                if ts is not None and from_ts < ts <= to_ts:
+                # Inclusive at the trace's end: a split leaves the next run
+                # starting on the first run's last reading.
+                if ts is not None and from_ts <= ts <= to_ts:
                     return str(other.get("id") or "?")
         except Exception:  # noqa: BLE001
             return None

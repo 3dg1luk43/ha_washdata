@@ -235,6 +235,24 @@ async def test_an_impossible_date_does_not_end_the_overlap_scans(
     assert ws_api._next_run_start_ts(manager, cid, start_ts + 3600) == pytest.approx(start_ts + 4000)  # noqa: SLF001
 
 
+async def test_a_run_starting_on_the_trace_end_counts_as_the_next(
+    hass: HomeAssistant,
+) -> None:
+    """A split leaves the second run starting on the first one's last reading:
+    both scans count it, so the first cannot take its readings (PR #539)."""
+    store = ProfileStore(hass, "e536e")
+    start = dt_util.utcnow() - timedelta(hours=8)
+    await store.async_add_cycle(_cycle(start, TRACE))
+    cid = store.get_past_cycles()[0]["id"]
+    await store.async_add_cycle(_cycle(start + timedelta(seconds=3600), TRACE))
+    start_ts = start.timestamp()
+    assert store._extension_overlaps(cid, start_ts + 3600, start_ts + 4500)  # noqa: SLF001
+    manager = SimpleNamespace(profile_store=store, detector=None)
+    assert ws_api._next_run_start_ts(manager, cid, start_ts + 3600) == pytest.approx(start_ts + 3600)  # noqa: SLF001
+    ext = cycle_extension_points(3600.0, 30.0, [(4500.0, 2000.0)], 4500.0, 0)
+    assert not await store.trim_cycle_power_data(cid, 0.0, 4500.0, extension=ext)
+
+
 # --- the trim task, through a real boot --------------------------------------
 
 class _Recorder:

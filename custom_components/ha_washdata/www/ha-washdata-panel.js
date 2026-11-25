@@ -14195,18 +14195,19 @@ class HaWashdataPanel extends HTMLElement {
       (best, s) => (Math.abs(s[0] - v) < Math.abs(best - v) ? s[0] : best),
       pts[0][0],
     );
-    m.trim.start = snap(m.trim.start, samples);
-    // Past the trace the end lands on a recorded reading (#536), which the store
-    // snaps to as well.
-    m.trim.end = snap(m.trim.end, samples.concat(this._trimExtensionRows(m)));
+    // Past the trace both handles land on a recorded reading (#536), which the
+    // store snaps to as well; inside it, on the trace's own samples.
+    const pts = samples.concat(this._trimExtensionRows(m));
+    m.trim.start = snap(m.trim.start, pts);
+    m.trim.end = snap(m.trim.end, pts);
     if (m.trim.end <= m.trim.start) {
-      const startIdx = samples.findIndex((s) => s[0] === m.trim.start);
-      if (startIdx >= 0 && startIdx + 1 < samples.length) {
-        m.trim.end = samples[startIdx + 1][0];
+      const startIdx = pts.findIndex((s) => s[0] === m.trim.start);
+      if (startIdx >= 0 && startIdx + 1 < pts.length) {
+        m.trim.end = pts[startIdx + 1][0];
       } else if (startIdx > 0) {
-        // Start snapped to the last sample: pull start back to the previous
-        // sample instead, so the window always has positive width.
-        m.trim.start = samples[startIdx - 1][0];
+        // Start snapped to the last reading: pull start back to the previous
+        // one instead, so the window always has positive width.
+        m.trim.start = pts[startIdx - 1][0];
       }
     }
   }

@@ -1096,8 +1096,9 @@ class CycleDetector:
         # `_terminal_event_so_far`'s memo (#518): (cycle start, gate spans, readings
         # checked, the last of them, the event threshold, the result).
         self._terminal_event_memo: tuple[Any, int, int, datetime, float, Any] | None = None
-        # `_unmatched_end_spike_terminal`'s memo (item 701): ((start, last active), result).
-        self._unmatched_spike_memo: tuple[tuple[Any, Any], bool] | None = None
+        # `_unmatched_end_spike_terminal`'s memo (item 701):
+        # ((start, last active, Stop Threshold), result).
+        self._unmatched_spike_memo: tuple[tuple[Any, Any, float], bool] | None = None
         # One-shot per cycle, so the held-finalise reason is visible in the log
         # without repeating it on every reading.
         self._anticrease_spin_wait_logged: bool = False
@@ -5323,11 +5324,12 @@ class CycleDetector:
         start, last = self._current_cycle_start, self._last_active_time
         if start is None or last is None:
             return False
-        # A reading under the Stop Threshold cannot change the answer.
-        memo = self._unmatched_spike_memo
-        if memo is not None and memo[0] == (start, last):
-            return memo[1]
+        # A reading under the Stop Threshold cannot change the answer; a new
+        # threshold (an options reload mid-cycle) can.
         stop = float(self._config.stop_threshold_w)
+        memo = self._unmatched_spike_memo
+        if memo is not None and memo[0] == (start, last, stop):
+            return memo[1]
         pts = [
             ((ts - start).total_seconds(), float(p))
             for ts, p in self._power_readings
@@ -5341,7 +5343,7 @@ class CycleDetector:
             <= TERMINAL_EVENT_MAX_PEAK_FRAC * float(self._cycle_max_power)
             and quiet_run_before(pts, pts[-1][0], stop) >= TERMINAL_BLIP_QUIET_MIN_S
         )
-        self._unmatched_spike_memo = ((start, last), result)
+        self._unmatched_spike_memo = ((start, last, stop), result)
         return result
 
     def _terminal_event_so_far(self) -> tuple[float, float] | None:

@@ -24,9 +24,12 @@ on record, and an edit or delete of a stored run does not move it.
 """
 from __future__ import annotations
 
+import asyncio
 from datetime import timedelta
 from typing import Any
+from unittest.mock import patch
 
+import pytest
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
@@ -190,3 +193,48 @@ async def test_undo_import_to_a_restore_point_from_before_0_6_2_seeds_it(
     store._data = {"profiles": {}, "past_cycles": [], "reference_cycles": [], "backfill_cycles": []}  # noqa: SLF001
     await store.async_restore_pre_import_snapshot()
     assert store.get_lifetime_cost() == 0.55
+
+
+async def test_a_run_counts_once_whatever_runs_in_the_envelope_rebuild(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """The run's lifetime figures are counted before the rebuild's await (PR #539
+    review): an import seeding Total Cost there found the run stored with its
+    cost still to come and counted it twice; a reload cancelling the rebuild
+    left it out of the odometer, the energy and the cost."""
+    entry = await setup_washdata_entry(
+        power_sensor=POWER, options={CONF_ENERGY_PRICE_STATIC: 0.25}
+    )
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store = manager.profile_store
+    original_add = store.async_add_cycle
+
+    async def add_and_touch(cycle):
+        await original_add(cycle)
+        return {"Cotton"}  # retention touched a profile: its rebuild is awaited
+
+    async def import_seeds(_name):
+        store._seed_lifetime_cost()  # noqa: SLF001 - what an import does there
+
+    start = dt_util.utcnow() - timedelta(hours=6)
+    with patch.object(store, "async_add_cycle", new=add_and_touch), \
+            patch.object(store, "async_rebuild_envelope", new=import_seeds):
+        await manager._async_process_cycle_end(_cycle(start, 90.0, watts=1000.0))  # noqa: SLF001
+    cost = float(store.get_past_cycles()[-1]["cost"])
+    assert cost > 0
+    assert store.get_lifetime_cost() == pytest.approx(cost)
+
+    async def cancelled(_name):
+        raise asyncio.CancelledError
+
+    count, energy = store.get_lifetime_cycle_count(), store.get_lifetime_energy_wh()
+    with patch.object(store, "async_add_cycle", new=add_and_touch), \
+            patch.object(store, "async_rebuild_envelope", new=cancelled), \
+            pytest.raises(asyncio.CancelledError):
+        await manager._async_process_cycle_end(  # noqa: SLF001
+            _cycle(start + timedelta(hours=3), 60.0, watts=800.0)
+        )
+    second = float(store.get_past_cycles()[-1]["cost"])
+    assert store.get_lifetime_cost() == pytest.approx(cost + second)
+    assert store.get_lifetime_cycle_count() == count + 1
+    assert store.get_lifetime_energy_wh() > energy

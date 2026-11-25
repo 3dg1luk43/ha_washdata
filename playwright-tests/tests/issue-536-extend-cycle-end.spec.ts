@@ -112,3 +112,16 @@ test('cutting most of the start still asks, though the end moves past the trace'
   const sent = await page.evaluate(() => (window as any).__get_calls('ha_washdata/trim_cycle').length);
   expect(sent).toBe(0);
 });
+
+test('the start lands on a recorded reading past the trace too', async ({ page }) => {
+  // Start and end both past the 1740 s trace: the start used to snap back onto
+  // the trace's last sample, keeping readings meant to go (PR #539 review).
+  await bootWith(page, {});
+  await openTrim(page);
+  await setEnd(page, '2440');
+  const start = page.locator('#wd-trim-start');
+  await start.fill('2400');
+  await start.dispatchEvent('change');
+  await expect(start).toHaveValue('2400');
+  await expect(page.locator('#wd-trim-end')).toHaveValue('2440');
+});

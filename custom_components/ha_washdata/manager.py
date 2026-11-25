@@ -7145,6 +7145,41 @@ class WashDataManager:
             return None
         return delta
 
+    async def _count_finished_cycle(
+        self, cycle_data: dict[str, Any], odometer_before_add: int | None
+    ) -> tuple[int | None, int | None]:
+        """Count a just-stored run in the lifetime figures, once. Never raises.
+
+        C2: the odometer (only ever increments, only on a real persisted cycle,
+        so milestones survive retention); #501 follow-up: Total Cost; B1: the
+        lifetime energy for the Energy dashboard (TOTAL_INCREASING, so exactly
+        once per persisted cycle). The odometer and the cost are in memory,
+        written with the lifetime-energy save. The cost is added before the
+        first await. Returns ``(previous, current)`` odometer readings for the
+        milestone check, ``(None, None)`` when it could not be read.
+        """
+        prev_count: int | None = None
+        cur_count: int | None = None
+        if odometer_before_add is not None:
+            try:
+                prev_count = odometer_before_add
+                cur_count = prev_count + 1
+                self.profile_store.set_lifetime_cycle_count(cur_count)
+            except Exception:  # noqa: BLE001 - counter must never break cycle end
+                prev_count = None
+                cur_count = None
+        try:
+            self.profile_store.add_lifetime_cost(cycle_data.get("cost"))
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Failed to accumulate lifetime cost: %s", e)
+        try:
+            await self.profile_store.async_add_lifetime_energy_wh(
+                self._cycle_report_energy_wh(cycle_data)
+            )
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Failed to accumulate lifetime energy: %s", e)
+        return prev_count, cur_count
+
     @staticmethod
     def _cycle_report_energy_wh(cycle_data: dict[str, Any]) -> float:
         """User-facing reported energy (Wh): meter value if present, else integrated.
@@ -7627,6 +7662,8 @@ class WashDataManager:
         # any profile retention trimmed. Nothing else needs rebuilding (the nightly
         # maintenance still rebuilds them all).
         touched_profiles: list[str] = []
+        prev_lifetime_count: int | None = None
+        cur_lifetime_count: int | None = None
         try:
             retained = await self.profile_store.async_add_cycle(cycle_data)
             cycle_persisted = True
@@ -7635,6 +7672,13 @@ class WashDataManager:
             # a failed save keeps the gaps for the next cycle-end attempt.
             if restart_gaps_snapshot is not None:
                 self._restart_gaps.clear()
+            # The run's lifetime figures, counted before the first await (the
+            # envelope rebuild): a reload cancelling the rebuild must not leave the
+            # stored run uncounted, and an import seeding Total Cost in that await
+            # must not find the run stored and its cost still to come (PR #539).
+            prev_lifetime_count, cur_lifetime_count = await self._count_finished_cycle(
+                cycle_data, odometer_before_add
+            )
             profile_name = cycle_data.get("profile_name")
             if profile_name:
                 touched_profiles.append(profile_name)
@@ -7654,24 +7698,6 @@ class WashDataManager:
         except Exception as e: # pylint: disable=broad-exception-caught
             self._logger.error("Failed to add cycle to store: %s", e)
 
-        # C2: bump the persisted lifetime cycle counter. Unlike ``cycle_count``
-        # (== len(history), which regresses when history is trimmed/merged), this
-        # monotonic counter only ever increments — and only on a real persisted
-        # cycle — so milestones stay correct across retention limits. Captured here
-        # for the milestone check below. The write is persisted by the lifetime-energy
-        # save immediately after (same store, one save).
-        prev_lifetime_count: int | None = None
-        cur_lifetime_count: int | None = None
-        if cycle_persisted and odometer_before_add is not None:
-            try:
-                prev_lifetime_count = odometer_before_add
-                cur_lifetime_count = prev_lifetime_count + 1
-                # In-memory only; persisted by the batched lifetime-energy save below.
-                self.profile_store.set_lifetime_cycle_count(cur_lifetime_count)
-            except Exception:  # noqa: BLE001 - counter must never break cycle end
-                prev_lifetime_count = None
-                cur_lifetime_count = None
-
         # #480: a finished cycle of a program a maintenance task names ("Cotton 90"
         # for the drum clean) logs that task as done. Only with a label the gate
         # above wrote, after the odometer counts this cycle; persisted by the save
@@ -7687,23 +7713,6 @@ class WashDataManager:
                     "Maintenance '%s' logged as done by program '%s'",
                     task_id, cycle_data.get("profile_name"),
                 )
-
-        # B1: accumulate lifetime energy for the HA Energy dashboard sensor. Runs
-        # exactly once per persisted cycle so the TOTAL_INCREASING meter never
-        # double-counts. Never breaks cycle end.
-        if cycle_persisted:
-            try:
-                # The Total Cost sensor's figure (#501 follow-up), persisted by
-                # the lifetime-energy save right below.
-                self.profile_store.add_lifetime_cost(cycle_data.get("cost"))
-            except Exception as e:  # pylint: disable=broad-exception-caught
-                self._logger.debug("Failed to accumulate lifetime cost: %s", e)
-            try:
-                await self.profile_store.async_add_lifetime_energy_wh(
-                    self._cycle_report_energy_wh(cycle_data)
-                )
-            except Exception as e:  # pylint: disable=broad-exception-caught
-                self._logger.debug("Failed to accumulate lifetime energy: %s", e)
 
         # Ensure cycle has a stable ID even if store add failed (or did not mutate).
         if not cycle_data.get("id"):

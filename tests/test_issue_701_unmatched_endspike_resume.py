@@ -109,3 +109,25 @@ def test_a_pump_out_dipping_under_the_signature_level_still_caps_the_wait() -> N
     done, _armed = _replay(pts, pump_at)
     assert len(done) == 1, [(c["detected_at_s"], c["duration"]) for c in done]
     assert pump_at < done[0]["detected_at_s"] <= pump_at + 1800 + 300
+
+
+def test_the_verdict_is_cached_per_stop_threshold() -> None:
+    """An options reload can change the Stop Threshold mid-cycle: the memo must
+    not hand the old threshold's verdict to the new one (PR #539 review)."""
+    det = CycleDetector(
+        build_detector_config(_OPTIONS, {}, DEVICE_TYPE_DISHWASHER),
+        on_state_change=lambda _a, _b: None,
+        on_cycle_end=lambda _c: None,
+    )
+    pts = [(float(t), 2000.0) for t in range(0, 600, 30)]
+    pts += [(float(t), 0.5) for t in range(600, 1800, 30)]     # quiet at 1.0 W, not at 0.2 W
+    pts += [(float(t), 1.5) for t in range(1800, 1860, 30)]    # the pump-out
+    det._current_cycle_start = T0  # noqa: SLF001
+    det._last_active_time = T0 + timedelta(seconds=pts[-1][0])  # noqa: SLF001
+    det._power_readings = [(T0 + timedelta(seconds=t), p) for t, p in pts]  # noqa: SLF001
+    det._cycle_max_power = 2000.0  # noqa: SLF001
+    det._terminal_event_so_far = lambda: None  # noqa: SLF001 - the Stop Threshold path only
+    det._config.stop_threshold_w = 1.0  # noqa: SLF001
+    assert det._unmatched_end_spike_terminal() is True  # noqa: SLF001
+    det._config.stop_threshold_w = 0.2  # noqa: SLF001
+    assert det._unmatched_end_spike_terminal() is False  # noqa: SLF001

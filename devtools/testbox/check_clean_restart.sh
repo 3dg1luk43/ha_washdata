@@ -102,6 +102,7 @@ $HACTL set-options "$ENTRY_B" \
   notify_unload_delay_minutes=0 > /dev/null
 scan_errors
 $HACTL restart > /dev/null
+"$HERE/log_check.sh" --previous || FAIL=1  # the boot before the restart
 # A state pushed through the REST API is not restored across a restart, so the
 # door is seeded after it (closed: only a closed door enters Clean).
 $HACTL set-state "$DOOR" off device_class=door > /dev/null
@@ -139,6 +140,7 @@ echo
 echo "== graceful restart (SIGTERM, the stop path)"
 scan_errors
 $HACTL restart > /dev/null
+"$HERE/log_check.sh" --previous || FAIL=1  # the boot before the restart
 sleep 5
 check "no door sensor: still Clean" "$(state_of sensor.clean_restart_state)" clean
 check "door sensor: still Clean" "$(state_of sensor.clean_door_state)" clean
@@ -154,6 +156,7 @@ scan_errors
 docker compose kill -s SIGKILL ha > /dev/null
 docker compose start ha > /dev/null
 $HACTL wait > /dev/null
+"$HERE/log_check.sh" --previous || FAIL=1  # the boot before the restart
 sleep 5
 check "no door sensor: Clean after a crash" "$(state_of sensor.clean_restart_state)" clean
 check "original Clean start kept" "$(clean_record "$ENTRY_A" start)" "$START_A"
@@ -177,6 +180,7 @@ echo
 echo "== a restart after the unload stays unloaded"
 scan_errors
 $HACTL restart > /dev/null
+"$HERE/log_check.sh" --previous || FAIL=1  # the boot before the restart
 sleep 5
 GOT=$(state_of sensor.clean_restart_state)
 [ "$GOT" != "clean" ] && echo "  PASS  not Clean again ($GOT)" \

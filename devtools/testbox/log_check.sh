@@ -3,13 +3,17 @@
 # assertions can pass over: an ERROR from ha_washdata, a traceback, or a
 # deprecated-API report ("Detected that custom integration 'ha_washdata' ..."),
 # which HA logs as a WARNING and is how #532 reached users. Run it right after a
-# check: the next `up.sh --fresh` wipes the log.
+# check: the next `up.sh --fresh` wipes the log. HA rotates the log at every
+# start (one backup), so a check that restarts HA runs `--previous` after each
+# restart: the boot before it, shutdown included, is then home-assistant.log.1.
 #
-#   ./log_check.sh            check config/home-assistant.log
+#   ./log_check.sh              check config/home-assistant.log
+#   ./log_check.sh --previous   check config/home-assistant.log.1
 set -uo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG="$HERE/config/home-assistant.log"
+[ "${1:-}" = "--previous" ] && LOG="$LOG.1"
 if [ ! -f "$LOG" ]; then
   echo "  FAIL  no log at $LOG"
   exit 1

@@ -2,8 +2,8 @@ name: Checks
 
 # Fast checks on every push: generated files match their sources (panel build,
 # WS types), the panel parses and renders, docs_check (docs vs code), and the fast
-# pytest suite. A pull request from a fork runs them too; a branch in this
-# repository is already checked on push. The slow suite needs the private
+# pytest suite. A pull request runs them again, on the merge commit with its
+# target branch (a push tests the branch alone). The slow suite needs the private
 # recordings and stays local (`devtools/verify.sh full`); the panel E2E and the
 # real-HA box have their own workflows (e2e.yml, testbox.yml). Public repository:
 # standard runners cost nothing, so the only budget is concurrency.
@@ -54,11 +54,10 @@ jobs:
   # The fast pytest suite (audit TESTING-02). It ran on pull requests only, so a
   # release branch pushed without one (0.6.2) was never tested in CI. Fast tier
   # only (no `slow`/`benchmark`), parallel, about two minutes with the install.
+  # On a pull request it runs again on purpose: that run tests the merge commit
+  # with the target branch, the push run only the branch.
   pytest-fast:
     name: Fast pytest suite
-    if: >-
-      github.event_name != 'pull_request' ||
-      github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
