@@ -184,6 +184,8 @@ def run(curve: list[tuple[float, float]], *, seed: int = 30, cycles: int = 60,
     past += [make_run(curve, seed + d, rng, cut_s=cut_min * 60) for d in range(cut)]
     # A store from before 0.5.8 (register item 463): the per-program trace cap kept
     # the newest 20 traces, so the oldest runs are summaries without a trace.
+    # Counted here: the replays below append to the same list.
+    seed_traceless = min(traceless, len(past))
     for cycle in past[:traceless]:
         strip_trace(cycle)
     data = {"profiles": {PROGRAM: {}}, "past_cycles": past, "envelopes": {}, "profile_groups": {}}
@@ -223,7 +225,7 @@ def run(curve: list[tuple[float, float]], *, seed: int = 30, cycles: int = 60,
         rows.append(row)
     return {
         "real_end_min": round(end_s / 60, 1), "seed_full": seed, "seed_cut": cut,
-        "seed_traceless": min(traceless, len(past)), "cycles": cycles,
+        "seed_traceless": seed_traceless, "cycles": cycles,
         "rows": rows, "ended_early": early, "no_completed_record": unfinished,
         "learned_first_min": rows[0]["learned_before_min"] if rows else _learned_min(store),
         "learned_last_min": _learned_min(store),

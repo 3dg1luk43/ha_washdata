@@ -16,7 +16,7 @@ Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 - New Total Cost sensor, with long-term statistics.
 - Trim can move a cycle's end past its recorded end, using Home Assistant's history.
 - A Stop Threshold below Min Power can be saved, and an emptied Start or Stop Threshold goes back to its default.
-- Dishwashers still finishing early after 0.6.1 (history from before 0.5.8) finish at the real end.
+- 0.6.1's fix for dishwashers finishing early now also reads history from before 0.5.8.
 - An unrecognised dishwasher run no longer splits in a drying pause longer than 30 min.
 
 ### Features

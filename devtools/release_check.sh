@@ -121,8 +121,19 @@ if want and want != mf:
 if m:
     section = open("CHANGELOG.md", encoding="utf-8").read()[m.end():]
     section = section.split("\n## ", 1)[0]
-    if "ko-fi.com/3dg1luk43" not in section.split("### ", 1)[0]:
-        bad.append("the top CHANGELOG section does not open with the badge row (copy it from the previous release)")
+    opening = section.split("### ", 1)[0]
+    # Each badge's link target, as the previous release's row has it.
+    badges = {
+        "donate": "https://ko-fi.com/3dg1luk43",
+        "docs": "https://github.com/3dg1luk43/ha_washdata/wiki",
+        "chat": "https://matrix.to/#/#washdata:matrix.org",
+        "translate": "https://gitlocalize.com/repo/10819",
+        "store": "https://3dg1luk43.github.io/washdata-store/",
+    }
+    missing = [name for name, url in badges.items() if f"]({url})" not in opening]
+    if missing:
+        bad.append("the top CHANGELOG section does not open with the full badge row, missing "
+                   + ", ".join(missing) + " (copy it from the previous release)")
 for b in bad:
     print("PROBLEM:" + b)
 sys.exit(1 if bad else 0)
