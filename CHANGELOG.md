@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
-## 0.6.2 - unreleased
+## 0.6.2 - 2026-11-26
 
 [![Donate](https://img.shields.io/badge/Donate-Ko--fi-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/3dg1luk43) [![Docs](https://img.shields.io/badge/Docs-Wiki-0969DA?logo=github)](https://github.com/3dg1luk43/ha_washdata/wiki) [![Matrix](https://img.shields.io/badge/Chat-Matrix-0DBD8B?logo=matrix&logoColor=white)](https://matrix.to/#/#washdata:matrix.org) [![Translate](https://img.shields.io/badge/Translate-GitLocalize-5A67D8)](https://gitlocalize.com/repo/10819) [![WashData Store](https://img.shields.io/badge/Programs-WashData%20Store-F28C28)](https://3dg1luk43.github.io/washdata-store/)
 

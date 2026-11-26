@@ -8,7 +8,8 @@
 #
 # One cycle, then a few readings under the Start Threshold after it ended (a
 # dishwasher's drying beep, #531/#487): the cycle's end is moved over them and
-# back, and a second cycle bounds how far it may go.
+# back, and a second cycle bounds how far it may go. The trim_cycle service
+# waits behind a panel extension and trims the trace it left (PR #539).
 #
 #   ./check_extend_end.sh          rebuild the box first (default)
 #   ./check_extend_end.sh --reuse  reuse a running box
@@ -183,6 +184,82 @@ async def main():
 
 
 sys.exit(0 if asyncio.run(main()) else 1)
+PYEOF
+
+echo
+echo "== the trim_cycle service (the panel trim's write lock, PR #539)"
+DEVICE=$($HACTL device-id --entry "$ENTRY")
+ENTRY="$ENTRY" HERE="$HERE" DEVICE="$DEVICE" "$PY" - <<'PYEOF' || FAIL=1
+import asyncio, os, sys
+sys.path.insert(0, os.environ["HERE"])
+import aiohttp
+import hactl
+
+ENTRY, DEVICE = os.environ["ENTRY"], os.environ["DEVICE"]
+cid, d0 = open(os.path.join(os.environ["HERE"], ".extend_check_state")).read().split()
+d0 = float(d0)
+fails = 0
+
+
+def check(label, ok, detail=""):
+    global fails
+    print(f"  {'PASS' if ok else 'FAIL'}  {label}{(' (' + detail + ')') if detail else ''}")
+    fails += 0 if ok else 1
+
+
+async def service(session, **fields):
+    return await hactl.rest(session, "POST", "/api/services/ha_washdata/trim_cycle",
+                            {"device_id": DEVICE, **fields})
+
+
+async def main():
+    async with aiohttp.ClientSession() as session, hactl.WS(session) as ws:
+        async def duration():
+            data = await ws.cmd("ha_washdata/get_cycle_power_data", entry_id=ENTRY, cycle_id=cid)
+            return data["full_duration_s"], data["samples"]
+
+        dur, samples = await duration()
+        check("the first cycle is back at its own end", abs(dur - d0) < 0.6, f"{dur} vs {d0}")
+        # Without trim_end_s the service trims to the trace's end: nothing changes.
+        await service(session, cycle_id=cid, trim_start_s=0)
+        dur2, samples2 = await duration()
+        check("no trim_end_s keeps the whole trace", samples2 == samples, f"{dur2}")
+
+        # A panel extension holds the lock across its recorder read; a service call
+        # sent behind it waits, then reads the trace the extension lengthened.
+        ctx = await ws.cmd("ha_washdata/get_cycle_context", entry_id=ENTRY, cycle_id=cid,
+                           before_s=0, after_s=14400)
+        after = [p for p in ctx["after"] if p[1] is not None and p[0] > d0 + 0.5]
+        nxt = ctx["next_start_s"]
+        target = [p[0] for p in after if p[1] == 3.0 and (nxt is None or p[0] < nxt)][-1]
+        tid = (await ws.cmd("ha_washdata/trim_cycle", entry_id=ENTRY, cycle_id=cid,
+                            start_s=0, end_s=target))["task_id"]
+        await service(session, cycle_id=cid, trim_start_s=0)
+        for _ in range(60):
+            snap = await ws.cmd("ha_washdata/get_task_result", task_id=tid)
+            if snap["state"] in ("done", "error", "cancelled"):
+                break
+            await asyncio.sleep(0.5)
+        dur3, _ = await duration()
+        check("the panel extension ran", snap["state"] == "done", str(snap.get("error")))
+        check("the service behind it kept the extended end", abs(dur3 - target) < 0.6,
+              f"{dur3} vs {target}")
+
+        # An explicit end inside the trace trims to the sample at or before it.
+        mid = samples[len(samples) // 2][0]
+        await service(session, cycle_id=cid, trim_start_s=0, trim_end_s=mid)
+        dur4, _ = await duration()
+        check("an explicit end trims to it", abs(dur4 - mid) < 0.6, f"{dur4} vs {mid}")
+
+        try:
+            await service(session, cycle_id="no-such-cycle", trim_start_s=0)
+            check("an unknown cycle is refused", False, "accepted")
+        except RuntimeError as err:
+            check("an unknown cycle is refused", "400" in str(err), str(err)[:120])
+
+
+asyncio.run(main())
+sys.exit(1 if fails else 0)
 PYEOF
 rm -f "$HERE/.extend_check_state"
 
