@@ -76,3 +76,16 @@ async def test_the_default_message_is_unchanged(hass, freezer) -> None:
     await feed(hass, freezer, 500, 180)
     assert [c["message"] for c in calls if "started" in str(c.get("message", ""))] == ["Washer started."]
     await mgr.async_shutdown()
+
+
+async def test_a_restored_cycle_counts_from_its_own_start(hass, freezer) -> None:
+    """The restart fallback can send the message before a power event has set the
+    manager's start: the detector's restored start is used (PR #539 review)."""
+    mgr = await boot(hass, make_entry(hass))
+    now = dt_util.utcnow()
+    mgr._cycle_start_time = None  # noqa: SLF001
+    mgr.detector._current_cycle_start = now - timedelta(hours=1)  # noqa: SLF001
+    mgr._matched_profile_duration = 7200.0  # noqa: SLF001
+    expected = dt_util.as_local(now + timedelta(hours=1)).strftime("%H:%M")
+    assert mgr._start_finish_time(now) == expected  # noqa: SLF001
+    await mgr.async_shutdown()

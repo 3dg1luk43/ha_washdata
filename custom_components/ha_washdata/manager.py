@@ -7150,18 +7150,18 @@ class WashDataManager:
             return None
         return delta
 
-    async def _count_finished_cycle(
+    def _count_finished_cycle(
         self, cycle_data: dict[str, Any], odometer_before_add: int | None
     ) -> tuple[int | None, int | None]:
-        """Count a just-stored run in the lifetime figures, once. Never raises.
+        """Count a just-stored run in the odometer and Total Cost, once, with no
+        await (the lifetime energy follows in :meth:`_add_finished_cycle_energy`).
+        Never raises.
 
-        C2: the odometer (only ever increments, only on a real persisted cycle,
-        so milestones survive retention); #501 follow-up: Total Cost; B1: the
-        lifetime energy for the Energy dashboard (TOTAL_INCREASING, so exactly
-        once per persisted cycle). The odometer and the cost are in memory,
-        written with the lifetime-energy save. The cost is added before the
-        first await. Returns ``(previous, current)`` odometer readings for the
-        milestone check, ``(None, None)`` when it could not be read.
+        C2: the odometer only ever increments, only on a real persisted cycle, so
+        milestones survive retention; #501 follow-up: Total Cost. Both in memory,
+        written with the lifetime-energy save. Returns ``(previous, current)``
+        odometer readings for the milestone check, ``(None, None)`` when it could
+        not be read.
         """
         prev_count: int | None = None
         cur_count: int | None = None
@@ -7177,13 +7177,17 @@ class WashDataManager:
             self.profile_store.add_lifetime_cost(cycle_data.get("cost"))
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.debug("Failed to accumulate lifetime cost: %s", e)
+        return prev_count, cur_count
+
+    async def _add_finished_cycle_energy(self, cycle_data: dict[str, Any]) -> None:
+        """B1: the run's lifetime energy for the Energy dashboard
+        (TOTAL_INCREASING, so exactly once per persisted cycle). Never raises."""
         try:
             await self.profile_store.async_add_lifetime_energy_wh(
                 self._cycle_report_energy_wh(cycle_data)
             )
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.debug("Failed to accumulate lifetime energy: %s", e)
-        return prev_count, cur_count
 
     @staticmethod
     def _cycle_report_energy_wh(cycle_data: dict[str, Any]) -> float:
@@ -7321,7 +7325,9 @@ class WashDataManager:
                 prefix = "~"
             if not expected or expected <= 0:
                 return ""
-            start = self._cycle_start_time or now
+            # A restored cycle sends the fallback before a power event has set
+            # the manager's own start: the detector holds the restored one.
+            start = self._cycle_start_time or self.detector.current_cycle_start or now
             elapsed = max(0.0, (dt_util.as_utc(now) - dt_util.as_utc(start)).total_seconds())
             finish = now + timedelta(seconds=max(0.0, float(expected) - elapsed))
             return prefix + dt_util.as_local(finish).strftime("%H:%M")
@@ -7723,13 +7729,29 @@ class WashDataManager:
             # a failed save keeps the gaps for the next cycle-end attempt.
             if restart_gaps_snapshot is not None:
                 self._restart_gaps.clear()
-            # The run's lifetime figures, counted before the first await (the
-            # envelope rebuild): a reload cancelling the rebuild must not leave the
-            # stored run uncounted, and an import seeding Total Cost in that await
-            # must not find the run stored and its cost still to come (PR #539).
-            prev_lifetime_count, cur_lifetime_count = await self._count_finished_cycle(
+            # The run's lifetime figures, counted with no await between the add
+            # and them: a reload cancelling a later await must not leave the stored
+            # run uncounted, and an import seeding Total Cost in one must not find
+            # the run stored and its cost still to come (PR #539).
+            prev_lifetime_count, cur_lifetime_count = self._count_finished_cycle(
                 cycle_data, odometer_before_add
             )
+            # #480: a finished cycle of a program a maintenance task names ("Cotton
+            # 90" for the drum clean) logs that task as done. Only with a label the
+            # gate above wrote, in the same step as the odometer count: a due check
+            # in a later await must not see the new count with the old stamp and
+            # call the task due (PR #539).
+            if (
+                label_gate_ok
+                and cycle_data.get("profile_name")
+                and notif_rules.cycle_end_is_finish(cycle_data.get("status"))
+            ):
+                for task_id in self.profile_store.log_maintenance_done_by_program(cycle_data):
+                    self._logger.info(
+                        "Maintenance '%s' logged as done by program '%s'",
+                        task_id, cycle_data.get("profile_name"),
+                    )
+            await self._add_finished_cycle_energy(cycle_data)
             profile_name = cycle_data.get("profile_name")
             if profile_name:
                 touched_profiles.append(profile_name)
@@ -7748,22 +7770,6 @@ class WashDataManager:
                         )
         except Exception as e: # pylint: disable=broad-exception-caught
             self._logger.error("Failed to add cycle to store: %s", e)
-
-        # #480: a finished cycle of a program a maintenance task names ("Cotton 90"
-        # for the drum clean) logs that task as done. Only with a label the gate
-        # above wrote, after the odometer counts this cycle; persisted by the save
-        # below.
-        if (
-            cycle_persisted
-            and label_gate_ok
-            and cycle_data.get("profile_name")
-            and notif_rules.cycle_end_is_finish(cycle_data.get("status"))
-        ):
-            for task_id in self.profile_store.log_maintenance_done_by_program(cycle_data):
-                self._logger.info(
-                    "Maintenance '%s' logged as done by program '%s'",
-                    task_id, cycle_data.get("profile_name"),
-                )
 
         # Ensure cycle has a stable ID even if store add failed (or did not mutate).
         if not cycle_data.get("id"):
