@@ -6178,13 +6178,20 @@ async def _trim_task(
         if error is not None:
             reg.finish(task, state=task_registry.STATE_ERROR, error=error)
             return
+        # The recorder read awaited: a reload in it retired this store, whose
+        # save no longer writes, so the edit would be reported and lost.
+        if _get_manager(hass, entry_id) is not manager:
+            reg.finish(task, state=task_registry.STATE_ERROR, error="device unavailable")
+            return
         ok = await store.trim_cycle_power_data(cycle_id, start_s, end_s, extension=extension)
         reg.update(task, done=1)
         if not ok:
             reg.finish(task, state=task_registry.STATE_ERROR, error="trim_failed")
             return
-        if _get_manager(hass, entry_id) is manager:
-            manager.notify_update()
+        if _get_manager(hass, entry_id) is not manager:
+            reg.finish(task, state=task_registry.STATE_ERROR, error="device unavailable")
+            return
+        manager.notify_update()
         reg.finish(task, state=task_registry.STATE_DONE, result={"success": True})
     except asyncio.CancelledError:
         reg.finish(task, state=task_registry.STATE_CANCELLED)

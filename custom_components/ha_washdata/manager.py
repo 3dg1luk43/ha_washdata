@@ -7325,10 +7325,14 @@ class WashDataManager:
                 prefix = "~"
             if not expected or expected <= 0:
                 return ""
-            # A restored cycle sends the fallback before a power event has set
-            # the manager's own start: the detector holds the restored one.
-            start = self._cycle_start_time or self.detector.current_cycle_start or now
-            elapsed = max(0.0, (dt_util.as_utc(now) - dt_util.as_utc(start)).total_seconds())
+            # From the detector's start, which a restore sets before any power
+            # event sets the manager's own, less the user-paused time (a restored
+            # cycle carries its pause total; a fresh start has none).
+            if self.detector.current_cycle_start is not None:
+                elapsed = float(self.net_elapsed_seconds)
+            else:
+                start = self._cycle_start_time or now
+                elapsed = max(0.0, (dt_util.as_utc(now) - dt_util.as_utc(start)).total_seconds())
             finish = now + timedelta(seconds=max(0.0, float(expected) - elapsed))
             return prefix + dt_util.as_local(finish).strftime("%H:%M")
         except Exception:  # pylint: disable=broad-exception-caught

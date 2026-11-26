@@ -361,3 +361,50 @@ async def test_the_snapped_end_stays_short_of_the_running_cycle(
         task = await _run_trim(hass, entry, cid, 0.0, 3999.0, recorder)
     assert task.error == "extend_overlaps"
     assert manager.profile_store.find_stored_cycle(cid)[0]["duration"] == 3600.0
+
+
+async def test_a_reload_during_the_recorder_read_is_not_reported_done(
+    hass: HomeAssistant, booted
+) -> None:
+    """The recorder read awaits: a reload in it retires the store, whose save no
+    longer writes, so the task must not report the edit (PR #539 review)."""
+    entry, manager, start, cid = booted
+
+    async def reload_during_read(_hass, mgr, _cid, _end):
+        hass.data[DOMAIN][entry.entry_id] = SimpleNamespace(profile_store=None)
+        return cycle_extension_points(3600.0, 30.0, [(4000.0, 3.3)], 4000.0, 0), None
+
+    reg = task_registry.get_registry(hass)
+    task = reg.create(entry.entry_id, "trim", "Trimming cycle")
+    try:
+        with patch.object(ws_api, "_trim_extension", new=reload_during_read):
+            await ws_api._trim_task(hass, task, entry.entry_id, cid, 0.0, 4000.0)  # noqa: SLF001
+    finally:
+        hass.data[DOMAIN][entry.entry_id] = manager
+    assert task.state == task_registry.STATE_ERROR
+    assert task.error == "device unavailable"
+    assert manager.profile_store.find_stored_cycle(cid)[0]["duration"] == 3600.0
+
+
+async def test_the_trim_service_waits_for_a_panel_trim(hass: HomeAssistant, booted) -> None:
+    """The panel's trim holds the per-entry write lock across its recorder read;
+    the service must wait for it, not trim the trace under it (PR #539 review)."""
+    import asyncio  # noqa: PLC0415
+
+    from homeassistant.helpers import device_registry as dr  # noqa: PLC0415
+
+    entry, manager, _start, cid = booted
+    device = dr.async_get(hass).async_get_device(identifiers={(DOMAIN, entry.entry_id)})
+    lock = ws_api._entry_write_lock(hass, entry.entry_id)  # noqa: SLF001
+    await lock.acquire()
+    call = hass.async_create_task(hass.services.async_call(
+        DOMAIN, "trim_cycle",
+        {"device_id": device.id, "cycle_id": cid, "trim_start_s": 0, "trim_end_s": 1800},
+        blocking=True,
+    ))
+    await asyncio.sleep(0.05)
+    assert not call.done()
+    assert manager.profile_store.find_stored_cycle(cid)[0]["duration"] == 3600.0
+    lock.release()
+    await call
+    assert manager.profile_store.find_stored_cycle(cid)[0]["duration"] == 1800.0

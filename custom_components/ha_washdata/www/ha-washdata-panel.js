@@ -14241,15 +14241,19 @@ class HaWashdataPanel extends HTMLElement {
     if (!m || m.type !== 'cycle-detail' || m.cycleId !== cycleId) return;
     const curve = m.curve;
     if (!curve || curve.is_reference || !(curve.samples || []).length) { m.ext = { loading: false, data: null }; return; }
-    if (m.ext && (m.ext.loading || m.ext.data)) return;
-    m.ext = { loading: true, data: null };
+    // Asked again on every entry into Trim (the recorder keeps recording after
+    // the cycle), but never twice at once.
+    if (m.ext && m.ext.loading) return;
+    const prev = (m.ext && m.ext.data) || null;
+    m.ext = { loading: true, data: prev };
     let data = null;
     try {
       data = await this._ws({ type: `${_DOMAIN}/get_cycle_context`, entry_id: entryId, cycle_id: cycleId, before_s: 0, after_s: _TRIM_EXTEND_MAX_S });
     } catch (_) { data = null; }
     const cur = this._modal;
     if (!cur || cur.type !== 'cycle-detail' || cur.cycleId !== cycleId || cur.entryId !== entryId) return;
-    cur.ext = { loading: false, data };
+    // A failed refetch keeps what an earlier one returned.
+    cur.ext = { loading: false, data: data || prev };
     if (cur.mode !== 'trim') return;
     // The render replaces the canvas, and its pointerup never reaches the old
     // one: a drag left set would follow the pointer with no button down. End it

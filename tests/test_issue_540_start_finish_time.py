@@ -89,3 +89,17 @@ async def test_a_restored_cycle_counts_from_its_own_start(hass, freezer) -> None
     expected = dt_util.as_local(now + timedelta(hours=1)).strftime("%H:%M")
     assert mgr._start_finish_time(now) == expected  # noqa: SLF001
     await mgr.async_shutdown()
+
+
+async def test_a_restored_cycle_leaves_out_its_user_pause(hass, freezer) -> None:
+    """A restored cycle carries its user-pause total: 90 min since the start with
+    60 of them paused leaves 90 of a 2 h program (PR #539 review)."""
+    mgr = await boot(hass, make_entry(hass))
+    now = dt_util.utcnow()
+    mgr._cycle_start_time = None  # noqa: SLF001
+    mgr.detector._current_cycle_start = now - timedelta(minutes=90)  # noqa: SLF001
+    mgr._total_user_paused_seconds = 3600.0  # noqa: SLF001
+    mgr._matched_profile_duration = 7200.0  # noqa: SLF001
+    expected = dt_util.as_local(now + timedelta(minutes=90)).strftime("%H:%M")
+    assert mgr._start_finish_time(now) == expected  # noqa: SLF001
+    await mgr.async_shutdown()

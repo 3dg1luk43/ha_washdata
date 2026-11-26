@@ -35,7 +35,7 @@ import json
 import math
 import sqlite3
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -55,10 +55,15 @@ _UNIT_SCALE = {"W": 1.0, "kW": 1000.0, "mW": 0.001}
 
 
 def _ts(value: Any) -> float | None:
+    # An offset-less stamp (an imported or hand-edited cycle) is UTC, as the
+    # WS trim path reads it (`dt_util.as_utc`), whatever this host's zone.
     try:
-        return datetime.fromisoformat(str(value)).timestamp()
+        parsed = datetime.fromisoformat(str(value))
     except (TypeError, ValueError):
         return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.timestamp()
 
 
 class Recorder:

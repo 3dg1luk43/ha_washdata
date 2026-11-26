@@ -125,3 +125,16 @@ test('the start lands on a recorded reading past the trace too', async ({ page }
   await expect(start).toHaveValue('2400');
   await expect(page.locator('#wd-trim-end')).toHaveValue('2440');
 });
+
+test('re-entering Trim asks the recorder again', async ({ page }) => {
+  // The recorder keeps recording after an early end: a later visit to Trim must
+  // see the readings since, not the first answer (PR #539 review).
+  await bootWith(page, {});
+  await openTrim(page);
+  const first = (await assertWsCalled(page, 'ha_washdata/get_cycle_context')).length;
+  await page.locator('button[data-maction="cyc-view"]').click();
+  await page.locator('button[data-maction="cyc-trim"]').click();
+  await expect(page.locator('#wd-trim-end')).toBeVisible();
+  await expect.poll(async () => (await assertWsCalled(page, 'ha_washdata/get_cycle_context')).length)
+    .toBe(first + 1);
+});

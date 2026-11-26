@@ -1461,7 +1461,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     translation_key="trim_invalid_range",
                 )
 
-            ok = await store.trim_cycle_power_data(cycle_id, trim_start_s, trim_end_s)
+            from .ws_api import (  # pylint: disable=import-outside-toplevel
+                _entry_write_lock,
+            )
+
+            # Under the panel's per-entry write lock: its trim holds it across the
+            # recorder read of an extension (#536), and a trim run in that await
+            # would move the trace the extension is appended to.
+            async with _entry_write_lock(hass, entry_id):
+                ok = await store.trim_cycle_power_data(cycle_id, trim_start_s, trim_end_s)
             if not ok:
                 raise ServiceValidationError(
                     translation_domain=DOMAIN,
