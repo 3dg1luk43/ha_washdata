@@ -408,3 +408,58 @@ async def test_the_trim_service_waits_for_a_panel_trim(hass: HomeAssistant, boot
     lock.release()
     await call
     assert manager.profile_store.find_stored_cycle(cid)[0]["duration"] == 1800.0
+
+
+async def test_the_service_reads_its_default_end_once_it_holds_the_lock(
+    hass: HomeAssistant, booted
+) -> None:
+    """Without trim_end_s the service trims to the trace's end: read after the
+    wait, an extension that finished meanwhile is kept (PR #539 review)."""
+    import asyncio  # noqa: PLC0415
+
+    from homeassistant.helpers import device_registry as dr  # noqa: PLC0415
+
+    entry, manager, _start, cid = booted
+    store = manager.profile_store
+    device = dr.async_get(hass).async_get_device(identifiers={(DOMAIN, entry.entry_id)})
+    lock = ws_api._entry_write_lock(hass, entry.entry_id)  # noqa: SLF001
+    await lock.acquire()
+    call = hass.async_create_task(hass.services.async_call(
+        DOMAIN, "trim_cycle",
+        {"device_id": device.id, "cycle_id": cid, "trim_start_s": 0}, blocking=True,
+    ))
+    await asyncio.sleep(0.05)
+    ext = cycle_extension_points(3600.0, 30.0, [(4000.0, 3.3)], 4000.0, 0)
+    assert await store.trim_cycle_power_data(cid, 0.0, 4000.0, extension=ext)
+    lock.release()
+    await call
+    assert store.find_stored_cycle(cid)[0]["duration"] == 4000.0
+
+
+async def test_the_service_reports_a_trim_its_unload_dropped(
+    hass: HomeAssistant, booted
+) -> None:
+    """An unload during the trim retires the store, whose save is skipped: the
+    service must not report success (PR #539 review)."""
+    from homeassistant.exceptions import ServiceValidationError  # noqa: PLC0415
+    from homeassistant.helpers import device_registry as dr  # noqa: PLC0415
+
+    entry, manager, _start, cid = booted
+    store = manager.profile_store
+    device = dr.async_get(hass).async_get_device(identifiers={(DOMAIN, entry.entry_id)})
+
+    async def retire_during_trim(*_a, **_k):
+        store._store.retired = True  # noqa: SLF001
+        return True
+
+    try:
+        with patch.object(store, "trim_cycle_power_data", new=retire_during_trim), \
+                pytest.raises(ServiceValidationError) as err:
+            await hass.services.async_call(
+                DOMAIN, "trim_cycle",
+                {"device_id": device.id, "cycle_id": cid, "trim_start_s": 0, "trim_end_s": 1800},
+                blocking=True,
+            )
+    finally:
+        store._store.retired = False  # noqa: SLF001
+    assert err.value.translation_key == "integration_not_loaded"

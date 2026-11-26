@@ -14257,8 +14257,12 @@ class HaWashdataPanel extends HTMLElement {
     if (cur.mode !== 'trim') return;
     // The render replaces the canvas, and its pointerup never reaches the old
     // one: a drag left set would follow the pointer with no button down. End it
-    // where it is, as a release would.
-    if (cur.drag) { cur.drag = null; this._snapTrimBounds(); }
+    // where it is, as a release would. A refetch can also bring the limit in
+    // (a run started since): an end past it is pulled back onto a reading.
+    const lim = this._trimEndLimit(cur);
+    const pastLimit = cur.trim && cur.trim.end > lim;
+    if (pastLimit) cur.trim.end = lim;
+    if (cur.drag || pastLimit) { cur.drag = null; this._snapTrimBounds(); }
     this._render();
   }
 

@@ -138,3 +138,20 @@ test('re-entering Trim asks the recorder again', async ({ page }) => {
   await expect.poll(async () => (await assertWsCalled(page, 'ha_washdata/get_cycle_context')).length)
     .toBe(first + 1);
 });
+
+test('a refetch that brings the limit in pulls the end back', async ({ page }) => {
+  // The end sat at 2440; a run has started at 2000 since: the refetch must not
+  // leave the end past it, off the chart and still applied (PR #539 review).
+  await bootWith(page, {});
+  await openTrim(page);
+  await setEnd(page, '2440');
+  await expect(page.locator('#wd-trim-end')).toHaveValue('2440');
+  await page.locator('button[data-maction="cyc-view"]').click();
+  await page.evaluate(() => {
+    const w = window as any;
+    const prev = w.__ws_handlers['ha_washdata/get_cycle_context'];
+    w.__ws_handlers['ha_washdata/get_cycle_context'] = (msg: any) => ({ ...prev(msg), next_start_s: 2000 });
+  });
+  await page.locator('button[data-maction="cyc-trim"]').click();
+  await expect(page.locator('#wd-trim-end')).toHaveValue('1800');
+});

@@ -5,7 +5,7 @@
 """Does a cycle's end moved past its trace from the recorder rebuild what was there? (#536)
 
     python3 devtools/extend_end_eval.py --store STORE.json --db home-assistant_v2.db \\
-        --entity sensor.x_power [--cut-min 5,15,30,60] [--keepalive S] [--json OUT]
+        --entity sensor.x_power [--cut-min 5,15,30,60] [--keepalive S] [--ha-tz ZONE] [--json OUT]
 
 Trim can move a cycle's end past its stored trace: the readings come from the power
 sensor's recorder history (``ws_api._trim_extension`` ->
@@ -36,6 +36,7 @@ import math
 import sqlite3
 import sys
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from pathlib import Path
 from typing import Any
 
@@ -54,15 +55,19 @@ from custom_components.ha_washdata.trace_codec import decode_store_payload  # no
 _UNIT_SCALE = {"W": 1.0, "kW": 1000.0, "mW": 0.001}
 
 
+# Home Assistant's configured zone (`--ha-tz`): an offset-less start_time (an
+# imported or hand-edited cycle) is read in it, as the WS trim path reads it
+# (`dt_util.as_utc` assumes DEFAULT_TIME_ZONE), whatever this host's zone.
+_HA_TZ: Any = timezone.utc
+
+
 def _ts(value: Any) -> float | None:
-    # An offset-less stamp (an imported or hand-edited cycle) is UTC, as the
-    # WS trim path reads it (`dt_util.as_utc`), whatever this host's zone.
     try:
         parsed = datetime.fromisoformat(str(value))
     except (TypeError, ValueError):
         return None
     if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=timezone.utc)
+        parsed = parsed.replace(tzinfo=_HA_TZ)
     return parsed.timestamp()
 
 
@@ -158,7 +163,14 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--cut-min", default="5,15,30,60")
     ap.add_argument("--keepalive", type=float, default=30.0, help="the device's watchdog interval, s")
     ap.add_argument("--json")
+    ap.add_argument("--ha-tz", default="UTC",
+                    help="Home Assistant's time zone (IANA name), for offset-less start times")
     args = ap.parse_args(argv)
+    global _HA_TZ  # noqa: PLW0603 - read by _ts
+    try:
+        _HA_TZ = ZoneInfo(args.ha_tz)
+    except (ZoneInfoNotFoundError, ValueError):
+        ap.error(f"unknown time zone {args.ha_tz!r}")
     try:
         cuts = [float(c) * 60 for c in args.cut_min.split(",") if c.strip()]
         payload = json.loads(Path(args.store).read_text(encoding="utf-8"))
