@@ -62,6 +62,8 @@ jobs:
               'Problem or Motivation', 'Proposed Solution', 'Related Device Type',
               'Alternatives Considered', 'Contributing an Implementation',
               'Page / Section', 'What is Wrong or Missing?', 'Suggested Change',
+              'No Evidence Needed', 'Export / Diagnostics / Log File',
+              'No Device Data Needed', 'Device Data',
             ];
             const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const hasTemplateHeading = KNOWN_HEADINGS.some(
@@ -220,10 +222,12 @@ jobs:
                 'Describe the Bug', 'Device Type', 'WashData Integration Version',
                 'Home Assistant Version', 'Reproduction Steps', 'Expected Behavior',
                 'Logs / Error Evidence', 'Contributing a Fix',
+                'No Evidence Needed', 'Export / Diagnostics / Log File',
               ],
               'feature request': [
                 'Problem or Motivation', 'Proposed Solution', 'Related Device Type',
                 'Alternatives Considered', 'Contributing an Implementation',
+                'No Device Data Needed', 'Device Data',
               ],
               'documentation': [
                 'Page / Section', 'What is Wrong or Missing?', 'Suggested Change',
@@ -265,7 +269,7 @@ jobs:
        (github.event_name == 'issues' && github.event.issue.pull_request == null))
 
     steps:
-      - name: Validate bug report completeness
+      - name: Validate bug report / feature request completeness
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
@@ -277,10 +281,12 @@ jobs:
               labels: [],
             } : context.payload.issue;
 
-            // The `bug` gate lives here rather than in the job's `if:` because the event
+            // The label gate lives here rather than in the job's `if:` because the event
             // payload is a snapshot taken BEFORE restore-template-label ran. Re-read the
             // issue so a label restored moments ago counts (#399, #400 were skipped
-            // outright because the payload had no labels at all).
+            // outright because the payload had no labels at all). A bug report gets
+            // every check; a feature request only the device-data one.
+            let kind = 'bug';
             if (!isDryRun) {
               const fresh = await github.rest.issues.get({
                 owner: context.repo.owner,
@@ -289,10 +295,16 @@ jobs:
               });
               issue = fresh.data;
               const names = (issue.labels || []).map(l => (typeof l === 'string' ? l : l.name));
-              if (!names.includes('bug')) {
-                console.log(`#${issue.number}: not labelled "bug" (${names.join(', ') || 'no labels'}) - skipping bug validation.`);
+              if (names.includes('bug')) {
+                kind = 'bug';
+              } else if (names.includes('feature request')) {
+                kind = 'feature request';
+              } else {
+                console.log(`#${issue.number}: not labelled "bug" or "feature request" (${names.join(', ') || 'no labels'}) - skipping validation.`);
                 return;
               }
+            } else if (/^#{1,6}[ \t]+Problem or Motivation(?=[ \t]|$)/im.test(issue.body || '')) {
+              kind = 'feature request';
             }
 
             const body = issue.body || '';
@@ -321,6 +333,51 @@ jobs:
               return m ? m[1].trim() : '';
             };
 
+            // Evidence (#541-era template, 2026-11-26): a checkbox says the report needs
+            // none; unticked, it needs an attached file or pasted log lines. N/A in the
+            // logs no longer counts. A body without the checkbox heading came from the
+            // older template and keeps its rule (an explained N/A is enough).
+            const hasHeading = label => new RegExp(
+              '^#{1,6}[ \\t]+' + escapeRe(label) + '(?=[ \\t]|$)', 'im').test(body);
+            // GitHub renders a ticked form checkbox as `- [X] label`.
+            const isTicked = label => /^[ \t]*[-*][ \t]+\[[xX]\]/m.test(fieldBlock(label));
+            // A file dragged into any field: `[name](https://github.com/user-attachments/files/...)`
+            // (older uploads: `.../<owner>/<repo>/files/...`). An image is not evidence.
+            const hasFile = /https:\/\/github\.com\/(?:user-attachments\/files\/|[^)\s]+\/files\/)/.test(body);
+            // Pasted log lines: Home Assistant's log format, the panel's Logs export
+            // (ISO stamp + level), a traceback, or a line naming the integration's logger.
+            const LOG_LINE = [
+              /^\s*\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(?:[.,]\d+)?Z?\s+(?:DEBUG|INFO|WARNING|ERROR|CRITICAL)\b/m,
+              /Traceback \(most recent call last\)/,
+              /custom_components[./]ha_washdata/,
+              /^\s*Logger:\s+\S+/m,
+            ];
+            const stripFence = t => t.replace(/^```[^\n]*\n?/, '').replace(/\n?```[ \t]*$/, '').trim();
+            const looksLikeLogs = t => LOG_LINE.some(re => re.test(t));
+            const EXPORT_HOWTO =
+              'To get the WashData export: WashData panel → pick the appliance → **Advanced** → **Diagnostics** → **Export / Import** → ' +
+              '**Quick export everything**, then drag the downloaded `.json` file into the issue. WashData\'s logs: the panel\'s **Logs** button → **Export**. ' +
+              '(Both are explained step by step in the issue form; see also the [Export and Import](https://github.com/3dg1luk43/ha_washdata/wiki/Export-and-Import) page.)';
+
+            if (kind === 'feature request') {
+              // Only the template with the checkbox is checked: an older request was
+              // never validated, and a "more info required" a maintainer set on it by
+              // hand must not be cleared by the next edit.
+              if (!hasHeading('No Device Data Needed')) {
+                console.log(`#${issue.number}: feature request without the device-data field - not validated.`);
+                return;
+              }
+              if (!isTicked('No Device Data Needed') && !hasFile &&
+                  !looksLikeLogs(stripFence(fieldBlock('Device Data')))) {
+                problems.push(
+                  '**Device Data** is missing. A request about how your appliance\'s cycles are detected, recognised or timed can only be judged on your data, so please attach the **WashData export**. ' +
+                  EXPORT_HOWTO + ' ' +
+                  'If the request does not depend on your appliance\'s data (a new option, sensor, notification or panel change), tick **No Device Data Needed** instead.'
+                );
+              }
+            }
+
+            if (kind === 'bug') {
             // 1. Device Brand & Model - must not be blank or the placeholder
             const brand = fieldLine('Device Brand & Model');
             const brandIsNA = /^n\/?a$/i.test(brand);
@@ -398,33 +455,47 @@ jobs:
               problems.push('**Home Assistant Version** is missing. You can find it in Settings → About.');
             }
 
-            // 4. Logs / Error Evidence - must contain actual log/error output, an attached file, or a clear N/A with stated reason
-            // The form renders this field with `render: shell`, so whatever the reporter
+            // 4. Evidence
+            // The form renders the logs field with `render: shell`, so whatever the reporter
             // typed arrives inside a ```shell fence: read what is inside it, or an
             // explained N/A never matched and every one was flagged (#533, #535).
-            const logContent = fieldBlock('Logs / Error Evidence')
-              .replace(/^```[^\n]*\n?/, '').replace(/\n?```[ \t]*$/, '').trim();
-            // Accept "N/A" / "NA" only when a reason follows on the same line
-            // (e.g. "N/A - crashes before logs"), not a bare "N/A".
-            const logIsExplainedNA =
-              /^n\/?a(?:[ \t]*[-:][ \t]*|[ \t]+)\S/i.test(logContent);
-            // Detect GitHub file attachments (pasted as markdown links)
-            const hasAttachment = /https:\/\/github\.com\/[^)]+\/files\//.test(logContent) ||
-              /https:\/\/github\.com\/user-attachments\//.test(logContent);
-            const hasLogs = logContent &&
-              logContent !== '_No response_' &&
-              logContent !== 'Paste log output or error messages here, or describe what file(s) you have attached above...' &&
-              (logContent.length > 50 || hasAttachment);
-            if (!hasLogs && !logIsExplainedNA) {
-              problems.push(
-                '**Logs / Error Evidence** are missing or appear empty. This is the most important piece of information for diagnosing bugs. ' +
-                'Please paste any relevant logs, error messages, or console output. At least one complete log line is enough - the section must contain more than 50 characters of actual error text (a bare `Error: null` passes the placeholder check but fails the length gate; paste the surrounding context). Debug logs are ideal when available. ' +
-                'See the **Logs / Error Evidence** section of the issue form for instructions on enabling debug logging. ' +
-                'If logs are **genuinely not applicable** to this report (for example: a documentation typo, a translation string fix, or a pure UI/config-flow layout issue where no runtime code path is exercised), ' +
-                'replace the placeholder with `N/A` followed by a short one-line reason - for example: `N/A - typo in README, no runtime behavior involved`. ' +
-                'Do not write `N/A` just because collecting logs is inconvenient; bug reports without logs and without a valid N/A reason cannot be investigated.'
-              );
+            const logContent = stripFence(fieldBlock('Logs / Error Evidence'));
+            if (hasHeading('No Evidence Needed')) {
+              const fileText = stripFence(fieldBlock('Export / Diagnostics / Log File'));
+              if (!isTicked('No Evidence Needed') && !hasFile &&
+                  !looksLikeLogs(logContent) && !looksLikeLogs(fileText)) {
+                problems.push(
+                  '**Evidence** is missing. Bugs about how a cycle was detected, recognised or timed can only be investigated on your data: ' +
+                  'attach the **WashData export** (best), a diagnostics or log file, or paste log lines (a line with its timestamp and level, or a traceback). ' +
+                  EXPORT_HOWTO + ' ' +
+                  'If no export or log could show the problem (a typo, a wrong translation, a layout problem in the panel), tick **No Evidence Needed** instead.'
+                );
+              }
+            } else {
+              // The older template (no checkbox): logs, an attached file, or an explained N/A.
+              // Accept "N/A" / "NA" only when a reason follows on the same line
+              // (e.g. "N/A - crashes before logs"), not a bare "N/A".
+              const logIsExplainedNA =
+                /^n\/?a(?:[ \t]*[-:][ \t]*|[ \t]+)\S/i.test(logContent);
+              // Detect GitHub file attachments (pasted as markdown links)
+              const hasAttachment = /https:\/\/github\.com\/[^)]+\/files\//.test(logContent) ||
+                /https:\/\/github\.com\/user-attachments\//.test(logContent);
+              const hasLogs = logContent &&
+                logContent !== '_No response_' &&
+                logContent !== 'Paste log output or error messages here, or describe what file(s) you have attached above...' &&
+                (logContent.length > 50 || hasAttachment);
+              if (!hasLogs && !logIsExplainedNA) {
+                problems.push(
+                  '**Logs / Error Evidence** are missing or appear empty. This is the most important piece of information for diagnosing bugs. ' +
+                  'Please paste any relevant logs, error messages, or console output. At least one complete log line is enough - the section must contain more than 50 characters of actual error text (a bare `Error: null` passes the placeholder check but fails the length gate; paste the surrounding context). Debug logs are ideal when available. ' +
+                  'See the **Logs / Error Evidence** section of the issue form for instructions on enabling debug logging. ' +
+                  'If logs are **genuinely not applicable** to this report (for example: a documentation typo, a translation string fix, or a pure UI/config-flow layout issue where no runtime code path is exercised), ' +
+                  'replace the placeholder with `N/A` followed by a short one-line reason - for example: `N/A - typo in README, no runtime behavior involved`. ' +
+                  'Do not write `N/A` just because collecting logs is inconvenient; bug reports without logs and without a valid N/A reason cannot be investigated.'
+                );
+              }
             }
+            }  // kind === 'bug'
 
 
             // ── Label management ─────────────────────────────────────────────────

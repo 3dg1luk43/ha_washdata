@@ -64,6 +64,46 @@ body:
     validations:
       required: false
 
+  - type: markdown
+    attributes:
+      value: |
+        ## Data from your appliance
+
+        A request about how your appliance's cycles are **detected, recognised or timed** (a program that is not recognised, an end that comes too early or too late, a phase that is not seen) can only be judged on your data: attach the **WashData export**. A request for something new (an option, a sensor, a notification text, a panel change) needs none: tick **No Device Data Needed**.
+
+        <details>
+        <summary><b>How to download the WashData export</b></summary>
+
+        1. Open the **WashData** panel from the Home Assistant sidebar (as an administrator).
+        2. Pick the appliance in the device bar at the top.
+        3. Open the **Advanced** tab, then **Diagnostics** and **Export / Import**.
+        4. Press **Quick export everything**. Your browser downloads a `.json` file (about 2 MB on a large install).
+        5. Drag that file into the **Device Data** field below. GitHub takes `.json` files up to 25 MB; zip it if it is larger.
+
+        The export holds this appliance's cycles, programs and WashData settings (entity ids included). It never contains passwords or tokens.
+
+        </details>
+
+  - type: checkboxes
+    id: no_device_data
+    attributes:
+      label: No Device Data Needed
+      description: >
+        Tick this when the request does not depend on how your appliance's cycles are detected, recognised or timed. Leave it unticked
+        otherwise: the request then needs the attached WashData export, and is flagged without it.
+      options:
+        - label: This request needs no data from my appliance (a new option, sensor, notification or panel change).
+          required: false
+
+  - type: textarea
+    id: device_data
+    attributes:
+      label: Device Data
+      description: Drag the WashData export (`.json`) here, and any log file (`.txt`) that shows the behaviour. Each file is attached as a link.
+      placeholder: "Drop the WashData export here..."
+    validations:
+      required: false
+
   - type: textarea
     id: alternatives
     attributes:

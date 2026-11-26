@@ -295,3 +295,125 @@ def test_logs_inside_the_form_fence_are_read(logs, flagged):
     res = _run([_scenario("logs", body, ["bug"])])["logs"]
     comments = res["validate"]["comments"]
     assert any("Logs / Error Evidence" in c for c in comments) is flagged
+
+
+# --- the evidence checkbox (2026-11-26) ------------------------------------------
+
+TEMPLATES = REPO / ".github" / "ISSUE_TEMPLATE"
+FILE_LINK = "[washdata_export.json](https://github.com/user-attachments/files/123456/washdata_export.json)"
+HA_LOG = "2026-11-25 20:48:07.210 WARNING (MainThread) [custom_components.ha_washdata.manager] [Washer] end"
+PANEL_LOG = "2026-11-25T20:48:07.210Z INFO Profile match attempt: name=Cotton, confidence=0.81"
+
+
+def _new_bug_body(*, ticked: bool = False, files: str = "_No response_",
+                  logs: list[str] | None = None) -> str:
+    """A bug report as the current web form renders it (checkbox + files field)."""
+    body = _bug_body("###", version="0.5.5")
+    head, rest = body.split("### Logs / Error Evidence\n", 1)
+    tail = rest[rest.index("\n#"):]
+    box = "- [X]" if ticked else "- [ ]"
+    evidence = "\n".join([
+        "### No Evidence Needed",
+        "",
+        f"{box} This report needs no export or logs (for example a typo, a wrong translation, or a layout problem in the panel).",
+        "",
+        "### Export / Diagnostics / Log File",
+        "",
+        files,
+        "",
+        "### Logs / Error Evidence",
+        "",
+        *(logs if logs is not None else ["_No response_"]),
+        "",
+    ])
+    return head + evidence + tail.lstrip("\n")
+
+
+def _new_fr_body(*, ticked: bool = False, data: str = "_No response_") -> str:
+    box = "- [X]" if ticked else "- [ ]"
+    return "\n".join([
+        "### Before You Submit", "", "- [X] searched", "",
+        "### Problem or Motivation", "", "The anti-crease tail is not recognised.", "",
+        "### Proposed Solution", "", "Recognise it by its own shape.", "",
+        "### Related Device Type", "", "Washing Machine", "",
+        "### No Device Data Needed", "",
+        f"{box} This request needs no data from my appliance (a new option, sensor, notification or panel change).", "",
+        "### Device Data", "", data, "",
+        "### Alternatives Considered", "", "_No response_", "",
+        "### Contributing an Implementation", "", "- [ ] no",
+    ])
+
+
+def _flagged(res: dict, field: str) -> bool:
+    return any(field in c for c in res["validate"]["comments"])
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "flagged"),
+    [
+        ({"ticked": True}, False),
+        ({}, True),
+        # N/A no longer waives it: the checkbox does.
+        ({"logs": ["```shell", "N/A - happens on every cycle", "```"]}, True),
+        # Prose is not a log line, however long.
+        ({"logs": ["```shell", "The cycle ended about twenty minutes too early again yesterday evening.", "```"]}, True),
+        ({"files": FILE_LINK}, False),
+        ({"logs": ["```shell", HA_LOG, "```"]}, False),
+        ({"logs": ["```shell", PANEL_LOG, "```"]}, False),
+        ({"logs": ["```shell", "Traceback (most recent call last):", '  File "x.py"', "```"]}, False),
+        # A screenshot is not evidence.
+        ({"files": '<img src="https://github.com/user-attachments/assets/abc" />'}, True),
+    ],
+)
+def test_the_evidence_checkbox_or_strict_evidence(kwargs, flagged):
+    res = _run([_scenario("ev", _new_bug_body(**kwargs), ["bug"])])["ev"]
+    assert _flagged(res, "**Evidence** is missing") is flagged
+    assert ("more info required" in res["validate"]["addedLabels"]) is flagged
+    if flagged:
+        comment = res["validate"]["comments"][0]
+        assert "Quick export everything" in comment and "No Evidence Needed" in comment
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "flagged"),
+    [
+        ({"ticked": True}, False),
+        ({}, True),
+        ({"data": FILE_LINK}, False),
+        ({"data": "I can share an export if needed."}, True),
+    ],
+)
+def test_a_feature_request_needs_its_data_or_the_checkbox(kwargs, flagged):
+    res = _run([_scenario("fr", _new_fr_body(**kwargs), ["feature request"])])["fr"]
+    assert _flagged(res, "**Device Data** is missing") is flagged
+    assert ("more info required" in res["validate"]["addedLabels"]) is flagged
+    # The bug-only checks never reach a feature request.
+    assert not _flagged(res, "WashData Integration Version")
+
+
+def test_a_feature_request_from_the_older_form_keeps_its_label_alone():
+    """A maintainer's hand-set "more info required" on an older request must not be
+    cleared by the validator now that it reads feature requests."""
+    body = _new_fr_body(ticked=True).replace("### No Device Data Needed", "### Something Else")
+    res = _run([_scenario("old-fr", body, ["feature request", "more info required"])])["old-fr"]
+    assert res["validate"]["removedLabels"] == []
+    assert res["validate"]["comments"] == []
+
+
+def _labels(template: str) -> set[str]:
+    data = yaml.safe_load((TEMPLATES / template).read_text(encoding="utf-8"))
+    return {f["attributes"]["label"] for f in data["body"] if f.get("type") != "markdown"}
+
+
+def test_the_validator_reads_fields_the_forms_have():
+    bug, fr = _labels("bug_report.yml"), _labels("feature_request.yml")
+    for label in ("No Evidence Needed", "Export / Diagnostics / Log File", "Logs / Error Evidence",
+                  "Device Brand & Model", "WashData Integration Version", "Home Assistant Version"):
+        assert label in bug, label
+    for label in ("No Device Data Needed", "Device Data", "Problem or Motivation"):
+        assert label in fr, label
+    # Every field of both forms is a heading the templateless gate knows.
+    known = _script("close-templateless-issues")
+    for label in bug | fr:
+        key = label.split(" (")[0]
+        assert f"'{key}'" in known, label
