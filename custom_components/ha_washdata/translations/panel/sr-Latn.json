@@ -1427,7 +1427,7 @@
       "label": "Poruka upozorenja pre kraja"
     },
     "notify_start_message": {
-      "doc": "Tekst koji se šalje kada ciklus počne. Promenljive šablona: {device}, {program}. Za svaku drugu promenljivu koristi se podrazumevani tekst.",
+      "doc": "Tekst koji se šalje kada ciklus počne. Promenljive šablona: {device}, {program}, {finish_time} (procenjeni završetak, npr. 14:30; ~14:30 se zasniva na uobičajenom trajanju rada uređaja i koristi se dok program nije poznat). Za svaku drugu promenljivu koristi se podrazumevani tekst.",
       "label": "Poruka pri startu"
     },
     "notify_start_services": {

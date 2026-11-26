@@ -1428,7 +1428,7 @@
       "label": "Eel-Lõpu Hoiatuse Sõnum"
     },
     "notify_start_message": {
-      "doc": "Tsükli alguses saadetav tekst. Malli muutujad: {device}, {program}. Muu muutuja korral kasutatakse vaiketeksti.",
+      "doc": "Tsükli alguses saadetav tekst. Malli muutujad: {device}, {program}, {finish_time} (eeldatav lõpp, nt 14:30; ~14:30 põhineb seadme tüüpilisel tööajal ja seda kasutatakse, kuni programm pole teada). Muu muutuja korral kasutatakse vaiketeksti.",
       "label": "Käivitamise Sõnum"
     },
     "notify_start_services": {

@@ -1445,7 +1445,7 @@
       "label": "Sporočilo opozorila pred koncem"
     },
     "notify_start_message": {
-      "doc": "Besedilo ob začetku cikla. Spremenljivke predloge: {device}, {program}. Pri vsaki drugi spremenljivki se uporabi privzeto besedilo.",
+      "doc": "Besedilo ob začetku cikla. Spremenljivke predloge: {device}, {program}, {finish_time} (ocenjeni konec, npr. 14:30; ~14:30 temelji na običajnem trajanju delovanja naprave in se uporablja, dokler program ni znan). Pri vsaki drugi spremenljivki se uporabi privzeto besedilo.",
       "label": "Sporočilo ob zagonu"
     },
     "notify_start_services": {

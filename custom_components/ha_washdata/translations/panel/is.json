@@ -1428,7 +1428,7 @@
       "label": "Skilaboð forlokaviðvörunar"
     },
     "notify_start_message": {
-      "doc": "Meginmál sent þegar lota hefst. Sniðbreytur: {device}, {program}. Ef önnur breyta er notuð gildir sjálfgefni textinn.",
+      "doc": "Meginmál sent þegar lota hefst. Sniðbreytur: {device}, {program}, {finish_time} (áætlaður lokatími, t.d. 14:30; ~14:30 miðast við dæmigerðan keyrslutíma tækisins og er notað á meðan kerfið er óþekkt). Ef önnur breyta er notuð gildir sjálfgefni textinn.",
       "label": "Ræsingarskilaboð"
     },
     "notify_start_services": {

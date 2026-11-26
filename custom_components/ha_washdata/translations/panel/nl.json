@@ -1428,7 +1428,7 @@
       "label": "Bericht voor Pre-eindalert"
     },
     "notify_start_message": {
-      "doc": "Tekst die wordt verstuurd als een cyclus start. Sjabloonvariabelen: {device}, {program}. Bij elke andere variabele wordt de standaardtekst gebruikt.",
+      "doc": "Tekst die wordt verstuurd als een cyclus start. Sjabloonvariabelen: {device}, {program}, {finish_time} (geschatte eindtijd, bijv. 14:30; ~14:30 is gebaseerd op de typische looptijd van het apparaat en wordt gebruikt zolang het programma nog onbekend is). Bij elke andere variabele wordt de standaardtekst gebruikt.",
       "label": "Startbericht"
     },
     "notify_start_services": {

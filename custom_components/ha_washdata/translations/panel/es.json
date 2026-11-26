@@ -1392,7 +1392,7 @@
       "label": "Mensaje de la alerta previa al fin"
     },
     "notify_start_message": {
-      "doc": "Cuerpo enviado cuando comienza un ciclo. Variables de plantilla: {device}, {program}. Cualquier otra variable hace que se use el texto predeterminado.",
+      "doc": "Cuerpo enviado cuando comienza un ciclo. Variables de plantilla: {device}, {program}, {finish_time} (hora de finalización estimada, ej. 14:30; ~14:30 se basa en la duración habitual del aparato y se usa mientras no se conoce el programa). Cualquier otra variable hace que se use el texto predeterminado.",
       "label": "Mensaje de inicio"
     },
     "notify_start_services": {

@@ -1428,7 +1428,7 @@
       "label": "Melding for forhåndsvarsling"
     },
     "notify_start_message": {
-      "doc": "Tekst som sendes når en syklus starter. Malvariabler: {device}, {program}. Med andre variabler brukes standardteksten.",
+      "doc": "Tekst som sendes når en syklus starter. Malvariabler: {device}, {program}, {finish_time} (beregnet sluttid, f.eks. 14:30; ~14:30 bygger på apparatets typiske kjøretid og brukes mens programmet ikke er kjent). Med andre variabler brukes standardteksten.",
       "label": "Startmelding"
     },
     "notify_start_services": {

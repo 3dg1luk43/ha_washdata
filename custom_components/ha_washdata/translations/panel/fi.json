@@ -1428,7 +1428,7 @@
       "label": "Lopetusennakkoilmoituksen viesti"
     },
     "notify_start_message": {
-      "doc": "Syklin alkaessa lähetettävä teksti. Mallin muuttujat: {device}, {program}. Muulla muuttujalla käytetään oletustekstiä.",
+      "doc": "Syklin alkaessa lähetettävä teksti. Mallin muuttujat: {device}, {program}, {finish_time} (arvioitu valmistumisaika, esim. 14:30; ~14:30 perustuu laitteen tyypilliseen käyntiaikaan, ja sitä käytetään, kunnes ohjelma tunnistetaan). Muulla muuttujalla käytetään oletustekstiä.",
       "label": "Käynnistysviesti"
     },
     "notify_start_services": {

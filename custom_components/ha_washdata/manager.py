@@ -297,6 +297,9 @@ from .frontend import PANEL_URL_PATH
 
 _LOGGER = logging.getLogger(__name__)
 
+# The start message's typical run (#540): this many recent completed runs.
+_TYPICAL_RUN_CYCLES = 20
+
 # Sentinel "message" understood by the Home Assistant companion app as "dismiss the
 # card carrying this tag" rather than as text to display. It is only meaningful
 # alongside a `tag`, and only on mobile_app targets - see _send_notification_service,
@@ -1697,6 +1700,7 @@ class WashDataManager:
                         fallback_template=DEFAULT_NOTIFY_START_MESSAGE,
                         device=self.config_entry.title,
                         program=self._current_program,
+                        finish_time=self._start_finish_time(utc_now()),
                     )
                     # B4: append a peak-rate advisory tip when the current price is
                     # at/above the configured threshold. Purely informational.
@@ -6478,6 +6482,7 @@ class WashDataManager:
                         fallback_template=DEFAULT_NOTIFY_START_MESSAGE,
                         device=self.config_entry.title,
                         program=self._current_program,
+                        finish_time=self._start_finish_time(utc_now()),
                     )
                     # B4: append a peak-rate advisory tip when the current price is
                     # at/above the configured threshold. Purely informational.
@@ -7297,6 +7302,52 @@ class WashDataManager:
             return ""
         hours, mins = divmod(total, 60)
         return f"{hours} h {mins:02d} min" if hours else f"{mins} min"
+
+    def _start_finish_time(self, now: datetime) -> str:
+        """``{finish_time}`` of the start message (#540), as local ``HH:MM``.
+
+        The program's learned length when one is known (picked by hand and
+        armed for this cycle, or matched when the restart fallback sends the
+        message); otherwise the device's typical run, the median of its last
+        ``_TYPICAL_RUN_CYCLES`` completed runs, marked ``~`` as an estimate.
+        Empty with neither. The live updates carry the matched estimate later.
+        Never raises.
+        """
+        try:
+            expected = self._matched_profile_duration or None
+            prefix = ""
+            if not expected:
+                expected = self._typical_run_seconds()
+                prefix = "~"
+            if not expected or expected <= 0:
+                return ""
+            start = self._cycle_start_time or now
+            elapsed = max(0.0, (dt_util.as_utc(now) - dt_util.as_utc(start)).total_seconds())
+            finish = now + timedelta(seconds=max(0.0, float(expected) - elapsed))
+            return prefix + dt_util.as_local(finish).strftime("%H:%M")
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Could not estimate the start finish time", exc_info=True)
+            return ""
+
+    def _typical_run_seconds(self) -> float | None:
+        """Median length of the device's last ``_TYPICAL_RUN_CYCLES`` completed
+        runs (observed ones), or None without any. Never raises."""
+        try:
+            lengths: list[float] = []
+            for cycle in reversed(self.profile_store.get_past_cycles()):
+                if cycle.get("status") != "completed":
+                    continue
+                try:
+                    value = float(cycle.get("duration") or 0.0)
+                except (TypeError, ValueError, OverflowError):
+                    continue
+                if math.isfinite(value) and value > 0:
+                    lengths.append(value)
+                if len(lengths) >= _TYPICAL_RUN_CYCLES:
+                    break
+            return float(np.median(lengths)) if lengths else None
+        except Exception:  # pylint: disable=broad-exception-caught
+            return None
 
     @staticmethod
     def _format_vs_typical(

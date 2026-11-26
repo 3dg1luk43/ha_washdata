@@ -410,7 +410,7 @@ const _SETTINGS_SECTIONS = [
       { key: 'notify_icon_color', label: 'Notification Colour', type: 'color', def: '', placeholder: '#03A9F4',
         doc: 'Accent colour for this appliance\'s notifications, so washer, dryer and dishwasher are easy to tell apart. On iOS it fills the circle behind the icon and colours the Live Activity bar. Many Android phones (Samsung especially) ignore it. Use hex, e.g. #03A9F4. Blank: platform default.' },
       { key: 'notify_start_message', label: 'Start Message', type: 'textarea', def: '{device} started.',
-        doc: 'Body sent when a cycle starts. Template variables: {device}, {program}. Any other variable falls back to the default text.' },
+        doc: "Body sent when a cycle starts. Template variables: {device}, {program}, {finish_time} (estimated finish, e.g. 14:30; ~14:30 is the device's typical run, used while no program is known). Any other variable falls back to the default text." },
       { key: 'notify_finish_message', label: 'Finish Message', type: 'textarea', def: '{device} finished. Duration: {duration} min.', basic: true,
         doc: 'Body sent when a cycle finishes. Variables: {device}, {program}, {duration} (minutes), {duration_hm} (1 h 05 min), {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}, {status} (completed or force_stopped; interrupted cycles send nothing). Any other variable falls back to the default text.' },
       { key: 'notify_pre_complete_message', label: 'Live Update Message', type: 'textarea', def: '{device}: Less than {minutes} minutes remaining.',

@@ -1427,7 +1427,7 @@
       "label": "Poruka upozorenja prije završetka"
     },
     "notify_start_message": {
-      "doc": "Tekst koji se šalje kada ciklus započne. Varijable predloška: {device}, {program}. Za svaku drugu varijablu koristi se zadani tekst.",
+      "doc": "Tekst koji se šalje kada ciklus započne. Varijable predloška: {device}, {program}, {finish_time} (procijenjeni završetak, npr. 14:30; ~14:30 temelji se na uobičajenom trajanju rada uređaja i koristi se dok program nije poznat). Za svaku drugu varijablu koristi se zadani tekst.",
       "label": "Poruka za početak"
     },
     "notify_start_services": {

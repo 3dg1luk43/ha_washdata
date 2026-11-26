@@ -1373,7 +1373,7 @@
       "label": "Mesaj Alertă Înainte de Sfârșit"
     },
     "notify_start_message": {
-      "doc": "Corpul trimis când pornește un ciclu. Variabile de șablon: {device}, {program}. Cu orice altă variabilă se folosește textul implicit.",
+      "doc": "Corpul trimis când pornește un ciclu. Variabile de șablon: {device}, {program}, {finish_time} (ora estimată de finalizare, ex. 14:30; ~14:30 se bazează pe durata obișnuită a aparatului și se folosește cât timp programul nu este cunoscut). Cu orice altă variabilă se folosește textul implicit.",
       "label": "Mesaj de Pornire"
     },
     "notify_start_services": {

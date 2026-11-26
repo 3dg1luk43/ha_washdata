@@ -1441,7 +1441,7 @@
       "label": "Zpráva upozornění před koncem"
     },
     "notify_start_message": {
-      "doc": "Text odeslaný při spuštění cyklu. Proměnné šablony: {device}, {program}. U jakékoli jiné proměnné se použije výchozí text.",
+      "doc": "Text odeslaný při spuštění cyklu. Proměnné šablony: {device}, {program}, {finish_time} (odhadovaný konec, např. 14:30; ~14:30 vychází z typické doby běhu spotřebiče a použije se, dokud program není znám). U jakékoli jiné proměnné se použije výchozí text.",
       "label": "Startovní zpráva"
     },
     "notify_start_services": {

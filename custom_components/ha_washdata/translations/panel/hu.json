@@ -1401,7 +1401,7 @@
             "label": "Befejezés előtti riasztás üzenete"
         },
         "notify_start_message": {
-            "doc": "A ciklus indulásakor küldött szöveg. Sablonváltozók: {device}, {program}. Más változóval az alapértelmezett szöveget küldi.",
+            "doc": "A ciklus indulásakor küldött szöveg. Sablonváltozók: {device}, {program}, {finish_time} (becsült befejezés, pl. 14:30; a ~14:30 a készülék szokásos futásidején alapul, és addig használatos, amíg a program nem ismert). Más változóval az alapértelmezett szöveget küldi.",
             "label": "Indítási üzenet"
         },
         "notify_start_services": {

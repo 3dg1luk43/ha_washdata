@@ -1400,7 +1400,7 @@
             "label": "Mesazhi i alarmit para fundit"
         },
         "notify_start_message": {
-            "doc": "Teksti që dërgohet kur fillon një cikël. Variablat shabllon: {device}, {program}. Me çdo variabël tjetër përdoret teksti i paracaktuar.",
+            "doc": "Teksti që dërgohet kur fillon një cikël. Variablat shabllon: {device}, {program}, {finish_time} (fundi i vlerësuar, p.sh. 14:30; ~14:30 bazohet në kohëzgjatjen tipike të pajisjes dhe përdoret derisa programi të njihet). Me çdo variabël tjetër përdoret teksti i paracaktuar.",
             "label": "Mesazh nisje"
         },
         "notify_start_services": {
