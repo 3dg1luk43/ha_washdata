@@ -306,10 +306,6 @@
       "start": "Must be above Stop Threshold ({stop} W)",
       "stop": "Must be below Start Threshold ({start} W)"
     },
-    "min_power": {
-      "min_power": "Must be at or below Stop Threshold ({stop} W)",
-      "stop": "Must be at or above Min Power ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Must be greater than Watchdog Interval ({wi} s)",
       "watchdog": "Must be less than No-Update Timeout ({to} s)"
@@ -1143,7 +1139,13 @@
     "review_q_more": "{count} more to review",
     "review_q_more_one": "{count} more to review",
     "review_q_more_other": "{count} more to review",
-    "review_which_program": "Which program was it?"
+    "review_which_program": "Which program was it?",
+    "trim_extend_hint": "Grey: what Home Assistant recorded after the cycle. Drag the end into it to add it to the cycle.",
+    "trim_extend_note": "The end is past the recorded cycle: the readings Home Assistant recorded up to it are added.",
+    "extend_no_history": "Home Assistant has no readings of this plug after the cycle.",
+    "extend_overlaps": "The end cannot move past the start of the next cycle.",
+    "extend_too_far": "The end can move at most 4 h past the recorded cycle.",
+    "extend_not_live": "Only a cycle this device recorded can be extended."
   },
   "pg_desc": {
     "completion_min_seconds": "Shortest run that counts as a real cycle",
@@ -1357,6 +1359,9 @@
       "doc": "Treat the sensor turning OFF (not ON) as the end signal.",
       "label": "Invert External Trigger (trigger on OFF)"
     },
+    "interrupted_min_seconds": {
+      "label": "Interrupted Min"
+    },
     "learning_confidence": {
       "doc": "Lowest match score for labelling a finished cycle. A clear winner is labelled; a close call goes to the review queue in Cycles. Below this, nothing is labelled or asked. Keep it below Auto-Label Confidence.",
       "label": "Learning Confidence"
@@ -1478,7 +1483,7 @@
       "label": "Pre-End Alert Message"
     },
     "notify_start_message": {
-      "doc": "Body sent when a cycle starts. Template variables: {device}, {program}. Any other variable falls back to the default text.",
+      "doc": "Body sent when a cycle starts. Template variables: {device}, {program}, {finish_time} (estimated finish, e.g. 14:30; ~14:30 is the device's typical run, used while no program is known). Any other variable falls back to the default text.",
       "label": "Start Message"
     },
     "notify_start_services": {
@@ -2014,7 +2019,8 @@
     "copied": "Copied",
     "copy_failed": "Copy failed. Select the text and copy it by hand.",
     "automation_label_failed": "Automation created, but the WashData label or category could not be added.",
-    "review_answered": "Saved: {program}"
+    "review_answered": "Saved: {program}",
+    "cycle_extended": "Cycle end moved; the recorded readings were added"
   },
   "trend": {
     "down": "Trending down",

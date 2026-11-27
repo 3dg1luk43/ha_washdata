@@ -297,6 +297,9 @@ from .frontend import PANEL_URL_PATH
 
 _LOGGER = logging.getLogger(__name__)
 
+# The start message's typical run (#540): this many recent completed runs.
+_TYPICAL_RUN_CYCLES = 20
+
 # Sentinel "message" understood by the Home Assistant companion app as "dismiss the
 # card carrying this tag" rather than as text to display. It is only meaningful
 # alongside a `tag`, and only on mobile_app targets - see _send_notification_service,
@@ -1697,6 +1700,7 @@ class WashDataManager:
                         fallback_template=DEFAULT_NOTIFY_START_MESSAGE,
                         device=self.config_entry.title,
                         program=self._current_program,
+                        finish_time=self._start_finish_time(utc_now()),
                     )
                     # B4: append a peak-rate advisory tip when the current price is
                     # at/above the configured threshold. Purely informational.
@@ -6478,6 +6482,7 @@ class WashDataManager:
                         fallback_template=DEFAULT_NOTIFY_START_MESSAGE,
                         device=self.config_entry.title,
                         program=self._current_program,
+                        finish_time=self._start_finish_time(utc_now()),
                     )
                     # B4: append a peak-rate advisory tip when the current price is
                     # at/above the configured threshold. Purely informational.
@@ -7145,6 +7150,45 @@ class WashDataManager:
             return None
         return delta
 
+    def _count_finished_cycle(
+        self, cycle_data: dict[str, Any], odometer_before_add: int | None
+    ) -> tuple[int | None, int | None]:
+        """Count a just-stored run in the odometer and Total Cost, once, with no
+        await (the lifetime energy follows in :meth:`_add_finished_cycle_energy`).
+        Never raises.
+
+        C2: the odometer only ever increments, only on a real persisted cycle, so
+        milestones survive retention; #501 follow-up: Total Cost. Both in memory,
+        written with the lifetime-energy save. Returns ``(previous, current)``
+        odometer readings for the milestone check, ``(None, None)`` when it could
+        not be read.
+        """
+        prev_count: int | None = None
+        cur_count: int | None = None
+        if odometer_before_add is not None:
+            try:
+                prev_count = odometer_before_add
+                cur_count = prev_count + 1
+                self.profile_store.set_lifetime_cycle_count(cur_count)
+            except Exception:  # noqa: BLE001 - counter must never break cycle end
+                prev_count = None
+                cur_count = None
+        try:
+            self.profile_store.add_lifetime_cost(cycle_data.get("cost"))
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Failed to accumulate lifetime cost: %s", e)
+        return prev_count, cur_count
+
+    async def _add_finished_cycle_energy(self, cycle_data: dict[str, Any]) -> None:
+        """B1: the run's lifetime energy for the Energy dashboard
+        (TOTAL_INCREASING, so exactly once per persisted cycle). Never raises."""
+        try:
+            await self.profile_store.async_add_lifetime_energy_wh(
+                self._cycle_report_energy_wh(cycle_data)
+            )
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Failed to accumulate lifetime energy: %s", e)
+
     @staticmethod
     def _cycle_report_energy_wh(cycle_data: dict[str, Any]) -> float:
         """User-facing reported energy (Wh): meter value if present, else integrated.
@@ -7262,6 +7306,58 @@ class WashDataManager:
             return ""
         hours, mins = divmod(total, 60)
         return f"{hours} h {mins:02d} min" if hours else f"{mins} min"
+
+    def _start_finish_time(self, now: datetime) -> str:
+        """``{finish_time}`` of the start message (#540), as local ``HH:MM``.
+
+        The program's learned length when one is known (picked by hand and
+        armed for this cycle, or matched when the restart fallback sends the
+        message); otherwise the device's typical run, the median of its last
+        ``_TYPICAL_RUN_CYCLES`` completed runs, marked ``~`` as an estimate.
+        Empty with neither. The live updates carry the matched estimate later.
+        Never raises.
+        """
+        try:
+            expected = self._matched_profile_duration or None
+            prefix = ""
+            if not expected:
+                expected = self._typical_run_seconds()
+                prefix = "~"
+            if not expected or expected <= 0:
+                return ""
+            # From the detector's start, which a restore sets before any power
+            # event sets the manager's own, less the user-paused time (a restored
+            # cycle carries its pause total; a fresh start has none).
+            if self.detector.current_cycle_start is not None:
+                elapsed = float(self.net_elapsed_seconds)
+            else:
+                start = self._cycle_start_time or now
+                elapsed = max(0.0, (dt_util.as_utc(now) - dt_util.as_utc(start)).total_seconds())
+            finish = now + timedelta(seconds=max(0.0, float(expected) - elapsed))
+            return prefix + dt_util.as_local(finish).strftime("%H:%M")
+        except Exception:  # pylint: disable=broad-exception-caught
+            self._logger.debug("Could not estimate the start finish time", exc_info=True)
+            return ""
+
+    def _typical_run_seconds(self) -> float | None:
+        """Median length of the device's last ``_TYPICAL_RUN_CYCLES`` completed
+        runs (observed ones), or None without any. Never raises."""
+        try:
+            lengths: list[float] = []
+            for cycle in reversed(self.profile_store.get_past_cycles()):
+                if cycle.get("status") != "completed":
+                    continue
+                try:
+                    value = float(cycle.get("duration") or 0.0)
+                except (TypeError, ValueError, OverflowError):
+                    continue
+                if math.isfinite(value) and value > 0:
+                    lengths.append(value)
+                if len(lengths) >= _TYPICAL_RUN_CYCLES:
+                    break
+            return float(np.median(lengths)) if lengths else None
+        except Exception:  # pylint: disable=broad-exception-caught
+            return None
 
     @staticmethod
     def _format_vs_typical(
@@ -7627,6 +7723,8 @@ class WashDataManager:
         # any profile retention trimmed. Nothing else needs rebuilding (the nightly
         # maintenance still rebuilds them all).
         touched_profiles: list[str] = []
+        prev_lifetime_count: int | None = None
+        cur_lifetime_count: int | None = None
         try:
             retained = await self.profile_store.async_add_cycle(cycle_data)
             cycle_persisted = True
@@ -7635,6 +7733,29 @@ class WashDataManager:
             # a failed save keeps the gaps for the next cycle-end attempt.
             if restart_gaps_snapshot is not None:
                 self._restart_gaps.clear()
+            # The run's lifetime figures, counted with no await between the add
+            # and them: a reload cancelling a later await must not leave the stored
+            # run uncounted, and an import seeding Total Cost in one must not find
+            # the run stored and its cost still to come (PR #539).
+            prev_lifetime_count, cur_lifetime_count = self._count_finished_cycle(
+                cycle_data, odometer_before_add
+            )
+            # #480: a finished cycle of a program a maintenance task names ("Cotton
+            # 90" for the drum clean) logs that task as done. Only with a label the
+            # gate above wrote, in the same step as the odometer count: a due check
+            # in a later await must not see the new count with the old stamp and
+            # call the task due (PR #539).
+            if (
+                label_gate_ok
+                and cycle_data.get("profile_name")
+                and notif_rules.cycle_end_is_finish(cycle_data.get("status"))
+            ):
+                for task_id in self.profile_store.log_maintenance_done_by_program(cycle_data):
+                    self._logger.info(
+                        "Maintenance '%s' logged as done by program '%s'",
+                        task_id, cycle_data.get("profile_name"),
+                    )
+            await self._add_finished_cycle_energy(cycle_data)
             profile_name = cycle_data.get("profile_name")
             if profile_name:
                 touched_profiles.append(profile_name)
@@ -7653,51 +7774,6 @@ class WashDataManager:
                         )
         except Exception as e: # pylint: disable=broad-exception-caught
             self._logger.error("Failed to add cycle to store: %s", e)
-
-        # C2: bump the persisted lifetime cycle counter. Unlike ``cycle_count``
-        # (== len(history), which regresses when history is trimmed/merged), this
-        # monotonic counter only ever increments — and only on a real persisted
-        # cycle — so milestones stay correct across retention limits. Captured here
-        # for the milestone check below. The write is persisted by the lifetime-energy
-        # save immediately after (same store, one save).
-        prev_lifetime_count: int | None = None
-        cur_lifetime_count: int | None = None
-        if cycle_persisted and odometer_before_add is not None:
-            try:
-                prev_lifetime_count = odometer_before_add
-                cur_lifetime_count = prev_lifetime_count + 1
-                # In-memory only; persisted by the batched lifetime-energy save below.
-                self.profile_store.set_lifetime_cycle_count(cur_lifetime_count)
-            except Exception:  # noqa: BLE001 - counter must never break cycle end
-                prev_lifetime_count = None
-                cur_lifetime_count = None
-
-        # #480: a finished cycle of a program a maintenance task names ("Cotton 90"
-        # for the drum clean) logs that task as done. Only with a label the gate
-        # above wrote, after the odometer counts this cycle; persisted by the save
-        # below.
-        if (
-            cycle_persisted
-            and label_gate_ok
-            and cycle_data.get("profile_name")
-            and notif_rules.cycle_end_is_finish(cycle_data.get("status"))
-        ):
-            for task_id in self.profile_store.log_maintenance_done_by_program(cycle_data):
-                self._logger.info(
-                    "Maintenance '%s' logged as done by program '%s'",
-                    task_id, cycle_data.get("profile_name"),
-                )
-
-        # B1: accumulate lifetime energy for the HA Energy dashboard sensor. Runs
-        # exactly once per persisted cycle so the TOTAL_INCREASING meter never
-        # double-counts. Never breaks cycle end.
-        if cycle_persisted:
-            try:
-                await self.profile_store.async_add_lifetime_energy_wh(
-                    self._cycle_report_energy_wh(cycle_data)
-                )
-            except Exception as e:  # pylint: disable=broad-exception-caught
-                self._logger.debug("Failed to accumulate lifetime energy: %s", e)
 
         # Ensure cycle has a stable ID even if store add failed (or did not mutate).
         if not cycle_data.get("id"):
@@ -11169,6 +11245,11 @@ class WashDataManager:
     def lifetime_energy_kwh(self) -> float:
         """Lifetime accumulated energy (kWh) for the HA Energy dashboard sensor."""
         return round(self.profile_store.get_lifetime_energy_wh() / 1000.0, 3)
+
+    @property
+    def lifetime_cost(self) -> float | None:
+        """What every stored run has cost, for the Total Cost sensor (#501)."""
+        return self.profile_store.get_lifetime_cost()
 
     @property
     def lifetime_cycle_count(self) -> int:

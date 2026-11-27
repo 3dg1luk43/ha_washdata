@@ -474,6 +474,9 @@
       "last_cycle_cost": {
         "name": "Son Döngü Maliyeti"
       },
+      "total_cost": {
+        "name": "Toplam Maliyet"
+      },
       "last_cycle_start": {
         "name": "Son Döngü Başlangıcı"
       }

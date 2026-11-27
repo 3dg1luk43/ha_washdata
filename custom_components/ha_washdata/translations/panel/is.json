@@ -298,10 +298,6 @@
       "start": "Verður að vera yfir Stöðvunarþröskuldi ({stop} W)",
       "stop": "Verður að vera undir Ræsingarþröskuldi ({start} W)"
     },
-    "min_power": {
-      "min_power": "Verður að vera við eða undir Stöðvunarþröskuldi ({stop} W)",
-      "stop": "Verður að vera við eða yfir Lágmarksafli ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Verður að vera meira en Gæsluabil ({wi} s)",
       "watchdog": "Verður að vera minna en Engin-uppfærsla-tímamark ({to} s)"
@@ -1132,7 +1128,13 @@
     "review_q_more": "{count} í viðbót til yfirferðar",
     "review_q_more_one": "{count} í viðbót til yfirferðar",
     "review_q_more_other": "{count} í viðbót til yfirferðar",
-    "review_which_program": "Hvaða kerfi var það?"
+    "review_which_program": "Hvaða kerfi var það?",
+    "trim_extend_hint": "Grátt: það sem Home Assistant skráði eftir lotuna. Dragðu endann inn á gráa svæðið til að bæta því við lotuna.",
+    "trim_extend_note": "Endirinn er fyrir aftan skráðu lotuna: mælingunum sem Home Assistant skráði fram að honum er bætt við.",
+    "extend_no_history": "Home Assistant hefur engar mælingar frá þessari innstungu eftir lotuna.",
+    "extend_overlaps": "Ekki er hægt að færa endann fram yfir upphaf næstu lotu.",
+    "extend_too_far": "Hægt er að færa endann mest 4 klst. fram yfir skráðu lotuna.",
+    "extend_not_live": "Aðeins er hægt að lengja lotu sem þetta tæki skráði."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Uppþvottavél: sekúndur undir Stöðvunarþröskuldi frá síðustu virkni sem þarf til að ljúka biðinni eftir lokaútdælingu að lokinni væntanlegri lengd",
@@ -1334,6 +1336,9 @@
       "doc": "Líttu á það þegar skynjarinn fer í SLÖKKT (ekki KVEIKT) sem lokamerkið.",
       "label": "Snúa ytri kveikin (kvikna á SLÖKKT)"
     },
+    "interrupted_min_seconds": {
+      "label": "Lágm. lengd (Truflað)"
+    },
     "learning_confidence": {
       "doc": "Lægsta samsvörunarskor til að merkja lotu sem er lokið. Skýr sigurvegari er merktur; tvísýnt tilvik fer í yfirferðarbiðröðina í Lotum. Fyrir neðan þetta er ekkert merkt eða spurt. Hafðu það undir Sjálfvirku merkingaöryggi.",
       "label": "Námsöryggi"
@@ -1423,7 +1428,7 @@
       "label": "Skilaboð forlokaviðvörunar"
     },
     "notify_start_message": {
-      "doc": "Meginmál sent þegar lota hefst. Sniðbreytur: {device}, {program}. Ef önnur breyta er notuð gildir sjálfgefni textinn.",
+      "doc": "Meginmál sent þegar lota hefst. Sniðbreytur: {device}, {program}, {finish_time} (áætlaður lokatími, t.d. 14:30; ~14:30 miðast við dæmigerðan keyrslutíma tækisins og er notað á meðan kerfið er óþekkt). Ef önnur breyta er notuð gildir sjálfgefni textinn.",
       "label": "Ræsingarskilaboð"
     },
     "notify_start_services": {
@@ -2003,7 +2008,8 @@
     "copied": "Afritað",
     "copy_failed": "Afritun mistókst. Veldu textann og afritu handvirkt.",
     "automation_label_failed": "Sjálvvirkni búinn til, en WashData-merkimiðann eða flokkinn var ekki hægt að bæta við.",
-    "review_answered": "Vistað: {program}"
+    "review_answered": "Vistað: {program}",
+    "cycle_extended": "Endir lotunnar færður; skráðu mælingunum var bætt við"
   },
   "trend": {
     "down": "Stefnir niður",

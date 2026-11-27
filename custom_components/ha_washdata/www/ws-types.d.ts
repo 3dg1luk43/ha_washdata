@@ -139,6 +139,7 @@ export interface GetCycleContextResponse {
   after_s: number;
   trace_end_s: number;
   after_end_s: number;
+  next_start_s: number | null;
   before: ((number | null)[])[];
   after: ((number | null)[])[];
 }

@@ -78,6 +78,7 @@ echo "device id (service route): $DEVICE_B"
 echo
 echo "== restart (the listener has to come back with it)"
 $HACTL restart > /dev/null
+"$HERE/log_check.sh" --previous || FAIL=1  # the boot before the restart
 # The restart clears `hass.data`, which re-anchors the unload-confirm replay
 # window (register item 367) - deliberately, since an HA restart IS the moment a
 # retained MQTT value can replay. The first-press check at the end of this script
@@ -108,7 +109,7 @@ for _ in $(seq 1 24); do
   sleep 5
 done
 
-FAIL=0
+FAIL=${FAIL:-0}  # the restart's log check above may have set it
 check() {  # check <label> <entity> <expected>
   local got
   got=$($HACTL state "$2" | $PY -c 'import json,sys; print(json.load(sys.stdin)["state"])')

@@ -1,10 +1,12 @@
 name: Checks
 
 # Fast checks on every push: generated files match their sources (panel build,
-# WS types), the panel parses and renders, and docs_check (docs vs code). On pull
-# requests the fast pytest suite runs too. The slow suite, the Playwright E2E
-# suites and the test box stay local (`devtools/verify.sh full [--box]`): runner
-# minutes are shared with the issue/PR automation.
+# WS types), the panel parses and renders, docs_check (docs vs code), and the fast
+# pytest suite. A pull request runs them again, on the merge commit with its
+# target branch (a push tests the branch alone). The slow suite needs the private
+# recordings and stays local (`devtools/verify.sh full`); the panel E2E and the
+# real-HA box have their own workflows (e2e.yml, testbox.yml). Public repository:
+# standard runners cost nothing, so the only budget is concurrency.
 
 on:
   push:
@@ -24,13 +26,13 @@ jobs:
     name: Generated artifacts are current
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "20"
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
       - name: Install build tooling
@@ -49,20 +51,19 @@ jobs:
           node --check custom_components/ha_washdata/www/ha-washdata-card.js
           node devtools/panel_smoke.js
 
-  # The fast pytest suite, on PULL REQUESTS only (audit TESTING-02). The concern
-  # above was re-running everything on every push to every branch; a PR is the one
-  # point where a contribution is judged, and until this job nothing ran pytest
-  # before a merge at all. Fast tier only (no `slow`/`benchmark`), parallel, about
-  # two minutes including the install.
+  # The fast pytest suite (audit TESTING-02). It ran on pull requests only, so a
+  # release branch pushed without one (0.6.2) was never tested in CI. Fast tier
+  # only (no `slow`/`benchmark`), parallel, about two minutes with the install.
+  # On a pull request it runs again on purpose: that run tests the merge commit
+  # with the target branch, the push run only the branch.
   pytest-fast:
     name: Fast pytest suite
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
           cache: pip

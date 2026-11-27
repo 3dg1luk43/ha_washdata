@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
+## 0.6.2 - 2026-11-27
+
+[![Donate](https://img.shields.io/badge/Donate-Ko--fi-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/3dg1luk43) [![Docs](https://img.shields.io/badge/Docs-Wiki-0969DA?logo=github)](https://github.com/3dg1luk43/ha_washdata/wiki) [![Matrix](https://img.shields.io/badge/Chat-Matrix-0DBD8B?logo=matrix&logoColor=white)](https://matrix.to/#/#washdata:matrix.org) [![Translate](https://img.shields.io/badge/Translate-GitLocalize-5A67D8)](https://gitlocalize.com/repo/10819) [![WashData Store](https://img.shields.io/badge/Programs-WashData%20Store-F28C28)](https://3dg1luk43.github.io/washdata-store/)
+
+### TL;DR
+
+- New Total Cost sensor, with long-term statistics.
+- Trim can move a cycle's end past its recorded end, using Home Assistant's history.
+- The Start Message can show the estimated finish time.
+- A Stop Threshold below Min Power can be saved, and an emptied Start or Stop Threshold goes back to its default.
+- 0.6.1's fix for dishwashers finishing early now also reads history from before 0.5.8.
+- An unrecognised dishwasher run no longer splits in a drying pause longer than 30 min.
+
+### Features
+
+- **Move a cycle's end past what was recorded** ([#536](https://github.com/3dg1luk43/ha_washdata/issues/536)): a cycle that ended too early (a dishwasher's drying, its final pump-out) can have its end moved in Trim into the power readings Home Assistant recorded after it, up to 4 h and short of the next cycle, while the recorder still holds them (10 days by default). Those readings are added to the cycle, and its energy and cost follow. Checked on real cycles: rebuilt from the recorder, the cut-off end of every one matched what WashData had stored. Thanks to @Sme1d.
+- **Total Cost sensor** ([#501](https://github.com/3dg1luk43/ha_washdata/issues/501)): what every run has cost so far, in your currency, with long-term statistics, so cost history outlasts the recorder's retention. It starts from the costs already recorded and adds each run's cost once when it ends; editing or deleting a stored run does not change it. Last Cycle Cost stays as it is: it follows edits to that cycle, so it cannot be summed. Thanks to @Di4bLo84.
+- **`{finish_time}` in the Start Message** ([#540](https://github.com/3dg1luk43/ha_washdata/issues/540)): the estimated finish as a clock time. The start message goes out before any program is recognised, so with a program picked before the start it uses that program's learned length, otherwise the device's typical run (the median of its last 20 completed runs), marked `~` as an estimate; empty until the device has a completed run. The live updates carry the matched estimate later. Thanks to @wst-tdb.
+
+### Fixes
+
+- **0.6.1's dishwasher fix did not reach older histories** ([#531](https://github.com/3dg1luk43/ha_washdata/issues/531)): until 0.5.8 only the newest 20 power traces per program were kept, so a program's earlier full-length runs are stored without one, and 0.6.1 looked for full runs among traced ones only. Runs closed before the low-power pump-outs after the last heating were missed too. Runs kept without a trace now count, for runs Smart Termination closed, and a program whose traced runs were all cut short takes its length from them. Replayed on a history like the reporter's (42 full runs without a trace, 164 cut short), ECO finishes at the beep again (it was 61 min early). Dishwasher profiles are rebuilt once more after the update; nothing needs deleting. Thanks to @ilCapitano25.
+- **An unrecognised dishwasher run could split in its drying**: with no program recognised, a drain or rinse that came back after the run had started ending capped the final wait at 30 min, whatever Min Off Gap was set to, so a longer drying pause started a new cycle. The cap now needs the last activity to look like the final pump-out (a low-power event after at least 10 min of quiet). On the recorded histories one end moved: an unrecognised Quick wash now ends 3 min later.
+- **A Stop Threshold below Min Power could not be saved, and a threshold could not be cleared** ([#535](https://github.com/3dg1luk43/ha_washdata/issues/535)): Settings flagged a Stop Threshold under Min Power as a conflict and held it back, although an unset Stop Threshold is 60% of Min Power and Min Power is not read by detection once both thresholds are set. The check is gone. An emptied Start or Stop Threshold was ignored on save; it is now saved as unset, so the threshold follows Min Power again. Thanks to @soeffi.
+- **The Playground's "Interrupted Min" label stayed in English** ([#537](https://github.com/3dg1luk43/ha_washdata/issues/537)): its key was missing from the English source file, so GitLocalize had nothing to translate. Added, with every language ([#538](https://github.com/3dg1luk43/ha_washdata/pull/538)). Thanks to @Sme1d and @theguysudo.
+- **A reload during a cycle's end could leave the run out of the lifetime figures**: the lifetime energy (Energy dashboard), the cycle count and Total Cost were added only after the program's profile was rebuilt, so a reload in that moment stored the run without counting it. They are now counted as soon as the run is stored.
+
 ## 0.6.1 - 2026-11-21
 
 ### TL;DR

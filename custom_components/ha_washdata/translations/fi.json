@@ -474,6 +474,9 @@
       "last_cycle_cost": {
         "name": "Viimeisimmän syklin kustannus"
       },
+      "total_cost": {
+        "name": "Kustannukset yhteensä"
+      },
       "last_cycle_start": {
         "name": "Viimeisimmän syklin alku"
       }

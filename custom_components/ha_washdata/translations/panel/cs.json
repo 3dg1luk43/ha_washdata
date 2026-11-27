@@ -306,10 +306,6 @@
       "start": "Musí být nad Prahem zastavení ({stop} W)",
       "stop": "Musí být pod Prahem spuštění ({start} W)"
     },
-    "min_power": {
-      "min_power": "Musí být na nebo pod Prahem zastavení ({stop} W)",
-      "stop": "Musí být na nebo nad Minimálním výkonem ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Musí být větší než Interval hlídače ({wi} s)",
       "watchdog": "Musí být menší než Timeout bez aktualizace ({to} s)"
@@ -1168,7 +1164,13 @@
     "review_q_more_few": "Ještě {count} cykly ke kontrole",
     "review_q_more_many": "Ještě {count} cyklu ke kontrole",
     "review_q_more_other": "Ještě {count} cyklů ke kontrole",
-    "review_which_program": "Který program to byl?"
+    "review_which_program": "Který program to byl?",
+    "trim_extend_hint": "Šedě: co Home Assistant zaznamenal po cyklu. Přetáhněte konec do této oblasti a přidáte ji k cyklu.",
+    "trim_extend_note": "Konec je za zaznamenaným cyklem: přidají se odečty, které Home Assistant zaznamenal až k němu.",
+    "extend_no_history": "Home Assistant nemá po cyklu žádné odečty z této zásuvky.",
+    "extend_overlaps": "Konec nelze posunout za začátek dalšího cyklu.",
+    "extend_too_far": "Konec lze posunout nejvýše 4 h za zaznamenaný cyklus.",
+    "extend_not_live": "Prodloužit lze jen cyklus, který zaznamenalo toto zařízení."
   },
   "phase_desc": {
     "anti_crease": "Občasné krátké otáčení bubnu po dokončení cyklu pro prevenci mačkání.",
@@ -1347,6 +1349,9 @@
       "doc": "Brát VYPNUTÍ senzoru (ne zapnutí) jako signál konce.",
       "label": "Invertovat vnější spouštěč (spustit při VYP)"
     },
+    "interrupted_min_seconds": {
+      "label": "Min. délka (Přerušeno)"
+    },
     "learning_confidence": {
       "doc": "Nejnižší skóre shody pro označení dokončeného cyklu. Jasný vítěz se označí; těsný výsledek jde do fronty kontroly v Cyklech. Pod touto hodnotou se nic neoznačí ani se neptá. Držte ji pod Důvěrou auto-označení.",
       "label": "Důvěra učení"
@@ -1436,7 +1441,7 @@
       "label": "Zpráva upozornění před koncem"
     },
     "notify_start_message": {
-      "doc": "Text odeslaný při spuštění cyklu. Proměnné šablony: {device}, {program}. U jakékoli jiné proměnné se použije výchozí text.",
+      "doc": "Text odeslaný při spuštění cyklu. Proměnné šablony: {device}, {program}, {finish_time} (odhadovaný konec, např. 14:30; ~14:30 vychází z typické doby běhu spotřebiče a použije se, dokud program není znám). U jakékoli jiné proměnné se použije výchozí text.",
       "label": "Startovní zpráva"
     },
     "notify_start_services": {
@@ -2024,7 +2029,8 @@
     "copied": "Zkopírováno",
     "copy_failed": "Kopírování se nezdařilo. Vyberte text a zkopírujte ho ručně.",
     "automation_label_failed": "Automatizace vytvořena, ale štítek nebo kategorie WashData nemohly být přidány.",
-    "review_answered": "Uloženo: {program}"
+    "review_answered": "Uloženo: {program}",
+    "cycle_extended": "Konec cyklu posunut; zaznamenané odečty byly přidány"
   },
   "trend": {
     "down": "Klesající trend",

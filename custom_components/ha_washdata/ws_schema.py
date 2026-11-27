@@ -467,7 +467,8 @@ class GetCycleContextResponse(TypedDict):
     start (``before`` offsets are negative; ``after`` starts at ``trace_end_s``);
     a null watt marks an unavailable row. ``reason`` is null when ``available``,
     else one of ``not_found`` / ``not_live`` / ``no_sensor`` / ``no_start`` /
-    ``no_history``. Display only: nothing here is part of the cycle."""
+    ``no_history``. Display only: nothing here is part of the cycle until Trim
+    moves the end into ``after`` (#536)."""
 
     cycle_id: str
     available: bool
@@ -477,6 +478,9 @@ class GetCycleContextResponse(TypedDict):
     after_s: float
     trace_end_s: float
     after_end_s: float
+    # When the next run started (stored or under way), as an offset; Trim may not
+    # move the end to it (#536). Null when none follows.
+    next_start_s: float | None
     before: list[list[float | None]]
     after: list[list[float | None]]
 

@@ -160,14 +160,15 @@ test('an off-screen cascade fix still reaches the save payload (#406 guard)', as
   // diff must use the untouched _preCascadeOpts baseline.
   //
   // Stop Threshold (5 W) at or above Start Threshold (4 W) conflicts. Taking the
-  // offered stop fix (3.2) then breaks min_power <= stop (3.5 W), whose only other
-  // fixable key - min_power - lives in the Basic section. (Until 0.5.9 this used the
-  // watchdog >= 2x sampling rule; the sampling interval is no longer a setting.)
+  // offered stop fix (3.2) runs the cascade, which also fixes the Off Delay (300 s)
+  // over Min Off Gap (200 s) conflict through Off Delay, which lives in the Basic
+  // section. (Until 0.6.2 this used the Min Power <= Stop rule, removed for #535.)
   await bootSettingsRaw(page, {
     ...CADENCE,
     start_threshold_w: 4,
     stop_threshold_w: 5,
-    min_power: 3.5,
+    off_delay: 300,
+    min_off_gap: 200,
   }, {});
 
   await page.locator('.wd-sec-btn', { hasText: 'Detection' }).click();
@@ -175,10 +176,10 @@ test('an off-screen cascade fix still reaches the save payload (#406 guard)', as
   await expect(fix).toBeVisible({ timeout: 5_000 });
   await fix.click();
 
-  // The off-screen cascade landed on min_power.
+  // The off-screen cascade landed on off_delay.
   await expect.poll(async () => page.evaluate(() =>
     JSON.stringify((document.querySelector('#wd-panel') as any)._cascadePending),
-  )).toContain('min_power');
+  )).toContain('off_delay');
 
   await page.locator('#wd-settings-save').click();
   await expect.poll(async () =>
@@ -186,7 +187,7 @@ test('an off-screen cascade fix still reaches the save payload (#406 guard)', as
   ).toBe(1);
   const [call] = await page.evaluate(() => (window as any).__get_calls('ha_washdata/set_options'));
   expect(call.options.stop_threshold_w).toBe(3.2);
-  expect(call.options.min_power).toBe(2.6);
+  expect(call.options.off_delay).toBe(200);
 });
 
 /**

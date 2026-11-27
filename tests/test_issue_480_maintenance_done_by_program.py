@@ -235,3 +235,32 @@ async def test_a_merge_import_unites_the_lists_of_a_task_both_stores_have(
             local_device_type="washing_machine",
         )
     assert store.get_maintenance_programs() == {"drum_clean": ["Eco", "Cotton 90"]}
+
+
+async def test_the_task_is_logged_before_the_cycle_end_awaits(
+    hass: HomeAssistant, setup_washdata_entry
+) -> None:
+    """The odometer counts the run before the lifetime-energy save and the
+    envelope rebuild await (PR #539): the maintenance stamp must be written in
+    that same step, or a due check in one of those awaits reads the new count
+    with the old stamp and calls the task due."""
+    entry = await setup_washdata_entry(power_sensor=POWER)
+    manager = hass.data[DOMAIN][entry.entry_id]
+    store = manager.profile_store
+    store._data["profiles"]["Cotton 90"] = {"avg_duration": 3600.0}  # noqa: SLF001
+    await store.async_set_maintenance_programs("drum_clean", ["Cotton 90"])
+    seen: list[int] = []
+    original = store.async_add_lifetime_energy_wh
+
+    async def energy_and_look(wh):
+        seen.append(store.cycles_since_maintenance("drum_clean"))
+        await original(wh)
+
+    manager._current_program = "Cotton 90"  # noqa: SLF001
+    manager._manual_program_active = True  # noqa: SLF001
+    with patch.object(store, "async_add_lifetime_energy_wh", new=energy_and_look):
+        await manager._async_process_cycle_end({  # noqa: SLF001
+            "duration": 3600.0, "status": "completed", "energy_wh": 1800.0,
+            "start_time": "2026-10-20T10:30:00+00:00", "end_time": END,
+        })
+    assert seen == [0]

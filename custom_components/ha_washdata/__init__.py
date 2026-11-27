@@ -1438,30 +1438,46 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             cycle_id = _require_str(call.data.get("cycle_id"), "cycle_id")
             trim_start_s = max(0.0, float(call.data.get("trim_start_s", 0)))
 
-            entry_id, manager = _service_manager(hass, device_id)
-            store = manager.profile_store
+            from .ws_api import (  # pylint: disable=import-outside-toplevel
+                _entry_write_lock,
+            )
 
-            # Determine trim end - default to full cycle duration if not supplied
-            raw_end = call.data.get("trim_end_s")
-            # Always check cycle existence first, regardless of which trim path is taken
-            p_data = store.get_cycle_power_data(cycle_id)
-            if not p_data:
+            entry_id, _manager = _service_manager(hass, device_id)
+            # Under the panel's per-entry write lock: its trim holds it across the
+            # recorder read of an extension (#536). Everything is read once the
+            # lock is held: the default end from the trace an extension may have
+            # just lengthened, and the manager a reload may have replaced.
+            async with _entry_write_lock(hass, entry_id):
+                entry_id, manager = _service_manager(hass, device_id)
+                store = manager.profile_store
+
+                # Determine trim end - default to full cycle duration if not supplied
+                raw_end = call.data.get("trim_end_s")
+                # Always check cycle existence first, regardless of which trim path is taken
+                p_data = store.get_cycle_power_data(cycle_id)
+                if not p_data:
+                    raise ServiceValidationError(
+                        translation_domain=DOMAIN,
+                        translation_key="cycle_not_found_or_no_power",
+                    )
+                if raw_end is not None:
+                    trim_end_s = max(0.0, float(raw_end))
+                else:
+                    trim_end_s = max(point[0] for point in p_data)
+
+                if trim_end_s <= trim_start_s:
+                    raise ServiceValidationError(
+                        translation_domain=DOMAIN,
+                        translation_key="trim_invalid_range",
+                    )
+
+                ok = await store.trim_cycle_power_data(cycle_id, trim_start_s, trim_end_s)
+            if store.retired:
+                # Unloaded during the trim: its save was skipped, nothing is kept.
                 raise ServiceValidationError(
                     translation_domain=DOMAIN,
-                    translation_key="cycle_not_found_or_no_power",
+                    translation_key="integration_not_loaded",
                 )
-            if raw_end is not None:
-                trim_end_s = max(0.0, float(raw_end))
-            else:
-                trim_end_s = max(point[0] for point in p_data)
-
-            if trim_end_s <= trim_start_s:
-                raise ServiceValidationError(
-                    translation_domain=DOMAIN,
-                    translation_key="trim_invalid_range",
-                )
-
-            ok = await store.trim_cycle_power_data(cycle_id, trim_start_s, trim_end_s)
             if not ok:
                 raise ServiceValidationError(
                     translation_domain=DOMAIN,

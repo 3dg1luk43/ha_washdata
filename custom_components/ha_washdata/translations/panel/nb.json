@@ -298,10 +298,6 @@
       "start": "Må være over stoppeterskelen ({stop} W)",
       "stop": "Må være under startterskelen ({start} W)"
     },
-    "min_power": {
-      "min_power": "Må være ved eller under stoppeterskelen ({stop} W)",
-      "stop": "Må være ved eller over minimumseffekten ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Må være større enn vaktbikkjeintervallet ({wi} s)",
       "watchdog": "Må være mindre enn ingen-oppdatering-tidsavbruddet ({to} s)"
@@ -1132,7 +1128,13 @@
     "review_q_more": "{count} til å vurdere",
     "review_q_more_one": "{count} til å vurdere",
     "review_q_more_other": "{count} til å vurdere",
-    "review_which_program": "Hvilket program var det?"
+    "review_which_program": "Hvilket program var det?",
+    "trim_extend_hint": "Grå: det Home Assistant har registrert etter syklusen. Dra slutten inn i det for å legge det til syklusen.",
+    "trim_extend_note": "Slutten ligger etter den registrerte syklusen: målingene Home Assistant har registrert frem dit, legges til.",
+    "extend_no_history": "Home Assistant har ingen målinger fra denne pluggen etter syklusen.",
+    "extend_overlaps": "Slutten kan ikke flyttes forbi starten av neste syklus.",
+    "extend_too_far": "Slutten kan flyttes høyst 4 t forbi den registrerte syklusen.",
+    "extend_not_live": "Bare en syklus denne enheten har registrert, kan forlenges."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Oppvaskmaskin: sekunder under Stoppterskel siden siste aktivitet som trengs for å avslutte ventingen på siste tømming etter forventet varighet",
@@ -1334,6 +1336,9 @@
       "doc": "Behandle at sensoren slår seg AV (ikke PÅ) som sluttsignalet.",
       "label": "Inverter ekstern utløser (utløs ved AV)"
     },
+    "interrupted_min_seconds": {
+      "label": "Min. varighet (Avbrutt)"
+    },
     "learning_confidence": {
       "doc": "Laveste matchpoeng for å merke en ferdig syklus. En klar vinner merkes; et jevnt tilfelle går til vurderingskøen under Sykluser. Under dette merkes eller spørres ingenting. Hold den under Auto-merking konfidensgrad.",
       "label": "Lærings-konfidensgrad"
@@ -1423,7 +1428,7 @@
       "label": "Melding for forhåndsvarsling"
     },
     "notify_start_message": {
-      "doc": "Tekst som sendes når en syklus starter. Malvariabler: {device}, {program}. Med andre variabler brukes standardteksten.",
+      "doc": "Tekst som sendes når en syklus starter. Malvariabler: {device}, {program}, {finish_time} (beregnet sluttid, f.eks. 14:30; ~14:30 bygger på apparatets typiske kjøretid og brukes mens programmet ikke er kjent). Med andre variabler brukes standardteksten.",
       "label": "Startmelding"
     },
     "notify_start_services": {
@@ -2003,7 +2008,8 @@
     "copied": "Kopiert",
     "copy_failed": "Kopiering mislyktes. Velg teksten og kopier manuelt.",
     "automation_label_failed": "Automatisering opprettet, men WashData-etiketten eller kategorien kunne ikke legges til.",
-    "review_answered": "Lagret: {program}"
+    "review_answered": "Lagret: {program}",
+    "cycle_extended": "Slutten av syklusen er flyttet; de registrerte målingene ble lagt til"
   },
   "trend": {
     "down": "Trender nedover",

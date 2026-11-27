@@ -294,10 +294,6 @@
             "start": "必须高于停止阈值 ({stop} W)",
             "stop": "必须低于启动阈值 ({start} W)"
         },
-        "min_power": {
-            "min_power": "必须不超过停止阈值 ({stop} W)",
-            "stop": "必须不低于最小功率 ({min} W)"
-        },
         "no_update_timeout": {
             "timeout": "必须大于看门狗间隔 ({wi} 秒)",
             "watchdog": "必须小于无更新超时 ({to} 秒)"
@@ -1114,7 +1110,13 @@
         "review_q_started": "开始于 {when}",
         "review_q_more": "还有 {count} 个待审查",
         "review_q_more_other": "还有 {count} 个待审查",
-        "review_which_program": "是哪个程序？"
+        "review_which_program": "是哪个程序？",
+        "trim_extend_hint": "灰色：周期结束后 Home Assistant 记录的数据。将结束点拖入其中，即可将其加入周期。",
+        "trim_extend_note": "结束点超出已记录的周期：将加入 Home Assistant 记录到该点为止的读数。",
+        "extend_no_history": "Home Assistant 没有此插座在周期结束后的读数。",
+        "extend_overlaps": "结束点不能移到下一个周期的开始之后。",
+        "extend_too_far": "结束点最多可移到已记录周期之后 4 小时。",
+        "extend_not_live": "只能延长由此设备记录的周期。"
     },
     "pg_desc": {
         "completion_min_seconds": "计为真实周期的最短运行时间",
@@ -1304,6 +1306,9 @@
             "doc": "将传感器变为关闭（而非打开）视为结束信号。",
             "label": "反转外部触发器（关闭时触发）"
         },
+        "interrupted_min_seconds": {
+            "label": "最短时长（已中断）"
+        },
         "learning_confidence": {
             "doc": "为已完成周期打标签所需的最低匹配分数。明确的胜出者会被标记；难分高下时进入“周期”中的审查队列。低于此值时既不标记也不询问。请保持低于自动标记置信度。",
             "label": "学习置信度"
@@ -1393,7 +1398,7 @@
             "label": "结束前提醒消息"
         },
         "notify_start_message": {
-            "doc": "周期开始时发送的正文。模板变量：{device}、{program}。使用其他变量时将改用默认文本。",
+            "doc": "周期开始时发送的正文。模板变量：{device}、{program}、{finish_time}（预计完成时间，例如 14:30；~14:30 按设备的典型运行时长估算，在尚未识别出程序时使用）。使用其他变量时将改用默认文本。",
             "label": "启动消息"
         },
         "notify_start_services": {
@@ -1894,7 +1899,8 @@
         "copied": "已复制",
         "copy_failed": "复制失败。请选择文本并手动复制。",
         "automation_label_failed": "自动化已创建，但无法添加 WashData 标签或类别。",
-        "review_answered": "已保存：{program}"
+        "review_answered": "已保存：{program}",
+        "cycle_extended": "周期结束点已移动；已加入记录的读数"
     },
     "suggestion": {
         "observed_label": "观测值",

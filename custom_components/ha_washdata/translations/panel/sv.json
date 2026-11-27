@@ -298,10 +298,6 @@
       "start": "Måste vara över stopptröskel ({stop} W)",
       "stop": "Måste vara under starttröskel ({start} W)"
     },
-    "min_power": {
-      "min_power": "Måste vara vid eller under stopptröskel ({stop} W)",
-      "stop": "Måste vara vid eller över mineffekt ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Måste vara större än vakthundsintervallet ({wi} s)",
       "watchdog": "Måste vara mindre än timeout utan uppdatering ({to} s)"
@@ -1132,7 +1128,13 @@
     "review_q_more": "{count} till att granska",
     "review_q_more_one": "{count} till att granska",
     "review_q_more_other": "{count} till att granska",
-    "review_which_program": "Vilket program var det?"
+    "review_which_program": "Vilket program var det?",
+    "trim_extend_hint": "Grått: det som Home Assistant registrerade efter cykeln. Dra slutet in i det för att lägga till det i cykeln.",
+    "trim_extend_note": "Slutet ligger efter den registrerade cykeln: mätvärdena som Home Assistant registrerade fram dit läggs till.",
+    "extend_no_history": "Home Assistant har inga mätvärden från den här kontakten efter cykeln.",
+    "extend_overlaps": "Slutet kan inte flyttas förbi starten av nästa cykel.",
+    "extend_too_far": "Slutet kan flyttas högst 4 tim förbi den registrerade cykeln.",
+    "extend_not_live": "Endast en cykel som den här enheten har registrerat kan förlängas."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Diskmaskin: sekunder under Stopptröskel sedan senaste aktiviteten som krävs för att avsluta väntan på den sista tömningen efter den förväntade längden",
@@ -1334,6 +1336,9 @@
       "doc": "Behandla att sensorn slås AV (inte PÅ) som slutsignalen.",
       "label": "Invertera extern utlösare (utlös vid AV)"
     },
+    "interrupted_min_seconds": {
+      "label": "Min. varaktighet (Avbruten)"
+    },
     "learning_confidence": {
       "doc": "Lägsta matchningspoäng för att märka en avslutad cykel. En klar vinnare märks; ett jämnt fall hamnar i granskningskön under Cykler. Under detta märks eller frågas ingenting. Håll den under Automärkningskonfidens.",
       "label": "Inlärningskonfidens"
@@ -1423,7 +1428,7 @@
       "label": "Meddelande för förvarning före slut"
     },
     "notify_start_message": {
-      "doc": "Text som skickas när en cykel startar. Mallvariabler: {device}, {program}. Med någon annan variabel används standardtexten.",
+      "doc": "Text som skickas när en cykel startar. Mallvariabler: {device}, {program}, {finish_time} (beräknad sluttid, t.ex. 14:30; ~14:30 bygger på apparatens typiska körtid och används medan programmet inte är känt). Med någon annan variabel används standardtexten.",
       "label": "Startmeddelande"
     },
     "notify_start_services": {
@@ -2003,7 +2008,8 @@
     "copied": "Kopierad",
     "copy_failed": "Kopiering misslyckades. Markera texten och kopiera manuellt.",
     "automation_label_failed": "Automatisering skapad, men WashData-etiketten eller kategorin kunde inte läggas till.",
-    "review_answered": "Sparat: {program}"
+    "review_answered": "Sparat: {program}",
+    "cycle_extended": "Cykelns slut flyttat; de registrerade mätvärdena lades till"
   },
   "trend": {
     "down": "Nedåtgående trend",

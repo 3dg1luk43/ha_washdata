@@ -80,6 +80,7 @@ python3 devtools/suggestion_churn_eval.py    # suggestions offered per key over 
 python3 devtools/suggestion_evidence_eval.py # clean-cycle programme-length exemption + standby advisory, swept and vs 0.6.0
 python3 devtools/duration_ratchet_eval.py    # closed loop: does a programme's learned length shrink when runs end early (#531)
 python3 devtools/program_mismatch_eval.py --sweep   # hand-picked program check (#530): false alarms vs wrong picks caught, LOO
+python3 devtools/extend_end_eval.py --store S --db DB --entity E   # #536 extension rebuilt from a recorder copy vs the stored tails
 
 python3 devtools/mqtt_mock_socket.py --source <export.json>   # mock MQTT plug into a real HA (web UI :8081)
 python3 devtools/mqtt_mock_socket.py --dry-run --source <export.json> --scenario soak --mode silent
@@ -88,6 +89,7 @@ cd devtools/testbox && ./up.sh --fresh   # real-HA container test box (see its R
 cd devtools/testbox && ./smoke.sh        # one cycle end-to-end on real HA + 22 checks (~4 min)
 cd devtools/testbox && ./check_notify_actions.sh   # the notification-ACTION delivery path (~1 min)
 cd devtools/testbox && ./check_unload_confirm.sh  # unload confirmation button/service/entity (~3 min)
+cd devtools/testbox && ./check_extend_end.sh     # Trim extending a cycle's end from the recorder (#536, ~2 min)
 cd devtools/testbox && ./check_clean_restart.sh  # the Clean state across a graceful restart and a crash (~8 min, #500)
 cd devtools/testbox && ./hactl.py ws ha_washdata/get_profiles entry_id=<id>   # drive it
 ```
@@ -104,7 +106,8 @@ that gap; keep both working:
 - `tests/conftest.py` has an **autouse guard** that replays every recorded service call through
   Home Assistant's real schemas. Do not "simplify" it away - reintroducing item 316 fails 13 tests
   because of it. When adding a notification path, assert on the payload *and* let the guard run.
-- `devtools/testbox/` is a **real HA container** (floats on HA `:stable`, 2026.9.3 at last check; the in-process test HA
+- `devtools/testbox/` is a **real HA container** (HA `:stable`, pulled again on every `up.sh --fresh`, 2026.11.3 at last
+  check; `HA_IMAGE_TAG=beta` for the beta; the in-process test HA
   is pinned to 2026.2.3 - the newest Home Assistant and pytest-homeassistant-custom-component that
   install on the Python 3.13 the suite runs on, so that gap cannot be closed from PyPI here, item
   322) with the working tree bind-mounted in and a notify platform that records every delivered
@@ -131,6 +134,12 @@ reject or sequence, which is where "all green, still broken" comes from:
   (item 316) or that needs `async_get_hass()` (item 323).
 - Config-flow steps, storage migration against a real `Store`, WS API handlers, entity wiring.
 - Anything whose failure mode is "the integration still loads, it just does nothing".
+
+**CI covers part of this:** `Checks` (tests.yml) runs the fast suite on every push; `Panel E2E` (e2e.yml)
+runs Playwright when the panel, its translations or the specs change; `Real Home Assistant` (testbox.yml)
+runs the synthetic box checks + `log_check.sh` (deprecated-API reports, errors, tracebacks) on HA stable
+and beta every Monday. The slow suite, the evals and `smoke.sh` need the private recordings and stay
+local. The repository is public: standard runners cost nothing, the only budget is concurrency.
 
 `smoke.sh` (~4 min) is the default choice; `check_notify_actions.sh` (~1 min) when the change is
 only in the notification-action path. Say in the commit or the report that the box ran and what it
@@ -423,7 +432,10 @@ arrive via [GitLocalize](https://gitlocalize.com/repo/10819) as PRs; merge them 
 
 ### CHANGELOG style
 
-- **Every release opens with a `### TL;DR`** - a handful of bullets, a few words each. It is
+- **Every release opens with the badge row** (donate, docs, chat, translate, store; copy it from the
+  previous release): the section is pasted as the GitHub release, which Home Assistant's update dialog
+  shows. `release_check.sh` fails without it.
+- **Then a `### TL;DR`** - a handful of bullets, a few words each. It is
   **rewritten as a whole** every time an entry is added, not appended to: merge and re-cut the bullets.
 - **Entries are direct and concise, not stories.** Symptom, cause, fix. Keep measured numbers, the
   issue link, and the `Thanks to @user` credit; cut the narration and the case history.

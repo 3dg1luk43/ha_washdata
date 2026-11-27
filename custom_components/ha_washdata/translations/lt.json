@@ -474,6 +474,9 @@
       "last_cycle_cost": {
         "name": "Paskutinio ciklo kaina"
       },
+      "total_cost": {
+        "name": "Bendra kaina"
+      },
       "last_cycle_start": {
         "name": "Paskutinio ciklo pradžia"
       }

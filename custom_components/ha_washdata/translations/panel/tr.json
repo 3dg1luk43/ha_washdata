@@ -306,10 +306,6 @@
             "start": "Durdurma Eşiğinin üzerinde olmalıdır ({stop} W)",
             "stop": "Başlangıç Eşiğinin altında olmalıdır ({start} W)"
         },
-        "min_power": {
-            "min_power": "Durdurma Eşiğinde veya altında olmalıdır ({stop} W)",
-            "stop": "Minimum Güç'te veya üzerinde olmalıdır ({min} W)"
-        },
         "no_update_timeout": {
             "timeout": "Bekçi Aralığından büyük olmalıdır ({wi} s)",
             "watchdog": "Güncelleme Yok Zaman Aşımından küçük olmalıdır ({to} s)"
@@ -1132,7 +1128,13 @@
         "review_q_more": "{count} tane daha incelenecek",
         "review_q_more_one": "{count} tane daha incelenecek",
         "review_q_more_other": "{count} tane daha incelenecek",
-        "review_which_program": "Hangi programdı?"
+        "review_which_program": "Hangi programdı?",
+        "trim_extend_hint": "Gri: Home Assistant'ın döngüden sonra kaydettikleri. Bunları döngüye eklemek için bitişi bu alana sürükleyin.",
+        "trim_extend_note": "Bitiş, kaydedilen döngünün ötesinde: Home Assistant'ın o noktaya kadar kaydettiği okumalar eklenir.",
+        "extend_no_history": "Home Assistant'ta döngüden sonra bu prize ait okuma yok.",
+        "extend_overlaps": "Bitiş, sonraki döngünün başlangıcını geçemez.",
+        "extend_too_far": "Bitiş, kaydedilen döngünün en fazla 4 sa ötesine taşınabilir.",
+        "extend_not_live": "Yalnızca bu cihazın kaydettiği bir döngü uzatılabilir."
     },
     "pg_desc": {
         "completion_min_seconds": "Gerçek döngü sayılan en kısa çalışma",
@@ -1322,6 +1324,9 @@
             "doc": "Sensörün AÇIK yerine KAPALI duruma geçmesini bitiş sinyali sayın.",
             "label": "Harici Tetikleyiciyi Tersine Çevir (KAPALI'da tetikle)"
         },
+        "interrupted_min_seconds": {
+            "label": "Min. Süre (Kesintiye uğradı)"
+        },
         "learning_confidence": {
             "doc": "Biten bir döngüyü etiketlemek için en düşük eşleşme puanı. Açık bir kazanan etiketlenir; kıl payı durumlar Döngüler'deki inceleme kuyruğuna gider. Bunun altında hiçbir şey etiketlenmez veya sorulmaz. Otomatik Etiket Güveni'nin altında tutun.",
             "label": "Öğrenme Güveni"
@@ -1411,7 +1416,7 @@
             "label": "Bitiş Öncesi Uyarı Mesajı"
         },
         "notify_start_message": {
-            "doc": "Döngü başladığında gönderilen metin. Şablon değişkenleri: {device}, {program}. Başka bir değişken kullanılırsa varsayılan metin gönderilir.",
+            "doc": "Döngü başladığında gönderilen metin. Şablon değişkenleri: {device}, {program}, {finish_time} (tahmini bitiş, örn. 14:30; ~14:30 ise cihazın tipik çalışma süresine dayanır ve program bilinmediği sürece kullanılır). Başka bir değişken kullanılırsa varsayılan metin gönderilir.",
             "label": "Başlangıç Mesajı"
         },
         "notify_start_services": {
@@ -1914,7 +1919,8 @@
         "copied": "Kopyalandı",
         "copy_failed": "Kopyalama başarısız. Metni seçin ve elle kopyalayın.",
         "automation_label_failed": "Otomasyon oluşturuldu, ancak WashData etiketi veya kategorisi eklenemedi.",
-        "review_answered": "Kaydedildi: {program}"
+        "review_answered": "Kaydedildi: {program}",
+        "cycle_extended": "Döngü bitişi taşındı; kaydedilen okumalar eklendi"
     },
     "suggestion": {
         "observed_label": "Gözlemlenen",

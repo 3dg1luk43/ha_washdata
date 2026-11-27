@@ -298,10 +298,6 @@
       "start": "Moet boven de stopdrempel ({stop} W) liggen",
       "stop": "Moet onder de startdrempel ({start} W) liggen"
     },
-    "min_power": {
-      "min_power": "Moet op of onder de stopdrempel ({stop} W) liggen",
-      "stop": "Moet op of boven het minimumvermogen ({min} W) liggen"
-    },
     "no_update_timeout": {
       "timeout": "Moet groter zijn dan het watchdog-interval ({wi} s)",
       "watchdog": "Moet kleiner zijn dan de geen-update-timeout ({to} s)"
@@ -1132,7 +1128,13 @@
     "review_q_more": "Nog {count} te beoordelen",
     "review_q_more_one": "Nog {count} te beoordelen",
     "review_q_more_other": "Nog {count} te beoordelen",
-    "review_which_program": "Welk programma was het?"
+    "review_which_program": "Welk programma was het?",
+    "trim_extend_hint": "Grijs: wat Home Assistant na de cyclus heeft vastgelegd. Sleep het einde erin om het aan de cyclus toe te voegen.",
+    "trim_extend_note": "Het einde ligt na de vastgelegde cyclus: de metingen die Home Assistant tot dat punt heeft vastgelegd, worden toegevoegd.",
+    "extend_no_history": "Home Assistant heeft geen metingen van deze stekker na de cyclus.",
+    "extend_overlaps": "Het einde kan niet voorbij het begin van de volgende cyclus worden verplaatst.",
+    "extend_too_far": "Het einde kan maximaal 4 uur voorbij de vastgelegde cyclus worden verplaatst.",
+    "extend_not_live": "Alleen een cyclus die dit apparaat heeft vastgelegd, kan worden verlengd."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Vaatwasser: seconden onder de Stopdrempel sinds de laatste activiteit die nodig zijn om na de verwachte duur het wachten op het laatste wegpompen te beëindigen",
@@ -1334,6 +1336,9 @@
       "doc": "Gebruik het UIT gaan (niet AAN) van de sensor als eindsignaal.",
       "label": "Externe trigger omkeren (activeer bij UIT)"
     },
+    "interrupted_min_seconds": {
+      "label": "Min. duur (Onderbroken)"
+    },
     "learning_confidence": {
       "doc": "Laagste matchscore om een voltooide cyclus te labelen. Een duidelijke winnaar wordt gelabeld; een nipte uitslag gaat naar de beoordelingswachtrij in Cycli. Daaronder wordt niets gelabeld of gevraagd. Houd het onder Auto-label betrouwbaarheid.",
       "label": "Leerbetrouwbaarheid"
@@ -1423,7 +1428,7 @@
       "label": "Bericht voor Pre-eindalert"
     },
     "notify_start_message": {
-      "doc": "Tekst die wordt verstuurd als een cyclus start. Sjabloonvariabelen: {device}, {program}. Bij elke andere variabele wordt de standaardtekst gebruikt.",
+      "doc": "Tekst die wordt verstuurd als een cyclus start. Sjabloonvariabelen: {device}, {program}, {finish_time} (geschatte eindtijd, bijv. 14:30; ~14:30 is gebaseerd op de typische looptijd van het apparaat en wordt gebruikt zolang het programma nog onbekend is). Bij elke andere variabele wordt de standaardtekst gebruikt.",
       "label": "Startbericht"
     },
     "notify_start_services": {
@@ -2003,7 +2008,8 @@
     "copied": "Gekopieerd",
     "copy_failed": "Kopiëren mislukt. Selecteer de tekst en kopieer het handmatig.",
     "automation_label_failed": "Automatisering aangemaakt, maar het WashData-label of de categorie kon niet worden toegevoegd.",
-    "review_answered": "Opgeslagen: {program}"
+    "review_answered": "Opgeslagen: {program}",
+    "cycle_extended": "Einde van de cyclus verplaatst; de vastgelegde metingen zijn toegevoegd"
   },
   "trend": {
     "down": "Trend naar beneden",

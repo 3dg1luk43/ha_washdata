@@ -298,10 +298,6 @@
       "start": "Skal være over stoptærsklen ({stop} W)",
       "stop": "Skal være under starttærsklen ({start} W)"
     },
-    "min_power": {
-      "min_power": "Skal være på eller under stoptærsklen ({stop} W)",
-      "stop": "Skal være på eller over minimumseffekten ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Skal være større end watchdog-intervallet ({wi} s)",
       "watchdog": "Skal være mindre end ingen-opdatering-timeout ({to} s)"
@@ -1132,7 +1128,13 @@
     "review_q_more": "{count} mere at gennemgå",
     "review_q_more_one": "{count} mere at gennemgå",
     "review_q_more_other": "{count} mere at gennemgå",
-    "review_which_program": "Hvilket program var det?"
+    "review_which_program": "Hvilket program var det?",
+    "trim_extend_hint": "Grå: det, Home Assistant har registreret efter cyklussen. Træk slutningen ind i det for at føje det til cyklussen.",
+    "trim_extend_note": "Slutningen ligger efter den registrerede cyklus: de målinger, Home Assistant har registreret indtil da, tilføjes.",
+    "extend_no_history": "Home Assistant har ingen målinger fra dette stik efter cyklussen.",
+    "extend_overlaps": "Slutningen kan ikke flyttes forbi starten af næste cyklus.",
+    "extend_too_far": "Slutningen kan højst flyttes 4 t forbi den registrerede cyklus.",
+    "extend_not_live": "Kun en cyklus, som denne enhed har registreret, kan forlænges."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Opvaskemaskine: sekunder under Stoptærskel siden seneste aktivitet, der skal til for at afslutte ventetiden på den sidste udpumpning efter den forventede varighed",
@@ -1334,6 +1336,9 @@
       "doc": "Behandl, at sensoren slukker (ikke tænder), som slutsignalet.",
       "label": "Inverter ekstern udløser (udløs ved SLUK)"
     },
+    "interrupted_min_seconds": {
+      "label": "Minimum varighed (Afbrudt)"
+    },
     "learning_confidence": {
       "doc": "Laveste matchscore for at mærke en færdig cyklus. En klar vinder mærkes; et tæt løb går til gennemgangskøen under Cykler. Under denne værdi mærkes eller spørges der ikke. Hold den under Auto-mærkning konfidens.",
       "label": "Læringskonfidens"
@@ -1423,7 +1428,7 @@
       "label": "Besked til forhåndsadvarsel om afslutning"
     },
     "notify_start_message": {
-      "doc": "Tekst, der sendes, når en cyklus starter. Skabelonvariabler: {device}, {program}. Med enhver anden variabel bruges standardteksten.",
+      "doc": "Tekst, der sendes, når en cyklus starter. Skabelonvariabler: {device}, {program}, {finish_time} (forventet sluttidspunkt, f.eks. 14:30; ~14:30 bygger på apparatets typiske køretid og bruges, mens programmet ikke er kendt). Med enhver anden variabel bruges standardteksten.",
       "label": "Startbesked"
     },
     "notify_start_services": {
@@ -2003,7 +2008,8 @@
     "copied": "Kopieret",
     "copy_failed": "Kopiering mislykkedes. Vælg teksten og kopiér manuelt.",
     "automation_label_failed": "Automatisering oprettet, men WashData-etiketten eller kategorien kunne ikke tilføjes.",
-    "review_answered": "Gemt: {program}"
+    "review_answered": "Gemt: {program}",
+    "cycle_extended": "Cyklussens slutning flyttet; de registrerede målinger blev tilføjet"
   },
   "trend": {
     "down": "Trend nedad",

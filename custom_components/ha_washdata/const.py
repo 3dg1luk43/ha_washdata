@@ -1394,6 +1394,10 @@ CYCLE_ENERGY_REBUILD_KEY = "_cycle_energy_rebuild_pending"
 # update, not the second; the manager rebuilds every profile with traced evidence in
 # the background after setup and sets it. No storage version.
 CUT_SHORT_REBUILD_KEY = "_cut_short_rebuild_done"
+# The revision of the #531 rule the marker records. A store rebuilt under an older
+# one (0.6.1 wrote True) is rebuilt once more: 2 lets runs kept without a trace vote
+# and a sibling quiet for most of the time after a run's end (CUT_SHORT_SIBLING_QUIET_SHARE).
+CUT_SHORT_RULE_REVISION = 2
 # Store key for the one pass that cuts the end wait off history-imported dishwasher
 # cycles already labelled before the cut existed (#518). Absent counts as pending,
 # so every store that predates it runs the pass once without a storage version;
@@ -2157,6 +2161,11 @@ TERMINAL_BLIP_RATIO = 1.5
 TERMINAL_BLIP_MIN_W = 1.0
 CUT_SHORT_MIN_RUNS = 3
 CUT_SHORT_MIN_SHARE = 0.10
+# ...and a sibling's quiet need not begin within TERMINAL_BLIP_QUIET_MIN_S of the
+# run's end if it fills more than this share of that time: the Bauknecht's short
+# pump-outs (15-31 W, under a minute each) after its last heating break the quiet
+# for 13 min, so a run closed before them was counted complete (#531 follow-up).
+CUT_SHORT_SIBLING_QUIET_SHARE = 0.5
 TERMINAL_QUIET_MIN_S = 120.0
 # ...but a gap of 120 s also sits between a dishwasher's own heating blocks
 # (120-160 s on 01KGM619), so a cycle closed before its pump-out offered its LAST

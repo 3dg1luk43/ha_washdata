@@ -306,10 +306,6 @@
             "start": "A Leállítási küszöb felett kell lennie ({stop} W)",
             "stop": "Az Indítási küszöb alatt kell lennie ({start} W)"
         },
-        "min_power": {
-            "min_power": "Legfeljebb a Leállítási küszöb értékén lehet ({stop} W)",
-            "stop": "Legalább a Minimális teljesítmény értékén kell lennie ({min} W)"
-        },
         "no_update_timeout": {
             "timeout": "Nagyobb kell lennie a Felügyelő intervalluménál ({wi} s)",
             "watchdog": "Kisebb kell lennie a Frissítés nélküli időtúllépésnél ({to} s)"
@@ -1132,7 +1128,13 @@
         "review_q_more": "Még {count} vár felülvizsgálatra",
         "review_q_more_one": "Még {count} vár felülvizsgálatra",
         "review_q_more_other": "Még {count} vár felülvizsgálatra",
-        "review_which_program": "Melyik program volt?"
+        "review_which_program": "Melyik program volt?",
+        "trim_extend_hint": "Szürke: amit a Home Assistant a ciklus után rögzített. Húzza a ciklus végét a szürke részbe, hogy hozzáadja a ciklushoz.",
+        "trim_extend_note": "A vége a rögzített ciklus után van: a Home Assistant által addig rögzített mérések hozzáadódnak.",
+        "extend_no_history": "A Home Assistant nem rögzített méréseket erről a konnektorról a ciklus után.",
+        "extend_overlaps": "A vége nem tolható a következő ciklus kezdete utánra.",
+        "extend_too_far": "A vége legfeljebb 4 órával tolható a rögzített ciklus utánra.",
+        "extend_not_live": "Csak az ezen eszköz által rögzített ciklus hosszabbítható meg."
     },
     "phase_desc": {
         "anti_crease": "Alkalmankénti rövid dobforgások a befejezés után a ráncok csökkentése érdekében.",
@@ -1307,6 +1309,9 @@
             "doc": "Az érzékelő KI állapotba váltása (nem a BE) jelzi a ciklus végét.",
             "label": "Külső trigger invertálása (trigger KI-re)"
         },
+        "interrupted_min_seconds": {
+            "label": "Min. időtartam (Megszakított)"
+        },
         "learning_confidence": {
             "doc": "A legkisebb egyezési pontszám egy befejezett ciklus megjelöléséhez. Egyértelmű győztest megjelöl; szoros eredménynél a ciklus a Ciklusok lap felülvizsgálati sorába kerül. Ez alatt semmit nem jelöl meg és nem kérdez. Tartsa az Automatikus jelölési megbízhatóság alatt.",
             "label": "Tanulási megbízhatóság"
@@ -1396,7 +1401,7 @@
             "label": "Befejezés előtti riasztás üzenete"
         },
         "notify_start_message": {
-            "doc": "A ciklus indulásakor küldött szöveg. Sablonváltozók: {device}, {program}. Más változóval az alapértelmezett szöveget küldi.",
+            "doc": "A ciklus indulásakor küldött szöveg. Sablonváltozók: {device}, {program}, {finish_time} (becsült befejezés, pl. 14:30; a ~14:30 a készülék szokásos futásidején alapul, és addig használatos, amíg a program nem ismert). Más változóval az alapértelmezett szöveget küldi.",
             "label": "Indítási üzenet"
         },
         "notify_start_services": {
@@ -1895,7 +1900,8 @@
         "copied": "Másolva",
         "copy_failed": "Másolás sikertelen. Jelölje ki a szöveget, és másolja kézzel.",
         "automation_label_failed": "Automatizálás létrehozva, de a WashData-címkét vagy -kategóriát nem sikerült hozzáadni.",
-        "review_answered": "Mentve: {program}"
+        "review_answered": "Mentve: {program}",
+        "cycle_extended": "A ciklus vége áthelyezve; a rögzített mérések hozzáadva"
     },
     "suggestion": {
         "observed_label": "Megfigyelt",

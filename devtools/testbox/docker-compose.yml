@@ -14,7 +14,9 @@ name: washdata-testbox
 
 services:
   ha:
-    image: ghcr.io/home-assistant/home-assistant:stable
+    # HA_IMAGE_TAG picks another release channel (beta, a version) for one run;
+    # the scheduled CI job runs stable and beta.
+    image: ghcr.io/home-assistant/home-assistant:${HA_IMAGE_TAG:-stable}
     container_name: washdata-testbox-ha
     restart: "no"
     # Host networking is deliberately NOT used: the box must not be able to see

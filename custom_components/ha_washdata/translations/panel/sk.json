@@ -306,10 +306,6 @@
       "start": "Musí byť nad Prahom zastavenia ({stop} W)",
       "stop": "Musí byť pod Prahom spustenia ({start} W)"
     },
-    "min_power": {
-      "min_power": "Musí byť na úrovni alebo pod Prahom zastavenia ({stop} W)",
-      "stop": "Musí byť na úrovni alebo nad Minimálnym výkonom ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Musí byť väčší ako Interval watchdog ({wi} s)",
       "watchdog": "Musí byť menší ako Časový limit bez aktualizácie ({to} s)"
@@ -1168,7 +1164,13 @@
     "review_q_more_few": "Ešte {count} cykly na kontrolu",
     "review_q_more_many": "Ešte {count} cyklu na kontrolu",
     "review_q_more_other": "Ešte {count} cyklov na kontrolu",
-    "review_which_program": "Ktorý program to bol?"
+    "review_which_program": "Ktorý program to bol?",
+    "trim_extend_hint": "Sivou: čo Home Assistant zaznamenal po cykle. Potiahnite koniec do tejto oblasti, aby sa pridala k cyklu.",
+    "trim_extend_note": "Koniec je za zaznamenaným cyklom: pridajú sa merania, ktoré Home Assistant zaznamenal až po neho.",
+    "extend_no_history": "Home Assistant nemá po cykle žiadne merania z tejto zásuvky.",
+    "extend_overlaps": "Koniec nemožno posunúť za začiatok ďalšieho cyklu.",
+    "extend_too_far": "Koniec možno posunúť najviac o 4 h za zaznamenaný cyklus.",
+    "extend_not_live": "Predĺžiť možno len cyklus, ktorý zaznamenalo toto zariadenie."
   },
   "phase_desc": {
     "anti_crease": "Príležitostné krátke otáčanie bubna po dokončení na predchádzanie krčeniu oblečenia.",
@@ -1347,6 +1349,9 @@
       "doc": "Brať VYPNUTIE senzora (nie zapnutie) ako signál konca.",
       "label": "Invertovať externý spúšť (spustiť pri VYPNUTÍ)"
     },
+    "interrupted_min_seconds": {
+      "label": "Min. trvanie (Prerušený)"
+    },
     "learning_confidence": {
       "doc": "Najnižšie skóre zhody na označenie dokončeného cyklu. Jasný víťaz sa označí; tesný výsledok ide do frontu kontroly v Cykloch. Pod touto hodnotou sa nič neoznačí ani sa nepýta. Držte ju pod Spoľahlivosťou autooznačovania.",
       "label": "Spoľahlivosť učenia"
@@ -1436,7 +1441,7 @@
       "label": "Správa upozornenia pred koncom"
     },
     "notify_start_message": {
-      "doc": "Text odoslaný pri spustení cyklu. Premenné šablóny: {device}, {program}. Pri akejkoľvek inej premennej sa použije predvolený text.",
+      "doc": "Text odoslaný pri spustení cyklu. Premenné šablóny: {device}, {program}, {finish_time} (odhadovaný koniec, napr. 14:30; ~14:30 vychádza z typickej doby chodu spotrebiča a použije sa, kým program nie je známy). Pri akejkoľvek inej premennej sa použije predvolený text.",
       "label": "Správa pri štarte"
     },
     "notify_start_services": {
@@ -2024,7 +2029,8 @@
     "copied": "Skopírované",
     "copy_failed": "Kopírovanie zlyhalo. Vyberte text a skopírujte ho ručne.",
     "automation_label_failed": "Automatizácia vytvorená, ale štítok alebo kategória WashData nemohli byť pridané.",
-    "review_answered": "Uložené: {program}"
+    "review_answered": "Uložené: {program}",
+    "cycle_extended": "Koniec cyklu posunutý; zaznamenané merania boli pridané"
   },
   "trend": {
     "down": "Klesajúci trend",

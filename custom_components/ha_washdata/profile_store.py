@@ -52,6 +52,7 @@ from .const import (
     TERMINAL_BLIP_RATIO,
     CUT_SHORT_MIN_RUNS,
     CUT_SHORT_MIN_SHARE,
+    CUT_SHORT_SIBLING_QUIET_SHARE,
     TERMINAL_BLIP_QUIET_MIN_S,
     END_GATE_HAZARD_MIN_CYCLES,
     PRICE_TIMELINE_MAX_POINTS,
@@ -71,6 +72,7 @@ from .const import (
     BANKED_TAIL_REPAIR_KEY,
     CYCLE_ENERGY_REBUILD_KEY,
     CUT_SHORT_REBUILD_KEY,
+    CUT_SHORT_RULE_REVISION,
     BANKED_TAIL_REPAIR_MIN_S,
     TERMINAL_QUIET_CAP_S,
     TERMINAL_QUIET_MIN_CONSISTENCY,
@@ -651,9 +653,67 @@ def _events_after_quiet(offsets: list[float], values: list[float], peak: float) 
     return events
 
 
+def _quiet_clock(offsets: list[float], values: list[float], peak: float) -> tuple[Any, Any]:
+    """``(offsets, quiet_s)``: the seconds a run spent quiet up to each reading, each
+    reading held to the next (#531). Quiet as :func:`_events_after_quiet` counts it:
+    at most ``TERMINAL_EVENT_PEAK_FRAC`` of the peak, and only observed (a step past
+    the same gap ceiling is no quiet). ``np.interp(t, *clock)`` reads it at ``t``."""
+    o = np.asarray(offsets, dtype=float)
+    v = np.asarray(values, dtype=float)
+    steps = np.diff(o) if o.size > 1 else np.asarray([])
+    gap_ceiling = float(np.clip(10.0 * np.percentile(steps, 95), 60.0, 3600.0)) if steps.size else 60.0
+    held = np.where((v[:-1] <= TERMINAL_EVENT_PEAK_FRAC * peak) & (steps <= gap_ceiling), steps, 0.0)
+    return o, np.concatenate(([0.0], np.cumsum(held)))
+
+
+def _summary_lengths(summaries: Any) -> list[float]:
+    """The finite positive lengths (s) of :func:`cut_short_mask`'s ``summaries``."""
+    out: list[float] = []
+    for value in summaries or ():
+        length = _positive_duration(value)
+        if length is not None:
+            out.append(length)
+    return out
+
+
+def summaries_past_traces(
+    runs: list[tuple[list[float], list[float], float, bool, float]],
+    summaries: Any,
+) -> list[float]:
+    """The ``summaries`` (lengths of runs kept without a trace) at least
+    ``TERMINAL_BLIP_QUIET_MIN_S`` longer than every traced run of ``runs``: a length
+    only runs without a trace reached (#531). Pure; never raises."""
+    try:
+        longest = max((float(r[2]) for r in runs), default=0.0)
+        return [d for d in _summary_lengths(summaries) if d >= longest + TERMINAL_BLIP_QUIET_MIN_S]
+    except Exception:  # noqa: BLE001 - a statistic must never break an envelope build
+        return []
+
+
+def _held_to_length(
+    offsets: list[float], values: list[float], peak: float, length_s: float,
+) -> tuple[list[float], list[float], float]:
+    """A run closed inside its programme's quiet phase, held at that quiet's level
+    (the median reading after its last main activity) to ``length_s`` (#531): what
+    the programme drew until its end, less the low-power pump-outs and the terminal
+    event no trace of it shows. A length at or before its end changes nothing."""
+    end = float(offsets[-1])
+    if not length_s > end:
+        return offsets, values, max(end, float(length_s or 0.0))
+    main = TERMINAL_EVENT_MAX_PEAK_FRAC * peak
+    last_main = max((t for t, w in zip(offsets, values, strict=False) if w > main), default=-math.inf)
+    tail = [w for t, w in zip(offsets, values, strict=False) if t > last_main]
+    level = float(np.median(tail)) if tail else float(values[-1])
+    step = min(1.0, (length_s - end) / 2.0)
+    return [*offsets, end + step, float(length_s)], [*values, level, level], float(length_s)
+
+
 def cut_short_mask(
     runs: list[tuple[list[float], list[float], float, bool, float]],
     sources: list[Any] | None = None,
+    *,
+    summaries: Any = None,
+    censored: list[bool] | None = None,
 ) -> list[bool]:
     """Which of a dishwasher programme's runs were closed inside its quiet phase (#531).
 
@@ -663,23 +723,46 @@ def cut_short_mask(
     runs end on their own event and are complete) and at least
     ``CUT_SHORT_MIN_RUNS`` (and ``CUT_SHORT_MIN_SHARE`` of the runs) others go on
     past its end into at least ``TERMINAL_BLIP_QUIET_MIN_S`` of quiet, begun no
-    later than that long after its end, and then show one
-    (:func:`_events_after_quiet`): its end came before the programme's. A pinned
-    run (golden or a corrected length) never is. Pure; never raises.
+    later than that long after its end or filling more than
+    ``CUT_SHORT_SIBLING_QUIET_SHARE`` of that time, and then show one
+    (:func:`_events_after_quiet`): its end came before the programme's. The share:
+    the short low-power pump-outs after a dishwasher's last heating break the
+    quiet, and a run closed before them was counted complete; a sibling still
+    working at its end is not quiet for most of the time after it. A pinned run
+    (golden or a corrected length) never is. Pure; never raises.
 
     ``sources`` (one hashable per run, :func:`_cut_short_sources`) names the run
     each one records: runs and votes count once per source, so a stored copy of a
     run is no independent evidence (PR #529 review). Omitted, every run is its own.
+
+    ``summaries``: the lengths (s) of the programme's runs kept without a trace (a
+    store from before 0.5.8 kept the newest 20 traces per programme, register item
+    463). Each is a run of the programme; one that went on ``TERMINAL_BLIP_QUIET_MIN_S``
+    past a run's end votes for it only when that run was closed by Smart
+    Termination (``censored``: ended at the programme's learned length, not by the
+    appliance) and its length is witnessed: within ``TERMINAL_BLIP_QUIET_MIN_S`` of
+    a traced sibling's terminal event that votes for the run, or longer than every
+    traced run (:func:`summaries_past_traces`), which only those runs reached. That
+    vote's share is of every run, traced or not; the traced siblings' own vote keeps
+    its share of the traced runs.
     """
     try:
         n = len(runs)
         src: list[Any] = (
             list(sources) if sources is not None and len(sources) == n else list(range(n))
         )
+        summ = _summary_lengths(summaries)
+        cens = list(censored) if censored is not None and len(censored) == n else [False] * n
+        # The traced runs' vote as before; one with the summaries counts every run.
         distinct = len(set(src))
         need = max(CUT_SHORT_MIN_RUNS, math.ceil(CUT_SHORT_MIN_SHARE * distinct))
-        if distinct <= need:
+        need_all = max(CUT_SHORT_MIN_RUNS, math.ceil(CUT_SHORT_MIN_SHARE * (distinct + len(summ))))
+        traced_vote = distinct > need
+        if not traced_vote and not (summ and any(cens) and distinct + len(summ) > need_all):
             return [False] * n
+        # A length only runs without a trace reached (summaries_past_traces).
+        past_traces = max((float(r[2]) for r in runs), default=0.0) + TERMINAL_BLIP_QUIET_MIN_S
+
         # Terminal only after the run's last main activity: an event the heater
         # restarts after is a pause, not the end (review of PR #529).
         def _terminal(o: list[float], v: list[float], pk: float) -> list[tuple[float, float]]:
@@ -688,6 +771,18 @@ def cut_short_mask(
             return [ev for ev in _events_after_quiet(o, v, pk) if ev[1] > last_main]
 
         events = [_terminal(o, v, pk) for o, v, _d, _p, pk in runs]
+        clocks: dict[int, tuple[Any, Any]] = {}
+
+        def _mostly_quiet(j: int, t0: float) -> bool:
+            # Quiet for more than the share of [t0, t0 + TERMINAL_BLIP_QUIET_MIN_S].
+            if j not in clocks:
+                o, v, _d, _p, pk = runs[j]
+                clocks[j] = _quiet_clock(o, v, pk)
+            o_j, q_j = clocks[j]
+            t1 = t0 + TERMINAL_BLIP_QUIET_MIN_S
+            quiet = float(np.interp(t1, o_j, q_j) - np.interp(t0, o_j, q_j))
+            return quiet > CUT_SHORT_SIBLING_QUIET_SHARE * TERMINAL_BLIP_QUIET_MIN_S
+
         mask: list[bool] = []
         for i, (_o, _v, d_i, pinned, _pk) in enumerate(runs):
             if pinned or any(t_e >= d_i - TERMINAL_BLIP_QUIET_MIN_S for _q0, t_e in events[i]):
@@ -695,16 +790,31 @@ def cut_short_mask(
                 continue
             # A sibling's evidence ends where its accepted length does: a trace
             # kept past a corrected end shows what came after the run (PR #529 review).
-            later = len({
-                src[j] for j, ev in enumerate(events)
-                if src[j] != src[i] and any(
-                    d_i < t_e <= runs[j][2]
-                    and q0 <= d_i + TERMINAL_BLIP_QUIET_MIN_S
-                    and t_e - max(q0, d_i) >= TERMINAL_BLIP_QUIET_MIN_S
-                    for q0, t_e in ev
+            witnessed: dict[Any, float] = {}
+            for j, ev in enumerate(events):
+                if src[j] == src[i]:
+                    continue
+                for q0, t_e in ev:
+                    if (
+                        d_i < t_e <= runs[j][2]
+                        and t_e - max(q0, d_i) >= TERMINAL_BLIP_QUIET_MIN_S
+                        and (q0 <= d_i + TERMINAL_BLIP_QUIET_MIN_S or _mostly_quiet(j, d_i))
+                    ):
+                        witnessed[src[j]] = min(t_e, witnessed.get(src[j], math.inf))
+            votes = len(witnessed)
+            if traced_vote and votes >= need:
+                mask.append(True)
+                continue
+            if cens[i] and summ:
+                ends = list(witnessed.values())
+                votes += sum(
+                    1 for d in summ
+                    if d >= d_i + TERMINAL_BLIP_QUIET_MIN_S
+                    and (d >= past_traces or any(abs(d - t_e) <= TERMINAL_BLIP_QUIET_MIN_S for t_e in ends))
                 )
-            })
-            mask.append(later >= need)
+                mask.append(votes >= need_all)
+                continue
+            mask.append(False)
         return mask
     except Exception:  # noqa: BLE001 - a statistic must never break an envelope build
         return [False] * len(runs)
@@ -1864,6 +1974,82 @@ def _recompute_cycle_energy(data: JSONDict) -> dict[str, Any]:
     return summary
 
 
+def cycle_extension_points(
+    trace_end_s: float,
+    last_power: float,
+    rows: list[tuple[float, float | None]],
+    end_s: float,
+    keepalive_s: float,
+) -> tuple[list[list[float]], list[float]] | None:
+    """The readings that carry a stored trace on to ``end_s`` (#536).
+
+    ``rows`` are the power sensor's recorder rows as ``(offset_s, watts)`` from the
+    cycle's start, None for an unavailable one; a row at or before
+    ``trace_end_s`` is the state in force at the trace's end. The new end snaps to
+    the last real reading at or before ``end_s`` (within the trim's whole-second
+    tolerance), as a trim does. A change-only sensor records nothing while its
+    value holds, so a silence longer than ``keepalive_s`` gets the keepalives the
+    live watchdog would have stored (the held value every ``keepalive_s``), and
+    they are returned as synthetic offsets; no keepalive is made across an
+    unavailable stretch. The stored cycle then integrates the gap as a live
+    trace does (the manager records no row for an unavailable state, and
+    ``integrate_cycle_wh`` holds each reading to the next, dropping gaps over
+    1 h). Offsets are on the trace's 0.1 s grid. None when no real
+    reading lies after the trace's end. Pure; never raises.
+    """
+    try:
+        trace_end = float(trace_end_s)
+        limit = float(end_s) + _TRIM_SNAP_TOLERANCE_S
+        step = float(keepalive_s)
+        if not (math.isfinite(trace_end) and math.isfinite(limit)) or limit <= trace_end:
+            return None
+        if not math.isfinite(step) or step <= 0:
+            step = math.inf
+        held: float | None = float(last_power) if math.isfinite(float(last_power)) else None
+        clean: list[tuple[float, float | None]] = []
+        for offset, watts in rows:
+            o = float(offset)
+            if not math.isfinite(o):
+                continue
+            w = None if watts is None else float(watts)
+            clean.append((o, w if w is not None and math.isfinite(w) else None))
+        clean.sort(key=lambda r: r[0])
+        for o, w in clean:
+            if o <= trace_end:
+                held = w
+        after = [(o, w) for o, w in clean if trace_end < o <= limit]
+        real = [o for o, w in after if w is not None]
+        if not real:
+            return None
+        new_end = max(real)
+        points: dict[int, list[float]] = {}
+        synthetic: set[int] = set()
+        prev = trace_end
+        for o, w in after:
+            if o > new_end:
+                break
+            if held is not None and math.isfinite(step):
+                k = prev + step
+                while k < o - 0.05:
+                    key = round(k * 10)
+                    if key > round(trace_end * 10):
+                        points[key] = [round(k, 1), held]
+                        synthetic.add(key)
+                    k += step
+            if w is None:
+                held = None
+            else:
+                key = round(o * 10)
+                points[key] = [round(o, 1), w]
+                synthetic.discard(key)
+                held = w
+            prev = o
+        out = [points[k] for k in sorted(points)]
+        return out, [round(k / 10, 1) for k in sorted(synthetic)]
+    except (TypeError, ValueError, OverflowError):
+        return None
+
+
 def _rescale_cycle_cost(cycle: CycleDict, old_wh: float | None, new_wh: float) -> None:
     """Move a cycle's cost with its re-integrated energy. A time-weighted cost is
     scaled (its prices are frozen with it); a fixed one is energy x price."""
@@ -2448,7 +2634,8 @@ _EXPORT_CATEGORIES: dict[str, dict[str, Any]] = {
     "ml_models":        {"keys": ["ml_model_versions", "ml_training_history", "ml_last_training_run"],
                          "kind": "mixed", "device_specific": True},
     "history_logs":     {"keys": ["auto_adjustments", "settings_changelog"], "kind": "list"},
-    "lifetime_stats":   {"keys": ["lifetime_energy_wh", "lifetime_cycle_count"], "kind": "scalar"},
+    "lifetime_stats":   {"keys": ["lifetime_energy_wh", "lifetime_cycle_count", "lifetime_cost"],
+                         "kind": "scalar"},
     "settings":         {"keys": [], "kind": "options", "device_specific": True},
 }
 
@@ -4774,6 +4961,70 @@ class ProfileStore:
         self._data["lifetime_energy_wh"] = round(base + add, 3)
         await self.async_save()
 
+    # ------------------------------------------------------------------
+    # Lifetime cost (#501 follow-up): the Total Cost sensor
+    # ------------------------------------------------------------------
+
+    def get_lifetime_cost(self) -> float | None:
+        """What every stored run has cost, in HA's currency, or None before any
+        run had a cost. Pure getter. Never raises."""
+        value = self._data.get("lifetime_cost")
+        if value is None or isinstance(value, bool):
+            return None
+        try:
+            number = float(value)
+        except (TypeError, ValueError, OverflowError):
+            return None
+        return number if math.isfinite(number) else None
+
+    def add_lifetime_cost(self, cost: Any) -> None:
+        """Add one stored run's cost in memory WITHOUT persisting.
+
+        Called once per stored run at its end, before the lifetime-energy save
+        that persists it (one write per cycle). A run without a cost adds
+        nothing; a negative one (a negative dynamic price) counts as it is.
+        """
+        if cost is None or isinstance(cost, bool):
+            return
+        try:
+            add = float(cost)
+        except (TypeError, ValueError, OverflowError):
+            return
+        if not math.isfinite(add):
+            return
+        base = self.get_lifetime_cost() or 0.0
+        self._data["lifetime_cost"] = round(base + add, 4)
+
+    def _seed_lifetime_cost(self) -> None:
+        """Start the figure from the stored runs' costs when there is none yet.
+
+        Only when the stored value is missing or unusable, so it runs once per
+        store and never moves a running total. With no costed run on record the
+        key stays absent and the sensor reads unknown. Never raises.
+        """
+        try:
+            if self.get_lifetime_cost() is not None:
+                return
+            total = 0.0
+            costed = False
+            for cycle in self.get_past_cycles():
+                cost = cycle.get("cost") if isinstance(cycle, dict) else None
+                if cost is None or isinstance(cost, bool):
+                    continue
+                try:
+                    value = float(cost)
+                except (TypeError, ValueError, OverflowError):
+                    continue
+                if math.isfinite(value):
+                    total += value
+                    costed = True
+            if costed:
+                self._data["lifetime_cost"] = round(total, 4)
+            else:
+                self._data.pop("lifetime_cost", None)
+        except Exception:  # noqa: BLE001 - a seed must never break a load
+            self._logger.debug("Could not seed the lifetime cost", exc_info=True)
+
     def get_lifetime_cycle_count(self) -> int:
         """Cycles this appliance has run, ever - the odometer.
 
@@ -6906,6 +7157,7 @@ class ProfileStore:
         await self._async_load_active()
         # The odometer can only be behind, never ahead, of the stored history (#414).
         self._heal_lifetime_cycle_count()
+        self._seed_lifetime_cost()
         # Ensure legacy custom phase formats are normalized in-memory.
         self._get_shared_custom_phases()
         # Assign ids to any custom phase missing one.
@@ -7878,6 +8130,15 @@ class ProfileStore:
         # dishwasher and a low-power pump).
         parsed: list[tuple[list[float], list[float], float, bool, float]] = []
         decoded = [(c, decompress_power_data(c)) for c in labeled_cycles]
+        # #531: a dishwasher run kept without a trace (the per-programme trace cap
+        # before 0.5.8, register item 463) is a run of the programme all the same;
+        # its stored length is the only record of how long it ran.
+        summaries = [
+            d for d in (
+                _positive_duration(c.get("duration")) for c, p in decoded
+                if len(p) < 3 and c.get("status") == "completed" and not _is_store_import(c)
+            ) if d is not None
+        ] if self.device_type == "dishwasher" else []
         decoded = [(c, p) for c, p in decoded if len(p) >= 3]
         flags = _effective_golden_flags([c for c, _ in decoded])
         for (cycle, pairs), is_golden in zip(decoded, flags):
@@ -7913,6 +8174,7 @@ class ProfileStore:
         # Only the runs the build keeps may vote on each other (a mis-capture is no
         # evidence). A user trim or edit is a corrected length, as manual_duration.
         cut_short = [False] * len(parsed)
+        restore_s: float | None = None
         if self.device_type == "dishwasher":
             voters = [k for k, p in enumerate(parsed) if p[4] >= degen_floor or p[3]]
 
@@ -7938,37 +8200,62 @@ class ProfileStore:
                 ]
                 return [t for t, _ in pairs], [v for _, v in pairs]
 
+            voter_runs = [
+                (*_observed(k), parsed[k][2],
+                 bool(parsed[k][3] or _corrected(decoded[k][0], parsed[k][0])),
+                 parsed[k][4])
+                for k in voters
+            ]
             sub = cut_short_mask(
-                [
-                    (*_observed(k), parsed[k][2],
-                     bool(parsed[k][3] or _corrected(decoded[k][0], parsed[k][0])),
-                     parsed[k][4])
-                    for k in voters
-                ],
+                voter_runs,
                 # A stored copy of a run (a reference imported from this
                 # device's own backup) votes as that run (PR #529 review).
                 _cut_short_sources([decoded[k] for k in voters]),
+                summaries=summaries,
+                # Closed at the learned length, not by the appliance: the only
+                # runs a summary may call cut off.
+                censored=[
+                    decoded[k][0].get("termination_reason") == TerminationReason.SMART
+                    for k in voters
+                ],
             )
             for k, cut in zip(voters, sub, strict=True):
                 cut_short[k] = cut
+            # Every traced run cut off, on the word of runs without a trace that
+            # went on past them all: no trace shows the programme's end, so the
+            # cut-offs keep the curve, held at their quiet level to the length those
+            # runs reached. Falling back to them as stored kept the cut-off length,
+            # and the next run ended there again.
+            if voters and all(sub):
+                past = summaries_past_traces(voter_runs, summaries)
+                if past:
+                    restore_s = float(np.median(past))
 
         raw_cycles_data: list[tuple[list[float], list[float], float]] = []
         durations: list[float] = []
         golden_mask: list[bool] = []
         dropped = 0
         for (offsets, values, final_dur, is_golden, peak), cut in zip(parsed, cut_short):
-            if (peak < degen_floor and not is_golden) or cut:
+            if (peak < degen_floor and not is_golden) or (cut and restore_s is None):
                 dropped += 1
                 continue
+            if cut and restore_s is not None:
+                offsets, values, final_dur = _held_to_length(offsets, values, peak, restore_s)
             raw_cycles_data.append((offsets, values, final_dur))
             durations.append(final_dur)
             golden_mask.append(is_golden)
         cut_short_ids = frozenset(
             str(decoded[k][0].get("id"))
             for k, cut in enumerate(cut_short)
-            if cut and decoded[k][0].get("id") is not None
+            if cut and restore_s is None and decoded[k][0].get("id") is not None
         )
-        if any(cut_short):
+        if restore_s is not None:
+            self._logger.debug(
+                "Envelope rebuild: %d run(s) closed inside the programme's quiet phase "
+                "held to %.0f s, the length its runs without a trace reached (#531)",
+                sum(cut_short), restore_s,
+            )
+        elif any(cut_short):
             self._logger.debug(
                 "Envelope rebuild: %d run(s) closed inside the programme's quiet phase "
                 "left out of its length (#531)", sum(cut_short),
@@ -8732,8 +9019,10 @@ class ProfileStore:
     def cut_short_rebuild_pending(self) -> bool:
         """Whether this store still has to be rebuilt once under the #531 cut-off
         rule (`CUT_SHORT_REBUILD_KEY` absent: a store from before it, or one an
-        envelope build under another device type has run on since)."""
-        return not self._data.get(CUT_SHORT_REBUILD_KEY)
+        envelope build under another device type has run on since; or below
+        `CUT_SHORT_RULE_REVISION`: rebuilt under an older rule, 0.6.1's True)."""
+        marker = self._data.get(CUT_SHORT_REBUILD_KEY)
+        return not (type(marker) is int and marker >= CUT_SHORT_RULE_REVISION)
 
     async def async_rebuild_for_cut_short_rule(self, device_type: str | None = None) -> int:
         """Rebuild, once, every profile that has traced evidence cycles (#531).
@@ -8810,7 +9099,7 @@ class ProfileStore:
                         self._logger.warning("Rebuild of %s under the #531 rule failed: %s", name, exc)
             if failed or _stale() or _names() - done:
                 return count  # still pending: the next start runs it again
-            self._data[CUT_SHORT_REBUILD_KEY] = True
+            self._data[CUT_SHORT_REBUILD_KEY] = CUT_SHORT_RULE_REVISION
             await self.async_save()
         except Exception as exc:  # noqa: BLE001 - never cost the user their history
             self._logger.warning("Rebuild under the #531 cut-off rule aborted: %s", exc)
@@ -13210,6 +13499,8 @@ class ProfileStore:
         data.pop("active_cycle", None)
         data.pop("last_active_save", None)
         self._data = data
+        # A restore point from before 0.6.2 has costs but no Total Cost yet.
+        self._seed_lifetime_cost()
         self._data_generation = getattr(self, "_data_generation", 0) + 1
         self._cached_sample_segments = {}
         self._cohesion_cache_generation += 1
@@ -13366,6 +13657,7 @@ class ProfileStore:
         # the next restart could report a lifetime count below its own retained
         # history. Only ever increases, and idempotent.
         self._heal_lifetime_cycle_count()
+        self._seed_lifetime_cost()
         for name in stale_profiles:
             await self.async_rebuild_envelope(name)
         # Required: an unload during the rebuilds retired this store, and a
@@ -14004,6 +14296,7 @@ class ProfileStore:
         # the next restart could report a lifetime count below its own retained
         # history. Only ever increases, and idempotent.
         self._heal_lifetime_cycle_count()
+        self._seed_lifetime_cost()
         # A real-history replace can take cycles whose review requests stay
         # queued: drop them, as a split, merge or load does (#362), so they neither
         # show nor spend their programme's review budget.
@@ -14121,8 +14414,15 @@ class ProfileStore:
         cycle_id: str,
         new_start_s: float,
         new_end_s: float,
+        extension: tuple[list[list[float]], list[float]] | None = None,
     ) -> bool:
         """Trim a cycle's power_data to the window [new_start_s, new_end_s].
+
+        ``extension`` (#536, :func:`cycle_extension_points`): readings after the
+        trace's end, from the power sensor's history, appended before the window
+        is cut, so the end can move past the stored one. Only a cycle this device
+        observed live (``past``), and not over the next stored run; its energy,
+        cost and meter reading move with the added stretch.
 
         Offsets are renormalized so the kept segment starts at 0.0.
         The cycle's ``duration``, ``signature``, and ``sampling_interval`` are
@@ -14146,6 +14446,29 @@ class ProfileStore:
 
         new_start_s = max(0.0, float(new_start_s))
         new_end_s = float(new_end_s)
+
+        old_end_s = float(p_data[-1][0])
+        ext_synthetic: list[float] = []
+        ext_meter_wh = 0.0
+        old_report_wh: float | None = None
+        if extension is not None:
+            ext_points, ext_synthetic = extension
+            ext_points = [
+                [float(o), float(w)] for o, w in ext_points
+                if math.isfinite(float(o)) and math.isfinite(float(w)) and float(o) > old_end_s
+            ]
+            if origin != "past" or not ext_points:
+                return False
+            start_ts = _value_to_timestamp(cycle.get("start_time"))
+            if start_ts is None or self._extension_overlaps(
+                cycle_id, start_ts + old_end_s, start_ts + ext_points[-1][0]
+            ):
+                return False
+            # The added stretch, held from the trace's last reading; its energy is
+            # taken once the kept window is known.
+            stretch = [[float(r[0]), float(r[1])] for r in (p_data[-1], *ext_points)]
+            old_report_wh = cycle_report_energy_wh(cycle)
+            p_data = [*p_data, *ext_points]
 
         # Guard against a destructive trim (#366): an inverted/empty window would
         # produce a zero- or single-sample segment that collapses the cycle to
@@ -14233,6 +14556,7 @@ class ProfileStore:
         remap_synthetic_offsets(
             cycle,
             lambda o: round(o - base, 2) if new_start_s <= o <= new_end_s else None,
+            [round(o - base, 2) for o in ext_synthetic if new_start_s <= o <= new_end_s],
         )
         cycle["sampling_interval"] = round(sampling_interval, 1)
         cycle["duration"] = new_duration
@@ -14260,12 +14584,47 @@ class ProfileStore:
         # Clear manual_duration override - trimmed duration is now authoritative
         cycle.pop("manual_duration", None)
 
+        extended = extension is not None and new_end_s > old_end_s
+        if extended:
+            # A meter reading stops where the cycle used to: the added stretch's
+            # integrated energy carries it on. The cost follows the energy as an
+            # energy re-integration moves it.
+            # The stretch up to the kept end. A start cut at or past the old end
+            # keeps none of the trace the meter reading describes: it is dropped
+            # and the integrated energy stands in, as for a cycle with no meter.
+            kept = [r for r in stretch if r[0] <= new_end_s]
+            if len(kept) > 1:
+                ext_meter_wh = integrate_cycle_wh(
+                    np.array([r[0] for r in kept], dtype=float),
+                    np.array([r[1] for r in kept], dtype=float),
+                )
+            # As cycle_report_energy_wh reads it: an imported numeric string
+            # counts, an integer too large for a float does not.
+            meter = cycle.get("energy_meter_wh")
+            try:
+                meter_wh = (
+                    None if meter is None or isinstance(meter, bool) else float(meter)
+                )
+            except (TypeError, ValueError, OverflowError):
+                meter_wh = None
+            if new_start_s >= old_end_s:
+                cycle.pop("energy_meter_wh", None)
+            elif meter_wh is not None and math.isfinite(meter_wh):
+                cycle["energy_meter_wh"] = round(meter_wh + ext_meter_wh, 3)
+            if cycle.get("cost") is not None:
+                try:
+                    _rescale_cycle_cost(cycle, old_report_wh, cycle_report_energy_wh(cycle))
+                except (TypeError, ValueError, OverflowError):
+                    self._logger.debug("Could not move the cost with the extension", exc_info=True)
+
         # Mark the cycle as edited so store-upload provenance (qc) can distinguish a
         # trimmed cycle from a plain detected one.
         meta = cycle.setdefault("meta", {})
         if isinstance(meta, dict):
             meta["edited"] = True
             meta["trim"] = [round(new_start_s, 1), round(new_end_s, 1)]
+            if extended:
+                meta["extend"] = [round(old_end_s, 1), round(new_end_s, 1)]
 
         # Invalidate cached sample segments for this cycle so future lookups
         # are recomputed from the trimmed data
@@ -14278,6 +14637,27 @@ class ProfileStore:
 
         await self.async_save()
         return True
+
+    def _extension_overlaps(self, cycle_id: str, from_ts: float, to_ts: float) -> str | None:
+        """The id of another run of this device, observed or history-imported,
+        that starts at or after ``from_ts`` and at or before ``to_ts`` (#536), else
+        None: an end moved past it would take its readings twice. A downloaded
+        reference cycle ran in another home and is not one. Never raises."""
+        try:
+            for other in (*self.get_past_cycles(), *self.get_backfill_cycles()):
+                if other.get("id") == cycle_id:
+                    continue
+                try:
+                    ts = _value_to_timestamp(other.get("start_time"))
+                except (TypeError, ValueError, OverflowError):
+                    continue  # an impossible date must not end the scan
+                # Inclusive at the trace's end: a split leaves the next run
+                # starting on the first run's last reading.
+                if ts is not None and from_ts <= ts <= to_ts:
+                    return str(other.get("id") or "?")
+        except Exception:  # noqa: BLE001
+            return None
+        return None
 
     def analyze_split_sync(
         self, cycle: CycleDict, min_gap_s: int = 900, idle_power: float = 2.0

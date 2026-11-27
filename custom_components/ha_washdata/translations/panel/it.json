@@ -256,10 +256,6 @@
       "start": "Deve essere superiore alla Soglia di arresto ({stop} W)",
       "stop": "Deve essere inferiore alla Soglia di avvio ({start} W)"
     },
-    "min_power": {
-      "min_power": "Deve essere minore o uguale alla Soglia di arresto ({stop} W)",
-      "stop": "Deve essere maggiore o uguale alla Potenza minima ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Deve essere maggiore dell'Intervallo watchdog ({wi} s)",
       "watchdog": "Deve essere minore del Timeout assenza aggiornamenti ({to} s)"
@@ -1096,7 +1092,13 @@
     "review_q_more_one": "{count} altro da revisionare",
     "review_q_more_many": "{count} altri da revisionare",
     "review_q_more_other": "{count} altri da revisionare",
-    "review_which_program": "Di quale programma si trattava?"
+    "review_which_program": "Di quale programma si trattava?",
+    "trim_extend_hint": "Grigio: ciò che Home Assistant ha registrato dopo il ciclo. Trascina la fine al suo interno per aggiungerlo al ciclo.",
+    "trim_extend_note": "La fine è oltre il ciclo registrato: vengono aggiunte le letture registrate da Home Assistant fino a quel punto.",
+    "extend_no_history": "Home Assistant non ha letture di questa presa dopo il ciclo.",
+    "extend_overlaps": "La fine non può andare oltre l'inizio del ciclo successivo.",
+    "extend_too_far": "La fine può andare al massimo 4 h oltre il ciclo registrato.",
+    "extend_not_live": "Solo un ciclo registrato da questo dispositivo può essere esteso."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Lavastoviglie: secondi sotto la Soglia di arresto dall'ultima attività necessari per chiudere l'attesa dello scarico finale dopo la durata prevista",
@@ -1298,6 +1300,9 @@
       "doc": "Considera come segnale di fine il passaggio del sensore a OFF (non a ON).",
       "label": "Inverti trigger esterno (attiva su SPENTO)"
     },
+    "interrupted_min_seconds": {
+      "label": "Durata minima (Interrotto)"
+    },
     "learning_confidence": {
       "doc": "Punteggio di corrispondenza minimo per etichettare un ciclo terminato. Un vincitore netto viene etichettato; un caso incerto va nella coda di revisione in Cicli. Sotto questo valore non si etichetta né si chiede nulla. Tienilo sotto la Confidenza etichettatura automatica.",
       "label": "Confidenza apprendimento"
@@ -1387,7 +1392,7 @@
       "label": "Messaggio dell'avviso pre-fine"
     },
     "notify_start_message": {
-      "doc": "Testo inviato all'avvio di un ciclo. Variabili di modello: {device}, {program}. Con qualsiasi altra variabile si usa il testo predefinito.",
+      "doc": "Testo inviato all'avvio di un ciclo. Variabili di modello: {device}, {program}, {finish_time} (ora di fine stimata, es. 14:30; ~14:30 si basa sulla durata tipica dell'apparecchio e si usa finché il programma non è noto). Con qualsiasi altra variabile si usa il testo predefinito.",
       "label": "Messaggio di avvio"
     },
     "notify_start_services": {
@@ -1880,7 +1885,8 @@
     "copied": "Copiato",
     "copy_failed": "Copia non riuscita. Seleziona il testo e copialo manualmente.",
     "automation_label_failed": "Automazione creata, ma l’etichetta o la categoria WashData non ha potuto essere aggiunta.",
-    "review_answered": "Salvato: {program}"
+    "review_answered": "Salvato: {program}",
+    "cycle_extended": "Fine del ciclo spostata; le letture registrate sono state aggiunte"
   },
   "suggestion": {
     "observed_label": "Osservato",

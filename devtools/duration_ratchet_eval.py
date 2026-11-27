@@ -5,7 +5,9 @@
 """Does a program's learned length ratchet down when its own ends cut cycles short? (#531)
 
     python3 devtools/duration_ratchet_eval.py [--curve CSV] [--seed N] [--cycles K]
-                                              [--stop W] [--start W] [--json OUT]
+                                              [--cut N --cut-min M] [--traceless N]
+                                              [--stop W] [--start W] [--set KEY=VALUE]
+                                              [--json OUT]
 
 Every end gate that reads the matched program's expected duration (Smart
 Termination, the dishwasher end-spike wait and its quiet release, the progress
@@ -19,7 +21,10 @@ then shorter every month down to 129 min, with "finished" 50 min early.
 
 **Loop** (all production code): ``--seed`` full runs of the curve are stored and
 labelled (then ``--cut`` runs cut at ``--cut-min``, the reporter's store after the
-ratchet), the profile's envelope is built; then ``--cycles`` more runs, one at a
+ratchet, recorded as closed by Smart Termination), the profile's envelope is built;
+``--traceless`` strips the trace off the oldest N of those (full ones first), as the
+per-program trace cap before 0.5.8 left them (register item 463); ``--set`` layers
+an option on the device's (e.g. a workaround setting); then ``--cycles`` more runs, one at a
 time, each replayed through the Playground replay (real ``CycleDetector``, real
 matcher and the manager's detector inputs, ``suggestion_loop_eval.replay_one``)
 against the profile as learned so far; its longest completed end the manager would
@@ -114,7 +119,8 @@ def real_end_s(curve: list[tuple[float, float]], stop: float) -> float:
 def make_run(curve: list[tuple[float, float]], day: int, rng: np.random.Generator,
              *, cut_s: float | None = None, hold_min: float = 0.0, idle_w: float = 3.3) -> dict:
     """One run of the curve as a stored cycle (labelled), cut at ``cut_s`` if given,
-    followed by ``hold_min`` of standby at ``idle_w``."""
+    followed by ``hold_min`` of standby at ``idle_w``. A cut run is recorded as Smart
+    Termination closed it (the ratchet: ended at the learned length)."""
     pts = [[round(t, 1), round(max(0.0, p * (1 + 0.03 * rng.standard_normal())), 2)]
            for t, p in curve if cut_s is None or t <= cut_s]
     t = pts[-1][0]
@@ -124,10 +130,18 @@ def make_run(curve: list[tuple[float, float]], day: int, rng: np.random.Generato
     start = T0 + timedelta(days=day)
     return {
         "id": f"r{day:04d}", "profile_name": PROGRAM, "label_source": "manual",
-        "status": "completed", "termination_reason": "timeout",
+        "status": "completed", "termination_reason": "timeout" if cut_s is None else "smart",
         "start_time": start.isoformat(), "end_time": (start + timedelta(seconds=pts[-1][0])).isoformat(),
         "duration": pts[-1][0], "power_data": pts,
     }
+
+
+def strip_trace(cycle: dict) -> None:
+    """``cycle`` as the pre-0.5.8 per-program trace cap left it (register item 463,
+    the old ``_enforce_retention_data``): trace, sampling interval and artifacts
+    gone, the summary (duration, times, label, energy) kept."""
+    for key in ("power_data", "sampling_interval", "artifacts", "debug_data"):
+        cycle.pop(key, None)
 
 
 def _learned_min(store: Any) -> float:
@@ -158,15 +172,22 @@ def stored_ends(rep: dict[str, Any] | None) -> list[int]:
 
 def run(curve: list[tuple[float, float]], *, seed: int = 30, cycles: int = 60,
         stop: float = 4.5, start: float = 5.0, hold_min: float = 40.0, rng_seed: int = 531,
-        cut: int = 0, cut_min: float = 131.0) -> dict[str, Any]:
+        cut: int = 0, cut_min: float = 131.0, traceless: int = 0,
+        overrides: dict[str, Any] | None = None) -> dict[str, Any]:
     sle._quiet()  # noqa: SLF001
     rng = np.random.default_rng(rng_seed)
     end_s = real_end_s(curve, stop)
     entry_data = {"device_type": "dishwasher", "name": "eval", "power_sensor": "sensor.eval_power"}
-    options = {"stop_threshold_w": stop, "start_threshold_w": start}
+    options = {"stop_threshold_w": stop, "start_threshold_w": start, **(overrides or {})}
     past = [make_run(curve, d, rng, cut_s=end_s + 30) for d in range(seed)]
     # The reporter's store after the ratchet: runs closed inside the drying (#531).
     past += [make_run(curve, seed + d, rng, cut_s=cut_min * 60) for d in range(cut)]
+    # A store from before 0.5.8 (register item 463): the per-program trace cap kept
+    # the newest 20 traces, so the oldest runs are summaries without a trace.
+    # Counted here: the replays below append to the same list.
+    seed_traceless = min(traceless, len(past))
+    for cycle in past[:traceless]:
+        strip_trace(cycle)
     data = {"profiles": {PROGRAM: {}}, "past_cycles": past, "envelopes": {}, "profile_groups": {}}
     mgr = sle._manager(entry_data, options, "eval", data)  # noqa: SLF001
     store = mgr.profile_store
@@ -203,7 +224,8 @@ def run(curve: list[tuple[float, float]], *, seed: int = 30, cycles: int = 60,
         row["learned_after_min"] = _learned_min(store)
         rows.append(row)
     return {
-        "real_end_min": round(end_s / 60, 1), "seed_full": seed, "seed_cut": cut, "cycles": cycles,
+        "real_end_min": round(end_s / 60, 1), "seed_full": seed, "seed_cut": cut,
+        "seed_traceless": seed_traceless, "cycles": cycles,
         "rows": rows, "ended_early": early, "no_completed_record": unfinished,
         "learned_first_min": rows[0]["learned_before_min"] if rows else _learned_min(store),
         "learned_last_min": _learned_min(store),
@@ -232,6 +254,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--hold", type=float, default=40.0, help="minutes of standby after the curve")
     ap.add_argument("--cut", type=_count, default=0, help="runs stored cut short after the full ones")
     ap.add_argument("--cut-min", type=float, default=131.0, help="where those were cut, minutes")
+    ap.add_argument("--traceless", type=_count, default=0,
+                    help="the oldest N stored runs (full ones first) kept without a trace, "
+                         "as the pre-0.5.8 per-program trace cap left them")
+    ap.add_argument("--set", action="append", default=[], metavar="KEY=VALUE",
+                    help="an option layered on the device's (a number, else text); repeatable")
     ap.add_argument("--json")
     a = ap.parse_args(argv)
     path = Path(a.curve)
@@ -253,10 +280,21 @@ def main(argv: list[str] | None = None) -> int:
             print(f"--cut-min {a.cut_min:g} does not cut the curve short (real end {end_min:.1f} min, "
                   f"{kept} readings before it)", file=sys.stderr)
             return 2
+    overrides: dict[str, Any] = {}
+    for item in a.set:
+        key, sep, raw = item.partition("=")
+        if not sep or not key:
+            print(f"--set {item!r} is not KEY=VALUE", file=sys.stderr)
+            return 2
+        try:
+            value: Any = float(raw)
+        except ValueError:
+            value = raw
+        overrides[key] = value
     res = run(curve, seed=a.seed, cycles=a.cycles, stop=a.stop, start=a.start, hold_min=a.hold,
-              cut=a.cut, cut_min=a.cut_min)
+              cut=a.cut, cut_min=a.cut_min, traceless=a.traceless, overrides=overrides)
     print(f"real end {res['real_end_min']} min; seed {res['seed_full']} full + {res['seed_cut']} cut "
-          f"runs; {res['cycles']} replayed")
+          f"runs ({res['seed_traceless']} without a trace); {res['cycles']} replayed")
     print(f"  {'run':>4s} {'target':>7s} {'learned':>8s} {'end':>7s} {'stored':>7s} {'learned':>8s}  reason")
     for r in res["rows"]:
         target = r.get("envelope_target_s")

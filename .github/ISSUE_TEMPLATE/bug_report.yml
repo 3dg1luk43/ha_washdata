@@ -10,6 +10,8 @@ body:
 
         Please complete **all required fields**. For fields that don't apply to your specific bug (e.g. device details for a purely UI issue), enter `N/A` - but do not skip them without reason. Issues missing key information will be automatically flagged and may be closed without investigation.
 
+        **Evidence is required**: attach the WashData export or paste logs in the **Evidence** section below (it explains how to get both), or tick **No Evidence Needed** there if your report genuinely needs none.
+
   - type: checkboxes
     id: preflight
     attributes:
@@ -18,7 +20,7 @@ body:
       options:
         - label: I have searched the [existing issues](https://github.com/3dg1luk43/ha_washdata/issues) and this is not a duplicate.
           required: true
-        - label: I have provided logs or error evidence in the field below (debug logs, error messages, warnings, or any relevant output), or entered `N/A` with a reason if genuinely not applicable.
+        - label: I have attached the WashData export or a log file, or pasted log lines, in the Evidence section below - or ticked **No Evidence Needed** because no data could show this problem.
           required: true
         - label: I have filled in all applicable fields with real values and used `N/A` only where the field is genuinely irrelevant to my bug.
           required: true
@@ -99,36 +101,91 @@ body:
     validations:
       required: true
 
-  - type: textarea
-    id: debug_log
+  - type: markdown
     attributes:
-      label: Logs / Error Evidence
-      description: |
-        **This is required.** Paste any relevant logs, error messages, or console output here. This does not have to be debug-level logs - any evidence of what went wrong is helpful: a single error line from the HA logbook, a warning trace, or a full debug log session. Paste whatever you have.
+      value: |
+        ## Evidence
 
-        > ⚠️ **Debug logs and the HA Diagnostics export are two different things.**
-        > - **Logs** = text output from `Settings → System → Logs`. Paste short excerpts directly; attach long files.
-        > - **Diagnostics export** = the JSON file from `Settings → Devices → your device → Download Diagnostics`. Always attach as a file - never paste inline.
+        Most bugs are about how a cycle was detected, recognised or timed, and those can only be investigated on **your data**. Attach the **WashData export** (best: it holds the power traces of your cycles) and/or paste **logs**. A report with neither is flagged automatically and closed if nothing is added. Expand the steps below.
 
-        **To get the most useful logs**, enable debug logging by adding this to your `configuration.yaml` and restarting HA:
+        <details>
+        <summary><b>How to download the WashData export</b> (recommended)</summary>
+
+        1. Open the **WashData** panel from the Home Assistant sidebar (as an administrator).
+        2. Pick the appliance in the device bar at the top.
+        3. Open the **Advanced** tab, then **Diagnostics** and **Export / Import**.
+        4. Press **Quick export everything**. Your browser downloads a `.json` file (about 2 MB on a large install).
+        5. Drag that file into the **Export / Diagnostics / Log File** field below. GitHub takes `.json` files up to 25 MB; zip it if it is larger.
+
+        The export holds this appliance's cycles, programs and WashData settings (entity ids included). It never contains passwords or tokens.
+
+        </details>
+
+        <details>
+        <summary><b>How to download WashData's logs</b></summary>
+
+        1. In the **WashData** panel, press the **Logs** button (the list icon at the top right, administrators only). It shows the last 500 WashData log lines since Home Assistant started.
+        2. Press **Export**. Your browser downloads `washdata_logs_....txt`.
+        3. Drag that file into the **Export / Diagnostics / Log File** field below, or paste the lines around the problem into **Logs / Error Evidence**.
+
+        For full detail, turn on debug logging first (next section), reproduce the problem, then export.
+
+        </details>
+
+        <details>
+        <summary><b>How to turn on debug logging</b></summary>
+
+        Add this to `configuration.yaml` and restart Home Assistant:
+
         ```yaml
         logger:
           default: info
           logs:
             custom_components.ha_washdata: debug
         ```
-        Then reproduce the bug and collect the output from `Settings → System → Logs`.
 
-        - **Short output (< ~50 lines):** paste directly below.
-        - **Long output:** download via `Settings → System → Logs → Download full log` and attach as a file.
+        Reproduce the problem, then export the WashData logs as above, or use `Settings → System → Logs → Download full log` (filter by `ha_washdata` to find the lines).
 
-        If you only have a brief error line or warning from the HA logbook, paste that - it is far better than nothing.
+        </details>
 
-        > **Tip:** Filter live logs by `ha_washdata` under `Settings → System → Logs` to quickly find relevant lines.
-      placeholder: "Paste log output or error messages here, or describe what file(s) you have attached above..."
+        <details>
+        <summary><b>Home Assistant diagnostics instead of the export</b></summary>
+
+        `Settings → Devices & services → WashData → your appliance → ⋮ → Download diagnostics`. Attach the file as it is, never paste it inline. The WashData export is still better: diagnostics hold fewer cycles.
+
+        </details>
+
+  - type: checkboxes
+    id: no_evidence
+    attributes:
+      label: No Evidence Needed
+      description: >
+        Tick this only when no export or log could show the problem. Leave it unticked otherwise: the report then needs an attached file
+        (export, diagnostics or log file) or pasted log lines, and is flagged without them.
+      options:
+        - label: This report needs no export or logs (for example a typo, a wrong translation, or a layout problem in the panel).
+          required: false
+
+  - type: textarea
+    id: evidence_files
+    attributes:
+      label: Export / Diagnostics / Log File
+      description: Drag the WashData export (`.json`), the diagnostics file or a log file (`.txt`) here. Each file is attached as a link.
+      placeholder: "Drop the export, diagnostics or log file here..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: debug_log
+    attributes:
+      label: Logs / Error Evidence
+      description: >
+        Paste the log lines around the problem: from WashData's Logs export, `Settings → System → Logs`, or a debug session (see the
+        Evidence section above). Short excerpts only; attach a long log as a file above.
+      placeholder: "Paste log lines here..."
       render: shell
     validations:
-      required: true
+      required: false
 
   - type: textarea
     id: additional_context

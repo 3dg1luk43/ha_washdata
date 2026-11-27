@@ -293,10 +293,6 @@
             "start": "Duhet të jetë mbi Pragun e Ndalimit ({stop} W)",
             "stop": "Duhet të jetë nën Pragun e Nisjes ({start} W)"
         },
-        "min_power": {
-            "min_power": "Duhet të jetë në ose nën Pragun e Ndalimit ({stop} W)",
-            "stop": "Duhet të jetë në ose mbi Fuqinë Minimale ({min} W)"
-        },
         "no_update_timeout": {
             "timeout": "Duhet të jetë më i madh se Intervali i Rojtarit ({wi} s)",
             "watchdog": "Duhet të jetë më i vogël se Koha e Skadimit pa Përditësim ({to} s)"
@@ -1127,7 +1123,13 @@
         "review_q_more": "Edhe {count} për rishikim",
         "review_q_more_one": "Edhe {count} për rishikim",
         "review_q_more_other": "Edhe {count} për rishikim",
-        "review_which_program": "Cili program ishte?"
+        "review_which_program": "Cili program ishte?",
+        "trim_extend_hint": "Gri: çfarë regjistroi Home Assistant pas ciklit. Zvarrit fundin në zonën gri për ta shtuar në cikël.",
+        "trim_extend_note": "Fundi është përtej ciklit të regjistruar: shtohen leximet që Home Assistant regjistroi deri aty.",
+        "extend_no_history": "Home Assistant nuk ka lexime nga kjo spinë pas ciklit.",
+        "extend_overlaps": "Fundi nuk mund të zhvendoset përtej fillimit të ciklit të radhës.",
+        "extend_too_far": "Fundi mund të zhvendoset deri në 4 orë përtej ciklit të regjistruar.",
+        "extend_not_live": "Mund të zgjatet vetëm një cikël që e ka regjistruar kjo pajisje."
     },
     "phase_desc": {
         "anti_crease": "Rrotullime të shkurtra të herëpashershme pas përfundimit për të reduktuar rrudhat.",
@@ -1306,6 +1308,9 @@
             "doc": "Trajtojeni kalimin e sensorit në OFF (jo ON) si sinjal përfundimi.",
             "label": "Invertoj aktivizuesin e jashtëm (aktivizoj kur FIKUR)"
         },
+        "interrupted_min_seconds": {
+            "label": "Kohëzgjatja min. (I ndërprerë)"
+        },
         "learning_confidence": {
             "doc": "Rezultati më i ulët i përputhjes për të etiketuar një cikël të përfunduar. Një fitues i qartë etiketohet; një rast i ngushtë shkon në radhën e rishikimit te Cikle. Nën këtë vlerë nuk etiketohet dhe nuk pyetet asgjë. Mbajeni më të ulët se Besueshmëria e etiketimit automatik.",
             "label": "Besueshmëria e të mësuarit"
@@ -1395,7 +1400,7 @@
             "label": "Mesazhi i alarmit para fundit"
         },
         "notify_start_message": {
-            "doc": "Teksti që dërgohet kur fillon një cikël. Variablat shabllon: {device}, {program}. Me çdo variabël tjetër përdoret teksti i paracaktuar.",
+            "doc": "Teksti që dërgohet kur fillon një cikël. Variablat shabllon: {device}, {program}, {finish_time} (fundi i vlerësuar, p.sh. 14:30; ~14:30 bazohet në kohëzgjatjen tipike të pajisjes dhe përdoret derisa programi të njihet). Me çdo variabël tjetër përdoret teksti i paracaktuar.",
             "label": "Mesazh nisje"
         },
         "notify_start_services": {
@@ -1890,7 +1895,8 @@
         "copied": "Kopjuar",
         "copy_failed": "Kopjimi dështoi. Zgjidh tekstin dhe kopjoje me dorë.",
         "automation_label_failed": "Automatizimi u krijua, por etiketa ose kategoria e WashData nuk mund të shtohej.",
-        "review_answered": "U ruajt: {program}"
+        "review_answered": "U ruajt: {program}",
+        "cycle_extended": "Fundi i ciklit u zhvendos; leximet e regjistruara u shtuan"
     },
     "suggestion": {
         "observed_label": "I vëzhguar",

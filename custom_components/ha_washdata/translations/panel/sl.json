@@ -306,10 +306,6 @@
       "start": "Mora biti nad Pragom zaustavitve ({stop} W)",
       "stop": "Mora biti pod Pragom zagona ({start} W)"
     },
-    "min_power": {
-      "min_power": "Mora biti enak ali pod Pragom zaustavitve ({stop} W)",
-      "stop": "Mora biti enak ali nad Minimalno močjo ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Mora biti večji od Intervala nadzornika ({wi} s)",
       "watchdog": "Mora biti manjši od Časovne omejitve brez posodobitve ({to} s)"
@@ -1168,7 +1164,13 @@
     "review_q_more_two": "Še {count} cikla za pregled",
     "review_q_more_few": "Še {count} cikli za pregled",
     "review_q_more_other": "Še {count} ciklov za pregled",
-    "review_which_program": "Kateri program je bil?"
+    "review_which_program": "Kateri program je bil?",
+    "trim_extend_hint": "Sivo: kar je Home Assistant zabeležil po ciklu. Povlecite konec v sivo območje, da ga dodate ciklu.",
+    "trim_extend_note": "Konec je za zabeleženim ciklom: dodajo se odčitki, ki jih je Home Assistant zabeležil do njega.",
+    "extend_no_history": "Home Assistant po ciklu nima odčitkov tega vtiča.",
+    "extend_overlaps": "Konca ni mogoče premakniti čez začetek naslednjega cikla.",
+    "extend_too_far": "Konec je mogoče premakniti največ 4 h za zabeleženi cikel.",
+    "extend_not_live": "Podaljšati je mogoče le cikel, ki ga je zabeležila ta naprava."
   },
   "phase_desc": {
     "anti_crease": "Občasno kratko vrtenje bobna po zaključku za preprečevanje gub na oblačilih.",
@@ -1351,6 +1353,9 @@
       "doc": "IZKLOP senzorja (ne vklop) obravnavajte kot signal konca.",
       "label": "Obrni zunanji sprožilec (sproži ob IZKLOP)"
     },
+    "interrupted_min_seconds": {
+      "label": "Min. trajanje (Prekinjeno)"
+    },
     "learning_confidence": {
       "doc": "Najnižja ocena ujemanja za označitev končanega cikla. Jasen zmagovalec se označi; tesen izid gre v čakalno vrsto za pregled v Ciklih. Pod to vrednostjo se nič ne označi in nič ne vpraša. Držite jo pod Zaupanjem samodejnega označevanja.",
       "label": "Zaupanje učenja"
@@ -1440,7 +1445,7 @@
       "label": "Sporočilo opozorila pred koncem"
     },
     "notify_start_message": {
-      "doc": "Besedilo ob začetku cikla. Spremenljivke predloge: {device}, {program}. Pri vsaki drugi spremenljivki se uporabi privzeto besedilo.",
+      "doc": "Besedilo ob začetku cikla. Spremenljivke predloge: {device}, {program}, {finish_time} (ocenjeni konec, npr. 14:30; ~14:30 temelji na običajnem trajanju delovanja naprave in se uporablja, dokler program ni znan). Pri vsaki drugi spremenljivki se uporabi privzeto besedilo.",
       "label": "Sporočilo ob zagonu"
     },
     "notify_start_services": {
@@ -2024,7 +2029,8 @@
     "copied": "Kopirano",
     "copy_failed": "Kopiranje ni uspelo. Izberite besedilo in ga ročno kopirajte.",
     "automation_label_failed": "Avtomatizacija ustvarjena, toda oznake ali kategorije WashData ni bilo mogoče dodati.",
-    "review_answered": "Shranjeno: {program}"
+    "review_answered": "Shranjeno: {program}",
+    "cycle_extended": "Konec cikla premaknjen; zabeleženi odčitki so dodani"
   },
   "trend": {
     "down": "Padajoči trend",

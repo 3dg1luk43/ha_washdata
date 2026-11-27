@@ -165,6 +165,9 @@ async def test_window_lengths_are_clamped():
     assert recorder.calls[0][1] == START - timedelta(seconds=3600)
     out = await _call(_manager(_cycle()), _Recorder(_history()), before_s=math.nan, after_s=math.inf)
     assert out["before_s"] == 0.0 and out["after_s"] == 0.0
+    # The after window reaches as far as Trim may extend the end (#536).
+    out = await _call(_manager(_cycle()), _Recorder(_history()), after_s=99999.0)
+    assert out["after_s"] == 4 * 3600.0
 
 
 @pytest.mark.asyncio
@@ -175,7 +178,11 @@ async def test_display_only_the_cycle_is_never_touched():
     await _call(manager, _Recorder(_history()))
     assert cycle == snapshot
     called = {name for name, _a, _k in manager.profile_store.method_calls}
-    assert called <= {"find_stored_cycle", "get_cycle_power_data"}
+    # Reads only; the past and backfill lists find the next run, which bounds
+    # Trim's end (#536).
+    assert called <= {
+        "find_stored_cycle", "get_cycle_power_data", "get_past_cycles", "get_backfill_cycles",
+    }
 
 
 def test_context_points_thin_each_run_and_keep_the_gap():

@@ -298,10 +298,6 @@
       "start": "Täytyy olla yli pysäytyskynnyksen ({stop} W)",
       "stop": "Täytyy olla alle käynnistyskynnyksen ({start} W)"
     },
-    "min_power": {
-      "min_power": "Täytyy olla enintään pysäytyskynnys ({stop} W)",
-      "stop": "Täytyy olla vähintään minimiteho ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Täytyy olla enemmän kuin tarkkailijaväli ({wi} s)",
       "watchdog": "Täytyy olla alle päivityksettömyyden aikakatkaisun ({to} s)"
@@ -1132,7 +1128,13 @@
     "review_q_more": "Vielä {count} tarkistettavana",
     "review_q_more_one": "Vielä {count} tarkistettavana",
     "review_q_more_other": "Vielä {count} tarkistettavana",
-    "review_which_program": "Mikä ohjelma se oli?"
+    "review_which_program": "Mikä ohjelma se oli?",
+    "trim_extend_hint": "Harmaa: mitä Home Assistant tallensi syklin jälkeen. Vedä loppu harmaalle alueelle, niin se lisätään sykliin.",
+    "trim_extend_note": "Loppu on tallennetun syklin jälkeen: Home Assistantin siihen asti tallentamat lukemat lisätään.",
+    "extend_no_history": "Home Assistantilla ei ole tämän pistokkeen lukemia syklin jälkeen.",
+    "extend_overlaps": "Loppua ei voi siirtää seuraavan syklin alun yli.",
+    "extend_too_far": "Loppua voi siirtää enintään 4 t tallennetun syklin yli.",
+    "extend_not_live": "Vain tämän laitteen tallentaman syklin voi pidentää."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Astianpesukone: sekunnit Pysäytyskynnyksen alapuolella viimeisestä toiminnasta, joita tarvitaan lopullisen vedenpoiston odotuksen päättämiseen odotetun keston jälkeen",
@@ -1334,6 +1336,9 @@
       "doc": "Käsittele anturin kytkeytymistä POIS (ei PÄÄLLE) päättymissignaalina.",
       "label": "Käännä ulkoinen signaali (laukaise POIS)"
     },
+    "interrupted_min_seconds": {
+      "label": "Vähimmäiskesto (Keskeytetty)"
+    },
     "learning_confidence": {
       "doc": "Pienin täsmäytyspistemäärä valmiin syklin merkitsemiseen. Selvä voittaja merkitään; tiukka tapaus menee Syklit-välilehden tarkistusjonoon. Tämän alapuolella mitään ei merkitä eikä kysytä. Pidä se pienempänä kuin Automaattimerkinnän varmuus.",
       "label": "Oppimisen varmuus"
@@ -1423,7 +1428,7 @@
       "label": "Lopetusennakkoilmoituksen viesti"
     },
     "notify_start_message": {
-      "doc": "Syklin alkaessa lähetettävä teksti. Mallin muuttujat: {device}, {program}. Muulla muuttujalla käytetään oletustekstiä.",
+      "doc": "Syklin alkaessa lähetettävä teksti. Mallin muuttujat: {device}, {program}, {finish_time} (arvioitu valmistumisaika, esim. 14:30; ~14:30 perustuu laitteen tyypilliseen käyntiaikaan, ja sitä käytetään, kunnes ohjelma tunnistetaan). Muulla muuttujalla käytetään oletustekstiä.",
       "label": "Käynnistysviesti"
     },
     "notify_start_services": {
@@ -2003,7 +2008,8 @@
     "copied": "Kopioitu",
     "copy_failed": "Kopiointi epäonnistui. Valitse teksti ja kopioi käsin.",
     "automation_label_failed": "Automaatio luotu, mutta WashData-etikettiä tai -luokkaa ei voitu lisätä.",
-    "review_answered": "Tallennettu: {program}"
+    "review_answered": "Tallennettu: {program}",
+    "cycle_extended": "Syklin loppua siirretty; tallennetut lukemat lisättiin"
   },
   "trend": {
     "down": "Trendikäs alaspäin",

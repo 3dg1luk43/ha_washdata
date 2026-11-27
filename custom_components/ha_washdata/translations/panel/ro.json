@@ -256,10 +256,6 @@
       "start": "Trebuie să fie peste Pragul de oprire ({stop} W)",
       "stop": "Trebuie să fie sub Pragul de pornire ({start} W)"
     },
-    "min_power": {
-      "min_power": "Trebuie să fie cel mult egal cu Pragul de oprire ({stop} W)",
-      "stop": "Trebuie să fie cel puțin egal cu Puterea minimă ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Trebuie să fie mai mare decât Intervalul watchdog ({wi} s)",
       "watchdog": "Trebuie să fie mai mic decât Limita de timp fără actualizări ({to} s)"
@@ -1096,7 +1092,13 @@
     "review_q_more_one": "Încă {count} de revizuit",
     "review_q_more_few": "Încă {count} de revizuit",
     "review_q_more_other": "Încă {count} de revizuit",
-    "review_which_program": "Ce program a fost?"
+    "review_which_program": "Ce program a fost?",
+    "trim_extend_hint": "Gri: ce a înregistrat Home Assistant după ciclu. Trageți sfârșitul în această zonă pentru a o adăuga la ciclu.",
+    "trim_extend_note": "Sfârșitul este după ciclul înregistrat: se adaugă citirile înregistrate de Home Assistant până acolo.",
+    "extend_no_history": "Home Assistant nu are citiri de la această priză după ciclu.",
+    "extend_overlaps": "Sfârșitul nu poate fi mutat după începutul ciclului următor.",
+    "extend_too_far": "Sfârșitul poate fi mutat cu cel mult 4 h după ciclul înregistrat.",
+    "extend_not_live": "Doar un ciclu înregistrat de acest dispozitiv poate fi prelungit."
   },
   "phase_desc": {
     "anti_crease": "Rotiri scurte ocazionale ale tamburului după finalizare pentru a reduce șifonarea.",
@@ -1279,6 +1281,9 @@
       "doc": "Considerați trecerea senzorului pe OPRIT (nu pe PORNIT) drept semnal de final.",
       "label": "Inversați Declanșatorul Extern (declanșare la OPRIT)"
     },
+    "interrupted_min_seconds": {
+      "label": "Durata Minimă (Întrerupt)"
+    },
     "learning_confidence": {
       "doc": "Scorul minim de potrivire pentru a eticheta un ciclu încheiat. Un câștigător clar este etichetat; un caz strâns ajunge în coada de revizuire din Cicluri. Sub acest prag nu se etichetează și nu se întreabă nimic. Păstrați-l sub Încredere Etichetare Automată.",
       "label": "Încredere Învățare"
@@ -1368,7 +1373,7 @@
       "label": "Mesaj Alertă Înainte de Sfârșit"
     },
     "notify_start_message": {
-      "doc": "Corpul trimis când pornește un ciclu. Variabile de șablon: {device}, {program}. Cu orice altă variabilă se folosește textul implicit.",
+      "doc": "Corpul trimis când pornește un ciclu. Variabile de șablon: {device}, {program}, {finish_time} (ora estimată de finalizare, ex. 14:30; ~14:30 se bazează pe durata obișnuită a aparatului și se folosește cât timp programul nu este cunoscut). Cu orice altă variabilă se folosește textul implicit.",
       "label": "Mesaj de Pornire"
     },
     "notify_start_services": {
@@ -1861,7 +1866,8 @@
     "copied": "Copiat",
     "copy_failed": "Copiere eșuată. Selectați textul și copiați-l manual.",
     "automation_label_failed": "Automatizare creată, dar eticheta sau categoria WashData nu a putut fi adăugată.",
-    "review_answered": "Salvat: {program}"
+    "review_answered": "Salvat: {program}",
+    "cycle_extended": "Sfârșitul ciclului a fost mutat; citirile înregistrate au fost adăugate"
   },
   "suggestion": {
     "observed_label": "Observat",

@@ -306,10 +306,6 @@
       "start": "Musi być powyżej Progu Zatrzymania ({stop} W)",
       "stop": "Musi być poniżej Progu Startu ({start} W)"
     },
-    "min_power": {
-      "min_power": "Musi być równy lub niższy niż Próg Zatrzymania ({stop} W)",
-      "stop": "Musi być równy lub wyższy niż Minimalna Moc ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Musi być większy niż Interwał Watchdog ({wi} s)",
       "watchdog": "Musi być mniejszy niż Limit Czasu Braku Aktualizacji ({to} s)"
@@ -1168,7 +1164,13 @@
     "review_q_more_few": "Jeszcze {count} cykle do sprawdzenia",
     "review_q_more_many": "Jeszcze {count} cykli do sprawdzenia",
     "review_q_more_other": "Jeszcze {count} cyklu do sprawdzenia",
-    "review_which_program": "Który program to był?"
+    "review_which_program": "Który program to był?",
+    "trim_extend_hint": "Szary: to, co Home Assistant zapisał po cyklu. Przeciągnij koniec w ten obszar, aby dodać go do cyklu.",
+    "trim_extend_note": "Koniec wypada po zapisanym cyklu: zostaną dodane odczyty zapisane przez Home Assistant do tego miejsca.",
+    "extend_no_history": "Home Assistant nie ma odczytów z tej wtyczki po cyklu.",
+    "extend_overlaps": "Końca nie można przesunąć za początek następnego cyklu.",
+    "extend_too_far": "Koniec można przesunąć najwyżej o 4 godz. poza zapisany cykl.",
+    "extend_not_live": "Wydłużyć można tylko cykl zapisany przez to urządzenie."
   },
   "phase_desc": {
     "anti_crease": "Sporadyczne krótkie obroty bębna po zakończeniu w celu zapobiegania gnieceniu tkanin.",
@@ -1347,6 +1349,9 @@
       "doc": "Traktuj wyłączenie czujnika (a nie włączenie) jako sygnał końca.",
       "label": "Odwróć Zewnętrzny Wyzwalacz (wyzwalaj przy WYŁ)"
     },
+    "interrupted_min_seconds": {
+      "label": "Minimalny Czas Trwania (Przerwano)"
+    },
     "learning_confidence": {
       "doc": "Najniższy wynik dopasowania, przy którym zakończony cykl dostaje etykietę. Wyraźny zwycięzca jest etykietowany; wynik na styk trafia do kolejki przeglądu w Cyklach. Poniżej tej wartości nic nie jest etykietowane ani nie ma pytania. Utrzymuj poniżej Pewności Automatycznego Etykietowania.",
       "label": "Pewność Uczenia"
@@ -1436,7 +1441,7 @@
       "label": "Wiadomość Alertu Przed Zakończeniem"
     },
     "notify_start_message": {
-      "doc": "Treść wysyłana po rozpoczęciu cyklu. Zmienne szablonu: {device}, {program}. Przy każdej innej zmiennej używany jest tekst domyślny.",
+      "doc": "Treść wysyłana po rozpoczęciu cyklu. Zmienne szablonu: {device}, {program}, {finish_time} (szacowana godzina zakończenia, np. 14:30; ~14:30 opiera się na typowym czasie pracy urządzenia i jest używane, dopóki program nie jest znany). Przy każdej innej zmiennej używany jest tekst domyślny.",
       "label": "Wiadomość Startu"
     },
     "notify_start_services": {
@@ -2024,7 +2029,8 @@
     "copied": "Skopiowano",
     "copy_failed": "Kopiowanie nie powiodło się. Zaznacz tekst i skopiuj go ręcznie.",
     "automation_label_failed": "Automatyzacja utworzona, ale etykiety ani kategorii WashData nie można było dodać.",
-    "review_answered": "Zapisano: {program}"
+    "review_answered": "Zapisano: {program}",
+    "cycle_extended": "Przesunięto koniec cyklu; dodano zapisane odczyty"
   },
   "trend": {
     "down": "Trend w dół",

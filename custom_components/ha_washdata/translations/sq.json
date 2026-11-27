@@ -474,6 +474,9 @@
       "last_cycle_cost": {
         "name": "Kostoja e ciklit të fundit"
       },
+      "total_cost": {
+        "name": "Kostoja totale"
+      },
       "last_cycle_start": {
         "name": "Fillimi i ciklit të fundit"
       }

@@ -178,6 +178,9 @@ const _AXIS_HANDLE_GRAB = 22;
 // Minutes of recorder history the cycle dialog can draw either side of a cycle
 // (item 513, discussion #463). Same list ws_set_user_prefs accepts; 0 = off.
 const _CYCLE_CONTEXT_CHOICES = [0, 5, 10, 30, 60];
+// How far Trim may move a cycle's end past its stored trace (#536); the backend's
+// ws_api._CYCLE_EXTEND_MAX_S, which clamps the request anyway.
+const _TRIM_EXTEND_MAX_S = 4 * 3600;
 const _CYCLE_CONTEXT_DEFAULT_MIN = 10;
 
 // Floor for the measured panel height (_syncPanelHeight), so a bad measurement in a
@@ -234,9 +237,9 @@ const _SETTINGS_SECTIONS = [
   ] },
   { id: 'detection', label: 'Detection', intro: 'How a cycle is detected as starting, running and finishing.', groups: [
     { sub: 'Thresholds & Gap', fields: [
-      { key: 'start_threshold_w', label: 'Start Threshold', unit: 'W', type: 'number', step: 1, min: 0,
+      { key: 'start_threshold_w', label: 'Start Threshold', unit: 'W', type: 'number', step: 1, min: 0, clearable: true,
         doc: 'Power must rise above this to start a cycle. Too low: standby power causes false starts. Too high: slow-starting programs (cold fill) are missed.' },
-      { key: 'stop_threshold_w', label: 'Stop Threshold', unit: 'W', type: 'number', step: 0.1, min: 0,
+      { key: 'stop_threshold_w', label: 'Stop Threshold', unit: 'W', type: 'number', step: 0.1, min: 0, clearable: true,
         doc: 'Power must fall below this before the off delay starts counting. Keep it below the Start Threshold. Too high, and low-power phases (rinse holds, anti-crease) start the end countdown by mistake.' },
       { key: 'min_off_gap', label: 'Min Off Gap', unit: 's', type: 'number', min: 0,
         doc: 'An off period shorter than this does not split a cycle, so soak pauses stay in one wash. Keep it shorter than the gap between back-to-back loads, or those merge into one cycle.' },
@@ -407,7 +410,7 @@ const _SETTINGS_SECTIONS = [
       { key: 'notify_icon_color', label: 'Notification Colour', type: 'color', def: '', placeholder: '#03A9F4',
         doc: 'Accent colour for this appliance\'s notifications, so washer, dryer and dishwasher are easy to tell apart. On iOS it fills the circle behind the icon and colours the Live Activity bar. Many Android phones (Samsung especially) ignore it. Use hex, e.g. #03A9F4. Blank: platform default.' },
       { key: 'notify_start_message', label: 'Start Message', type: 'textarea', def: '{device} started.',
-        doc: 'Body sent when a cycle starts. Template variables: {device}, {program}. Any other variable falls back to the default text.' },
+        doc: "Body sent when a cycle starts. Template variables: {device}, {program}, {finish_time} (estimated finish, e.g. 14:30; ~14:30 is the device's typical run, used while no program is known). Any other variable falls back to the default text." },
       { key: 'notify_finish_message', label: 'Finish Message', type: 'textarea', def: '{device} finished. Duration: {duration} min.', basic: true,
         doc: 'Body sent when a cycle finishes. Variables: {device}, {program}, {duration} (minutes), {duration_hm} (1 h 05 min), {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}, {status} (completed or force_stopped; interrupted cycles send nothing). Any other variable falls back to the default text.' },
       { key: 'notify_pre_complete_message', label: 'Live Update Message', type: 'textarea', def: '{device}: Less than {minutes} minutes remaining.',
@@ -532,48 +535,6 @@ function _nonPriceReason(id, vals, ctx) {
 const _ENERGY_DEVICE_CLASSES = new Set(['energy', 'energy_storage']);
 const _ENERGY_UNITS = new Set(['mwh', 'wh', 'kwh', 'gwh', 'twh', 'j', 'kj', 'mj', 'gj', 'cal', 'kcal', 'mcal', 'gcal']);
 
-// Whether a Min Power under 1 W would switch this Power Sensor to raw readings:
-// const.power_unit_scale reads a kW (or larger) sensor raw below 1 (#481), so no
-// cycle would start (PR #529). A sensor not in the states yet, or unavailable /
-// unknown without a unit, counts as one that could be kW, as
-// SuggestionEngine._min_power_floor does.
-function _powerSensorScale(id, ctx) {
-  // const.power_unit_scale's unit factor, or null when the unit is not known yet.
-  const st = (id && ctx && ctx.stateOf) ? ctx.stateOf(id) : null;
-  if (!st) return null;
-  const attrs = st.attributes || {};
-  const unit = String(attrs.unit_of_measurement == null ? '' : attrs.unit_of_measurement).trim();
-  if (!unit && (st.state === 'unavailable' || st.state === 'unknown')) return null;
-  const own = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key) ? obj[key] : null;
-  let scale = own({ mW: 0.001, W: 1, kW: 1000, MW: 1e6, GW: 1e9 }, unit);
-  if (scale == null) scale = unit.toLowerCase() === 'kw' ? 1000 : 1;
-  const slash = unit.indexOf('/');
-  if (slash >= 0) {
-    const energy = own({ Wh: 1, kWh: 1000, MWh: 1e6 }, unit.slice(0, slash).trim());
-    const per = own({ s: 1 / 3600, min: 1 / 60, h: 1, d: 24 }, unit.slice(slash + 1).trim());
-    if (energy != null && per != null) scale = energy / per;
-  }
-  return scale;
-}
-function _minPowerMustStayAtOne(id, ctx) {
-  const scale = _powerSensorScale(id, ctx);
-  return scale == null || scale > 1;
-}
-// The milliwatt side of the same rule: a mW sensor is read raw while Min Power is
-// 1000 or more (const.power_unit_scale), so a fix under 1000 would switch it to
-// watts while the thresholds stayed in milliwatts (review of PR #529).
-// The kW side of keeping the scale: a kW sensor already read raw (Min Power under
-// 1) must keep a Min Power fix under 1, or the readings switch to watts while the
-// thresholds stay in kilowatts (review of PR #529).
-function _minPowerRawKilowatt(v, ctx) {
-  const scale = _powerSensorScale(v.power_sensor, ctx);
-  return scale != null && scale > 1 && v.min_power != null && v.min_power < 1;
-}
-function _minPowerRawMilliwatt(v, ctx) {
-  const scale = _powerSensorScale(v.power_sensor, ctx);
-  return scale != null && scale < 1 && v.min_power != null && v.min_power >= 1000;
-}
-
 // Why the chosen Power Sensor cannot be one: it counts energy (#481), or null. Only
 // positive evidence, as the backend refuses it.
 function _energyCounterReason(id, ctx) {
@@ -614,31 +575,6 @@ const _SETTING_CONFLICTS = [
     fieldErrors: v => ({
       start_threshold_w: { msgKey: 'conflict.hysteresis.start', msgVars: {stop: v.stop_threshold_w}, msgFb: `Must be above Stop Threshold (${v.stop_threshold_w} W)`, fixVal: +Math.max(v.stop_threshold_w + 0.5, v.stop_threshold_w * 1.25).toFixed(1) },
       stop_threshold_w:  { msgKey: 'conflict.hysteresis.stop',  msgVars: {start: v.start_threshold_w}, msgFb: `Must be below Start Threshold (${v.start_threshold_w} W)`, fixVal: +Math.min(v.start_threshold_w - 0.5, v.start_threshold_w * 0.8).toFixed(1) },
-    }),
-  },
-  {
-    // min_power <= stop_threshold_w (noise gate must sit below the stop floor). On a
-    // sensor Min Power under 1 W switches to raw readings (a kW one, PR #529;
-    // reconcile holds it at 1 the same way) its fix is never under 1 W, and the
-    // conflict is waived only where nothing at or above 1 W can sit at or under the
-    // stop. Over the stop it is soft: no detection threshold reads it once start and
-    // stop are set.
-    keys: ['min_power', 'stop_threshold_w'],
-    check: (v, ctx) => v.min_power != null && v.stop_threshold_w != null && v.min_power > v.stop_threshold_w
-      && !(v.min_power >= 1 && v.stop_threshold_w < 1 && _minPowerMustStayAtOne(v.power_sensor, ctx))
-      && !(v.stop_threshold_w < 1000 && _minPowerRawMilliwatt(v, ctx)),
-    fieldErrors: (v, ctx) => ({
-      min_power:        { msgKey: 'conflict.min_power.min_power', msgVars: {stop: v.stop_threshold_w}, msgFb: `Must be at or below Stop Threshold (${v.stop_threshold_w} W)`,
-        fixVal: _minPowerRawMilliwatt(v, ctx)
-          ? Math.max(1000, +(v.stop_threshold_w * 0.8).toFixed(1))
-          : _minPowerRawKilowatt(v, ctx)
-            ? Math.min(0.999, +(v.stop_threshold_w * 0.8).toFixed(3))
-          : _minPowerMustStayAtOne(v.power_sensor, ctx)
-            ? Math.max(1, +(v.stop_threshold_w * 0.8).toFixed(1)) : +(v.stop_threshold_w * 0.8).toFixed(1) },
-      // Not a Stop fix that would reach Start: it would cascade into Start, and this
-      // conflict is soft when both are set (PR #529 review).
-      stop_threshold_w: { msgKey: 'conflict.min_power.stop',      msgVars: {min: v.min_power},  msgFb: `Must be at or above Min Power (${v.min_power} W)`,
-        fixVal: (v.start_threshold_w != null && +(v.min_power * 1.25).toFixed(1) >= v.start_threshold_w) ? null : +(v.min_power * 1.25).toFixed(1) },
     }),
   },
   {
@@ -3013,7 +2949,19 @@ class HaWashdataPanel extends HTMLElement {
   // Kick off a detached task command, show a header pill via the registry, and run
   // onDone(result, state) when it settles. Falls back to polling if the task
   // subscription isn't active. Errors surface as a toast.
-  async _kickAndTrack(msg, busyKey, onDone) {
+  // Why an extended trim was refused (#536), or null for any other error.
+  _trimErrorText(code) {
+    const texts = {
+      extend_no_history: ['msg.extend_no_history', 'Home Assistant has no readings of this plug after the cycle.'],
+      extend_overlaps: ['msg.extend_overlaps', 'The end cannot move past the start of the next cycle.'],
+      extend_too_far: ['msg.extend_too_far', 'The end can move at most 4 h past the recorded cycle.'],
+      extend_not_live: ['msg.extend_not_live', 'Only a cycle this device recorded can be extended.'],
+    };
+    const t = texts[code];
+    return t ? this._tText(t[0], {}, t[1]) : null;
+  }
+
+  async _kickAndTrack(msg, busyKey, onDone, errorText) {
     if (this._busy.has(busyKey)) return;  // single-flight: ignore a double click
     this._busy.add(busyKey);
     this._render();
@@ -3038,7 +2986,8 @@ class HaWashdataPanel extends HTMLElement {
     this._taskCallbacks[tid] = async (t) => {
       this._busy.delete(busyKey);
       if (t.state === 'error') {
-        this._showToast(this._tText('msg.toast_error', {error: t.error || ''}, 'Error: ' + (t.error || '')), 'error');
+        const worded = errorText ? errorText(t.error) : null;
+        this._showToast(worded || this._tText('msg.toast_error', {error: t.error || ''}, 'Error: ' + (t.error || '')), 'error');
         this._render();
         return;
       }
@@ -12448,7 +12397,9 @@ class HaWashdataPanel extends HTMLElement {
       const sv = tm === 'clock' ? this._offsetToClock(m.trim.start) : Math.round(m.trim.start);
       const ev = tm === 'clock' ? this._offsetToClock(m.trim.end) : Math.round(m.trim.end);
       const itype = tm === 'clock' ? 'time' : 'number';
-      const iattr = tm === 'clock' ? 'step="1"' : `min="0" max="${Math.ceil(full)}" step="1"`;
+      const endLimit = this._trimEndLimit(m);
+      const iattr = tm === 'clock' ? 'step="1"' : `min="0" max="${Math.ceil(endLimit)}" step="1"`;
+      const extNote = `<div id="wd-trim-ext-note">${this._trimExtendNoteHtml(m)}</div>`;
       const ulbl = tm === 'clock' ? '' : ' ' + this._t('lbl.unit_s', {}, '(s)');
       controls = `<p class="wd-info" style="margin:4px 0 8px">${this._t('msg.trim_intro', {}, 'Drag the red handles, or enter values. Everything outside the window is removed.')}</p>
         <div class="wd-mode-bar" style="margin-bottom:8px;align-items:center">
@@ -12456,6 +12407,7 @@ class HaWashdataPanel extends HTMLElement {
           <button class="wd-btn wd-btn-sm ${tm === 's' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="trim-mode-s">${this._t('lbl.seconds_from_start', {}, 'Seconds from start')}</button>
           <button class="wd-btn wd-btn-sm ${tm === 'clock' ? 'wd-btn-primary' : 'wd-btn-secondary'}" data-maction="trim-mode-clock">${this._t('lbl.clock_time', {}, 'Clock time')}</button>
         </div>
+        ${extNote}
         <div class="wd-form-grid">
           <div class="wd-field"><label>${this._t('lbl.start', {}, 'Start')}${ulbl}</label><input type="${itype}" id="wd-trim-start" ${iattr} value="${sv}"></div>
           <div class="wd-field"><label>${this._t('lbl.end', {}, 'End')}${ulbl}</label><input type="${itype}" id="wd-trim-end" ${iattr} value="${ev}"></div>
@@ -12943,14 +12895,18 @@ class HaWashdataPanel extends HTMLElement {
   }
 
   // The context as one drawable series plus its extent, or null when none is
-  // shown (off, loading, nothing recorded, or Trim/Split, which edit the trace and
-  // must not suggest they can reach outside it). A change-only sensor holds its
+  // shown (off, loading, nothing recorded, or Split, which edits the trace and
+  // must not suggest it can reach outside it). Trim draws only the history after
+  // the end, which its end handle can move into (#536). A change-only sensor holds its
   // value until the next row, so it is drawn as steps: a straight line from the
   // last idle row to the first cycle reading would invent a slow rise that never
   // happened. A null power (an unavailable row) breaks the line.
   _cycleContextSeries(m) {
-    if (!m || (m.mode !== 'view' && m.mode !== 'review')) return null;
-    const d = m.ctx && m.ctx.data;
+    if (!m) return null;
+    // Trim shows the history after the end, which the end can move into (#536).
+    const trim = m.mode === 'trim';
+    if (!trim && m.mode !== 'view' && m.mode !== 'review') return null;
+    const d = trim ? (m.ext && m.ext.data) : (m.ctx && m.ctx.data);
     const samples = (m.curve && m.curve.samples) || [];
     if (!d || !d.available || !samples.length) return null;
     const first = samples[0], last = samples[samples.length - 1];
@@ -12963,8 +12919,9 @@ class HaWashdataPanel extends HTMLElement {
       hold = w;
     };
     const rows = (list, keep) => (Array.isArray(list) ? list : []).filter(p => Array.isArray(p) && Number.isFinite(p[0]) && keep(p[0]));
-    const before = rows(d.before, t => t < first[0]);
-    const after = rows(d.after, t => t >= last[0]);
+    const lim = trim ? this._trimEndLimit(m) : Infinity;
+    const before = trim ? [] : rows(d.before, t => t < first[0]);
+    const after = rows(d.after, t => t >= last[0] && t <= lim);
     before.forEach(([t, w]) => add(t, w));
     // Hold the last reading up to the start, then rise into the trace's first one.
     if (hold != null) { pts.push([first[0], hold]); pts.push([first[0], first[1]]); }
@@ -12973,12 +12930,12 @@ class HaWashdataPanel extends HTMLElement {
       hold = null;
       add(last[0], last[1]);
       after.forEach(([t, w]) => add(t, w));
-      const endX = Number(d.after_end_s) || 0;
+      const endX = Math.min(Number(d.after_end_s) || 0, lim);
       if (hold != null && endX > pts[pts.length - 1][0]) pts.push([endX, hold]);
     }
     if (!pts.some(p => p[1] != null)) return null;
     const xStart = before.length ? Math.min(before[0][0], -(Number(d.before_s) || 0)) : first[0];
-    const xEnd = after.length ? Math.max(pts[pts.length - 1][0], Number(d.after_end_s) || 0) : last[0];
+    const xEnd = after.length ? Math.max(pts[pts.length - 1][0], Math.min(Number(d.after_end_s) || 0, lim)) : last[0];
     return {
       series: { kind: 'context', points: pts, stroke: '#9e9e9e', width: 2, alpha: 1, bounded: true, aside: true,
         name: this._tText('lbl.cycle_context_series', {}, 'Recorder history') },
@@ -14206,6 +14163,21 @@ class HaWashdataPanel extends HTMLElement {
     const s = sr.getElementById('wd-trim-start'), e = sr.getElementById('wd-trim-end');
     if (s) s.value = clock ? this._offsetToClock(m.trim.start) : Math.round(m.trim.start);
     if (e) e.value = clock ? this._offsetToClock(m.trim.end) : Math.round(m.trim.end);
+    const note = sr.getElementById('wd-trim-ext-note');
+    if (note) note.innerHTML = this._trimExtendNoteHtml(m);
+  }
+
+  // #536: says that the history after the cycle is drawn and the end can move into
+  // it, or, once it has, that those readings are added.
+  _trimExtendNoteHtml(m) {
+    const full = (m && m.curve && m.curve.full_duration_s) || 0;
+    if (m.trim && m.trim.end > full + 1) {
+      return `<p class="wd-info wd-trim-extend" style="margin:4px 0 8px">${this._t('msg.trim_extend_note', {}, 'The end is past the recorded cycle: the readings Home Assistant recorded up to it are added.')}</p>`;
+    }
+    if (this._trimEndLimit(m) > full + 1) {
+      return `<p class="wd-info wd-trim-extend" style="margin:4px 0 8px">${this._t('msg.trim_extend_hint', {}, 'Grey: what Home Assistant recorded after the cycle. Drag the end into it to add it to the cycle.')}</p>`;
+    }
+    return '';
   }
 
   // Snap the trim window to the nearest real sample offsets so the shaded
@@ -14219,22 +14191,79 @@ class HaWashdataPanel extends HTMLElement {
     const m = this._modal;
     const samples = (m.curve && m.curve.samples) || [];
     if (samples.length < 2) return;
-    const snap = (v) => samples.reduce(
+    const snap = (v, pts) => pts.reduce(
       (best, s) => (Math.abs(s[0] - v) < Math.abs(best - v) ? s[0] : best),
-      samples[0][0],
+      pts[0][0],
     );
-    m.trim.start = snap(m.trim.start);
-    m.trim.end = snap(m.trim.end);
+    // Past the trace both handles land on a recorded reading (#536), which the
+    // store snaps to as well; inside it, on the trace's own samples.
+    const pts = samples.concat(this._trimExtensionRows(m));
+    m.trim.start = snap(m.trim.start, pts);
+    m.trim.end = snap(m.trim.end, pts);
     if (m.trim.end <= m.trim.start) {
-      const startIdx = samples.findIndex((s) => s[0] === m.trim.start);
-      if (startIdx >= 0 && startIdx + 1 < samples.length) {
-        m.trim.end = samples[startIdx + 1][0];
+      const startIdx = pts.findIndex((s) => s[0] === m.trim.start);
+      if (startIdx >= 0 && startIdx + 1 < pts.length) {
+        m.trim.end = pts[startIdx + 1][0];
       } else if (startIdx > 0) {
-        // Start snapped to the last sample: pull start back to the previous
-        // sample instead, so the window always has positive width.
-        m.trim.start = samples[startIdx - 1][0];
+        // Start snapped to the last reading: pull start back to the previous
+        // one instead, so the window always has positive width.
+        m.trim.start = pts[startIdx - 1][0];
       }
     }
+  }
+
+  // The recorder readings after the trace Trim may move the end onto (#536):
+  // real ones only, up to the furthest end allowed.
+  _trimExtensionRows(m) {
+    const d = m && m.ext && m.ext.data;
+    const samples = (m && m.curve && m.curve.samples) || [];
+    if (!d || !d.available || !samples.length) return [];
+    const last = samples[samples.length - 1][0], lim = this._trimEndLimit(m);
+    return (Array.isArray(d.after) ? d.after : [])
+      .filter(p => Array.isArray(p) && Number.isFinite(p[0]) && p[1] != null && p[0] > last && p[0] <= lim);
+  }
+
+  // The furthest Trim may move the end (#536): the trace's own end, or into the
+  // recorder history after it, short of the next run.
+  _trimEndLimit(m) {
+    const full = (m && m.curve && m.curve.full_duration_s) || 0;
+    const d = m && m.ext && m.ext.data;
+    if (!d || !d.available) return full;
+    let lim = Math.max(full, Number(d.after_end_s) || 0);
+    if (d.next_start_s != null && Number.isFinite(+d.next_start_s)) lim = Math.min(lim, +d.next_start_s - 1);
+    return Math.max(full, lim);
+  }
+
+  // Fetch the recorder history after the trace for Trim (#536). Only a cycle this
+  // device recorded: the backend answers `not_live` for any other.
+  async _loadTrimExtension(entryId, cycleId) {
+    const m = this._modal;
+    if (!m || m.type !== 'cycle-detail' || m.cycleId !== cycleId) return;
+    const curve = m.curve;
+    if (!curve || curve.is_reference || !(curve.samples || []).length) { m.ext = { loading: false, data: null }; return; }
+    // Asked again on every entry into Trim (the recorder keeps recording after
+    // the cycle), but never twice at once.
+    if (m.ext && m.ext.loading) return;
+    const prev = (m.ext && m.ext.data) || null;
+    m.ext = { loading: true, data: prev };
+    let data = null;
+    try {
+      data = await this._ws({ type: `${_DOMAIN}/get_cycle_context`, entry_id: entryId, cycle_id: cycleId, before_s: 0, after_s: _TRIM_EXTEND_MAX_S });
+    } catch (_) { data = null; }
+    const cur = this._modal;
+    if (!cur || cur.type !== 'cycle-detail' || cur.cycleId !== cycleId || cur.entryId !== entryId) return;
+    // A failed refetch keeps what an earlier one returned.
+    cur.ext = { loading: false, data: data || prev };
+    if (cur.mode !== 'trim') return;
+    // The render replaces the canvas, and its pointerup never reaches the old
+    // one: a drag left set would follow the pointer with no button down. End it
+    // where it is, as a release would. A refetch can also bring the limit in
+    // (a run started since): an end past it is pulled back onto a reading.
+    const lim = this._trimEndLimit(cur);
+    const pastLimit = cur.trim && cur.trim.end > lim;
+    if (pastLimit) cur.trim.end = lim;
+    if (cur.drag || pastLimit) { cur.drag = null; this._snapTrimBounds(); }
+    this._render();
   }
 
   // Trim-input value <-> cycle-offset seconds (supports the clock-time mode).
@@ -14257,7 +14286,8 @@ class HaWashdataPanel extends HTMLElement {
     const dt = new Date(start);
     dt.setHours(p[0] || 0, p[1] || 0, p[2] || 0, 0);
     let off = (dt - start) / 1000;
-    const full = (m.curve && m.curve.full_duration_s) || 0;
+    // In Trim the end may reach into the recorder history after the trace (#536).
+    const full = m.mode === 'trim' ? this._trimEndLimit(m) : ((m.curve && m.curve.full_duration_s) || 0);
     // Only apply the past-midnight +24h correction when the shifted value still
     // lands inside the cycle. An early START (a clock time before the cycle's
     // actual start) would otherwise wrap forward a full day and clamp to the far
@@ -14298,7 +14328,7 @@ class HaWashdataPanel extends HTMLElement {
       // 'input' tracks the live value for the preview; 'change' (blur/Enter)
       // commits and snaps both handles to real samples (#373).
       if (start) start.addEventListener('input', () => { const off = this._trimInputToOffset(start.value); if (off === null) return; m.trim.start = Math.max(0, Math.min(off, m.trim.end - 1)); this._drawCycleEditor(); });
-      if (end) end.addEventListener('input', () => { const off = this._trimInputToOffset(end.value); if (off === null) return; m.trim.end = Math.min(m.curve.full_duration_s, Math.max(off, m.trim.start + 1)); this._drawCycleEditor(); });
+      if (end) end.addEventListener('input', () => { const off = this._trimInputToOffset(end.value); if (off === null) return; m.trim.end = Math.min(this._trimEndLimit(m), Math.max(off, m.trim.start + 1)); this._drawCycleEditor(); });
       const commit = () => { this._snapTrimBounds(); this._syncTrimInputs(); this._drawCycleEditor(); };
       if (start) start.addEventListener('change', commit);
       if (end) end.addEventListener('change', commit);
@@ -14336,7 +14366,7 @@ class HaWashdataPanel extends HTMLElement {
         if (!m.drag || cyc._wdPinching) return; const wd = cyc._wd; if (!wd) return;
         const r = cyc.getBoundingClientRect(); const x = wd.cssToX(e.clientX - r.left);
         if (m.drag === 'start') m.trim.start = Math.min(x, m.trim.end - 1);
-        else m.trim.end = Math.max(x, m.trim.start + 1);
+        else m.trim.end = Math.min(this._trimEndLimit(m), Math.max(x, m.trim.start + 1));
         this._syncTrimInputs(); this._drawCycleEditor();
       });
       cyc.addEventListener('pointerup', stop); cyc.addEventListener('pointercancel', stop);
@@ -16403,7 +16433,7 @@ class HaWashdataPanel extends HTMLElement {
     // ---- Cycle inspector ----
     if (m && m.type === 'cycle-detail') {
       if (action === 'cyc-view') { m.mode = 'view'; this._render(); return; }
-      if (action === 'cyc-trim') { m.mode = 'trim'; if (!m.trim || m.trim.end <= 0) m.trim = { start: 0, end: (m.curve && m.curve.full_duration_s) || 0 }; this._render(); return; }
+      if (action === 'cyc-trim') { m.mode = 'trim'; if (!m.trim || m.trim.end <= 0) m.trim = { start: 0, end: (m.curve && m.curve.full_duration_s) || 0 }; this._render(); this._loadTrimExtension(eid, m.cycleId); return; }
       if (action === 'cyc-split') { m.mode = 'split'; this._render(); return; }
       if (action === 'cyc-review') { m.mode = 'review'; this._render(); return; }
       if (action === 'cyc-ctx') {
@@ -16483,17 +16513,23 @@ class HaWashdataPanel extends HTMLElement {
         // The trim is irreversible (no undo). Confirm before discarding the
         // majority of the trace so an accidental collapse can't slip through on
         // a single click (#373).
+        // Of the ORIGINAL trace: an extension past its end adds readings but
+        // keeps nothing of what the start cut removes.
         const full = (m.curve && m.curve.full_duration_s) || 0;
-        const keptPct = full > 0 ? Math.max(0, Math.round(((e2 - s) / full) * 100)) : 100;
+        const keptPct = full > 0 ? Math.max(0, Math.round(((Math.min(e2, full) - s) / full) * 100)) : 100;
         if (keptPct < 50 && !confirm(this._tText('msg.trim_destructive_confirm', {pct: keptPct}, `This keeps only ${keptPct}% of the cycle and cannot be undone. Continue?`))) return;
+        const extended = e2 > full + 1;
         this._kickAndTrack(
           { type: `${_DOMAIN}/trim_cycle`, entry_id: eid, cycle_id: cid, start_s: s, end_s: e2 },
           'cyc-trim-apply',
           async () => {
-            this._showToast(this._t('toast.cycle_trimmed', {}, 'Cycle trimmed'));
+            this._showToast(extended
+              ? this._t('toast.cycle_extended', {}, 'Cycle end moved; the recorded readings were added')
+              : this._t('toast.cycle_trimmed', {}, 'Cycle trimmed'));
             await this._closeCycleDetail(eid);
             await this._fetchCycles(eid);
           },
+          (code) => this._trimErrorText(code),
         );
         return;
       }
@@ -16737,6 +16773,9 @@ class HaWashdataPanel extends HTMLElement {
       const n = parseFloat(el.value);
       if (!isNaN(n)) vals[key] = n;
       else if (el.value !== '') vals[key] = el.value;
+      // An emptied clearable field saves as unset (#535), so the rules must not
+      // keep judging the stored value the save is about to drop.
+      else if ((_FIELD_BY_KEY[key] || {}).clearable) vals[key] = null;
     });
     return vals;
   }

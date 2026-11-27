@@ -185,6 +185,7 @@ async def async_setup_entry(
         WasherSuggestionsSensor(manager, entry),
         WasherCycleCountSensor(manager, entry),
         WasherEnergyTotalSensor(manager, entry),
+        WasherTotalCostSensor(manager, entry),
         WasherLastCycleDurationSensor(manager, entry),
         WasherLastCycleEnergySensor(manager, entry),
         WasherLastCycleCostSensor(manager, entry),
@@ -1166,6 +1167,38 @@ class WasherEnergyTotalSensor(WasherBaseSensor):
     @property
     def native_value(self) -> float:  # type: ignore[override]
         return self._manager.lifetime_energy_kwh
+
+
+class WasherTotalCostSensor(WasherBaseSensor):
+    """What every run has cost, in HA's currency (#501 follow-up).
+
+    A running total for long-term statistics: each stored run's cost is added
+    once at its end, starting from the costs already on record. TOTAL without
+    last_reset, like the cycle count: Last Cycle Cost follows edits to that
+    cycle (a delete shows the one before), so a last_reset on it would count a
+    run twice. Unknown until a run had a cost.
+    """
+
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
+        self.entity_description = SensorEntityDescription(
+            key="total_cost",
+            translation_key="total_cost",
+            device_class=SensorDeviceClass.MONETARY,
+            state_class=SensorStateClass.TOTAL,
+            suggested_display_precision=2,
+            icon="mdi:cash-multiple",
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_unit_of_measurement(self) -> str | None:  # type: ignore[override]
+        # The currency is the unit: a change in HA's general settings shows at
+        # the next refresh.
+        return self._manager.hass.config.currency
+
+    @property
+    def native_value(self) -> float | None:  # type: ignore[override]
+        return self._manager.lifetime_cost
 
 
 def _finite(value: Any) -> float | None:

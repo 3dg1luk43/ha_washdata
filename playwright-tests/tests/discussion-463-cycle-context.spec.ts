@@ -7,7 +7,8 @@
  * history either side of the stored trace and draws it grey on a shaded
  * background, read as "Before start" / "After end". The length is a per-device
  * pref (10 min by default, Off turns it off), it is absent when the recorder has
- * nothing, and Trim/Split never show it (they edit the trace itself).
+ * nothing, and Split never shows it (it edits the trace itself); Trim shows the
+ * part after the end, which its end handle can move into (#536).
  */
 
 import { test, expect, Page } from '@playwright/test';
@@ -164,13 +165,16 @@ test('absent when the recorder has nothing, and says so', async ({ page }) => {
   expect(lines[0]).toBe('From start: 0:00');
 });
 
-test('Trim never shows the context, and Inspect brings it back', async ({ page }) => {
+test('Trim shows only the history after the end, and Inspect brings the rest back', async ({ page }) => {
   await bootWith(page, {}, { context: true });
   await openCycle(page);
   await expect.poll(async () => (await chart(page)).xStart).toBe(-600);
   await page.locator('button[data-maction="cyc-trim"]').click();
   await expect.poll(async () => (await chart(page)).xStart).toBe(0);
-  expect((await chart(page)).ctx).toBeNull();
+  // #536: the end handle can move into the history after the end, so that part
+  // is drawn; nothing before the start is.
+  await expect.poll(async () => ((await chart(page)).ctx || []).length).toBeGreaterThan(0);
+  expect((await chart(page)).ctx!.every(([x]) => x >= 1740)).toBe(true);
   await expect(page.locator('#wd-cyc-ctx')).toHaveCount(0);
   await page.locator('button[data-maction="cyc-view"]').click();
   await expect.poll(async () => (await chart(page)).xStart).toBe(-600);

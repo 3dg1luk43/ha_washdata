@@ -310,10 +310,6 @@
       "start": "Jābūt virs apstāšanās sliekšņa ({stop} W)",
       "stop": "Jābūt zem sākuma sliekšņa ({start} W)"
     },
-    "min_power": {
-      "min_power": "Jābūt vienādam vai zem apstāšanās sliekšņa ({stop} W)",
-      "stop": "Jābūt vienādam vai virs minimālās jaudas ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Jābūt lielākam par sargsuna intervālu ({wi} s)",
       "watchdog": "Jābūt mazākam par taimauta bez atjauninājumiem ({to} s)"
@@ -1150,7 +1146,13 @@
     "review_q_more_zero": "Vēl {count} cikli pārskatīšanai",
     "review_q_more_one": "Vēl {count} cikls pārskatīšanai",
     "review_q_more_other": "Vēl {count} cikli pārskatīšanai",
-    "review_which_program": "Kura programma tā bija?"
+    "review_which_program": "Kura programma tā bija?",
+    "trim_extend_hint": "Pelēkā krāsā: tas, ko Home Assistant ierakstīja pēc cikla. Velciet beigas pelēkajā daļā, lai to pievienotu ciklam.",
+    "trim_extend_note": "Beigas ir aiz ierakstītā cikla: tiek pievienoti rādījumi, ko Home Assistant ierakstīja līdz tām.",
+    "extend_no_history": "Home Assistant nav ierakstījis šī spraudņa rādījumus pēc cikla.",
+    "extend_overlaps": "Beigas nevar pārvietot aiz nākamā cikla sākuma.",
+    "extend_too_far": "Beigas var pārvietot ne vairāk kā 4 h aiz ierakstītā cikla.",
+    "extend_not_live": "Pagarināt var tikai ciklu, ko ierakstījusi šī ierīce."
   },
   "phase_desc": {
     "anti_crease": "Laiku pa laikam pēc pabeigšanas trumulis īsi griežas, lai samazinātu grumbiņas.",
@@ -1333,6 +1335,9 @@
       "doc": "Uzskatīt sensora pāreju uz IZSLĒGTS (nevis IESLĒGTS) par beigu signālu.",
       "label": "Invertēt ārējo aktivatoru (aktivēt pie IZSLĒGTS)"
     },
+    "interrupted_min_seconds": {
+      "label": "Min. ilgums (Pārtrauca)"
+    },
     "learning_confidence": {
       "doc": "Zemākais atbilstības rezultāts pabeigta cikla marķēšanai. Skaidrs uzvarētājs tiek marķēts; ja rezultāti ir tuvi, cikls nonāk pārskatīšanas rindā sadaļā Cikli. Zem šīs vērtības nekas netiek marķēts un nekas netiek jautāts. Turiet to zem Automātiskās marķēšanas pārliecības.",
       "label": "Mācīšanās pārliecība"
@@ -1422,7 +1427,7 @@
       "label": "Brīdinājuma pirms beigām ziņojums"
     },
     "notify_start_message": {
-      "doc": "Teksts, ko nosūta, kad cikls sākas. Veidnes mainīgie: {device}, {program}. Ar jebkuru citu mainīgo tiek izmantots noklusējuma teksts.",
+      "doc": "Teksts, ko nosūta, kad cikls sākas. Veidnes mainīgie: {device}, {program}, {finish_time} (paredzamais beigu laiks, piem. 14:30; ~14:30 balstās uz ierīces tipisko darbības ilgumu un tiek izmantots, kamēr programma nav zināma). Ar jebkuru citu mainīgo tiek izmantots noklusējuma teksts.",
       "label": "Starta ziņojums"
     },
     "notify_start_services": {
@@ -1915,7 +1920,8 @@
     "copied": "Nokopēts",
     "copy_failed": "Kopēšana neizdevās. Atlasiet tekstu un kopējiet to manuāli.",
     "automation_label_failed": "Automatizācija izveidota, bet WashData etiķeti vai kategoriju nevarēja pievienot.",
-    "review_answered": "Saglabāts: {program}"
+    "review_answered": "Saglabāts: {program}",
+    "cycle_extended": "Cikla beigas pārvietotas; ierakstītie rādījumi pievienoti"
   },
   "suggestion": {
     "observed_label": "Novērotais",

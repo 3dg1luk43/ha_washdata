@@ -256,10 +256,6 @@
       "start": "Deve ser superior ao Limiar de paragem ({stop} W)",
       "stop": "Deve ser inferior ao Limiar de arranque ({start} W)"
     },
-    "min_power": {
-      "min_power": "Deve ser inferior ou igual ao Limiar de paragem ({stop} W)",
-      "stop": "Deve ser superior ou igual à Potência mínima ({min} W)"
-    },
     "no_update_timeout": {
       "timeout": "Deve ser maior que o Intervalo watchdog ({wi} s)",
       "watchdog": "Deve ser menor que o Tempo de espera sem actualização ({to} s)"
@@ -1096,7 +1092,13 @@
     "review_q_more_one": "Mais {count} para rever",
     "review_q_more_many": "Mais {count} para rever",
     "review_q_more_other": "Mais {count} para rever",
-    "review_which_program": "Qual foi o programa?"
+    "review_which_program": "Qual foi o programa?",
+    "trim_extend_hint": "Cinzento: o que o Home Assistant registou após o ciclo. Arraste o fim até lá para o adicionar ao ciclo.",
+    "trim_extend_note": "O fim está para além do ciclo registado: são adicionadas as leituras que o Home Assistant registou até esse ponto.",
+    "extend_no_history": "O Home Assistant não tem leituras desta tomada após o ciclo.",
+    "extend_overlaps": "O fim não pode passar o início do ciclo seguinte.",
+    "extend_too_far": "O fim pode avançar no máximo 4 h para além do ciclo registado.",
+    "extend_not_live": "Só é possível prolongar um ciclo registado por este dispositivo."
   },
   "pg_desc": {
     "dishwasher_end_spike_quiet_release": "Máquina de lavar loiça: segundos abaixo do Limiar de Paragem desde a última atividade necessários para terminar a espera pelo escoamento final após a duração esperada",
@@ -1298,6 +1300,9 @@
       "doc": "Tratar a passagem do sensor a desligado (e não a ligado) como sinal de fim.",
       "label": "Inverter Gatilho Externo (activar em DESLIGADO)"
     },
+    "interrupted_min_seconds": {
+      "label": "Duração Mínima (Interrompido)"
+    },
     "learning_confidence": {
       "doc": "Pontuação de correspondência mínima para rotular um ciclo terminado. Um vencedor claro é rotulado; um caso renhido vai para a fila de revisão em Ciclos. Abaixo disto, nada é rotulado nem perguntado. Mantenha-a abaixo da Confiança de Rotulagem Automática.",
       "label": "Confiança de Aprendizagem"
@@ -1387,7 +1392,7 @@
       "label": "Mensagem do Alerta Pré-Fim"
     },
     "notify_start_message": {
-      "doc": "Corpo enviado quando um ciclo começa. Variáveis de modelo: {device}, {program}. Com qualquer outra variável é usado o texto predefinido.",
+      "doc": "Corpo enviado quando um ciclo começa. Variáveis de modelo: {device}, {program}, {finish_time} (hora de fim estimada, ex. 14:30; ~14:30 baseia-se na duração habitual do aparelho e é usado enquanto o programa não é conhecido). Com qualquer outra variável é usado o texto predefinido.",
       "label": "Mensagem de Início"
     },
     "notify_start_services": {
@@ -1880,7 +1885,8 @@
     "copied": "Copiado",
     "copy_failed": "Falha na cópia. Selecione o texto e copie-o manualmente.",
     "automation_label_failed": "Automatização criada, mas a etiqueta ou categoria WashData não pôde ser adicionada.",
-    "review_answered": "Guardado: {program}"
+    "review_answered": "Guardado: {program}",
+    "cycle_extended": "Fim do ciclo movido; as leituras registadas foram adicionadas"
   },
   "suggestion": {
     "observed_label": "Observado",
