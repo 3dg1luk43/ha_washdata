@@ -367,10 +367,12 @@ jobs:
                 console.log(`#${issue.number}: feature request without the device-data field - not validated.`);
                 return;
               }
-              if (!isTicked('No Device Data Needed') && !hasFile &&
-                  !looksLikeLogs(stripFence(fieldBlock('Device Data')))) {
+              // The export itself (or the diagnostics file): a `.json`, or a `.zip` when
+              // it was too large. A log file or pasted lines do not replace it.
+              const hasExport = /https:\/\/github\.com\/(?:user-attachments\/files\/|[^)\s]+\/files\/)[^)\s]*\.(?:json|zip)(?=[)\s?#]|$)/im.test(body);
+              if (!isTicked('No Device Data Needed') && !hasExport) {
                 problems.push(
-                  '**Device Data** is missing. A request about how your appliance\'s cycles are detected, recognised or timed can only be judged on your data, so please attach the **WashData export**. ' +
+                  '**Device Data** is missing. A request about how your appliance\'s cycles are detected, recognised or timed can only be judged on your data, so please attach the **WashData export** (a `.json` file, or `.zip` it when it is larger than 25 MB; a log file alone is not enough). ' +
                   EXPORT_HOWTO + ' ' +
                   'If the request does not depend on your appliance\'s data (a new option, sensor, notification or panel change), tick **No Device Data Needed** instead.'
                 );

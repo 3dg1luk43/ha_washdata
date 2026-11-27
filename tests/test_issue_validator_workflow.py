@@ -380,7 +380,11 @@ def test_the_evidence_checkbox_or_strict_evidence(kwargs, flagged):
         ({"ticked": True}, False),
         ({}, True),
         ({"data": FILE_LINK}, False),
+        ({"data": "[export.zip](https://github.com/user-attachments/files/9/export.zip)"}, False),
         ({"data": "I can share an export if needed."}, True),
+        # A log file or pasted log lines are not the export the form asks for.
+        ({"data": "[washdata_logs.txt](https://github.com/user-attachments/files/9/washdata_logs.txt)"}, True),
+        ({"data": "```\n" + HA_LOG + "\n```"}, True),
     ],
 )
 def test_a_feature_request_needs_its_data_or_the_checkbox(kwargs, flagged):
