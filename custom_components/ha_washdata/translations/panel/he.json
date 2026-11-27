@@ -1,0 +1,2308 @@
+{
+  "card": {
+    "min": "דק׳",
+    "entity_not_found": "הישות לא נמצאה",
+    "running_long": "הפעולה מתארכת",
+    "stalled": "תקוע",
+    "remaining": "נותרו",
+    "progress": "התקדמות",
+    "show_time_remaining": "הצגת הזמן שנותר",
+    "show_percentage": "הצגת אחוזים",
+    "layout": {
+      "tile": "אריח (קומפקטי)",
+      "detail": "מפורט (עשיר במידע)",
+      "glance": "מבט מהיר (מכשירים מרובים)"
+    },
+    "btn": {
+      "pause": "השהיה",
+      "resume": "המשך",
+      "terminate": "סיום מחזור",
+      "record_start": "התחלת הקלטה",
+      "record_stop": "עצירת הקלטה",
+      "program": "תוכנית",
+      "open_panel": "פתיחת WashData"
+    },
+    "editor": {
+      "layout": "פריסה",
+      "entity": "ישות המכשיר",
+      "entities": "מכשירים",
+      "title": "כותרת",
+      "icon": "סמל",
+      "show_state": "הצגת מצב",
+      "show_program": "הצגת תוכנית",
+      "show_progress_bar": "הצגת סרגל התקדמות",
+      "spin_icon": "סיבוב הסמל בזמן פעולה",
+      "display_mode": "שורת פרטים",
+      "active_color": "צבע מותאם למצב פעיל",
+      "show_phase": "הצגת שלב",
+      "show_energy": "הצגת אנרגיה ועלות",
+      "show_anomaly": "הצגת אזהרת התארכות",
+      "show_sparkline": "הצגת גרף הספק בזמן אמת",
+      "buttons": "כפתורי פעולה",
+      "program_entity": "ישות התוכנית (החלפה)",
+      "time_entity": "ישות הזמן (החלפה)",
+      "pct_entity": "ישות ההתקדמות (החלפה)",
+      "power_entity": "ישות ההספק (החלפה)",
+      "tap_action": "פעולה בלחיצה",
+      "hold_action": "פעולה בלחיצה ממושכת",
+      "double_tap_action": "פעולה בלחיצה כפולה"
+    }
+  },
+  "badge": {
+    "artifact_tip": "זוהו {n} חריגות (למשל פתיחת דלת באמצע מחזור) – יש לפתוח כדי לראות אותן בגרף",
+    "artifact_tip_one": "זוהתה חריגה אחת ({n}), למשל פתיחת דלת באמצע מחזור - יש לפתוח כדי לראות אותה בגרף",
+    "artifact_tip_two": "זוהו {n} חריגות (למשל פתיחת דלת באמצע מחזור) - יש לפתוח כדי לראות אותן בגרף",
+    "artifact_tip_other": "זוהו {n} חריגות (למשל פתיחת דלת באמצע מחזור) - יש לפתוח כדי לראות אותן בגרף",
+    "auto": "(זוהה אוטומטית)",
+    "backfilled_tip": "זוהה בהיסטוריית הספק שיובאה. משפיע רק על התאמת תוכניות, ולא נכלל בסטטיסטיקה.",
+    "built_in_tag": "מובנה",
+    "declining": "↘ בירידה",
+    "energy_low": "צריכת אנרגיה נמוכה מהרגיל",
+    "energy_spike": "צריכת אנרגיה גבוהה מהרגיל",
+    "exists": "קיים",
+    "feedback_requested": "התבקש משוב",
+    "golden_cycle": "מחזור ייחוס שהוקלט",
+    "duration_outlier": "{n} מחזורים בעלי משך חריג",
+    "imported_tip": "יובא ממאגר הקהילה. משמש להתאמה בלבד, ולא נכלל בסטטיסטיקה.",
+    "matcher_unused": "עדיין לא הותאם למחזורי הפעולה שלך",
+    "matcher_used": "הותאם ל־{n} מחזורי פעולה שלך",
+    "matcher_used_one": "הותאם למחזור פעולה אחד שלך ({n})",
+    "matcher_used_two": "הותאם ל־{n} מחזורי פעולה שלך",
+    "matcher_used_other": "הותאם ל־{n} מחזורי פעולה שלך",
+    "matcher_used_tip": "מחזורים במכשיר הזה ש־WashData התאים בעצמו לתוכנית המיובאת. תוכנית מיובאת שאינה מתאימה לאף מחזור אולי אינה מתאימה למכשיר שלך; אפשר להסיר אותה. הספירה מקומית, ולא נשלח דבר למאגר.",
+    "unmatchable": "לא ניתן להתאמה",
+    "quiet_tail": "סיום שקט של כ־{mins} דק׳",
+    "quiet_tail_tip": "לקראת הסיום התוכנית שקטה למשך כ־{mins} דקות, ואז צורכת כ־{watts} W למשך {secs} שניות. נצפה ב־{seen} מתוך {measured} מחזורים שנמדדו.",
+    "improving": "↗ בשיפור",
+    "manual": "(נבחר ידנית)",
+    "needs_review": "דורש בדיקה",
+    "not_importable": "לא רלוונטי כאן",
+    "overrun": "נמשך יותר מהרגיל",
+    "overrun_ratio": "(פי {x} מהצפוי)",
+    "poor_fit": "איכות נמוכה",
+    "restart_gap_tip": "{n} פערים עקב הפעלה מחדש של HA: חסר מקטע בנתוני ההספק",
+    "restart_gap_tip_one": "{n} פער עקב הפעלה מחדש של HA: חסר מקטע בנתוני ההספק",
+    "restart_gap_tip_two": "{n} פערים עקב הפעלה מחדש של HA: חסרים מקטעים בנתוני ההספק",
+    "restart_gap_tip_other": "{n} פערים עקב הפעלה מחדש של HA: חסרים מקטעים בנתוני ההספק",
+    "reviewed": "נבדק",
+    "steady": "→ יציב",
+    "underrun": "הסתיים מהר מהרגיל",
+    "underrun_ratio": "({pct}% מהמשך הצפוי)",
+    "armed": "(חל על המחזור הבא)",
+    "awaiting_tip": "ממתין לאישור הקהילה",
+    "awaiting_n": "ממתין לאישור · {n} אישרו",
+    "awaiting": "ממתין לאישור",
+    "approved": "אושר",
+    "bp_installed": "מותקן",
+    "bp_installed_other": "מותקנת גרסה אחרת"
+  },
+  "btn": {
+    "log_done_task": "תיעוד ביצוע: {task}",
+    "add_task": "הוספת משימה",
+    "add_appliance": "הוספת מכשיר",
+    "add_brand": "הוספת מותג",
+    "add_device": "+ הוספת מכשיר",
+    "add_device_tip": "הוספת מכשיר נוסף ל־WashData",
+    "add_maintenance": "הוספת אירוע תחזוקה",
+    "add_phase": "+ הוספת שלב",
+    "add_timer": "+ הוספת טיימר",
+    "analyze_import": "ניתוח קובץ",
+    "apply_all": "החלת הכול",
+    "apply_label": "החלת תווית",
+    "apply_split": "החלת פיצול",
+    "apply_trim": "החלת חיתוך",
+    "auto_detect_split": "זיהוי אוטומטי",
+    "auto_label_cycles": "תיוג מחזורים אוטומטי",
+    "auto_label_cycles_tip": "מתן שם למחזורים ללא תווית שרמת הביטחון בהתאמתם עוברת את הסף.",
+    "back": "חזרה",
+    "browse_community_setups": "עיון בהגדרות הקהילה",
+    "cancel": "ביטול",
+    "clear": "ניקוי",
+    "clear_debug": "ניקוי נתוני ניפוי שגיאות",
+    "clear_splits": "ניקוי",
+    "close": "סגירה",
+    "compare": "השוואה",
+    "confirm": "אישור",
+    "confirm_appliance": "אישור המכשיר הזה",
+    "confirmed": "אושר",
+    "connect_github": "חיבור GitHub",
+    "convert_to_automation": "המרה לאוטומציה",
+    "correct": "תיקון…",
+    "create": "יצירה",
+    "create_profile_from_gap": "יצירת פרופיל",
+    "delete": "מחיקה",
+    "delete_group": "מחיקת קבוצה",
+    "delete_group_tip": "מחיקת הקבוצה בלבד - הפרופילים שבה נשמרים",
+    "delete_profile": "מחיקת פרופיל",
+    "delete_selected": "מחיקת הנבחרים ({n})",
+    "discard": "ביטול ההקלטה",
+    "discard_tip": "ביטול נתוני ההספק שהוקלטו ללא שמירה",
+    "disconnect": "ניתוק",
+    "dismiss": "סגירה",
+    "done": "סיום",
+    "download_device": "הורדת ההגדרות האלה",
+    "download_export": "הורדת הייצוא",
+    "edit": "עריכה",
+    "export": "ייצוא",
+    "export_all": "ייצוא מהיר של הכול",
+    "export_selected": "ייצוא (בחירת נתונים)",
+    "force_stop": "עצירה כפויה",
+    "force_stop_tip": "סיום מיידי של המחזור הנוכחי וסימונו כנעצר בכפייה",
+    "hist_goto_cycles": "הצגת המחזורים",
+    "hist_import_n": "ייבוא {n} מחזורים",
+    "hist_read_recorder": "קריאה מ־Home Assistant",
+    "hist_scan": "סריקה לאיתור מחזורים",
+    "ignore": "התעלמות",
+    "import": "ייבוא",
+    "import_json": "ייבוא מ־JSON",
+    "import_power_history": "ייבוא היסטוריית הספק",
+    "import_selected": "ייבוא הנבחרים",
+    "inspect": "בדיקה",
+    "label": "תיוג",
+    "load_more": "טעינת עוד",
+    "manage": "ניהול",
+    "merge": "מיזוג",
+    "mute_suggestion": "הפסקת ההצעות להגדרה הזו",
+    "new_group": "+ קבוצה חדשה",
+    "new_group_tip": "קיבוץ פרופילים כמעט זהים (אותה צורה, טמפרטורה או סחיטה שונות) כדי שמנגנון ההתאמה יוכל להבדיל ביניהם.",
+    "new_phase": "+ שלב חדש",
+    "new_profile": "+ פרופיל חדש",
+    "new_profile_tip": "יצירת פרופיל תוכנית חדש ממחזור מתויג קיים או מהקלטה",
+    "pause_cycle": "השהיה",
+    "pause_cycle_tip": "השהיית המחזור הפעיל – המכשיר ימשיך מהמקום שבו עצר",
+    "pg_apply_best": "החלת הטובים ביותר",
+    "pg_apply_to_settings_tip": "העתקת הערכים שערכת כאן להגדרות הפעילות של המכשיר",
+    "pg_load_live": "טעינת ההגדרות הפעילות",
+    "pg_load_live_tip": "קריאה מחדש של הגדרות האינטגרציה הנוכחיות וביטול כל העריכות בסביבת הניסוי",
+    "pg_load_suggested": "טעינת המוצעים ({n})",
+    "pg_load_suggested_tip": "הכנת ההצעות הנוכחיות של הכוונון האוטומטי כערכי החלפה בסביבת הניסוי",
+    "pg_preset_delete": "מחיקת הגדרה קבועה מראש",
+    "pg_preset_load": "טעינת הגדרה קבועה מראש",
+    "pg_preset_load_tip": "החלפת ערכי סביבת הניסוי בהגדרה הקבועה הזו (ההגדרות הפעילות אינן משתנות)",
+    "pg_preset_save": "שמירה כהגדרה קבועה מראש",
+    "pg_preset_save_tip": "שמירת כל הערכים שלהלן כהגדרה קבועה בעלת שם עבור המכשיר",
+    "pg_publish_all": "פרסום {n} באינטגרציה",
+    "pg_publish_one": "פרסום {label} באינטגרציה",
+    "process": "עיבוד",
+    "process_history": "עיבוד עכשיו",
+    "process_recording": "שמירת הקלטה",
+    "process_tip": "שמירת נתוני ההספק שהוקלטו כפרופיל חדש או קיים",
+    "rebuild": "בנייה מחדש של מעטפות ההספק",
+    "rebuild_envelope": "בנייה מחדש של מעטפת ההספק",
+    "rebuild_tip": "בנייה מחדש של טווח ההספק הצפוי לכל פרופיל מהמחזורים המתויגים שלו. כדאי להריץ לאחר תיוג או תיקון מחזורים.",
+    "rec_start_tip": "התחלת הקלטת נתוני ההספק של המכשיר – יש להתחיל רגע לפני הפעלת מחזור",
+    "rec_stop": "עצירה",
+    "rec_stop_tip": "עצירת ההקלטה ושמירת הנתונים שנאספו לבדיקה",
+    "record": "התחלת הקלטה",
+    "refresh": "רענון",
+    "refresh_catalog": "רענון הקטלוג",
+    "refresh_diag_tip": "טעינה מחדש של סטטיסטיקת האחסון",
+    "refresh_settings_tip": "טעינה מחדש של ההגדרות מהשרת",
+    "relabel": "תיוג מחדש ({count})",
+    "remove": "הסרה",
+    "remove_timer": "מחיקה",
+    "reset": "איפוס",
+    "reset_ml_models_tip": "מחיקת המודלים המותאמים וחזרה למודלים המובנים. WashData יוכל ללמוד אותם מחדש בהמשך.",
+    "reset_muted": "איפוס ההשתקות",
+    "reset_phase_tip": "ביטול העריכה ושחזור השלב המובנה",
+    "reset_to_builtin": "איפוס למודלים המובנים",
+    "reset_zoom": "איפוס התקריב",
+    "resume_cycle": "המשך המחזור",
+    "resume_cycle_tip": "המשך המחזור המושהה",
+    "retry": "ניסיון חוזר",
+    "revert": "שחזור",
+    "revert_settings": "ביטול שינויים",
+    "revert_settings_tip": "שחזור ההגדרות שהיו לפני השמירה האחרונה",
+    "revert_settings_tip_none": "יש לשמור תחילה כדי לאפשר ביטול",
+    "revert_to_previous": "שחזור ההגדרה הזו לערכה הקודם",
+    "review": "בדיקה",
+    "run": "הרצה",
+    "run_analysis": "🔍 ניתוח הצעות",
+    "run_analysis_tip": "ניתוח המחזורים המוקלטים עכשיו ורענון הצעות הכוונון",
+    "run_auto_label": "הרצת תיוג אוטומטי",
+    "save": "שמירה",
+    "save_access_control": "שמירת בקרת הגישה",
+    "save_group": "שמירת הקבוצה",
+    "save_panel_settings": "שמירת הגדרות הלוח",
+    "save_phases": "שמירת השלבים",
+    "save_preferences": "שמירת ההעדפות",
+    "save_reminders": "שמירת התזכורות",
+    "save_review": "שמירת הבדיקה",
+    "save_settings": "שמירת ההגדרות",
+    "save_total_cycles": "שמירת הסך הכולל",
+    "select": "בחירה",
+    "select_all": "בחירת הכול",
+    "select_none": "ניקוי",
+    "set_brand_model": "הגדרת מותג ודגם",
+    "share": "שיתוף",
+    "share_device": "⬆ שיתוף המכשיר הזה",
+    "share_device_tip": "שיתוף המכשיר ומחזורי הייחוס שלו במאגר הקהילה, כדי שבעלי אותו מכשיר יוכלו לאמץ אותם.",
+    "share_n": "שיתוף {n} מחזורים",
+    "share_to_store": "שיתוף במאגר",
+    "show_only": "הצגת הנבחרים בלבד",
+    "split": "פיצול",
+    "stop": "עצירה",
+    "submit_correction": "שליחת תיקון",
+    "train_now": "אימון עכשיו",
+    "trim": "חיתוך",
+    "trim_split": "חיתוך / פיצול",
+    "undo": "ביטול",
+    "undo_import": "ביטול הייבוא האחרון",
+    "unlabel_selected": "הסרת תוויות מהנבחרים ({n})",
+    "unlabel_selected_tip": "הסרת התווית מהמחזורים שנבחרו. הם נשארים בהיסטוריה אך מפסיקים לעצב את הפרופיל הזה.",
+    "use": "שימוש",
+    "wipe_all": "מחיקת כל הנתונים",
+    "pg_rerun": "עדכון ההדמיה",
+    "replace": "החלפה",
+    "auto_edit_in_ha": "עריכה ב־Home Assistant",
+    "auto_fewer_triggers": "פחות טריגרים",
+    "auto_more_triggers": "עוד {count} טריגרים",
+    "auto_more_triggers_one": "עוד טריגר אחד ({count})",
+    "auto_more_triggers_two": "עוד {count} טריגרים",
+    "auto_more_triggers_other": "עוד {count} טריגרים",
+    "auto_blank": "אוטומציה ריקה",
+    "bp_refresh": "בדיקת תבניות חדשות ב־GitHub",
+    "bp_turn_on_online": "הפעלת התכונות המקוונות",
+    "bp_add_tip": "יצירת האוטומציה למכשיר הזה עם הגדרות ברירת המחדל, ואז פתיחתה ב־Home Assistant",
+    "bp_add_to": "הוספה ל־{device}",
+    "bp_setup_tip": "התקנת התבנית ואז פתיחת Home Assistant להשלמת ההגדרות",
+    "bp_setup_in_ha": "הגדרה ב־Home Assistant",
+    "bp_details": "פרטים",
+    "bp_copy_yaml": "העתקת YAML",
+    "bp_hide_yaml": "הסתרת ה־YAML",
+    "bp_show_yaml": "הצגת ה־YAML",
+    "review_something_else": "משהו אחר…",
+    "review_not_sure": "אין ודאות",
+    "review_prev": "המחזור הקודם",
+    "review_next": "המחזור הבא"
+  },
+  "note": {
+    "off_delay": {
+      "effective": "מחזור שהסתיים ממתין בפועל {eff} שניות, ולא {delay} שניות: פער הכיבוי המזערי ({gap} שניות) ארוך יותר ולכן מקבל קדימות."
+    }
+  },
+  "conflict": {
+    "anti_wrinkle_max": {
+      "max": "חייב להיות מעל סף ההתחלה ({start} W); אחרת מגבלת משך מניעת הקמטים אינה חלה",
+      "start": "חייב להיות מתחת להספק המרבי למניעת קמטים ({max} W)"
+    },
+    "attn_sub": "יש לתקן את הסתירות לפני השמירה",
+    "attn_title": "סתירות בהגדרות: {n}",
+    "price_entity": {
+      "power_sensor": "זהו חיישן ההספק של המכשיר, ולא מחיר. עלות המחזורים תחושב בוואט לכל kWh; יש לנקות את השדה.",
+      "energy_sensor": "זהו מד האנרגיה של המכשיר, ולא מחיר. עלות המחזורים תחושב לפי קריאת המונה לכל kWh; יש לנקות את השדה.",
+      "device_class": "החיישן הזה מודד {dc}, ולא מחיר לכל kWh. יש לנקות את השדה או לבחור חיישן תעריף.",
+      "unit": "החיישן הזה מציג ערכים ב־{unit}, ולא מחיר לכל kWh. יש לנקות את השדה או לבחור חיישן תעריף."
+    },
+    "settings_banner": "סתירות בהגדרות: {n}. יש לבדוק את הסעיפים המודגשים ולתקן אותם לפני השמירה.",
+    "settings_banner_btn": "מעבר לראשונה",
+    "confidence": {
+      "auto": "חייב להיות שווה לסף ההתאמה ({match}) או גבוה ממנו",
+      "learning": "חייב להיות שווה לסף ההתאמה ({match}) או גבוה ממנו",
+      "match_for_auto": "חייב להיות שווה לרמת הביטחון לתיוג אוטומטי ({alc}) או נמוך ממנה",
+      "match_for_learning": "חייב להיות שווה לרמת הביטחון ללמידה ({lc}) או נמוך ממנה"
+    },
+    "duration_ratio": {
+      "max": "חייב להיות גדול מיחס המשך המזערי ({min})",
+      "min": "חייב להיות קטן מיחס המשך המרבי ({max})"
+    },
+    "hysteresis": {
+      "start": "חייב להיות מעל סף העצירה ({stop} W)",
+      "stop": "חייב להיות מתחת לסף ההתחלה ({start} W)"
+    },
+    "min_power": {
+      "min_power": "חייב להיות שווה לסף העצירה ({stop} W) או נמוך ממנו",
+      "stop": "חייב להיות שווה להספק המזערי ({min} W) או גבוה ממנו"
+    },
+    "no_update_timeout": {
+      "timeout": "חייב להיות גדול ממרווח הבדיקה של מנגנון ההשגחה ({wi} שניות)",
+      "watchdog": "חייב להיות קטן מזמן ההמתנה ללא עדכונים ({to} שניות)"
+    },
+    "off_delay": {
+      "gap": "פער הכיבוי המזערי צריך להיות לפחות כהשהיית הכיבוי ({delay} שניות)",
+      "off_delay": "השהיית הכיבוי ({off_delay} שניות) עולה על פער הכיבוי המזערי ({gap} שניות); מחזורים רצופים עלולים להתמזג"
+    },
+    "power_off": {
+      "stop": "חייב להיות מעל סף הכיבוי ({pot} W)",
+      "threshold": "חייב להיות מתחת לסף העצירה ({stop} W) כדי להשפיע"
+    },
+    "pump_stuck": {
+      "duration": "חייב להיות קצר מזמן ההמתנה ללא עדכונים ({to} שניות), כדי שהתרעת התקיעה תוכל לפעול קודם",
+      "timeout": "חייב לעלות על משך המשאבה התקועה ({ps} שניות), כדי שהתרעת התקיעה תוכל לפעול קודם"
+    },
+    "start_dur": {
+      "threshold": "מומלץ שיהיה לפחות מרווח דגימה אחד ({si} שניות), כדי למנוע זיהוי התחלה שגוי על סמך דגימה בודדת"
+    },
+    "cascade_toast": "הגדרות נוספות הותאמו לשמירת עקביות: {n}",
+    "suggestion_resolves": "יש להכין את ההצעה הממתינה ({val}) שלהלן כדי לתקן זאת",
+    "use_fix": "שימוש ב־{val}",
+    "watchdog": {
+      "interval": "מומלץ שיהיה לפחות פי 2 ממרווח הדגימה ({si} שניות)"
+    },
+    "end_energy": {
+      "energy": "מחמיר מדי ביחס לסף העצירה ({w} W) לאורך השהיית הכיבוי ({d} שניות); המחזור יוכל להסתיים רק דרך מנגנון גיבוי",
+      "stop": "סף אנרגיית הסיום ({e} Wh לאורך {d} שניות) מאפשר רק {p} W"
+    },
+    "power_sensor": {
+      "energy": "החיישן הזה סופר אנרגיה ({unit}), ולא הספק, ולכן אי אפשר לזהות מחזורים. יש לבחור את חיישן ההספק של השקע (W או kW)."
+    }
+  },
+  "hdr": {
+    "custom_tasks": "המשימות שלך",
+    "maintenance_supporter": "צריך עוד?",
+    "access_control": "בקרת גישה",
+    "add_maintenance": "הוספת אירוע תחזוקה",
+    "automation_delete": "מחיקת האוטומציה הזו",
+    "automation_needs_review": "המחזור הזה דורש בדיקה",
+    "automation_review_this_cycle": "בדיקת המחזור הזה",
+    "automations": "אוטומציות",
+    "clear_debug": "ניקוי נתוני ניפוי שגיאות",
+    "community_store": "מאגר הקהילה",
+    "diagnostics_pref": "אבחון",
+    "display": "תצוגה",
+    "export_import": "ייצוא / ייבוא",
+    "import_power_history": "ייבוא היסטוריית הספק",
+    "live_power": "הספק בזמן אמת",
+    "logs": "יומנים",
+    "maintenance": "פעולות תחזוקה",
+    "maintenance_log": "יומן תחזוקה",
+    "maintenance_reminders": "תזכורות טיפול",
+    "manual_recording": "הקלטה ידנית",
+    "manual_recording_tip": "להקלטת מחזור מכוונת: יש ללחוץ על התחלה רגע לפני שהמכשיר מתחיל, ועל עצירה כשהוא מסיים, ואז על עיבוד כדי לשמור אותו כפרופיל.",
+    "ml_learned": "מה WashData למד",
+    "ml_settings_card": "הגדרות",
+    "ml_smart_learning": "למידה חכמה",
+    "my_preferences": "ההעדפות שלי",
+    "online_account": "מאגר הקהילה ותכונות מקוונות",
+    "online_account_tab": "מקוון וקהילה",
+    "panel_settings": "הגדרות הלוח",
+    "pg_across_cycles": "בכל המחזורים שלך",
+    "pg_detection_params": "הגדרות זיהוי",
+    "pg_outcome": "תוצאת ההדמיה",
+    "pg_settings_source": "מקור ההגדרות",
+    "phase_catalog": "קטלוג השלבים",
+    "playground": "סביבת ניסוי",
+    "process_history": "עיבוד היסטוריה",
+    "service_status": "מצב השירות",
+    "settings_history": "היסטוריית הגדרות",
+    "status": "מצב",
+    "status_graph": "גרף מצב",
+    "storage_stats": "סטטיסטיקת אחסון",
+    "toggle_sidebar": "הצגה או הסתרה של סרגל הצד של Home Assistant",
+    "wipe_history": "מחיקת היסטוריה",
+    "live_match_debug": "ניפוי שגיאות בהתאמה בזמן אמת",
+    "automations_all_tip": "רשימת האוטומציות של Home Assistant, מסוננת לפי התווית WashData. אוטומציות שנוצרות כאן נמצאות גם בקטגוריית WashData.",
+    "maint_done_by_program": "בוצע אוטומטית",
+    "auto_start": "יצירת אוטומציה חדשה",
+    "auto_yours": "האוטומציות שלך",
+    "bp_needs_online": "ספריית התבניות דורשת תכונות מקוונות",
+    "bp_unreachable": "לא ניתן לגשת לספריית התבניות",
+    "bp_library": "ספריית תבניות",
+    "bp_settings": "מה אפשר להגדיר"
+  },
+  "health": {
+    "fair": "איכות פרופיל סבירה",
+    "good": "✓ איכות פרופיל טובה",
+    "poor": "⚠ איכות פרופיל נמוכה"
+  },
+  "lbl": {
+    "task_name": "משימה",
+    "every_cycles": "כל (מחזורים)",
+    "every_days": "כל (ימים)",
+    "new_task_name": "משימה חדשה",
+    "days_since_service": "{since} / {total} ימים",
+    "actions": "פעולות",
+    "activity": "פעילות",
+    "administrators": "מנהלי מערכת",
+    "adopt_settings": "אימוץ ההגדרות גם כן",
+    "anonymous": "אנונימי",
+    "aria_compare_chart": "תרשים השוואת מחזורים",
+    "aria_cycle_chart": "נתוני ההספק של המחזור",
+    "aria_envelope_chart": "תרשים מעטפת ההספק של הפרופיל",
+    "aria_phase_chart": "תרשים עורך השלבים",
+    "aria_playground_chart3": "גרף הספק מחזור אינטראקטיבי: ריחוף להצגת זמן והספק, גלילה או צביטה לתקריב, גרירה להזזה",
+    "aria_power_chart": "תרשים צריכת הספק",
+    "aria_spaghetti_chart": "נתוני הספק של מחזורים המוצגים זה על גבי זה",
+    "artifact_anomaly": "חריגה",
+    "artifact_high_power": "הספק גבוה",
+    "artifact_interruption": "הפרעה",
+    "artifact_low_power": "הספק נמוך",
+    "at": "ב־",
+    "auto_detect": "זיהוי אוטומטי",
+    "auto_fine_tune_off": "התאמה אוטומטית כבויה",
+    "auto_fine_tune_on": "התאמה אוטומטית פעילה (בסביבות {hour}:00)",
+    "avg_cost": "עלות ממוצעת",
+    "cat_backfill_cycles": "מחזורים שנמצאו בהיסטוריית הספק מיובאת",
+    "cat_custom_phases": "שלבים מותאמים אישית",
+    "cat_feedback": "משוב ותוויות בדיקה",
+    "cat_history_logs": "היסטוריה ויומני שינויים",
+    "cat_lifetime_stats": "נתונים מצטברים לכל חיי המכשיר",
+    "cat_maintenance_log": "יומן תחזוקה",
+    "cat_ml_models": "מודלים של למידת מכונה",
+    "cat_profile_groups": "קבוצות פרופילים",
+    "cat_profiles": "פרופילים (תוכניות)",
+    "cat_real_cycles": "מחזורים (היסטוריית פעולות)",
+    "cat_reference_cycles": "מחזורי ייחוס (מיובאים)",
+    "cat_settings": "הגדרות זיהוי והתאמה",
+    "cat_suggestions": "הצעות",
+    "change": "שינוי",
+    "click_to_select": "לחיצה לבחירה",
+    "clock_time": "שעה",
+    "cohesion_good": "אחידות {pct}%",
+    "cohesion_low": "⚠ אחידות נמוכה {pct}%",
+    "compare_profiles": "השוואה לפרופילים",
+    "confidence": "רמת ביטחון",
+    "confidence_threshold": "סף רמת הביטחון",
+    "conflict_import_copy": "ייבוא כעותק",
+    "conflict_keep_mine": "שמירת שלי",
+    "conflict_overwrite": "דריסה",
+    "conflict_resolution": "התנגשויות שמות",
+    "correct_duration": "משך מתוקן (דקות, לא חובה)",
+    "correct_profile": "פרופיל מתוקן",
+    "cost": "עלות",
+    "create_new_profile": "+ יצירת פרופיל חדש…",
+    "current_phase": "השלב הנוכחי",
+    "cycle": "מחזור",
+    "cycle_date_display": "תצוגת תאריך המחזור",
+    "cycle_context": "היסטוריית המקליט סביב המחזור",
+    "cycle_context_off": "כבוי",
+    "cycle_context_minutes": "{min} דקות",
+    "cycle_context_series": "היסטוריית המקליט",
+    "before_start": "לפני ההתחלה",
+    "after_end": "אחרי הסיום",
+    "cycle_destination": "לאן להעביר את המחזורים המיובאים?",
+    "cycles_count": "מחזורים",
+    "cycles_lc": "מחזורים",
+    "cycles_short": "מחזורים",
+    "cycles_title": "מחזורים ({n})",
+    "date": "תאריך",
+    "debug_traces": "נתוני ניפוי שגיאות",
+    "device_unresolved": "מכשיר לא זמין ({id})",
+    "default_access_level": "רמת ברירת המחדל למשתמשים שאינם מופיעים למטה",
+    "default_other": "ברירת מחדל (מכשירים אחרים)",
+    "default_tab": "לשונית ברירת המחדל בפתיחת הלוח",
+    "description": "תיאור",
+    "dest_real_history": "היסטוריה אמיתית (נכללת בסטטיסטיקה)",
+    "dest_reference": "ייחוס (צורה בלבד)",
+    "drag_to_resize": "גרירה לשינוי הגודל",
+    "duration": "משך",
+    "duration_avg": "ממוצע כ־{v} דק׳",
+    "enable_access_control": "הפעלת בקרת גישה לפי משתמש",
+    "enable_online": "הפעלת תכונות מקוונות",
+    "end": "סיום",
+    "energy": "אנרגיה",
+    "envelope": "מעטפת הספק",
+    "eta_mins": "נותרו כ־{n} דק׳",
+    "eta_secs": "נותרו כ־{n} שנ׳",
+    "event_type": "סוג אירוע",
+    "evidence_backfill_cycles": "נמצאו בהיסטוריית הספק מיובאת",
+    "evidence_real_cycles": "מחזורים שהמכשיר הזה ביצע",
+    "evidence_reference_cycles": "הורדו ממאגר הקהילה",
+    "expected": "צפוי",
+    "suspected_profile": "{name} (משוער)",
+    "runner_up_profile": "{name} (במקום השני)",
+    "expected_duration": "משך צפוי (דקות)",
+    "file_kb": "קובץ (kB)",
+    "flags": "סימונים",
+    "font_size": "גודל הגופן בלוח",
+    "from": "מ־",
+    "from_start": "מההתחלה",
+    "gap_s": "פער (שניות)",
+    "group_name": "שם הקבוצה",
+    "ha_restarted": "HA הופעל מחדש",
+    "head_trim": "חיתוך מההתחלה (שניות)",
+    "hide_tabs": "הסתרת לשוניות ממי שאינם מנהלי מערכת",
+    "hist_csv_data": "נתוני CSV",
+    "hist_from_recorder": "או קריאה מ־Home Assistant",
+    "hist_keep": "שמירת המחזור הזה",
+    "hist_looks_complete": "שלם",
+    "hist_reason_no_end": "לא הסתיים באופן תקין",
+    "hist_reason_short": "קצר מהמחזור האמיתי הקצר ביותר של המכשיר הזה",
+    "hist_since": "מאז",
+    "hist_skip_idle": "אין פעילות",
+    "hist_skip_long": "אין הפסקה ארוכה מספיק לפיצול",
+    "hist_skip_short": "מעט מדי קריאות",
+    "hist_skip_sparse": "הקריאות מרוחקות מדי זו מזו",
+    "import_mode": "אופן השילוב",
+    "include_phase_map": "הכללת מפת שלבים",
+    "include_settings": "הכללת הגדרות זיהוי והתאמה",
+    "input": "קלט:",
+    "json_data": "נתוני JSON",
+    "label": "התוכנית שהותאמה",
+    "last": "אחרון",
+    "last_checked": "נבדק לאחרונה:",
+    "load_from_file": "טעינה מקובץ",
+    "loading_paren": "(בטעינה…)",
+    "manual_duration": "משך ידני (דקות, לא חובה)",
+    "match": "התאמה",
+    "members": "פרופילים בקבוצה",
+    "mode_existing_profile": "הוספה לפרופיל קיים",
+    "mode_merge": "מיזוג (שמירת שלי)",
+    "mode_new_profile": "יצירת פרופיל חדש",
+    "mode_replace": "החלפת הנבחרים",
+    "models_fine_tuned": "(מודלים מותאמים: {count})",
+    "n_imported_note": ", {n} מיובאים",
+    "n_selected": "{n} נבחרו",
+    "n_shown": ", {n} מוצגים",
+    "n_tuning_suggestions": "{n} הצעות כוונון",
+    "n_tuning_suggestions_one": "הצעת כוונון אחת ({n})",
+    "n_tuning_suggestions_two": "{n} הצעות כוונון",
+    "n_tuning_suggestions_other": "{n} הצעות כוונון",
+    "name_placeholder": "(שם)",
+    "new_profile_name": "שם הפרופיל החדש",
+    "no_duration": "ללא משך",
+    "notes": "הערות",
+    "panel_default_tab": "לשונית ברירת מחדל",
+    "panel_language": "שפת הלוח",
+    "pct_match_confidence": "{pct}% ביטחון בהתאמה",
+    "peak_power_short": "שיא",
+    "per_cycle_short": "מחזור",
+    "pg_alert_ambiguous": "התאמה לא חד־משמעית",
+    "pg_alert_did_not_finish": "לא הסתיים",
+    "pg_alert_discarded": "נפסל כזיהוי שווא או כריקון מים",
+    "pg_alert_energy": "חריגה באנרגיה",
+    "pg_alert_false_end": "פוצל למספר מחזורים",
+    "pg_alert_indefinite": "יימשך ללא הגבלה",
+    "pg_alert_overrun": "התארכות",
+    "pg_alert_timeout_end": "הסתיים בגלל תום זמן ההמתנה, ולא לפי החיזוי",
+    "pg_alert_underrun": "סיום מוקדם מהצפוי",
+    "pg_alert_unmatched": "ללא התאמה",
+    "pg_anti_wrinkle": "מניעת קמטים",
+    "pg_best_value": "הערך הטוב ביותר שנמצא",
+    "pg_broke": "נפגעו",
+    "pg_current_value": "הערך הנוכחי:",
+    "pg_detecting": "בזיהוי",
+    "pg_drag_hint": "יש לגרור את הקו בגרף",
+    "pg_end_timing_changed": "תזמון הסיום השתנה",
+    "pg_ended": "הסתיים",
+    "pg_ev_ambiguous": "לא חד־משמעי",
+    "pg_ev_detected": "זוהה",
+    "pg_ev_ending": "בשלב סיום",
+    "pg_ev_finished": "הסתיים",
+    "pg_ev_match": "ההתאמה נקבעה",
+    "pg_ev_match_changed": "ההתאמה השתנתה",
+    "pg_ev_notify_finish": "התראת סיום",
+    "pg_ev_notify_held": "ההתראה ממתינה (שעות שקטות)",
+    "pg_ev_notify_milestone": "התראת אבן דרך",
+    "pg_ev_notify_pre": "התראת סיום מתקרב",
+    "pg_ev_notify_start": "התראת התחלה",
+    "pg_ev_running": "פועל",
+    "pg_ev_unmatched": "ללא התאמה",
+    "pg_fixed": "תוקנו",
+    "pg_group_advanced": "מקרי קצה",
+    "pg_group_detection": "טריגרים לזיהוי",
+    "pg_group_matching": "התאמת תוכניות",
+    "pg_group_timing": "כללי תזמון",
+    "pg_idle": "לא פעיל",
+    "pg_load_run": "טעינת ההרצה הזו מחדש",
+    "pg_match_confidence": "רמת הביטחון בהתאמה",
+    "pg_mode_history": "בדיקה על ההיסטוריה",
+    "pg_mode_optimize": "מיטוב",
+    "pg_newly_correct": "נכונים כעת",
+    "pg_obj_ambiguity": "שיעור אי־הוודאות",
+    "pg_obj_endtiming": "דיוק תזמון הסיום",
+    "pg_obj_falseend": "שיעור סיומי השווא",
+    "pg_obj_match": "דיוק ההתאמה",
+    "pg_obj_overrun": "סטיית המשך מהיעד",
+    "pg_objective": "יעד",
+    "pg_poor_match": "התאמה גרועה",
+    "pg_preset": "הגדרה קבועה מראש לסביבת הניסוי",
+    "pg_preset_name": "שם ההגדרה הקבועה החדשה",
+    "pg_preset_none": "בחירת הגדרה קבועה מראש…",
+    "pg_proj_energy": "אנרגיה חזויה",
+    "pg_recent_runs": "הרצות אחרונות",
+    "pg_regressed": "נסוגו",
+    "pg_steps": "צעדים",
+    "pg_strong_match": "התאמה חזקה",
+    "pg_sweep_param": "פרמטר",
+    "pg_time_left_model": "הזמן שנותר (מודל)",
+    "pg_time_left_model_tip": "מוערך לפי שלבי התוכנית, ולא לפי ספירה קבועה לאחור",
+    "pg_vs_current": "לעומת הנוכחי",
+    "pg_weak_match": "התאמה חלשה",
+    "pg_zoom_hint": "לחיצה כפולה לאיפוס התקריב",
+    "phase": "שלב",
+    "phase_name": "שם השלב",
+    "name": "שם",
+    "phase_timeline": "ציר הזמן של השלבים",
+    "power": "הספק",
+    "profile": "פרופיל",
+    "profile_name": "שם הפרופיל",
+    "program": "תוכנית",
+    "program_tip": "בחירת התוכנית שאליה מותאם המחזור הנוכחי. זיהוי אוטומטי בוחר את ההתאמה הטובה ביותר. אפשר לקבע תוכנית כשהזיהוי האוטומטי שגוי; בחירה לפני ההתחלה תחול על המחזור הבא.",
+    "progress": "התקדמות",
+    "envelope_position": "עקומה {pct}%",
+    "envelope_position_tip": "המיקום על העקומה המוקלטת של התוכנית שהותאמה: {pct}%. נקבע באמצעות יישור המחזור לפרופיל, ולכן נשאר נכון גם כשהפעולה ארוכה או קצרה יותר. מתעדכן כשהמכשיר שקט, ולכן עשוי להתעכב.",
+    "quality": "איכות",
+    "raw_socket": "קריאת שקע גולמית",
+    "ref_cycle": "מחזור ייחוס (לא חובה)",
+    "remaining": "נותר",
+    "reminder_every": "תזכורת כל (מחזורים)",
+    "remove_label": "- הסרת תווית -",
+    "rename_profile": "שינוי שם הפרופיל",
+    "resulting_profile": "הפרופיל שיתקבל",
+    "reviewed_on": "נבדק ב־{date}",
+    "save_mode": "אופן השמירה",
+    "seconds_from_start": "שניות מההתחלה",
+    "select_profile": "בחירת פרופיל",
+    "setting": "הגדרה",
+    "settings_advanced": "מתקדם",
+    "settings_basic": "בסיסי",
+    "settings_detail_level": "רמת פירוט ההגדרות",
+    "shape": "צורה",
+    "show_contributor": "הצגת שמות התורמים",
+    "show_debug": "הצגת כרטיס ניפוי שגיאות התאמה בזמן אמת בעמוד המצב (רמת ביטחון, אי־ודאות, מועמדים מובילים)",
+    "show_expected": "הצגת העקומה הצפויה מעל הגרף (הפרופיל שהותאם, בכתום)",
+    "show_raw": "הצגת מתג הקריאה הגולמית מהשקע בגרף ההספק בזמן אמת",
+    "sparkline": "מגמת משך המחזורים האחרונים",
+    "start": "התחלה",
+    "status": "מצב",
+    "tags": "תגיות",
+    "tail_trim": "חיתוך מהסוף (שניות)",
+    "task_history_import": "סריקת היסטוריית הספק",
+    "task_history_import_apply": "ייבוא מחזורים",
+    "task_merge": "מיזוג מחזורים",
+    "task_ml_training": "למידה",
+    "task_pg_detail": "הדמיית מחזור",
+    "task_pg_history": "בדיקה על ההיסטוריה",
+    "task_pg_sweep": "מיטוב",
+    "task_rebuild": "בנייה מחדש של מעטפות ההספק",
+    "task_reprocess": "עיבוד מחדש",
+    "task_split": "פיצול מחזור",
+    "task_trim": "חיתוך מחזור",
+    "time_remaining": "נותרו כ־{v}",
+    "timer_auto_pause": "השהיה אוטומטית",
+    "timer_min": "דק׳",
+    "timer_msg_placeholder": "הודעה (לא חובה, {device}/{program}/{minutes})",
+    "to": "עד",
+    "to_end": "עד הסיום",
+    "ungrouped": "ללא קבוצה",
+    "unit_s": "(שניות)",
+    "unknown": "לא ידוע",
+    "unlabelled": "ללא תווית",
+    "unlabelled_paren": "(ללא תווית)",
+    "tap_to_dismiss": "נגיעה בתרשים לסגירה",
+    "zoom_hint": "גלילה לתקריב · לחיצה כפולה לאיפוס",
+    "zoom_hint_touch": "צביטה לתקריב",
+    "zoom_hint_touch_zoomed": "צביטה לתקריב · נגיעה כפולה לאיפוס",
+    "cycles_since_service": "{since} / {total} מחזורים",
+    "total_cycles_run": "מחזורי פעולה בסך הכול",
+    "correct_total_cycles": "תיקון הסך הכולל",
+    "hist_reason_already_recorded": "חופף למחזור ש־WashData כבר הקליט",
+    "share_consent": "אני מאשר/ת שהמחזורים האלה הסתיימו כרגיל ללא הפרעה",
+    "show_internal": "הצגת הגדרות פנימיות",
+    "show_internal_tip": "הגדרות ש־WashData מכוונן עבורך (מנגנון השגחה, תדירות התאמה, ספים). מוצגות כשיש למכשיר ערך משלו, סתירה או הצעה.",
+    "rate_n": "{n} כוכבים",
+    "rate_quality": "דירוג האיכות",
+    "pg_autolabel": "תיוג אוטומטי",
+    "pg_label_review": "מבקש בדיקה",
+    "pg_ev_match_reverted": "ההתאמה בוטלה",
+    "pg_ev_verified_pause": "השהיה מאומתת",
+    "n_samples": "{n} דגימות",
+    "n_samples_one": "דגימה אחת ({n})",
+    "n_samples_two": "{n} דגימות",
+    "n_samples_other": "{n} דגימות",
+    "n_cycles": "{n} מחזורים",
+    "n_cycles_one": "מחזור אחד ({n})",
+    "n_cycles_two": "{n} מחזורים",
+    "n_cycles_other": "{n} מחזורים",
+    "energy_per_cycle": "{v}/מחזור",
+    "energy_total": "{v} בסך הכול",
+    "automation_off": "(כבוי)",
+    "ref_cycle_none": "ללא",
+    "share_name": "הצגת שמי בתוכן שאני משתף/ת",
+    "pg_compare_profile": "השוואה לפרופיל",
+    "pg_obj_endlag": "השהיית סיום (חציון)",
+    "pg_obj_early": "שיעור הסיומים המוקדמים",
+    "pg_obj_split": "שיעור הפיצולים",
+    "pg_sweep_cycles": "מחזורים אחרונים",
+    "bp_yaml": "YAML של תבנית האוטומציה",
+    "automation_wd_label": "נושאת את התווית WashData",
+    "done_by_none": "לא הוגדר",
+    "done_by_programs": "מבוצע אוטומטית באמצעות: {programs}",
+    "done_by_cycle": "בוצע במחזור {program}",
+    "bp_by": "מאת {author}",
+    "bp_for_all": "כל מכשיר",
+    "bp_for": "עבור",
+    "bp_needs": "דרישות",
+    "bp_needs_version": "WashData {version} ומעלה",
+    "bp_author": "יוצר",
+    "bp_required": "נדרש",
+    "pg_runs_as": "פועל כ־{value}",
+    "review_this_cycle": "המחזור הזה",
+    "review_usual": "הרגיל עבור {name}"
+  },
+  "log": {
+    "all_levels": "כל הרמות",
+    "all_devices": "כל המכשירים",
+    "all_components": "כל הרכיבים",
+    "search_ph": "חיפוש ביומנים…"
+  },
+  "maint": {
+    "salt": "מילוי מלח",
+    "rinse_aid": "מילוי נוזל הברקה",
+    "lint_filter": "ניקוי מסנן המוך",
+    "condenser_clean": "ניקוי המעבה",
+    "descale": "הסרת אבנית",
+    "filter_clean": "ניקוי המסנן",
+    "drum_clean": "ניקוי התוף",
+    "bearing_service": "טיפול במיסבים",
+    "other": "אחר"
+  },
+  "ml": {
+    "builtin_models": "● שימוש במודלים מובנים",
+    "fit_good": "טובה",
+    "fit_slight": "קלה",
+    "fit_strong": "חזקה",
+    "fit_word": "התאמה",
+    "personalized": "● מותאם למכשיר הזה",
+    "better_than_baseline": "טוב ב־{pct}% מאומדן הבסיס ({metric})",
+    "trend_improving_tip": "התאמת המודל הזה השתפרה בבדיקות החוזרות האחרונות.",
+    "trend_declining_tip": "התאמת המודל הזה ירדה בבדיקות החוזרות האחרונות – בדיקת מחזורים נוספים עשויה לעזור לו ללמוד מחדש.",
+    "trend_steady_tip": "התאמת המודל הזה נותרה יציבה בקירוב בבדיקות החוזרות האחרונות.",
+    "cap_label": {
+      "total_energy": "אומדן אנרגיה"
+    },
+    "cap_blurb": {
+      "total_energy": "חיזוי סך האנרגיה והעלות"
+    },
+    "metric_mae": "שגיאה {model} לעומת {baseline} בבסיס",
+    "fine_tuned_at": "הותאם ב־{when}",
+    "never": "מעולם לא",
+    "trained_unknown": "בזמן לא ידוע",
+    "held_out_count": "נמדד על {count} מחזורים שהופרשו לבדיקה",
+    "held_out_count_one": "נמדד על מחזור אחד ({count}) שהופרש לבדיקה",
+    "held_out_count_two": "נמדד על {count} מחזורים שהופרשו לבדיקה",
+    "held_out_count_other": "נמדד על {count} מחזורים שהופרשו לבדיקה",
+    "last_run_not_promoted": "הבדיקה האחרונה ({when}): {reason}",
+    "skip_reason": {
+      "insufficient_rows": "עדיין אין מספיק מחזורים מתאימים: עד כה {count} מחזורים מתויגים ותקינים.",
+      "insufficient_rows_one": "עדיין אין מספיק מחזורים מתאימים: עד כה מחזור מתויג ותקין אחד ({count}).",
+      "insufficient_rows_two": "עדיין אין מספיק מחזורים מתאימים: עד כה {count} מחזורים מתויגים ותקינים.",
+      "insufficient_rows_other": "עדיין אין מספיק מחזורים מתאימים: עד כה {count} מחזורים מתויגים ותקינים.",
+      "holdout_too_small": "מעט מדי מחזורים לבדיקה הוגנת של מודל חדש: ניתן להפריש {held_out} לבדיקה, ונדרשים {min}.",
+      "not_better_than_naive": "המודל החדש לא היה טוב באופן ברור מהאומדן הפשוט (שגיאה {model} לעומת {naive}).",
+      "not_better_than_incumbent": "המודל החדש לא היה טוב מהמודל שבשימוש (שגיאה {model} לעומת {incumbent}), ולכן נשמר המודל הנוכחי.",
+      "fit_failed": "האימון נכשל: {error}",
+      "unknown": "לא נלמד דבר חדש."
+    }
+  },
+  "modal": {
+    "remove_task_title": "הסרת משימה",
+    "remove_task_msg": "להסיר את התזכורת \"{task}\"? הרשומות שלה ביומן התחזוקה נשמרות.",
+    "apply_suggestions_msg": "לשנות את {n} ההגדרות האלה? האינטגרציה תיטען מחדש לאחר השמירה.",
+    "apply_suggestions_title": "החלת הצעות",
+    "auto_label": "תיוג מחזורים אוטומטי",
+    "clear_debug_msg": "למחוק את כל נתוני ניפוי השגיאות השמורים?",
+    "clear_debug_title": "ניקוי נתוני ניפוי שגיאות",
+    "correct_feedback": "תיקון משוב",
+    "create_profile": "יצירת פרופיל",
+    "cycle": "מחזור",
+    "delete_automation_msg": "למחוק את האוטומציה \"{name}\" מ־Home Assistant? לא ניתן לבטל פעולה זו.",
+    "delete_automation_title": "מחיקת אוטומציה",
+    "delete_maintenance_msg": "למחוק את רשומת התחזוקה הזו? לא ניתן לבטל פעולה זו.",
+    "delete_maintenance_title": "מחיקת אירוע תחזוקה",
+    "delete_phase_msg": "למחוק את השלב \"{name}\"?",
+    "delete_phase_title": "מחיקת שלב",
+    "discard_recording_msg": "למחוק את ההקלטה השמורה? לא ניתן לבטל פעולה זו.",
+    "discard_recording_title": "ביטול הקלטה",
+    "discard_settings_msg": "{n} שינויים בהגדרות עדיין לא נשמרו. לצאת מההגדרות ולבטל אותם?",
+    "discard_settings_title": "לבטל את השינויים שלא נשמרו?",
+    "dismiss_all_msg": "לסגור את כל {count} בקשות המשוב הממתינות?",
+    "dismiss_all_ok": "סגירת הכול",
+    "dismiss_all_title": "סגירת כל בקשות המשוב",
+    "edit_group": "עריכת קבוצת פרופילים",
+    "edit_phase": "עריכת שלב",
+    "export_select": "ייצוא - בחירת נתונים",
+    "force_stop_msg": "לעצור בכפייה את המחזור הפעיל עכשיו? המחזור יישמר כמחזור שנקטע.",
+    "force_stop_title": "עצירה כפויה של מחזור",
+    "history_import": "ייבוא היסטוריית הספק",
+    "import_wizard": "ייבוא - בחירת נתונים",
+    "label_cycle": "תיוג מחזור",
+    "merge_cycles": "מיזוג {n} מחזורים",
+    "new_group": "קבוצת פרופילים חדשה",
+    "new_phase": "שלב חדש",
+    "process_history_msg": "הרצת ההתאמה מחדש, רענון הצעות, אימון מחדש של למידת המכונה (אם הופעלה), חישוב עלויות מחדש לפי מחירי האנרגיה שנרשמו וחישוב מחדש של תקינות כל המחזורים השמורים. הפעולה עשויה לקחת זמן.",
+    "process_history_ok": "עיבוד",
+    "process_history_title": "עיבוד היסטוריה",
+    "process_recording": "עיבוד הקלטה",
+    "relabel_cycles": "תיוג מחדש של {count} מחזורים",
+    "remove_legacy_msg": "להסיר את הפעולות המותאמות הישנות? הן יפסיקו לפעול באירועי מחזור. לא ניתן לבטל זאת מהלוח.",
+    "remove_legacy_title": "הסרת פעולות ישנות",
+    "reset_phase_msg": "לבטל את העריכה של \"{name}\" ולשחזר את השלב המובנה? טווחי התוכניות נשמרים.",
+    "reset_phase_title": "איפוס שלב",
+    "store_import": "ייבוא מחזור ייחוס",
+    "store_share": "שיתוף במאגר הקהילה",
+    "store_share_device": "שיתוף המכשיר הזה",
+    "undo_import_msg": "הנתונים וההגדרות של המכשיר יחזרו למצבם לפני הייבוא האחרון ({when}). מחזורים שהוקלטו ושינויים שבוצעו מאז יאבדו.",
+    "undo_import_ok": "ביטול הייבוא",
+    "undo_import_title": "ביטול הייבוא האחרון",
+    "wipe_all_msg": "⚠️ הפעולה תמחק לצמיתות את כל המחזורים והפרופילים. לא ניתן לבטל פעולה זו.",
+    "wipe_all_ok": "מחיקת הכול",
+    "wipe_all_title": "מחיקת כל הנתונים",
+    "profile_title": "פרופיל · {name}",
+    "bp_replace_title": "להחליף את התבנית המותקנת?",
+    "bp_replace_library_msg": "ב־Home Assistant יש גרסה אחרת של \"{name}\". להחליף אותה בגרסה מספריית התבניות? האוטומציות שמשתמשות בה ישתנו יחד איתה."
+  },
+  "msg": {
+    "custom_task_limit": "הגעת למגבלה של {max} משימות.",
+    "custom_tasks_intro": "אפשר להוסיף כל דבר נוסף שברצונך לקבל עליו תזכורת. משימה מגיעה למועד הביצוע כאשר אחד המרווחים הושלם; אפשר להשאיר מרווח ריק או 0 כדי להשתמש רק בשני.",
+    "maintenance_due_sensor_hint": "החיישן הבינארי של תחזוקה נדרשת פעיל כל עוד משימה כלשהי דורשת ביצוע, לשימוש באוטומציות ההתראות שלך.",
+    "maintenance_supporter_intro": "Maintenance Supporter היא אינטגרציה נפרדת שמציעה הרבה יותר: כל מכשיר או משימה, תזמון לפי זמן, שימוש או חיישן, התראות והיסטוריה. היא יכולה להשתמש במונה המחזורים של WashData.",
+    "adopt_settings_hint": "דריסת ספי הזיהוי וההתאמה של המכשיר בספים המשותפים. ההתראות, הישויות ומחיר האנרגיה שלך לעולם אינם משתנים.",
+    "advisory_duration_trend_up": "מחזורי '{name}' ממשיכים להתארך (כ־+{pct}% בכל מחזור). אם המכשיר השתנה, כדאי להקליט מחדש או לבנות מחדש את הפרופיל הזה.",
+    "advisory_energy_trend_up": "'{name}' צורך יותר אנרגיה בכל מחזור (כ־+{pct}% בכל מחזור). כדאי לבדוק את המכשיר אם זה לא צפוי.",
+    "advisory_poor_health": "ההתאמה של '{name}' חלשה: המחזורים האחרונים שלו משתנים מאוד או מתאימים באופן חלש. כדאי לבדוק את המחזורים או להקליט אותו מחדש לשמירת דיוק ההתאמה והאומדנים.",
+    "advisory_shape_drift": "'{name}' התרחק מצורת ההספק המקורית שלו, אולי בגלל אבנית או בלאי. כדאי לשקול להקליט אותו מחדש עם מחזורים עדכניים.",
+    "advisory_shape_drift_corr": "'{name}' התרחק מצורת ההספק המקורית שלו (מתאם {corr}), אולי בגלל אבנית או בלאי. כדאי לשקול להקליט אותו מחדש עם מחזורים עדכניים.",
+    "advisory_unmatchable": "לא ניתן להתאים את '{name}': אין מאחוריו מחזור עם נתוני הספק. יש לתייג או להקליט מחזור של התוכנית הזו כדי לתקן זאת.",
+    "advisory_unmatchable_no_duration": "לא ניתן להתאים את '{name}': למחזור שלו אין משך שניתן להשתמש בו. יש להקליט את התוכנית מחדש או להגדיר את משכה הצפוי.",
+    "analyzing": "בניתוח…",
+    "appliance_monitor": "ניטור מכשירים",
+    "artifact_dip_detail": "ההספק ירד מתחת לטווח הרגיל למשך כ־{n} שניות.",
+    "artifact_footer": "מודגשות בגרף שלמעלה. אלה חריגות חולפות (למשל פתיחת דלת באמצע מחזור), ולא בהכרח תקלות.",
+    "artifact_header": "זוהו {n} חריגות במהלך המחזור הזה",
+    "artifact_header_one": "זוהתה חריגה אחת ({n}) במהלך המחזור הזה",
+    "artifact_header_two": "זוהו {n} חריגות במהלך המחזור הזה",
+    "artifact_header_other": "זוהו {n} חריגות במהלך המחזור הזה",
+    "artifact_pause_detail": "ההספק ירד לכמעט אפס למשך כ־{n} שניות, ואז הפעולה נמשכה. כנראה נפתחה הדלת או שהמחזור הושהה.",
+    "artifact_spike_detail": "ההספק עלה מעל הטווח הרגיל למשך כ־{n} שניות.",
+    "auto_label_intro": "שיוך פרופילים למחזורים ללא תווית שרמת הביטחון בהתאמתם עוברת את הסף.",
+    "cleanup_intro": "כל המחזורים המתויגים מוצגים זה על גבי זה. אפשר לסמן חריגים ואז להסיר את התוויות שלהם (יישמרו בהיסטוריה ולא יעצבו עוד את הפרופיל) או למחוק אותם.",
+    "clear_debug_hint": "הסרת נתוני ניפוי שגיאות שמורים לפינוי מקום.",
+    "collecting_data": "באיסוף נתונים. מחזורים נוספים הדרושים לפני תחילת ההתאמה: {need} ({current}/{min}).",
+    "compare_overlay_profiles": "פרופילים מעל הגרף (בהירים)",
+    "compare_overlay_tip": "הצגת מעטפות הפרופילים שנלמדו מעל הגרף כדי לראות לאיזו תוכנית דומה כל מחזור.",
+    "compare_profiles_tip": "הצגת פרופילים נוספים מעל התרשים כדי לראות איזה מהם מתאים ביותר למחזור הזה.",
+    "compare_selected_cycles": "מחזורים שנבחרו (קו מלא) – הצגה / הסתרה",
+    "cycles_deleted": "{count} מחזורים נמחקו",
+    "cycle_context_loading": "היסטוריית המקליט בטעינה…",
+    "cycle_context_note": "אפור: היסטוריית המקליט של חיישן ההספק סביב המחזור. היא אינה חלק מהמחזור ואינה משפיעה על המשך, האנרגיה או ההתאמה.",
+    "cycle_context_none": "למקליט אין קריאות סביב המחזור הזה (Home Assistant שומר כברירת מחדל היסטוריה של 10 ימים).",
+    "cycle_context_tip": "לתצוגה בלבד: מציג את היסטוריית המקליט של חיישן ההספק סביב המחזור, אם היא עדיין שמורה. להוספת ניסיונות התחלה כושלים למחזורים עתידיים, יש להשתמש בהקדמת העקומה (הגדרות > זיהוי > התחלת מחזור), שמשנה את המשכים השמורים.",
+    "dest_real_history_hint": "מחזורים מיובאים נחשבים להיסטוריה ולסטטיסטיקה של המכשיר עצמו. מתאים להעברת מכשיר להתקנה חדשה.",
+    "dest_reference_hint": "מחזורים מיובאים משפרים רק את התאמת התוכניות ואינם משפיעים על סטטיסטיקת השימוש או האנרגיה.",
+    "device_type_mismatch_warn": "הייצוא הזה הוא מסוג מכשיר אחר ({src} לעומת {local}). עדיין אפשר לייבא תוכניות ומחזורים כנתוני ייחוס, אך לא הגדרות מכשיר או היסטוריה אמיתית.",
+    "diagnostics_load_failed": "לא ניתן לטעון את נתוני האבחון: {error}",
+    "enough_data": "יש מספיק נתונים ללמידה ({current}/{min} מחזורים).",
+    "export_description": "בחירה מדויקת של הפרופילים, המחזורים, ההגדרות ועוד לייצוא ל־JSON, או ניתוח קובץ וייבוא החלקים הרצויים בלבד.",
+    "export_select_intro": "יש לסמן מה לכלול. פרופילים ללא המחזורים שלהם עדיין מייצאים תוכנית שניתן להתאים.",
+    "feedback_cycles_pending": "לבדיקה: {n}",
+    "feedback_prompt": "אפשר לאשר שהזיהוי היה נכון, לתקן את התוכנית או להתעלם.",
+    "feedback_relabel_hint": "גם תיוג המחזור מחדש פותר זאת.",
+    "filter_by_profile": "סינון לפי פרופיל…",
+    "font_size_hint": "הגדלת או הקטנת כל התוכן בלוח הזה. חל על החשבון שלך במכשיר הזה.",
+    "group_modal_help": "קיבוץ תוכניות בעלות אותה צורה שנבדלות בטמפרטורה או בסחיטה. מנגנון ההתאמה מדרג את הקבוצה כיחידה אחת, ואז בוחר את הפרופיל המתאים ביותר מתוכה. יש לבחור לפחות 2; הצגת העקומות זו על גבי זו מראה עד כמה הן דומות.",
+    "group_not_cohesive": "הפרופילים האלה אינם דומים מספיק לקיבוץ אמין, ולכן מנגנון ההתאמה מתייחס אליהם בנפרד עד להסרת החריג או לפיצול הקבוצה.",
+    "group_preview_hint": "יש לסמן לפחות 2 פרופילים לתצוגה מקדימה ולהשוואת עקומות ההספק שלהם.",
+    "head_trim_hint": "הסרת מספר השניות הזה מההתחלה",
+    "hist_breaks": "{n} פערים שבהם החיישן לא היה זמין",
+    "hist_capped": "הושגה מגבלת המחזורים המיובאים למכשיר; היתר לא נשמרו.",
+    "hist_duplicates": "{n} כבר יובאו ודולגו.",
+    "hist_entity_substituted": "נקרא {used} (המכשיר הזה מוגדר עבור {wanted})",
+    "hist_found": "נמצאו {n} מחזורים. יש לבטל את הסימון של כל מה שאינו נראה כפעולה אמיתית - דבר לא נשמר עד הייבוא.",
+    "hist_import_failed": "הייבוא נכשל.",
+    "hist_imported_count": "יובאו {n} מחזורים.",
+    "hist_input_hint": "אפשר להעלות CSV מלוח ההיסטוריה (ישות, מצב, שינוי אחרון), או לאפשר ל־WashData לקרוא ישירות את היסטוריית החיישן. מנגנון הזיהוי החי מעבד אותה, ואת המחזורים לשמירה בוחרים כאן.",
+    "hist_next_step": "הם נמצאים ברשימת המחזורים שלך, עם תגית היסטוריה מיובאת. אפשר לפתוח מחזור ולהשתמש בתיוג כדי לתת שם לתוכנית שלו.",
+    "hist_none_found": "לא ניתן היה לזהות מחזורים בהיסטוריה הזו.",
+    "hist_other_entity": "התעלמות מ־{n} קריאות של ישויות אחרות",
+    "hist_recorder_empty": "ל־Home Assistant אין היסטוריה מפורטת לחיישן הזה בחלון הזמן שנבחר.",
+    "hist_recorder_hint": "קריאה מהתאריך שנבחר ועד עכשיו. Home Assistant שומר כברירת מחדל היסטוריה מפורטת של 10 ימים; ממוצעים שעתיים ישנים גסים מדי לזיהוי מחזורים.",
+    "hist_rows_read": "נקראו {n} קריאות",
+    "hist_scan_capped": "מוצגים רק המועמדים הראשונים (נמצאו {n}).",
+    "hist_scan_expired": "הסריקה הזו אינה זמינה עוד. יש לסרוק שוב.",
+    "hist_scan_failed": "הסריקה נכשלה.",
+    "hist_scanning": "ההיסטוריה שלך עוברת דרך מנגנון הזיהוי ברקע. אפשר לסגור את החלון ולחזור.",
+    "hist_settings_used": "זוהו באמצעות ההגדרות הנוכחיות של המכשיר (הספק מזערי {w} W, השהיית כיבוי {s} שניות).",
+    "hist_skipped_spans": "מקטעים שדולגו",
+    "import_analyze_hint": "אפשר לטעון קובץ מיוצא (או להדביק את ה־JSON שלו). WashData מציג מה ניתן לייבא לפני שמשהו משתנה.",
+    "import_history_description": "היה לך שקע חכם לפני WashData? אפשר להעלות את היסטוריית ההספק שלו או לקרוא אותה מ־Home Assistant. מנגנון הזיהוי מעבד אותה, ומחזורים קודמים מופיעים ברשימת המחזורים, מוכנים למתן שם.",
+    "import_undo_hint": "נשמרה נקודת שחזור מלפני הייבוא האחרון ({when}): {profiles} פרופילים ו־{cycles} מחזורים.",
+    "imported_history_note": "נמצא בהיסטוריית הספק מיובאת. עוזר להתאמה אך אינו נכלל בסטטיסטיקה שלך ולא ניתן לפיצול. יש לתייג אותו כדי לתת שם לתוכנית.",
+    "imported_readonly": "יובא ממאגר הקהילה. משמש לייחוס ולהתאמה, אינו נכלל בסטטיסטיקה שלך ולא ניתן לעריכה.",
+    "include_settings_hint": "שיתוף ספי הזיהוי וההתאמה של המכשיר (ללא התראות, ישויות או מחיר אנרגיה). אחרים בוחרים אם להחיל אותם.",
+    "legacy_actions_title": "{count} פעולות מותאמות ישנות עדיין פועלות",
+    "legacy_actions_title_one": "פעולה מותאמת ישנה אחת ({count}) עדיין פועלת",
+    "legacy_actions_title_two": "{count} פעולות מותאמות ישנות עדיין פועלות",
+    "legacy_actions_title_other": "{count} פעולות מותאמות ישנות עדיין פועלות",
+    "live_chart_loading": "גרף ההספק בזמן אמת מופיע עם הגעת הקריאות.",
+    "loading": "בטעינה…",
+    "loading_curve": "העקומה בטעינה…",
+    "loading_settings": "ההגדרות בטעינה…",
+    "log_buffer_hint": "החדש ביותר ראשון · שומר במאגר את 500 רשומות ha_washdata האחרונות מאז ההפעלה מחדש · גרירת הקצה התחתון לשינוי הגודל.",
+    "maintenance_due": "נדרשת תחזוקה: {items}",
+    "maintenance_intro": "תיעוד טיפולים במכשיר וקבלת תזכורת כשמגיע שוב מועד הביצוע של כל משימה.",
+    "maintenance_load_error": "לא ניתן לטעון את נתוני התחזוקה: {error}",
+    "maintenance_requires_access": "תחזוקה וייצוא/ייבוא דורשים גישה מלאה.",
+    "manual_duration_hint": "משך המחזור הצפוי של הפרופיל, המשמש לאומדן הזמן שנותר. יש להשאיר ללא שינוי כדי לשמור את הערך הנוכחי.",
+    "manual_duration_ref_hint": "משמש רק ללא מחזור ייחוס; מחזור ייחוס קובע את המשך לפי אורכו שלו.",
+    "duration_learned_hint": "מחושב ממחזורי התוכנית הזו (ללא חריגים) ומתעדכן לאחר כל מחזור חדש. כדי לשנות אותו, יש לחתוך או להסיר מחזורים שאינם מייצגים.",
+    "merge_hint": "הפריטים המיובאים מתווספים; שום נתון מקומי אינו אובד. התנגשויות שמות נפתרות למטה.",
+    "merge_intro": "המחזורים שנבחרו משולבים למחזור אחד (בסדר כרונולוגי; פערים ממולאים ב־0 W). יש לבחור את הפרופיל שיתקבל.",
+    "merge_no_imports": "לא ניתן למזג הקלטות מיובאות למחזור אמיתי. יש לבטל את בחירתן כדי למזג.",
+    "ml_intro": "WashData כולל מודלים חכמים שעובדים מיד ללא הגדרה.",
+    "ml_learned_intro": "מודלים שהותאמו למכשיר הזה.",
+    "ml_settings_intro": "שני מתגים עצמאיים: אחד מחיל את המודלים בזמן שמחזור פועל, והשני מאפשר ל־WashData להתאים אותם למכשיר שלך לאורך זמן.",
+    "n_suggestions_muted": "{count} הושתקו; הכוונון האוטומטי לא יציע אותן.",
+    "n_suggestions_muted_one": "הצעה אחת ({count}) הושתקה; הכוונון האוטומטי לא יציע אותה.",
+    "n_suggestions_muted_two": "{count} הצעות הושתקו; הכוונון האוטומטי לא יציע אותן.",
+    "n_suggestions_muted_other": "{count} הצעות הושתקו; הכוונון האוטומטי לא יציע אותן.",
+    "no_cycles_match": "אין מחזורים שמתאימים למסנן הנוכחי.",
+    "no_cycles_profile": "אין מחזורים לפרופיל הזה.",
+    "no_cycles_selected": "יש לבחור תחילה לפחות מחזור אחד.",
+    "no_cycles_yet": "עדיין לא הוקלטו מחזורים.",
+    "no_device_selected": "לא נבחר מכשיר.",
+    "no_devices": "עדיין לא הוגדרו מכשירים ב־WashData.",
+    "no_envelope": "עדיין אין מעטפת הספק - יש לבנות מחדש לאחר תיוג מחזורים.",
+    "no_envelope_overlay": "אין מעטפת הספק זמינה להצגה מעל הגרף.",
+    "no_fine_tuned": "עדיין לא הותאם דבר – WashData משתמש במודלים המובנים שלו.",
+    "no_logs": "עדיין אין רשומות יומן במאגר.",
+    "no_logs_match": "אין רשומות יומן שמתאימות למסננים האלה.",
+    "no_maintenance": "עדיין לא תועדה תחזוקה.",
+    "no_match_yet": "עדיין לא נעשה ניסיון התאמה - הנתונים מופיעים במהלך מחזור פעיל.",
+    "no_other_users": "לא נמצאו משתמשי Home Assistant נוספים.",
+    "no_phases": "לא הוגדרו שלבים.",
+    "no_phases_assigned": "לא שויכו שלבים.",
+    "no_profiles_compare": "אין פרופילים להשוואה.",
+    "no_profiles_overlay": "אין פרופילים להצגה מעל הגרף.",
+    "no_profiles_yet": "עדיין אין פרופילים. אפשר ליצור פרופיל ממחזור מתויג.",
+    "no_profiles_option": "(עדיין אין פרופילים - יש להוסיף אחד)",
+    "no_profiles_yet_short": "עדיין אין פרופילים.",
+    "no_reminders_set": "עדיין לא הוגדרו תזכורות טיפול.",
+    "no_settings_match": "אין הגדרות שמתאימות ל־\"{q}\"",
+    "no_split_points": "עדיין אין נקודות פיצול.",
+    "no_suggestions": "אין הצעות פעילות.",
+    "notify_services_hint": "יש להוסיף שירותי {entity} לכל רשימה שלהלן. משתני תבנית: {vars}.",
+    "odometer_correct_hint": "יש להגדיר זאת אם WashData ספר פעולה שלא התרחשה, או אם המכשיר ביצע מחזורים לפני התקנת WashData.",
+    "odometer_intro": "הסך הזה רק עולה. מחיקת מחזור אינה מפחיתה אותו, כדי שתזכורות הטיפול יישארו נכונות.",
+    "old_actions_warning": "הוגדרו בעורך הפעולות הישן (שהוסר). הן עדיין פועלות באירועי מחזור אך לא ניתן עוד לערוך אותן כאן. אפשר להמיר אותן לאוטומציה רגילה או להסיר אותן.",
+    "onboard_download": "מכשיר חדש? אפשר לאמץ הגדרה מוכנה (תוכניות, מחזורי ייחוס ושלבים) ממשתמש WashData אחר עם אותו מכשיר.",
+    "online_intro_global": "עיון בהקלטות ייחוס ושיתוף שלהן עם משתמשי WashData אחרים, ושימוש בספריית תבניות האוטומציה. חיבור אחד מכסה את כל מכשירי WashData שלך; מותג ודגם מוגדרים לכל מכשיר בנפרד תחת בסיסי. התכונות המקוונות כבויות עד להפעלתן.",
+    "online_unavailable": "תכונות מקוונות אינן זמינות בשרת הזה.",
+    "pending_feedback": "משוב זיהוי ממתין",
+    "performance_trend": "מגמת ביצועים ({n} מחזורים)",
+    "pg_analysis_hint2": "יש לבחור מחזור וללחוץ על הרצה כדי לטעון ניתוח התאמה.",
+    "pg_apply_confirm": "להחיל את הערך הטוב ביותר: {label} = {value}?",
+    "pg_apply_settings_confirm": "לשמור את {n} ההגדרות האלה במכשיר? {list}",
+    "pg_canvas_empty3": "יש לבחור מחזור למעלה וללחוץ על הרצה כדי לדמות אותו. לאחר מכן אפשר לרחף להצגת ערכים, לגלול או לצבוט לתקריב ולגרור להזזה.",
+    "pg_ctrl_intro": "הערכים מתחילים מההגדרות הפעילות של האינטגרציה למכשיר הזה. העריכות נשארות בסביבת הניסוי עד לפרסומן.",
+    "pg_history_empty": "יש ללחוץ על הרצה כדי לשחזר את המחזורים שלך.",
+    "pg_history_intro2": "שחזור מחזורים אחרונים דרך מנגנוני הזיהוי וההתאמה האמיתיים עם ההגדרות שלמעלה. לחיצה על שורה טוענת אותה לגרף; שינוי הגדרה מאפשר להשוות לפני ואחרי.",
+    "pg_history_summary": "{detected}/{total} זוהו · {correct} הותאמו נכון",
+    "pg_in_sample_note": "המחזורים האלה עזרו לבנות את הפרופילים שאליהם הם מותאמים, ולכן התוצאות אופטימיות: במחזורים חדשים צפויות מעט פחות התאמות נכונות.",
+    "pg_live_unavailable": "ההגדרות הפעילות אינן זמינות, מוצגות ברירות המחדל.",
+    "pg_load_live_confirm": "לבטל {n} עריכות בסביבת הניסוי ולטעון מחדש את הגדרות האינטגרציה הנוכחיות?",
+    "pg_matches_live": "זהה להגדרות הפעילות",
+    "pg_n_changed": "{n} שינויים לעומת ההגדרות הפעילות",
+    "pg_no_alerts": "לא זוהו בעיות בהרצה הזו.",
+    "pg_override_active": "שימוש בהגדרות שערכת במקום ההגדרות הנוכחיות",
+    "pg_preset_delete_confirm": "למחוק את ההגדרה הקבועה \"{name}\"?",
+    "pg_preset_limit": "הושגה מגבלת ההגדרות הקבועות ({n})",
+    "pg_preset_overwrite": "לדרוס את ההגדרה הקבועה \"{name}\"?",
+    "pg_publish_one_confirm": "לשמור {label} = {value} בהגדרות המכשיר?",
+    "pg_restart_note": "יש להפעיל מחדש את Home Assistant כדי להפעיל את כלי ההדמיה.",
+    "pg_row_load_hint": "טעינת המחזור הזה בגרף שלמעלה",
+    "pg_simulating": "מחזור בהדמיה…",
+    "pg_sugg_none": "כל ההצעות כבר זהות להגדרות הנוכחיות",
+    "pg_sweep_intro2": "מציאת ההגדרה שעונה בצורה הטובה ביותר על יעד לאורך המחזורים האחרונים שלך. דבר אינו משתנה עד להחלתה.",
+    "pg_sweep_no_metric": "אין מספיק נתונים לדירוג היעד הזה.",
+    "phase_catalog_intro": "מקטעי מחזור בעלי שם (קדם־כביסה, חימום, סחיטה…). אפשר לשייך אותם לפרופיל דרך לוח הבקרה שלו.",
+    "phase_ranges_intro": "טווחי שלבים (דקות מתחילת המחזור) מוצגים מעל העקומה הממוצעת. אפשר לערוך ערכים לתצוגה מקדימה בזמן אמת.",
+    "pick_brand_first": "יש לבחור תחילה מותג מכשיר.",
+    "playground_intro": "ניסוי הגדרות על נתוני המחזורים האמיתיים שלך. שום דבר כאן אינו משנה את ההגדרות הפעילות עד להחלתו.",
+    "prefs_personal": "ההעדפות האלה חלות רק על חשבון Home Assistant שלך.",
+    "process_history_hint": "הרצת ההתאמה מחדש על כל המחזורים השמורים, רענון הצעות, אימון מחדש של מודלי למידת המכונה (אם הופעלו), חישוב עלויות מחדש מהמחירים שנרשמו וחישוב תקינות המחזורים מחדש. כדאי להריץ לאחר סדרת בדיקות.",
+    "profile_deleted": "הפרופיל נמחק",
+    "profiles_intro": "לחיצה על פרופיל מציגה סטטיסטיקה, שלבים וכלי ניקוי. כדאי לקבץ תוכניות כמעט זהות (אותה צורה ומשך, טמפרטורה או סחיטה שונות) כדי שמנגנון ההתאמה יבחר ביניהן באופן אמין.",
+    "rbac_hint": "כבוי: לכל משתמש Home Assistant יש גישה מלאה (ברירת מחדל). למנהלי מערכת תמיד יש גישה מלאה ויכולת לנהל את כולם.",
+    "recording_in_progress": "הקלטה מתבצעת",
+    "refresh_catalog_hint": "רשימות המותגים והמכשירים של הקהילה נשמרות במטמון כדי לחסוך במכסת השימוש היומית של המאגר. רענון מציג פריטים שאחרים הוסיפו או אישרו.",
+    "reminders_intro": "הצגת תזכורת בלוח לאחר מספר המחזורים הזה מאז הטיפול האחרון. שדה ריק או 0 מכבים את התזכורת.",
+    "replace_undo_hint": "נקודת שחזור נשמרת תחילה, כדי שאפשר יהיה לבטל את הייבוא דרך ייצוא / ייבוא.",
+    "replace_warn": "כל קטגוריה מסומנת נמחקת ומוחלפת בנתונים מהקובץ. קטגוריות שלא סומנו נשארות ללא שינוי.",
+    "restart_gap_footer": "מודגשים בגרף. נתוני ההספק חסרים במרווחים האלה; ההתאמה השתמשה רק בקריאות אמיתיות.",
+    "restart_gap_header": "{n} פערים עקב הפעלה מחדש של HA במהלך המחזור הזה",
+    "restart_gap_header_one": "פער אחד ({n}) עקב הפעלה מחדש של HA במהלך המחזור הזה",
+    "restart_gap_header_two": "{n} פערים עקב הפעלה מחדש של HA במהלך המחזור הזה",
+    "restart_gap_header_other": "{n} פערים עקב הפעלה מחדש של HA במהלך המחזור הזה",
+    "restart_gap_item": "פער של {dur}",
+    "review_confirm_help": "האם המחזור הזה זוהה נכון? אישור מחזורים משפר את ההתאמה למכשיר שלך. דירוג מהיר טוב/גרוע מספיק.",
+    "review_in_settings": "בדיקה בהגדרות",
+    "review_notes_placeholder": "הערות (לא חובה)",
+    "review_notes_tip": "הערות בטקסט חופשי לעיונך. אינן משמשות להתאמה או לאימון.",
+    "review_profile_tip": "התוכנית שבה מתויג המחזור. אם היא שגויה, אפשר לתקן כאן; התוויות מלמדות את מנגנון ההתאמה.",
+    "review_quality_tip": "עד כמה המחזור תקין. טוב: פעולה מייצגת של התוכנית. גרוע: זוהה, אך רועש או לא רגיל. בלתי שמיש: זיהוי שגוי (מוזג, נקטע או מדומה). משפיע על ציון התקינות ועל המחזורים שמשמשים לאימון המודל.",
+    "review_recorded_tip": "סימון כמחזור ייחוס שנבחר ידנית עבור התוכנית, בדומה למחזור שהוקלט ידנית. מחזורי ייחוס תמיד נשמרים, משמשים בסיס לתבנית ההתאמה ולעולם אינם מוסרים בניקוי.",
+    "review_tags_tip": "סימונים אופציונליים של מה שהשתבש, כדי שהאימון והניקוי יוכלו להתחשב בכך.",
+    "review_to_cycles": "פתיחת תור הבדיקה של המחזורים",
+    "samples_decimated": "מוצגות {shown} מתוך {total} דגימות (דוללו לתצוגה; השיאים נשמרו). פער רחב כאן הוא דילול, ולא נתונים חסרים.",
+    "saving_triggers_reload": "השמירה טוענת מחדש את האינטגרציה. ישויות עשויות להופיע כלא זמינות לזמן קצר.",
+    "search_placeholder": "חיפוש בהגדרות…",
+    "see_recorder": "אפשר לראות את כלי ההקלטה למטה",
+    "setting_changed": "השתנה מ־{old} ל־{new} ב־{date}",
+    "settings_basic_note": "מוצגות ההגדרות החיוניות. מעבר למתקדם מציג את הרשימה המלאה.",
+    "share_device_none": "עדיין אין מחזורים לשיתוף. תחילה יש לסמן מחזור שהוקלט או נבחר ידנית כמחזור ייחוס (⭐) בלשונית המחזורים.",
+    "share_guideline_naming": "יש לתת לכל פרופיל שם בדיוק כפי שמופיע על בורר התוכניות או צג המכשיר (למשל 'כותנה 40', 'חסכוני 60').",
+    "share_guideline_quality": "יש לשתף רק מחזורים שהסתיימו כרגיל: ללא הפרעות, פתיחת דלת או הפרעות חשמל קצרות.",
+    "share_guideline_review": "ההעלאה שלך מתחילה כממתינה ומתפרסמת לאחר שמספיק חברי קהילה מאשרים אותה.",
+    "share_guidelines_title": "לפני השיתוף",
+    "share_profile_no_cycles": "אין מחזורי ייחוס – יש לסמן מחזור ב־⭐ בלשונית המחזורים כדי לכלול את הפרופיל הזה",
+    "show_all_settings": "הצגת כל ההגדרות",
+    "showing_suggestions": "מוצגות {count} הגדרות עם הצעות.",
+    "showing_suggestions_one": "מוצגת הגדרה אחת ({count}) עם הצעות.",
+    "showing_suggestions_two": "מוצגות {count} הגדרות עם הצעות.",
+    "showing_suggestions_other": "מוצגות {count} הגדרות עם הצעות.",
+    "split_intro": "לחיצה על הגרף מוסיפה או מסירה נקודת פיצול, ואפשר גם לזהות אוטומטית לפי פערי חוסר פעילות. כל חלק יכול לקבל פרופיל משלו.",
+    "store_declare_appliance": "יש לציין ב־WashData איזה מכשיר ברשותך כדי לראות הגדרות שאחרים שיתפו עבורו. אפשר גם להקליד מותג למעלה כדי לעיין.",
+    "store_download_device_intro": "הוספת כל התוכניות המשותפות ומחזורי הייחוס שלהן למכשיר שלך. המחזורים והסטטיסטיקה שלך אינם מושפעים.",
+    "store_enable_hint": "יש להפעיל תכונות מקוונות בהעדפות > מקוון וקהילה כדי לעיין במחזורי ייחוס של הקהילה ולייבא אותם.",
+    "advisory_duration_outlier": "{n} מחזורים המתויגים ‘{name}’ רחוקים מדי ממשכה הרגיל כדי להתאים אי פעם (החריג ביותר: פי {ratio}). כנראה תויגו שגוי או כוללים שתי פעולות. יש לתייג מחדש או לפצל כדי שיפסיקו להטות את אומדן הזמן.",
+    "standby_above_stop_title": "עדיין צרך {idle} W כשהמחזור הסתיים",
+    "standby_above_stop_sub": "{n} מתוך {total} המחזורים האחרונים. השהיית הכיבוי מתחילה רק כשההספק מתחת לסף העצירה ({stop} W), ולכן מחזורים מסתיימים באיחור או דורשים עצירה ידנית.",
+    "store_picker_offline": "יש להפעיל תכונות מקוונות בתפריט גלגל השיניים כדי לבחור מקטלוג הקהילה.",
+    "store_share_device_intro": "העלאת {brand} {model} עם מחזורי הייחוס שייבחרו. אחרים עם אותו מכשיר יוכלו לאמץ את התוכניות שלך. הפריטים נבדקים לפני הפרסום.",
+    "store_share_intro": "העלאת מחזור הייחוס הזה כדי שאחרים עם אותו מכשיר יוכלו להשתמש בו. הוא נבדק לפני הפרסום.",
+    "store_sibling_hint": "אין שיתוף לדגם שלך? דגם קרוב מאותו מותג הוא בדרך כלל נקודת פתיחה טובה.",
+    "sug_mute_failed": "לא ניתן להשתיק את ההצעה",
+    "sug_muted": "ההגדרה הזו לא תוצע שוב",
+    "sug_staged": "הוגדר {key} = {val}. יש לשמור כדי להחיל.",
+    "sug_unmuted_all": "ההצעות המושתקות אופסו",
+    "sug_unmute_incomplete": "האיפוס לא הושלם: חלק מההצעות עדיין מושתקות. יש לנסות שוב.",
+    "tail_trim_hint": "הסרת מספר השניות הזה מהסוף",
+    "toast_auto_detect_enabled": "הזיהוי האוטומטי הופעל",
+    "toast_auto_label_complete": "התיוג האוטומטי הושלם",
+    "toast_auto_label_failed": "התיוג האוטומטי נכשל: {error}",
+    "toast_automation_failed": "לא ניתן ליצור אוטומציה: {error}",
+    "toast_automation_migrated": "הפעולות הועברו לאוטומציה; העורך נפתח",
+    "toast_convert_failed": "ההמרה נכשלה: {error}",
+    "toast_convert_orphan": "האוטומציה נוצרה, אך ניקוי הפעולות הישנות נכשל. אין לנסות שוב: יש להסיר את הפעולות הישנות ידנית כדי למנוע אוטומציה כפולה.",
+    "toast_convert_rolled_back": "ההעברה נכשלה ובוטלה (לא נשארה אוטומציה): {error}",
+    "toast_create_failed": "היצירה נכשלה: {error}",
+    "toast_delete_failed": "המחיקה נכשלה: {error}",
+    "toast_error": "שגיאה: {error}",
+    "toast_failed": "נכשל: {error}",
+    "toast_force_stop_failed": "העצירה הכפויה נכשלה: {error}",
+    "toast_name_required": "נדרש שם",
+    "toast_range_required": "יש להגדיר טווח תקין של התחלה וסיום.",
+    "toast_no_automation": "לא ניתן ליצור כאן אוטומציה",
+    "toast_profile_name_required": "נדרש שם פרופיל",
+    "toast_program_armed": "התוכנית הוגדרה למחזור הבא: {program}",
+    "toast_program_set": "התוכנית הוגדרה: {program}",
+    "toast_resume_failed": "ההמשך נכשל: {error}",
+    "toast_revert_failed": "השחזור נכשל: {error}",
+    "toast_reverted": "{key} שוחזר",
+    "toast_save_failed": "השמירה נכשלה: {error}",
+    "trend_duration_longer": "המשך במגמת התארכות ({pct}%/מחזור) – ממוצע אחרון {avg}",
+    "trend_duration_shorter": "המשך במגמת התקצרות ({pct}%/מחזור) – ממוצע אחרון {avg}",
+    "trend_energy_down": "האנרגיה במגמת ירידה ({pct}%/מחזור)",
+    "trend_energy_up": "האנרגיה במגמת עלייה ({pct}%/מחזור) – ממוצע אחרון {avg}",
+    "trim_destructive_confirm": "הפעולה משאירה רק {pct}% מהמחזור ולא ניתן לבטל אותה. להמשיך?",
+    "trim_intro": "אפשר לגרור את הידיות האדומות או להזין ערכים. כל מה שמחוץ לחלון יוסר.",
+    "tuning_suggestions_available": "זמינות {count} הצעות כוונון מהמחזורים שנצפו. הן מופיעות לצד השדות המתאימים.",
+    "tuning_suggestions_available_one": "זמינה הצעת כוונון אחת ({count}) מהמחזורים שנצפו. היא מופיעה לצד השדה המתאים.",
+    "tuning_suggestions_available_two": "זמינות {count} הצעות כוונון מהמחזורים שנצפו. הן מופיעות לצד השדות המתאימים.",
+    "tuning_suggestions_available_other": "זמינות {count} הצעות כוונון מהמחזורים שנצפו. הן מופיעות לצד השדות המתאימים.",
+    "unsure_detected_prefix": "WashData אינו בטוח שזיהה",
+    "warmup_badge": "עדיין בלמידה ({done}/{needed} מחזורים)",
+    "warmup_detail": "ההתאמה כבר פועלת. WashData מבקש לאשר את {needed} המחזורים הראשונים של הפרופיל לפני שיתייג בעצמו.",
+    "wipe_history_warning": "מחיקה לצמיתות של כל המחזורים והפרופילים. לא ניתן לבטל.",
+    "compare_cycles_title": "השוואת {count} מחזורים",
+    "edit_builtin_phase": "זהו שלב מובנה. השמירה יוצרת עותק מותאם אישית; מחיקת העותק משחזרת את המקור.",
+    "fetch_error": "טעינת הנתונים נכשלה.",
+    "connection_lost": "החיבור נותק - מוצגים נתונים מ־{time}.",
+    "pg_notify_partial": "הסמנים מציגים רק התראות התחלה, סיום מתקרב, סיום, אבני דרך ושעות שקטות. עדכונים בזמן אמת, תזכורות פינוי ואזהרות התארכות אינם נכללים בהדמיה.",
+    "connect_to_confirm": "יש להתחבר דרך תפריט גלגל השיניים כדי לאשר או לדרג.",
+    "coverage_gap_cluster": "{count} מחזורים אחרונים ללא תווית באורך של כ־{min} דקות נראים כמו תוכנית אחת שעדיין לא יצרת.",
+    "pg_label_yes": "יתויג כ־\"{name}\" בסיום המחזור",
+    "pg_label_no": "יבקש בדיקה: {reason}",
+    "live_match_debug_tip": "רמת ביטחון: עד כמה עקומת ההספק הנוכחית דומה לפרופיל המועמד המוביל (0-100%). לא חד־משמעי: שני המועמדים הטובים ביותר מקבלים ציונים בהפרש קטן מ־5% - התווית אינה ודאית עד לסיום המחזור.",
+    "feedback_detected": "WashData זיהה: {name}",
+    "pg_outcome_stale": "ההגדרות השתנו מאז הרצת ההדמיה. עדיין מוצגת התוצאה הישנה.",
+    "pg_compare_profile_tip": "בוחר רק את הפרופיל המצויר מעל הגרף. ההדמיה תמיד מתאימה את המחזור בעצמה, בדיוק כמו האינטגרציה הפעילה.",
+    "pg_task_busy": "בדיקה על ההיסטוריה או מיטוב כבר מתבצעים עבור המכשיר הזה. יש להמתין או לבטל את ההרצה.",
+    "pg_sweep_guarded": "מסיים יותר מחזורים מוקדם, מפצל יותר מהם או מפספס מחזורים שההגדרה הנוכחית מזהה, ולכן לעולם אינו מומלץ.",
+    "pg_sweep_n_cycles": "לאורך {count} מחזורים",
+    "pg_sweep_n_cycles_one": "לאורך מחזור אחד ({count})",
+    "pg_sweep_n_cycles_two": "לאורך {count} מחזורים",
+    "pg_sweep_n_cycles_other": "לאורך {count} מחזורים",
+    "pg_sweep_keep_current": "שמירת הערך הנוכחי ({value}, {metric}): אף ערך לא שיפר את התוצאה במחזור אחד לפחות.",
+    "hist_truncated": "נעצר במגבלת {n} הקריאות, ולכן יתר ההיסטוריה לא נסרקה",
+    "hist_warn_kw": "הקריאה הגבוהה ביותר היא רק {w}. נראה שהחיישן מדווח בקילוואט; WashData זקוק לוואט, ולכן לא ניתן לזהות מחזורים.",
+    "hist_warn_naive_time": "ל־{n} חותמות זמן אין אזור זמן והן נקראו כ־UTC. אם הקובץ משתמש בזמן מקומי, המחזורים מוזזים לפי הפרש ה־UTC שלך, וקריאות ליד מעבר שעון קיץ עשויות להיפסל.",
+    "hist_warn_naive_time_one": "לחותמת זמן אחת ({n}) אין אזור זמן והיא נקראה כ־UTC. אם הקובץ משתמש בזמן מקומי, המחזורים מוזזים לפי הפרש ה־UTC שלך, וקריאות ליד מעבר שעון קיץ עשויות להיפסל.",
+    "hist_warn_naive_time_two": "ל־{n} חותמות זמן אין אזור זמן והן נקראו כ־UTC. אם הקובץ משתמש בזמן מקומי, המחזורים מוזזים לפי הפרש ה־UTC שלך, וקריאות ליד מעבר שעון קיץ עשויות להיפסל.",
+    "hist_warn_naive_time_other": "ל־{n} חותמות זמן אין אזור זמן והן נקראו כ־UTC. אם הקובץ משתמש בזמן מקומי, המחזורים מוזזים לפי הפרש ה־UTC שלך, וקריאות ליד מעבר שעון קיץ עשויות להיפסל.",
+    "hist_tail_trimmed": "נחתכו {min} דקות המתנה לאחר סיום המחזור, כפי שהאינטגרציה הפעילה חותכת אותן",
+    "invalid_threshold_pair": "סף העצירה ({stop} W) חייב להיות מתחת לסף ההתחלה ({start} W). דבר לא נשמר; יש לשנות את שניהם יחד.",
+    "end_gate_check_failed": "לא ניתן היה לבדוק את הגדרות התזמון המוצעות מול ההפסקות של המכשיר. דבר לא נשמר; יש לנסות שוב.",
+    "analysis_superseded": "ההגדרות או נתוני המחזורים השתנו במהלך הניתוח. יש להריץ שוב.",
+    "analysis_check_failed": "לא ניתן היה לבדוק את הגדרות התזמון המוצעות מול ההפסקות של המכשיר. יש להריץ שוב.",
+    "apply_cycles_changed": "מחזור נשמר במהלך החלת ההצעות. שום הגדרה לא השתנתה וההצעות נוקו. יש להריץ את ניתוח ההצעות שוב.",
+    "bp_admin_only": "התקנת תבניות מתבצעת בידי מנהל מערכת.",
+    "automation_alias_trigger": "{device}: {trigger}",
+    "automation_desc_trigger": "נוצר על ידי WashData עבור {device}. יש להוסיף פעולות משלך (התראה, תאורה, ...).",
+    "automation_alias_new": "{device}: אוטומציה חדשה",
+    "maint_done_by_program_intro": "משימה נחשבת כמבוצעת כשמחזור של אחת מהתוכניות שלה מסתיים, למשל ניקוי תוף בהפעלת כותנה 90. רק מחזורים ש־WashData בטוח בהם, או שבחרת בעצמך, נחשבים.",
+    "auto_none": "עדיין אין אוטומציות שמשתמשות במכשיר הזה.",
+    "auto_start_hint": "פתיחה בעורך האוטומציות של Home Assistant כשהמכשיר הזה כבר מוזן.",
+    "auto_yours_intro": "אוטומציות Home Assistant שמגיבות למכשיר הזה.",
+    "bp_needs_online": "התבניות יורדות מ־GitHub, ולכן הספרייה פועלת רק כשהתכונות המקוונות מופעלות. התכונות המקוונות כוללות גם את מאגר הקהילה.",
+    "bp_needs_online_admin": "מנהל מערכת יכול להפעיל אותן בתפריט גלגל השיניים, תחת מקוון וקהילה.",
+    "bp_stale": "לא ניתן היה לגשת ל־GitHub כרגע. אלה התבניות שהורדו קודם.",
+    "bp_none_yet": "עדיין אין תבניות לסוג המכשיר הזה. אפשר לשתף את הראשונה.",
+    "bp_unreachable": "הספרייה יורדת מ־GitHub. יש לבדוק ש־Home Assistant יכול לגשת לאינטרנט ואז לנסות שוב.",
+    "bp_library_intro": "אוטומציות מוכנות שמשתמשי WashData שיתפו ב־GitHub, ונבדקו לפני הכללתן ברשימה. זמינות רק כשהתכונות המקוונות מופעלות.",
+    "bp_needs_version": "נדרש WashData {version} ומעלה.",
+    "bp_review_check": "יש לבדוק לפני השמירה: Home Assistant יריץ זאת בדיוק כפי שנכתב.",
+    "review_q_title": "איזו תוכנית זו הייתה?",
+    "review_q_intro": "WashData אינו בטוח לגבי המחזורים האלה. התשובה שלך מלמדת אותו.",
+    "review_q_started": "התחיל {when}",
+    "review_q_more": "עוד {count} לבדיקה",
+    "review_q_more_one": "עוד אחד ({count}) לבדיקה",
+    "review_q_more_two": "עוד {count} לבדיקה",
+    "review_q_more_other": "עוד {count} לבדיקה",
+    "review_which_program": "איזו תוכנית זו הייתה?"
+  },
+  "pg_desc": {
+    "completion_min_seconds": "הפעולה הקצרה ביותר שנחשבת למחזור אמיתי",
+    "interrupted_min_seconds": "מחזורים קצרים מסומנים כמחזורים שנקטעו",
+    "min_off_gap": "הפער הנדרש להפרדה בין שני מחזורים",
+    "off_delay": "שניות בהספק נמוך לפני סיום המחזור",
+    "start_duration_threshold": "שניות מעל הסף לאישור ההתחלה",
+    "start_threshold_w": "מספר הוואטים המזערי כדי להיחשב כפעיל",
+    "stop_threshold_w": "מתחת לערך הזה, המכשיר נחשב כבוי",
+    "profile_match_min_duration_ratio": "משך המחזור המזערי כחלק ממשך הפרופיל; ברירת מחדל 0.1 (10%)",
+    "profile_match_max_duration_ratio": "משך המחזור המרבי כחלק ממשך הפרופיל; ברירת מחדל 1.8 (180%)",
+    "anti_wrinkle_idle_timeout": "הזמן השקט המותר בין שתי פעימות סיבוב תוף לפני סיום מניעת הקמטים",
+    "dishwasher_end_spike_quiet_release": "מדיח כלים: מספר השניות מתחת לסף העצירה מאז הפעילות האחרונה, הדרוש לסיום ההמתנה לניקוז האחרון לאחר המשך הצפוי",
+    "smart_termination_duration_ratio": "החלק ממשך התוכנית הממוצע שהמחזור חייב להגיע אליו לפני שסיום חכם רשאי לסיים אותו מוקדם; כדאי להנמיך אם המשכים משתנים",
+    "anti_crease_finalize_ratio": "החלק ממשך התוכנית הממוצע שהמחזור חייב להגיע אליו לפני שמקטע מניעת הקמטים רשאי לסיים אותו; כדאי להנמיך במייבשים ולהשאיר ברירת מחדל במכונות כביסה",
+    "anti_wrinkle_max_power": "פעימה מעל הערך הזה מסיימת את מניעת הקמטים ופותחת מחזור חדש",
+    "anti_wrinkle_enabled": "שיוך פעימות סיבוב התוף אחרי השלב הראשי למחזור במקום לפרש אותן כמחזורים חדשים",
+    "anti_wrinkle_max_duration": "פעימה ארוכה מהערך הזה מסיימת את מניעת הקמטים ופותחת מחזור חדש",
+    "curve_preroll_seconds": "שניות של קריאות מניסיונות התחלה שבוטלו, המצורפות לתחילת עקומת המחזור; 0 = כבוי"
+  },
+  "phase_desc": {
+    "anti_crease": "סיבובי תוף קצרים מדי פעם לאחר הסיום להפחתת קמטים.",
+    "anti_wrinkle": "סיבובי תוף מחזוריים לאחר סיום המחזור להפחתת קמטים.",
+    "cool_down": "סיבוב תוף ללא חימום לקראת סיום המחזור.",
+    "drain_and_switch": "תקופת מעבר ממצב כביסה למצב ייבוש.",
+    "dry": "שלב ייבוש באמצעות גוף חימום ו/או חום שיורי.",
+    "drying": "התקופה העיקרית של סיבוב תוף עם חימום.",
+    "heat_up": "חימום ראשוני של גוף החימום לפני תחילת הייבוש המלא.",
+    "pre_rinse": "התזה ראשונית לפני השטיפה עם חומר ניקוי.",
+    "pre_wash": "השריה או טיפול מקדים לפני הכביסה העיקרית.",
+    "rinse": "שלב שטיפה במים נקיים. השלב הזה עשוי לחזור מספר פעמים.",
+    "sanitize": "שלב ניקוי בטמפרטורה גבוהה בתוכניות חיטוי.",
+    "sensor_check": "הפסקה קצרה בהספק נמוך בזמן מדידת רמת היובש.",
+    "soak": "תקופת השריה בפעילות נמוכה בין שלבי כביסה פעילים.",
+    "soak_dw": "תקופת השריה ממושכת ללכלוך קשה.",
+    "spin": "סחיטה במהירות גבוהה להסרת מים מהכביסה.",
+    "spin_wd": "סחיטה במהירות גבוהה לפני המעבר לייבוש.",
+    "wash": "הכביסה העיקרית עם תנועת תוף וחימום לפי הצורך.",
+    "wash_dw": "השטיפה העיקרית עם חומר ניקוי וחימום."
+  },
+  "placeholder": {
+    "custom_task": "למשל ניקוי אטם הדלת",
+    "add": "הוספה…",
+    "group_name": "למשל כותנה 2:47",
+    "json_buttons": "[{\"action\":\"ID\",\"title\":\"תווית\"}]",
+    "maintenance_notes": "למשל הוחלף מסנן, נוקה אטם הדלת",
+    "notify": "הוספת שירות התראות…",
+    "notify_services_list": "notify.mobile_app_phone, ...",
+    "person": "הוספת אדם…",
+    "phase_name": "למשל קדם־כביסה",
+    "profile_name": "למשל כותנה 40°C",
+    "store_brand": "למשל Bosch",
+    "store_model": "למשל WAT28401"
+  },
+  "pref": {
+    "date_absolute": "מוחלט (למשל 14:32 ב־2 ביולי)",
+    "date_relative": "יחסי (למשל לפני שעתיים)",
+    "lang_auto": "ברירת מחדל של המערכת ({lang})",
+    "lang_en": "אנגלית",
+    "use_panel_default": "(ברירת מחדל של הלוח)"
+  },
+  "quality": {
+    "bad": "גרוע",
+    "good": "טוב",
+    "unusable": "בלתי שמיש"
+  },
+  "section": {
+    "anti_wrinkle": {
+      "intro": "משאיר את פעימות סיבוב התוף בהספק נמוך של המייבש לאחר השלב הראשי כחלק מהמחזור שהסתיים.",
+      "label": "מניעת קמטים"
+    },
+    "basic": {
+      "intro": "פרטי הזיהוי המרכזיים וההגדרות החיוניות לרוב ההתקנות.",
+      "label": "בסיסי"
+    },
+    "delay": {
+      "intro": "זיהוי מכשיר דולק שממתין להתחלה מושהית.",
+      "label": "התחלה מושהית"
+    },
+    "detection": {
+      "intro": "איך מזוהים התחלת מחזור, פעילותו וסיומו.",
+      "label": "זיהוי"
+    },
+    "dishwasher": {
+      "intro": "טיפול בסיום של מדיחי כלים, שלרוב מייבשים בשקט זמן רב לפני ניקוז אחרון קצר.",
+      "label": "מדיח כלים"
+    },
+    "matching": {
+      "intro": "איך מחזורים שהסתיימו מותאמים לפרופילים שנלמדו ומתויגים.",
+      "label": "התאמה"
+    },
+    "ml_training": {
+      "intro": "לוח זמנים ונתונים לאימון מחדש של למידת מכונה במכשיר.",
+      "label": "אימון למידת מכונה"
+    },
+    "notifications": {
+      "intro": "מתי ואיך מתקבלות התראות על אירועי מחזור.",
+      "label": "התראות"
+    },
+    "timing": {
+      "intro": "תדירות עבודה ברקע, מנגנון השגחה במצב לא מקוון ותחזוקה שוטפת.",
+      "label": "תזמון ומנגנון השגחה"
+    },
+    "triggers": {
+      "intro": "תוספות אופציונליות: טריגר סיום, חיישן דלת, מתג השהיה ותזכורת פינוי.",
+      "label": "טריגרים ודלתות"
+    }
+  },
+  "setting": {
+    "anti_crease_finalize_ratio": {
+      "doc": "החלק ממשך התוכנית הממוצע שהמחזור חייב להגיע אליו לפני שסיבוב תוף בהספק נמוך נחשב למקטע מניעת הקמטים. כדאי להנמיך (למשל 0.75) במייבשים עם חישת עומס. במכונות כביסה יש לשמור את ברירת המחדל (0.98), אחרת כביסה עלולה להסתיים באמצע.",
+      "label": "יחס הסיום במניעת קמטים"
+    },
+    "anti_wrinkle_enabled": {
+      "doc": "שיוך פעימות סיבוב התוף הקצרות בהספק נמוך של המייבש אחרי שלב החימום הראשי למחזור שהסתיים, במקום לפרש אותן כמחזורים חדשים.",
+      "label": "הפעלת זיהוי מניעת קמטים"
+    },
+    "anti_wrinkle_idle_timeout": {
+      "label": "פער מרבי בין פעימות",
+      "doc": "כמה זמן המייבש רשאי להישאר שקט בין פעימות סיבוב התוף לפני שמצב מניעת הקמטים מסתיים. יש להגדיר מעל הפער הארוך ביותר של המייבש, אחרת פעימות מאוחרות יתפרשו כהתחלות שווא."
+    },
+    "anti_wrinkle_max_duration": {
+      "doc": "פעימה ארוכה מהמשך הזה נחשבת למחזור אמיתי, ולא לסיבוב תוף למניעת קמטים.",
+      "label": "משך מרבי"
+    },
+    "anti_wrinkle_max_power": {
+      "doc": "פעימה מעל ההספק הזה נחשבת למחזור חדש אמיתי, ולא לסיבוב תוף. יש להגדיר מעט מעל הספק פעימות סיבוב התוף שלך.",
+      "label": "הספק מרבי למניעת קמטים"
+    },
+    "auto_label_confidence": {
+      "doc": "ציון ההתאמה בסיום מחזור שממנו ומעלה התוכנית מתויגת ללא שאלה. העלאה מגבירה ודאות; הורדה מתייגת יותר מחזורים אוטומטית. יש להשאיר מעל רמת הביטחון ללמידה.",
+      "label": "רמת ביטחון לתיוג אוטומטי"
+    },
+    "auto_maintenance": {
+      "doc": "ניקוי לילי: תיוג מחזורים ישנים שכעת מתאימים בבירור לתוכנית, בנייה מחדש של עקומות תוכנית, רענון סימוני חריגות ותקינות מחזורים, והסרת נתוני ניפוי שגיאות אם שמירתם כבויה. המחזורים ונתוני ההספק שלהם תמיד נשמרים.",
+      "label": "תחזוקה אוטומטית (ניקוי לילי)"
+    },
+    "completion_min_seconds": {
+      "doc": "מחזורים קצרים מהמשך הזה (הרצות ניסיון, פתיחת הדלת להוספת גרב) נשמרים כמחזורים שנקטעו ולא נשלחת עבורם התראת סיום.",
+      "label": "משך מחזור מזערי"
+    },
+    "curve_preroll_seconds": {
+      "doc": "הוספת קריאות מניסיונות התחלה כושלים לתחילת המחזור, למכשירים שמבצעים בדיקות לפני ההתחלה (נעילת דלת, מילוי ראשון). 300 שניות מספיקות לרוב; 0 = כבוי. ההתחלות המוקלטות מוקדמות יותר, ולכן המשכים שנלמדו משתנים לזמן מה.",
+      "label": "הקדמת העקומה"
+    },
+    "delay_confirm_seconds": {
+      "doc": "ההספק חייב להישאר בטווח ההמתנה למשך הזמן הזה לפני שהמכשיר נחשב כממתין להתחלה.",
+      "label": "שניות לאישור"
+    },
+    "delay_start_detect_enabled": {
+      "doc": "זיהוי מכשיר דולק שממתין להתחלה מושהית, כדי שצריכת ההמתנה שלו לא תיחשב למחזור פעיל.",
+      "label": "הפעלת זיהוי התחלה מושהית"
+    },
+    "delay_timeout_hours": {
+      "doc": "הפסקת ההמתנה להתחלה מושהית לאחר מספר השעות הזה וחזרה למצב לא פעיל.",
+      "label": "שעות עד תום ההמתנה"
+    },
+    "device_type": {
+      "doc": "קובע ברירות מחדל לזיהוי (ספים, השהיית כיבוי, טיפול בסיום) עבור סוג המכשיר הזה. יש לשנות רק אם המכשיר הוגדר כסוג שגוי.",
+      "label": "סוג מכשיר"
+    },
+    "dishwasher_end_spike_quiet_release": {
+      "doc": "לאחר המשך הצפוי, WashData מפסיק להמתין לניקוז האחרון כשהמדיח נשאר מתחת לסף העצירה למשך הזמן הזה מאז הפעילות האחרונה, לכל היותר 30 דקות (וכאשר לתוכנית יש 3 מחזורים מוקלטים, לפחות כאורך הפסקת הייבוש המוקלטת הארוכה ביותר). כדאי להעלות אם ניקוז מאוחר לאחר ייבוש ארוך מתפספס.",
+      "label": "סיום המתנה בייבוש פסיבי שקט"
+    },
+    "door_end_dwell_seconds": {
+      "label": "משך פתיחת דלת לסיום",
+      "doc": "כש־\"פתיחת הדלת מסיימת את המחזור\" פעיל: כמה זמן הדלת חייבת להישאר פתוחה לפני סיום המחזור. ארוך מספיק להתעלם מהוספת כלי (ברירת מחדל 60 שניות)."
+    },
+    "door_opens_at_end": {
+      "label": "פתיחת הדלת מסיימת את המחזור",
+      "doc": "עם ישות חיישן דלת, דלת שנשארת פתוחה למשך הזמן שלהלן כשההספק נמוך מסיימת את המחזור במקום להשהות אותו. במחזור מושהה זה קורה רק כשהתוכנית שזוהתה כמעט הסתיימה, כך שהפסקה באמצע תוכנית נשארת הפסקה."
+    },
+    "door_sensor_entity": {
+      "doc": "חיישן דלת אופציונלי. מציג מתי המכשיר נפתח לפינוי לאחר מחזור.",
+      "label": "ישות חיישן דלת"
+    },
+    "enable_ml_models": {
+      "doc": "שימוש במודל שאומן על המכשיר הזה לחיזוי האנרגיה והעלות של מחזור פעיל, ומתן אפשרות לתוכנית מוכרת היטב שנעצרת מוקדם באופן חריג להסתיים ללא מלוא השהיית הכיבוי. כבוי: לוגיקה מבוססת הספק בלבד.",
+      "label": "החלת מודלים חכמים במהלך מחזור"
+    },
+    "end_energy_threshold": {
+      "doc": "האנרגיה המותרת במהלך השהיית הכיבוי. מעליה המחזור נמשך, כך שסיבובי תוף ומקטעי ייבוש בסוף נשארים חלק ממנו. כדאי להנמיך אם מחזורים מסתיימים במהלך מקטע סיום; להעלות אם מחזורים שהסתיימו ממשיכים להמתין.",
+      "label": "אנרגיית סיום"
+    },
+    "energy_price_dynamic": {
+      "doc": "חישוב עלות כל מחזור לפי המחיר בכל רגע שבו פעל, במקום המחיר בסיומו. דורש ישות מחיר. עיבוד היסטוריה (אבחון) מחשב מחדש עלויות של מחזורים ישנים.",
+      "label": "עלות משוקללת לפי זמן"
+    },
+    "energy_price_entity": {
+      "doc": "חיישן עם המחיר הנוכחי לכל kWh (למשל תעריף משתנה). מחליף את המחיר הקבוע שלהלן, ולכן חייב להיות מחיר ולא חיישן ההספק או האנרגיה של השקע.",
+      "label": "ישות מחיר אנרגיה"
+    },
+    "energy_price_static": {
+      "doc": "מחיר קבוע לכל kWh, המשמש כשלא מוגדרת ישות מחיר.",
+      "label": "מחיר אנרגיה קבוע (לכל kWh)"
+    },
+    "energy_sensor": {
+      "doc": "מונה kWh או Wh אופציונלי (total_increasing, למשל המונה של השקע עצמו). אנרגיית המחזור נקראת ממנו, בדיוק גבוה יותר מחישוב מחיישן הספק איטי. אם הקריאה אינה שמישה, משתמשים בערך המחושב.",
+      "label": "ישות מד אנרגיה"
+    },
+    "expose_debug_entities": {
+      "doc": "הוספת ישויות אבחון (רמת ביטחון בהתאמה, אי־ודאות, מצב פנימי). כשההגדרה כבויה, רשימת הישויות נשארת נקייה.",
+      "label": "חשיפת ישויות ניפוי שגיאות"
+    },
+    "external_end_trigger": {
+      "doc": "חיישן בינארי אופציונלי שמסיים את המחזור כשהוא נדלק, בנוסף לזיהוי מבוסס הספק (למשל מגע \"הסתיים\" או אינטגרציה אחרת). שדה ריק מכבה אותו.",
+      "label": "ישות טריגר חיצוני"
+    },
+    "external_end_trigger_inverted": {
+      "doc": "התייחסות לכיבוי החיישן (ולא להדלקתו) כאות הסיום.",
+      "label": "היפוך הטריגר החיצוני (הפעלה בכיבוי)"
+    },
+    "learning_confidence": {
+      "doc": "ציון ההתאמה הנמוך ביותר לתיוג מחזור שהסתיים. מנצח ברור מתויג; מקרה גבולי עובר לתור הבדיקה במחזורים. מתחת לערך הזה אין תיוג או בקשת בדיקה. יש להשאיר מתחת לרמת הביטחון לתיוג אוטומטי.",
+      "label": "רמת ביטחון ללמידה"
+    },
+    "linked_device": {
+      "doc": "לא חובה. הצגת מכשיר WashData הזה תחת מכשיר אחר (למשל השקע החכם) ב־Home Assistant, כ־\"מחובר דרך ...\".",
+      "label": "קיבוץ תחת מכשיר"
+    },
+    "min_off_gap": {
+      "doc": "פרק כיבוי קצר מהמשך הזה אינו מפצל מחזור, כך שהפסקות השריה נשארות באותה כביסה. יש לשמור קצר מהפער בין פעולות עוקבות, אחרת הן יתמזגו למחזור אחד.",
+      "label": "פער כיבוי מזערי"
+    },
+    "min_power": {
+      "doc": "רצפת חוסר הפעילות. אם לא הוגדרו ידנית, סף ההתחלה הוא מעט מעליה וסף העצירה הוא 60% ממנה, כך שקריאות מתחתיה אינן מתחילות מחזור. כדאי להעלות אם צריכת השקע במנוחה או נוריות ההמתנה מתחילות מחזורים.",
+      "label": "הספק מזערי"
+    },
+    "ml_training_enabled": {
+      "doc": "אימון מחדש של מודל האנרגיה מדי פעם על המחזורים שהסתיימו במכשיר הזה. מודל חדש נשמר רק אם הוא טוב מהאומדן הפשוט במחזורי הבדיקה.",
+      "label": "למידה מהמכשיר הזה"
+    },
+    "name": {
+      "doc": "השם המוצג ב־Home Assistant עבור המכשיר הזה.",
+      "label": "שם המכשיר"
+    },
+    "no_update_active_timeout": {
+      "doc": "כמה זמן השקע רשאי לא לשלוח עדכונים במהלך מחזור לפני ש־WashData מפסיק לסמוך על הקריאה האחרונה שלו. מחזור ללא עדכונים בהספק נמוך לרוב מסתיים כרגיל; בהספק גבוה הוא נעצר בכפייה רק זמן רב לאחר אורכו הצפוי. ברירת המחדל של 600 שניות מאפשרת עיכובים בענן או ברשת Mesh.",
+      "label": "זמן המתנה ללא עדכונים"
+    },
+    "notify_before_end_minutes": {
+      "doc": "שליחת התראת סיום מתקרב כשהזמן המשוער שנותר יורד מתחת לערך הזה. 0 מכבה אותה.",
+      "label": "התראה לפני הסיום"
+    },
+    "notify_channel": {
+      "doc": "ערוץ Android להודעות התחלה ועדכונים בזמן אמת; הערוץ קובע צליל ועדיפות. ריק: ברירת המחדל של האפליקציה.",
+      "label": "ערוץ Android (התחלה/זמן אמת)"
+    },
+    "notify_cycle_timers": {
+      "doc": "התראות לאחר מספר דקות מוגדר מתחילת מחזור (למשל להוספת מרכך). ההודעה תומכת ב־{device}, {program}, {minutes}. עם השהיה אוטומטית, המחזור גם מושהה בנקודה הזו וההתראה מקבלת כפתור המשך.",
+      "label": "טיימרים למחזור"
+    },
+    "notify_finish_channel": {
+      "doc": "ערוץ Android להודעת הסיום. ריק משתמש שוב בערוץ ההתחלה/זמן אמת.",
+      "label": "ערוץ Android (סיום)"
+    },
+    "notify_finish_message": {
+      "doc": "תוכן ההודעה שנשלחת בסיום מחזור. משתנים: {device}, {program}, {duration} (דקות), {duration_hm} (1 שעה 05 דקות), {energy_kwh}, {cost}, {time_finished}, {vs_typical}, {cycle_count}, {status} (completed או force_stopped; מחזורים שנקטעו אינם שולחים דבר). כל משתנה אחר גורם לשימוש בטקסט ברירת המחדל.",
+      "label": "הודעת סיום"
+    },
+    "notify_finish_services": {
+      "doc": "שירותי notify.* להפעלה כשמחזור מסתיים. ריק פירושו ללא שירותים.",
+      "label": "שירותי התראת סיום"
+    },
+    "notify_icon": {
+      "doc": "סמל קטן בהתראה (למשל mdi:washing-machine). נשלח רק ליעדי mobile_app, ולא לקבוצות notify. ב־iOS מחליף את סמל האפליקציה ודורש אפליקציית Companion בגרסה 2026.8 ומעלה. ריק: ברירת המחדל של הפלטפורמה.",
+      "label": "סמל ההתראה"
+    },
+    "notify_icon_color": {
+      "doc": "צבע הדגשה להתראות של המכשיר הזה, להבחנה קלה בין מכונת כביסה, מייבש ומדיח כלים. ב־iOS ממלא את העיגול מאחורי הסמל וצובע את סרגל Live Activity. טלפוני Android רבים (במיוחד Samsung) מתעלמים ממנו. יש להשתמש בערך הקסדצימלי, למשל #03A9F4. ריק: ברירת המחדל של הפלטפורמה.",
+      "label": "צבע ההתראה"
+    },
+    "notify_live_chronometer": {
+      "doc": "Android: מוסיף ספירה לאחור לסיום המשוער לצד טקסט ההתראה. אפשר להשתמש ב־{finish_time} בהודעת העדכון בזמן אמת להצגת שעת הסיום במקום ספירה נוספת לאחור.",
+      "label": "שימוש בשעון ספירה בזמן אמת"
+    },
+    "notify_live_click_action": {
+      "label": "יעד לחיצה על ההתראה",
+      "doc": "מה נפתח בלחיצה על התראה של המכשיר הזה. ריק: לוח WashData במכשיר הזה. אפשר להזין נתיב ללוח בקרה (למשל /lovelace/laundry) או URL, או \"none\" ללא פעולה בלחיצה."
+    },
+    "notify_live_interval_seconds": {
+      "doc": "תדירות רענון התראות ההתקדמות בזמן אמת במהלך מחזור פעיל.",
+      "label": "מרווח עדכון בזמן אמת"
+    },
+    "notify_live_overrun_percent": {
+      "doc": "עדכונים בזמן אמת מפסיקים כשהמחזור חורג מהמשך הצפוי באחוז הזה (20 = עד פי 1.2 מהזמן הצפוי).",
+      "label": "אחוז התארכות לפני התראה בזמן אמת"
+    },
+    "notify_live_services": {
+      "doc": "שירותי notify.* לעדכוני התקדמות בזמן אמת במהלך מחזור פעיל. ריק מכבה אותם.",
+      "label": "שירותי התקדמות בזמן אמת"
+    },
+    "notify_live_silent": {
+      "label": "עדכונים שקטים בזמן אמת",
+      "doc": "iOS בלבד. עדכון התקדמות בזמן אמת בשקט, בעדיפות חסכונית בסוללה ש־iOS עשוי לאגד. העדכון הראשון והתראות ההתחלה והסיום עדיין מתריעים. כבוי: כל עדכון מתריע."
+    },
+    "notify_live_sticky": {
+      "label": "שמירת ההתראה בזמן אמת בלחיצה",
+      "doc": "Android בלבד. השארת התראת ההתקדמות בזמן אמת לאחר לחיצה. כבוי: לחיצה סוגרת אותה."
+    },
+    "notify_milestone_message": {
+      "doc": "ההודעה להתראת אבן הדרך. משתני תבנית: {device}, {cycle_count}.",
+      "label": "הודעת אבן דרך"
+    },
+    "notify_milestones": {
+      "doc": "מספרי מחזורים שגורמים להתראת חגיגה חד־פעמית, מופרדים בפסיקים (למשל 50, 100, 500, 1000). ריק מכבה אותן.",
+      "label": "אבני דרך במחזורים"
+    },
+    "notify_only_when_home": {
+      "doc": "שליחת התראות רק כשלפחות אחד מהאנשים שלמעלה נמצא בבית.",
+      "label": "התראות רק כשנמצאים בבית"
+    },
+    "notify_people": {
+      "doc": "ישויות person.* שנבדקות על ידי \"התראות רק כשנמצאים בבית\".",
+      "label": "אנשים (לבדיקת נוכחות בבית)"
+    },
+    "notify_pre_complete_message": {
+      "doc": "הטקסט של כל עדכון התקדמות בזמן אמת. משתני תבנית: {device}, {program}, {minutes} (דקות שנותרו), {finish_time} (סיום משוער, למשל 14:30). כל משתנה אחר גורם לשימוש בטקסט ברירת המחדל.",
+      "label": "הודעת עדכון בזמן אמת"
+    },
+    "notify_quiet_end_hour": {
+      "doc": "סיום חלון הזמן ללא הפרעות (0-23); התראות שהמתינו נשלחות אז. ריק מכבה אותו.",
+      "label": "סיום השעות השקטות"
+    },
+    "notify_quiet_start_hour": {
+      "doc": "תחילת חלון זמן ללא הפרעות (0-23). התראות סיום, תזכורות וכביסה נקייה בחלון הזה ממתינות עד סיומו. יכול לחצות חצות (למשל 22 עד 7). ריק מכבה אותו.",
+      "label": "תחילת השעות השקטות"
+    },
+    "notify_reminder_message": {
+      "doc": "הטקסט של ההתראה החד־פעמית לפני הסיום. משתני תבנית: {device}, {program}, {minutes} (הגדרת ההתראה לפני הסיום). כל משתנה אחר גורם לשימוש בטקסט ברירת המחדל.",
+      "label": "הודעת התראה לפני הסיום"
+    },
+    "notify_start_message": {
+      "doc": "תוכן ההודעה שנשלחת בתחילת מחזור. משתני תבנית: {device}, {program}. כל משתנה אחר גורם לשימוש בטקסט ברירת המחדל.",
+      "label": "הודעת התחלה"
+    },
+    "notify_start_services": {
+      "doc": "שירותי notify.* להפעלה בתחילת מחזור (טלפון, לוח בקרה, ...). ריק פירושו ללא שירותים.",
+      "label": "שירותי התראת התחלה"
+    },
+    "notify_timeout_seconds": {
+      "doc": "סגירת ההתראה לאחר מספר השניות הזה (כשנתמך). 0 משאיר אותה עד לסגירה ידנית.",
+      "label": "סגירה אוטומטית לאחר"
+    },
+    "notify_title": {
+      "doc": "כותרת ההתראה. רק {device} מוחלף; כל משתנה אחר גורם לשימוש בכותרת ברירת המחדל.",
+      "label": "כותרת ההתראה"
+    },
+    "notify_unload_delay_minutes": {
+      "doc": "מספר הדקות מסיום המחזור עד תזכורת \"פינוי המכשיר\". 0 מכבה אותה.",
+      "label": "השהיית תזכורת פינוי"
+    },
+    "notify_unload_repeat": {
+      "doc": "שליחה חוזרת של תזכורת הפינוי כל מספר דקות שנקבע ב־\"השהיית תזכורת פינוי\", עד לאישור הפינוי או ללחיצה על \"הפסקת תזכורות\" (באפליקציה לנייד). דורש ישות חיישן דלת, ישות אישור פינוי או \"אישור פינוי ידני\".",
+      "label": "חזרה עד לפינוי"
+    },
+    "off_delay": {
+      "doc": "כמה זמן ההספק חייב להישאר נמוך לפני שהמחזור נחשב כמחזור שהסתיים. חזרת ההספק בתוך הזמן הזה ממשיכה את המחזור. מדיחי כלים עשויים להיות שקטים 20-60 דקות בייבוש, ולכן יש להגדיר זמן ארוך יותר.",
+      "label": "השהיית כיבוי"
+    },
+    "pause_cuts_power": {
+      "doc": "כשהמחזור מושהה, כיבוי גם של ישות המתג שלהלן. רק למכשירים שניתן לנתק בבטחה מהחשמל באמצע מחזור.",
+      "label": "השהיה מנתקת גם את החשמל (דרך מתג)"
+    },
+    "peak_rate_message": {
+      "doc": "טקסט מותאם להמלצת תעריף השיא. משתני תבנית: {device}, {price}. ריק משתמש בברירת המחדל.",
+      "label": "הודעת תעריף שיא"
+    },
+    "peak_rate_threshold": {
+      "doc": "אם המחיר לכל kWh שווה לערך הזה או גבוה ממנו בתחילת מחזור, נוספת להודעת ההתחלה המלצה לגבי תעריף שיא. 0 או ריק מכבים אותה.",
+      "label": "סף תעריף שיא (לכל kWh)"
+    },
+    "power_off_delay": {
+      "doc": "כמה זמן ההספק חייב להישאר מתחת לסף הכיבוי לאחר מחזור לפני שהמצב חוזר לכבוי. משמש רק כשהסף מעל 0. נבדק מדי פעם, ולכן ההמתנה בפועל עשויה להיות מעט ארוכה יותר.",
+      "label": "השהיית ניתוק הספק"
+    },
+    "power_off_threshold_w": {
+      "doc": "לאחר מחזור, הספק מתחת לערך הזה לאורך השהיית ניתוק ההספק מעביר את המצב לכבוי, במקום השהיית איפוס ההתקדמות. יש להגדיר מעל צריכת הכיבוי, מתחת לצריכת ההמתנה ולסף העצירה. 0 מכבה זאת (ברירת מחדל).",
+      "label": "סף כיבוי"
+    },
+    "power_profile_interval_min": {
+      "label": "מרווח פרופיל ההספק",
+      "doc": "גודל חלון הזמן במאפיין power_profile (וואט ממוצע לכל חלון), המשמש מתכננים כמו EMHASS ו־tibber_prices. קטן יותר שומר קפיצות קצרות; גדול יותר מחליק את העקומה. ברירת מחדל 15 דקות. אינו משפיע על הזיהוי."
+    },
+    "power_sensor": {
+      "doc": "החיישן שמדווח על ההספק בזמן אמת של המכשיר ב־W או kW (למשל sensor.washer_power), ולא מונה האנרגיה שלו (kWh). כל הזיהוי מבוסס עליו.",
+      "label": "חיישן הספק"
+    },
+    "profile_evidence_sources": {
+      "label": "מחזורים שמעצבים תוכנית",
+      "doc": "אילו סוגי מחזורים מעצבים את העקומה וההתאמה של כל תוכנית. ביטול סימון של סוג אינו מוחק דבר; שימושי אם אינך סומך/ת על נתונים מיובאים. הסטטיסטיקה תמיד סופרת רק את מחזורי המכשיר הזה. ביטול כל הסימונים אינו נלקח בחשבון."
+    },
+    "profile_match_interval": {
+      "doc": "תדירות התאמת מחזור פעיל לפרופילים. ברירת מחדל 300 שניות (5 דקות).",
+      "label": "מרווח התאמה"
+    },
+    "profile_match_max_duration_ratio": {
+      "doc": "תוכנית נפסלת כשהמחזור נמשך יותר מהמכפלה הזו של משכה הרגיל. 1.8: מחזור ארוך ב־80% מהתוכנית אינו מתאים לה עוד.",
+      "label": "יחס משך מרבי"
+    },
+    "profile_match_min_duration_ratio": {
+      "doc": "תוכנית נשקלת רק לאחר שהמחזור נמשך את החלק הזה ממשכה הרגיל. 0.10: תוכנית של שעתיים הופכת למועמדת לאחר 12 דקות. אינו חל ב־15 הדקות הראשונות של מחזור.",
+      "label": "יחס משך מזערי"
+    },
+    "profile_match_threshold": {
+      "doc": "ציון ההתאמה בזמן אמת הדרוש לפני שסיום חכם או סיום מניעת קמטים רשאים לסיים מחזור מוקדם. אינו משנה את התוכנית המוצגת. כדאי להעלות אם התאמות חלשות מסיימות מחזורים מוקדם; להנמיך אם התאמות ברורות ממתינות להשהיית הכיבוי.",
+      "label": "סף התאמה"
+    },
+    "progress_reset_delay": {
+      "doc": "לאחר מחזור, שמירת ההתקדמות על 100% למשך הזמן הזה לפני איפוס למצב לא פעיל.",
+      "label": "השהיית איפוס התקדמות"
+    },
+    "pump_stuck_duration": {
+      "doc": "כמה זמן משאבה רשאית לפעול ברציפות לפני הפעלת אירוע משאבה תקועה.",
+      "label": "משך משאבה תקועה"
+    },
+    "save_debug_traces": {
+      "doc": "שמירת נתוני ניפוי השגיאות של מנגנון ההתאמה (ציוני כל מועמד) עם כל מחזור לצורך פתרון תקלות. מוסיף כ־20 KB לכל מחזור.",
+      "label": "שמירת נתוני ניפוי שגיאות"
+    },
+    "show_contributor": {
+      "doc": "הצגת הייחוס \"מאת <contributor>\" במכשירי קהילה ובמחזורי ייחוס."
+    },
+    "smart_termination_duration_ratio": {
+      "doc": "החלק ממשך התוכנית הממוצע שהמחזור חייב להגיע אליו לפני שסיום חכם רשאי לסיים אותו מוקדם. אם המשכים משתנים (טמפרטורת מים, ייבוש לפי חיישן, גודל עומס), כדאי להנמיך (למשל 0.85). ריק פירושו 0.98 (0.99 במדיחי כלים).",
+      "label": "יחס סיום חכם"
+    },
+    "start_duration_threshold": {
+      "doc": "ההספק חייב להישאר מעל סף ההתחלה למשך הזמן הזה לפני תחילת מחזור, כדי להתעלם מהדלקות וכיבויים קצרים.",
+      "label": "משך התחלה"
+    },
+    "start_energy_threshold": {
+      "doc": "האנרגיה שהמכשיר חייב לצרוך לפני שהמחזור נחשב כפעיל. קפיצת הספק קצרה צורכת מעט אנרגיה, ולכן אינה מתחילה מחזור.",
+      "label": "אנרגיית התחלה"
+    },
+    "start_threshold_w": {
+      "doc": "ההספק חייב לעלות מעל הערך הזה כדי להתחיל מחזור. נמוך מדי: צריכת המתנה גורמת להתחלת שווא. גבוה מדי: תוכניות שמתחילות לאט (מילוי קר) מתפספסות.",
+      "label": "סף התחלה"
+    },
+    "stop_threshold_w": {
+      "doc": "ההספק חייב לרדת מתחת לערך הזה לפני שהשהיית הכיבוי מתחילה להיספר. יש לשמור מתחת לסף ההתחלה. ערך גבוה מדי יגרום לשלבים בהספק נמוך (המתנה בשטיפה, מניעת קמטים) להתחיל בטעות את הספירה לסיום.",
+      "label": "סף עצירה"
+    },
+    "store_brand": {
+      "label": "מותג המכשיר",
+      "doc": "לא חובה. מותג המכשיר מקטלוג הקהילה, המשמש למציאת הקלטות ייחוס ולשיתוף שלהן. יש להשאיר ריק אם אין שימוש בתכונות המקוונות."
+    },
+    "store_model": {
+      "label": "דגם המכשיר",
+      "doc": "לא חובה. דגם המכשיר מקטלוג הקהילה (יש לבחור תחילה מותג). אם אינו מופיע, אפשר להוסיף אותו."
+    },
+    "switch_entity": {
+      "doc": "מתג אופציונלי שמכובה בהשהיה ומודלק שוב בהמשך, עם \"השהיה מנתקת גם את החשמל\".",
+      "label": "ישות מתג"
+    },
+    "unload_confirm_entity": {
+      "doc": "לא חובה. כל ישות שמאשרת שהתכולה הוצאה, למכשירים ללא חיישן דלת (כפתור, input_button, חיישן תנועה, סצנה). כל שינוי מצב נחשב למעט כיבוי או מעבר ללא זמין. מפעיל גם את תזכורת הפינוי.",
+      "label": "ישות אישור פינוי"
+    },
+    "unload_track_without_door": {
+      "doc": "הפעלת תזכורת הפינוי ללא חיישן דלת או ישות אישור. יש לאשר את הפינוי מאוטומציה משלך באמצעות כפתור \"סימון כפונה\" או השירות ha_washdata.mark_unloaded. אינו נלקח בחשבון כשמוגדרת ישות חיישן דלת.",
+      "label": "אישור פינוי ידני"
+    },
+    "watchdog_interval": {
+      "doc": "תדירות הבדיקה ברקע לאיתור חיישנים תקועים ותום זמני המתנה. ברירת מחדל 30 שניות.",
+      "label": "מרווח מנגנון ההשגחה"
+    },
+    "share_name": {
+      "doc": "הצגת שם החשבון שלך כמי שהעלה את המחזורים ששיתפת. כבוי: שיתוף ללא שם."
+    }
+  },
+  "setting_group": {
+    "auto_labeling": {
+      "label": "תיוג אוטומטי"
+    },
+    "basic_configuration": {
+      "label": "הגדרות בסיסיות"
+    },
+    "cycle_end": {
+      "label": "סיום מחזור"
+    },
+    "cycle_start": {
+      "label": "התחלת מחזור"
+    },
+    "cycle_timers": {
+      "label": "טיימרים למחזור"
+    },
+    "data_management": {
+      "label": "ניהול נתונים"
+    },
+    "debug": {
+      "label": "ניפוי שגיאות"
+    },
+    "device_info": {
+      "label": "פרטי המכשיר"
+    },
+    "dishwasher_end": {
+      "label": "סיום מדיח כלים"
+    },
+    "door_pause": {
+      "label": "דלת והשהיה"
+    },
+    "duration_gates": {
+      "label": "תנאי משך"
+    },
+    "energy": {
+      "label": "אנרגיה"
+    },
+    "external_end_trigger": {
+      "label": "טריגר סיום חיצוני"
+    },
+    "housekeeping": {
+      "label": "תחזוקה שוטפת"
+    },
+    "match_scoring": {
+      "label": "דירוג התאמה"
+    },
+    "messages": {
+      "label": "הודעות"
+    },
+    "power_off": {
+      "label": "כיבוי"
+    },
+    "predictive_end": {
+      "label": "סיום חזוי"
+    },
+    "profile_evidence": {
+      "label": "נתוני בסיס לפרופיל"
+    },
+    "quiet_hours_milestones": {
+      "label": "שעות שקטות ואבני דרך"
+    },
+    "schedule": {
+      "label": "לוח זמנים"
+    },
+    "services": {
+      "label": "שירותים"
+    },
+    "thresholds_gap": {
+      "label": "ספים ופער"
+    },
+    "timing": {
+      "label": "תזמון"
+    },
+    "unload_reminder": {
+      "label": "תזכורת פינוי"
+    },
+    "watchdog": {
+      "label": "מנגנון השגחה"
+    }
+  },
+  "status": {
+    "active": "פעיל",
+    "all_statuses": "כל המצבים",
+    "ambiguous": "לא חד־משמעי",
+    "analyzing": "בניתוח…",
+    "auto_detect": "זיהוי אוטומטי",
+    "clear": "ברור",
+    "completed": "הושלם",
+    "deleting": "במחיקה…",
+    "fine_tuning": "בתהליך התאמה עכשיו…",
+    "force_stopped": "נעצר בכפייה",
+    "idle": "לא פעיל",
+    "imported": "יובא",
+    "interrupted": "נקטע",
+    "match_sure": "כ־{pct}% ביטחון",
+    "match_uncertain": "לא ודאי: {top} או {runner}",
+    "match_uncertain_single": "לא ודאי: אולי {top}",
+    "match_uncertain_tip": "WashData עדיין לא החליט על תוכנית. המספר מציין באיזו תדירות הניחוש המוביל, {top}, היה נכון במחזורים קודמים כשהוביל בהפרש כזה. למידע בלבד.",
+    "preparing": "בהכנה…",
+    "ready": "מוכן לעיבוד",
+    "rebuilding": "בבנייה מחדש…",
+    "recording": "בהקלטה",
+    "resetting": "באיפוס…",
+    "saving": "בשמירה…",
+    "splitting": "בפיצול…",
+    "stalled": "תקוע",
+    "training": "באימון…",
+    "trimming": "בחיתוך…",
+    "unlabelling": "בהסרת תוויות…",
+    "working": "בעבודה…",
+    "torn_pick": "{a} או {b}?",
+    "torn_tip": "WashData עדיין אינו יכול להבדיל בין שתי התוכניות, ולכן יש לבחור את זו שפועלת כדי לתייג בה את המחזור (זיהוי אוטומטי מבטל את הבחירה).",
+    "program_mismatch": "נראה יותר כמו {program}",
+    "program_mismatch_tip": "המחזור הזה נראה בבירור דומה יותר ל־{program} מאשר ל־{selected}, אך WashData שומר את התוכנית שבחרת."
+  },
+  "suggestion": {
+    "observed_label": "נצפה",
+    "impact": {
+      "auto_label_confidence": {
+        "higher": "פחות מחזורים מתויגים אוטומטית; יותר מועברים לבדיקה",
+        "lower": "יותר מחזורים מתויגים אוטומטית; חלקם עלולים להיות מזוהים שגוי"
+      },
+      "end_energy_threshold": {
+        "higher": "מסיים רק מחזורים שצרכו אנרגיה משמעותית",
+        "lower": "מסיים גם מחזורים קצרים יותר או בעלי צריכת אנרגיה נמוכה יותר"
+      },
+      "learning_confidence": {
+        "higher": "למידה רק מהתאמות ברמת ביטחון גבוהה מאוד – איטית יותר אך אמינה יותר",
+        "lower": "למידה מיותר מחזורים; המודל עלול להיות רועש יותר"
+      },
+      "min_off_gap": {
+        "higher": "נדרש חוסר פעילות ארוך יותר לפני תחילת מחזור חדש",
+        "lower": "חוסר פעילות קצר מתחיל מחזור חדש – פעולות עוקבות עשויות להתפצל"
+      },
+      "min_power": {
+        "higher": "פחות רגיש לצריכה במנוחה; עלול לפספס תוכניות שקטות מאוד",
+        "lower": "רגיש יותר; עלול לתעד צריכת המתנה כפעילות"
+      },
+      "no_update_active_timeout": {
+        "higher": "יותר זמן לפני קביעה שהמחזור תקוע",
+        "lower": "עוצר בכפייה מחזור תקוע מוקדם יותר"
+      },
+      "off_delay": {
+        "higher": "יותר זמן להפסקות המכשיר – מתאים לשלבי השריה או ייבוש ארוכים",
+        "lower": "זיהוי סיום מהיר יותר – מתאים למכשירים עם הדלקה וכיבוי ברורים"
+      },
+      "profile_match_threshold": {
+        "higher": "קובע רק התאמות ברמת ביטחון גבוהה; יותר מחזורים נשארים ללא תווית",
+        "lower": "מתאים יותר מחזורים; חלקם עלולים להיות מעט שגויים"
+      },
+      "start_threshold_w": {
+        "higher": "מונע התחלות שווא מקפיצות הספק קצרות",
+        "lower": "מזהה תוכניות בהספק נמוך; עלול להגיב לרעש"
+      },
+      "stop_threshold_w": {
+        "higher": "מסיים מחזור מהר יותר – עלול לסיים במהלך הפסקה",
+        "lower": "ממתין יותר לסיום – פחות סיומים מוקדמים מדי"
+      },
+      "watchdog_interval": {
+        "higher": "מאפשר שלבים שקטים ארוכים יותר; פחות עצירות כפויות שגויות",
+        "lower": "מזהה מחזורים תקועים באופן מחמיר יותר"
+      }
+    },
+    "reason": {
+      "watchdog": "נשמר נמוך ככל שבטוח (מעט מעל פער העדכונים באחוזון 95 של {p95} שניות ולפחות פי 2 ממרווח הדגימה של {median} שניות, מינימום 30 שניות), כדי לזהות תקיעות מהר ללא עצירות שווא.",
+      "no_update_timeout": "מבוסס על תדירות העדכונים שנצפתה (p95={p95} שניות) * 20 (מינימום 60 שניות).",
+      "off_delay_device_floor": "נעשה שימוש במינימום הבטוח הייעודי ל־{device} ({floor} שניות).",
+      "off_delay_generic_floor": "נעשה שימוש במינימום בטוח כללי ({floor} שניות).",
+      "off_delay_pauses": "נקבע כדי לעבור הפסקות אמיתיות: הפסקה בתוך מחזור באחוזון 95 של {p95} שניות + מרווח ביטחון של 60 שניות, מתוך {pauses} הפסקות ב־{cycles} מחזורים תקינים (מינימום {floor} שניות).",
+      "match_interval": "מבוסס על תדירות העדכונים שנצפתה (חציון={median} שניות) * 10.",
+      "match_interval_capped": "הוגבל כך ש־{persistence} התאמות רצופות ייכנסו בתוך {pct}% מהתוכנית הקצרה ביותר ({shortest} שניות); תדירות העדכונים לבדה (חציון={median} שניות) הייתה מציעה מרווח ארוך יותר.",
+      "match_interval_floored": "התוכנית הקצרה ביותר ({shortest} שניות) הייתה מגבילה זאת ל־{cap} שניות, מתחת למינימום של {minimum} שניות, ולכן נעשה שימוש במינימום: {persistence} התאמות רצופות אורכות {budget} שניות, מעל {pct}% מהתוכנית. ההתאמה רצה רק כשמגיעה קריאה (חציון={median} שניות), ולכן אין לכך עלות נוספת.",
+      "max_duration_ratio": "מבוסס על משכי המחזורים המתויגים (p95={p95}).",
+      "min_power": "40% מההספק הפעיל הנמוך ביותר באחוזון 5 ({p05}W) לאורך {cycles} מחזורים תקינים, כדי להשאיר את תנאי הכיבוי מתחת לצריכה האמיתית.{excl}",
+      "completion_min_seconds": "מחצית ממשך מחזור תקין באחוזון 5 ({minutes} דקות) לאורך {cycles} מחזורים; מסנן מחזורי שווא.{excl}",
+      "completion_min_seconds_capped": "הוגבל ל־{cap} כדי שגם התוכניות הקצרות ביותר ייחשבו; מחצית ממשך המחזור התקין באחוזון 5 ({minutes} דקות, {cycles} מחזורים) הייתה גבוהה יותר.{excl}",
+      "min_off_gap": "מבוסס על {gaps} פערים שנצפו בין מחזורים (p05={p05} שניות). מינימום למכשיר: {floor} שניות.",
+      "min_off_gap_bridge": "נקבע כדי לגשר על המקטע השקט הארוך ביותר בתוך מחזור: {span} שניות + מרווח ביטחון של 60 שניות, מתוך {spans} פערים שגושרו ב־{cycles} מחזורים תקינים (נשאר מתחת למרווח של {ceiling} שניות בין פעולות עוקבות שלך).",
+      "standby_floor": "כל מחזור אחרון עדיין צרך {idle}W בסיומו, ולכן סף נמוך מזה לעולם לא יזהה את כיבוי המכשיר. נשמר מעליו; {cycles} המחזורים התקינים השמורים מעולם לא הפסיקו מתחתיו ליותר מ־{pause} שניות.",
+      "start_above_running": "ההספק הנמוך הרגיל של המכשיר בזמן פעולה הוא {low} W, אך סף ההתחלה הוא {start} W, ולכן פעולה ברמה הזו לעולם לא מתחילה. סף ההתחלה נקבע למחצית הרמה הזו, וסף העצירה נמוך ממנו.",
+      "thr_batch": "מעט מעל ההספק הפעיל הנמוך ביותר (אחוזון 5) לאורך {cycles} מחזורים ({p05}W), כדי לזהות התחלות מוקדם ולהשאיר את סף העצירה מתחת להספק הפעולה הנמוך ביותר.",
+      "max_duration_ratio_default": "חזרה לברירת המחדל: תקרה נמוכה יותר פוסלת את התוכנית הנכונה בכל פעם שפעולה נמשכת יותר מהרגיל.",
+      "min_duration_ratio_default": "חזרה לברירת המחדל: רצפה גבוהה יותר מונעת זיהוי מחזור פעיל עד שהוא מתקדם מאוד.",
+      "end_energy_floor": "הועלה למינימום הנובע מסף העצירה ({stop} W) לאורך השהיית הכיבוי ({off_delay} שניות); מתחתיו המחזור יכול להסתיים רק דרך מנגנון גיבוי."
+    },
+    "exclusions": {
+      "summary": "הוחרגו {total} מחזורים שזוהו שגוי: {parts}.",
+      "reason": {
+        "force_stopped": "נעצרו בכפייה",
+        "user_stopped": "נעצרו ידנית",
+        "interrupted": "נקטעו",
+        "incomplete": "לא שלמים",
+        "noise": "רעש",
+        "unlabeled": "ללא תווית",
+        "no_trace_short": "קצרים מדי לבדיקה",
+        "high_start": "התחילו בהספק גבוה",
+        "abrupt_end": "הסתיימו בפתאומיות",
+        "mid_restart": "הפעלה מחדש באמצע מחזור",
+        "no_power": "ללא הספק",
+        "no_active_power": "ללא הספק פעיל"
+      }
+    },
+    "now_value": "(כעת {v})"
+  },
+  "tab": {
+    "advanced": "מתקדם",
+    "diagnostics": "אבחון",
+    "history": "מחזורים",
+    "maintenance": "תחזוקה",
+    "ml": "אימון למידת מכונה",
+    "playground": "סביבת ניסוי",
+    "pp_cleanup": "ניקוי",
+    "pp_manage": "ניהול",
+    "pp_overview": "סקירה",
+    "pp_phases": "שלבים",
+    "profiles": "פרופילים",
+    "settings": "הגדרות",
+    "status": "סקירה",
+    "subtab_phase_catalog": "קטלוג השלבים",
+    "subtab_profiles": "פרופילים",
+    "store": "מאגר",
+    "automations": "אוטומציות"
+  },
+  "tag": {
+    "early_end": "סיום מוקדם",
+    "late_start": "התחלה מאוחרת",
+    "merged": "מחזורים ממוזגים",
+    "noise": "רעש",
+    "sensor_gap": "פער בחיישן",
+    "split": "מחזור מפוצל",
+    "wrong_profile": "פרופיל שגוי"
+  },
+  "toast": {
+    "task_name_required": "יש לתת שם למשימה",
+    "task_added": "המשימה נוספה",
+    "task_save_failed": "לא ניתן לשמור את המשימה: {error}",
+    "task_removed": "המשימה הוסרה",
+    "maint_logged": "תועד כבוצע: {task}",
+    "access_saved": "בקרת הגישה נשמרה",
+    "all_wiped": "כל הנתונים נמחקו",
+    "analysis_complete": "הניתוח הושלם: {count} הצעות",
+    "analysis_complete_none": "הניתוח הושלם: אין הצעות חדשות",
+    "analysis_failed": "הניתוח נכשל: {error}",
+    "appliance_added": "המכשיר נוסף - ממתין לאישור",
+    "apply_failed": "ההחלה נכשלה: {error}",
+    "auto_detect_failed": "הזיהוי האוטומטי נכשל: {error}",
+    "auto_label_complete": "התיוג האוטומטי הושלם",
+    "auto_label_failed": "התיוג האוטומטי נכשל: {error}",
+    "auto_label_done": "התיוג האוטומטי הושלם: {count} מחזורים תויגו, {skipped} נשארו ללא תווית.",
+    "auto_label_done_one": "התיוג האוטומטי הושלם: מחזור אחד ({count}) תויג, {skipped} נשארו ללא תווית.",
+    "auto_label_done_two": "התיוג האוטומטי הושלם: {count} מחזורים תויגו, {skipped} נשארו ללא תווית.",
+    "auto_label_done_other": "התיוג האוטומטי הושלם: {count} מחזורים תויגו, {skipped} נשארו ללא תווית.",
+    "auto_label_cancelled": "התיוג האוטומטי בוטל לאחר תיוג {count} מחזורים.",
+    "auto_label_cancelled_one": "התיוג האוטומטי בוטל לאחר תיוג מחזור אחד ({count}).",
+    "auto_label_cancelled_two": "התיוג האוטומטי בוטל לאחר תיוג {count} מחזורים.",
+    "auto_label_cancelled_other": "התיוג האוטומטי בוטל לאחר תיוג {count} מחזורים.",
+    "automation_deleted": "האוטומציה נמחקה",
+    "brand_added": "המותג נוסף - ממתין לאישור",
+    "catalog_refreshed": "קטלוג הקהילה רוענן",
+    "contrib_device_changed": "נוסף למאגר הקהילה, אך המכשיר השתנה בזמן שהטופס היה פתוח. יש לבחור אותו בהגדרות.",
+    "correction_submitted": "התיקון נשלח",
+    "could_not_load_cycle": "לא ניתן לטעון את המחזור: {error}",
+    "create_failed": "היצירה נכשלה: {error}",
+    "cycle_force_stopped": "המחזור נעצר בכפייה",
+    "cycle_labelled": "המחזור תויג",
+    "cycle_paused": "המחזור הושהה",
+    "cycle_resumed": "המחזור נמשך",
+    "cycle_trimmed": "המחזור נחתך",
+    "cycles_deleted": "נמחקו {count} מחזורים",
+    "cycles_merged": "המחזורים מוזגו",
+    "debug_cleared": "נוקו {count} רשומות ניפוי שגיאות",
+    "delete_failed": "המחיקה נכשלה: {error}",
+    "delete_partial_failed": "חלק מהפריטים לא ניתנו למחיקה ושוחזרו",
+    "device_approved": "אושר על ידי הקהילה",
+    "discard_failed": "הביטול נכשל: {error}",
+    "envelope_rebuilt": "מעטפת ההספק נבנתה מחדש",
+    "envelopes_rebuilt": "מעטפות ההספק נבנו מחדש",
+    "error": "שגיאה: {error}",
+    "export_downloaded": "הייצוא הורד",
+    "export_failed": "הייצוא נכשל: {error}",
+    "export_selective_done": "הייצוא הורד",
+    "feedback_all_dismissed": "כל בקשות המשוב נסגרו",
+    "feedback_confirmed": "המשוב אושר",
+    "feedback_dismissed": "בקשת המשוב נסגרה",
+    "file_read_failed": "לא ניתן לקרוא את הקובץ",
+    "group_deleted": "הקבוצה נמחקה",
+    "group_name_required": "נדרש שם קבוצה",
+    "group_saved": "הקבוצה נשמרה",
+    "hist_csv_required": "יש לטעון קובץ CSV או להדביק את תוכנו תחילה",
+    "import_failed": "הייבוא נכשל: {error}",
+    "import_no_restore_point": "הייבוא הושלם, אך לא ניתן היה לשמור נקודת שחזור, ולכן אי אפשר לבטל אותו",
+    "import_selective_done": "יובאו {profiles} פרופילים ו־{cycles} מחזורים",
+    "import_undo_failed": "לא ניתן לבטל את הייבוא: {error}",
+    "import_undone": "הייבוא בוטל: {profiles} פרופילים ו־{cycles} מחזורים שוחזרו",
+    "invalid_json": "\"{key}\" אינו JSON תקין - יש לתקן או לנקות את השדה לפני השמירה.",
+    "json_required": "נדרשים נתוני JSON",
+    "label_failed": "התיוג נכשל: {error}",
+    "legacy_removed": "הפעולות הישנות הוסרו",
+    "load_more_failed": "לא ניתן לטעון עוד: {error}",
+    "logs_exported": "היומנים יוצאו",
+    "maint_add_failed": "לא ניתן להוסיף אירוע: {error}",
+    "maint_added": "אירוע התחזוקה נוסף",
+    "maint_delete_failed": "לא ניתן למחוק אירוע: {error}",
+    "maint_deleted": "אירוע התחזוקה נמחק",
+    "min_2_profiles": "יש לבחור לפחות 2 פרופילים לקבוצה",
+    "ml_training_no_improvement": "האימון הושלם: מודל הבסיס נשמר (ללא שיפור)",
+    "ml_training_promoted": "האימון הושלם: {count} מודלים קודמו",
+    "models_reverted": "המודלים שאומנו במכשיר הוחזרו לבסיס",
+    "name_required": "נדרש שם",
+    "no_split_found": "לא נמצאו פערי חוסר פעילות לפיצול",
+    "odometer_save_failed": "לא ניתן לשמור את הסך הכולל: {error}",
+    "odometer_saved": "סך המחזורים נשמר",
+    "panel_settings_saved": "הגדרות הלוח נשמרו",
+    "pause_failed": "ההשהיה נכשלה: {error}",
+    "pause_no_cycle": "אין מחזור פעיל להשהיה",
+    "pg_preset_loaded": "ההגדרה הקבועה \"{name}\" נטענה",
+    "pg_preset_saved": "ההגדרה הקבועה \"{name}\" נשמרה",
+    "pg_run_gone": "ההרצה הזו אינה זמינה עוד.",
+    "pg_sugg_loaded": "{n} ערכים מוצעים הוכנו - יש להריץ את סביבת הניסוי להשוואה",
+    "phase_created": "השלב \"{name}\" נוצר",
+    "phase_deleted": "השלב \"{name}\" נמחק",
+    "phase_name_required": "נדרש שם שלב",
+    "phase_reset": "\"{name}\" שוחזר לשלב המובנה",
+    "phase_updated": "השלב עודכן",
+    "phases_saved": "השלבים נשמרו",
+    "preferences_saved": "ההעדפות נשמרו",
+    "processed": "עובדו {bits}",
+    "processed_cycles": "{n} מחזורים",
+    "processed_models": "{n} מודלים קודמו",
+    "processed_suggestions": "{n} הצעות",
+    "profile_added": "הפרופיל נוסף - ממתין לאישור",
+    "profile_created": "הפרופיל \"{name}\" נוצר",
+    "profile_name_required": "נדרש שם פרופיל",
+    "profile_renamed": "שם הפרופיל שונה",
+    "rating_saved": "דירוג האיכות נשמר",
+    "recording_discarded": "ההקלטה בוטלה",
+    "recording_saved": "ההקלטה נשמרה בפרופיל",
+    "recording_started": "ההקלטה התחילה",
+    "recording_stopped": "ההקלטה נעצרה",
+    "relabel_done": "{count} מחזורים תויגו מחדש",
+    "relabel_failed": "התיוג מחדש נכשל: {error}",
+    "reminders_save_failed": "לא ניתן לשמור תזכורות: {error}",
+    "reminders_saved": "תזכורות הטיפול נשמרו",
+    "remove_failed": "ההסרה נכשלה: {error}",
+    "rename_failed": "שינוי השם נכשל: {error}",
+    "resume_no_cycle": "אין מחזור מושהה להמשך",
+    "review_saved": "הבדיקה נשמרה",
+    "save_failed": "השמירה נכשלה: {error}",
+    "saved_except_conflicts": "נשמר. יש לתקן את הסתירות המודגשות כדי לשמור את היתר.",
+    "settings_conflicts": "יש לתקן את הסתירות המודגשות בהגדרות לפני השמירה.",
+    "settings_no_changes": "אין שינויים לשמירה",
+    "settings_reverted": "ההגדרות שוחזרו; האינטגרציה נטענת מחדש",
+    "settings_saved": "ההגדרות נשמרו; האינטגרציה נטענת מחדש",
+    "share_device_none_sel": "יש לבחור לפחות מחזור אחד לשיתוף",
+    "split_complete": "פוצל ל־{count} מחזורים",
+    "start_failed": "ההתחלה נכשלה: {error}",
+    "stop_failed": "העצירה נכשלה: {error}",
+    "store_connect_failed": "החיבור נכשל: {error}",
+    "store_connected": "מחובר למאגר הקהילה",
+    "store_device_downloaded": "נוספו {p} תוכניות ו־{c} הקלטות",
+    "store_device_downloaded_phases": "נוספו {p} תוכניות, {c} הקלטות ו־{ph} מפות שלבים",
+    "store_device_downloaded_settings": "נוספו {p} תוכניות, {c} הקלטות, {ph} מפות שלבים ו־{s} הגדרות",
+    "store_device_shared": "שותפו {n} מחזורים במאגר הקהילה - ממתינים לבדיקה.",
+    "store_device_shared_all_dup": "כל {n} המחזורים כבר היו במאגר הקהילה.",
+    "store_device_shared_partial": "שותפו {n} מחזורים; {failed} לא ניתנו להעלאה.",
+    "store_device_shared_some_dup": "שותפו {created} מחזורים; {dup} כבר היו במאגר.",
+    "store_disconnected": "מנותק ממאגר הקהילה",
+    "store_download_failed": "ההורדה נכשלה: {error}",
+    "store_download_nothing": "אין דבר חדש להורדה - ההגדרה הזו כבר נמצאת במכשיר שלך.",
+    "store_download_skipped": "{n} הקלטות דולגו: קצרות מדי, עם פערים רבים מדי או כבר במכשיר שלך.",
+    "store_error": "שגיאה: {error}",
+    "store_import_duplicate": "ההקלטה הזו כבר נמצאת במכשיר שלך.",
+    "store_import_failed": "הייבוא נכשל: {error}",
+    "store_import_low_quality": "ההקלטה הזו קצרה מדי, כוללת פערים רבים מדי או אינה סבירה לייבוא.",
+    "store_imported": "יובא אל {profile}",
+    "store_name_required": "יש להזין שם פרופיל",
+    "store_no_appliance": "יש להגדיר תחילה מותג ודגם מכשיר בהגדרות.",
+    "store_pick_profile": "יש לבחור פרופיל למיזוג",
+    "store_pick_profile_share": "יש לבחור פרופיל לשיתוף אליו",
+    "store_search_failed": "החיפוש נכשל: {error}",
+    "store_share_failed": "השיתוף נכשל: {error}",
+    "store_shared": "שותף במאגר הקהילה - ממתין לבדיקה.",
+    "store_unavailable": "מאגר הקהילה אינו זמין.",
+    "suggestions_applied": "ההצעות הוחלו; האינטגרציה נטענת מחדש",
+    "suggestions_none_applied": "שום הגדרה לא השתנתה: ההצעות שנבחרו כבר אינן רלוונטיות",
+    "suggestions_changed": "ההצעות השתנו מאז שבדקת אותן. דבר לא נשמר; יש לבדוק ולהחיל שוב.",
+    "suggestions_dismissed": "ההצעות נסגרו",
+    "task_cancelled": "בוטל.",
+    "thanks_confirming": "תודה על האישור",
+    "unlabel_done": "הוסרו תוויות מ־{count} מחזורים",
+    "unlabel_failed": "הסרת התוויות נכשלה: {error}",
+    "update_failed": "העדכון נכשל: {error}",
+    "store_download_partial": "{n} תוכניות לא ניתנו להורדה; יש לנסות שוב מאוחר יותר.",
+    "bp_install_failed": "לא ניתן להתקין את התבנית: {error}",
+    "bp_installed_finish": "התבנית הותקנה. יש להשלים את ההגדרות ב־Home Assistant.",
+    "bp_automation_failed": "התבנית מותקנת, אך לא ניתן היה ליצור את האוטומציה: {error}",
+    "bp_automation_created": "האוטומציה נוצרה עם הגדרות ברירת המחדל; היא נפתחת",
+    "copied": "הועתק",
+    "copy_failed": "ההעתקה נכשלה. יש לבחור את הטקסט ולהעתיק ידנית.",
+    "automation_label_failed": "האוטומציה נוצרה, אך לא ניתן היה להוסיף את התווית או הקטגוריה WashData.",
+    "review_answered": "נשמר: {program}"
+  },
+  "trend": {
+    "down": "במגמת ירידה",
+    "up": "במגמת עלייה"
+  },
+  "col": {
+    "profile_tip": "שם התוכנית שהותאמה. ללא תווית פירושו שאף פרופיל לא התאים בסיום המחזור.",
+    "status_tip": "תוצאת המחזור: הושלם (סיום טבעי), נקטע (נפילת הספק פתאומית), נעצר בכפייה (ידנית), או דורש בדיקה (משוב ממתין).",
+    "date_tip": "התאריך והשעה שבהם המחזור התחיל.",
+    "duration_tip": "משך הפעולה הכולל של המחזור מהתחלה ועד סיום.",
+    "energy_tip": "סך האנרגיה שנצרכה (kWh), מחושב מההספק לאורך זמן.",
+    "cost_dynamic_tip": "משוקלל לפי זמן: מחושב לפי המחיר שהיה בתוקף במהלך המחזור (בפועל {price} {cur}/kWh).",
+    "cost_tip": "עלות האנרגיה של המחזור, שנקבעת בסיומו. כשעלות משוקללת לפי זמן פעילה, כל רגע מחושב לפי המחיר שלו; אחרת לפי המחיר בסיום. יש להגדיר מחיר בהגדרות כדי למלא זאת.",
+    "confidence_tip": "רמת הביטחון בהתאמת הפרופיל (0-100%). עד כמה עקומת ההספק של המחזור התאימה לתוכנית שזוהתה.",
+    "flags_tip": "סימוני בדיקה, חריגות ומקור המחזור. ריחוף מעל סמל מציג פרטים.",
+    "dbg_conf": "ביטחון",
+    "dbg_mae": "MAE",
+    "dbg_corr": "מתאם"
+  },
+  "stat": {
+    "avg": "ממוצע",
+    "min": "מינימום {v}",
+    "max": "מקסימום {v}",
+    "consistency": "עקביות ±{v}",
+    "total": "סך הכול {v}",
+    "last_run": "פעולה אחרונה {v}",
+    "score": "ציון {pct}%",
+    "duration_cv": "מקדם השתנות המשך {pct}%",
+    "avg_confidence": "רמת ביטחון ממוצעת {pct}%"
+  },
+  "pg_evd": {
+    "detected": "מנגנון הזיהוי זיהה שהתחיל מחזור.",
+    "match_commit": "מנגנון ההתאמה קבע תוכנית ברמת ביטחון מספקת.",
+    "match_changed": "התוכנית המובילה השתנתה ככל שנצפה חלק גדול יותר מהמחזור.",
+    "match_ambiguous": "שתי תוכניות קיבלו ציונים קרובים, ולכן ההתאמה לא הייתה ודאית.",
+    "unmatched": "אף תוכנית שמורה לא התאימה למחזור הזה.",
+    "notify_start": "תישלח התראת התחלה.",
+    "notify_pre_complete": "תישלח התראת סיום מתקרב.",
+    "notify_finish": "תישלח התראת סיום.",
+    "notify_milestone": "תישלח התראת אבן דרך.",
+    "notify_held": "התראה עוכבה בגלל שעות שקטות.",
+    "finished": "המחזור הגיע למצב סופי והסתיים.",
+    "match_reverted": "התוכנית חזרה למצב זיהוי: הציון שלה ירד הרבה מתחת לשיא שלה.",
+    "verified_pause": "היישור בזמן אמת אישר (או שחרר) הפסקה בתוך התוכנית. כל עוד היא בתוקף, המחזור אינו מסתיים.",
+    "stalled": "המחזור נשאר בצריכת המתנה יותר מכל הפסקה מוכרת של התוכנית ברמה הזו, כשעדיין נותרה עבודה. מוצג כמושהה (תקוע); המחזור נשאר פתוח."
+  },
+  "store": {
+    "browse": "עיון",
+    "device": "מכשיר",
+    "programs_count": "תוכניות: {n}",
+    "search_ph2": "חיפוש לפי מותג או דגם…",
+    "your_model": "שלך",
+    "your_model_tip": "זהו המכשיר שציינת בהגדרות",
+    "no_results": "לא נמצאו מכשירים מתאימים. כדאי לנסות חיפוש אחר.",
+    "no_programs": "עדיין אין תוכניות משותפות למכשיר הזה.",
+    "no_cycles": "עדיין לא שותפו מחזורי ייחוס לתוכנית הזו.",
+    "anon": "אנונימי",
+    "uploaded_by": "שותף על ידי {name}",
+    "connected_as": "מחובר בתור {name}",
+    "not_connected": "לא מחובר. יש לחבר חשבון GitHub כדי לשתף מחזורים משלך.",
+    "import_new": "פרופיל חדש",
+    "import_merge": "מיזוג לקיים",
+    "merge_target": "מיזוג לפרופיל",
+    "description": "תיאור (לא חובה)",
+    "contributed_by": "מאת {name}",
+    "website": "אתר המאגר ↗",
+    "website_tip": "פתיחת אתר מאגר הקהילה",
+    "favorites": "מועדפים",
+    "rating_summary": "★ {avg} ({n})",
+    "no_ratings": "עדיין אין דירוגים",
+    "unreachable": "לא ניתן לגשת למאגר הקהילה. יש לבדוק את החיבור ולנסות שוב."
+  },
+  "settings": {
+    "gear": {
+      "title": "העדפות"
+    }
+  },
+  "link": {
+    "maintenance_supporter": "Maintenance Supporter ב־GitHub ↗",
+    "manual": "מדריך ↗",
+    "automations_all": "כל אוטומציות WashData ב־Home Assistant",
+    "bp_share_pr": "שיתוף תבנית משלך: פתיחת בקשת משיכה ב־GitHub",
+    "bp_view_github": "הצגה ב־GitHub",
+    "bp_import_my_ha": "ייבוא באמצעות My Home Assistant"
+  },
+  "tip": {
+    "add_brand": "המותג לא מופיע? אפשר להוסיף אותו לקטלוג הקהילה",
+    "add_appliance": "הדגם לא מופיע? אפשר להוסיף את המכשיר שלך לקטלוג הקהילה",
+    "add_profile": "הוספת פרופיל למכשיר הזה באתר הקהילה"
+  },
+  "task": {
+    "reprocess": {
+      "matching": "עיבוד מחדש: התאמת מחזורים",
+      "golden": "עיבוד מחדש: השלמת מחזורי ייחוס",
+      "suggestions": "עיבוד מחדש: הצעות",
+      "ml_training": "עיבוד מחדש: אימון למידת מכונה",
+      "costs": "עיבוד מחדש: עלויות אנרגיה",
+      "health": "עיבוד מחדש: תקינות מחזורים"
+    },
+    "pg_sweep": {
+      "optimize": "מיטוב: {param}"
+    },
+    "pg_detail": {
+      "simulate": "הדמיית מחזור"
+    },
+    "split": {
+      "apply": "פיצול מחזור"
+    },
+    "trim": {
+      "apply": "חיתוך מחזור"
+    },
+    "merge": {
+      "apply": "מיזוג מחזורים"
+    },
+    "rebuild": {
+      "envelopes": "בנייה מחדש של מעטפות הספק"
+    },
+    "cancelling": "בביטול...",
+    "auto_label": {
+      "running": "תיוג אוטומטי של מחזורים"
+    },
+    "store_download": {
+      "running": "הורדה מהמאגר"
+    }
+  },
+  "setup": {
+    "hdr": {
+      "card": "הגדרת מכשיר",
+      "healthy_chip": "ההגדרה הושלמה"
+    },
+    "phase0": {
+      "washer": "WashData כבר מזהה את המחזורים שלך. יש להקליט את המחזור הראשון כדי להפעיל שמות תוכניות ואומדני זמן.",
+      "dishwasher": "WashData מנטר. מחזורי מדיח כלים מורכבים, ולכן יש להקליט את המחזור הראשון. אם מחזור שזוהה נמשך זמן רב מדי, יש לחתוך אותו בעורך המחזורים לפני שמירתו כפרופיל.",
+      "generic": "WashData מנטר. יש להקליט או לתייג מחזור שזוהה כדי להתחיל לבנות פרופילים."
+    },
+    "phase1a": {
+      "labelled": "התחלה טובה: התוכנית הראשונה שלך נשמרה. לקבלת הנתונים הנקיים ביותר, כדאי להקליט את המחזור הבא באמצעות כלי ההקלטה."
+    },
+    "phase1b": {
+      "recorded": "ההקלטה שלך נשמרה בשם {profile_name}. כעת כדאי להקליט או לתייג את התוכניות הנפוצות האחרות שלך."
+    },
+    "phase1c": {
+      "verify": "יש לך {count} תוכניות מהקהילה. כדאי להפעיל מחזור כדי לבדוק ש־WashData מזהה אותו; ההתאמה משתפרת ככל שהמכשיר בונה היסטוריה משלו."
+    },
+    "phase2": {
+      "cluster": "WashData ראה {count} מחזורים דומים שאינם מתאימים לאף תוכנית שמורה. ליצור עבורם פרופיל חדש?",
+      "unmatched": "המחזור האחרון שלך לא התאים לאף תוכנית שמורה. האם זו תוכנית חדשה?"
+    },
+    "phase3": {
+      "suggestions": "ל־WashData יש הצעות להגדרות מתוך היסטוריית המחזורים שלך. כדאי לבדוק אותן לשיפור הזיהוי."
+    },
+    "phase4": {
+      "healthy": "המכשיר הזה מוגדר במלואו ({profile_count} פרופילים)."
+    },
+    "cta": {
+      "start_recording": "התחלת הקלטה",
+      "label_detected_cycle": "כבר יש לי מחזור שזוהה – לתייג אותו במקום",
+      "browse_cycles": "עיון במחזורים לתיוג מחזור נוסף",
+      "view_profiles": "הצגת הפרופילים שלך",
+      "create_from_cluster": "יצירת פרופיל מהמחזורים האלה",
+      "create_profile": "יצירת פרופיל עבורו",
+      "review_suggestions": "בדיקת הצעות",
+      "skip_step": "דילוג על השלב הזה",
+      "skip_forever": "לא להציג שוב",
+      "hide_guidance": "הסתרת ההדרכה",
+      "show_guidance": "הצגת ההדרכה"
+    }
+  },
+  "access": {
+    "edit": "עריכה",
+    "full": "מלאה",
+    "inherit": "לפי ברירת המחדל",
+    "none": "ללא (מוסתר)",
+    "read": "קריאה"
+  },
+  "pg_label_reason": {
+    "no_winner": "אף תוכנית לא התאימה",
+    "below_floor": "מתחת לרמת הביטחון ללמידה",
+    "ambiguous": "סומן כלא חד־משמעי",
+    "margin": "קרוב מדי למועמד שבמקום השני",
+    "unknown_profile": "התוכנית אינה קיימת עוד",
+    "not_evaluated": "לא הוערך"
+  },
+  "diagram": {
+    "accum": "מצטבר",
+    "auto": "אוטומטי",
+    "below_off": "מתחת = כבוי",
+    "confirmed": "אושר",
+    "energy_counts": "אנרגיה נחשבת",
+    "feedback": "משוב",
+    "gap_below_min": "פער מתחת למינימום = מחזור אחד",
+    "heat_phase": "שלב חימום",
+    "held_at_100": "נשמר על 100%",
+    "ignored": "התעלמות",
+    "kept": "נשמר",
+    "max": "מקסימום",
+    "min": "מינימום",
+    "no_match": "אין התאמה",
+    "no_updates": "אין עדכונים",
+    "off_delay_wait": "המתנת השהיית כיבוי",
+    "off_gap": "פער כיבוי",
+    "sensor_offline": "חיישן לא מקוון: עצירה כפויה",
+    "spike_ignored": "התעלמות מקפיצה",
+    "spike_ignored_short": "קפיצה: התעלמות",
+    "start": "התחלה",
+    "stop": "עצירה",
+    "tail_energy_resets": "אנרגיה במקטע הסיום מעל הסף: הטיימר מתאפס",
+    "thr": "סף",
+    "too_short": "קצר מדי",
+    "tumble_kept": "פעימות סיבוב התוף נשמרות"
+  },
+  "trigger": {
+    "cycle_started": {
+      "name": "מחזור התחיל"
+    },
+    "program_recognised": {
+      "name": "תוכנית זוהתה"
+    },
+    "phase_started": {
+      "name": "שלב התחיל"
+    },
+    "finishing_soon": {
+      "name": "הסיום מתקרב"
+    },
+    "cycle_overrun": {
+      "name": "מחזור מתארך"
+    },
+    "program_mismatch": {
+      "name": "התוכנית הפעילה שונה מהתוכנית שנבחרה"
+    },
+    "cycle_paused": {
+      "name": "מחזור הושהה"
+    },
+    "cycle_resumed": {
+      "name": "מחזור נמשך"
+    },
+    "cycle_stalled": {
+      "name": "מחזור נתקע"
+    },
+    "cycle_finished": {
+      "name": "מחזור הושלם"
+    },
+    "cycle_ended": {
+      "name": "מחזור הסתיים"
+    },
+    "anti_wrinkle_started": {
+      "name": "מניעת קמטים התחילה"
+    },
+    "still_tumbling": {
+      "name": "התוף עדיין מסתובב לאחר המחזור"
+    },
+    "unload_pending": {
+      "name": "ממתין לפינוי"
+    },
+    "unloaded": {
+      "name": "פונה"
+    },
+    "state_changed": {
+      "name": "מצב המכשיר השתנה"
+    },
+    "maintenance_due": {
+      "name": "נדרשת תחזוקה"
+    },
+    "milestone_reached": {
+      "name": "הושגה אבן דרך במחזורים"
+    },
+    "pump_stuck": {
+      "name": "משאבה תקועה"
+    }
+  }
+}

@@ -1,0 +1,765 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "הגדרת WashData",
+        "description": "הגדרת מכונת כביסה או מכשיר אחר. נדרש חיישן הספק.\n\nלאחר ההגדרה, יש לפתוח את לוח WashData מסרגל הצד ([/ha-washdata](/ha-washdata)) כדי לצפות במחזורים, בפרופילים ובכל ההגדרות.",
+        "data": {
+          "name": "שם המכשיר",
+          "device_type": "סוג המכשיר",
+          "power_sensor": "חיישן הספק",
+          "min_power": "סף הספק מינימלי (W)"
+        },
+        "data_description": {
+          "name": "שם נוח לזיהוי המכשיר (למשל, 'מכונת כביסה', 'מדיח כלים').",
+          "device_type": "קובע את ברירות המחדל לזיהוי עבור סוג מכשיר זה.",
+          "power_sensor": "חיישן ההספק של השקע החכם (W או kW), לא מונה האנרגיה שלו (kWh).",
+          "min_power": "קריאות מעל ערך זה (בוואט) מציינות שהמכשיר פועל. 2 W מתאים לרוב המכשירים."
+        }
+      },
+      "reconfigure": {
+        "title": "הגדרה מחדש של WashData",
+        "description": "שינוי שם המכשיר, סוג המכשיר או חיישן ההספק.\n\nכל שאר ההגדרות נמצאות בלוח WashData (בסרגל הצד, או בכתובת [/ha-washdata](/ha-washdata)).",
+        "data": {
+          "name": "שם המכשיר",
+          "device_type": "סוג המכשיר",
+          "power_sensor": "חיישן הספק",
+          "min_power": "סף הספק מינימלי (W)"
+        }
+      }
+    },
+    "error": {
+      "unknown": "שגיאה בלתי צפויה",
+      "invalid_power": "סף ההספק חייב להיות גדול מ-0",
+      "power_sensor_energy": "זהו מונה אנרגיה (kWh), לא חיישן הספק. יש לבחור את חיישן ההספק של השקע (W או kW). אם לשקע אין חיישן כזה, עוזר מסוג Derivative יכול להפיק אותו מהמונה."
+    },
+    "abort": {
+      "already_configured": "המכשיר כבר מוגדר",
+      "reconfigure_successful": "ההגדרה מחדש הצליחה"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "הגדרות WashData",
+        "description": "שינוי שם המכשיר או ההגדרות הבסיסיות שלו. כל שאר ההגדרות נמצאות ב[לוח WashData](/ha-washdata) בסרגל הצד.",
+        "data": {
+          "name": "שם המכשיר",
+          "device_type": "סוג המכשיר",
+          "power_sensor": "חיישן הספק",
+          "min_power": "סף הספק מינימלי (W)"
+        }
+      }
+    },
+    "error": {
+      "invalid_power": "סף ההספק חייב להיות גדול מ-0",
+      "timer_default_message": "{device}: טיימר של {minutes} דקות",
+      "timer_pause_action_title": "המשך מחזור",
+      "timer_pause_body_suffix": "המחזור מושהה. יש לפתוח את לוח WashData כדי להמשיך.",
+      "unload_dismiss_action_title": "הפסק תזכורות",
+      "review_action_title": "זו הייתה {program}",
+      "vs_typical_longer": "ארוך מהרגיל ב-{pct}%",
+      "vs_typical_shorter": "קצר מהרגיל ב-{pct}%",
+      "notify_live_waiting_message": "{device}: עדיין לא נמצאה התאמה לפרופיל.",
+      "power_sensor_energy": "זהו מונה אנרגיה (kWh), לא חיישן הספק. יש לבחור את חיישן ההספק של השקע (W או kW). אם לשקע אין חיישן כזה, עוזר מסוג Derivative יכול להפיק אותו מהמונה."
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "cycle_started": "המחזור התחיל",
+      "program_recognised": "התוכנית זוהתה",
+      "phase_started": "השלב התחיל",
+      "finishing_soon": "מסתיים בקרוב",
+      "cycle_overrun": "המחזור מתארך",
+      "program_mismatch": "התוכנית הפועלת שונה מהתוכנית שנבחרה",
+      "cycle_paused": "המחזור הושהה",
+      "cycle_resumed": "המחזור נמשך",
+      "cycle_stalled": "המחזור נתקע",
+      "cycle_finished": "המחזור הסתיים",
+      "cycle_ended": "המחזור הסתיים (מכל סיבה)",
+      "anti_wrinkle_started": "מניעת קמטים התחילה",
+      "still_tumbling": "עדיין מסובב את התוף לאחר המחזור",
+      "unload_pending": "ממתין לריקון",
+      "unloaded": "רוקן",
+      "state_changed": "מצב המכשיר השתנה",
+      "maintenance_due": "נדרשת תחזוקה",
+      "milestone_reached": "הושגה אבן דרך במספר המחזורים",
+      "pump_stuck": "המשאבה תקועה"
+    },
+    "extra_fields": {
+      "program": "תוכנית",
+      "phase": "שלב",
+      "minutes": "דקות",
+      "percent": "חריגה במשך (%)",
+      "include_detected": "כלול השהיות שזוהו",
+      "status": "אופן הסיום",
+      "from": "ממצב",
+      "to": "למצב",
+      "task": "משימה"
+    },
+    "extra_fields_descriptions": {
+      "program": "רק תוכנית זו, לפי שמה המדויק. יש להשאיר ריק לכל תוכנית.",
+      "phase": "רק שלב זה, לפי שמו. יש להשאיר ריק לכל שלב.",
+      "minutes": "מסתיים בקרוב: מספר הדקות שנותרו. עדיין מסובב את התוף: מספר הדקות לאחר הסיום.",
+      "percent": "אחוז החריגה מהמשך הרגיל של התוכנית.",
+      "include_detected": "הפעל גם בהשהיות ש-WashData מזהה בהספק, כגון השריה או תקיעה.",
+      "status": "רק מחזורים שהסתיימו באופן זה.",
+      "from": "רק שינויים ממצב זה. יש להשאיר ריק לכל מצב.",
+      "to": "רק שינויים למצב זה. יש להשאיר ריק לכל מצב.",
+      "task": "רק משימה זו, לפי שמה או המזהה שלה. יש להשאיר ריק לכל משימה."
+    }
+  },
+  "selector": {
+    "device_type": {
+      "options": {
+        "washing_machine": "מכונת כביסה",
+        "dryer": "מייבש כביסה",
+        "washer_dryer": "מכונת כביסה משולבת מייבש",
+        "dishwasher": "מדיח כלים",
+        "pump": "משאבה / משאבת ניקוז",
+        "generic": "אחר (מתקדם)",
+        "other": "מכשיר מבוסס סף"
+      }
+    },
+    "trigger_cycle_status": {
+      "options": {
+        "any": "כל אופן סיום",
+        "completed": "הושלם",
+        "force_stopped": "נעצר בכפייה",
+        "interrupted": "נקטע"
+      }
+    },
+    "trigger_state": {
+      "options": {
+        "off": "כבוי",
+        "idle": "בהמתנה",
+        "starting": "מתחיל",
+        "running": "פועל",
+        "paused": "מושהה",
+        "user_paused": "הושהה על ידי המשתמש",
+        "ending": "מסתיים",
+        "finished": "הסתיים",
+        "anti_wrinkle": "מניעת קמטים",
+        "delay_wait": "התחלה מושהית",
+        "interrupted": "נקטע",
+        "force_stopped": "נעצר בכפייה",
+        "unknown": "לא ידוע",
+        "clean": "נקי"
+      }
+    }
+  },
+  "services": {
+    "label_cycle": {
+      "name": "תייג מחזור",
+      "description": "שיוך פרופיל קיים למחזור קודם, או הסרת התיוג.",
+      "fields": {
+        "device_id": {
+          "name": "מכשיר",
+          "description": "מכשיר WashData שבו יש לתייג מחזור."
+        },
+        "cycle_id": {
+          "name": "מזהה מחזור",
+          "description": "מזהה המחזור לתיוג."
+        },
+        "profile_name": {
+          "name": "שם הפרופיל",
+          "description": "שם של פרופיל קיים (יצירת פרופילים מתבצעת בלוח WashData). יש להשאיר ריק כדי להסיר את התיוג."
+        }
+      }
+    },
+    "create_profile": {
+      "name": "צור פרופיל",
+      "description": "יצירת פרופיל חדש (עצמאי או מבוסס על מחזור ייחוס).",
+      "fields": {
+        "device_id": {
+          "name": "מכשיר",
+          "description": "מכשיר WashData."
+        },
+        "profile_name": {
+          "name": "שם הפרופיל",
+          "description": "שם לפרופיל החדש (למשל 'כביסה אינטנסיבית', 'כביסה עדינה')."
+        },
+        "reference_cycle_id": {
+          "name": "מזהה מחזור ייחוס",
+          "description": "מזהה מחזור אופציונלי שעליו יתבסס הפרופיל."
+        }
+      }
+    },
+    "delete_profile": {
+      "name": "מחק פרופיל",
+      "description": "מחיקת פרופיל, ובאופן אופציונלי הסרת התיוג ממחזורים המשתמשים בו.",
+      "fields": {
+        "device_id": {
+          "name": "מכשיר",
+          "description": "מכשיר WashData."
+        },
+        "profile_name": {
+          "name": "שם הפרופיל",
+          "description": "הפרופיל למחיקה."
+        },
+        "unlabel_cycles": {
+          "name": "הסר תיוג ממחזורים",
+          "description": "הסרת תיוג הפרופיל ממחזורים המשתמשים בפרופיל זה."
+        }
+      }
+    },
+    "auto_label_cycles": {
+      "name": "תייג אוטומטית מחזורים ישנים",
+      "description": "תיוג בדיעבד של מחזורים ללא תיוג באמצעות התאמה לפרופילים.",
+      "fields": {
+        "device_id": {
+          "name": "מכשיר",
+          "description": "מכשיר WashData."
+        },
+        "confidence_threshold": {
+          "name": "סף ביטחון",
+          "description": "רמת הביטחון המינימלית בהתאמה (0.50-0.95) להחלת תיוגים. יש להשאיר ריק כדי להשתמש בהגדרת רמת הביטחון לתיוג אוטומטי של המכשיר."
+        }
+      }
+    },
+    "export_config": {
+      "name": "ייצא תצורה",
+      "description": "ייצוא הפרופילים, המחזורים וההגדרות של מכשיר זה לקובץ JSON.",
+      "fields": {
+        "device_id": {
+          "name": "מכשיר",
+          "description": "מכשיר WashData לייצוא."
+        },
+        "path": {
+          "name": "נתיב",
+          "description": "נתיב מוחלט אופציונלי לכתיבת הקובץ (ברירת המחדל היא /config/ha_washdata_export_{entry}.json)."
+        }
+      }
+    },
+    "import_config": {
+      "name": "ייבא תצורה",
+      "description": "ייבוא פרופילים, מחזורים והגדרות עבור מכשיר זה מקובץ ייצוא JSON (ייתכן שההגדרות יידרסו).",
+      "fields": {
+        "device_id": {
+          "name": "מכשיר",
+          "description": "מכשיר WashData שאליו יש לייבא."
+        },
+        "path": {
+          "name": "נתיב",
+          "description": "נתיב מוחלט לקובץ ייצוא JSON לייבוא."
+        }
+      }
+    },
+    "submit_cycle_feedback": {
+      "name": "שלח משוב על מחזור",
+      "description": "אישור או תיקון התוכנית שזוהתה במחזור שהסתיים. יש לציין `device_id` (מומלץ) או `entry_id`.",
+      "fields": {
+        "device_id": {
+          "name": "מכשיר",
+          "description": "מכשיר WashData (מומלץ במקום entry_id)."
+        },
+        "entry_id": {
+          "name": "מזהה רשומה",
+          "description": "מזהה רשומת התצורה של המכשיר (חלופה ל-device_id)."
+        },
+        "cycle_id": {
+          "name": "מזהה מחזור",
+          "description": "מזהה המחזור שמופיע בהתראת המשוב / ביומנים."
+        },
+        "user_confirmed": {
+          "name": "אשר את התוכנית שזוהתה",
+          "description": "יש להגדיר true אם התוכנית שזוהתה נכונה."
+        },
+        "corrected_profile": {
+          "name": "פרופיל מתוקן",
+          "description": "אם הזיהוי לא אושר, יש לציין את שם הפרופיל/התוכנית הנכון."
+        },
+        "corrected_duration": {
+          "name": "משך מתוקן (שניות)",
+          "description": "משך מתוקן אופציונלי בשניות."
+        },
+        "notes": {
+          "name": "הערות",
+          "description": "הערות אופציונליות על מחזור זה."
+        }
+      }
+    },
+    "record_start": {
+      "name": "התחל הקלטת מחזור",
+      "description": "התחלת הקלטה ידנית של מחזור נקי (עוקפת את כל לוגיקת ההתאמה).",
+      "fields": {
+        "device_id": {
+          "name": "מכשיר",
+          "description": "מכשיר WashData להקלטה."
+        }
+      }
+    },
+    "record_stop": {
+      "name": "הפסק הקלטת מחזור",
+      "description": "הפסקת הקלטה ידנית.",
+      "fields": {
+        "device_id": {
+          "name": "מכשיר",
+          "description": "מכשיר WashData שבו יש להפסיק את ההקלטה."
+        }
+      }
+    },
+    "trim_cycle": {
+      "name": "חתוך מחזור",
+      "description": "חיתוך נתוני ההספק של מחזור קודם לחלון זמן מסוים.",
+      "fields": {
+        "device_id": {
+          "name": "מכשיר",
+          "description": "מכשיר WashData."
+        },
+        "cycle_id": {
+          "name": "מזהה מחזור",
+          "description": "מזהה המחזור לחיתוך."
+        },
+        "trim_start_s": {
+          "name": "תחילת החיתוך (שניות)",
+          "description": "שמירת הנתונים החל מקיזוז זמן זה בשניות. ברירת המחדל היא 0."
+        },
+        "trim_end_s": {
+          "name": "סוף החיתוך (שניות)",
+          "description": "שמירת הנתונים עד לקיזוז זמן זה בשניות. ברירת המחדל = המשך המלא."
+        }
+      }
+    },
+    "pause_cycle": {
+      "name": "השהה מחזור",
+      "description": "השהיית המחזור הפעיל של מכשיר WashData.",
+      "fields": {
+        "device_id": {
+          "name": "מכשיר",
+          "description": "מכשיר WashData להשהיה."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "המשך מחזור",
+      "description": "המשך מחזור מושהה של מכשיר WashData.",
+      "fields": {
+        "device_id": {
+          "name": "מכשיר",
+          "description": "מכשיר WashData שבו יש להמשיך את המחזור."
+        }
+      }
+    },
+    "mark_maintenance_done": {
+      "name": "סמן תחזוקה כבוצעה",
+      "description": "רישום משימת תחזוקה כבוצעה כעת, כפי שעושה כפתור 'בוצע' בלוח.",
+      "fields": {
+        "device_id": {
+          "name": "מכשיר",
+          "description": "מכשיר WashData שאליו שייכת המשימה."
+        },
+        "task_id": {
+          "name": "מזהה משימה",
+          "description": "מזהה המשימה, כפי שמופיע במאפיין due_task_ids של חיישן התחזוקה הנדרשת (descale, filter_clean, drum_clean, bearing_service, salt, rinse_aid, lint_filter, condenser_clean, other, או מזהה custom_ של משימה מותאמת אישית)."
+        },
+        "notes": {
+          "name": "הערות",
+          "description": "הערה אופציונלית שתישמר עם רשומת היומן."
+        }
+      }
+    },
+    "delete_cycle": {
+      "name": "מחק מחזור",
+      "description": "מחיקת מחזור שמור אחד. התוכנית שלו נבנית מחדש בלעדיו, או מוסרת אם מחזור מיובא זה היה האחרון שלה. לא ניתן לבטל פעולה זו.",
+      "fields": {
+        "device_id": {
+          "name": "מכשיר",
+          "description": "מכשיר WashData."
+        },
+        "cycle_id": {
+          "name": "מזהה מחזור",
+          "description": "מזהה המחזור למחיקה, למשל המשתנה cycle_id של הטריגר 'המחזור הסתיים' (ריק כאשר לא נשמר מחזור בהפעלה זו, לכן יש לבדוק אותו תחילה)."
+        }
+      }
+    },
+    "trigger_ml_training": {
+      "name": "הפעל אימון ML",
+      "description": "אימון ידני מחדש של מודלי ML שבמכשיר, על סמך המחזורים המתויגים של מכשיר זה עצמו (ניסיוני).",
+      "fields": {
+        "device_id": {
+          "name": "מכשיר",
+          "description": "מכשיר WashData שעבורו יש לאמן מחדש את המודלים."
+        }
+      }
+    },
+    "mark_unloaded": {
+      "name": "סמן כרוקן",
+      "description": "אישור שהתכולה הוצאה לאחר הסיום. מנקה את המצב 'נקי' ואת כל תזכורות הריקון.",
+      "fields": {
+        "device_id": {
+          "name": "מכשיר",
+          "description": "מכשיר WashData שהתכולה הוצאה ממנו לאחר הסיום."
+        }
+      }
+    }
+  },
+  "triggers": {
+    "cycle_started": {
+      "name": "המחזור התחיל",
+      "description": "מופעל כשהמכשיר מתחיל מחזור."
+    },
+    "program_recognised": {
+      "name": "התוכנית זוהתה",
+      "description": "מופעל כש-WashData מזהה את התוכנית של המחזור הפעיל, או משנה את הזיהוי לתוכנית אחרת.",
+      "fields": {
+        "program": {
+          "name": "תוכנית",
+          "description": "רק תוכנית זו, לפי שמה המדויק. יש להשאיר ריק לכל תוכנית."
+        }
+      }
+    },
+    "phase_started": {
+      "name": "השלב התחיל",
+      "description": "מופעל כשהמחזור הפעיל עובר לשלב חדש בתוכנית שלו.",
+      "fields": {
+        "phase": {
+          "name": "שלב",
+          "description": "רק שלב זה, לפי שמו. יש להשאיר ריק לכל שלב."
+        }
+      }
+    },
+    "finishing_soon": {
+      "name": "מסתיים בקרוב",
+      "description": "מופעל פעם אחת במחזור, כשהזמן שנותר יורד לראשונה למספר דקות זה.",
+      "fields": {
+        "minutes": {
+          "name": "דקות שנותרו",
+          "description": "הפעל כשנותרו מספר דקות זה או פחות."
+        }
+      }
+    },
+    "cycle_overrun": {
+      "name": "המחזור מתארך",
+      "description": "מופעל פעם אחת במחזור, כשהוא חורג במידה זו מהמשך הרגיל של התוכנית שלו.",
+      "fields": {
+        "percent": {
+          "name": "חריגה במשך",
+          "description": "אחוז החריגה מהמשך הרגיל של התוכנית."
+        }
+      }
+    },
+    "program_mismatch": {
+      "name": "התוכנית הפועלת שונה מהתוכנית שנבחרה",
+      "description": "מופעל פעם אחת כשהמחזור מתאים לתוכנית אחרת יותר מאשר לתוכנית שנבחרה. בחירה חדשה מתחילה בדיקה חדשה.",
+      "fields": {
+        "program": {
+          "name": "תוכנית",
+          "description": "רק כאשר תוכנית זו היא התוכנית שנבחרה, לפי שמה המדויק. יש להשאיר ריק לכל תוכנית."
+        }
+      }
+    },
+    "cycle_paused": {
+      "name": "המחזור הושהה",
+      "description": "מופעל בעת השהיית מחזור על ידי המשתמש, ובאופן אופציונלי גם כשהמכשיר משהה את פעולתו בעצמו.",
+      "fields": {
+        "include_detected": {
+          "name": "כלול השהיות שזוהו",
+          "description": "הפעל גם בהשהיות ש-WashData מזהה בהספק, כגון השריה או תקיעה, ולא רק בהשהיות שהמשתמש יוזם."
+        }
+      }
+    },
+    "cycle_resumed": {
+      "name": "המחזור נמשך",
+      "description": "מופעל כשמחזור מושהה ממשיך.",
+      "fields": {
+        "include_detected": {
+          "name": "כלול השהיות שזוהו",
+          "description": "הפעל גם בהשהיות ש-WashData מזהה בהספק, כגון השריה או תקיעה, ולא רק בהשהיות שהמשתמש יוזם."
+        }
+      }
+    },
+    "cycle_stalled": {
+      "name": "המחזור נתקע",
+      "description": "מופעל כשמחזור פעיל נעצר ברמת הספק נמוכה וקבועה."
+    },
+    "cycle_finished": {
+      "name": "המחזור הסתיים",
+      "description": "מופעל כשמחזור מסתיים, גם כשהמשתמש עוצר אותו. לא מופעל עבור התחלת שווא.",
+      "fields": {
+        "program": {
+          "name": "תוכנית",
+          "description": "רק תוכנית זו, לפי שמה המדויק. יש להשאיר ריק לכל תוכנית."
+        }
+      }
+    },
+    "cycle_ended": {
+      "name": "המחזור הסתיים",
+      "description": "מופעל כשמחזור מסתיים מכל סיבה, כולל התחלות שווא.",
+      "fields": {
+        "status": {
+          "name": "אופן הסיום",
+          "description": "רק מחזורים שהסתיימו באופן זה."
+        }
+      }
+    },
+    "anti_wrinkle_started": {
+      "name": "מניעת קמטים התחילה",
+      "description": "מופעל כשהמכשיר מתחיל לסובב את התוף עם הכביסה שסיימה את המחזור כדי למנוע קמטים."
+    },
+    "still_tumbling": {
+      "name": "עדיין מסובב את התוף לאחר המחזור",
+      "description": "מופעל פעם אחת כשהמכשיר עדיין מסובב את התוף בפרקי זמן קצרים מספר דקות זה לאחר סיום המחזור. המעקב נפסק במחזור חדש או 4 שעות לאחר הסיום.",
+      "fields": {
+        "minutes": {
+          "name": "דקות לאחר הסיום",
+          "description": "הפעל בסיבוב התוף הראשון שמתרחש לפחות לאחר פרק זמן זה מהסיום."
+        }
+      }
+    },
+    "unload_pending": {
+      "name": "ממתין לריקון",
+      "description": "מופעל כשהמחזור הסתיים והתכולה עדיין בפנים."
+    },
+    "unloaded": {
+      "name": "רוקן",
+      "description": "מופעל כשהתכולה מוצאת לאחר מחזור: הדלת נפתחה או שהריקון אושר."
+    },
+    "state_changed": {
+      "name": "מצב המכשיר השתנה",
+      "description": "מופעל כשהמצב ב-WashData משתנה.",
+      "fields": {
+        "from": {
+          "name": "ממצב",
+          "description": "רק שינויים ממצב זה. יש להשאיר ריק לכל מצב."
+        },
+        "to": {
+          "name": "למצב",
+          "description": "רק שינויים למצב זה. יש להשאיר ריק לכל מצב."
+        }
+      }
+    },
+    "maintenance_due": {
+      "name": "נדרשת תחזוקה",
+      "description": "מופעל כשמגיע מועד ביצוע של משימת תחזוקה.",
+      "fields": {
+        "task": {
+          "name": "משימה",
+          "description": "רק משימה זו, לפי שמה או המזהה שלה. יש להשאיר ריק לכל משימה."
+        }
+      }
+    },
+    "milestone_reached": {
+      "name": "הושגה אבן דרך במספר המחזורים",
+      "description": "מופעל כשמספר המחזורים המצטבר מגיע לאחת מאבני הדרך שהוגדרו להתראות."
+    },
+    "pump_stuck": {
+      "name": "המשאבה תקועה",
+      "description": "מופעל כשהמשאבה פועלת מעבר למגבלת הזמן שנקבעה לזיהוי תקיעה."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "running": {
+        "name": "פועל"
+      },
+      "match_ambiguity": {
+        "name": "עמימות בהתאמה"
+      },
+      "maintenance_due": {
+        "name": "נדרשת תחזוקה",
+        "state": {
+          "on": "נדרשת",
+          "off": "לא נדרשת"
+        },
+        "state_attributes": {
+          "due_task_ids": {
+            "name": "מזהי משימות שהגיע מועדן"
+          },
+          "due_tasks": {
+            "name": "משימות שהגיע מועדן",
+            "state": {
+              "descale": "הסרת אבנית",
+              "filter_clean": "ניקוי מסנן",
+              "drum_clean": "ניקוי תוף",
+              "bearing_service": "טיפול במיסבים",
+              "other": "אחר",
+              "salt": "מילוי מלח",
+              "rinse_aid": "מילוי נוזל הברקה",
+              "lint_filter": "ניקוי מסנן מוך",
+              "condenser_clean": "ניקוי מעבה"
+            }
+          }
+        }
+      }
+    },
+    "sensor": {
+      "washer_state": {
+        "name": "מצב",
+        "state": {
+          "off": "כבוי",
+          "idle": "בהמתנה",
+          "starting": "מתחיל",
+          "running": "פועל",
+          "paused": "מושהה",
+          "user_paused": "הושהה על ידי המשתמש",
+          "ending": "מסתיים",
+          "finished": "הסתיים",
+          "anti_wrinkle": "מניעת קמטים",
+          "interrupted": "נקטע",
+          "force_stopped": "נעצר בכפייה",
+          "unknown": "לא ידוע",
+          "clean": "נקי",
+          "delay_wait": "התחלה מושהית"
+        },
+        "state_attributes": {
+          "cycle_anomaly": {
+            "name": "חריגה במחזור",
+            "state": {
+              "overrun": "מתארך",
+              "stalled": "תקוע"
+            }
+          }
+        }
+      },
+      "washer_program": {
+        "name": "תוכנית"
+      },
+      "time_remaining": {
+        "name": "זמן שנותר"
+      },
+      "total_duration": {
+        "name": "משך כולל"
+      },
+      "cycle_progress": {
+        "name": "התקדמות"
+      },
+      "current_power": {
+        "name": "הספק נוכחי"
+      },
+      "elapsed_time": {
+        "name": "זמן שחלף"
+      },
+      "debug_info": {
+        "name": "מידע על ניפוי באגים"
+      },
+      "match_confidence": {
+        "name": "רמת ביטחון בהתאמה"
+      },
+      "top_candidates": {
+        "name": "מועמדים מובילים",
+        "state": {
+          "none": "אין"
+        }
+      },
+      "ambiguity": {
+        "name": "ציון עמימות"
+      },
+      "current_phase": {
+        "name": "השלב הנוכחי"
+      },
+      "profile_cycle_count": {
+        "name": "מספר מחזורים בפרופיל {profile_name}",
+        "unit_of_measurement": "מחזורים"
+      },
+      "suggestions": {
+        "name": "זמינות הגדרות מוצעות"
+      },
+      "pump_runs_today": {
+        "name": "הפעלות משאבה (24 השעות האחרונות)"
+      },
+      "cycle_count": {
+        "name": "מספר מחזורים"
+      },
+      "energy_total": {
+        "name": "אנרגיה מצטברת"
+      },
+      "last_cycle_duration": {
+        "name": "משך המחזור האחרון"
+      },
+      "last_cycle_energy": {
+        "name": "אנרגיה במחזור האחרון"
+      },
+      "last_cycle_cost": {
+        "name": "עלות המחזור האחרון"
+      },
+      "last_cycle_start": {
+        "name": "תחילת המחזור האחרון"
+      }
+    },
+    "select": {
+      "program_select": {
+        "name": "תוכנית המחזור",
+        "state": {
+          "auto_detect": "זיהוי אוטומטי"
+        }
+      }
+    },
+    "button": {
+      "force_end_cycle": {
+        "name": "סיים מחזור בכפייה"
+      },
+      "pause_cycle": {
+        "name": "השהה מחזור"
+      },
+      "resume_cycle": {
+        "name": "המשך מחזור"
+      },
+      "record_start": {
+        "name": "התחל הקלטת מחזור"
+      },
+      "record_stop": {
+        "name": "הפסק הקלטת מחזור"
+      },
+      "mark_unloaded": {
+        "name": "סמן כרוקן"
+      }
+    }
+  },
+  "exceptions": {
+    "device_id_required": {
+      "message": "נדרש device_id תקין."
+    },
+    "cycle_id_required": {
+      "message": "נדרש cycle_id תקין."
+    },
+    "profile_name_required": {
+      "message": "נדרש profile_name תקין."
+    },
+    "device_not_found": {
+      "message": "המכשיר לא נמצא."
+    },
+    "no_config_entry": {
+      "message": "לא נמצאה רשומת תצורה עבור המכשיר."
+    },
+    "integration_not_loaded": {
+      "message": "האינטגרציה לא נטענה עבור מכשיר זה."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "המחזור לא נמצא או שאין בו נתוני הספק."
+    },
+    "trim_failed_empty_window": {
+      "message": "החיתוך נכשל - המחזור לא נמצא, אין נתוני הספק, או שחלון הזמן שהתקבל ריק."
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s חייב להיות גדול מ-trim_start_s."
+    },
+    "no_active_cycle": {
+      "message": "אין מחזור פעיל להשהיה או להמשך."
+    },
+    "path_not_allowed": {
+      "message": "הנתיב אינו מותר: {path}. יש להוסיף את התיקייה שלו ל-'allowlist_external_dirs' ב-configuration.yaml."
+    },
+    "export_path_exists": {
+      "message": "יעד הייצוא כבר קיים: {path}. יש לבחור נתיב אחר או להסיר תחילה את הקובץ הקיים."
+    },
+    "export_write_failed": {
+      "message": "לא ניתן לכתוב את הייצוא ל-{path}: {error}"
+    },
+    "create_profile_failed": {
+      "message": "לא ניתן ליצור פרופיל: {error}"
+    },
+    "assign_profile_failed": {
+      "message": "לא ניתן לשייך פרופיל: {error}"
+    },
+    "cycle_not_found": {
+      "message": "המחזור לא נמצא."
+    },
+    "maintenance_task_not_found": {
+      "message": "אין במכשיר זה משימת תחזוקה עם המזהה {task_id}."
+    },
+    "task_id_required": {
+      "message": "נדרש task_id תקין."
+    }
+  }
+}

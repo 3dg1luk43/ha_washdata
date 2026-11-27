@@ -10,6 +10,7 @@ import { buildHandlers } from '../helpers/ws-handlers';
 import deviceIdle from '../fixtures/mock-data/device-idle.json';
 import en from '../../custom_components/ha_washdata/translations/panel/en.json';
 import de from '../../custom_components/ha_washdata/translations/panel/de.json';
+import he from '../../custom_components/ha_washdata/translations/panel/he.json';
 
 const DE = { locale: { language: 'de', number_format: 'language', time_format: '24' } };
 
@@ -168,4 +169,47 @@ test('UI-07: profile meta, profile title and diagram labels follow the loaded la
   const field = page.locator('.wd-field[data-field="off_delay"]');
   await expect(field).toBeVisible({ timeout: 8_000 });
   await expect(field.locator('svg.wd-dg text')).toHaveText(['XX Ausschaltverzögerung']);
+});
+
+test('Hebrew translations render in the RTL Home Assistant shell', async ({ page }, testInfo) => {
+  await page.goto('/');
+  await page.evaluate(() => {
+    document.documentElement.lang = 'he';
+    document.documentElement.dir = 'rtl';
+  });
+  await bootPanel(page, {}, {
+    locale: { language: 'he', number_format: 'language', time_format: '24' },
+  }, { translations: { en, he } });
+
+  await expect(page.locator('button[data-tab="status"]')).toHaveText(he.tab.status);
+  await expect(page.locator('.wd-shell')).toHaveCSS('direction', 'rtl');
+  const overview = await page.locator('button[data-tab="status"]').boundingBox();
+  const history = await page.locator('button[data-tab="history"]').boundingBox();
+  expect(overview).not.toBeNull();
+  expect(history).not.toBeNull();
+  expect(overview!.x).toBeGreaterThan(history!.x);
+  await expect(page.locator('.wd-attn-title', {
+    hasText: he.lbl.n_tuning_suggestions_two.replace('{n}', '2'),
+  })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('hebrew-overview.png') });
+
+  await clickTab(page, 'history');
+  await expect(page.locator('tr[data-cid="cyc-001"]')).toContainText('0.85 kWh');
+  await page.screenshot({ path: testInfo.outputPath('hebrew-cycles.png') });
+
+  await clickTab(page, 'profiles');
+  await page.locator('.wd-profile-card', { hasText: 'Cotton 40°C' }).click();
+  await expect(page.locator('.wd-modal h2').first()).toHaveText(
+    he.modal.profile_title.replace('{name}', 'Cotton 40°C'),
+  );
+  await page.screenshot({ path: testInfo.outputPath('hebrew-profile.png') });
+  await page.locator('[data-maction="cancel"]').first().click();
+
+  await clickTab(page, 'settings');
+  await page.locator('#wd-settings-search').fill(he.setting.min_power.label);
+  await expect(page.locator('.wd-field[data-field="min_power"]')).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('hebrew-settings.png') });
+
+  expect(await page.evaluate(() => document.documentElement.scrollWidth))
+    .toBeLessThanOrEqual(page.viewportSize()!.width);
 });

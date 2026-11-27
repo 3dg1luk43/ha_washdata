@@ -1,0 +1,13 @@
+{
+  "HaWashdataStatus": {
+    "running_with_estimate": "המכשיר {device} עדיין פועל. נותרו כ-{minutes} דקות.",
+    "running_no_estimate": "המכשיר {device} עדיין פועל.",
+    "finished_recently": "המכשיר {device} סיים לפני {minutes} דקות.",
+    "just_finished": "המכשיר {device} סיים ממש עכשיו.",
+    "not_running": "המכשיר {device} אינו פועל.",
+    "no_devices": "לא מצאתי מכשירים של WashData.",
+    "unknown_device": "לא מצאתי מכשיר של WashData בשם {device}.",
+    "none_running": "אף אחד ממכשירי WashData שלך אינו פועל.",
+    "error": "מצטער, לא הצלחתי לבדוק את המכשירים כרגע."
+  }
+}

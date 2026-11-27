@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
+## Unreleased
+
+### TL;DR
+
+- Hebrew interface and voice responses.
+
+### Features
+
+- **Hebrew translation**: Home Assistant labels, the WashData panel and voice status responses are available in Hebrew, including dual plural forms.
+
 ## 0.6.1 - 2026-11-21
 
 ### TL;DR
